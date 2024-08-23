@@ -21,7 +21,7 @@ export default function TabLayout() {
                     paddingTop: 5,
                     level: 100,
                 },
-                headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text },
+                headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
                 headerShown: true,
                 tabBarShowLabel: true,
             }}
@@ -33,7 +33,7 @@ export default function TabLayout() {
                     headerStyle: {
                         backgroundColor: Colors[colorScheme ?? 'light'].background,
                     },
-                    headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text },
+                    headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
                     title: 'Home',
                     tabBarIcon: ({ color, focused }) => <MaterialIcons size={24} name='home' color={color} />,
                 }}
@@ -44,7 +44,7 @@ export default function TabLayout() {
                     headerStyle: {
                         backgroundColor: Colors[colorScheme ?? 'light'].background,
                     },
-                    headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text },
+                    headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
                     title: 'Exercise',
                     tabBarIcon: ({ color, focused }) => <MaterialIcons name='sports-martial-arts' size={24} color={color} />,
                 }}
@@ -55,7 +55,7 @@ export default function TabLayout() {
                     headerStyle: {
                         backgroundColor: Colors[colorScheme ?? 'light'].background,
                     },
-                    headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text },
+                    headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
                     title: 'Nutrition',
                     tabBarIcon: ({ color, focused }) => <Entypo name='leaf' size={22} color={color} />,
                 }}
@@ -66,7 +66,7 @@ export default function TabLayout() {
                     headerStyle: {
                         backgroundColor: Colors[colorScheme ?? 'light'].background,
                     },
-                    headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text },
+                    headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
                     title: 'Progress',
                     tabBarIcon: ({ color, focused }) => <TabBarIcon name='stats-chart' size={21} color={color} />,
                 }}

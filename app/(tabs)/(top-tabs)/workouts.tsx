@@ -16,9 +16,8 @@ export default function WorkoutsScreen() {
 
     return (
         <ThemedView style={styles.container}>
-            <ThemedText>Workouts</ThemedText>
             <TouchableOpacity onPress={navigateToAllWorkouts} style={styles.linkButton}>
-                <ThemedText type='link'>See All Workouts</ThemedText>
+                <ThemedText type='link'>All Workouts</ThemedText>
             </TouchableOpacity>
         </ThemedView>
     );

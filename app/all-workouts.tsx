@@ -39,13 +39,17 @@ export default function AllWorkoutsScreen() {
         navigation.setOptions({
             title: 'All Workouts',
             headerBackTitleVisible: false, // Hide the back button label
+            headerStyle: {
+                backgroundColor: Colors[colorScheme ?? 'light'].background,
+            },
+            headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
             headerLeft: () => <CustomBackButton />,
         });
     }, [navigation]);
 
     return (
         <ThemedView style={{ flex: 1 }}>
-            <ThemedText type='subtitle' style={styles.countContainer}>
+            <ThemedText type='overline' style={[styles.countContainer, { color: themeColors.textLight }]}>
                 {workouts.length} workouts
             </ThemedText>
             <ScrollView>
@@ -63,8 +67,9 @@ export default function AllWorkoutsScreen() {
 
 const styles = StyleSheet.create({
     countContainer: {
-        padding: 16,
+        paddingLeft: 24,
         paddingTop: 24,
+        paddingBottom: 8,
     },
     contentContainer: {
         padding: 16,

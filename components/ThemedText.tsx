@@ -59,10 +59,15 @@ const styles = StyleSheet.create({
         fontFamily: 'InterBold',
         lineHeight: 24,
     },
-    overline: {
-        fontSize: 10,
-        fontFamily: 'InterExtraLight', // Light weight for overlines
+    overlineTransformed: {
+        fontSize: 14,
+        fontFamily: 'InterMedium', // Light weight for overlines
         textTransform: 'uppercase',
+        lineHeight: 16,
+    },
+    overline: {
+        fontSize: 14,
+        fontFamily: 'InterMedium', // Light weight for overlines
         lineHeight: 16,
     },
     italic: {
@@ -88,4 +93,3 @@ export function ThemedText({ style, lightColor, darkColor, type = 'body', ...res
         />
     );
 }
-
