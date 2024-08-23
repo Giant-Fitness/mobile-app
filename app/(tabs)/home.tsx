@@ -1,4 +1,4 @@
-// app/(tabs)/index.tsx
+// app/(tabs)/home.tsx
 
 import React from 'react';
 import { Image, StyleSheet, Platform } from 'react-native';
@@ -21,7 +21,7 @@ export default function HomeScreen() {
             <ThemedView style={styles.stepContainer}>
                 <ThemedText type='subtitle'>Step 1: Try it</ThemedText>
                 <ThemedText>
-                    Edit <ThemedText type='defaultSemiBold'>app/(tabs)/index.tsx</ThemedText> to see changes. Press{' '}
+                    Edit <ThemedText type='defaultSemiBold'>app/(tabs)/home.tsx</ThemedText> to see changes. Press{' '}
                     <ThemedText type='defaultSemiBold'>{Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}</ThemedText> to open developer tools.
                 </ThemedText>
             </ThemedView>
