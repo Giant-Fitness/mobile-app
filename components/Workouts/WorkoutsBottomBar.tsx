@@ -2,10 +2,11 @@
 
 import React from 'react';
 import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
-import { TabBarIcon } from './navigation/TabBarIcon';
+import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { ThemedView } from './ThemedView';
+import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/ThemedText';
 
 type WorkoutsBottomBarProps = {
     onSortPress: () => void;
@@ -21,13 +22,15 @@ export const WorkoutsBottomBar: React.FC<BottomBarProps> = ({ onSortPress, onFil
     return (
         <ThemedView style={styles.container}>
             <TouchableOpacity style={styles.button} onPress={onFilterPress}>
-                <TabBarIcon name={filterIcon} style={{ color: themeColors.icon }} size={20} />
-                <Text style={[styles.buttonText, { color: themeColors.icon }]}>Filter</Text>
+                <TabBarIcon name={filterIcon} style={{ color: themeColors.tabIconDefault }} size={20} />
+                <Text style={[styles.buttonText, { color: themeColors.tabIconDefault }]}>Filter</Text>
             </TouchableOpacity>
-            <View style={[styles.divider, { backgroundColor: themeColors.icon }]} />
+            <View style={[styles.divider, { backgroundColor: themeColors.tabIconDefault }]} />
             <TouchableOpacity style={styles.button} onPress={onSortPress}>
-                <TabBarIcon name={sortIcon} style={{ color: themeColors.icon }} size={20} />
-                <Text style={[styles.buttonText, { color: themeColors.icon }]}>Sort</Text>
+                <TabBarIcon name={sortIcon} style={{ color: themeColors.tabIconDefault }} size={18} />
+                <ThemedText type='default' style={[styles.buttonText, { color: themeColors.tabIconDefault }]}>
+                    Sort
+                </ThemedText>
             </TouchableOpacity>
         </ThemedView>
     );
@@ -44,7 +47,6 @@ const styles = StyleSheet.create({
         paddingTop: 10,
         paddingHorizontal: 20,
         paddingBottom: 40,
-        borderTopWidth: 1,
     },
     button: {
         flexDirection: 'row',
@@ -52,11 +54,10 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         marginLeft: 8,
-        fontSize: 16,
     },
     divider: {
         width: 1,
-        height: '60%', // Smaller height for the divider
+        height: '50%', // Smaller height for the divider
         alignSelf: 'center', // Center the divider vertically
         marginHorizontal: 10, // Space between buttons and divider
     },
