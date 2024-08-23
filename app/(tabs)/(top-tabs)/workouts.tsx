@@ -29,6 +29,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 16,
+        flex: 1,
     },
     linkButton: {
         marginTop: 16,
