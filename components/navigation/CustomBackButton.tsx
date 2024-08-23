@@ -10,7 +10,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 export const CustomBackButton: React.FC = () => {
     const navigation = useNavigation();
     const colorScheme = useColorScheme();
-    const iconColor = Colors[colorScheme].icon;
+    const iconColor = Colors[colorScheme].tabIconDefault;
 
     return (
         <TouchableOpacity style={styles.button} onPress={() => navigation.goBack()}>

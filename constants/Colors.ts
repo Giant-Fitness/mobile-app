@@ -78,6 +78,7 @@ export const Colors = {
     },
     dark: {
         text: '#f9f1f0',
+        textLight: '#f9f1f0',
         background: '#0b0504',
         primary: '#cc4533',
         secondary: '#7c2318',
