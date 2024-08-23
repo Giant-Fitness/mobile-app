@@ -5,53 +5,87 @@ import { Text, type TextProps, StyleSheet } from 'react-native';
 
 import { useThemeColor } from '@/hooks/useThemeColor';
 
+// typescript typings for props
 export type ThemedTextProps = TextProps & {
     lightColor?: string;
     darkColor?: string;
-    type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
+    type?: 'body' | 'bodyBold' | 'titleLarge' | 'titleMedium' | 'titleSmall' | 'subtitle' | 'caption' | 'link' | 'button' | 'overline';
 };
 
-export function ThemedText({ style, lightColor, darkColor, type = 'default', ...rest }: ThemedTextProps) {
+// Styles for different text types using specific Inter fonts
+const styles = StyleSheet.create({
+    body: {
+        fontSize: 16,
+        lineHeight: 24,
+        fontFamily: 'InterRegular',
+    },
+    bodyBold: {
+        fontSize: 16,
+        lineHeight: 24,
+        fontFamily: 'InterBold',
+    },
+    titleLarge: {
+        fontSize: 34,
+        fontFamily: 'InterExtraBold',
+        lineHeight: 40,
+    },
+    titleMedium: {
+        fontSize: 24,
+        fontFamily: 'InterSemiBold',
+        lineHeight: 32,
+    },
+    titleSmall: {
+        fontSize: 20,
+        fontFamily: 'InterMedium',
+        lineHeight: 28,
+    },
+    subtitle: {
+        fontSize: 18,
+        fontFamily: 'InterMedium',
+        lineHeight: 26,
+    },
+    caption: {
+        fontSize: 12,
+        fontFamily: 'InterLight',
+        lineHeight: 16,
+    },
+    link: {
+        fontSize: 16,
+        fontFamily: 'InterMedium', // Assuming you want italics for links
+        lineHeight: 24,
+    },
+    button: {
+        fontSize: 18,
+        fontFamily: 'InterBold',
+        lineHeight: 24,
+    },
+    overline: {
+        fontSize: 10,
+        fontFamily: 'InterExtraLight', // Light weight for overlines
+        textTransform: 'uppercase',
+        lineHeight: 16,
+    },
+    italic: {
+        fontSize: 16,
+        fontFamily: 'InterItalic',
+        lineHeight: 24,
+    },
+});
+
+// ThemedText component definition remains the same, leveraging these styles
+export function ThemedText({ style, lightColor, darkColor, type = 'body', ...rest }: ThemedTextProps) {
     const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
 
     return (
         <Text
             style={[
-                { color },
-                type === 'default' ? styles.default : undefined,
-                type === 'title' ? styles.title : undefined,
-                type === 'defaultSemiBold' ? styles.defaultSemiBold : undefined,
-                type === 'subtitle' ? styles.subtitle : undefined,
-                type === 'link' ? styles.link : undefined,
-                style,
+                styles.body, // Default style
+                styles[type] || {}, // Apply type-specific styles if any
+                { color }, // Apply dynamic color
+                style, // Apply custom styles passed as props
             ]}
             {...rest}
         />
     );
 }
 
-const styles = StyleSheet.create({
-    default: {
-        fontSize: 16,
-        lineHeight: 24,
-    },
-    defaultSemiBold: {
-        fontSize: 16,
-        lineHeight: 24,
-        fontWeight: '600',
-    },
-    title: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        lineHeight: 32,
-    },
-    subtitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-    link: {
-        lineHeight: 30,
-        fontSize: 16,
-        color: '#0a7ea4',
-    },
-});
