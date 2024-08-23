@@ -1,3 +1,5 @@
+// components/Workouts/WorkoutDetailedCard.tsx
+
 import React from 'react';
 import { StyleSheet, View, Text, Image, ImageSourcePropType, TouchableOpacity } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -5,7 +7,7 @@ import { Colors } from '@/constants/Colors';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 
-type WorkoutCardProps = {
+type WorkoutDetailedCardProps = {
     name: string;
     length: string;
     photo: ImageSourcePropType;
@@ -13,7 +15,7 @@ type WorkoutCardProps = {
     onPress: () => void;
 };
 
-const WorkoutCard: React.FC<WorkoutCardProps> = ({ name, length, intensity, onPress, photo }) => {
+export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, length, intensity, onPress, photo }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
@@ -58,5 +60,3 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
     },
 });
-
-export default WorkoutCard;

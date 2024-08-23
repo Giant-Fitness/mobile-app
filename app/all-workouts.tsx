@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ScrollView, StyleSheet, Image, Button, TouchableOpacity, View } from 'react-native';
-import WorkoutCard from '@/components/Workouts/WorkoutCard';
+import { WorkoutDetailedCard } from '@/components/Workouts/WorkoutDetailedCard';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { useNavigation } from '@react-navigation/native';
@@ -55,7 +55,7 @@ export default function AllWorkoutsScreen() {
             <ScrollView>
                 <ThemedView style={[styles.contentContainer, { backgroundColor: themeColors.cardBackground }]}>
                     {workouts.map((workout) => (
-                        <WorkoutCard key={workout.id} name={workout.name} photo={workout.photo} length={workout.length} intensity={workout.intensity} />
+                        <WorkoutDetailedCard key={workout.id} name={workout.name} photo={workout.photo} length={workout.length} intensity={workout.intensity} />
                     ))}
                 </ThemedView>
             </ScrollView>

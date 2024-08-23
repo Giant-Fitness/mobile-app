@@ -1,4 +1,4 @@
-// components/WorkoutsBottomBar.tsx
+// components/Workouts/WorkoutsBottomBar.tsx
 
 import React from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
