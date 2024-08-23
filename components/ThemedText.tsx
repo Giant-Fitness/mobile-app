@@ -59,14 +59,19 @@ const styles = StyleSheet.create({
         fontFamily: 'InterBold',
         lineHeight: 24,
     },
+    buttonSmall: {
+        fontSize: 13,
+        fontFamily: 'InterRegular',
+        lineHeight: 24,
+    },
     overlineTransformed: {
-        fontSize: 14,
+        fontSize: 13,
         fontFamily: 'InterMedium', // Light weight for overlines
         textTransform: 'uppercase',
         lineHeight: 16,
     },
     overline: {
-        fontSize: 14,
+        fontSize: 13,
         fontFamily: 'InterMedium', // Light weight for overlines
         lineHeight: 16,
     },

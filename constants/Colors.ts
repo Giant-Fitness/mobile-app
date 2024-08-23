@@ -10,6 +10,7 @@ export const Colors = {
         accent: '#fa533d',
         tabIconDefault: '#687076',
         tabIconSelected: '#120907',
+        containerBorderColor: '#d8d8d8',
         textShades: {
             50: '#f8eeed',
             100: '#f0dddb',
@@ -79,6 +80,7 @@ export const Colors = {
     dark: {
         text: '#f9f1f0',
         textLight: '#f9f1f0',
+        containerBorderColor: '#272729',
         background: '#0b0504',
         primary: '#cc4533',
         secondary: '#7c2318',
