@@ -24,6 +24,16 @@ const styles = StyleSheet.create({
         lineHeight: 24,
         fontFamily: 'InterBold',
     },
+    bodyMedium: {
+        fontSize: 16,
+        lineHeight: 24,
+        fontFamily: 'InterMedium',
+    },
+    bodySmall: {
+        fontSize: 12,
+        lineHeight: 24,
+        fontFamily: 'InterRegular',
+    },
     titleLarge: {
         fontSize: 34,
         fontFamily: 'InterExtraBold',
@@ -46,7 +56,7 @@ const styles = StyleSheet.create({
     },
     caption: {
         fontSize: 12,
-        fontFamily: 'InterLight',
+        fontFamily: 'InterMedium',
         lineHeight: 16,
     },
     link: {

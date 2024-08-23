@@ -79,7 +79,7 @@ export const Colors = {
     },
     dark: {
         text: '#f9f1f0',
-        textLight: '#f9f1f0',
+        textLight: '#969696',
         containerBorderColor: '#272729',
         background: '#0b0504',
         primary: '#cc4533',

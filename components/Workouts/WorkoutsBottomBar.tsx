@@ -20,11 +20,13 @@ export const WorkoutsBottomBar: React.FC<WorkoutsBottomBarProps> = ({ onSortPres
     const themeColors = Colors[colorScheme ?? 'light'];
 
     return (
-        <ThemedView style={[styles.container, {borderColor: themeColors.containerBorderColor }]}>
+        <ThemedView style={[styles.container, { borderColor: themeColors.containerBorderColor }]}>
             <TouchableOpacity style={styles.button} onPress={onFilterPress}>
                 <View style={styles.iconAndText}>
                     <TabBarIcon name={filterIcon} style={[styles.icon, { color: themeColors.tabIconDefault, marginRight: 4 }]} size={15} />
-                    <ThemedText type='buttonSmall' style={[styles.text, { color: themeColors.tabIconDefault }]}>Filter</ThemedText>
+                    <ThemedText type='buttonSmall' style={[styles.text, { color: themeColors.tabIconDefault }]}>
+                        Filter
+                    </ThemedText>
                 </View>
             </TouchableOpacity>
             <View style={[styles.divider, { backgroundColor: themeColors.tabIconDefault }]} />
@@ -73,7 +75,7 @@ const styles = StyleSheet.create({
     },
     divider: {
         width: 0.5,
-        height: '30%',
+        height: '40%',
         alignSelf: 'center',
     },
 });

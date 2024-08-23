@@ -13,11 +13,61 @@ import { WorkoutsBottomBar } from '@/components/Workouts/WorkoutsBottomBar';
 import { CustomBackButton } from '@/components/navigation/CustomBackButton';
 
 const workouts = [
-    { id: '1', name: 'Full Body Workout', photo: require('@/assets/images/vb.webp'), length: '45 mins', intensity: 'High', onPress: () => {} },
-    { id: '2', name: 'Cardio Blast', photo: require('@/assets/images/vb.webp'), length: '30 mins', intensity: 'Medium', onPress: () => {} },
-    { id: '3', name: 'Ab Blast', photo: require('@/assets/images/vb.webp'), length: '30 mins', intensity: 'Medium', onPress: () => {} },
-    { id: '4', name: 'Shoulder Blast', photo: require('@/assets/images/vb.webp'), length: '30 mins', intensity: 'Medium', onPress: () => {} },
-    { id: '5', name: 'Legs Blast', photo: require('@/assets/images/vb.webp'), length: '30 mins', intensity: 'Medium', onPress: () => {} },
+    {
+        id: '1',
+        name: 'Full Body Workout',
+        photo: require('@/assets/images/vb.webp'),
+        length: '45 mins',
+        level: 'Advanced',
+        equipment: 'Kettlebells',
+        focus: 'Strength',
+        trainer: 'Viren Barman',
+        onPress: () => {},
+    },
+    {
+        id: '2',
+        name: 'Cardio Blast',
+        photo: require('@/assets/images/vb.webp'),
+        length: '30 mins',
+        level: 'Intermediate',
+        equipment: 'Kettlebells',
+        focus: 'Endurance',
+        trainer: 'Viren Barman',
+        onPress: () => {},
+    },
+    {
+        id: '3',
+        name: 'Morning Flexibility',
+        photo: require('@/assets/images/vb.webp'),
+        length: '20 mins',
+        level: 'Beginner',
+        equipment: 'No Equipment',
+        focus: 'Mobility',
+        trainer: 'Viren Barman',
+        onPress: () => {},
+    },
+    {
+        id: '4',
+        name: 'Tank Top Arms',
+        photo: require('@/assets/images/vb.webp'),
+        length: '30 mins',
+        level: 'Advanced',
+        equipment: 'Dumbbells',
+        focus: 'Strength',
+        trainer: 'Viren Barman',
+        onPress: () => {},
+    },
+    {
+        id: '5',
+        name: '5 minute Calming Breath',
+        photo: require('@/assets/images/vb.webp'),
+        length: '5 mins',
+        level: 'Beginner',
+        equipment: 'No Equipment',
+        focus: 'Mobility',
+        trainer: 'Viren Barman',
+        onPress: () => {},
+    },
     // fetch from the backend. caching?
 ];
 
@@ -53,9 +103,18 @@ export default function AllWorkoutsScreen() {
                 {workouts.length} workouts
             </ThemedText>
             <ScrollView>
-                <ThemedView style={[styles.contentContainer, { backgroundColor: themeColors.cardBackground }]}>
+                <ThemedView style={[styles.contentContainer, { backgroundColor: themeColors.background }]}>
                     {workouts.map((workout) => (
-                        <WorkoutDetailedCard key={workout.id} name={workout.name} photo={workout.photo} length={workout.length} intensity={workout.intensity} />
+                        <WorkoutDetailedCard
+                            key={workout.id}
+                            name={workout.name}
+                            photo={workout.photo}
+                            length={workout.length}
+                            level={workout.level}
+                            focus={workout.focus}
+                            equipment={workout.equipment}
+                            trainer={workout.trainer}
+                        />
                     ))}
                 </ThemedView>
             </ScrollView>
@@ -72,7 +131,7 @@ const styles = StyleSheet.create({
         paddingBottom: 8,
     },
     contentContainer: {
-        padding: 16,
-        paddingBottom: 70, // Add padding to ensure content doesn't overlap with the bottom bar
+        paddingLeft: 16,
+        paddingBottom: 90, // Add padding to ensure content doesn't overlap with the bottom bar
     },
 });
