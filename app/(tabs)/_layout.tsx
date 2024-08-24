@@ -13,16 +13,27 @@ export default function TabLayout() {
 
     return (
         <Tabs
-            initialRouteName='fitness'
             screenOptions={{
-                tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+                tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tabIconSelected,
+                tabBarStyle: {
+                    backgroundColor: Colors[colorScheme ?? 'light'].background,
+                    height: 90,
+                    paddingTop: 5,
+                    level: 100,
+                },
+                headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
                 headerShown: true,
                 tabBarShowLabel: true,
             }}
+            sceneContainerStyle={{ backgroundColor: Colors[colorScheme ?? 'light'].background }}
         >
             <Tabs.Screen
                 name='home'
                 options={{
+                    headerStyle: {
+                        backgroundColor: Colors[colorScheme ?? 'light'].background,
+                    },
+                    headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
                     title: 'Home',
                     tabBarIcon: ({ color, focused }) => <MaterialIcons size={24} name='home' color={color} />,
                 }}
@@ -30,6 +41,10 @@ export default function TabLayout() {
             <Tabs.Screen
                 name='(top-tabs)'
                 options={{
+                    headerStyle: {
+                        backgroundColor: Colors[colorScheme ?? 'light'].background,
+                    },
+                    headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
                     title: 'Exercise',
                     tabBarIcon: ({ color, focused }) => <MaterialIcons name='sports-martial-arts' size={24} color={color} />,
                 }}
@@ -37,6 +52,10 @@ export default function TabLayout() {
             <Tabs.Screen
                 name='nutrition'
                 options={{
+                    headerStyle: {
+                        backgroundColor: Colors[colorScheme ?? 'light'].background,
+                    },
+                    headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
                     title: 'Nutrition',
                     tabBarIcon: ({ color, focused }) => <Entypo name='leaf' size={22} color={color} />,
                 }}
@@ -44,6 +63,10 @@ export default function TabLayout() {
             <Tabs.Screen
                 name='progress'
                 options={{
+                    headerStyle: {
+                        backgroundColor: Colors[colorScheme ?? 'light'].background,
+                    },
+                    headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
                     title: 'Progress',
                     tabBarIcon: ({ color, focused }) => <TabBarIcon name='stats-chart' size={21} color={color} />,
                 }}

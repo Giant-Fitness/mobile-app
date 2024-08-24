@@ -2,22 +2,67 @@
 
 import React from 'react';
 import { ScrollView, StyleSheet, Image, Button, TouchableOpacity, View } from 'react-native';
-import WorkoutCard from '@/components/WorkoutCard';
+import { WorkoutDetailedCard } from '@/components/workouts/WorkoutDetailedCard';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { useNavigation } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import { WorkoutsBottomBar } from '@/components/WorkoutsBottomBar';
+import { WorkoutsBottomBar } from '@/components/workouts/WorkoutsBottomBar';
 import { CustomBackButton } from '@/components/navigation/CustomBackButton';
 
 const workouts = [
-    { id: '1', name: 'Full Body Workout', photo: require('@/assets/images/vb.webp'), length: '45 mins', intensity: 'High', onPress: () => {} },
-    { id: '2', name: 'Cardio Blast', photo: require('@/assets/images/vb.webp'), length: '30 mins', intensity: 'Medium', onPress: () => {} },
-    { id: '3', name: 'Ab Blast', photo: require('@/assets/images/vb.webp'), length: '30 mins', intensity: 'Medium', onPress: () => {} },
-    { id: '4', name: 'Shoulder Blast', photo: require('@/assets/images/vb.webp'), length: '30 mins', intensity: 'Medium', onPress: () => {} },
-    { id: '5', name: 'Legs Blast', photo: require('@/assets/images/vb.webp'), length: '30 mins', intensity: 'Medium', onPress: () => {} },
+    {
+        id: '1',
+        name: 'Full Body Workout',
+        photo: require('@/assets/images/vb.webp'),
+        length: '45 mins',
+        level: 'Advanced',
+        equipment: 'Kettlebells',
+        focus: 'Strength',
+        trainer: 'Viren Barman',
+    },
+    {
+        id: '2',
+        name: 'Cardio Blast',
+        photo: require('@/assets/images/vb.webp'),
+        length: '30 mins',
+        level: 'Intermediate',
+        equipment: 'Kettlebells',
+        focus: 'Endurance',
+        trainer: 'Viren Barman',
+    },
+    {
+        id: '3',
+        name: 'Morning Flexibility',
+        photo: require('@/assets/images/vb.webp'),
+        length: '20 mins',
+        level: 'Beginner',
+        equipment: 'No Equipment',
+        focus: 'Mobility',
+        trainer: 'Viren Barman',
+    },
+    {
+        id: '4',
+        name: 'Tank Top Arms',
+        photo: require('@/assets/images/vb.webp'),
+        length: '30 mins',
+        level: 'Advanced',
+        equipment: 'Dumbbells',
+        focus: 'Strength',
+        trainer: 'Viren Barman',
+    },
+    {
+        id: '5',
+        name: '5 minute Calming Breath',
+        photo: require('@/assets/images/vb.webp'),
+        length: '5 mins',
+        level: 'Beginner',
+        equipment: 'No Equipment',
+        focus: 'Mobility',
+        trainer: 'Viren Barman',
+    },
     // fetch from the backend. caching?
 ];
 
@@ -39,19 +84,32 @@ export default function AllWorkoutsScreen() {
         navigation.setOptions({
             title: 'All Workouts',
             headerBackTitleVisible: false, // Hide the back button label
+            headerStyle: {
+                backgroundColor: Colors[colorScheme ?? 'light'].background,
+            },
+            headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
             headerLeft: () => <CustomBackButton />,
         });
     }, [navigation]);
 
     return (
         <ThemedView style={{ flex: 1 }}>
-            <ThemedText type='subtitle' style={styles.countContainer}>
+            <ThemedText type='overline' style={[styles.countContainer, { color: themeColors.textLight }]}>
                 {workouts.length} workouts
             </ThemedText>
             <ScrollView>
-                <ThemedView style={[styles.contentContainer, { backgroundColor: themeColors.cardBackground }]}>
+                <ThemedView style={[styles.contentContainer, { backgroundColor: themeColors.background }]}>
                     {workouts.map((workout) => (
-                        <WorkoutCard key={workout.id} name={workout.name} photo={workout.photo} length={workout.length} intensity={workout.intensity} />
+                        <WorkoutDetailedCard
+                            key={workout.id}
+                            name={workout.name}
+                            photo={workout.photo}
+                            length={workout.length}
+                            level={workout.level}
+                            focus={workout.focus}
+                            equipment={workout.equipment}
+                            trainer={workout.trainer}
+                        />
                     ))}
                 </ThemedView>
             </ScrollView>
@@ -63,11 +121,12 @@ export default function AllWorkoutsScreen() {
 
 const styles = StyleSheet.create({
     countContainer: {
-        padding: 16,
+        paddingLeft: 24,
         paddingTop: 24,
+        paddingBottom: 8,
     },
     contentContainer: {
-        padding: 16,
-        paddingBottom: 70, // Add padding to ensure content doesn't overlap with the bottom bar
+        paddingLeft: 16,
+        paddingBottom: 90, // Add padding to ensure content doesn't overlap with the bottom bar
     },
 });
