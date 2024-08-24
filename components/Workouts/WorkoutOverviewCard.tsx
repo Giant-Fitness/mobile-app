@@ -8,6 +8,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useNavigation } from '@react-navigation/native';
 
 type WorkoutOverviewCardProps = {
     name: string;
@@ -23,6 +24,12 @@ export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, 
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
+    const navigation = useNavigation();
+
+    const navigateToWorkoutDetails = () => {
+        navigation.navigate('workout-details', { name, length, level, equipment, focus, photo, trainer });
+    };
+
     // Function to determine the level icons
     const renderLevelIcon = (level) => {
         switch (level.toLowerCase()) {
@@ -37,7 +44,7 @@ export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, 
         }
     };
     return (
-        <ThemedView style={styles.cardContainer}>
+        <TouchableOpacity onPress={navigateToWorkoutDetails} style={styles.cardContainer}>
             <ImageBackground source={photo} style={styles.image}>
                 <LinearGradient
                     colors={['transparent', 'rgba(0,0,0,0.8)']} // Adjust the colors and opacity as needed
@@ -51,7 +58,7 @@ export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, 
                     </ThemedText>
                 </LinearGradient>
             </ImageBackground>
-        </ThemedView>
+        </TouchableOpacity>
     );
 };
 

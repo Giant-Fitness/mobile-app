@@ -4,6 +4,7 @@ export const Colors = {
     light: {
         text: '#0f0706',
         textLight: '#687076',
+        textMedium: '#E2E4E6',
         background: '#fdfcfb',
         primary: '#cc4533',
         secondary: '#e78e83',

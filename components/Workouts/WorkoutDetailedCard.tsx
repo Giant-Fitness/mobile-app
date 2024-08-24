@@ -7,6 +7,7 @@ import { Colors } from '@/constants/Colors';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 type WorkoutDetailedCardProps = {
     name: string;
@@ -16,12 +17,17 @@ type WorkoutDetailedCardProps = {
     equipment: string;
     focus: string;
     trainer: string;
-    onPress: () => void;
 };
 
-export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, length, level, equipment, focus, onPress, photo, trainer }) => {
+export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, length, level, equipment, focus, photo, trainer }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
+
+    const navigation = useNavigation();
+
+    const navigateToWorkoutDetails = () => {
+        navigation.navigate('workout-details', { name, length, level, equipment, focus, photo, trainer });
+    };
 
     // Function to determine the level icons
     const renderLevelIcon = (level) => {
@@ -38,7 +44,7 @@ export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, 
     };
 
     return (
-        <TouchableOpacity onPress={onPress} style={styles.card}>
+        <TouchableOpacity onPress={navigateToWorkoutDetails} style={styles.card}>
             <ThemedView style={[styles.cardContent, { backgroundColor: themeColors.background }]}>
                 <Image source={photo} style={styles.image} />
                 <ThemedView style={styles.textContainer}>

@@ -35,8 +35,8 @@ const styles = StyleSheet.create({
         fontFamily: 'InterRegular',
     },
     titleLarge: {
-        fontSize: 34,
-        fontFamily: 'InterExtraBold',
+        fontSize: 24,
+        fontFamily: 'InterSemiBold',
         lineHeight: 40,
     },
     titleMedium: {
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     },
     subtitle: {
         fontSize: 18,
-        fontFamily: 'InterMedium',
+        fontFamily: 'InterRegular',
         lineHeight: 26,
     },
     caption: {

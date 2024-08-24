@@ -25,7 +25,7 @@ export default function TabLayout() {
                 headerShown: true,
                 tabBarShowLabel: true,
             }}
-            sceneContainerStyle={{ backgroundColor: 'yellow' }}
+            sceneContainerStyle={{ backgroundColor: Colors[colorScheme ?? 'light'].background }}
         >
             <Tabs.Screen
                 name='home'

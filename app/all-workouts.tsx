@@ -22,7 +22,6 @@ const workouts = [
         equipment: 'Kettlebells',
         focus: 'Strength',
         trainer: 'Viren Barman',
-        onPress: () => {},
     },
     {
         id: '2',
@@ -33,7 +32,6 @@ const workouts = [
         equipment: 'Kettlebells',
         focus: 'Endurance',
         trainer: 'Viren Barman',
-        onPress: () => {},
     },
     {
         id: '3',
@@ -44,7 +42,6 @@ const workouts = [
         equipment: 'No Equipment',
         focus: 'Mobility',
         trainer: 'Viren Barman',
-        onPress: () => {},
     },
     {
         id: '4',
@@ -55,7 +52,6 @@ const workouts = [
         equipment: 'Dumbbells',
         focus: 'Strength',
         trainer: 'Viren Barman',
-        onPress: () => {},
     },
     {
         id: '5',
@@ -66,7 +62,6 @@ const workouts = [
         equipment: 'No Equipment',
         focus: 'Mobility',
         trainer: 'Viren Barman',
-        onPress: () => {},
     },
     // fetch from the backend. caching?
 ];
