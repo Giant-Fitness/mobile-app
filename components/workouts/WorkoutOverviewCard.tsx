@@ -44,7 +44,7 @@ export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, 
         }
     };
     return (
-        <TouchableOpacity onPress={navigateToWorkoutDetails} style={styles.cardContainer}>
+        <TouchableOpacity onPress={navigateToWorkoutDetails} style={styles.cardContainer} activeOpacity={1}>
             <ImageBackground source={photo} style={styles.image}>
                 <LinearGradient
                     colors={['transparent', 'rgba(0,0,0,0.8)']} // Adjust the colors and opacity as needed

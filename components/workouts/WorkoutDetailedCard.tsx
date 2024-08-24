@@ -44,7 +44,7 @@ export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, 
     };
 
     return (
-        <TouchableOpacity onPress={navigateToWorkoutDetails} style={styles.card}>
+        <TouchableOpacity onPress={navigateToWorkoutDetails} style={styles.card} activeOpacity={1}>
             <ThemedView style={[styles.cardContent, { backgroundColor: themeColors.background }]}>
                 <Image source={photo} style={styles.image} />
                 <ThemedView style={styles.textContainer}>
