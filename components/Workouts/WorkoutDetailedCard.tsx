@@ -25,13 +25,13 @@ export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, 
 
     // Function to determine the level icons
     const renderLevelIcon = (level) => {
-        switch(level.toLowerCase()) {
+        switch (level.toLowerCase()) {
             case 'beginner':
-                return <MaterialCommunityIcons name="chevron-up" size={14} color={themeColors.textLight} />;
+                return <MaterialCommunityIcons name='chevron-up' size={14} color={themeColors.textLight} />;
             case 'intermediate':
-                return <MaterialCommunityIcons name="chevron-double-up" size={14} color={themeColors.textLight} />;
+                return <MaterialCommunityIcons name='chevron-double-up' size={14} color={themeColors.textLight} />;
             case 'advanced':
-                return <MaterialCommunityIcons name="chevron-triple-up" size={14} color={themeColors.textLight} />;
+                return <MaterialCommunityIcons name='chevron-triple-up' size={14} color={themeColors.textLight} />;
             default:
                 return null; // No icon for undefined intensity levels
         }
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     },
     attributeText: {
         marginLeft: 5,
-        lineHeight: 22,  // Reduced line height for tighter text wrapping
+        lineHeight: 22, // Reduced line height for tighter text wrapping
     },
     attributeRow: {
         flexDirection: 'row',
@@ -131,8 +131,8 @@ const styles = StyleSheet.create({
     },
     workoutName: {
         marginTop: 2,
-        marginRight: 16,  // Add right margin to ensure there's space on the right
-        lineHeight: 20,  // Reduced line height for tighter text wrapping
+        marginRight: 16, // Add right margin to ensure there's space on the right
+        lineHeight: 20, // Reduced line height for tighter text wrapping
         paddingBottom: 4,
     },
 });

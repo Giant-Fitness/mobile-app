@@ -16,12 +16,12 @@ export function Collapsible({ children, title }: PropsWithChildren & { title: st
     return (
         <ThemedView>
             <TouchableOpacity style={styles.heading} onPress={() => setIsOpen((value) => !value)} activeOpacity={0.8}>
+                <ThemedText type='bodyMedium'>{title}</ThemedText>
                 <Ionicons
                     name={isOpen ? 'chevron-down' : 'chevron-forward-outline'}
                     size={18}
                     color={theme === 'light' ? Colors.light.icon : Colors.dark.icon}
                 />
-                <ThemedText type='defaultSemiBold'>{title}</ThemedText>
             </TouchableOpacity>
             {isOpen && <ThemedView style={styles.content}>{children}</ThemedView>}
         </ThemedView>
@@ -33,6 +33,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 6,
+        padding: 16,
+        paddingTop: 36,
+        paddingLeft: 24,
     },
     content: {
         marginTop: 6,

@@ -45,8 +45,8 @@ const styles = StyleSheet.create({
         lineHeight: 32,
     },
     titleSmall: {
-        fontSize: 20,
-        fontFamily: 'InterMedium',
+        fontSize: 16,
+        fontFamily: 'InterSemiBold',
         lineHeight: 28,
     },
     subtitle: {
