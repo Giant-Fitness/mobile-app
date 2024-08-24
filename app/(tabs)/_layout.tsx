@@ -43,6 +43,9 @@ export default function TabLayout() {
                 options={{
                     headerStyle: {
                         backgroundColor: Colors[colorScheme ?? 'light'].background,
+                        borderBottomWidth: 0, // Remove the border under the navbar
+                        shadowOpacity: 0, // Remove the shadow for iOS
+                        elevation: 0, // Remove the elevation for Android
                     },
                     headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
                     title: 'Exercise',

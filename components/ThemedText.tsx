@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     },
     link: {
         fontSize: 16,
-        fontFamily: 'InterMedium', // Assuming you want italics for links
+        fontFamily: 'InterMedium',
         lineHeight: 24,
     },
     button: {
@@ -76,13 +76,13 @@ const styles = StyleSheet.create({
     },
     overlineTransformed: {
         fontSize: 13,
-        fontFamily: 'InterMedium', // Light weight for overlines
+        fontFamily: 'InterMedium',
         textTransform: 'uppercase',
         lineHeight: 16,
     },
     overline: {
         fontSize: 13,
-        fontFamily: 'InterMedium', // Light weight for overlines
+        fontFamily: 'InterMedium',
         lineHeight: 16,
     },
     italic: {
