@@ -2,14 +2,14 @@
 
 import React from 'react';
 import { ScrollView, StyleSheet, Image, Button, TouchableOpacity, View } from 'react-native';
-import { WorkoutDetailedCard } from '@/components/Workouts/WorkoutDetailedCard';
+import { WorkoutDetailedCard } from '@/components/workouts/WorkoutDetailedCard';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { useNavigation } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import { WorkoutsBottomBar } from '@/components/Workouts/WorkoutsBottomBar';
+import { WorkoutsBottomBar } from '@/components/workouts/WorkoutsBottomBar';
 import { CustomBackButton } from '@/components/navigation/CustomBackButton';
 
 const workouts = [

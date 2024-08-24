@@ -81,6 +81,8 @@ const styles = StyleSheet.create({
         textShadowColor: 'rgba(0,0,0,0.75)',
         textShadowOffset: { width: 1, height: 1 },
         textShadowRadius: 10,
+        marginRight: 48, // Add right margin to ensure there's space on the right
+        lineHeight: 20, // Reduced line height for tighter text wrapping
     },
     attributes: {
         textShadowColor: 'rgba(0,0,0,0.75)',

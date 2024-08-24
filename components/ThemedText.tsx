@@ -15,8 +15,8 @@ export type ThemedTextProps = TextProps & {
 // Styles for different text types using specific Inter fonts
 const styles = StyleSheet.create({
     body: {
-        fontSize: 16,
-        lineHeight: 24,
+        fontSize: 14,
+        lineHeight: 20,
         fontFamily: 'InterRegular',
     },
     bodyBold: {

@@ -11,6 +11,7 @@ export const Colors = {
         tabIconDefault: '#687076',
         tabIconSelected: '#120907',
         containerBorderColor: '#d8d8d8',
+        containerLightColor: '#fbf5f4',
         textShades: {
             50: '#f8eeed',
             100: '#f0dddb',
