@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     },
     icon: {
         alignSelf: 'center',
-        marginTop: -2, // Adjust this value as needed to align the top of the icon with the text
+        marginTop: -2,
     },
     text: {
         marginLeft: 4,

@@ -26,10 +26,7 @@ export default function WorkoutDetailScreen() {
         <ThemedView style={styles.container}>
             <TouchableOpacity onPress={() => console.log('pressed')} style={styles.cardContainer}>
                 <ImageBackground source={photo} style={styles.image}>
-                    <LinearGradient
-                        colors={['transparent', 'rgba(0,0,0,0.5)']} // Adjust the colors and opacity as needed
-                        style={styles.gradientOverlay}
-                    >
+                    <LinearGradient colors={['transparent', 'rgba(0,0,0,0.5)']} style={styles.gradientOverlay}>
                         <ThemedText type='titleLarge' style={[styles.title, { color: themeColors.background }]}>
                             {name}
                         </ThemedText>
@@ -95,7 +92,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         alignItems: 'center',
         justifyContent: 'center',
-        height: '50%', // Adjust depending on your design needs
+        height: '50%',
         zIndex: 2,
     },
     title: {

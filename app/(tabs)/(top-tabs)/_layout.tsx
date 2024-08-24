@@ -6,16 +6,16 @@ import { MaterialTopTabNavigationEventMap, MaterialTopTabNavigationOptions, crea
 import { withLayoutContext } from 'expo-router';
 import { ParamListBase, TabNavigationState } from '@react-navigation/native';
 import Constants from 'expo-constants';
-import { useColorScheme } from '@/hooks/useColorScheme'; // Import the color scheme hook
-import { Colors } from '@/constants/Colors'; // Import your color definitions
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/Colors';
 
 const { Navigator, Screen } = createMaterialTopTabNavigator();
 
 export const MaterialTopTabs = withLayoutContext<
-  MaterialTopTabNavigationOptions,
-  typeof Navigator,
-  TabNavigationState<ParamListBase>,
-  MaterialTopTabNavigationEventMap
+    MaterialTopTabNavigationOptions,
+    typeof Navigator,
+    TabNavigationState<ParamListBase>,
+    MaterialTopTabNavigationEventMap
 >(Navigator);
 
 export default function TabLayout() {
@@ -25,11 +25,16 @@ export default function TabLayout() {
     return (
         <MaterialTopTabs
             screenOptions={{
-                tabBarLabelStyle: { textTransform: 'none', fontSize: 15 },
-                tabBarStyle: { backgroundColor: themeColors.background },
-                tabBarIndicatorStyle: { backgroundColor: themeColors.text },
+                tabBarLabelStyle: { textTransform: 'none' },
+                tabBarStyle: {
+                    backgroundColor: themeColors.background,
+                },
+                tabBarIndicatorStyle: {
+                    backgroundColor: themeColors.text,
+                    height: 0.7, // Thickness of the tab indicator line
+                },
                 tabBarActiveTintColor: themeColors.text, // Active tab label color
-                tabBarInactiveTintColor: themeColors.textShades[500], // Inactive tab label color
+                tabBarInactiveTintColor: themeColors.textLight, // Inactive tab label color
             }}
         >
             <MaterialTopTabs.Screen name='programs' options={{ title: 'Programs' }} />
@@ -37,7 +42,3 @@ export default function TabLayout() {
         </MaterialTopTabs>
     );
 }
-
-const styles = StyleSheet.create({
-    // Define any styles for your components here
-});
