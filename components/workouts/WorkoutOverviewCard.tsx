@@ -18,16 +18,18 @@ type WorkoutOverviewCardProps = {
     equipment: string;
     focus: string;
     trainer: string;
+    longText: string;
+    focusMulti: array;
 };
 
-export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, length, level, equipment, focus, photo, trainer }) => {
+export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, length, level, equipment, focus, photo, trainer, longText, focusMulti }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
     const navigation = useNavigation();
 
     const navigateToWorkoutDetails = () => {
-        navigation.navigate('workout-details', { name, length, level, equipment, focus, photo, trainer });
+        navigation.navigate('workout-details', { name, length, level, equipment, focus, photo, trainer, longText, focusMulti });
     };
 
     // Function to determine the level icons
