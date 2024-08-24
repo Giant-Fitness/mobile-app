@@ -6,10 +6,13 @@ import React from 'react';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Entypo, MaterialIcons } from '@expo/vector-icons';
+import { Entypo, MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
+    const navigation = useNavigation();
 
     return (
         <Tabs
@@ -21,9 +24,18 @@ export default function TabLayout() {
                     paddingTop: 5,
                     level: 100,
                 },
+                headerTitleContainerStyle: {
+                    paddingLeft: 8, // Add padding on the left
+                },
                 headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
+                headerTitleAlign: 'left', // Align the title to the left
                 headerShown: true,
                 tabBarShowLabel: true,
+                headerRight: () => (
+                    <TouchableOpacity activeOpacity={1} onPress={() => navigation.navigate('settings')}>
+                        <Ionicons name="person-circle-outline" size={22} color={Colors[colorScheme ?? 'light'].text} style={{ marginRight: 16 }} />
+                    </TouchableOpacity>
+                ),
             }}
             sceneContainerStyle={{ backgroundColor: Colors[colorScheme ?? 'light'].background }}
         >
