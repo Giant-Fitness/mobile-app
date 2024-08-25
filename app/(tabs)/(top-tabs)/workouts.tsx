@@ -139,7 +139,7 @@ export default function WorkoutsScreen() {
                     ))}
                     <ThemedView
                         style={{
-                            paddingBottom: 48,
+                            paddingBottom: 66,
                         }}
                     >
                         <TouchableOpacity onPress={navigateToAllWorkouts} style={styles.allWorkouts}>
@@ -167,7 +167,6 @@ export default function WorkoutsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingBottom: 32,
     },
     allWorkouts: {
         padding: 24,
