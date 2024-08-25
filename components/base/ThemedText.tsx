@@ -86,9 +86,9 @@ const styles = StyleSheet.create({
         lineHeight: 16,
     },
     italic: {
-        fontSize: 16,
+        fontSize: 13,
         fontFamily: 'InterItalic',
-        lineHeight: 24,
+        lineHeight: 16,
     },
 });
 

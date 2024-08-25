@@ -30,6 +30,12 @@ export default function ProgramsScreen() {
                     justifyContent: 'flex-start',
                 }}
             >
+                <ThemedView style={styles.quoteContainer}>
+                    <ThemedText type='italic' style={[styles.quoteText, { color: themeColors.textLight }]}>
+                        "The only bad workout is the one that didn't happen."
+                    </ThemedText>
+                </ThemedView>
+
                 <ThemedView style={[styles.activeCardContainer]}>
                     <ActiveProgramDayCard />
                 </ThemedView>
@@ -100,7 +106,7 @@ export default function ProgramsScreen() {
                 </ThemedView>
                 <ThemedView
                     style={{
-                        paddingBottom: 32,
+                        paddingBottom: 48,
                     }}
                 >
                     <TouchableOpacity style={styles.menuItem}>
@@ -147,13 +153,19 @@ const styles = StyleSheet.create({
         paddingTop: 24,
         paddingBottom: 32,
     },
-    activeCardContainer: {
-        paddingTop: 48,
-    },
+    activeCardContainer: {},
     menuItem: {
         padding: 16,
         paddingTop: 16,
         flexDirection: 'row',
         justifyContent: 'space-between',
+    },
+    quoteContainer: {
+        paddingTop: 36,
+        paddingBottom: 24,
+        paddingHorizontal: 16,
+    },
+    quoteText: {
+        textAlign: 'center',
     },
 });

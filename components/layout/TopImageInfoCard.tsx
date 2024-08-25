@@ -67,7 +67,6 @@ const styles = StyleSheet.create({
         borderBottomRightRadius: 5,
     },
     title: {
-        fontSize: 18,
         marginBottom: 8,
     },
     subtitle: {
