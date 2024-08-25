@@ -1,4 +1,5 @@
-/* eslint-disable react/prop-types */
+// components/programs/DayOverview.tsx
+
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import React from 'react';

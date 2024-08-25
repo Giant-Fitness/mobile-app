@@ -8,7 +8,6 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { useNavigation } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { TabBarIcon } from '@/components/base/TabBarIcon';
 import { WorkoutsBottomBar } from '@/components/workouts/WorkoutsBottomBar';
 import { CustomBackButton } from '@/components/base/CustomBackButton';
 

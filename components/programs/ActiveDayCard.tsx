@@ -1,3 +1,5 @@
+// components/programs/ActiveDayCard.tsx
+
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import React from 'react';

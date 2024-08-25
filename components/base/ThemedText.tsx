@@ -1,4 +1,4 @@
-// components/ThemedText.tsx
+// components/base/ThemedText.tsx
 
 import React from 'react';
 import { Text, type TextProps, StyleSheet } from 'react-native';

@@ -3,7 +3,7 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 
-import { TabBarIcon } from '@/components/base/TabBarIcon';
+import { TabBarIcon } from '@/components/icons/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Entypo, MaterialIcons, Ionicons } from '@expo/vector-icons';

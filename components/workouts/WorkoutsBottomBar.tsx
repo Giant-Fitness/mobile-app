@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import { TabBarIcon } from '@/components/base/TabBarIcon';
+import { TabBarIcon } from '@/components/icons/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { ThemedView } from '@/components/base/ThemedView';
