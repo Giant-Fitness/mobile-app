@@ -111,7 +111,7 @@ export default function AllWorkoutsScreen() {
             <ThemedText type='overline' style={[styles.countContainer, { color: themeColors.textLight }]}>
                 {workouts.length} workouts
             </ThemedText>
-            <ScrollView>
+            <ScrollView showsVerticalScrollIndicator={false}>
                 <ThemedView style={[styles.contentContainer, { backgroundColor: themeColors.background }]}>
                     {workouts.map((workout) => (
                         <WorkoutDetailedCard

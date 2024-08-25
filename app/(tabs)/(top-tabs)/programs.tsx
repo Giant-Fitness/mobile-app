@@ -29,6 +29,7 @@ export default function ProgramsScreen() {
                 contentContainerStyle={{
                     justifyContent: 'flex-start',
                 }}
+                showsVerticalScrollIndicator={false}
             >
                 <ThemedView style={styles.quoteContainer}>
                     <ThemedText type='italic' style={[styles.quoteText, { color: themeColors.textLight }]}>
