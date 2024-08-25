@@ -58,10 +58,12 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 14,
+        marginBottom: 0,
     },
     image: {
         height: 90,
         width: 90,
+        borderRadius: 5,
     },
     contentContainer: {
         width: '100%',
