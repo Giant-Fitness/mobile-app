@@ -1,7 +1,7 @@
 // components/workouts/WorkoutDetailedCard.tsx
 
 import React from 'react';
-import { StyleSheet, Image, ImageSourcePropType, TouchableOpacity } from 'react-native';
+import { StyleSheet, ImageSourcePropType } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -9,17 +9,18 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { LevelIcon } from '@/components/icons/LevelIcon';
+import { LeftImageInfoCard } from '@/components/layout/LeftImageInfoCard';
 
 type WorkoutDetailedCardProps = {
     name: string;
     length: string;
     photo: ImageSourcePropType;
-    intensity: string;
+    level: string;
     equipment: string;
     focus: string;
     trainer: string;
     longText: string;
-    focusMulti: array;
+    focusMulti: string[];
 };
 
 export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, length, level, equipment, focus, photo, trainer, longText, focusMulti }) => {
@@ -33,101 +34,53 @@ export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, 
     };
 
     return (
-        <TouchableOpacity onPress={navigateToWorkoutDetails} style={styles.card} activeOpacity={1}>
-            <ThemedView style={[styles.cardContent, { backgroundColor: themeColors.background }]}>
-                <Image source={photo} style={styles.image} />
-                <ThemedView style={styles.textContainer}>
-                    <ThemedText type='bodyMedium' style={[styles.workoutName, { color: themeColors.text }]}>
-                        {name}
-                    </ThemedText>
-                    {/*                    <ThemedText type='caption' style={[styles.trainer, { color: themeColors.textLight }]}>
-                        With {trainer}
-                    </ThemedText>*/}
-                    <ThemedView style={styles.attributeGrid}>
-                        <ThemedView style={styles.attributeRow}>
-                            <ThemedView style={styles.attribute}>
-                                <MaterialCommunityIcons name='yoga' size={14} color={themeColors.textLight} />
-                                <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight }]}>
-                                    {focus}
-                                </ThemedText>
-                            </ThemedView>
-                            <ThemedView style={[styles.attribute, { paddingLeft: 10 }]}>
-                                <LevelIcon level={level} size={14} color={themeColors.textLight} />
-                                <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight, marginLeft: 4 }]}>
-                                    {level}
-                                </ThemedText>
-                            </ThemedView>
-                        </ThemedView>
-                        <ThemedView style={styles.attributeRow}>
-                            <ThemedView style={styles.attribute}>
-                                <MaterialCommunityIcons name='dumbbell' size={14} color={themeColors.textLight} />
-                                <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight }]}>
-                                    {equipment}
-                                </ThemedText>
-                            </ThemedView>
-                        </ThemedView>
-                        <ThemedView style={styles.attributeRow}>
-                            <ThemedView style={styles.attribute}>
-                                <Ionicons name='stopwatch-outline' size={14} color={themeColors.textLight} />
-                                <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight }]}>
-                                    {length}
-                                </ThemedText>
-                            </ThemedView>
-                        </ThemedView>
+        <LeftImageInfoCard
+            image={photo}
+            title={name}
+            containerStyle={{ paddingBottom: 24 }}
+            onPress={navigateToWorkoutDetails}
+            extraContent={
+                <ThemedView style={styles.attributeContainer}>
+                    <ThemedView style={styles.attributeRow}>
+                        <MaterialCommunityIcons name='yoga' size={14} color={themeColors.textLight} />
+                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight }]}>
+                            {focus}
+                        </ThemedText>
+                        <LevelIcon level={level} size={14} color={themeColors.textLight} />
+                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight }]}>
+                            {level}
+                        </ThemedText>
+                    </ThemedView>
+                    <ThemedView style={styles.attributeRow}>
+                        <MaterialCommunityIcons name='dumbbell' size={14} color={themeColors.textLight} />
+                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight }]}>
+                            {equipment}
+                        </ThemedText>
+                    </ThemedView>
+                    <ThemedView style={styles.attributeRow}>
+                        <Ionicons name='stopwatch-outline' size={14} color={themeColors.textLight} />
+                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight }]}>
+                            {length}
+                        </ThemedText>
                     </ThemedView>
                 </ThemedView>
-            </ThemedView>
-        </TouchableOpacity>
+            }
+        />
     );
 };
 
 const styles = StyleSheet.create({
-    card: {
-        overflow: 'hidden',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3, // For Android shadow
-    },
-    cardContent: {
-        flexDirection: 'row',
-        padding: 12,
-        alignItems: 'flex-start', // Align items to the top of the container
-    },
-    image: {
-        marginTop: 6,
-        width: 120,
-        height: 120,
-        borderRadius: 8,
-        marginRight: 16,
-    },
-    textContainer: {
-        flex: 1, // Take up remaining space
+    attributeContainer: {
         flexDirection: 'column',
-    },
-    attribute: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    attributeText: {
-        marginLeft: 5,
-        lineHeight: 22, // Reduced line height for tighter text wrapping
+        justifyContent: 'flex-start',
     },
     attributeRow: {
         flexDirection: 'row',
-        justifyContent: 'flex-start',
+        alignItems: 'center',
+        marginBottom: 8,
     },
-    attributeGrid: {
-        flex: 1, // Take up all available space left by the title
-    },
-    trainer: {
-        paddingBottom: 6,
-    },
-    workoutName: {
-        marginTop: 2,
-        marginRight: 16, // Add right margin to ensure there's space on the right
-        lineHeight: 20, // Reduced line height for tighter text wrapping
-        paddingBottom: 4,
+    attributeText: {
+        marginLeft: 4,
+        lineHeight: 14, // Ensures the text is aligned with the icon
     },
 });

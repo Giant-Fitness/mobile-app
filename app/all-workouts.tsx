@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     countContainer: {
         paddingLeft: 24,
         paddingTop: 24,
-        paddingBottom: 8,
+        paddingBottom: 24,
     },
     contentContainer: {
         paddingLeft: 16,
