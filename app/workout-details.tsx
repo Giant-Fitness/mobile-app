@@ -11,6 +11,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { CustomBackButton } from '@/components/navigation/CustomBackButton';
 import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { ImageTextOverlay } from '@/components/images/ImageTextOverlay';
+import { LevelIcon } from '@/components/icons/LevelIcon';
 
 export default function WorkoutDetailScreen() {
     const colorScheme = useColorScheme();
@@ -20,20 +21,6 @@ export default function WorkoutDetailScreen() {
     const route = useRoute();
 
     const scrollY = useRef(new Animated.Value(0)).current;
-
-    // Function to determine the level icons
-    const renderLevelIcon = (level) => {
-        switch (level.toLowerCase()) {
-            case 'beginner':
-                return <MaterialCommunityIcons name='chevron-up' size={18} color={themeColors.text} />;
-            case 'intermediate':
-                return <MaterialCommunityIcons name='chevron-double-up' size={18} color={themeColors.text} />;
-            case 'advanced':
-                return <MaterialCommunityIcons name='chevron-triple-up' size={16} color={themeColors.text} />;
-            default:
-                return null; // No icon for undefined intensity levels
-        }
-    };
 
     React.useEffect(() => {
         navigation.setOptions({ headerShown: false });
@@ -71,7 +58,7 @@ export default function WorkoutDetailScreen() {
                             </ThemedText>
                         </ThemedView>
                         <ThemedView style={[styles.attribute, { backgroundColor: themeColors.backgroundLight, paddingLeft: 32 }]}>
-                            {renderLevelIcon(level)}
+                            <LevelIcon level={level} size={16} />
                             <ThemedText type='body' style={[styles.attributeText, { color: themeColors.text, marginLeft: 4 }]}>
                                 {level}
                             </ThemedText>

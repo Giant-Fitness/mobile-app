@@ -8,6 +8,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { LevelIcon } from '@/components/icons/LevelIcon';
 
 type WorkoutDetailedCardProps = {
     name: string;
@@ -31,20 +32,6 @@ export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, 
         navigation.navigate('workout-details', { name, length, level, equipment, focus, photo, trainer, longText, focusMulti });
     };
 
-    // Function to determine the level icons
-    const renderLevelIcon = (level) => {
-        switch (level.toLowerCase()) {
-            case 'beginner':
-                return <MaterialCommunityIcons name='chevron-up' size={14} color={themeColors.textLight} />;
-            case 'intermediate':
-                return <MaterialCommunityIcons name='chevron-double-up' size={14} color={themeColors.textLight} />;
-            case 'advanced':
-                return <MaterialCommunityIcons name='chevron-triple-up' size={14} color={themeColors.textLight} />;
-            default:
-                return null; // No icon for undefined intensity levels
-        }
-    };
-
     return (
         <TouchableOpacity onPress={navigateToWorkoutDetails} style={styles.card} activeOpacity={1}>
             <ThemedView style={[styles.cardContent, { backgroundColor: themeColors.background }]}>
@@ -65,7 +52,7 @@ export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, 
                                 </ThemedText>
                             </ThemedView>
                             <ThemedView style={[styles.attribute, { paddingLeft: 10 }]}>
-                                {renderLevelIcon(level)}
+                                <LevelIcon level={level} size={14} color={themeColors.textLight} />
                                 <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight, marginLeft: 4 }]}>
                                     {level}
                                 </ThemedText>

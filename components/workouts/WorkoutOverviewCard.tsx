@@ -32,19 +32,6 @@ export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, 
         navigation.navigate('workout-details', { name, length, level, equipment, focus, photo, trainer, longText, focusMulti });
     };
 
-    // Function to determine the level icons
-    const renderLevelIcon = (level) => {
-        switch (level.toLowerCase()) {
-            case 'beginner':
-                return <MaterialCommunityIcons name='chevron-up' size={14} color={themeColors.background} />;
-            case 'intermediate':
-                return <MaterialCommunityIcons name='chevron-double-up' size={14} color={themeColors.background} />;
-            case 'advanced':
-                return <MaterialCommunityIcons name='chevron-triple-up' size={14} color={themeColors.background} />;
-            default:
-                return null; // No icon for undefined intensity levels
-        }
-    };
     return (
         <TouchableOpacity onPress={navigateToWorkoutDetails} style={styles.cardContainer} activeOpacity={1}>
             <ImageBackground source={photo} style={styles.image}>
