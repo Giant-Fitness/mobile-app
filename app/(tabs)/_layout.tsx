@@ -33,7 +33,7 @@ export default function TabLayout() {
                 tabBarShowLabel: true,
                 headerRight: () => (
                     <TouchableOpacity activeOpacity={1} onPress={() => navigation.navigate('settings')}>
-                        <Ionicons name='person-circle-outline' size={22} color={Colors[colorScheme ?? 'light'].text} style={{ marginRight: 16 }} />
+                        <Ionicons name='person-circle' size={26} color={Colors[colorScheme ?? 'light'].textLight} style={{ marginRight: 18 }} />
                     </TouchableOpacity>
                 ),
             }}

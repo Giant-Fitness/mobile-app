@@ -25,7 +25,7 @@ export default function TabLayout() {
     return (
         <MaterialTopTabs
             screenOptions={{
-                tabBarLabelStyle: { textTransform: 'none' },
+                tabBarLabelStyle: { textTransform: 'none', fontSize: 14 },
                 tabBarStyle: {
                     backgroundColor: themeColors.background,
                 },
