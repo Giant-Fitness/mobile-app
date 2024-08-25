@@ -1,7 +1,7 @@
 // app/workout-details.tsx
 
 import React, { useRef } from 'react';
-import { View, Image, StyleSheet, ScrollView, TouchableOpacity, ImageBackground, Animated } from 'react-native';
+import { StyleSheet, ScrollView, Animated } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
@@ -10,6 +10,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { CustomBackButton } from '@/components/navigation/CustomBackButton';
 import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { ImageTextOverlay } from '@/components/images/ImageTextOverlay';
 
 export default function WorkoutDetailScreen() {
     const colorScheme = useColorScheme();
@@ -43,12 +44,6 @@ export default function WorkoutDetailScreen() {
     // Convert focusMulti array to a comma-separated string
     const focusMultiText = focusMulti.join(', ');
 
-    const gradientOpacity = scrollY.interpolate({
-        inputRange: [0, 300], // Adjust these values based on your image height
-        outputRange: [0, 1], // Start with a lighter gradient, become fully opaque
-        extrapolate: 'clamp',
-    });
-
     return (
         <ThemedView style={styles.container}>
             <CustomBackButton style={styles.backButton} />
@@ -57,34 +52,15 @@ export default function WorkoutDetailScreen() {
                 showsVerticalScrollIndicator={false}
                 bounces={false}
                 overScrollMode='never'
-                onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: false })}
                 scrollEventThrottle={16}
             >
-                <TouchableOpacity onPress={() => console.log('pressed')} style={styles.cardContainer} activeOpacity={1}>
-                    <ImageBackground source={photo} style={styles.image}>
-                        <Animated.View style={[styles.gradientOverlay, { opacity: gradientOpacity }]}>
-                            <LinearGradient colors={['transparent', 'rgba(0,0,0,0.8)']} style={StyleSheet.absoluteFill} />
-                        </Animated.View>
-                        <LinearGradient
-                            colors={[
-                                'transparent', // Start fully transparent
-                                'rgba(0, 0, 0, 0.1)', // Slightly darker near the top
-                                'rgba(0, 0, 0, 0.5)', // Halfway through the fade
-                                'rgba(0, 0, 0, 0.75)', // Near opaque
-                                themeColors.textMedium, // Fully transition to the background color
-                            ]}
-                            style={styles.bottomFade}
-                        />
-                        <View style={styles.nameContainer}>
-                            <ThemedText type='titleLarge' style={[styles.title, { color: themeColors.background }]}>
-                                {name}
-                            </ThemedText>
-                            {/*                            <ThemedText type='subtitle' style={[styles.title, { color: themeColors.textMedium }]}>
-                                With {trainer}
-                            </ThemedText>*/}
-                        </View>
-                    </ImageBackground>
-                </TouchableOpacity>
+                <ImageTextOverlay
+                    photo={photo}
+                    title={name}
+                    gradientColors={['transparent', 'rgba(0,0,0,0.2)']}
+                    containerStyle={{ width: '100%', height: 500, overflow: 'hidden', elevation: 5 }}
+                    textContainerStyle={{ bottom: 24 }}
+                />
 
                 <ThemedView style={[styles.textContainer, { backgroundColor: themeColors.backgroundLight }]}>
                     <ThemedView style={[styles.attributeRow, { backgroundColor: themeColors.backgroundLight }]}>
@@ -134,19 +110,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: 'none',
     },
-    image: {
-        width: '100%',
-        height: '100%',
-        position: 'absolute',
-        top: 0,
-        zIndex: 1,
-    },
-    cardContainer: {
-        width: '100%',
-        height: 500,
-        overflow: 'hidden',
-        elevation: 5,
-    },
     gradientOverlay: {
         flex: 1,
         justifyContent: 'flex-end',
@@ -160,27 +123,9 @@ const styles = StyleSheet.create({
         zIndex: 10,
         color: '#fdfcfb',
     },
-    title: {
-        textShadowColor: 'rgba(0,0,0,0.75)',
-        textShadowRadius: 10,
-        marginRight: 48,
-        lineHeight: 40,
-        zIndex: 20,
-    },
     textContainer: {
         flex: 1,
         padding: 24,
-        zIndex: 2,
-    },
-    nameContainer: {
-        position: 'absolute',
-        bottom: 48,
-        left: 24,
-        zIndex: 3, // Ensure text is above the gradient
-    },
-    bottomFade: {
-        height: 120,
-        marginTop: -120, // Pull the gradient overlay upwards to overlap with the bottom of the image
         zIndex: 2,
     },
     attribute: {
@@ -198,6 +143,7 @@ const styles = StyleSheet.create({
     },
     detailsContainer: {
         paddingTop: 24,
+        paddingBottom: 36,
     },
     detailsText: {
         lineHeight: 24,
