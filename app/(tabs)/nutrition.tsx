@@ -2,9 +2,9 @@
 
 import { Image, StyleSheet, Platform } from 'react-native';
 import React from 'react';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import ParallaxScrollView from '@/components/layout/ParallaxScrollView';
+import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
 
 const NutritionScreen = () => {
     return (

@@ -1,12 +1,12 @@
-// components/Workouts/WorkoutsBottomBar.tsx
+// components/workouts/WorkoutsBottomBar.tsx
 
 import React from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
+import { TabBarIcon } from '@/components/base/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
+import { ThemedText } from '@/components/base/ThemedText';
 
 type WorkoutsBottomBarProps = {
     onSortPress: () => void;

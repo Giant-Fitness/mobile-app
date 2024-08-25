@@ -3,14 +3,14 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, Image, Platform } from 'react-native';
 import React from 'react';
-import { Collapsible } from '@/components/Collapsible';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { Collapsible } from '@/components/layout/Collapsible';
+import ParallaxScrollView from '@/components/layout/ParallaxScrollView';
+import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { CustomBackButton } from '@/components/navigation/CustomBackButton';
+import { CustomBackButton } from '@/components/base/CustomBackButton';
 
 export default function ProgressScreen() {
     const navigation = useNavigation();

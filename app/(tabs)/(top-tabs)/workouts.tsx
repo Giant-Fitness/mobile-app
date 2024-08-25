@@ -1,7 +1,7 @@
 // app/(tabs)/(top-tabs)/workouts.tsx
 
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { TouchableOpacity, StyleSheet, ScrollView, View, Text } from 'react-native';
@@ -9,7 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { WorkoutOverviewCard } from '@/components/workouts/WorkoutOverviewCard';
-import { Collapsible } from '@/components/Collapsible';
+import { Collapsible } from '@/components/layout/Collapsible';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 const recommendedWorkouts = [
@@ -22,7 +22,9 @@ const recommendedWorkouts = [
         equipment: 'Kettlebells',
         focus: 'Strength',
         trainer: 'Viren Barman',
-        onPress: () => {},
+        longText:
+            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\nUse it as a standalone or pair it with a core session for a full-body workout.',
+        focusMulti: ['Arms', 'Legs', 'Chest'],
     },
     {
         id: '2',
@@ -33,7 +35,9 @@ const recommendedWorkouts = [
         equipment: 'Kettlebells',
         focus: 'Endurance',
         trainer: 'Viren Barman',
-        onPress: () => {},
+        longText:
+            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\nUse it as a standalone or pair it with a core session for a full-body workout.',
+        focusMulti: ['Arms', 'Legs', 'Chest'],
     },
     {
         id: '3',
@@ -44,8 +48,11 @@ const recommendedWorkouts = [
         equipment: 'No Equipment',
         focus: 'Mobility',
         trainer: 'Viren Barman',
-        onPress: () => {},
+        longText:
+            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\nUse it as a standalone or pair it with a core session for a full-body workout.',
+        focusMulti: ['Arms', 'Legs', 'Chest'],
     },
+    // fetch from the backend. caching?
 ];
 
 export default function WorkoutsScreen() {
@@ -82,6 +89,8 @@ export default function WorkoutsScreen() {
                             focus={workout.focus}
                             equipment={workout.equipment}
                             trainer={workout.trainer}
+                            longText={workout.longText}
+                            focusMulti={workout.focusMulti}
                         />
                     ))}
                 </ScrollView>
@@ -99,10 +108,13 @@ export default function WorkoutsScreen() {
                                         focus={workout.focus}
                                         equipment={workout.equipment}
                                         trainer={workout.trainer}
+                                        longText={workout.longText}
+                                        focusMulti={workout.focusMulti}
                                     />
                                 ))}
                                 <TouchableOpacity
-                                    activeOpacity={1} style={[styles.seeAllButton, { backgroundColor: themeColors.containerLightColor }]}
+                                    activeOpacity={1}
+                                    style={[styles.seeAllButton, { backgroundColor: themeColors.containerLightColor }]}
                                     onPress={() => console.log('Navigate to see all')}
                                 >
                                     <ThemedText type='body' style={[{ color: themeColors.text }]}>

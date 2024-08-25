@@ -1,13 +1,14 @@
-// components/Workouts/WorkoutDetailedCard.tsx
+// components/workouts/WorkoutDetailedCard.tsx
 
 import React from 'react';
-import { StyleSheet, View, Text, Image, ImageSourcePropType, TouchableOpacity } from 'react-native';
+import { StyleSheet, Image, ImageSourcePropType, TouchableOpacity } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
-import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { ThemedView } from '@/components/base/ThemedView';
+import { ThemedText } from '@/components/base/ThemedText';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { LevelIcon } from '@/components/icons/LevelIcon';
 
 type WorkoutDetailedCardProps = {
     name: string;
@@ -17,30 +18,18 @@ type WorkoutDetailedCardProps = {
     equipment: string;
     focus: string;
     trainer: string;
+    longText: string;
+    focusMulti: array;
 };
 
-export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, length, level, equipment, focus, photo, trainer }) => {
+export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, length, level, equipment, focus, photo, trainer, longText, focusMulti }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
     const navigation = useNavigation();
 
     const navigateToWorkoutDetails = () => {
-        navigation.navigate('workout-details', { name, length, level, equipment, focus, photo, trainer });
-    };
-
-    // Function to determine the level icons
-    const renderLevelIcon = (level) => {
-        switch (level.toLowerCase()) {
-            case 'beginner':
-                return <MaterialCommunityIcons name='chevron-up' size={14} color={themeColors.textLight} />;
-            case 'intermediate':
-                return <MaterialCommunityIcons name='chevron-double-up' size={14} color={themeColors.textLight} />;
-            case 'advanced':
-                return <MaterialCommunityIcons name='chevron-triple-up' size={14} color={themeColors.textLight} />;
-            default:
-                return null; // No icon for undefined intensity levels
-        }
+        navigation.navigate('workout-details', { name, length, level, equipment, focus, photo, trainer, longText, focusMulti });
     };
 
     return (
@@ -63,7 +52,7 @@ export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, 
                                 </ThemedText>
                             </ThemedView>
                             <ThemedView style={[styles.attribute, { paddingLeft: 10 }]}>
-                                {renderLevelIcon(level)}
+                                <LevelIcon level={level} size={14} color={themeColors.textLight} />
                                 <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight, marginLeft: 4 }]}>
                                     {level}
                                 </ThemedText>

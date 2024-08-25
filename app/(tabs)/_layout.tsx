@@ -3,7 +3,7 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
+import { TabBarIcon } from '@/components/base/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Entypo, MaterialIcons, Ionicons } from '@expo/vector-icons';
@@ -33,7 +33,7 @@ export default function TabLayout() {
                 tabBarShowLabel: true,
                 headerRight: () => (
                     <TouchableOpacity activeOpacity={1} onPress={() => navigation.navigate('settings')}>
-                        <Ionicons name="person-circle-outline" size={22} color={Colors[colorScheme ?? 'light'].text} style={{ marginRight: 16 }} />
+                        <Ionicons name='person-circle-outline' size={22} color={Colors[colorScheme ?? 'light'].text} style={{ marginRight: 16 }} />
                     </TouchableOpacity>
                 ),
             }}

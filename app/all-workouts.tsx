@@ -3,14 +3,14 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Image, Button, TouchableOpacity, View } from 'react-native';
 import { WorkoutDetailedCard } from '@/components/workouts/WorkoutDetailedCard';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
+import { ThemedText } from '@/components/base/ThemedText';
 import { useNavigation } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
+import { TabBarIcon } from '@/components/base/TabBarIcon';
 import { WorkoutsBottomBar } from '@/components/workouts/WorkoutsBottomBar';
-import { CustomBackButton } from '@/components/navigation/CustomBackButton';
+import { CustomBackButton } from '@/components/base/CustomBackButton';
 
 const workouts = [
     {
@@ -22,6 +22,9 @@ const workouts = [
         equipment: 'Kettlebells',
         focus: 'Strength',
         trainer: 'Viren Barman',
+        longText:
+            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\nUse it as a standalone or pair it with a core session for a full-body workout.',
+        focusMulti: ['Arms', 'Legs', 'Chest'],
     },
     {
         id: '2',
@@ -32,6 +35,9 @@ const workouts = [
         equipment: 'Kettlebells',
         focus: 'Endurance',
         trainer: 'Viren Barman',
+        longText:
+            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\nUse it as a standalone or pair it with a core session for a full-body workout.',
+        focusMulti: ['Arms', 'Legs', 'Chest'],
     },
     {
         id: '3',
@@ -42,6 +48,9 @@ const workouts = [
         equipment: 'No Equipment',
         focus: 'Mobility',
         trainer: 'Viren Barman',
+        longText:
+            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\nUse it as a standalone or pair it with a core session for a full-body workout.',
+        focusMulti: ['Arms', 'Legs', 'Chest'],
     },
     {
         id: '4',
@@ -52,6 +61,9 @@ const workouts = [
         equipment: 'Dumbbells',
         focus: 'Strength',
         trainer: 'Viren Barman',
+        longText:
+            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\nUse it as a standalone or pair it with a core session for a full-body workout.',
+        focusMulti: ['Arms', 'Legs', 'Chest'],
     },
     {
         id: '5',
@@ -62,6 +74,9 @@ const workouts = [
         equipment: 'No Equipment',
         focus: 'Mobility',
         trainer: 'Viren Barman',
+        longText:
+            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\nUse it as a standalone or pair it with a core session for a full-body workout.',
+        focusMulti: ['Arms', 'Legs', 'Chest'],
     },
     // fetch from the backend. caching?
 ];
@@ -109,6 +124,8 @@ export default function AllWorkoutsScreen() {
                             focus={workout.focus}
                             equipment={workout.equipment}
                             trainer={workout.trainer}
+                            longText={workout.longText}
+                            focusMulti={workout.focusMulti}
                         />
                     ))}
                 </ThemedView>

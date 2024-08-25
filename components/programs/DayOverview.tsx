@@ -4,10 +4,9 @@ import { Colors } from '@/constants/Colors';
 import React from 'react';
 import { Entypo, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { ThemedText } from '../ThemedText';
+import { ThemedText } from '@/components/base/ThemedText';
 
 const DayOverviewCard = (props) => {
-
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
@@ -18,14 +17,10 @@ const DayOverviewCard = (props) => {
                 <ThemedText style={[styles.title, { color: themeColors.text }]}>
                     Week {props.week} Day {props.day}
                 </ThemedText>
-                <ThemedText style={[styles.content, { color: themeColors.subText }]}>
-                    {props.workout}
-                </ThemedText>
+                <ThemedText style={[styles.content, { color: themeColors.subText }]}>{props.workout}</ThemedText>
                 <View style={styles.IconTextView}>
-                    <Entypo name="stopwatch" size={16} color={themeColors.subText} style={{ marginRight: '2%' }} />
-                    <ThemedText style={[styles.content, { color: themeColors.subText }]}>
-                        {props.length}
-                    </ThemedText>
+                    <Entypo name='stopwatch' size={16} color={themeColors.subText} style={{ marginRight: '2%' }} />
+                    <ThemedText style={[styles.content, { color: themeColors.subText }]}>{props.length}</ThemedText>
                 </View>
             </View>
         </TouchableOpacity>
@@ -45,7 +40,7 @@ const styles = StyleSheet.create({
         borderBottomLeftRadius: 5,
         borderTopLeftRadius: 5,
         height: 115,
-        width: 115
+        width: 115,
     },
     contentContainer: {
         width: '100%',
@@ -60,7 +55,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 17,
         fontWeight: 'condensedBold',
-        marginBottom: '5%'
+        marginBottom: '5%',
     },
     content: {
         fontSize: 13,
@@ -68,8 +63,8 @@ const styles = StyleSheet.create({
     IconTextView: {
         flexDirection: 'row',
         marginTop: '2%',
-        alignItems: 'center'
-    }
+        alignItems: 'center',
+    },
 });
 
 export default DayOverviewCard;
