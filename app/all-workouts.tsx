@@ -8,9 +8,8 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { useNavigation } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { TabBarIcon } from '@/components/base/TabBarIcon';
 import { WorkoutsBottomBar } from '@/components/workouts/WorkoutsBottomBar';
-import { CustomBackButton } from '@/components/base/CustomBackButton';
+import { CustomBackButton } from '@/components/icons/CustomBackButton';
 
 const workouts = [
     {
@@ -112,7 +111,7 @@ export default function AllWorkoutsScreen() {
             <ThemedText type='overline' style={[styles.countContainer, { color: themeColors.textLight }]}>
                 {workouts.length} workouts
             </ThemedText>
-            <ScrollView>
+            <ScrollView showsVerticalScrollIndicator={false}>
                 <ThemedView style={[styles.contentContainer, { backgroundColor: themeColors.background }]}>
                     {workouts.map((workout) => (
                         <WorkoutDetailedCard
@@ -140,7 +139,7 @@ const styles = StyleSheet.create({
     countContainer: {
         paddingLeft: 24,
         paddingTop: 24,
-        paddingBottom: 8,
+        paddingBottom: 24,
     },
     contentContainer: {
         paddingLeft: 16,

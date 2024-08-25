@@ -1,4 +1,4 @@
-// components/ThemedText.tsx
+// components/base/ThemedText.tsx
 
 import React from 'react';
 import { Text, type TextProps, StyleSheet } from 'react-native';
@@ -86,9 +86,9 @@ const styles = StyleSheet.create({
         lineHeight: 16,
     },
     italic: {
-        fontSize: 16,
+        fontSize: 13,
         fontFamily: 'InterItalic',
-        lineHeight: 24,
+        lineHeight: 16,
     },
 });
 
