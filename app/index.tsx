@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { StyleSheet, Pressable, Text } from 'react-native';
-import { ThemedView } from '@/components/ThemedView';
+import { ThemedView } from '@/components/base/ThemedView';
 import { Link } from 'expo-router';
 
 export default function LoginPage() {

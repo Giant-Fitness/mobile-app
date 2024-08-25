@@ -1,7 +1,7 @@
 // app/(tabs)/(top-tabs)/programs.tsx
 
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
 import { StatusBar } from 'expo-status-bar';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import React from 'react';
@@ -9,24 +9,24 @@ import ActiveCard from '@/components/programs/ActiveDayCard';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import DayOverviewCard from '@/components/programs/DayOverview';
-import { Collapsible } from '@/components/Collapsible';
+import { Collapsible } from '@/components/layout/Collapsible';
 
 export default function ProgramsScreen() {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
     const dummyDayPlans = [
-        { dayId: 1, Week: 3, Day: 3, workoutName: 'Upper Body A', length: '30 mins'},
-        { dayId: 2, Week: 3, Day: 4, workoutName: 'Upper Body B', length: '25 mins'},
-        { dayId: 3, Week: 3, Day: 5, workoutName: 'Upper Body C', length: '27 mins'},
-    ]
+        { dayId: 1, Week: 3, Day: 3, workoutName: 'Upper Body A', length: '30 mins' },
+        { dayId: 2, Week: 3, Day: 4, workoutName: 'Upper Body B', length: '25 mins' },
+        { dayId: 3, Week: 3, Day: 5, workoutName: 'Upper Body C', length: '27 mins' },
+    ];
 
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
-            <ScrollView 
+            <ScrollView
                 style={styles.scrollContainer}
                 contentContainerStyle={{
-                    justifyContent: 'flex-start'
+                    justifyContent: 'flex-start',
                 }}
             >
                 <ActiveCard />
@@ -37,18 +37,13 @@ export default function ProgramsScreen() {
                     style={{
                         borderBottomColor: themeColors.subText,
                         borderBottomWidth: StyleSheet.hairlineWidth,
-                        marginBottom: '7%'
+                        marginBottom: '7%',
                     }}
                 />
-                {dummyDayPlans && dummyDayPlans.map((plan, i) => (
-                    <DayOverviewCard 
-                        key={plan.dayId} 
-                        week={plan.Week}
-                        day={plan.Day}
-                        workout={plan.workoutName}
-                        length={plan.length}
-                    />
-                ))}
+                {dummyDayPlans &&
+                    dummyDayPlans.map((plan, i) => (
+                        <DayOverviewCard key={plan.dayId} week={plan.Week} day={plan.Day} workout={plan.workoutName} length={plan.length} />
+                    ))}
                 <ThemedView>
                     <Collapsible title='Program Calendar'></Collapsible>
                     <ThemedView style={[styles.divider, { backgroundColor: themeColors.containerBorderColor }]} />
@@ -92,5 +87,5 @@ const styles = StyleSheet.create({
         height: 0.7,
         width: '10%',
         alignSelf: 'center',
-    }
+    },
 });

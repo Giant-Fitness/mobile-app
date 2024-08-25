@@ -5,6 +5,5 @@ export const store = configureStore({
     reducer: {
         programs: programsReducer,
     },
-    devTools: true
+    devTools: true,
 });
-

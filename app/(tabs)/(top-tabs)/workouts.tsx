@@ -1,7 +1,7 @@
 // app/(tabs)/(top-tabs)/workouts.tsx
 
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { TouchableOpacity, StyleSheet, ScrollView, View, Text } from 'react-native';
@@ -9,7 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { WorkoutOverviewCard } from '@/components/workouts/WorkoutOverviewCard';
-import { Collapsible } from '@/components/Collapsible';
+import { Collapsible } from '@/components/layout/Collapsible';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 const recommendedWorkouts = [

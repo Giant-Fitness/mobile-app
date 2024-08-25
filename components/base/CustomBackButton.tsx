@@ -1,4 +1,4 @@
-// components/CustomBackButton.tsx
+// components/base/CustomBackButton.tsx
 
 import React from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
