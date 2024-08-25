@@ -44,43 +44,43 @@ export default function WorkoutDetailScreen() {
                     photo={photo}
                     title={name}
                     gradientColors={['transparent', 'rgba(0,0,0,0.2)']}
-                    containerStyle={{ width: '100%', height: 500, overflow: 'hidden', elevation: 5 }}
+                    containerStyle={{ height: 400, elevation: 5 }}
                     textContainerStyle={{ bottom: 24 }}
                 />
 
-                <ThemedView style={[styles.textContainer, { backgroundColor: themeColors.backgroundLight }]}>
-                    <ThemedView style={[styles.attributeRow, { backgroundColor: themeColors.backgroundLight }]}>
-                        <ThemedView style={[styles.attribute, { backgroundColor: themeColors.backgroundLight }]}>
+                <ThemedView style={[styles.textContainer]}>
+                    <ThemedView style={[styles.attributeRow]}>
+                        <ThemedView style={[styles.attribute]}>
                             <Ionicons name='stopwatch-outline' size={18} color={themeColors.text} />
-                            <ThemedText type='body' style={[styles.attributeText, { color: themeColors.text }]}>
+                            <ThemedText type='body' style={[styles.attributeText]}>
                                 {length}
                             </ThemedText>
                         </ThemedView>
-                        <ThemedView style={[styles.attribute, { backgroundColor: themeColors.backgroundLight, paddingLeft: 32 }]}>
+                        <ThemedView style={[styles.attribute, { paddingLeft: 32 }]}>
                             <LevelIcon level={level} size={16} />
-                            <ThemedText type='body' style={[styles.attributeText, { color: themeColors.text, marginLeft: 4 }]}>
+                            <ThemedText type='body' style={[styles.attributeText, { marginLeft: 4 }]}>
                                 {level}
                             </ThemedText>
                         </ThemedView>
                     </ThemedView>
-                    <ThemedView style={[styles.attributeRow, { backgroundColor: themeColors.backgroundLight }]}>
-                        <ThemedView style={[styles.attribute, { backgroundColor: themeColors.backgroundLight }]}>
+                    <ThemedView style={[styles.attributeRow]}>
+                        <ThemedView style={[styles.attribute]}>
                             <MaterialCommunityIcons name='dumbbell' size={18} color={themeColors.text} />
-                            <ThemedText type='body' style={[styles.attributeText, { color: themeColors.text }]}>
+                            <ThemedText type='body' style={[styles.attributeText]}>
                                 {equipment}
                             </ThemedText>
                         </ThemedView>
                     </ThemedView>
-                    <ThemedView style={[styles.attributeRow, { backgroundColor: themeColors.backgroundLight }]}>
-                        <ThemedView style={[styles.attribute, { backgroundColor: themeColors.backgroundLight }]}>
+                    <ThemedView style={[styles.attributeRow]}>
+                        <ThemedView style={[styles.attribute]}>
                             <MaterialCommunityIcons name='yoga' size={18} color={themeColors.text} />
-                            <ThemedText type='body' style={[styles.attributeText, { color: themeColors.text }]}>
+                            <ThemedText type='body' style={[styles.attributeText]}>
                                 {focusMultiText}
                             </ThemedText>
                         </ThemedView>
                     </ThemedView>
 
-                    <ThemedView style={[styles.detailsContainer, { backgroundColor: themeColors.backgroundLight }]}>
+                    <ThemedView style={[styles.detailsContainer]}>
                         <ThemedText type='body' style={[styles.detailsText, { color: themeColors.textLight }]}>
                             {longText}
                         </ThemedText>

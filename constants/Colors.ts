@@ -7,6 +7,7 @@ export const Colors = {
         subText: 'rgba(0, 0, 0, 0.5)',
         textMedium: '#E2E4E6',
         background: '#fdfcfb',
+        whiteText: '#fdfcfb',
         backgroundLight: '#E2E4E6',
         primary: '#cc4533',
         borderColor: 'rgba(0, 0, 0, 0.3)',

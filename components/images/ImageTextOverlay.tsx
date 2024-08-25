@@ -41,7 +41,7 @@ export const ImageTextOverlay: React.FC<ImageTextOverlayProps> = ({
             <ImageBackground source={photo} style={styles.image}>
                 <LinearGradient colors={gradientColors} style={[StyleSheet.absoluteFill]} />
                 <ThemedView style={[styles.textContainer, textContainerStyle]}>
-                    <ThemedText type={titleType} style={[styles.title, titleStyle, { color: themeColors.background }]}>
+                    <ThemedText type={titleType} style={[styles.title, titleStyle, { color: themeColors.whiteText }]}>
                         {title}
                     </ThemedText>
                     {subtitle && (
