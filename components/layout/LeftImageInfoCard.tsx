@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
     },
     image: {
-        borderRadius: 8,
+        borderRadius: 6,
         height: 120,
         width: 120,
         marginRight: 16,

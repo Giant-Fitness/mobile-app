@@ -8,7 +8,7 @@ import React from 'react';
 import ActiveCard from '@/components/programs/ActiveDayCard';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import DayOverviewCard from '@/components/programs/DayOverview';
+import ProgramDayOverviewCard from '@/components/programs/ProgramDayOverviewCard';
 import { Collapsible } from '@/components/layout/Collapsible';
 
 export default function ProgramsScreen() {
@@ -16,9 +16,9 @@ export default function ProgramsScreen() {
     const themeColors = Colors[colorScheme ?? 'light'];
 
     const dummyDayPlans = [
-        { dayId: 1, Week: 3, Day: 3, workoutName: 'Upper Body A', length: '30 mins' },
-        { dayId: 2, Week: 3, Day: 4, workoutName: 'Upper Body B', length: '25 mins' },
-        { dayId: 3, Week: 3, Day: 5, workoutName: 'Upper Body C', length: '27 mins' },
+        { dayId: 1, Week: 3, Day: 3, workoutName: 'Upper Body A', length: '30 mins', photo: require('@/assets/images/vb.webp') },
+        { dayId: 2, Week: 3, Day: 4, workoutName: 'Upper Body B', length: '25 mins', photo: require('@/assets/images/vb.webp') },
+        { dayId: 3, Week: 3, Day: 5, workoutName: 'Upper Body C', length: '27 mins', photo: require('@/assets/images/vb.webp') },
     ];
 
     return (
@@ -42,7 +42,14 @@ export default function ProgramsScreen() {
                 />
                 {dummyDayPlans &&
                     dummyDayPlans.map((plan, i) => (
-                        <DayOverviewCard key={plan.dayId} week={plan.Week} day={plan.Day} workout={plan.workoutName} length={plan.length} />
+                        <ProgramDayOverviewCard
+                            key={plan.dayId}
+                            week={plan.Week}
+                            day={plan.Day}
+                            workout={plan.workoutName}
+                            length={plan.length}
+                            photo={plan.photo}
+                        />
                     ))}
                 <ThemedView>
                     <Collapsible title='Program Calendar'></Collapsible>
