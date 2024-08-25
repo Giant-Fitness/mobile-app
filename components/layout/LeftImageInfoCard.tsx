@@ -47,7 +47,7 @@ export const LeftImageInfoCard: React.FC<LeftImageInfoCardProps> = ({
                         {subtitle}
                     </ThemedText>
                 )}
-                {extraContent && <View style={styles.extraContent}>{extraContent}</View>}
+                {extraContent && <ThemedView style={styles.extraContent}>{extraContent}</ThemedView>}
             </ThemedView>
         </TouchableOpacity>
     );

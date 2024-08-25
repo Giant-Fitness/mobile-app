@@ -3,13 +3,14 @@
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { StatusBar } from 'expo-status-bar';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View, TouchableOpacity } from 'react-native';
 import React from 'react';
 import ActiveCard from '@/components/programs/ActiveDayCard';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import ProgramDayOverviewCard from '@/components/programs/ProgramDayOverviewCard';
 import { Collapsible } from '@/components/layout/Collapsible';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function ProgramsScreen() {
     const colorScheme = useColorScheme();
@@ -29,43 +30,91 @@ export default function ProgramsScreen() {
                     justifyContent: 'flex-start',
                 }}
             >
-                <ActiveCard />
-                <ThemedText type='titleLarge' style={[styles.subHeader, { color: themeColors.text }]}>
-                    Up Next
-                </ThemedText>
+                <ThemedView style={[styles.activeCardContainer]}>
+                    <ActiveCard />
+                </ThemedView>
+
+                <ThemedView style={[styles.upNextContainer]}>
+                    <ThemedText type='titleSmall' style={[styles.subHeader, { color: themeColors.textLight }]}>
+                        Up Next...
+                    </ThemedText>
+                    {dummyDayPlans &&
+                        dummyDayPlans.map((plan, i) => (
+                            <ProgramDayOverviewCard
+                                key={plan.dayId}
+                                week={plan.Week}
+                                day={plan.Day}
+                                workout={plan.workoutName}
+                                length={plan.length}
+                                photo={plan.photo}
+                            />
+                        ))}
+                </ThemedView>
                 <View
                     style={{
-                        borderBottomColor: themeColors.subText,
+                        borderBottomColor: themeColors.containerBorderColor,
                         borderBottomWidth: StyleSheet.hairlineWidth,
-                        marginBottom: '7%',
                     }}
                 />
-                {dummyDayPlans &&
-                    dummyDayPlans.map((plan, i) => (
-                        <ProgramDayOverviewCard
-                            key={plan.dayId}
-                            week={plan.Week}
-                            day={plan.Day}
-                            workout={plan.workoutName}
-                            length={plan.length}
-                            photo={plan.photo}
-                        />
-                    ))}
                 <ThemedView>
-                    <Collapsible title='Program Calendar'></Collapsible>
-                    <ThemedView style={[styles.divider, { backgroundColor: themeColors.containerBorderColor }]} />
+                    <TouchableOpacity style={styles.menuItem}>
+                        <ThemedText type='body' style={[{ color: themeColors.text }]}>
+                            Program Calendar
+                        </ThemedText>
+                        <Ionicons name={'chevron-forward-outline'} size={16} color={themeColors.tabIconDefault} />
+                    </TouchableOpacity>
+                    <View
+                        style={{
+                            borderBottomColor: themeColors.containerBorderColor,
+                            borderBottomWidth: StyleSheet.hairlineWidth,
+                        }}
+                    />
                 </ThemedView>
                 <ThemedView>
-                    <Collapsible title='Program Overview'></Collapsible>
-                    <ThemedView style={[styles.divider, { backgroundColor: themeColors.containerBorderColor }]} />
+                    <TouchableOpacity style={styles.menuItem}>
+                        <ThemedText type='body' style={[{ color: themeColors.text }]}>
+                            Program Overview
+                        </ThemedText>
+                        <Ionicons name={'chevron-forward-outline'} size={16} color={themeColors.tabIconDefault} />
+                    </TouchableOpacity>
+                    <View
+                        style={{
+                            borderBottomColor: themeColors.containerBorderColor,
+                            borderBottomWidth: StyleSheet.hairlineWidth,
+                        }}
+                    />
                 </ThemedView>
                 <ThemedView>
-                    <Collapsible title='Browse Programs'></Collapsible>
-                    <ThemedView style={[styles.divider, { backgroundColor: themeColors.containerBorderColor }]} />
+                    <TouchableOpacity style={styles.menuItem}>
+                        <ThemedText type='body' style={[{ color: themeColors.text }]}>
+                            Browse Programs
+                        </ThemedText>
+                        <Ionicons name={'chevron-forward-outline'} size={16} color={themeColors.tabIconDefault} />
+                    </TouchableOpacity>
+                    <View
+                        style={{
+                            borderBottomColor: themeColors.containerBorderColor,
+                            borderBottomWidth: StyleSheet.hairlineWidth,
+                        }}
+                    />
                 </ThemedView>
-                <ThemedView>
-                    <Collapsible title='End Program'></Collapsible>
-                    <ThemedView style={[styles.divider, { backgroundColor: themeColors.containerBorderColor }]} />
+                <ThemedView
+                    style={{
+                        paddingBottom: 32,
+                    }}
+                >
+                    <TouchableOpacity style={styles.menuItem}>
+                        <ThemedText type='body' style={[{ color: themeColors.text }]}>
+                            End Program
+                        </ThemedText>
+                        <Ionicons name={'chevron-forward-outline'} size={16} color={themeColors.tabIconDefault} />
+                    </TouchableOpacity>
+                    <View
+                        style={{
+                            borderBottomColor: themeColors.containerBorderColor,
+                            borderBottomWidth: StyleSheet.hairlineWidth,
+                        }}
+                    />
                 </ThemedView>
             </ScrollView>
         </ThemedView>
@@ -77,8 +126,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        paddingHorizontal: '5%',
-        paddingTop: '5%',
+        paddingHorizontal: 24,
     },
     scrollContainer: {
         width: '100%',
@@ -92,7 +140,20 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 0.7,
-        width: '10%',
+        width: '100%',
         alignSelf: 'center',
+    },
+    upNextContainer: {
+        paddingTop: 32,
+        paddingBottom: 32,
+    },
+    activeCardContainer: {
+        paddingTop: 42,
+    },
+    menuItem: {
+        padding: 16,
+        paddingTop: 16,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
     },
 });

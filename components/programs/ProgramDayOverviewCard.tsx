@@ -65,6 +65,7 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         width: '100%',
+        backgroundColor: 'transparent',
     },
     attributeRow: {
         flexDirection: 'row',
