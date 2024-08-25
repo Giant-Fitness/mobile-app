@@ -54,16 +54,18 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         backgroundColor: 'transparent',
         width: '100%',
-        marginBottom: 16,
+        marginBottom: 36,
     },
     title: {
         fontSize: 14,
         marginBottom: 0,
+        marginLeft: 4,
+        marginTop: 4,
     },
     image: {
-        height: 90,
-        width: 90,
-        borderRadius: 5,
+        height: 100,
+        width: 100,
+        borderRadius: 2,
     },
     contentContainer: {
         width: '100%',
@@ -73,6 +75,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 2,
+        marginLeft: 4,
     },
     attributeText: {
         marginLeft: 4,

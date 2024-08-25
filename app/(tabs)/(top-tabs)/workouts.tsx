@@ -94,44 +94,71 @@ export default function WorkoutsScreen() {
                         />
                     ))}
                 </ScrollView>
-                {categories.map((category, index) => (
-                    <ThemedView key={index}>
-                        <Collapsible title={category.title}>
-                            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollView}>
-                                {category.workouts.map((workout) => (
-                                    <WorkoutOverviewCard
-                                        key={workout.id}
-                                        name={workout.name}
-                                        photo={workout.photo}
-                                        length={workout.length}
-                                        level={workout.level}
-                                        focus={workout.focus}
-                                        equipment={workout.equipment}
-                                        trainer={workout.trainer}
-                                        longText={workout.longText}
-                                        focusMulti={workout.focusMulti}
-                                    />
-                                ))}
-                                <TouchableOpacity
-                                    activeOpacity={1}
-                                    style={[styles.seeAllButton, { backgroundColor: themeColors.containerLightColor }]}
-                                    onPress={() => console.log('Navigate to see all')}
-                                >
-                                    <ThemedText type='body' style={[{ color: themeColors.text }]}>
-                                        See All
-                                    </ThemedText>
-                                </TouchableOpacity>
-                            </ScrollView>
-                        </Collapsible>
-                        {<ThemedView style={[styles.divider, { backgroundColor: themeColors.containerBorderColor }]} />}
+                <ThemedView>
+                    {categories.map((category, index) => (
+                        <ThemedView key={index} style={styles.collapsible}>
+                            <Collapsible title={category.title}>
+                                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollView}>
+                                    {category.workouts.map((workout) => (
+                                        <WorkoutOverviewCard
+                                            key={workout.id}
+                                            name={workout.name}
+                                            photo={workout.photo}
+                                            length={workout.length}
+                                            level={workout.level}
+                                            focus={workout.focus}
+                                            equipment={workout.equipment}
+                                            trainer={workout.trainer}
+                                            longText={workout.longText}
+                                            focusMulti={workout.focusMulti}
+                                        />
+                                    ))}
+                                    <TouchableOpacity
+                                        activeOpacity={1}
+                                        style={[styles.seeAllButton, { backgroundColor: themeColors.containerLightColor }]}
+                                        onPress={() => console.log('Navigate to see all')}
+                                    >
+                                        <ThemedText type='body' style={[{ color: themeColors.text }]}>
+                                            See All
+                                        </ThemedText>
+                                    </TouchableOpacity>
+                                </ScrollView>
+                            </Collapsible>
+                            {
+                                <View
+                                    style={[
+                                        styles.dividerInterior,
+                                        {
+                                            borderBottomColor: themeColors.containerBorderColor,
+                                            borderBottomWidth: StyleSheet.hairlineWidth,
+                                        },
+                                    ]}
+                                />
+                            }
+                        </ThemedView>
+                    ))}
+                    <ThemedView
+                        style={{
+                            paddingBottom: 48,
+                        }}
+                    >
+                        <TouchableOpacity onPress={navigateToAllWorkouts} style={styles.allWorkouts}>
+                            <ThemedText type='body' style={[{ color: themeColors.text }]}>
+                                All Workouts
+                            </ThemedText>
+                            <Ionicons name={'chevron-forward-outline'} size={16} color={themeColors.tabIconDefault} />
+                        </TouchableOpacity>
+                        <View
+                            style={[
+                                styles.divider,
+                                {
+                                    borderBottomColor: themeColors.containerBorderColor,
+                                    borderBottomWidth: StyleSheet.hairlineWidth,
+                                },
+                            ]}
+                        />
                     </ThemedView>
-                ))}
-                <TouchableOpacity onPress={navigateToAllWorkouts} style={styles.allWorkouts}>
-                    <ThemedText type='body' style={[{ color: themeColors.text }]}>
-                        All Workouts
-                    </ThemedText>
-                    <Ionicons name={'chevron-forward-outline'} size={16} color={themeColors.tabIconDefault} />
-                </TouchableOpacity>
+                </ThemedView>
             </ThemedView>
         </ScrollView>
     );
@@ -140,11 +167,11 @@ export default function WorkoutsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingBottom: 20,
+        paddingBottom: 32,
     },
     allWorkouts: {
-        padding: 16,
-        paddingTop: 16,
+        padding: 24,
+        paddingTop: 24,
         paddingLeft: 24,
         paddingRight: 24,
         flexDirection: 'row',
@@ -162,11 +189,19 @@ const styles = StyleSheet.create({
     },
     scrollView: {
         paddingLeft: 24, // Starts content 24pts from the left
+        paddingBottom: 36,
+    },
+    collapsible: {
+        paddingTop: 12, // Starts content 24pts from the left
     },
     divider: {
-        height: 0.7,
-        width: '10%',
+        width: '90%',
         alignSelf: 'center',
+    },
+    dividerInterior: {
+        width: '90%',
+        alignSelf: 'center',
+        paddingTop: 12,
     },
     seeAllButton: {
         width: 250,

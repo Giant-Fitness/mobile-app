@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     },
     subHeader: {
         marginTop: '5%',
-        marginBottom: '3%',
+        marginBottom: 16,
         marginLeft: '1%',
     },
     divider: {
@@ -152,17 +152,17 @@ const styles = StyleSheet.create({
     },
     upNextContainer: {
         paddingTop: 24,
-        paddingBottom: 32,
+        paddingBottom: 16,
     },
     activeCardContainer: {},
     menuItem: {
-        padding: 16,
-        paddingTop: 16,
+        paddingTop: 24,
+        paddingBottom: 24,
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
     quoteContainer: {
-        paddingTop: 36,
+        paddingTop: 42,
         paddingBottom: 24,
         paddingHorizontal: 16,
     },
