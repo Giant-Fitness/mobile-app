@@ -1,4 +1,4 @@
-// components/Workouts/WorkoutOverviewCard.tsx
+// components/workouts/WorkoutOverviewCard.tsx
 
 import React from 'react';
 import { StyleSheet, Image, ImageSourcePropType, TouchableOpacity, ImageBackground } from 'react-native';

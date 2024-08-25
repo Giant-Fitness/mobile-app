@@ -9,6 +9,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { CustomBackButton } from '@/components/navigation/CustomBackButton';
+import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function WorkoutDetailScreen() {
     const colorScheme = useColorScheme();
@@ -19,11 +20,28 @@ export default function WorkoutDetailScreen() {
 
     const scrollY = useRef(new Animated.Value(0)).current;
 
+    // Function to determine the level icons
+    const renderLevelIcon = (level) => {
+        switch (level.toLowerCase()) {
+            case 'beginner':
+                return <MaterialCommunityIcons name='chevron-up' size={18} color={themeColors.text} />;
+            case 'intermediate':
+                return <MaterialCommunityIcons name='chevron-double-up' size={18} color={themeColors.text} />;
+            case 'advanced':
+                return <MaterialCommunityIcons name='chevron-triple-up' size={16} color={themeColors.text} />;
+            default:
+                return null; // No icon for undefined intensity levels
+        }
+    };
+
     React.useEffect(() => {
         navigation.setOptions({ headerShown: false });
     }, [navigation]);
 
     const { name, length, level, equipment, focus, photo, trainer, longText, focusMulti } = route.params;
+
+    // Convert focusMulti array to a comma-separated string
+    const focusMultiText = focusMulti.join(', ');
 
     const gradientOpacity = scrollY.interpolate({
         inputRange: [0, 300], // Adjust these values based on your image height
@@ -57,7 +75,7 @@ export default function WorkoutDetailScreen() {
                             ]}
                             style={styles.bottomFade}
                         />
-                        <View style={styles.textContainer}>
+                        <View style={styles.nameContainer}>
                             <ThemedText type='titleLarge' style={[styles.title, { color: themeColors.background }]}>
                                 {name}
                             </ThemedText>
@@ -68,18 +86,43 @@ export default function WorkoutDetailScreen() {
                     </ImageBackground>
                 </TouchableOpacity>
 
-                <ThemedView style={[styles.details, { backgroundColor: themeColors.backgroundLight }]}>
-                    <ThemedText>Duration: {length}</ThemedText>
-                    <ThemedText>Level: {level}</ThemedText>
-                    <ThemedText>Focus: {focus}</ThemedText>
-                    <ThemedText>Equipment: {equipment}</ThemedText>
-                    <ThemedText>Trainer: {trainer}</ThemedText>
-                    <ThemedText>longText: {longText}</ThemedText>
-                    <ThemedText>longText: {longText}</ThemedText>
-                    <ThemedText>longText: {longText}</ThemedText>
-                    <ThemedText>longText: {longText}</ThemedText>
-                    <ThemedText>longText: {longText}</ThemedText>
-                    <ThemedText>focusMulti: {focusMulti}</ThemedText>
+                <ThemedView style={[styles.textContainer, { backgroundColor: themeColors.backgroundLight }]}>
+                    <ThemedView style={[styles.attributeRow, { backgroundColor: themeColors.backgroundLight }]}>
+                        <ThemedView style={[styles.attribute, { backgroundColor: themeColors.backgroundLight }]}>
+                            <Ionicons name='stopwatch-outline' size={18} color={themeColors.text} />
+                            <ThemedText type='body' style={[styles.attributeText, { color: themeColors.text }]}>
+                                {length}
+                            </ThemedText>
+                        </ThemedView>
+                        <ThemedView style={[styles.attribute, { backgroundColor: themeColors.backgroundLight, paddingLeft: 32 }]}>
+                            {renderLevelIcon(level)}
+                            <ThemedText type='body' style={[styles.attributeText, { color: themeColors.text, marginLeft: 4 }]}>
+                                {level}
+                            </ThemedText>
+                        </ThemedView>
+                    </ThemedView>
+                    <ThemedView style={[styles.attributeRow, { backgroundColor: themeColors.backgroundLight }]}>
+                        <ThemedView style={[styles.attribute, { backgroundColor: themeColors.backgroundLight }]}>
+                            <MaterialCommunityIcons name='dumbbell' size={18} color={themeColors.text} />
+                            <ThemedText type='body' style={[styles.attributeText, { color: themeColors.text }]}>
+                                {equipment}
+                            </ThemedText>
+                        </ThemedView>
+                    </ThemedView>
+                    <ThemedView style={[styles.attributeRow, { backgroundColor: themeColors.backgroundLight }]}>
+                        <ThemedView style={[styles.attribute, { backgroundColor: themeColors.backgroundLight }]}>
+                            <MaterialCommunityIcons name='yoga' size={18} color={themeColors.text} />
+                            <ThemedText type='body' style={[styles.attributeText, { color: themeColors.text }]}>
+                                {focusMultiText}
+                            </ThemedText>
+                        </ThemedView>
+                    </ThemedView>
+
+                    <ThemedView style={[styles.detailsContainer, { backgroundColor: themeColors.backgroundLight }]}>
+                        <ThemedText type='body' style={[styles.detailsText, { color: themeColors.textLight }]}>
+                            {longText}
+                        </ThemedText>
+                    </ThemedView>
                 </ThemedView>
             </Animated.ScrollView>
         </ThemedView>
@@ -124,12 +167,12 @@ const styles = StyleSheet.create({
         lineHeight: 40,
         zIndex: 20,
     },
-    details: {
+    textContainer: {
         flex: 1,
         padding: 24,
         zIndex: 2,
     },
-    textContainer: {
+    nameContainer: {
         position: 'absolute',
         bottom: 48,
         left: 24,
@@ -139,5 +182,24 @@ const styles = StyleSheet.create({
         height: 120,
         marginTop: -120, // Pull the gradient overlay upwards to overlap with the bottom of the image
         zIndex: 2,
+    },
+    attribute: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingBottom: 10,
+    },
+    attributeText: {
+        marginLeft: 12,
+        lineHeight: 24,
+    },
+    attributeRow: {
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+    },
+    detailsContainer: {
+        paddingTop: 24,
+    },
+    detailsText: {
+        lineHeight: 24,
     },
 });

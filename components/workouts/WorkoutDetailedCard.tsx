@@ -1,4 +1,4 @@
-// components/Workouts/WorkoutDetailedCard.tsx
+// components/workouts/WorkoutDetailedCard.tsx
 
 import React from 'react';
 import { StyleSheet, View, Text, Image, ImageSourcePropType, TouchableOpacity } from 'react-native';
