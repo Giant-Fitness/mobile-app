@@ -17,6 +17,8 @@ type ImageTextOverlayProps = {
     containerStyle?: StyleProp<ViewStyle>;
     textContainerStyle?: StyleProp<ViewStyle>;
     gradientColors?: string[];
+    titleType?: string; // Optional type for title
+    subtitleType?: string; // Optional type for subtitle
 };
 
 export const ImageTextOverlay: React.FC<ImageTextOverlayProps> = ({
@@ -25,6 +27,8 @@ export const ImageTextOverlay: React.FC<ImageTextOverlayProps> = ({
     subtitle,
     titleStyle,
     subtitleStyle,
+    titleType = 'titleLarge', // Default to 'titleLarge' if not provided
+    subtitleType = 'subtitle', // Default to 'subtitle' if not provided
     containerStyle,
     textContainerStyle,
     gradientColors = ['transparent', 'rgba(0,0,0,0.8)'],
@@ -37,11 +41,11 @@ export const ImageTextOverlay: React.FC<ImageTextOverlayProps> = ({
             <ImageBackground source={photo} style={styles.image}>
                 <LinearGradient colors={gradientColors} style={[StyleSheet.absoluteFill]} />
                 <ThemedView style={[styles.textContainer, textContainerStyle]}>
-                    <ThemedText type='titleLarge' style={[styles.title, titleStyle, { color: themeColors.background }]}>
+                    <ThemedText type={titleType} style={[styles.title, titleStyle, { color: themeColors.background }]}>
                         {title}
                     </ThemedText>
                     {subtitle && (
-                        <ThemedText type='subtitle' style={[styles.subtitle, subtitleStyle, { color: themeColors.textMedium }]}>
+                        <ThemedText type={subtitleType} style={[styles.subtitle, subtitleStyle, { color: themeColors.textMedium }]}>
                             {subtitle}
                         </ThemedText>
                     )}

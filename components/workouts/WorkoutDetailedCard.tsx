@@ -1,12 +1,12 @@
 // components/workouts/WorkoutDetailedCard.tsx
 
 import React from 'react';
-import { StyleSheet, View, Text, Image, ImageSourcePropType, TouchableOpacity } from 'react-native';
+import { StyleSheet, Image, ImageSourcePropType, TouchableOpacity } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
-import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { LevelIcon } from '@/components/icons/LevelIcon';
 

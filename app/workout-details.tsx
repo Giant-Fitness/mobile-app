@@ -5,11 +5,10 @@ import { StyleSheet, ScrollView, Animated } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { LinearGradient } from 'expo-linear-gradient';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { CustomBackButton } from '@/components/navigation/CustomBackButton';
-import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { ImageTextOverlay } from '@/components/images/ImageTextOverlay';
 import { LevelIcon } from '@/components/icons/LevelIcon';
 

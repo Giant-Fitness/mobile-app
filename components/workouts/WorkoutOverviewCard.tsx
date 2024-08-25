@@ -9,6 +9,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
+import { ImageTextOverlay } from '@/components/images/ImageTextOverlay';
 
 type WorkoutOverviewCardProps = {
     name: string;
@@ -34,19 +35,18 @@ export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, 
 
     return (
         <TouchableOpacity onPress={navigateToWorkoutDetails} style={styles.cardContainer} activeOpacity={1}>
-            <ImageBackground source={photo} style={styles.image}>
-                <LinearGradient
-                    colors={['transparent', 'rgba(0,0,0,0.8)']} // Adjust the colors and opacity as needed
-                    style={styles.gradientOverlay}
-                >
-                    <ThemedText type='titleSmall' style={[styles.title, { color: themeColors.background }]}>
-                        {name}
-                    </ThemedText>
-                    <ThemedText type='bodySmall' style={[styles.attributes, { color: themeColors.background }]}>
-                        {length}, {level}
-                    </ThemedText>
-                </LinearGradient>
-            </ImageBackground>
+            <ImageTextOverlay
+                photo={photo}
+                title={name}
+                subtitle={length + ', ' + level}
+                gradientColors={['transparent', 'rgba(0,0,0,0.8)']}
+                containerStyle={{ height: '100%', elevation: 5 }}
+                textContainerStyle={{ bottom: 24 }}
+                subtitleType='bodySmall'
+                titleType='titleSmall'
+                titleStyle={{ marginRight: 40, lineHeight: 20 }}
+                subtitleStyle={{ marginTop: 0 }}
+            />
         </TouchableOpacity>
     );
 };
@@ -63,31 +63,5 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 4,
-    },
-    image: {
-        flex: 1,
-    },
-    gradientOverlay: {
-        flex: 1,
-        justifyContent: 'flex-end',
-        padding: 16,
-        paddingLeft: 24,
-    },
-    title: {
-        textShadowColor: 'rgba(0,0,0,0.75)',
-        textShadowOffset: { width: 1, height: 1 },
-        textShadowRadius: 10,
-        marginRight: 48, // Add right margin to ensure there's space on the right
-        lineHeight: 20, // Reduced line height for tighter text wrapping
-    },
-    attributes: {
-        textShadowColor: 'rgba(0,0,0,0.75)',
-        textShadowOffset: { width: 1, height: 1 },
-        textShadowRadius: 10,
-    },
-    attributeContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        background: 'none',
     },
 });
