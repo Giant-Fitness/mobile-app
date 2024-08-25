@@ -43,11 +43,11 @@ export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, 
                 <ThemedView style={styles.attributeContainer}>
                     <ThemedView style={styles.attributeRow}>
                         <MaterialCommunityIcons name='yoga' size={14} color={themeColors.textLight} />
-                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight }]}>
+                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight, paddingRight: 12 }]}>
                             {focus}
                         </ThemedText>
                         <LevelIcon level={level} size={14} color={themeColors.textLight} />
-                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight }]}>
+                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight, marginLeft: 3 }]}>
                             {level}
                         </ThemedText>
                     </ThemedView>
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     attributeText: {
-        marginLeft: 4,
+        marginLeft: 5,
         lineHeight: 14, // Ensures the text is aligned with the icon
     },
 });

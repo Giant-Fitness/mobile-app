@@ -17,19 +17,19 @@ type ProgramDayOverviewCardProps = {
     photo: ImageSourcePropType;
 };
 
-const ProgramDayOverviewCard: React.FC<DayOverviewCardProps> = ({ week, day, workout, length, photo }) => {
+export const ProgramDayOverviewCard: React.FC<DayOverviewCardProps> = ({ week, day, workout, length, photo }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
     return (
         <LeftImageInfoCard
             image={photo}
-            title={`Week ${week} Day ${day}`}
+            title={workout}
             extraContent={
                 <ThemedView>
                     <ThemedView style={styles.attributeRow}>
                         <ThemedText type='bodySmall' style={[{ color: themeColors.text }]}>
-                            {workout}
+                            {`Week ${week} Day ${day}`}
                         </ThemedText>
                     </ThemedView>
 
@@ -70,12 +70,10 @@ const styles = StyleSheet.create({
     attributeRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 6,
+        marginBottom: 2,
     },
     attributeText: {
         marginLeft: 4,
         lineHeight: 14,
     },
 });
-
-export default ProgramDayOverviewCard;

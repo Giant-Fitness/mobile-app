@@ -5,10 +5,10 @@ import { ThemedView } from '@/components/base/ThemedView';
 import { StatusBar } from 'expo-status-bar';
 import { ScrollView, StyleSheet, View, TouchableOpacity } from 'react-native';
 import React from 'react';
-import ActiveCard from '@/components/programs/ActiveDayCard';
+import { ActiveProgramDayCard } from '@/components/programs/ActiveProgramDayCard';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import ProgramDayOverviewCard from '@/components/programs/ProgramDayOverviewCard';
+import { ProgramDayOverviewCard } from '@/components/programs/ProgramDayOverviewCard';
 import { Collapsible } from '@/components/layout/Collapsible';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -31,7 +31,7 @@ export default function ProgramsScreen() {
                 }}
             >
                 <ThemedView style={[styles.activeCardContainer]}>
-                    <ActiveCard />
+                    <ActiveProgramDayCard />
                 </ThemedView>
 
                 <ThemedView style={[styles.upNextContainer]}>
@@ -144,11 +144,11 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     },
     upNextContainer: {
-        paddingTop: 32,
+        paddingTop: 24,
         paddingBottom: 32,
     },
     activeCardContainer: {
-        paddingTop: 42,
+        paddingTop: 48,
     },
     menuItem: {
         padding: 16,
