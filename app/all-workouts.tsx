@@ -9,7 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { WorkoutsBottomBar } from '@/components/workouts/WorkoutsBottomBar';
-import { CustomBackButton } from '@/components/base/CustomBackButton';
+import { CustomBackButton } from '@/components/icons/CustomBackButton';
 
 const workouts = [
     {
