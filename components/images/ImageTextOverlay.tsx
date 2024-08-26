@@ -1,12 +1,13 @@
 // components/images/ImageTextOverlay.tsx
 
 import React from 'react';
-import { ImageBackground, StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import { Image } from 'expo-image';
 
 type ImageTextOverlayProps = {
     photo: any;
@@ -38,30 +39,36 @@ export const ImageTextOverlay: React.FC<ImageTextOverlayProps> = ({
 
     return (
         <ThemedView style={[containerStyle]}>
-            <ImageBackground source={photo} style={styles.image}>
-                <LinearGradient colors={gradientColors} style={[StyleSheet.absoluteFill]} />
+            <ThemedView style={styles.imageWrapper}>
+                <Image source={photo} style={styles.image} contentFit='cover' cachePolicy='memory-disk' />
+                <LinearGradient colors={gradientColors} style={styles.gradientOverlay} />
                 <ThemedView style={[styles.textContainer, textContainerStyle]}>
                     <ThemedText type={titleType} style={[styles.title, titleStyle, { color: themeColors.whiteText }]}>
                         {title}
                     </ThemedText>
                     {subtitle && (
-                        <ThemedText type={subtitleType} style={[styles.subtitle, subtitleStyle, { color: themeColors.textMedium }]}>
+                        <ThemedText type={subtitleType} style={[styles.subtitle, subtitleStyle, { color: themeColors.whiteText }]}>
                             {subtitle}
                         </ThemedText>
                     )}
                 </ThemedView>
-            </ImageBackground>
+            </ThemedView>
         </ThemedView>
     );
 };
 
 const styles = StyleSheet.create({
+    imageWrapper: {
+        flex: 1,
+        overflow: 'hidden',
+    },
     image: {
         width: '100%',
         height: '100%',
-        position: 'absolute',
-        top: 0,
-        zIndex: 1,
+    },
+    gradientOverlay: {
+        ...StyleSheet.absoluteFillObject, // Ensures the gradient covers the entire image
+        zIndex: 2,
     },
     textContainer: {
         position: 'absolute',
@@ -76,7 +83,6 @@ const styles = StyleSheet.create({
         textShadowRadius: 10,
         marginRight: 48,
         lineHeight: 40,
-        zIndex: 20,
     },
     subtitle: {
         marginTop: 8,

@@ -4,7 +4,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { LeftImageInfoCard } from '@/components/layout/LeftImageInfoCard';
 import { ThemedView } from '@/components/base/ThemedView';

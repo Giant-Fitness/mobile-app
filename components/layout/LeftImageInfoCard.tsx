@@ -1,11 +1,12 @@
 // components/layout/LeftImageInfoCard.tsx
 
 import React from 'react';
-import { Image, StyleSheet, TouchableOpacity, View, StyleProp, ViewStyle, ImageSourcePropType, TextStyle } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, StyleProp, ViewStyle, ImageSourcePropType, TextStyle } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import { Image } from 'expo-image';
 
 type LeftImageInfoCardProps = {
     image: ImageSourcePropType;

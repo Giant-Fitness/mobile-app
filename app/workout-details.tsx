@@ -43,7 +43,7 @@ export default function WorkoutDetailScreen() {
                 <ImageTextOverlay
                     photo={photo}
                     title={name}
-                    gradientColors={['transparent', 'rgba(0,0,0,0.2)']}
+                    gradientColors={['transparent', 'rgba(0,0,0,0.4)']}
                     containerStyle={{ height: 400, elevation: 5 }}
                     textContainerStyle={{ bottom: 24 }}
                 />

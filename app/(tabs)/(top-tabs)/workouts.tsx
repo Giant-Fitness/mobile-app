@@ -115,7 +115,7 @@ export default function WorkoutsScreen() {
                                     ))}
                                     <TouchableOpacity
                                         activeOpacity={1}
-                                        style={[styles.seeAllButton, { backgroundColor: themeColors.containerLightColor }]}
+                                        style={[styles.seeAllButton, { backgroundColor: themeColors.containerColor }]}
                                         onPress={() => console.log('Navigate to see all')}
                                     >
                                         <ThemedText type='body' style={[{ color: themeColors.text }]}>

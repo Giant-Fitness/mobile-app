@@ -1,11 +1,12 @@
 // components/layout/TopImageInfoCard.tsx
 
 import React from 'react';
-import { Image, StyleSheet, StyleProp, ViewStyle, TextStyle, ImageSourcePropType } from 'react-native';
+import { StyleSheet, StyleProp, ViewStyle, TextStyle, ImageSourcePropType } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import { Image } from 'expo-image';
 
 type TopImageInfoCardProps = {
     image: ImageSourcePropType;

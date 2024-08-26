@@ -1,7 +1,7 @@
 // app/all-workouts.tsx
 
 import React from 'react';
-import { ScrollView, StyleSheet, Image, Button, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Button, TouchableOpacity, View } from 'react-native';
 import { WorkoutDetailedCard } from '@/components/workouts/WorkoutDetailedCard';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -10,6 +10,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { WorkoutsBottomBar } from '@/components/workouts/WorkoutsBottomBar';
 import { CustomBackButton } from '@/components/icons/CustomBackButton';
+import { Image } from 'expo-image';
 
 const workouts = [
     {
