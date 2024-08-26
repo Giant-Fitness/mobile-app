@@ -11,6 +11,7 @@ import { Colors } from '@/constants/Colors';
 import { ProgramDayOverviewCard } from '@/components/programs/ProgramDayOverviewCard';
 import { Collapsible } from '@/components/layout/Collapsible';
 import { Ionicons } from '@expo/vector-icons';
+import ProgressBar from '@/components/programs/ProgressBar';
 
 export default function ProgramsScreen() {
     const colorScheme = useColorScheme();
@@ -31,11 +32,21 @@ export default function ProgramsScreen() {
                 }}
                 showsVerticalScrollIndicator={false}
             >
+
                 <ThemedView style={styles.quoteContainer}>
                     <ThemedText type='italic' style={[styles.quoteText, { color: themeColors.textLight }]}>
                         "The only bad workout is the one that didn't happen."
                     </ThemedText>
                 </ThemedView>
+
+                <ThemedView style={styles.planHeader}>
+                    <ThemedText type='titleSmall' style={{ fontSize: 20 }}>Lean Machine</ThemedText>
+                    <ThemedText style={{ color: themeColors.textLight  }}>Week 3 Day 2</ThemedText>
+                </ThemedView>
+
+                <View style={{ marginBottom: '10%'}}>
+                    <ProgressBar highlightedParts={2} />
+                </View>
 
                 <ThemedView style={[styles.activeCardContainer]}>
                     <ActiveProgramDayCard />
@@ -169,4 +180,11 @@ const styles = StyleSheet.create({
     quoteText: {
         textAlign: 'center',
     },
+    planHeader: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        width: '100%',
+        justifyContent: 'space-between',
+        marginVertical: '3%',
+    }
 });
