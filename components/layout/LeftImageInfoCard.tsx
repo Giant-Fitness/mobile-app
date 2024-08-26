@@ -19,6 +19,7 @@ type LeftImageInfoCardProps = {
     contentContainerStyle?: StyleProp<ViewStyle>;
     titleStyle?: StyleProp<TextStyle>;
     subtitleStyle?: StyleProp<TextStyle>;
+    placeholder?: any; // Placeholder image while loading
 };
 
 export const LeftImageInfoCard: React.FC<LeftImageInfoCardProps> = ({
@@ -32,13 +33,14 @@ export const LeftImageInfoCard: React.FC<LeftImageInfoCardProps> = ({
     contentContainerStyle,
     titleStyle,
     subtitleStyle,
+    placeholder = '@/assets/images/adaptive-icon.png',
 }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
     return (
         <TouchableOpacity onPress={onPress} style={[styles.card, containerStyle]} activeOpacity={1}>
-            <Image source={image} style={[styles.image, imageStyle]} />
+            <Image source={image} style={[styles.image, imageStyle]} placeholder={placeholder} />
             <ThemedView style={[styles.textContainer, contentContainerStyle]}>
                 <ThemedText type='bodyMedium' style={[styles.title, titleStyle, { color: themeColors.text }]}>
                     {title}

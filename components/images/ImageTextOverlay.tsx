@@ -20,6 +20,7 @@ type ImageTextOverlayProps = {
     gradientColors?: string[];
     titleType?: string; // Optional type for title
     subtitleType?: string; // Optional type for subtitle
+    placeholder?: any; // Placeholder image while loading
 };
 
 export const ImageTextOverlay: React.FC<ImageTextOverlayProps> = ({
@@ -33,6 +34,7 @@ export const ImageTextOverlay: React.FC<ImageTextOverlayProps> = ({
     containerStyle,
     textContainerStyle,
     gradientColors = ['transparent', 'rgba(0,0,0,0.8)'],
+    placeholder = '@/assets/images/adaptive-icon.png',
 }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
@@ -40,7 +42,7 @@ export const ImageTextOverlay: React.FC<ImageTextOverlayProps> = ({
     return (
         <ThemedView style={[containerStyle]}>
             <ThemedView style={styles.imageWrapper}>
-                <Image source={photo} style={styles.image} contentFit='cover' cachePolicy='memory-disk' />
+                <Image source={photo} style={styles.image} contentFit='cover' cachePolicy='memory-disk' placeholder={placeholder} />
                 <LinearGradient colors={gradientColors} style={styles.gradientOverlay} />
                 <ThemedView style={[styles.textContainer, textContainerStyle]}>
                     <ThemedText type={titleType} style={[styles.title, titleStyle, { color: themeColors.whiteText }]}>
