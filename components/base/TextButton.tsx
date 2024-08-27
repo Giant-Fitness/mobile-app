@@ -1,4 +1,4 @@
-// components/base/Button.tsx
+// components/base/TextButton.tsx
 
 import React from 'react';
 import { TouchableOpacity, StyleSheet, Text, StyleProp, ViewStyle, TextStyle } from 'react-native';
@@ -7,23 +7,25 @@ import { Colors } from '@/constants/Colors';
 import { Icon } from '@/components/icons/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
 
-type ButtonProps = {
+type TextButtonProps = {
     onPress: () => void;
     text?: string;
     iconName?: string;
     style?: StyleProp<ViewStyle>;
     textStyle?: StyleProp<TextStyle>;
     iconStyle?: StyleProp<ViewStyle>;
+    textType?: string;
 };
 
-export const Button: React.FC<ButtonProps> = ({ onPress, text, iconName, style, textStyle, iconStyle }) => {
+export const TextButton: React.FC<TextButtonProps> = ({ onPress, text, style, textStyle, textType }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
     return (
         <TouchableOpacity style={[styles.button, { backgroundColor: themeColors.primary }, style]} onPress={onPress}>
-            {iconName && <Icon name={iconName} style={[styles.icon, iconStyle]} />}
-            {text && <ThemedText style={[styles.text, textStyle, {color: themeColors.white }]}>{text}</ThemedText>}
+            <ThemedText type={textType} style={[styles.text, textStyle, { color: themeColors.white }]}>
+                {text}
+            </ThemedText>
         </TouchableOpacity>
     );
 };
@@ -33,15 +35,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 12,
-        borderRadius: 8,
+        borderRadius: 30,
     },
     text: {
         color: '#fff',
         fontSize: 16,
         fontWeight: 'bold',
-    },
-    icon: {
-        marginRight: 8,
     },
 });

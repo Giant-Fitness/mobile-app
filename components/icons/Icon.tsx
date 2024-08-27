@@ -1,7 +1,7 @@
 // components/icons/Icon.tsx
 
 import React from 'react';
-import { Ionicons, MaterialCommunityIcons, MaterialIcons, Entypo } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons, MaterialIcons, Entypo, SimpleLineIcons } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { StyleProp, TextStyle } from 'react-native';
@@ -55,6 +55,8 @@ export const Icon: React.FC<IconProps> = ({ name, size = 18, color, style }) => 
             return <Ionicons name='options' {...commonProps} />;
         case 'sort':
             return <Ionicons name='swap-vertical' {...commonProps} />;
+        case 'notebook':
+            return <MaterialCommunityIcons name='notebook' {...commonProps} />;
         default:
             return <Ionicons name='alert-circle-outline' s {...commonProps} />;
     }

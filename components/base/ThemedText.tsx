@@ -34,6 +34,11 @@ const styles = StyleSheet.create({
         fontFamily: 'InterSemiBold',
         lineHeight: 32,
     },
+    titleXLarge: {
+        fontSize: 24,
+        fontFamily: 'InterMedium',
+        lineHeight: 32,
+    },
     title: {
         fontSize: 16,
         fontFamily: 'InterSemiBold',
