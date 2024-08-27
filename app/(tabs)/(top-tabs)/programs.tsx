@@ -3,7 +3,7 @@
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { StatusBar } from 'expo-status-bar';
-import { ScrollView, StyleSheet, View, TouchableOpacity } from 'react-native';
+import { ScrollView, StyleSheet, View, TouchableOpacity, Dimensions } from 'react-native';
 import React from 'react';
 import { ActiveProgramDayCard } from '@/components/programs/ActiveProgramDayCard';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -16,6 +16,7 @@ import ProgressBar from '@/components/programs/ProgressBar';
 export default function ProgramsScreen() {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
+    const screenWidth = Dimensions.get('window').width;
 
     const dummyDayPlans = [
         { dayId: 1, Week: 3, Day: 3, workoutName: 'Upper Body A', length: '30 mins', photo: require('@/assets/images/vb.webp') },
@@ -32,28 +33,27 @@ export default function ProgramsScreen() {
                 }}
                 showsVerticalScrollIndicator={false}
             >
-
                 <ThemedView style={styles.quoteContainer}>
                     <ThemedText type='italic' style={[styles.quoteText, { color: themeColors.textLight }]}>
-                        "The only bad workout is the one that didn't happen."
+                        The only bad workout is the one that didn't happen.
                     </ThemedText>
                 </ThemedView>
 
                 <ThemedView style={styles.planHeader}>
-                    <ThemedText type='titleSmall' style={{ fontSize: 20 }}>Lean Machine</ThemedText>
-                    <ThemedText style={{ color: themeColors.textLight  }}>Week 3 Day 2</ThemedText>
+                    <ThemedText type='titleLarge'>Lean Machine Challenge</ThemedText>
                 </ThemedView>
 
-                <View style={{ marginBottom: '10%'}}>
-                    <ProgressBar highlightedParts={2} />
-                </View>
+                <ThemedView style={[styles.weekProgress]}>
+                    <ProgressBar completedParts={2} currentPart={3} parts={6} containerWidth={screenWidth - 48} />
+                    <ThemedText style={[{ color: themeColors.textLight, marginTop: 12 }]}>Current Week: 3 of 6</ThemedText>
+                </ThemedView>
 
                 <ThemedView style={[styles.activeCardContainer]}>
                     <ActiveProgramDayCard />
                 </ThemedView>
 
                 <ThemedView style={[styles.upNextContainer]}>
-                    <ThemedText type='titleSmall' style={[styles.subHeader, { color: themeColors.textLight }]}>
+                    <ThemedText type='title' style={[styles.subHeader, { color: themeColors.textLight }]}>
                         Up Next...
                     </ThemedText>
                     {dummyDayPlans &&
@@ -148,13 +148,10 @@ const styles = StyleSheet.create({
     },
     scrollContainer: {
         width: '100%',
-        // borderWidth: 1,
-        // borderColor: 'crimson',
     },
     subHeader: {
-        marginTop: '5%',
+        marginTop: 18,
         marginBottom: 16,
-        marginLeft: '1%',
     },
     divider: {
         height: 0.7,
@@ -165,7 +162,6 @@ const styles = StyleSheet.create({
         paddingTop: 24,
         paddingBottom: 16,
     },
-    activeCardContainer: {},
     menuItem: {
         paddingTop: 24,
         paddingBottom: 24,
@@ -181,10 +177,9 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     planHeader: {
-        alignItems: 'center',
-        flexDirection: 'row',
-        width: '100%',
-        justifyContent: 'space-between',
-        marginVertical: '3%',
-    }
+        marginBottom: 12,
+    },
+    weekProgress: {
+        marginBottom: 24,
+    },
 });

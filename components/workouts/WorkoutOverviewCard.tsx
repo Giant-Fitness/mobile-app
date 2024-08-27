@@ -43,7 +43,7 @@ export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, 
                 containerStyle={{ height: '100%', elevation: 5 }}
                 textContainerStyle={{ bottom: 24 }}
                 subtitleType='bodySmall'
-                titleType='titleSmall'
+                titleType='title'
                 titleStyle={{ marginRight: 40, lineHeight: 20 }}
                 subtitleStyle={{ marginTop: 0 }}
             />

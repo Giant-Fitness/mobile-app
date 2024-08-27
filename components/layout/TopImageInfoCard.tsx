@@ -38,7 +38,7 @@ export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
             <Image source={image} style={[styles.image, imageStyle]} />
             <ThemedView style={[styles.contentContainer, contentContainerStyle, { backgroundColor: themeColors.containerColor }]}>
                 {subtitle && <ThemedText style={[styles.subtitle, subtitleStyle, { color: themeColors.textLight }]}>{subtitle}</ThemedText>}
-                <ThemedText type='titleSmall' style={[styles.title, titleStyle, { color: themeColors.text }]}>
+                <ThemedText type='title' style={[styles.title, titleStyle, { color: themeColors.text }]}>
                     {title}
                 </ThemedText>
                 {extraContent}
