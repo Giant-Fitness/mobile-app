@@ -1,11 +1,12 @@
 // components/layout/TopImageInfoCard.tsx
 
 import React from 'react';
-import { Image, StyleSheet, StyleProp, ViewStyle, TextStyle, ImageSourcePropType } from 'react-native';
+import { StyleSheet, StyleProp, ViewStyle, TextStyle, ImageSourcePropType } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import { Image } from 'expo-image';
 
 type TopImageInfoCardProps = {
     image: ImageSourcePropType;
@@ -17,6 +18,7 @@ type TopImageInfoCardProps = {
     contentContainerStyle?: StyleProp<ViewStyle>;
     titleStyle?: StyleProp<TextStyle>;
     subtitleStyle?: StyleProp<TextStyle>;
+    placeholder?: any; // Placeholder image while loading
 };
 
 export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
@@ -29,13 +31,14 @@ export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
     contentContainerStyle,
     titleStyle,
     subtitleStyle,
+    placeholder = '@/assets/images/adaptive-icon.png',
 }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
     return (
         <ThemedView style={[styles.container, containerStyle]}>
-            <Image source={image} style={[styles.image, imageStyle]} />
+            <Image source={image} style={[styles.image, imageStyle]} placeholder={placeholder} />
             <ThemedView style={[styles.contentContainer, contentContainerStyle, { backgroundColor: themeColors.containerColor }]}>
                 {subtitle && <ThemedText style={[styles.subtitle, subtitleStyle, { color: themeColors.textLight }]}>{subtitle}</ThemedText>}
                 <ThemedText type='titleSmall' style={[styles.title, titleStyle, { color: themeColors.text }]}>

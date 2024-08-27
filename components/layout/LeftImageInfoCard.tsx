@@ -1,11 +1,12 @@
 // components/layout/LeftImageInfoCard.tsx
 
 import React from 'react';
-import { Image, StyleSheet, TouchableOpacity, View, StyleProp, ViewStyle, ImageSourcePropType, TextStyle } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, StyleProp, ViewStyle, ImageSourcePropType, TextStyle } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import { Image } from 'expo-image';
 
 type LeftImageInfoCardProps = {
     image: ImageSourcePropType;
@@ -18,6 +19,7 @@ type LeftImageInfoCardProps = {
     contentContainerStyle?: StyleProp<ViewStyle>;
     titleStyle?: StyleProp<TextStyle>;
     subtitleStyle?: StyleProp<TextStyle>;
+    placeholder?: any; // Placeholder image while loading
 };
 
 export const LeftImageInfoCard: React.FC<LeftImageInfoCardProps> = ({
@@ -31,13 +33,14 @@ export const LeftImageInfoCard: React.FC<LeftImageInfoCardProps> = ({
     contentContainerStyle,
     titleStyle,
     subtitleStyle,
+    placeholder = '@/assets/images/adaptive-icon.png',
 }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
     return (
         <TouchableOpacity onPress={onPress} style={[styles.card, containerStyle]} activeOpacity={1}>
-            <Image source={image} style={[styles.image, imageStyle]} />
+            <Image source={image} style={[styles.image, imageStyle]} placeholder={placeholder} />
             <ThemedView style={[styles.textContainer, contentContainerStyle]}>
                 <ThemedText type='bodyMedium' style={[styles.title, titleStyle, { color: themeColors.text }]}>
                     {title}
@@ -61,9 +64,9 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
     },
     image: {
-        borderRadius: 6,
-        height: 120,
-        width: 120,
+        borderRadius: 3,
+        height: 125,
+        width: 125,
         marginRight: 16,
     },
     textContainer: {
