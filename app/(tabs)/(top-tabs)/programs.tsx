@@ -10,12 +10,8 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ProgramDayOverviewCard } from '@/components/programs/ProgramDayOverviewCard';
 import { Collapsible } from '@/components/layout/Collapsible';
-<<<<<<< HEAD
-import { Ionicons } from '@expo/vector-icons';
 import ProgressBar from '@/components/programs/ProgressBar';
-=======
 import { Icon } from '@/components/icons/Icon';
->>>>>>> master
 
 export default function ProgramsScreen() {
     const colorScheme = useColorScheme();
