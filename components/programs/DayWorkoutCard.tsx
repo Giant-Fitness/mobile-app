@@ -8,42 +8,32 @@ import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { LeftImageInfoCard } from '@/components/layout/LeftImageInfoCard';
 import { ThemedView } from '@/components/base/ThemedView';
-import { useNavigation } from '@react-navigation/native';
 
-type ProgramDayOverviewCardProps = {
-    week: number;
-    day: number;
-    workout: string;
-    length: string;
-    photo: ImageSourcePropType;
-};
-
-export const ProgramDayOverviewCard: React.FC<DayOverviewCardProps> = ({ week, day, workout, length, photo }) => {
+const DayWorkoutCard = (props) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
-    const navigation = useNavigation();
-
-    const navigateToProgramDay = () => {
-        navigation.navigate('program-day-workouts', { workout, week, day, length });
-    };
 
     return (
         <LeftImageInfoCard
-            image={photo}
-            onPress={navigateToProgramDay}
-            title={workout}
+            image={props.photo}
+            title={props.workoutName}
             extraContent={
                 <ThemedView>
                     <ThemedView style={styles.attributeRow}>
-                        <ThemedText type='bodySmall' style={[{ color: themeColors.text }]}>
-                            {`Week ${week} Day ${day}`}
+                        <ThemedText style={[styles.extraContentText, { color: themeColors.subText }]}>
+                            {`${props.numSets} sets x ${props.lowerLimReps} - ${props.higherLimReps} reps`}
                         </ThemedText>
                     </ThemedView>
 
                     <ThemedView style={styles.attributeRow}>
-                        <Ionicons name='stopwatch-outline' size={14} color={themeColors.textLight} />
-                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight }]}>
-                            {length}
+                        <ThemedText style={[styles.extraContentText, { color: themeColors.subText }]}>
+                            {`${props.restPeriod} rest`}
+                        </ThemedText>
+                    </ThemedView>
+
+                    <ThemedView style={styles.attributeRow}>
+                        <ThemedText style={[styles.extraContentText, { color: themeColors.subText }]}>
+                            {props.intro}
                         </ThemedText>
                     </ThemedView>
                 </ThemedView>
@@ -81,11 +71,14 @@ const styles = StyleSheet.create({
     attributeRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 2,
         marginLeft: 4,
     },
     attributeText: {
         marginLeft: 4,
-        lineHeight: 14,
     },
+    extraContentText: {
+        fontSize: 13
+    }
 });
+
+export default DayWorkoutCard;
