@@ -2,20 +2,18 @@
 
 import React from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import { TabBarIcon } from '@/components/icons/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
+import { Icon } from '@/components/icons/Icon';
 
 type WorkoutsBottomBarProps = {
     onSortPress: () => void;
     onFilterPress: () => void;
-    sortIcon: ComponentProps<typeof TabBarIcon>['name'];
-    filterIcon: ComponentProps<typeof TabBarIcon>['name'];
 };
 
-export const WorkoutsBottomBar: React.FC<WorkoutsBottomBarProps> = ({ onSortPress, onFilterPress, sortIcon, filterIcon }) => {
+export const WorkoutsBottomBar: React.FC<WorkoutsBottomBarProps> = ({ onSortPress, onFilterPress }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
@@ -23,7 +21,7 @@ export const WorkoutsBottomBar: React.FC<WorkoutsBottomBarProps> = ({ onSortPres
         <ThemedView style={[styles.container, { borderColor: themeColors.containerBorderColor }]}>
             <TouchableOpacity style={styles.button} onPress={onFilterPress}>
                 <View style={styles.iconAndText}>
-                    <TabBarIcon name={filterIcon} style={[styles.icon, { color: themeColors.tabIconDefault, marginRight: 4 }]} size={15} />
+                    <Icon name='filter' style={[styles.icon, { marginRight: 4 }]} color={themeColors.tabIconDefault} size={15} />
                     <ThemedText type='buttonSmall' style={[styles.text, { color: themeColors.tabIconDefault }]}>
                         Filter
                     </ThemedText>
@@ -32,7 +30,7 @@ export const WorkoutsBottomBar: React.FC<WorkoutsBottomBarProps> = ({ onSortPres
             <View style={[styles.divider, { backgroundColor: themeColors.tabIconDefault }]} />
             <TouchableOpacity style={styles.button} onPress={onSortPress}>
                 <View style={styles.iconAndText}>
-                    <TabBarIcon name={sortIcon} style={[styles.icon, { color: themeColors.tabIconDefault, marginRight: 4 }]} size={16} />
+                    <Icon name='sort' style={[styles.icon, { marginRight: 4 }]} color={themeColors.tabIconDefault} size={16} />
                     <ThemedText type='buttonSmall' style={[styles.text, { color: themeColors.tabIconDefault }]}>
                         Sort
                     </ThemedText>

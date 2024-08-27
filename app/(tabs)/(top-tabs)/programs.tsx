@@ -10,7 +10,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ProgramDayOverviewCard } from '@/components/programs/ProgramDayOverviewCard';
 import { Collapsible } from '@/components/layout/Collapsible';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/icons/Icon';
 
 export default function ProgramsScreen() {
     const colorScheme = useColorScheme();
@@ -68,7 +68,7 @@ export default function ProgramsScreen() {
                         <ThemedText type='body' style={[{ color: themeColors.text }]}>
                             Program Calendar
                         </ThemedText>
-                        <Ionicons name={'chevron-forward-outline'} size={16} color={themeColors.tabIconDefault} />
+                        <Icon name='chevron-forward' size={16} color={themeColors.tabIconDefault} />
                     </TouchableOpacity>
                     <View
                         style={{
@@ -82,7 +82,7 @@ export default function ProgramsScreen() {
                         <ThemedText type='body' style={[{ color: themeColors.text }]}>
                             Program Overview
                         </ThemedText>
-                        <Ionicons name={'chevron-forward-outline'} size={16} color={themeColors.tabIconDefault} />
+                        <Icon name='chevron-forward' size={16} color={themeColors.tabIconDefault} />
                     </TouchableOpacity>
                     <View
                         style={{
@@ -96,7 +96,7 @@ export default function ProgramsScreen() {
                         <ThemedText type='body' style={[{ color: themeColors.text }]}>
                             Browse Programs
                         </ThemedText>
-                        <Ionicons name={'chevron-forward-outline'} size={16} color={themeColors.tabIconDefault} />
+                        <Icon name='chevron-forward' size={16} color={themeColors.tabIconDefault} />
                     </TouchableOpacity>
                     <View
                         style={{
@@ -114,7 +114,7 @@ export default function ProgramsScreen() {
                         <ThemedText type='body' style={[{ color: themeColors.text }]}>
                             End Program
                         </ThemedText>
-                        <Ionicons name={'chevron-forward-outline'} size={16} color={themeColors.tabIconDefault} />
+                        <Icon name='chevron-forward' size={16} color={themeColors.tabIconDefault} />
                     </TouchableOpacity>
                     <View
                         style={{

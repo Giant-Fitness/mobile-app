@@ -9,7 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { WorkoutsBottomBar } from '@/components/workouts/WorkoutsBottomBar';
-import { CustomBackButton } from '@/components/icons/CustomBackButton';
+import { CustomBackButton } from '@/components/base/CustomBackButton';
 import { Image } from 'expo-image';
 
 const workouts = [
@@ -131,7 +131,7 @@ export default function AllWorkoutsScreen() {
                 </ThemedView>
             </ScrollView>
             {/* Bar with Sort and Filter buttons */}
-            <WorkoutsBottomBar onSortPress={handleSortPress} onFilterPress={handleFilterPress} sortIcon='swap-vertical' filterIcon='options' />
+            <WorkoutsBottomBar onSortPress={handleSortPress} onFilterPress={handleFilterPress} />
         </ThemedView>
     );
 }
@@ -144,6 +144,6 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         paddingLeft: 16,
-        paddingBottom: 90, // Add padding to ensure content doesn't overlap with the bottom bar
+        paddingBottom: 100, // Add padding to ensure content doesn't overlap with the bottom bar
     },
 });

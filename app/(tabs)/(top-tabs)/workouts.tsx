@@ -10,7 +10,7 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { WorkoutOverviewCard } from '@/components/workouts/WorkoutOverviewCard';
 import { Collapsible } from '@/components/layout/Collapsible';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from '@/components/icons/Icon';
 
 const recommendedWorkouts = [
     {
@@ -146,7 +146,7 @@ export default function WorkoutsScreen() {
                             <ThemedText type='body' style={[{ color: themeColors.text }]}>
                                 All Workouts
                             </ThemedText>
-                            <Ionicons name={'chevron-forward-outline'} size={16} color={themeColors.tabIconDefault} />
+                            <Icon name='chevron-forward' size={16} color={themeColors.tabIconDefault} />
                         </TouchableOpacity>
                         <View
                             style={[

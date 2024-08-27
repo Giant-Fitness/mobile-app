@@ -3,12 +3,12 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 
-import { TabBarIcon } from '@/components/icons/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Entypo, MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { Entypo, MaterialIcons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Icon } from '@/components/icons/Icon';
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
@@ -33,7 +33,7 @@ export default function TabLayout() {
                 tabBarShowLabel: true,
                 headerRight: () => (
                     <TouchableOpacity activeOpacity={1} onPress={() => navigation.navigate('settings')}>
-                        <Ionicons name='person-circle' size={26} color={Colors[colorScheme ?? 'light'].textLight} style={{ marginRight: 18 }} />
+                        <Icon name='person' size={26} color={Colors[colorScheme ?? 'light'].textLight} style={{ marginRight: 18 }} />
                     </TouchableOpacity>
                 ),
             }}
@@ -47,7 +47,7 @@ export default function TabLayout() {
                     },
                     headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
                     title: 'Home',
-                    tabBarIcon: ({ color, focused }) => <MaterialIcons size={24} name='home' color={color} />,
+                    tabBarIcon: ({ color, focused }) => <Icon size={24} name='home' color={color} />,
                 }}
             />
             <Tabs.Screen
@@ -61,7 +61,7 @@ export default function TabLayout() {
                     },
                     headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
                     title: 'Exercise',
-                    tabBarIcon: ({ color, focused }) => <MaterialIcons name='sports-martial-arts' size={24} color={color} />,
+                    tabBarIcon: ({ color, focused }) => <Icon name='exercise' size={24} color={color} />,
                 }}
             />
             <Tabs.Screen
@@ -72,7 +72,7 @@ export default function TabLayout() {
                     },
                     headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
                     title: 'Nutrition',
-                    tabBarIcon: ({ color, focused }) => <Entypo name='leaf' size={22} color={color} />,
+                    tabBarIcon: ({ color, focused }) => <Icon name='nutrition' size={22} color={color} />,
                 }}
             />
             <Tabs.Screen
@@ -83,7 +83,7 @@ export default function TabLayout() {
                     },
                     headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
                     title: 'Progress',
-                    tabBarIcon: ({ color, focused }) => <TabBarIcon name='stats-chart' size={21} color={color} />,
+                    tabBarIcon: ({ color, focused }) => <Icon name='progress' size={21} color={color} />,
                 }}
             />
         </Tabs>
