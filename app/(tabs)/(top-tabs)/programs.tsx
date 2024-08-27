@@ -34,7 +34,7 @@ export default function ProgramsScreen() {
                 showsVerticalScrollIndicator={false}
             >
                 <ThemedView style={styles.quoteContainer}>
-                    <ThemedText type='italic' style={[styles.quoteText, { color: themeColors.textLight }]}>
+                    <ThemedText type='italic' style={[styles.quoteText, { color: themeColors.subText }]}>
                         The only bad workout is the one that didn't happen.
                     </ThemedText>
                 </ThemedView>
@@ -45,7 +45,7 @@ export default function ProgramsScreen() {
 
                 <ThemedView style={[styles.weekProgress]}>
                     <ProgressBar completedParts={2} currentPart={3} parts={6} containerWidth={screenWidth - 48} />
-                    <ThemedText style={[{ color: themeColors.textLight, marginTop: 12 }]}>Current Week: 3 of 6</ThemedText>
+                    <ThemedText style={[{ color: themeColors.subText, marginTop: 12 }]}>Current Week: 3 of 6</ThemedText>
                 </ThemedView>
 
                 <ThemedView style={[styles.activeCardContainer]}>
@@ -53,7 +53,7 @@ export default function ProgramsScreen() {
                 </ThemedView>
 
                 <ThemedView style={[styles.upNextContainer]}>
-                    <ThemedText type='title' style={[styles.subHeader, { color: themeColors.textLight }]}>
+                    <ThemedText type='title' style={[styles.subHeader, { color: themeColors.subText }]}>
                         Up Next...
                     </ThemedText>
                     {dummyDayPlans &&
@@ -70,7 +70,7 @@ export default function ProgramsScreen() {
                 </ThemedView>
                 <View
                     style={{
-                        borderBottomColor: themeColors.containerBorderColor,
+                        borderBottomColor: themeColors.systemBorderColor,
                         borderBottomWidth: StyleSheet.hairlineWidth,
                     }}
                 />
@@ -79,11 +79,11 @@ export default function ProgramsScreen() {
                         <ThemedText type='body' style={[{ color: themeColors.text }]}>
                             Program Calendar
                         </ThemedText>
-                        <Icon name='chevron-forward' size={16} color={themeColors.tabIconDefault} />
+                        <Icon name='chevron-forward' size={16} color={themeColors.iconDefault} />
                     </TouchableOpacity>
                     <View
                         style={{
-                            borderBottomColor: themeColors.containerBorderColor,
+                            borderBottomColor: themeColors.systemBorderColor,
                             borderBottomWidth: StyleSheet.hairlineWidth,
                         }}
                     />
@@ -93,11 +93,11 @@ export default function ProgramsScreen() {
                         <ThemedText type='body' style={[{ color: themeColors.text }]}>
                             Program Overview
                         </ThemedText>
-                        <Icon name='chevron-forward' size={16} color={themeColors.tabIconDefault} />
+                        <Icon name='chevron-forward' size={16} color={themeColors.iconDefault} />
                     </TouchableOpacity>
                     <View
                         style={{
-                            borderBottomColor: themeColors.containerBorderColor,
+                            borderBottomColor: themeColors.systemBorderColor,
                             borderBottomWidth: StyleSheet.hairlineWidth,
                         }}
                     />
@@ -107,11 +107,11 @@ export default function ProgramsScreen() {
                         <ThemedText type='body' style={[{ color: themeColors.text }]}>
                             Browse Programs
                         </ThemedText>
-                        <Icon name='chevron-forward' size={16} color={themeColors.tabIconDefault} />
+                        <Icon name='chevron-forward' size={16} color={themeColors.iconDefault} />
                     </TouchableOpacity>
                     <View
                         style={{
-                            borderBottomColor: themeColors.containerBorderColor,
+                            borderBottomColor: themeColors.systemBorderColor,
                             borderBottomWidth: StyleSheet.hairlineWidth,
                         }}
                     />
@@ -125,11 +125,11 @@ export default function ProgramsScreen() {
                         <ThemedText type='body' style={[{ color: themeColors.text }]}>
                             End Program
                         </ThemedText>
-                        <Icon name='chevron-forward' size={16} color={themeColors.tabIconDefault} />
+                        <Icon name='chevron-forward' size={16} color={themeColors.iconDefault} />
                     </TouchableOpacity>
                     <View
                         style={{
-                            borderBottomColor: themeColors.containerBorderColor,
+                            borderBottomColor: themeColors.systemBorderColor,
                             borderBottomWidth: StyleSheet.hairlineWidth,
                         }}
                     />

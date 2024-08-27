@@ -18,20 +18,20 @@ export const WorkoutsBottomBar: React.FC<WorkoutsBottomBarProps> = ({ onSortPres
     const themeColors = Colors[colorScheme ?? 'light'];
 
     return (
-        <ThemedView style={[styles.container, { borderColor: themeColors.containerBorderColor }]}>
+        <ThemedView style={[styles.container, { borderColor: themeColors.systemBorderColor }]}>
             <TouchableOpacity style={styles.button} onPress={onFilterPress}>
                 <View style={styles.iconAndText}>
-                    <Icon name='filter' style={[styles.icon, { marginRight: 4 }]} color={themeColors.tabIconDefault} size={15} />
-                    <ThemedText type='buttonSmall' style={[styles.text, { color: themeColors.tabIconDefault }]}>
+                    <Icon name='filter' style={[styles.icon, { marginRight: 4 }]} color={themeColors.iconDefault} size={15} />
+                    <ThemedText type='buttonSmall' style={[styles.text, { color: themeColors.iconDefault }]}>
                         Filter
                     </ThemedText>
                 </View>
             </TouchableOpacity>
-            <View style={[styles.divider, { backgroundColor: themeColors.tabIconDefault }]} />
+            <View style={[styles.divider, { backgroundColor: themeColors.iconDefault }]} />
             <TouchableOpacity style={styles.button} onPress={onSortPress}>
                 <View style={styles.iconAndText}>
-                    <Icon name='sort' style={[styles.icon, { marginRight: 4 }]} color={themeColors.tabIconDefault} size={16} />
-                    <ThemedText type='buttonSmall' style={[styles.text, { color: themeColors.tabIconDefault }]}>
+                    <Icon name='sort' style={[styles.icon, { marginRight: 4 }]} color={themeColors.iconDefault} size={16} />
+                    <ThemedText type='buttonSmall' style={[styles.text, { color: themeColors.iconDefault }]}>
                         Sort
                     </ThemedText>
                 </View>

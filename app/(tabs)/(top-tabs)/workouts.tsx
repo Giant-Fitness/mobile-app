@@ -115,7 +115,7 @@ export default function WorkoutsScreen() {
                                     ))}
                                     <TouchableOpacity
                                         activeOpacity={1}
-                                        style={[styles.seeAllButton, { backgroundColor: themeColors.containerColor }]}
+                                        style={[styles.seeAllButton, { backgroundColor: themeColors.containerHighlight }]}
                                         onPress={() => console.log('Navigate to see all')}
                                     >
                                         <ThemedText type='body' style={[{ color: themeColors.text }]}>
@@ -129,7 +129,7 @@ export default function WorkoutsScreen() {
                                     style={[
                                         styles.dividerInterior,
                                         {
-                                            borderBottomColor: themeColors.containerBorderColor,
+                                            borderBottomColor: themeColors.systemBorderColor,
                                             borderBottomWidth: StyleSheet.hairlineWidth,
                                         },
                                     ]}
@@ -146,13 +146,13 @@ export default function WorkoutsScreen() {
                             <ThemedText type='body' style={[{ color: themeColors.text }]}>
                                 All Workouts
                             </ThemedText>
-                            <Icon name='chevron-forward' size={16} color={themeColors.tabIconDefault} />
+                            <Icon name='chevron-forward' size={16} color={themeColors.iconDefault} />
                         </TouchableOpacity>
                         <View
                             style={[
                                 styles.divider,
                                 {
-                                    borderBottomColor: themeColors.containerBorderColor,
+                                    borderBottomColor: themeColors.systemBorderColor,
                                     borderBottomWidth: StyleSheet.hairlineWidth,
                                 },
                             ]}

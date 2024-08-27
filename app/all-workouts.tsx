@@ -100,16 +100,16 @@ export default function AllWorkoutsScreen() {
             title: 'All Workouts',
             headerBackTitleVisible: false, // Hide the back button label
             headerStyle: {
-                backgroundColor: Colors[colorScheme ?? 'light'].background,
+                backgroundColor: themeColors.background,
             },
-            headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
+            headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
             headerLeft: () => <CustomBackButton />,
         });
     }, [navigation]);
 
     return (
         <ThemedView style={{ flex: 1 }}>
-            <ThemedText type='overline' style={[styles.countContainer, { color: themeColors.textLight }]}>
+            <ThemedText type='overline' style={[styles.countContainer, { color: themeColors.subText }]}>
                 {workouts.length} workouts
             </ThemedText>
             <ScrollView showsVerticalScrollIndicator={false}>
