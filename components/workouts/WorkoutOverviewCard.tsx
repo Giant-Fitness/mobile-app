@@ -6,7 +6,6 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { ImageTextOverlay } from '@/components/images/ImageTextOverlay';
@@ -39,7 +38,7 @@ export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, 
                 photo={photo}
                 title={name}
                 subtitle={length + ', ' + level}
-                gradientColors={['transparent', 'rgba(0,0,0,0.8)']}
+                gradientColors={['transparent', 'rgba(0,0,0,0.6)']}
                 containerStyle={{ height: '100%', elevation: 5 }}
                 textContainerStyle={{ bottom: 24 }}
                 subtitleType='bodySmall'

@@ -7,10 +7,9 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
-import { CustomBackButton } from '@/components/icons/CustomBackButton';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { CustomBackButton } from '@/components/base/CustomBackButton';
 import { ImageTextOverlay } from '@/components/images/ImageTextOverlay';
-import { LevelIcon } from '@/components/icons/LevelIcon';
+import { Icon } from '@/components/icons/Icon';
 
 export default function WorkoutDetailScreen() {
     const colorScheme = useColorScheme();
@@ -29,6 +28,7 @@ export default function WorkoutDetailScreen() {
 
     // Convert focusMulti array to a comma-separated string
     const focusMultiText = focusMulti.join(', ');
+    const levelIcon = 'level-' + level.toLowerCase();
 
     return (
         <ThemedView style={styles.container}>
@@ -43,7 +43,7 @@ export default function WorkoutDetailScreen() {
                 <ImageTextOverlay
                     photo={photo}
                     title={name}
-                    gradientColors={['transparent', 'rgba(0,0,0,0.2)']}
+                    gradientColors={['transparent', 'rgba(0,0,0,0.4)']}
                     containerStyle={{ height: 400, elevation: 5 }}
                     textContainerStyle={{ bottom: 24 }}
                 />
@@ -51,13 +51,14 @@ export default function WorkoutDetailScreen() {
                 <ThemedView style={[styles.textContainer]}>
                     <ThemedView style={[styles.attributeRow]}>
                         <ThemedView style={[styles.attribute]}>
-                            <Ionicons name='stopwatch-outline' size={18} color={themeColors.text} />
+                            <Icon name='stopwatch-outline' size={18} color={themeColors.text} />
                             <ThemedText type='body' style={[styles.attributeText]}>
                                 {length}
                             </ThemedText>
                         </ThemedView>
                         <ThemedView style={[styles.attribute, { paddingLeft: 32 }]}>
-                            <LevelIcon level={level} size={16} />
+                            <Icon name={levelIcon} size={16} color={themeColors.text} />
+
                             <ThemedText type='body' style={[styles.attributeText, { marginLeft: 4 }]}>
                                 {level}
                             </ThemedText>
@@ -65,7 +66,8 @@ export default function WorkoutDetailScreen() {
                     </ThemedView>
                     <ThemedView style={[styles.attributeRow]}>
                         <ThemedView style={[styles.attribute]}>
-                            <MaterialCommunityIcons name='dumbbell' size={18} color={themeColors.text} />
+                            <Icon name='dumbbell' size={18} color={themeColors.text} />
+
                             <ThemedText type='body' style={[styles.attributeText]}>
                                 {equipment}
                             </ThemedText>
@@ -73,7 +75,7 @@ export default function WorkoutDetailScreen() {
                     </ThemedView>
                     <ThemedView style={[styles.attributeRow]}>
                         <ThemedView style={[styles.attribute]}>
-                            <MaterialCommunityIcons name='yoga' size={18} color={themeColors.text} />
+                            <Icon name='yoga' size={18} color={themeColors.text} />
                             <ThemedText type='body' style={[styles.attributeText]}>
                                 {focusMultiText}
                             </ThemedText>

@@ -1,9 +1,9 @@
-// components/icons/CustomBackButton.tsx
+// components/base/CustomBackButton.tsx
 
 import React from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from '@/components/icons/Icon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
@@ -14,7 +14,7 @@ export const CustomBackButton: React.FC = ({ style }) => {
 
     return (
         <TouchableOpacity style={[styles.button, style]} onPress={() => navigation.goBack()}>
-            <Ionicons name='chevron-back' size={24} color={(style && style.color) || iconColor} />
+            <Icon name='chevron-back' size={24} color={(style && style.color) || iconColor} />
         </TouchableOpacity>
     );
 };

@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
         fontFamily: 'InterMedium',
     },
     bodySmall: {
-        fontSize: 12,
+        fontSize: 13,
         lineHeight: 24,
         fontFamily: 'InterRegular',
     },
