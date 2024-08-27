@@ -45,23 +45,23 @@ export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, 
                 <ThemedView style={styles.attributeContainer}>
                     <ThemedView style={styles.attributeRow}>
                         <Icon name='yoga' size={14} />
-                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight, paddingRight: 10 }]}>
+                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.subText, paddingRight: 10 }]}>
                             {focus}
                         </ThemedText>
                         <Icon name={levelIcon} size={14} />
-                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight, marginLeft: 2 }]}>
+                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.subText, marginLeft: 2 }]}>
                             {level}
                         </ThemedText>
                     </ThemedView>
                     <ThemedView style={styles.attributeRow}>
                         <Icon name='dumbbell' size={14} />
-                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight }]}>
+                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.subText }]}>
                             {equipment}
                         </ThemedText>
                     </ThemedView>
                     <ThemedView style={styles.attributeRow}>
                         <Icon name='stopwatch' size={14} />
-                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight }]}>
+                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.subText }]}>
                             {length}
                         </ThemedText>
                     </ThemedView>

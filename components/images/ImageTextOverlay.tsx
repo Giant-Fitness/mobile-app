@@ -45,11 +45,11 @@ export const ImageTextOverlay: React.FC<ImageTextOverlayProps> = ({
                 <Image source={photo} style={styles.image} contentFit='cover' cachePolicy='memory-disk' placeholder={placeholder} />
                 <LinearGradient colors={gradientColors} style={styles.gradientOverlay} />
                 <ThemedView style={[styles.textContainer, textContainerStyle]}>
-                    <ThemedText type={titleType} style={[styles.title, titleStyle, { color: themeColors.whiteText }]}>
+                    <ThemedText type={titleType} style={[styles.title, titleStyle, { color: themeColors.white }]}>
                         {title}
                     </ThemedText>
                     {subtitle && (
-                        <ThemedText type={subtitleType} style={[styles.subtitle, subtitleStyle, { color: themeColors.whiteText }]}>
+                        <ThemedText type={subtitleType} style={[styles.subtitle, subtitleStyle, { color: themeColors.white }]}>
                             {subtitle}
                         </ThemedText>
                     )}

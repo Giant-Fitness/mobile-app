@@ -32,7 +32,7 @@ export default function WorkoutDetailScreen() {
 
     return (
         <ThemedView style={styles.container}>
-            <CustomBackButton style={styles.backButton} />
+            <CustomBackButton style={styles.backButton} iconColor={themeColors.white} />
             <Animated.ScrollView
                 contentContainerStyle={{ flexGrow: 1 }}
                 showsVerticalScrollIndicator={false}
@@ -83,7 +83,7 @@ export default function WorkoutDetailScreen() {
                     </ThemedView>
 
                     <ThemedView style={[styles.detailsContainer]}>
-                        <ThemedText type='body' style={[styles.detailsText, { color: themeColors.textLight }]}>
+                        <ThemedText type='body' style={[styles.detailsText, { color: themeColors.subText }]}>
                             {longText}
                         </ThemedText>
                     </ThemedView>
@@ -109,7 +109,6 @@ const styles = StyleSheet.create({
         top: 40,
         left: 15,
         zIndex: 10,
-        color: '#fdfcfb',
     },
     textContainer: {
         flex: 1,

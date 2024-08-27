@@ -34,7 +34,7 @@ export default function TabLayout() {
                     height: 0.7, // Thickness of the tab indicator line
                 },
                 tabBarActiveTintColor: themeColors.text, // Active tab label color
-                tabBarInactiveTintColor: themeColors.textLight, // Inactive tab label color
+                tabBarInactiveTintColor: themeColors.subText, // Inactive tab label color
             }}
         >
             <MaterialTopTabs.Screen name='programs' options={{ title: 'Programs' }} />

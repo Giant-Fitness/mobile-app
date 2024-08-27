@@ -39,8 +39,8 @@ export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
     return (
         <ThemedView style={[styles.container, containerStyle]}>
             <Image source={image} style={[styles.image, imageStyle]} placeholder={placeholder} />
-            <ThemedView style={[styles.contentContainer, contentContainerStyle, { backgroundColor: themeColors.containerColor }]}>
-                {subtitle && <ThemedText style={[styles.subtitle, subtitleStyle, { color: themeColors.textLight }]}>{subtitle}</ThemedText>}
+            <ThemedView style={[styles.contentContainer, contentContainerStyle, { backgroundColor: themeColors.containerHighlight }]}>
+                {subtitle && <ThemedText style={[styles.subtitle, subtitleStyle, { color: themeColors.subText }]}>{subtitle}</ThemedText>}
                 <ThemedText type='title' style={[styles.title, titleStyle, { color: themeColors.text }]}>
                     {title}
                 </ThemedText>

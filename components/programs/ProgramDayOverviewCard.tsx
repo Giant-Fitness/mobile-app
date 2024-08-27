@@ -42,7 +42,7 @@ export const ProgramDayOverviewCard: React.FC<DayOverviewCardProps> = ({ week, d
 
                     <ThemedView style={styles.attributeRow}>
                         <Icon name='stopwatch' size={14} />
-                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight }]}>
+                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.subText }]}>
                             {length}
                         </ThemedText>
                     </ThemedView>
