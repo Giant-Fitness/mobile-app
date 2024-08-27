@@ -1,4 +1,4 @@
-// app/workout-details.tsx
+// app/workouts/workout-details.tsx
 
 import React, { useRef } from 'react';
 import { StyleSheet, ScrollView, Animated } from 'react-native';

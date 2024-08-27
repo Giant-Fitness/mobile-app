@@ -62,7 +62,7 @@ export default function WorkoutsScreen() {
     const navigation = useNavigation();
 
     const navigateToAllWorkouts = () => {
-        navigation.navigate('all-workouts');
+        navigation.navigate('workouts/all-workouts');
     };
 
     // Define categories and their respective workout data

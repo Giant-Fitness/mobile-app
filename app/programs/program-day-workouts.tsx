@@ -1,3 +1,5 @@
+// app/program-day-workouts.tsx
+
 import React from 'react';
 import { ScrollView, StyleSheet, Image, Button, TouchableOpacity, View } from 'react-native';
 import { WorkoutDetailedCard } from '@/components/workouts/WorkoutDetailedCard';

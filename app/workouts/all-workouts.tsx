@@ -1,4 +1,4 @@
-// app/all-workouts.tsx
+// app/workouts/all-workouts.tsx
 
 import React from 'react';
 import { ScrollView, StyleSheet, Button, TouchableOpacity, View } from 'react-native';

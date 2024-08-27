@@ -1,3 +1,5 @@
+// components/programs/ProgressBar.tsx
+
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
