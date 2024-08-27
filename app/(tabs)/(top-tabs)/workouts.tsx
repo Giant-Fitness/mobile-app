@@ -75,7 +75,7 @@ export default function WorkoutsScreen() {
     return (
         <ScrollView style={[styles.container, { backgroundColor: themeColors.background }]} showsVerticalScrollIndicator={false}>
             <ThemedView>
-                <ThemedText type='titleSmall' style={[styles.header, { color: themeColors.text }]}>
+                <ThemedText type='title' style={[styles.header, { color: themeColors.text }]}>
                     Top Picks For You
                 </ThemedText>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.mainScrollView}>
