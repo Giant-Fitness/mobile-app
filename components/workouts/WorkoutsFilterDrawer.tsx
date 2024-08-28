@@ -66,6 +66,10 @@ export const WorkoutsFilterDrawer: React.FC<WorkoutsFilterDrawerProps> = ({ visi
         onClose();
     };
 
+    const handleReset = () => {
+        setTemporaryFilters({});
+    };
+
     const filteredWorkoutsCount = useMemo(() => {
         if (Object.keys(temporaryFilters).length === 0) {
             return workouts.length;
@@ -82,14 +86,12 @@ export const WorkoutsFilterDrawer: React.FC<WorkoutsFilterDrawerProps> = ({ visi
         }).length;
     }, [temporaryFilters, workouts]);
 
-    // Helper function to calculate chip width based on count
     const calculateChipWidth = (count: number) => {
-        if (count === 2) return '49%'; // Two items per row, nearly 50% each
-        if (count === 3) return '32%'; // Three items per row, nearly 1/3 each
-        return '32%'; // Default to 1/3 for uneven numbers
+        if (count === 2) return '49%';
+        if (count === 3) return '32%';
+        return '32%';
     };
 
-    // Function to split the chips into rows of up to 3 chips each
     const splitIntoRows = (items: string[]) => {
         const rows = [];
         for (let i = 0; i < items.length; i += 3) {
@@ -100,17 +102,22 @@ export const WorkoutsFilterDrawer: React.FC<WorkoutsFilterDrawerProps> = ({ visi
 
     return (
         <BottomDrawer visible={visible} onClose={handleClose}>
+            {/* Header with centered title and count, reset button on the top left */}
             <View style={styles.header}>
-                <ThemedText type='titleXLarge'>Filters</ThemedText>
-                <TouchableOpacity onPress={handleClose} style={styles.closeButton} activeOpacity={0.8}>
+                <TouchableOpacity onPress={handleReset} style={styles.resetButton} activeOpacity={0.1} hitSlop={{ top: 30, bottom: 30, left: 30, right: 30 }}>
+                    <ThemedText type='overline' style={{ color: themeColors.subText, fontSize: 12 }}>
+                        Reset
+                    </ThemedText>
+                </TouchableOpacity>
+                <View style={styles.titleContainer}>
+                    <ThemedText type='title'>Filters</ThemedText>
+                    <ThemedText type='overline' style={{ color: themeColors.subText, fontSize: 12 }}>
+                        {filteredWorkoutsCount} {filteredWorkoutsCount === 1 ? 'workout' : 'workouts'} found
+                    </ThemedText>
+                </View>
+                <TouchableOpacity onPress={handleClose} style={styles.closeButton} activeOpacity={0.8} hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
                     <Icon name='close' size={26} color={themeColors.subText} />
                 </TouchableOpacity>
-            </View>
-
-            <View style={styles.countContainer}>
-                <ThemedText type='overline' style={{ color: themeColors.subText }}>
-                    {filteredWorkoutsCount} {filteredWorkoutsCount === 1 ? 'workout' : 'workouts'} found
-                </ThemedText>
             </View>
 
             <ScrollView style={styles.filterScroll}>
@@ -170,7 +177,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: 24,
+        marginTop: 12,
+        paddingHorizontal: 64,
+        paddingBottom: 12,
+    },
+    titleContainer: {
+        alignItems: 'center',
+        flex: 1, // Center the title and count
     },
     countContainer: {
         marginBottom: 16,
@@ -178,8 +191,15 @@ const styles = StyleSheet.create({
     filterScroll: {
         paddingVertical: 16,
     },
+    resetButton: {
+        position: 'absolute',
+        left: 0,
+        padding: 8, // Increase padding to extend touch area
+    },
     closeButton: {
-        padding: 8,
+        position: 'absolute',
+        right: 0,
+        padding: 8, // Increase padding to extend touch area
     },
     categoryContainer: {
         marginBottom: 20,
