@@ -1,8 +1,11 @@
 // components/layout/BottomDrawer.tsx
 
 import React from 'react';
-import { Modal, StyleSheet, TouchableOpacity } from 'react-native';
+import { Modal, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
+import { BlurView } from 'expo-blur';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/Colors';
 
 interface BottomDrawerProps {
     visible: boolean;
@@ -11,30 +14,42 @@ interface BottomDrawerProps {
 }
 
 export const BottomDrawer: React.FC<BottomDrawerProps> = ({ visible, onClose, children }) => {
+    const colorScheme = useColorScheme();
+    const themeColors = Colors[colorScheme ?? 'light'];
+
     return (
-        <Modal animationType='slide' transparent={true} visible={visible} onRequestClose={onClose}>
-            <ThemedView style={styles.overlay}>
-                <TouchableOpacity style={styles.background} onPress={onClose} />
-                <ThemedView style={styles.drawer}>{children}</ThemedView>
-            </ThemedView>
+        <Modal animationType='fade' transparent={true} visible={visible} onRequestClose={onClose}>
+            <View style={styles.container}>
+                {/* BlurView with a semi-transparent background to blur the content underneath */}
+                <TouchableOpacity style={styles.overlay} onPress={onClose} activeOpacity={1}>
+                    <BlurView intensity={50} style={styles.blur} tint='systemUltraThinMaterial' experimentalBlurMethod='dimezisBlurView' />
+                </TouchableOpacity>
+                {/* Drawer slides up independently from the overlay */}
+                <ThemedView style={[styles.drawer, { backgroundColor: themeColors.background }]}>{children}</ThemedView>
+            </View>
         </Modal>
     );
 };
 
 const styles = StyleSheet.create({
-    overlay: {
+    container: {
         flex: 1,
         justifyContent: 'flex-end',
     },
-    background: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    overlay: {
+        ...StyleSheet.absoluteFillObject,
+    },
+    blur: {
+        flex: 1, // Ensures the blur view covers the entire overlay
+        backgroundColor: 'rgba(0, 0, 0, 0.1)',
     },
     drawer: {
-        backgroundColor: 'white',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        padding: 20,
-        maxHeight: '80%',
+        borderTopLeftRadius: 5,
+        borderTopRightRadius: 5,
+        paddingHorizontal: 24,
+        maxHeight: '90%',
+        position: 'absolute',
+        bottom: 0,
+        width: '100%',
     },
 });
