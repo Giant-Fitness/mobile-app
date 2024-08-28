@@ -22,7 +22,7 @@ export const TextButton: React.FC<TextButtonProps> = ({ onPress, text, style, te
     const themeColors = Colors[colorScheme ?? 'light'];
 
     return (
-        <TouchableOpacity style={[styles.button, { backgroundColor: themeColors.primary }, style]} onPress={onPress}>
+        <TouchableOpacity style={[styles.button, { backgroundColor: themeColors.primary }, style]} onPress={onPress} activeOpacity={1}>
             <ThemedText type={textType} style={[styles.text, textStyle, { color: themeColors.background }]}>
                 {text}
             </ThemedText>

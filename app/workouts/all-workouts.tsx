@@ -1,6 +1,6 @@
 // app/workouts/all-workouts.tsx
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Button, TouchableOpacity, View } from 'react-native';
 import { WorkoutDetailedCard } from '@/components/workouts/WorkoutDetailedCard';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -11,6 +11,7 @@ import { Colors } from '@/constants/Colors';
 import { WorkoutsBottomBar } from '@/components/workouts/WorkoutsBottomBar';
 import { CustomBackButton } from '@/components/base/CustomBackButton';
 import { Image } from 'expo-image';
+import { WorkoutsFilterDrawer } from '@/components/workouts/WorkoutsFilterDrawer';
 
 const workouts = [
     {
@@ -45,7 +46,7 @@ const workouts = [
         photo: require('@/assets/images/vb.webp'),
         length: '20 mins',
         level: 'Beginner',
-        equipment: 'No Equipment',
+        equipment: 'None',
         focus: 'Mobility',
         trainer: 'Viren Barman',
         longText:
@@ -71,7 +72,7 @@ const workouts = [
         photo: require('@/assets/images/vb.webp'),
         length: '5 mins',
         level: 'Beginner',
-        equipment: 'No Equipment',
+        equipment: 'None',
         focus: 'Mobility',
         trainer: 'Viren Barman',
         longText:
@@ -82,12 +83,31 @@ const workouts = [
 ];
 
 export default function AllWorkoutsScreen() {
+    const [isFilterVisible, setIsFilterVisible] = useState(false);
+    const [filteredWorkouts, setFilteredWorkouts] = useState(workouts);
+
     const handleSortPress = () => {
         // Handle sort action
     };
 
     const handleFilterPress = () => {
-        // Handle filter action
+        setIsFilterVisible(true);
+    };
+
+    const applyFilters = (filters: any) => {
+        let filtered = workouts;
+
+        if (filters.level?.length) {
+            filtered = filtered.filter((workout) => filters.level.includes(workout.level));
+        }
+        if (filters.equipment?.length) {
+            filtered = filtered.filter((workout) => filters.equipment.includes(workout.equipment));
+        }
+        if (filters.focus?.length) {
+            filtered = filtered.filter((workout) => filters.focus.includes(workout.focus));
+        }
+
+        setFilteredWorkouts(filtered);
     };
 
     const colorScheme = useColorScheme();
@@ -107,14 +127,18 @@ export default function AllWorkoutsScreen() {
         });
     }, [navigation]);
 
+    // Determine the correct label for workout count
+    const workoutCount = filteredWorkouts.length;
+    const workoutLabel = workoutCount === 1 ? 'workout' : 'workouts';
+
     return (
-        <ThemedView style={{ flex: 1 }}>
+        <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
             <ThemedText type='overline' style={[styles.countContainer, { color: themeColors.subText }]}>
-                {workouts.length} workouts
+                {workoutCount} {workoutLabel}
             </ThemedText>
             <ScrollView showsVerticalScrollIndicator={false}>
-                <ThemedView style={[styles.contentContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
-                    {workouts.map((workout) => (
+                <ThemedView style={[styles.contentContainer, { backgroundColor: themeColors.background }]}>
+                    {filteredWorkouts.map((workout) => (
                         <WorkoutDetailedCard
                             key={workout.id}
                             name={workout.name}
@@ -132,6 +156,7 @@ export default function AllWorkoutsScreen() {
             </ScrollView>
             {/* Bar with Sort and Filter buttons */}
             <WorkoutsBottomBar onSortPress={handleSortPress} onFilterPress={handleFilterPress} />
+            <WorkoutsFilterDrawer visible={isFilterVisible} onClose={() => setIsFilterVisible(false)} onApply={applyFilters} workouts={workouts} />
         </ThemedView>
     );
 }
@@ -143,7 +168,7 @@ const styles = StyleSheet.create({
         paddingBottom: 24, // Add padding to ensure content doesn't overlap with the bottom bar
     },
     contentContainer: {
-        paddingTop: 36,
+        paddingTop: 12,
         paddingLeft: 16,
         paddingBottom: 100, // Add padding to ensure content doesn't overlap with the bottom bar
     },

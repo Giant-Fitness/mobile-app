@@ -57,6 +57,8 @@ export const Icon: React.FC<IconProps> = ({ name, size = 18, color, style }) => 
             return <Ionicons name='swap-vertical' {...commonProps} />;
         case 'notebook':
             return <MaterialCommunityIcons name='notebook' {...commonProps} />;
+        case 'close':
+            return <Ionicons name='close-circle-outline' {...commonProps} />;
         default:
             return <Ionicons name='alert-circle-outline' s {...commonProps} />;
     }
