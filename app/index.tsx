@@ -8,7 +8,7 @@ import { Link } from 'expo-router';
 export default function LoginPage() {
     return (
         <ThemedView style={styles.titleContainer}>
-            <Link href={'/home'} replace asChild>
+            <Link href={'/(top-tabs)/programs'} replace asChild>
                 <Pressable style={styles.button}>
                     <Text style={styles.buttonText}>Login</Text>
                 </Pressable>
