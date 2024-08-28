@@ -8,15 +8,22 @@ import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { LeftImageInfoCard } from '@/components/layout/LeftImageInfoCard';
 import { ThemedView } from '@/components/base/ThemedView';
+import { useNavigation } from '@react-navigation/native';
 
 const DayWorkoutCard = (props) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
+    const navigation = useNavigation();
+
+    const navigateToWorkoutDetail = () => {
+        navigation.navigate('program-day-workout-details', props);
+    }
 
     return (
         <LeftImageInfoCard
             image={props.photo}
             title={props.workoutName}
+            onPress={navigateToWorkoutDetail}
             extraContent={
                 <ThemedView>
                     <ThemedView style={styles.attributeRow}>

@@ -21,7 +21,7 @@ const workouts = [
         upperLimReps: 12,
         restPeriod: "2 min",
         introText: 'Alternate reps on each side. We’re aiming for 10-12 reps',
-        longText: 'Weight selection tip goes here. 0.6x 1RM. tell them to use calculator \n\n Set up tip goes here. Set up the rack to have the barbell at upper chest height. Position the bar high on the back of your shoulders. Dismount the bar from the rack, and \n\n position yourself in a shoulder-width stance. Form tip goes here - Squat down by bending hips back, don’t bend your back and brace your core.'
+        longText: 'Weight selection tip goes here. 0.6x 1RM. tell them to use calculator \n\nSet up tip goes here. Set up the rack to have the barbell at upper chest height. Position the bar high on the back of your shoulders. Dismount the bar from the rack, and \n\nposition yourself in a shoulder-width stance. Form tip goes here - Squat down by bending hips back, don’t bend your back and brace your core.'
     },
     {
         id: '2',
@@ -32,7 +32,7 @@ const workouts = [
         upperLimReps: 12,
         restPeriod: "2 min",
         introText: 'Alternate reps on each side. We’re aiming for 10-12 reps',
-        longText: 'Weight selection tip goes here. 0.6x 1RM. tell them to use calculator \n\n Set up tip goes here. Set up the rack to have the barbell at upper chest height. Position the bar high on the back of your shoulders. Dismount the bar from the rack, and \n\n position yourself in a shoulder-width stance. Form tip goes here - Squat down by bending hips back, don’t bend your back and brace your core.'
+        longText: 'Weight selection tip goes here. 0.6x 1RM. tell them to use calculator \n\nSet up tip goes here. Set up the rack to have the barbell at upper chest height. Position the bar high on the back of your shoulders. Dismount the bar from the rack, and \n\nposition yourself in a shoulder-width stance. Form tip goes here - Squat down by bending hips back, don’t bend your back and brace your core.'
     },
     {
         id: '3',
@@ -43,7 +43,7 @@ const workouts = [
         upperLimReps: 12,
         restPeriod: "2 min",
         introText: 'Alternate reps on each side. We’re aiming for 10-12 reps',
-        longText: 'Weight selection tip goes here. 0.6x 1RM. tell them to use calculator \n\n Set up tip goes here. Set up the rack to have the barbell at upper chest height. Position the bar high on the back of your shoulders. Dismount the bar from the rack, and \n\n position yourself in a shoulder-width stance. Form tip goes here - Squat down by bending hips back, don’t bend your back and brace your core.'
+        longText: 'Weight selection tip goes here. 0.6x 1RM. tell them to use calculator \n\nSet up tip goes here. Set up the rack to have the barbell at upper chest height. Position the bar high on the back of your shoulders. Dismount the bar from the rack, and \n\nposition yourself in a shoulder-width stance. Form tip goes here - Squat down by bending hips back, don’t bend your back and brace your core.'
     },
     {
         id: '4',
@@ -54,7 +54,7 @@ const workouts = [
         upperLimReps: 12,
         restPeriod: "2 min",
         introText: 'Alternate reps on each side. We’re aiming for 10-12 reps',
-        longText: 'Weight selection tip goes here. 0.6x 1RM. tell them to use calculator \n\n Set up tip goes here. Set up the rack to have the barbell at upper chest height. Position the bar high on the back of your shoulders. Dismount the bar from the rack, and \n\n position yourself in a shoulder-width stance. Form tip goes here - Squat down by bending hips back, don’t bend your back and brace your core.'
+        longText: 'Weight selection tip goes here. 0.6x 1RM. tell them to use calculator \n\nSet up tip goes here. Set up the rack to have the barbell at upper chest height. Position the bar high on the back of your shoulders. Dismount the bar from the rack, and \n\nposition yourself in a shoulder-width stance. Form tip goes here - Squat down by bending hips back, don’t bend your back and brace your core.'
     },
     {
         id: '5',
@@ -65,7 +65,7 @@ const workouts = [
         upperLimReps: 12,
         restPeriod: "2 min",
         introText: 'Alternate reps on each side. We’re aiming for 10-12 reps',
-        longText: 'Weight selection tip goes here. 0.6x 1RM. tell them to use calculator \n\n Set up tip goes here. Set up the rack to have the barbell at upper chest height. Position the bar high on the back of your shoulders. Dismount the bar from the rack, and \n\n position yourself in a shoulder-width stance. Form tip goes here - Squat down by bending hips back, don’t bend your back and brace your core.'
+        longText: 'Weight selection tip goes here. 0.6x 1RM. tell them to use calculator \n\nSet up tip goes here. Set up the rack to have the barbell at upper chest height. Position the bar high on the back of your shoulders. Dismount the bar from the rack, and \n\nposition yourself in a shoulder-width stance. Form tip goes here - Squat down by bending hips back, don’t bend your back and brace your core.'
     }
 ]
 
@@ -74,7 +74,6 @@ const CustomHeader = ({ workout, themeColors, week, day, length }) => {
         <ThemedView style={styles.container}>
             <ThemedText style={[styles.title, { color: themeColors.text }]}>{workout}</ThemedText>
             <ThemedView style={styles.subView}>
-                {/* Add your custom element here */}
                 <View style={styles.subTextView}>
                     <Ionicons name='stopwatch-outline' size={15} color={themeColors.text} />
                     <ThemedText style={[styles.subText, { color: themeColors.text, marginLeft: 3 }]}>
@@ -138,6 +137,7 @@ const DayWorkoutsScreen = () => {
                             higherLimReps={workout.upperLimReps}
                             restPeriod={workout.restPeriod}
                             intro={workout.introText}
+                            longText={workout.longText}
                         />
                     ))}
                 </ThemedView>

@@ -26,11 +26,11 @@ const ProgressBar = ({ parts = 11, highlightedParts = 0, barColor = '#1c691e', b
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
-        height: 3, // Adjust height as needed
+        height: 3,
     },
     part: {
         height: '100%',
-        marginHorizontal: 1, // Adds space between parts
+        marginHorizontal: 1,
     },
 });
 
