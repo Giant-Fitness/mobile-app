@@ -2,43 +2,47 @@
 
 export const Colors = {
     light: {
-        text: '#0f0706',
-        subText: '#5f5e5b',
-        subTextSecondary: '#C6C6C6',
-        background: '#fcfcfc',
-        backgroundSecondary: 'rgba(244, 247, 244, 0.9)',
-        primary: '#204D24',
-        secondary: '#EAEAEA',
-        accent: '#45A949',
-        systemBorderColor: 'rgba(0, 0, 0, 0.3)',
-        container: '#f7f7f5',
-        containerHighlight: '#242a24',
-        buttonPrimary: '#2B2B2B',
-        buttonSecondary: '#f7f7f5',
-        iconDefault: '#687076',
-        iconSelected: '#120907',
-        highlightContainerText: '#fafafa',
-        white: '#FEFEFE',
-        red: '#cc4533',
+        text: '#0f0706', // Main text color
+        subText: '#5f5e5b', // Secondary text
+        subTextSecondary: '#C6C6C6', // Tertiary text
+        background: '#fcfcfc', // Main background
+        backgroundSecondary: 'rgba(244, 247, 244, 0.95)', // Slightly adjusted for better contrast
+        primary: '#204D24', // Primary color (Green)
+        secondary: '#EAEAEA', // Secondary elements
+        accent: '#45A949', // Accent color
+        systemBorderColor: 'rgba(0, 0, 0, 0.2)', // Lighter border for subtle dividers
+        container: '#f7f7f5', // Container background
+        containerHighlight: '#1e221e', // Slightly adjusted to avoid too dark
+        buttonPrimary: '#1A1A1A', // Darker button primary for contrast
+        buttonSecondary: '#f7f7f5', // Secondary button background
+        iconDefault: '#687076', // Default icon color
+        iconSelected: '#0f0f0f', // Adjusted for visibility
+        highlightContainerText: '#fafafa', // Text on highlighted containers
+        white: '#FEFEFE', // White
+        red: '#cc4533', // Error color
+        warning: '#FFA500', // Optional: Warning color (e.g., for alerts)
+        info: '#1E90FF', // Optional: Info color (e.g., for badges)
     },
     dark: {
-        text: '#F6F8F6',
-        subText: '#9b9d9b',
-        subTextSecondary: '#D1D6D2',
-        background: '#191a19',
-        backgroundSecondary: '#202220',
-        primary: '#204D24',
-        secondary: '#23312a',
-        accent: '#279E2C',
-        systemBorderColor: 'rgba(100, 100, 100, 0.3)',
-        container: '#202220',
-        containerHighlight: '#2d2f2d',
-        buttonPrimary: '#F6F8F6',
-        buttonSecondary: '#2f312f',
-        iconDefault: '#9b9b9b',
-        iconSelected: '#F6F6F6',
-        highlightContainerText: '#F6F8F6',
-        white: '#FEFEFE',
-        red: '#cc4533',
+        text: '#F6F8F6', // Main text color
+        subText: '#9b9d9b', // Secondary text
+        subTextSecondary: '#D1D6D2', // Tertiary text
+        background: '#191a19', // Main background
+        backgroundSecondary: '#202220', // Secondary background
+        primary: '#204D24', // Primary color (Green)
+        secondary: '#23312a', // Secondary elements
+        accent: '#279E2C', // Accent color
+        systemBorderColor: 'rgba(100, 100, 100, 0.5)', // Darker border for more contrast
+        container: '#202220', // Container background
+        containerHighlight: '#2d2f2d', // Highlighted container
+        buttonPrimary: '#F6F8F6', // Light button for contrast
+        buttonSecondary: '#2f312f', // Secondary button background
+        iconDefault: '#B0B0B0', // Slightly brighter for visibility
+        iconSelected: '#F6F6F6', // Selected icon color
+        highlightContainerText: '#F6F8F6', // Text on highlighted containers
+        white: '#FEFEFE', // White
+        red: '#cc4533', // Error color
+        warning: '#FF8C00', // Optional: Warning color (darker orange)
+        info: '#4682B4', // Optional: Info color (muted blue)
     },
 };
