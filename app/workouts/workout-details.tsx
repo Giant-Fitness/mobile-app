@@ -12,6 +12,7 @@ import { ImageTextOverlay } from '@/components/images/ImageTextOverlay';
 import { Icon } from '@/components/icons/Icon';
 import { TextButton } from '@/components/base/TextButton';
 import { IconButton } from '@/components/base/IconButton';
+import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle } from '@/components/video/FullScreenVideoPlayer';
 
 export default function WorkoutDetailScreen() {
     const colorScheme = useColorScheme();
@@ -21,6 +22,7 @@ export default function WorkoutDetailScreen() {
     const route = useRoute();
 
     const scrollY = useRef(new Animated.Value(0)).current;
+    const videoPlayerRef = useRef<VideoPlayerHandle>(null);
 
     React.useEffect(() => {
         navigation.setOptions({ headerShown: false });
@@ -31,6 +33,13 @@ export default function WorkoutDetailScreen() {
     // Convert focusMulti array to a comma-separated string
     const focusMultiText = focusMulti.join(', ');
     const levelIcon = 'level-' + level.toLowerCase();
+
+    // Function to start the video playback
+    const handleStartWorkout = () => {
+        if (videoPlayerRef.current) {
+            videoPlayerRef.current.startPlayback(); // Call the method to start playback
+        }
+    };
 
     return (
         <ThemedView style={styles.container}>
@@ -92,8 +101,14 @@ export default function WorkoutDetailScreen() {
                     </ThemedView>
                 </ThemedView>
             </Animated.ScrollView>
+            <FullScreenVideoPlayer ref={videoPlayerRef} source={{ uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' }} />
             <ThemedView style={styles.buttonContainer}>
-                <TextButton text='Start Workout' textType='bodyMedium' style={[styles.startButton, { backgroundColor: themeColors.buttonPrimary }]} />
+                <TextButton
+                    text='Start Workout'
+                    textType='bodyMedium'
+                    style={[styles.startButton, { backgroundColor: themeColors.buttonPrimary }]}
+                    onPress={handleStartWorkout}
+                />
                 <IconButton
                     iconName='notebook'
                     style={[styles.notesButton, { backgroundColor: themeColors.buttonSecondary }]}
