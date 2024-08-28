@@ -1,4 +1,4 @@
-// app/workout-details.tsx
+// app/workouts/workout-details.tsx
 
 import React, { useRef } from 'react';
 import { StyleSheet, ScrollView, Animated } from 'react-native';
@@ -10,6 +10,8 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { CustomBackButton } from '@/components/base/CustomBackButton';
 import { ImageTextOverlay } from '@/components/images/ImageTextOverlay';
 import { Icon } from '@/components/icons/Icon';
+import { TextButton } from '@/components/base/TextButton';
+import { IconButton } from '@/components/base/IconButton';
 
 export default function WorkoutDetailScreen() {
     const colorScheme = useColorScheme();
@@ -36,30 +38,31 @@ export default function WorkoutDetailScreen() {
             <Animated.ScrollView
                 contentContainerStyle={{ flexGrow: 1 }}
                 showsVerticalScrollIndicator={false}
-                bounces={false}
+                // bounces={false}
                 overScrollMode='never'
-                scrollEventThrottle={16}
             >
                 <ImageTextOverlay
                     photo={photo}
                     title={name}
+                    titleType='titleXXLarge'
                     gradientColors={['transparent', 'rgba(0,0,0,0.4)']}
-                    containerStyle={{ height: 400, elevation: 5 }}
+                    containerStyle={{ height: 500, elevation: 5 }}
                     textContainerStyle={{ bottom: 24 }}
                 />
 
                 <ThemedView style={[styles.textContainer]}>
                     <ThemedView style={[styles.attributeRow]}>
                         <ThemedView style={[styles.attribute]}>
-                            <Icon name='stopwatch-outline' size={18} color={themeColors.text} />
+                            <Icon name='stopwatch' size={18} color={themeColors.text} />
                             <ThemedText type='body' style={[styles.attributeText]}>
                                 {length}
                             </ThemedText>
                         </ThemedView>
-                        <ThemedView style={[styles.attribute, { paddingLeft: 32 }]}>
-                            <Icon name={levelIcon} size={16} color={themeColors.text} />
-
-                            <ThemedText type='body' style={[styles.attributeText, { marginLeft: 4 }]}>
+                    </ThemedView>
+                    <ThemedView style={[styles.attributeRow]}>
+                        <ThemedView style={[styles.attribute]}>
+                            <Icon name={levelIcon} size={18} color={themeColors.text} />
+                            <ThemedText type='body' style={[styles.attributeText]}>
                                 {level}
                             </ThemedText>
                         </ThemedView>
@@ -89,6 +92,15 @@ export default function WorkoutDetailScreen() {
                     </ThemedView>
                 </ThemedView>
             </Animated.ScrollView>
+            <ThemedView style={styles.buttonContainer}>
+                <TextButton text='Start Workout' textType='bodyMedium' style={[styles.startButton, { backgroundColor: themeColors.buttonPrimary }]} />
+                <IconButton
+                    iconName='notebook'
+                    style={[styles.notesButton, { backgroundColor: themeColors.buttonSecondary }]}
+                    iconSize={24}
+                    iconColor={themeColors.buttonPrimary}
+                />
+            </ThemedView>
         </ThemedView>
     );
 }
@@ -112,13 +124,15 @@ const styles = StyleSheet.create({
     },
     textContainer: {
         flex: 1,
-        padding: 24,
+        paddingHorizontal: 24,
+        paddingTop: 30,
+        paddingBottom: 120,
         zIndex: 2,
     },
     attribute: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingBottom: 10,
+        paddingBottom: 20,
     },
     attributeText: {
         marginLeft: 12,
@@ -129,10 +143,32 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
     },
     detailsContainer: {
-        paddingTop: 24,
+        paddingTop: 18,
         paddingBottom: 36,
     },
     detailsText: {
         lineHeight: 24,
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: '5%',
+        position: 'absolute',
+        bottom: 30,
+        left: 0,
+        right: 0,
+        backgroundColor: 'transparent',
+    },
+    startButton: {
+        width: '80%',
+        paddingVertical: 16,
+        marginRight: '2%',
+    },
+    notesButton: {
+        width: '18%', // Fixed width for the icon button
+        height: '100%', // Fixed height for the icon button
+        alignItems: 'center',
+        alignItems: 'center',
+        borderRadius: '100%', // Ensure the button is perfectly circular
     },
 });

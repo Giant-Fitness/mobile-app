@@ -33,7 +33,7 @@ export default function TabLayout() {
                 headerShown: true,
                 tabBarShowLabel: true,
                 headerRight: () => (
-                    <TouchableOpacity activeOpacity={1} onPress={() => navigation.navigate('settings')}>
+                    <TouchableOpacity activeOpacity={1} onPress={() => navigation.navigate('settings/settings')}>
                         <Icon name='person' size={26} color={themeColors.subText} style={{ marginRight: 18 }} />
                     </TouchableOpacity>
                 ),

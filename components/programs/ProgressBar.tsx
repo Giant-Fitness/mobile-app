@@ -1,3 +1,5 @@
+// components/programs/ProgressBar.tsx
+
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -27,7 +29,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ parts = 8, currentPart = 0, c
                 } else if (index === currentPart - 1) {
                     backgroundColor = themeColors.accent;
                 } else {
-                    backgroundColor = themeColors.lightGray;
+                    backgroundColor = themeColors.secondary;
                 }
 
                 return (

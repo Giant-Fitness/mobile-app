@@ -29,7 +29,7 @@ export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, 
     const navigation = useNavigation();
 
     const navigateToWorkoutDetails = () => {
-        navigation.navigate('workout-details', { name, length, level, equipment, focus, photo, trainer, longText, focusMulti });
+        navigation.navigate('workouts/workout-details', { name, length, level, equipment, focus, photo, trainer, longText, focusMulti });
     };
 
     return (

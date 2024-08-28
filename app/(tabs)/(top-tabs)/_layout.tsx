@@ -25,13 +25,13 @@ export default function TabLayout() {
     return (
         <MaterialTopTabs
             screenOptions={{
-                tabBarLabelStyle: { textTransform: 'none', fontSize: 14 },
+                tabBarLabelStyle: { textTransform: 'none', fontSize: 15 },
                 tabBarStyle: {
                     backgroundColor: themeColors.background,
                 },
                 tabBarIndicatorStyle: {
                     backgroundColor: themeColors.text,
-                    height: 0.7, // Thickness of the tab indicator line
+                    height: 0.8, // Thickness of the tab indicator line
                 },
                 tabBarActiveTintColor: themeColors.text, // Active tab label color
                 tabBarInactiveTintColor: themeColors.subText, // Inactive tab label color

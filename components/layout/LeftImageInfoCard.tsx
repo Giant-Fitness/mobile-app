@@ -7,6 +7,7 @@ import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 
 type LeftImageInfoCardProps = {
     image: ImageSourcePropType;
@@ -20,6 +21,7 @@ type LeftImageInfoCardProps = {
     titleStyle?: StyleProp<TextStyle>;
     subtitleStyle?: StyleProp<TextStyle>;
     placeholder?: any; // Placeholder image while loading
+    gradientColors?: string[];
 };
 
 export const LeftImageInfoCard: React.FC<LeftImageInfoCardProps> = ({
@@ -33,6 +35,7 @@ export const LeftImageInfoCard: React.FC<LeftImageInfoCardProps> = ({
     contentContainerStyle,
     titleStyle,
     subtitleStyle,
+    gradientColors = ['transparent', 'rgba(0,0,0,0.4)'],
     placeholder = '@/assets/images/adaptive-icon.png',
 }) => {
     const colorScheme = useColorScheme();
@@ -40,7 +43,10 @@ export const LeftImageInfoCard: React.FC<LeftImageInfoCardProps> = ({
 
     return (
         <TouchableOpacity onPress={onPress} style={[styles.card, containerStyle]} activeOpacity={1}>
-            <Image source={image} style={[styles.image, imageStyle]} placeholder={placeholder} />
+            <View style={[{ marginRight: 16 }]}>
+                <Image source={image} style={[styles.image, imageStyle]} placeholder={placeholder} />
+                <LinearGradient colors={gradientColors} style={styles.gradientOverlay} />
+            </View>
             <ThemedView style={[styles.textContainer, contentContainerStyle]}>
                 <ThemedText type='bodyMedium' style={[styles.title, titleStyle, { color: themeColors.text }]}>
                     {title}
@@ -67,12 +73,12 @@ const styles = StyleSheet.create({
         borderRadius: 3,
         height: 125,
         width: 125,
-        marginRight: 16,
     },
     textContainer: {
         flex: 1,
         flexDirection: 'column',
         justifyContent: 'center',
+        backgroundColor: 'transparent',
     },
     title: {
         marginBottom: 5,
@@ -82,5 +88,12 @@ const styles = StyleSheet.create({
     subtitle: {
         marginTop: 5,
         lineHeight: 20,
+    },
+    extraContent: {
+        backgroundColor: 'transparent',
+    },
+    gradientOverlay: {
+        ...StyleSheet.absoluteFillObject, // Ensures the gradient covers the entire image
+        zIndex: 2,
     },
 });

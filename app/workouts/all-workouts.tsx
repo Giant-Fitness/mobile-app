@@ -1,4 +1,4 @@
-// app/all-workouts.tsx
+// app/workouts/all-workouts.tsx
 
 import React from 'react';
 import { ScrollView, StyleSheet, Button, TouchableOpacity, View } from 'react-native';
@@ -113,7 +113,7 @@ export default function AllWorkoutsScreen() {
                 {workouts.length} workouts
             </ThemedText>
             <ScrollView showsVerticalScrollIndicator={false}>
-                <ThemedView style={[styles.contentContainer, { backgroundColor: themeColors.background }]}>
+                <ThemedView style={[styles.contentContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
                     {workouts.map((workout) => (
                         <WorkoutDetailedCard
                             key={workout.id}
@@ -140,9 +140,10 @@ const styles = StyleSheet.create({
     countContainer: {
         paddingLeft: 24,
         paddingTop: 24,
-        paddingBottom: 24,
+        paddingBottom: 24, // Add padding to ensure content doesn't overlap with the bottom bar
     },
     contentContainer: {
+        paddingTop: 36,
         paddingLeft: 16,
         paddingBottom: 100, // Add padding to ensure content doesn't overlap with the bottom bar
     },
