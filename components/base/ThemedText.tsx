@@ -16,7 +16,7 @@ export type ThemedTextProps = TextProps & {
 const styles = StyleSheet.create({
     body: {
         fontSize: 14,
-        lineHeight: 20,
+        lineHeight: 21,
         fontFamily: 'InterRegular',
     },
     bodyMedium: {
@@ -26,18 +26,18 @@ const styles = StyleSheet.create({
     },
     bodySmall: {
         fontSize: 13,
-        lineHeight: 24,
+        lineHeight: 20,
         fontFamily: 'InterRegular',
     },
     bodyXSmall: {
         fontSize: 12,
-        lineHeight: 24,
+        lineHeight: 18,
         fontFamily: 'InterRegular',
     },
     titleLarge: {
         fontSize: 18,
         fontFamily: 'InterSemiBold',
-        lineHeight: 32,
+        lineHeight: 27,
     },
     titleXLarge: {
         fontSize: 21,
@@ -47,22 +47,22 @@ const styles = StyleSheet.create({
     titleXXLarge: {
         fontSize: 24,
         fontFamily: 'InterMedium',
-        lineHeight: 32,
+        lineHeight: 36,
     },
     title: {
         fontSize: 16,
         fontFamily: 'InterSemiBold',
-        lineHeight: 28,
+        lineHeight: 24,
     },
     subtitle: {
         fontSize: 18,
         fontFamily: 'InterRegular',
-        lineHeight: 26,
+        lineHeight: 27,
     },
     caption: {
         fontSize: 12,
         fontFamily: 'InterMedium',
-        lineHeight: 16,
+        lineHeight: 18,
     },
     link: {
         fontSize: 16,
@@ -77,23 +77,23 @@ const styles = StyleSheet.create({
     buttonSmall: {
         fontSize: 13,
         fontFamily: 'InterRegular',
-        lineHeight: 24,
+        lineHeight: 20,
     },
     overlineTransformed: {
         fontSize: 13,
         fontFamily: 'InterMedium',
         textTransform: 'uppercase',
-        lineHeight: 16,
+        lineHeight: 20,
     },
     overline: {
         fontSize: 13,
         fontFamily: 'InterMedium',
-        lineHeight: 16,
+        lineHeight: 20,
     },
     italic: {
         fontSize: 12,
         fontFamily: 'InterItalic',
-        lineHeight: 16,
+        lineHeight: 18,
     },
 });
 
