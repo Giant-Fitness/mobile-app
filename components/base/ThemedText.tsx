@@ -9,7 +9,7 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 export type ThemedTextProps = TextProps & {
     lightColor?: string;
     darkColor?: string;
-    type?: 'body' | 'bodyBold' | 'titleLarge' | 'title' | 'subtitle' | 'caption' | 'link' | 'button' | 'overline';
+    type?: 'body' | 'titleLarge' | 'title' | 'subtitle' | 'caption' | 'link' | 'button' | 'overline';
 };
 
 // Styles for different text types using specific Inter fonts
@@ -18,11 +18,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         lineHeight: 20,
         fontFamily: 'InterRegular',
-    },
-    bodyBold: {
-        fontSize: 16,
-        lineHeight: 24,
-        fontFamily: 'InterBold',
     },
     bodyMedium: {
         fontSize: 16,
@@ -37,6 +32,16 @@ const styles = StyleSheet.create({
     titleLarge: {
         fontSize: 18,
         fontFamily: 'InterSemiBold',
+        lineHeight: 32,
+    },
+    titleXLarge: {
+        fontSize: 21,
+        fontFamily: 'InterMedium',
+        lineHeight: 32,
+    },
+    titleXXLarge: {
+        fontSize: 24,
+        fontFamily: 'InterMedium',
         lineHeight: 32,
     },
     title: {
@@ -81,7 +86,7 @@ const styles = StyleSheet.create({
         lineHeight: 16,
     },
     italic: {
-        fontSize: 13,
+        fontSize: 12,
         fontFamily: 'InterItalic',
         lineHeight: 16,
     },

@@ -24,7 +24,7 @@ export const ProgramDayOverviewCard: React.FC<DayOverviewCardProps> = ({ week, d
     const navigation = useNavigation();
 
     const navigateToProgramDay = () => {
-        navigation.navigate('program-day-workouts', { workout, week, day, length });
+        navigation.navigate('programs/program-day-workouts', { workout, week, day, length });
     };
 
     return (
@@ -41,8 +41,8 @@ export const ProgramDayOverviewCard: React.FC<DayOverviewCardProps> = ({ week, d
                     </ThemedView>
 
                     <ThemedView style={styles.attributeRow}>
-                        <Icon name='stopwatch' size={14} />
-                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight }]}>
+                        <Icon name='stopwatch' size={14} color={themeColors.text} />
+                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.text }]}>
                             {length}
                         </ThemedText>
                     </ThemedView>
@@ -81,14 +81,17 @@ const styles = StyleSheet.create({
     attributeRow: {
         flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: 'transparent',
         marginBottom: 4,
         marginLeft: 4,
     },
     attributeText: {
         marginLeft: 4,
         lineHeight: 14,
+        backgroundColor: 'transparent',
     },
     attributeContainer: {
         marginTop: 2,
+        backgroundColor: 'transparent',
     },
 });

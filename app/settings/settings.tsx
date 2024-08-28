@@ -1,4 +1,4 @@
-// app/settings.tsx
+// app/settings/settings.tsx
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, Image, Platform } from 'react-native';
@@ -23,9 +23,9 @@ export default function ProgressScreen() {
             title: 'Settings',
             headerBackTitleVisible: false, // Hide the back button label
             headerStyle: {
-                backgroundColor: Colors[colorScheme ?? 'light'].background,
+                backgroundColor: themeColors.background,
             },
-            headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
+            headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
             headerLeft: () => <CustomBackButton />,
         });
     }, [navigation]);
