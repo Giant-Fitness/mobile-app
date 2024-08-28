@@ -33,15 +33,11 @@ const DayWorkoutCard = (props) => {
                     </ThemedView>
 
                     <ThemedView style={styles.attributeRow}>
-                        <ThemedText style={[styles.extraContentText, { color: themeColors.subText }]}>
-                            {`${props.restPeriod} rest`}
-                        </ThemedText>
+                        <ThemedText style={[styles.extraContentText, { color: themeColors.subText }]}>{`${props.restPeriod} rest`}</ThemedText>
                     </ThemedView>
 
                     <ThemedView style={styles.attributeRow}>
-                        <ThemedText style={[styles.extraContentText, { color: themeColors.subText }]}>
-                            {props.intro}
-                        </ThemedText>
+                        <ThemedText style={[styles.extraContentText, { color: themeColors.subText }]}>{props.intro}</ThemedText>
                     </ThemedView>
                 </ThemedView>
             }
@@ -84,8 +80,8 @@ const styles = StyleSheet.create({
         marginLeft: 4,
     },
     extraContentText: {
-        fontSize: 13
-    }
+        fontSize: 13,
+    },
 });
 
 export default DayWorkoutCard;

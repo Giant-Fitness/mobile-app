@@ -10,7 +10,7 @@ import { ThemedView } from '@/components/base/ThemedView';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { CustomBackButton } from '@/components/icons/CustomBackButton';
+import { CustomBackButton } from '@/components/base/CustomBackButton';
 
 export default function ProgressScreen() {
     const navigation = useNavigation();

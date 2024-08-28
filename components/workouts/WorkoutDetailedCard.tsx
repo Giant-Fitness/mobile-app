@@ -6,10 +6,9 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { LevelIcon } from '@/components/icons/LevelIcon';
 import { LeftImageInfoCard } from '@/components/layout/LeftImageInfoCard';
+import { Icon } from '@/components/icons/Icon';
 
 type WorkoutDetailedCardProps = {
     name: string;
@@ -33,32 +32,35 @@ export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, 
         navigation.navigate('workout-details', { name, length, level, equipment, focus, photo, trainer, longText, focusMulti });
     };
 
+    const levelIcon = 'level-' + level.toLowerCase();
+
     return (
         <LeftImageInfoCard
             image={photo}
             title={name}
+            titleStyle={{ fontSize: 14 }}
             containerStyle={{ paddingBottom: 24 }}
             onPress={navigateToWorkoutDetails}
             extraContent={
                 <ThemedView style={styles.attributeContainer}>
                     <ThemedView style={styles.attributeRow}>
-                        <MaterialCommunityIcons name='yoga' size={14} color={themeColors.textLight} />
-                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight, paddingRight: 12 }]}>
+                        <Icon name='yoga' size={14} />
+                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight, paddingRight: 10 }]}>
                             {focus}
                         </ThemedText>
-                        <LevelIcon level={level} size={14} color={themeColors.textLight} />
-                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight, marginLeft: 3 }]}>
+                        <Icon name={levelIcon} size={14} />
+                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight, marginLeft: 2 }]}>
                             {level}
                         </ThemedText>
                     </ThemedView>
                     <ThemedView style={styles.attributeRow}>
-                        <MaterialCommunityIcons name='dumbbell' size={14} color={themeColors.textLight} />
+                        <Icon name='dumbbell' size={14} />
                         <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight }]}>
                             {equipment}
                         </ThemedText>
                     </ThemedView>
                     <ThemedView style={styles.attributeRow}>
-                        <Ionicons name='stopwatch-outline' size={14} color={themeColors.textLight} />
+                        <Icon name='stopwatch' size={14} />
                         <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.textLight }]}>
                             {length}
                         </ThemedText>
@@ -73,6 +75,7 @@ const styles = StyleSheet.create({
     attributeContainer: {
         flexDirection: 'column',
         justifyContent: 'flex-start',
+        marginTop: 8,
     },
     attributeRow: {
         flexDirection: 'row',
