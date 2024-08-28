@@ -40,21 +40,21 @@ export default function ProgramsScreen() {
                 </ThemedView>
 
                 <ThemedView style={styles.planHeader}>
-                    <ThemedText type='titleLarge'>Lean Machine Challenge</ThemedText>
+                    <ThemedText type='titleXLarge'>Lean Machine Challenge</ThemedText>
                 </ThemedView>
 
                 <ThemedView style={[styles.weekProgress]}>
                     <ProgressBar completedParts={2} currentPart={3} parts={6} containerWidth={screenWidth - 48} />
-                    <ThemedText style={[{ color: themeColors.subText, marginTop: 12 }]}>Current Week: 3 of 6</ThemedText>
+                    <ThemedText style={[{ color: themeColors.subText, marginTop: 12 }]}>Week 3 of 6</ThemedText>
                 </ThemedView>
 
                 <ThemedView style={[styles.activeCardContainer]}>
                     <ActiveProgramDayCard />
                 </ThemedView>
 
-                <ThemedView style={[styles.upNextContainer]}>
-                    <ThemedText type='title' style={[styles.subHeader, { color: themeColors.subText }]}>
-                        Up Next...
+                <ThemedView style={[styles.upNextContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
+                    <ThemedText type='title' style={[styles.subHeader, { color: themeColors.text }]}>
+                        Up Next
                     </ThemedText>
                     {dummyDayPlans &&
                         dummyDayPlans.map((plan, i) => (
@@ -68,71 +68,74 @@ export default function ProgramsScreen() {
                             />
                         ))}
                 </ThemedView>
-                <View
+
+                <ThemedView style={[styles.menuContainer]}>
+                    {/*                <View
                     style={{
                         borderBottomColor: themeColors.systemBorderColor,
                         borderBottomWidth: StyleSheet.hairlineWidth,
                     }}
-                />
-                <ThemedView>
-                    <TouchableOpacity style={styles.menuItem}>
-                        <ThemedText type='body' style={[{ color: themeColors.text }]}>
-                            Program Calendar
-                        </ThemedText>
-                        <Icon name='chevron-forward' size={16} color={themeColors.iconDefault} />
-                    </TouchableOpacity>
-                    <View
+                />*/}
+                    <ThemedView>
+                        <TouchableOpacity style={styles.menuItem}>
+                            <ThemedText type='body' style={[{ color: themeColors.text }]}>
+                                Program Calendar
+                            </ThemedText>
+                            <Icon name='chevron-forward' size={16} color={themeColors.iconDefault} />
+                        </TouchableOpacity>
+                        <View
+                            style={{
+                                borderBottomColor: themeColors.systemBorderColor,
+                                borderBottomWidth: StyleSheet.hairlineWidth,
+                            }}
+                        />
+                    </ThemedView>
+                    <ThemedView>
+                        <TouchableOpacity style={styles.menuItem}>
+                            <ThemedText type='body' style={[{ color: themeColors.text }]}>
+                                Program Overview
+                            </ThemedText>
+                            <Icon name='chevron-forward' size={16} color={themeColors.iconDefault} />
+                        </TouchableOpacity>
+                        <View
+                            style={{
+                                borderBottomColor: themeColors.systemBorderColor,
+                                borderBottomWidth: StyleSheet.hairlineWidth,
+                            }}
+                        />
+                    </ThemedView>
+                    <ThemedView>
+                        <TouchableOpacity style={styles.menuItem}>
+                            <ThemedText type='body' style={[{ color: themeColors.text }]}>
+                                Browse Programs
+                            </ThemedText>
+                            <Icon name='chevron-forward' size={16} color={themeColors.iconDefault} />
+                        </TouchableOpacity>
+                        <View
+                            style={{
+                                borderBottomColor: themeColors.systemBorderColor,
+                                borderBottomWidth: StyleSheet.hairlineWidth,
+                            }}
+                        />
+                    </ThemedView>
+                    <ThemedView
                         style={{
-                            borderBottomColor: themeColors.systemBorderColor,
-                            borderBottomWidth: StyleSheet.hairlineWidth,
+                            paddingBottom: 48,
                         }}
-                    />
-                </ThemedView>
-                <ThemedView>
-                    <TouchableOpacity style={styles.menuItem}>
-                        <ThemedText type='body' style={[{ color: themeColors.text }]}>
-                            Program Overview
-                        </ThemedText>
-                        <Icon name='chevron-forward' size={16} color={themeColors.iconDefault} />
-                    </TouchableOpacity>
-                    <View
-                        style={{
-                            borderBottomColor: themeColors.systemBorderColor,
-                            borderBottomWidth: StyleSheet.hairlineWidth,
-                        }}
-                    />
-                </ThemedView>
-                <ThemedView>
-                    <TouchableOpacity style={styles.menuItem}>
-                        <ThemedText type='body' style={[{ color: themeColors.text }]}>
-                            Browse Programs
-                        </ThemedText>
-                        <Icon name='chevron-forward' size={16} color={themeColors.iconDefault} />
-                    </TouchableOpacity>
-                    <View
-                        style={{
-                            borderBottomColor: themeColors.systemBorderColor,
-                            borderBottomWidth: StyleSheet.hairlineWidth,
-                        }}
-                    />
-                </ThemedView>
-                <ThemedView
-                    style={{
-                        paddingBottom: 48,
-                    }}
-                >
-                    <TouchableOpacity style={styles.menuItem}>
-                        <ThemedText type='body' style={[{ color: themeColors.text }]}>
-                            End Program
-                        </ThemedText>
-                        <Icon name='chevron-forward' size={16} color={themeColors.iconDefault} />
-                    </TouchableOpacity>
-                    <View
-                        style={{
-                            borderBottomColor: themeColors.systemBorderColor,
-                            borderBottomWidth: StyleSheet.hairlineWidth,
-                        }}
-                    />
+                    >
+                        <TouchableOpacity style={styles.menuItem}>
+                            <ThemedText type='body' style={[{ color: themeColors.text }]}>
+                                End Program
+                            </ThemedText>
+                            <Icon name='chevron-forward' size={16} color={themeColors.iconDefault} />
+                        </TouchableOpacity>
+                        <View
+                            style={{
+                                borderBottomColor: themeColors.systemBorderColor,
+                                borderBottomWidth: StyleSheet.hairlineWidth,
+                            }}
+                        />
+                    </ThemedView>
                 </ThemedView>
             </ScrollView>
         </ThemedView>
@@ -144,8 +147,6 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        paddingHorizontal: 24,
-        paddingBottom: 18,
     },
     scrollContainer: {
         width: '100%',
@@ -160,8 +161,8 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     },
     upNextContainer: {
-        paddingTop: 24,
-        paddingBottom: 16,
+        paddingBottom: 0,
+        paddingHorizontal: 24,
     },
     menuItem: {
         paddingTop: 24,
@@ -170,17 +171,29 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     quoteContainer: {
-        paddingTop: 42,
-        paddingBottom: 24,
-        paddingHorizontal: 16,
+        paddingTop: 24,
+        paddingBottom: 12,
+        marginHorizontal: 48,
     },
     quoteText: {
         textAlign: 'center',
+        paddingBottom: 6,
     },
     planHeader: {
         marginBottom: 12,
+        paddingHorizontal: 24,
     },
     weekProgress: {
         marginBottom: 24,
+        paddingHorizontal: 24,
+    },
+    activeCardContainer: {
+        paddingHorizontal: 24,
+        paddingBottom: 48,
+    },
+    menuContainer: {
+        paddingHorizontal: 24,
+        paddingBottom: 12,
+        paddingTop: 18,
     },
 });

@@ -22,17 +22,19 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = ({}) =>
             subtitle='Week 3 Day 2'
             extraContent={
                 <ThemedView style={styles.attributeRow}>
-                    <Icon name='stopwatch' size={14} color={themeColors.text} />
-                    <ThemedText type='body' style={[styles.attributeText, { color: themeColors.text, paddingRight: 16 }]}>
+                    <Icon name='stopwatch' size={14} color={themeColors.highlightContainerText} />
+                    <ThemedText type='body' style={[styles.attributeText, { color: themeColors.highlightContainerText, paddingRight: 16 }]}>
                         40 mins
                     </ThemedText>
-                    <Icon name='dumbbell' size={14} color={themeColors.text} />
-                    <ThemedText type='body' style={[styles.attributeText, { color: themeColors.text, marginLeft: 5 }]}>
+                    <Icon name='dumbbell' size={14} color={themeColors.highlightContainerText} />
+                    <ThemedText type='body' style={[styles.attributeText, { color: themeColors.highlightContainerText, marginLeft: 5 }]}>
                         Full Gym
                     </ThemedText>
-                    <Icon name='chevron-forward' size={16} color={themeColors.text} style={styles.chevronIcon} />
+                    <Icon name='chevron-forward' size={16} color={themeColors.highlightContainerText} style={styles.chevronIcon} />
                 </ThemedView>
             }
+            titleStyle={{ color: themeColors.highlightContainerText }}
+            subtitleStyle={{ color: themeColors.subTextSecondary }}
         />
     );
 };

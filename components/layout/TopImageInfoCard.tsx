@@ -40,8 +40,8 @@ export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
         <ThemedView style={[styles.container, containerStyle]}>
             <Image source={image} style={[styles.image, imageStyle]} placeholder={placeholder} />
             <ThemedView style={[styles.contentContainer, contentContainerStyle, { backgroundColor: themeColors.containerHighlight }]}>
-                {subtitle && <ThemedText style={[styles.subtitle, subtitleStyle, { color: themeColors.subText }]}>{subtitle}</ThemedText>}
-                <ThemedText type='title' style={[styles.title, titleStyle, { color: themeColors.text }]}>
+                {subtitle && <ThemedText style={[styles.subtitle, subtitleStyle]}>{subtitle}</ThemedText>}
+                <ThemedText type='title' style={[styles.title, titleStyle]}>
                     {title}
                 </ThemedText>
                 {extraContent}
@@ -53,21 +53,20 @@ export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
 const styles = StyleSheet.create({
     container: {
         backgroundColor: 'transparent',
-        borderRadius: 5,
         overflow: 'hidden',
     },
     image: {
         width: '100%',
         height: 200,
-        borderTopRightRadius: 5,
-        borderTopLeftRadius: 5,
+        borderTopRightRadius: 3,
+        borderTopLeftRadius: 3,
     },
     contentContainer: {
         width: '100%',
         paddingHorizontal: 16,
         paddingVertical: 12,
-        borderBottomLeftRadius: 5,
-        borderBottomRightRadius: 5,
+        borderBottomLeftRadius: 3,
+        borderBottomRightRadius: 3,
     },
     title: {
         marginBottom: 8,

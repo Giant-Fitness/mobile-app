@@ -76,11 +76,13 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'flex-start',
         marginTop: 8,
+        backgroundColor: 'transparent',
     },
     attributeRow: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 8,
+        backgroundColor: 'transparent',
     },
     attributeText: {
         marginLeft: 5,

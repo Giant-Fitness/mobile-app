@@ -21,17 +21,17 @@ export const WorkoutsBottomBar: React.FC<WorkoutsBottomBarProps> = ({ onSortPres
         <ThemedView style={[styles.container, { borderColor: themeColors.systemBorderColor }]}>
             <TouchableOpacity style={styles.button} onPress={onFilterPress}>
                 <View style={styles.iconAndText}>
-                    <Icon name='filter' style={[styles.icon, { marginRight: 4 }]} color={themeColors.iconDefault} size={15} />
-                    <ThemedText type='buttonSmall' style={[styles.text, { color: themeColors.iconDefault }]}>
+                    <Icon name='filter' style={[styles.icon, { marginRight: 4 }]} color={themeColors.text} size={15} />
+                    <ThemedText type='buttonSmall' style={[styles.text, { color: themeColors.text }]}>
                         Filter
                     </ThemedText>
                 </View>
             </TouchableOpacity>
-            <View style={[styles.divider, { backgroundColor: themeColors.iconDefault }]} />
+            <View style={[styles.divider, { backgroundColor: themeColors.text }]} />
             <TouchableOpacity style={styles.button} onPress={onSortPress}>
                 <View style={styles.iconAndText}>
-                    <Icon name='sort' style={[styles.icon, { marginRight: 4 }]} color={themeColors.iconDefault} size={16} />
-                    <ThemedText type='buttonSmall' style={[styles.text, { color: themeColors.iconDefault }]}>
+                    <Icon name='sort' style={[styles.icon, { marginRight: 4 }]} color={themeColors.text} size={16} />
+                    <ThemedText type='buttonSmall' style={[styles.text, { color: themeColors.text }]}>
                         Sort
                     </ThemedText>
                 </View>

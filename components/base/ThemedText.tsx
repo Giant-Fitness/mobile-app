@@ -35,6 +35,11 @@ const styles = StyleSheet.create({
         lineHeight: 32,
     },
     titleXLarge: {
+        fontSize: 21,
+        fontFamily: 'InterMedium',
+        lineHeight: 32,
+    },
+    titleXXLarge: {
         fontSize: 24,
         fontFamily: 'InterMedium',
         lineHeight: 32,
@@ -81,7 +86,7 @@ const styles = StyleSheet.create({
         lineHeight: 16,
     },
     italic: {
-        fontSize: 13,
+        fontSize: 12,
         fontFamily: 'InterItalic',
         lineHeight: 16,
     },

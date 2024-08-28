@@ -16,11 +16,11 @@ export const CustomBackButton: React.FC<CustomBackButtonProps> = ({ style, iconC
     const navigation = useNavigation();
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
-    const defaultIconColor = themeColors.iconDefault;
+    const defaultIconColor = themeColors.text;
 
     return (
         <TouchableOpacity style={[styles.button, style]} onPress={() => navigation.goBack()}>
-            <Icon name='chevron-back' size={24} color={iconColor || defaultIconColor} />
+            <Icon name='chevron-back' size={22} color={iconColor || defaultIconColor} />
         </TouchableOpacity>
     );
 };

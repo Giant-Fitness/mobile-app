@@ -44,7 +44,7 @@ export default function WorkoutDetailScreen() {
                 <ImageTextOverlay
                     photo={photo}
                     title={name}
-                    titleType='titleXLarge'
+                    titleType='titleXXLarge'
                     gradientColors={['transparent', 'rgba(0,0,0,0.4)']}
                     containerStyle={{ height: 500, elevation: 5 }}
                     textContainerStyle={{ bottom: 24 }}
@@ -96,7 +96,7 @@ export default function WorkoutDetailScreen() {
                 <TextButton text='Start Workout' textType='bodyMedium' style={[styles.startButton, { backgroundColor: themeColors.buttonPrimary }]} />
                 <IconButton
                     iconName='notebook'
-                    style={[styles.notesButton, { backgroundColor: themeColors.backgroundSecondary }]}
+                    style={[styles.notesButton, { backgroundColor: themeColors.buttonSecondary }]}
                     iconSize={24}
                     iconColor={themeColors.buttonPrimary}
                 />
