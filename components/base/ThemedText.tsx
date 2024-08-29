@@ -1,8 +1,9 @@
 // components/base/ThemedText.tsx
 
 import React from 'react';
-import { Text, type TextProps, StyleSheet, Platform } from 'react-native';
+import { Text, type TextProps, StyleSheet } from 'react-native';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { moderateScale } from '@/utils/scaling'; // Use the customized moderateScale
 
 export type ThemedTextProps = TextProps & {
     lightColor?: string;
@@ -10,96 +11,92 @@ export type ThemedTextProps = TextProps & {
     type?: 'body' | 'titleLarge' | 'title' | 'subtitle' | 'caption' | 'link' | 'button' | 'overline';
 };
 
-// Adjust font size slightly smaller on Android
-const fontSizeAdjustment = Platform.select({
-    ios: 1,  // No adjustment for iOS
-    android: 0.95,  // Adjust fonts down by 5% for Android
-});
-
+// Styles for different text types using specific Inter fonts with adjusted scaling
 const styles = StyleSheet.create({
     body: {
-        fontSize: 14 * fontSizeAdjustment,
-        lineHeight: 21 * fontSizeAdjustment,
+        fontSize: moderateScale(14), // Adjusted with moderate scaling
+        lineHeight: moderateScale(21),
         fontFamily: 'InterRegular',
     },
     bodyMedium: {
-        fontSize: 16 * fontSizeAdjustment,
-        lineHeight: 24 * fontSizeAdjustment,
+        fontSize: moderateScale(16),
+        lineHeight: moderateScale(24),
         fontFamily: 'InterMedium',
     },
     bodySmall: {
-        fontSize: 13 * fontSizeAdjustment,
-        lineHeight: 20 * fontSizeAdjustment,
+        fontSize: moderateScale(13),
+        lineHeight: moderateScale(20),
         fontFamily: 'InterRegular',
     },
     bodyXSmall: {
-        fontSize: 12 * fontSizeAdjustment,
-        lineHeight: 18 * fontSizeAdjustment,
+        fontSize: moderateScale(12),
+        lineHeight: moderateScale(18),
         fontFamily: 'InterRegular',
     },
     titleLarge: {
-        fontSize: 18 * fontSizeAdjustment,
+        fontSize: moderateScale(18),
+        lineHeight: moderateScale(27),
         fontFamily: 'InterSemiBold',
-        lineHeight: 27 * fontSizeAdjustment,
     },
     titleXLarge: {
-        fontSize: 21 * fontSizeAdjustment,
+        fontSize: moderateScale(21),
+        lineHeight: moderateScale(32),
         fontFamily: 'InterMedium',
-        lineHeight: 32 * fontSizeAdjustment,
     },
     titleXXLarge: {
-        fontSize: 24 * fontSizeAdjustment,
+        fontSize: moderateScale(24),
+        lineHeight: moderateScale(36),
         fontFamily: 'InterMedium',
-        lineHeight: 36 * fontSizeAdjustment,
     },
     title: {
-        fontSize: 16 * fontSizeAdjustment,
+        fontSize: moderateScale(16),
+        lineHeight: moderateScale(24),
         fontFamily: 'InterSemiBold',
-        lineHeight: 24 * fontSizeAdjustment,
     },
     subtitle: {
-        fontSize: 18 * fontSizeAdjustment,
+        fontSize: moderateScale(18),
+        lineHeight: moderateScale(27),
         fontFamily: 'InterRegular',
-        lineHeight: 27 * fontSizeAdjustment,
     },
     caption: {
-        fontSize: 12 * fontSizeAdjustment,
+        fontSize: moderateScale(12),
+        lineHeight: moderateScale(18),
         fontFamily: 'InterMedium',
-        lineHeight: 18 * fontSizeAdjustment,
     },
     link: {
-        fontSize: 16 * fontSizeAdjustment,
+        fontSize: moderateScale(16),
+        lineHeight: moderateScale(24),
         fontFamily: 'InterMedium',
-        lineHeight: 24 * fontSizeAdjustment,
     },
     button: {
-        fontSize: 18 * fontSizeAdjustment,
+        fontSize: moderateScale(18),
+        lineHeight: moderateScale(24),
         fontFamily: 'InterBold',
-        lineHeight: 24 * fontSizeAdjustment,
     },
     buttonSmall: {
-        fontSize: 13 * fontSizeAdjustment,
+        fontSize: moderateScale(13),
+        lineHeight: moderateScale(20),
         fontFamily: 'InterRegular',
-        lineHeight: 20 * fontSizeAdjustment,
     },
     overlineTransformed: {
-        fontSize: 13 * fontSizeAdjustment,
+        fontSize: moderateScale(13),
+        lineHeight: moderateScale(20),
         fontFamily: 'InterMedium',
         textTransform: 'uppercase',
-        lineHeight: 20 * fontSizeAdjustment,
     },
     overline: {
-        fontSize: 13 * fontSizeAdjustment,
+        fontSize: moderateScale(13),
+        lineHeight: moderateScale(20),
         fontFamily: 'InterMedium',
-        lineHeight: 20 * fontSizeAdjustment,
     },
     italic: {
-        fontSize: 12 * fontSizeAdjustment,
+        fontSize: moderateScale(12),
+        lineHeight: moderateScale(18),
         fontFamily: 'InterItalic',
-        lineHeight: 18 * fontSizeAdjustment,
     },
 });
 
+// ThemedText component definition remains the same, leveraging these styles
 export function ThemedText({ style, lightColor, darkColor, type = 'body', ...rest }: ThemedTextProps) {
     const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
 

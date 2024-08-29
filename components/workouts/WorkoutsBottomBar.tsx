@@ -7,6 +7,8 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
 import { Icon } from '@/components/icons/Icon';
+import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { spacing } from '@/utils/spacing';
 
 type WorkoutsBottomBarProps = {
     onSortPress: () => void;
@@ -22,7 +24,7 @@ export const WorkoutsBottomBar: React.FC<WorkoutsBottomBarProps> = ({ onSortPres
         <ThemedView style={[styles.container, { borderColor: themeColors.systemBorderColor }]}>
             <TouchableOpacity style={styles.button} onPress={onFilterPress}>
                 <View style={styles.iconAndText}>
-                    <Icon name='filter' style={[styles.icon, { marginRight: 4 }]} color={themeColors.text} size={15} />
+                    <Icon name='filter' style={[styles.icon, { marginRight: spacing.xs }]} color={themeColors.text} size={moderateScale(15)} />
                     <ThemedText type='buttonSmall' style={[styles.text, { color: themeColors.text }]}>
                         Filter
                     </ThemedText>
@@ -38,7 +40,7 @@ export const WorkoutsBottomBar: React.FC<WorkoutsBottomBarProps> = ({ onSortPres
             <View style={[styles.divider, { backgroundColor: themeColors.text }]} />
             <TouchableOpacity style={styles.button} onPress={onSortPress}>
                 <View style={styles.iconAndText}>
-                    <Icon name='sort' style={[styles.icon, { marginRight: 4 }]} color={themeColors.text} size={16} />
+                    <Icon name='sort' style={[styles.icon, { marginRight: spacing.xs }]} color={themeColors.text} size={moderateScale(16)} />
                     <ThemedText type='buttonSmall' style={[styles.text, { color: themeColors.text }]}>
                         Sort
                     </ThemedText>
@@ -53,18 +55,18 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         paddingTop: Platform.select({
-            ios: 10, // Height for iOS
-            android: 20, // Height for Android
+            ios: spacing.sm, // Adjusted for scaling
+            android: spacing.md, // Adjusted for scaling
         }),
-        paddingHorizontal: 20,
+        paddingHorizontal: spacing.md,
         paddingBottom: Platform.select({
-            ios: 40, // Height for iOS
-            android: 25, // Height for Android
+            ios: spacing.xl, // Adjusted for scaling
+            android: spacing.lg, // Adjusted for scaling
         }),
-        borderTopWidth: 0.3,
+        borderTopWidth: scale(0.3),
         height: Platform.select({
-            ios: 90, // Height for iOS
-            android: 70, // Height for Android
+            ios: verticalScale(80), // Adjusted for scaling
+            android: verticalScale(60), // Adjusted for scaling
         }),
         position: 'absolute',
         left: 0,
@@ -80,32 +82,31 @@ const styles = StyleSheet.create({
     iconAndText: {
         flexDirection: 'row',
         alignItems: 'center',
-        position: 'relative', // Allows positioning of the badge
+        position: 'relative',
     },
     icon: {
         alignSelf: 'center',
-        marginTop: -2,
     },
     text: {
-        marginLeft: 4,
+        marginLeft: spacing.xs,
     },
     badge: {
         position: 'absolute',
-        top: -6, // Position above the "Filter" text
-        right: -14, // Position to the right of the "Filter" text
-        minWidth: 16,
-        height: 16,
-        borderRadius: 8,
+        top: verticalScale(-6),
+        right: scale(-14),
+        minWidth: spacing.md,
+        height: spacing.md,
+        borderRadius: spacing.md,
         justifyContent: 'center',
         alignItems: 'center',
-        paddingHorizontal: 4,
+        paddingHorizontal: spacing.xs,
     },
     badgeText: {
-        fontSize: 8,
-        lineHeight: 12,
+        fontSize: spacing.sm,
+        lineHeight: verticalScale(12),
     },
     divider: {
-        width: 0.5,
+        width: scale(0.5),
         height: '40%',
         alignSelf: 'center',
     },

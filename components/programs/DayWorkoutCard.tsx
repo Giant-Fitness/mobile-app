@@ -1,4 +1,4 @@
-// components/programs/ProgramDayOverviewCard.tsx
+// components/programs/DayWorkoutCard.tsx
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
@@ -8,6 +8,9 @@ import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { LeftImageInfoCard } from '@/components/layout/LeftImageInfoCard';
 import { ThemedView } from '@/components/base/ThemedView';
+import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { spacing } from '@/utils/spacing';
+import { sizes } from '@/utils/sizes';
 
 const DayWorkoutCard = (props) => {
     const colorScheme = useColorScheme();
@@ -44,21 +47,19 @@ const DayWorkoutCard = (props) => {
 
 const styles = StyleSheet.create({
     container: {
-        flexDirection: 'row',
         backgroundColor: 'transparent',
         width: '100%',
-        marginBottom: 36,
+        marginBottom: spacing.lg,
     },
     title: {
-        fontSize: 14,
+        fontSize: moderateScale(14),
         marginBottom: 0,
-        marginLeft: 4,
-        marginTop: 4,
+        marginTop: spacing.xs,
     },
     image: {
-        height: 100,
-        width: 100,
-        borderRadius: 2,
+        height: sizes.imageMediumHeight,
+        width: sizes.imageMediumWidth,
+        borderRadius: scale(2),
     },
     contentContainer: {
         width: '100%',
@@ -67,13 +68,10 @@ const styles = StyleSheet.create({
     attributeRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginLeft: 4,
     },
-    attributeText: {
-        marginLeft: 4,
-    },
+    attributeText: {},
     extraContentText: {
-        fontSize: 13,
+        fontSize: moderateScale(13),
     },
 });
 

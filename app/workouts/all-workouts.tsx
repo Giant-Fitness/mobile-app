@@ -12,6 +12,8 @@ import { WorkoutsBottomBar } from '@/components/workouts/WorkoutsBottomBar';
 import { CustomBackButton } from '@/components/base/CustomBackButton';
 import { WorkoutsFilterDrawer } from '@/components/workouts/WorkoutsFilterDrawer';
 import { WorkoutsSortDrawer } from '@/components/workouts/WorkoutsSortDrawer';
+import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { spacing } from '@/utils/spacing';
 
 const workouts = [
     {
@@ -79,7 +81,6 @@ const workouts = [
             'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\nUse it as a standalone or pair it with a core session for a full-body workout.',
         focusMulti: ['Arms', 'Legs', 'Chest'],
     },
-    // fetch from the backend. caching?
 ];
 
 export default function AllWorkoutsScreen() {
@@ -91,7 +92,7 @@ export default function AllWorkoutsScreen() {
     const navigation = useNavigation();
     const route = useRoute();
 
-    const { initialFilters } = route.params || {}; // Get initial filters from route parameters
+    const { initialFilters } = route.params || {};
     const [filters, setFilters] = useState(initialFilters || {});
 
     const handleSortPress = () => {
@@ -104,7 +105,7 @@ export default function AllWorkoutsScreen() {
 
     const applyFilters = (appliedFilters: any) => {
         setFilters(appliedFilters);
-        filterAndSortWorkouts(appliedFilters, sortOption); // Call combined filtering and sorting
+        filterAndSortWorkouts(appliedFilters, sortOption);
     };
 
     const filterAndSortWorkouts = (appliedFilters: any, sortOption: { type: string; order: string }) => {
@@ -132,21 +133,20 @@ export default function AllWorkoutsScreen() {
             filtered.sort((a, b) => (sortOption.order === 'A to Z' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)));
         }
 
-        setFilteredWorkouts([...filtered]); // Update state with new sorted array
+        setFilteredWorkouts([...filtered]);
     };
 
     const applySort = (option: { type: string; order: string }) => {
         setSortOption(option);
-        filterAndSortWorkouts(filters, option); // Apply sorting with current filters
+        filterAndSortWorkouts(filters, option);
     };
 
     useEffect(() => {
-        // Initialize filters and apply sorting
         if (Object.keys(initialFilters).length > 0) {
             setFilters(initialFilters);
-            filterAndSortWorkouts(initialFilters, sortOption); // Apply both filtering and sorting initially
+            filterAndSortWorkouts(initialFilters, sortOption);
         } else {
-            filterAndSortWorkouts({}, sortOption); // Apply sorting with empty filters to trigger initial sort
+            filterAndSortWorkouts({}, sortOption);
         }
     }, [initialFilters]);
 
@@ -156,20 +156,19 @@ export default function AllWorkoutsScreen() {
     useEffect(() => {
         navigation.setOptions({
             title: 'All Workouts',
-            headerBackTitleVisible: false, // Hide the back button label
+            headerBackTitleVisible: false,
             headerStyle: {
                 backgroundColor: themeColors.background,
             },
+            headerShadowVisible: false, // Specifically disable shadow
             headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
             headerLeft: () => <CustomBackButton />,
         });
     }, [navigation, themeColors]);
 
-    // Determine the correct label for workout count
     const workoutCount = filteredWorkouts.length;
     const workoutLabel = workoutCount === 1 ? 'workout' : 'workouts';
 
-    // Count the number of filter types with active filters
     const activeFilterTypesCount = Object.keys(filters).filter((key) => filters[key].length > 0).length;
 
     return (
@@ -195,7 +194,6 @@ export default function AllWorkoutsScreen() {
                     ))}
                 </ThemedView>
             </ScrollView>
-            {/* Bar with Sort and Filter buttons */}
             <WorkoutsBottomBar onSortPress={handleSortPress} onFilterPress={handleFilterPress} appliedFilterCount={activeFilterTypesCount} />
             <WorkoutsFilterDrawer
                 visible={isFilterVisible}
@@ -211,13 +209,12 @@ export default function AllWorkoutsScreen() {
 
 const styles = StyleSheet.create({
     countContainer: {
-        paddingLeft: 24,
-        paddingTop: 24,
-        paddingBottom: 24, // Add padding to ensure content doesn't overlap with the bottom bar
+        padding: spacing.lg,
+        paddingVertical: spacing.md,
     },
     contentContainer: {
-        paddingTop: 12,
-        paddingLeft: 16,
-        paddingBottom: 100, // Add padding to ensure content doesn't overlap with the bottom bar
+        paddingTop: spacing.sm,
+        paddingLeft: spacing.md,
+        paddingBottom: verticalScale(100),
     },
 });

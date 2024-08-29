@@ -1,3 +1,5 @@
+// components/layout/SortDrawer.tsx
+
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { BottomDrawer } from '@/components/layout/BottomDrawer';
@@ -6,6 +8,8 @@ import { TextButton } from '@/components/base/TextButton';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Icon } from '@/components/icons/Icon';
+import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { spacing } from '@/utils/spacing';
 
 interface SortOption {
     type: string;
@@ -17,8 +21,8 @@ interface SortDrawerProps {
     onClose: () => void;
     onApply: (sortOption: { type: string; order: string }) => void;
     initialSort?: { type: string; order: string };
-    sortOptions: SortOption[]; // Array of sort options
-    title: string; // Title of the drawer
+    sortOptions: SortOption[];
+    title: string;
 }
 
 export const SortDrawer: React.FC<SortDrawerProps> = ({ visible, onClose, onApply, initialSort = { type: '', order: '' }, sortOptions, title }) => {
@@ -35,7 +39,6 @@ export const SortDrawer: React.FC<SortDrawerProps> = ({ visible, onClose, onAppl
         setSelectedSort({ type, order });
     };
 
-    // Reset selected sort when the drawer is closed without applying
     useEffect(() => {
         if (!visible) {
             setSelectedSort(initialSort);
@@ -48,8 +51,13 @@ export const SortDrawer: React.FC<SortDrawerProps> = ({ visible, onClose, onAppl
                 <View style={styles.titleContainer}>
                     <ThemedText type='title'>{title}</ThemedText>
                 </View>
-                <TouchableOpacity onPress={onClose} style={styles.closeButton} activeOpacity={0.8} hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
-                    <Icon name='close' size={21} color={themeColors.subText} />
+                <TouchableOpacity
+                    onPress={onClose}
+                    style={styles.closeButton}
+                    activeOpacity={0.8}
+                    hitSlop={{ top: scale(20), bottom: scale(20), left: scale(20), right: scale(20) }}
+                >
+                    <Icon name='close' size={moderateScale(21)} color={themeColors.subText} />
                 </TouchableOpacity>
             </View>
 
@@ -67,7 +75,7 @@ export const SortDrawer: React.FC<SortDrawerProps> = ({ visible, onClose, onAppl
                                     </ThemedText>
                                     <Icon
                                         name={selectedSort.type === type && selectedSort.order === order ? 'radio-button-on' : 'radio-button-off'}
-                                        size={18}
+                                        size={moderateScale(18)}
                                         color={themeColors.subText}
                                     />
                                 </TouchableOpacity>
@@ -94,9 +102,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: 24,
-        paddingHorizontal: 64,
-        paddingBottom: 24,
+        marginTop: spacing.lg,
+        paddingBottom: spacing.lg,
     },
     titleContainer: {
         alignItems: 'center',
@@ -104,38 +111,38 @@ const styles = StyleSheet.create({
     },
     closeButton: {
         position: 'absolute',
-        right: 24,
-        top: 4,
+        right: spacing.lg,
+        top: spacing.xs,
     },
     optionContainer: {
-        paddingVertical: 16,
+        paddingBottom: spacing.md,
     },
     section: {
-        marginBottom: 24,
+        marginBottom: spacing.lg,
     },
     sectionTitle: {
-        marginBottom: 8,
+        marginBottom: spacing.sm,
         fontWeight: 'bold',
-        fontSize: 14,
-        paddingHorizontal: 24,
+        fontSize: moderateScale(14),
+        paddingHorizontal: spacing.xl,
     },
     optionButton: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 12,
-        paddingLeft: 36,
-        paddingRight: 26,
-        borderRadius: 4,
-        marginVertical: 4,
+        paddingVertical: spacing.sm,
+        paddingLeft: spacing.xl,
+        paddingRight: spacing.lg,
+        borderRadius: spacing.xs,
+        marginVertical: spacing.xs,
     },
     buttonContainer: {
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 30,
+        marginBottom: spacing.lg,
     },
     applyButton: {
-        paddingVertical: 16,
+        paddingVertical: spacing.md,
         width: '90%',
     },
 });

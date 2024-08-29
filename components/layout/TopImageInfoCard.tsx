@@ -7,6 +7,9 @@ import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Image } from 'expo-image';
+import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { spacing } from '@/utils/spacing';
+import { sizes } from '@/utils/sizes';
 
 type TopImageInfoCardProps = {
     image: ImageSourcePropType;
@@ -18,7 +21,7 @@ type TopImageInfoCardProps = {
     contentContainerStyle?: StyleProp<ViewStyle>;
     titleStyle?: StyleProp<TextStyle>;
     subtitleStyle?: StyleProp<TextStyle>;
-    placeholder?: any; // Placeholder image while loading
+    placeholder?: any;
 };
 
 export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
@@ -57,22 +60,22 @@ const styles = StyleSheet.create({
     },
     image: {
         width: '100%',
-        height: 200,
-        borderTopRightRadius: 3,
-        borderTopLeftRadius: 3,
+        height: sizes.imageLargeHeight,
+        borderTopRightRadius: spacing.xs,
+        borderTopLeftRadius: spacing.xs,
     },
     contentContainer: {
         width: '100%',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        borderBottomLeftRadius: 3,
-        borderBottomRightRadius: 3,
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.md,
+        borderBottomLeftRadius: spacing.xs,
+        borderBottomRightRadius: spacing.xs,
     },
     title: {
-        marginBottom: 8,
+        marginBottom: spacing.sm,
     },
     subtitle: {
-        marginTop: 6,
-        fontSize: 14,
+        marginTop: spacing.xs,
+        fontSize: moderateScale(14),
     },
 });

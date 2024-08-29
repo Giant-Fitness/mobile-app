@@ -1,7 +1,7 @@
 // components/video/FullScreenVideoPlayer.tsx
 
 import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
-import { View, StyleSheet, Button, Alert, Animated, Dimensions } from 'react-native';
+import { View, StyleSheet, Alert, Animated, Dimensions } from 'react-native';
 import { Video, ResizeMode, Audio } from 'expo-av';
 import PropTypes from 'prop-types'; // Import PropTypes for validation
 
@@ -120,12 +120,6 @@ export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, Ful
                         onPlaybackStatusUpdate={onPlaybackStatusUpdate} // Pass playback status updates to the handler
                     />
                 )}
-                {!isFullScreen &&
-                    !isVideoVisible && ( // Only show button when video is not visible or fullscreen
-                        <View style={styles.buttons}>
-                            <Button title='Play Fullscreen' onPress={handleFullScreen} />
-                        </View>
-                    )}
                 {isVideoVisible && <Animated.View style={[styles.overlay, { opacity: fadeAnim }]} />}
             </View>
         );
@@ -155,12 +149,6 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         width: 1,
         height: 1,
-    },
-    buttons: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 20,
     },
     overlay: {
         position: 'absolute',

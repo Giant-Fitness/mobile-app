@@ -6,6 +6,8 @@ import { useNavigation } from '@react-navigation/native';
 import { Icon } from '@/components/icons/Icon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { moderateScale } from '@/utils/scaling';
+import { spacing } from '@/utils/spacing';
 
 type CustomBackButtonProps = {
     style?: ViewStyle;
@@ -20,14 +22,14 @@ export const CustomBackButton: React.FC<CustomBackButtonProps> = ({ style, iconC
 
     return (
         <TouchableOpacity style={[styles.button, style]} onPress={() => navigation.goBack()}>
-            <Icon name='chevron-back' size={22} color={iconColor || defaultIconColor} />
+            <Icon name='chevron-back' size={moderateScale(22)} color={iconColor || defaultIconColor} />
         </TouchableOpacity>
     );
 };
 
 const styles = StyleSheet.create({
     button: {
-        paddingHorizontal: 10,
-        paddingVertical: 5,
+        paddingHorizontal: spacing.sm,
+        paddingVertical: spacing.xs,
     },
 });

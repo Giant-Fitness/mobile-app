@@ -5,6 +5,8 @@ import { TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { moderateScale } from '@/utils/scaling';
+import { spacing } from '@/utils/spacing';
 
 interface FilterChipProps {
     label: string;
@@ -17,17 +19,15 @@ export const FilterChip: React.FC<FilterChipProps> = ({ label, selected, onToggl
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
-    // Styles for the chip based on the selected state
     const chipStyle = [
         styles.chip,
         {
             backgroundColor: selected ? themeColors.buttonPrimary : themeColors.background,
             borderColor: selected ? themeColors.buttonPrimary : themeColors.systemBorderColor,
         },
-        style, // Apply the additional style prop here
+        style,
     ];
 
-    // Styles for the text based on the selected state
     const textStyle = {
         color: selected ? themeColors.background : themeColors.subText,
     };
@@ -43,9 +43,9 @@ export const FilterChip: React.FC<FilterChipProps> = ({ label, selected, onToggl
 
 const styles = StyleSheet.create({
     chip: {
-        paddingVertical: 8,
-        borderWidth: 0.8,
-        borderRadius: 2,
+        paddingVertical: spacing.sm,
+        borderWidth: moderateScale(0.8),
+        borderRadius: spacing.xxs,
         alignItems: 'center',
         justifyContent: 'center',
     },
