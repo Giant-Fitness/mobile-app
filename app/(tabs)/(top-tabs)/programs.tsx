@@ -35,7 +35,7 @@ export default function ProgramsScreen() {
             >
                 <ThemedView style={styles.quoteContainer}>
                     <ThemedText type='italic' style={[styles.quoteText, { color: themeColors.subText }]}>
-                        The only bad workout is the one that didn't happen.
+                        The only bad workout is the one that didn&apos;t happen.
                     </ThemedText>
                 </ThemedView>
 

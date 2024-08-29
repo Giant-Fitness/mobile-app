@@ -1,8 +1,7 @@
-// components/video/FullScreenVideoPlayer.tsx
-
 import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { View, StyleSheet, Button, Alert, Animated, Dimensions } from 'react-native';
 import { Video, ResizeMode, Audio } from 'expo-av';
+import PropTypes from 'prop-types'; // Import PropTypes for validation
 
 interface FullScreenVideoPlayerProps {
     source: { uri: string };
@@ -126,6 +125,17 @@ export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, Ful
         </View>
     );
 });
+
+// Adding a display name for better debugging and linting
+FullScreenVideoPlayer.displayName = 'FullScreenVideoPlayer';
+
+// Adding PropTypes validation to handle ESLint warnings
+FullScreenVideoPlayer.propTypes = {
+    source: PropTypes.shape({
+        uri: PropTypes.string.isRequired,
+    }).isRequired,
+    startInFullscreen: PropTypes.bool,
+};
 
 const { width, height } = Dimensions.get('window');
 

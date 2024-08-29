@@ -133,8 +133,8 @@ const styles = StyleSheet.create({
     },
     backButton: {
         position: 'absolute',
-        top: 40,
-        left: 15,
+        top: 54,
+        left: 16,
         zIndex: 10,
     },
     textContainer: {

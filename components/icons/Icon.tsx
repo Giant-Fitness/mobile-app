@@ -59,6 +59,10 @@ export const Icon: React.FC<IconProps> = ({ name, size = 18, color, style }) => 
             return <MaterialCommunityIcons name='notebook' {...commonProps} />;
         case 'close':
             return <Ionicons name='close-circle-outline' {...commonProps} />;
+        case 'radio-button-on':
+            return <Ionicons name='radio-button-on' {...commonProps} />;
+        case 'radio-button-off':
+            return <Ionicons name='radio-button-off' {...commonProps} />;
         default:
             return <Ionicons name='alert-circle-outline' s {...commonProps} />;
     }

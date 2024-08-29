@@ -1,7 +1,7 @@
 // components/layout/BottomDrawer.tsx
 
 import React from 'react';
-import { Modal, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Modal, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { BlurView } from 'expo-blur';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -11,9 +11,10 @@ interface BottomDrawerProps {
     visible: boolean;
     onClose: () => void;
     children: React.ReactNode;
+    style?: ViewStyle;
 }
 
-export const BottomDrawer: React.FC<BottomDrawerProps> = ({ visible, onClose, children }) => {
+export const BottomDrawer: React.FC<BottomDrawerProps> = ({ visible, onClose, children, style }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
@@ -25,7 +26,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({ visible, onClose, ch
                     <BlurView intensity={50} style={styles.blur} tint='systemUltraThinMaterial' experimentalBlurMethod='dimezisBlurView' />
                 </TouchableOpacity>
                 {/* Drawer slides up independently from the overlay */}
-                <ThemedView style={[styles.drawer, { backgroundColor: themeColors.background }]}>{children}</ThemedView>
+                <ThemedView style={[styles.drawer, { backgroundColor: themeColors.background }, style]}>{children}</ThemedView>
             </View>
         </Modal>
     );
