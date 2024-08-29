@@ -219,6 +219,6 @@ const styles = StyleSheet.create({
         width: '18%', // Fixed width for the icon button
         height: '100%', // Fixed height for the icon button
         alignItems: 'center',
-        borderRadius: '100%', // Ensure the button is perfectly circular
+        borderRadius: 100, // Ensure the button is perfectly circular
     },
 });
