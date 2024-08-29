@@ -1,17 +1,19 @@
 // app/workouts/all-workouts.tsx
 
-import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Button, TouchableOpacity, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { WorkoutDetailedCard } from '@/components/workouts/WorkoutDetailedCard';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { WorkoutsBottomBar } from '@/components/workouts/WorkoutsBottomBar';
 import { CustomBackButton } from '@/components/base/CustomBackButton';
-import { Image } from 'expo-image';
 import { WorkoutsFilterDrawer } from '@/components/workouts/WorkoutsFilterDrawer';
+import { WorkoutsSortDrawer } from '@/components/workouts/WorkoutsSortDrawer';
+import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { spacing } from '@/utils/spacing';
 
 const workouts = [
     {
@@ -79,57 +81,95 @@ const workouts = [
             'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\nUse it as a standalone or pair it with a core session for a full-body workout.',
         focusMulti: ['Arms', 'Legs', 'Chest'],
     },
-    // fetch from the backend. caching?
 ];
 
 export default function AllWorkoutsScreen() {
     const [isFilterVisible, setIsFilterVisible] = useState(false);
+    const [isSortVisible, setIsSortVisible] = useState(false);
     const [filteredWorkouts, setFilteredWorkouts] = useState(workouts);
+    const [sortOption, setSortOption] = useState({ type: 'Length', order: 'Shortest' });
+
+    const navigation = useNavigation();
+    const route = useRoute();
+
+    const { initialFilters } = route.params || {};
+    const [filters, setFilters] = useState(initialFilters || {});
 
     const handleSortPress = () => {
-        // Handle sort action
+        setIsSortVisible(true);
     };
 
     const handleFilterPress = () => {
         setIsFilterVisible(true);
     };
 
-    const applyFilters = (filters: any) => {
+    const applyFilters = (appliedFilters: any) => {
+        setFilters(appliedFilters);
+        filterAndSortWorkouts(appliedFilters, sortOption);
+    };
+
+    const filterAndSortWorkouts = (appliedFilters: any, sortOption: { type: string; order: string }) => {
         let filtered = workouts;
 
-        if (filters.level?.length) {
-            filtered = filtered.filter((workout) => filters.level.includes(workout.level));
+        // Filtering logic
+        if (appliedFilters.level?.length) {
+            filtered = filtered.filter((workout) => appliedFilters.level.includes(workout.level));
         }
-        if (filters.equipment?.length) {
-            filtered = filtered.filter((workout) => filters.equipment.includes(workout.equipment));
+        if (appliedFilters.equipment?.length) {
+            filtered = filtered.filter((workout) => appliedFilters.equipment.includes(workout.equipment));
         }
-        if (filters.focus?.length) {
-            filtered = filtered.filter((workout) => filters.focus.includes(workout.focus));
+        if (appliedFilters.focus?.length) {
+            filtered = filtered.filter((workout) => appliedFilters.focus.includes(workout.focus));
         }
 
-        setFilteredWorkouts(filtered);
+        // Sorting logic
+        const parseLength = (length: string) => parseInt(length.replace(/\D/g, ''), 10);
+
+        if (sortOption.type === 'Length') {
+            filtered.sort((a, b) =>
+                sortOption.order === 'Shortest' ? parseLength(a.length) - parseLength(b.length) : parseLength(b.length) - parseLength(a.length),
+            );
+        } else if (sortOption.type === 'Name') {
+            filtered.sort((a, b) => (sortOption.order === 'A to Z' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)));
+        }
+
+        setFilteredWorkouts([...filtered]);
     };
+
+    const applySort = (option: { type: string; order: string }) => {
+        setSortOption(option);
+        filterAndSortWorkouts(filters, option);
+    };
+
+    useEffect(() => {
+        if (Object.keys(initialFilters).length > 0) {
+            setFilters(initialFilters);
+            filterAndSortWorkouts(initialFilters, sortOption);
+        } else {
+            filterAndSortWorkouts({}, sortOption);
+        }
+    }, [initialFilters]);
 
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
-    const navigation = useNavigation();
-
-    React.useEffect(() => {
+    useEffect(() => {
         navigation.setOptions({
             title: 'All Workouts',
-            headerBackTitleVisible: false, // Hide the back button label
+            headerBackTitleVisible: false,
             headerStyle: {
                 backgroundColor: themeColors.background,
             },
+            headerShadowVisible: false, // Specifically disable shadow
             headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
             headerLeft: () => <CustomBackButton />,
         });
-    }, [navigation]);
+    }, [navigation, themeColors]);
 
-    // Determine the correct label for workout count
     const workoutCount = filteredWorkouts.length;
     const workoutLabel = workoutCount === 1 ? 'workout' : 'workouts';
+
+    const activeFilterTypesCount = Object.keys(filters).filter((key) => filters[key].length > 0).length;
 
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
@@ -154,22 +194,27 @@ export default function AllWorkoutsScreen() {
                     ))}
                 </ThemedView>
             </ScrollView>
-            {/* Bar with Sort and Filter buttons */}
-            <WorkoutsBottomBar onSortPress={handleSortPress} onFilterPress={handleFilterPress} />
-            <WorkoutsFilterDrawer visible={isFilterVisible} onClose={() => setIsFilterVisible(false)} onApply={applyFilters} workouts={workouts} />
+            <WorkoutsBottomBar onSortPress={handleSortPress} onFilterPress={handleFilterPress} appliedFilterCount={activeFilterTypesCount} />
+            <WorkoutsFilterDrawer
+                visible={isFilterVisible}
+                onClose={() => setIsFilterVisible(false)}
+                onApply={applyFilters}
+                workouts={workouts}
+                initialFilters={filters}
+            />
+            <WorkoutsSortDrawer visible={isSortVisible} onClose={() => setIsSortVisible(false)} onApply={applySort} initialSort={sortOption} />
         </ThemedView>
     );
 }
 
 const styles = StyleSheet.create({
     countContainer: {
-        paddingLeft: 24,
-        paddingTop: 24,
-        paddingBottom: 24, // Add padding to ensure content doesn't overlap with the bottom bar
+        padding: spacing.lg,
+        paddingVertical: spacing.md,
     },
     contentContainer: {
-        paddingTop: 12,
-        paddingLeft: 16,
-        paddingBottom: 100, // Add padding to ensure content doesn't overlap with the bottom bar
+        paddingTop: spacing.sm,
+        paddingLeft: spacing.md,
+        paddingBottom: verticalScale(100),
     },
 });

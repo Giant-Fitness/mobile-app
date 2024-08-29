@@ -1,11 +1,12 @@
 // components/base/TextButton.tsx
 
 import React from 'react';
-import { TouchableOpacity, StyleSheet, Text, StyleProp, ViewStyle, TextStyle } from 'react-native';
+import { TouchableOpacity, StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { Icon } from '@/components/icons/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
+import { moderateScale } from '@/utils/scaling';
+import { spacing } from '@/utils/spacing';
 
 type TextButtonProps = {
     onPress: () => void;
@@ -35,11 +36,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: 30,
+        borderRadius: spacing.xl,
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.md,
     },
     text: {
         color: '#fff',
-        fontSize: 16,
+        fontSize: moderateScale(14),
         fontWeight: 'bold',
     },
 });

@@ -3,12 +3,15 @@
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, ImageSourcePropType } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { LeftImageInfoCard } from '@/components/layout/LeftImageInfoCard';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useNavigation } from '@react-navigation/native';
 import { Icon } from '@/components/icons/Icon';
+import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { spacing } from '@/utils/spacing';
+import { sizes } from '@/utils/sizes';
 
 type ProgramDayOverviewCardProps = {
     week: number;
@@ -18,7 +21,7 @@ type ProgramDayOverviewCardProps = {
     photo: ImageSourcePropType;
 };
 
-export const ProgramDayOverviewCard: React.FC<DayOverviewCardProps> = ({ week, day, workout, length, photo }) => {
+export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ week, day, workout, length, photo }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
     const navigation = useNavigation();
@@ -41,7 +44,7 @@ export const ProgramDayOverviewCard: React.FC<DayOverviewCardProps> = ({ week, d
                     </ThemedView>
 
                     <ThemedView style={styles.attributeRow}>
-                        <Icon name='stopwatch' size={14} color={themeColors.text} />
+                        <Icon name='stopwatch' size={moderateScale(14)} color={themeColors.text} />
                         <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.text }]}>
                             {length}
                         </ThemedText>
@@ -61,18 +64,18 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         backgroundColor: 'transparent',
         width: '100%',
-        marginBottom: 36,
+        marginBottom: spacing.xl,
     },
     title: {
-        fontSize: 14,
+        fontSize: moderateScale(14),
         marginBottom: 0,
-        marginLeft: 4,
-        marginTop: 4,
+        marginLeft: spacing.xs,
+        marginTop: spacing.xs,
     },
     image: {
-        height: 100,
-        width: 100,
-        borderRadius: 2,
+        height: sizes.imageMediumHeight,
+        width: sizes.imageMediumWidth,
+        borderRadius: spacing.xxs,
     },
     contentContainer: {
         width: '100%',
@@ -82,16 +85,16 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: 'transparent',
-        marginBottom: 4,
-        marginLeft: 4,
+        marginBottom: spacing.xs,
+        marginLeft: spacing.xs,
     },
     attributeText: {
-        marginLeft: 4,
-        lineHeight: 14,
+        marginLeft: spacing.xs,
+        lineHeight: spacing.md,
         backgroundColor: 'transparent',
     },
     attributeContainer: {
-        marginTop: 2,
+        marginTop: spacing.xxs,
         backgroundColor: 'transparent',
     },
 });

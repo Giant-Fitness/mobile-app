@@ -5,6 +5,9 @@ import { View, StyleSheet } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { spacing } from '@/utils/spacing';
+import { sizes } from '@/utils/sizes';
 
 type ProgressBarProps = {
     parts: number; // Total number of parts/weeks
@@ -14,7 +17,7 @@ type ProgressBarProps = {
 };
 
 const ProgressBar: React.FC<ProgressBarProps> = ({ parts = 8, currentPart = 0, completedParts = 0, containerWidth }) => {
-    const margin = 4; // Margin between pills
+    const margin = spacing.xs; // Margin between pills
     const totalMarginSpace = margin * (parts - 1); // Total space taken by margins
     const partWidth = Math.floor((containerWidth - totalMarginSpace) / parts); // Adjusted part width
     const colorScheme = useColorScheme();
@@ -53,11 +56,11 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ parts = 8, currentPart = 0, c
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
-        height: 3,
+        height: spacing.xs,
     },
     part: {
         height: '100%',
-        marginHorizontal: 1,
+        borderRadius: spacing.xxs,
     },
 });
 

@@ -1,7 +1,7 @@
 // app/workouts/workout-details.tsx
 
-import React, { useRef } from 'react';
-import { StyleSheet, ScrollView, Animated } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { StyleSheet, Animated } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
@@ -13,6 +13,9 @@ import { Icon } from '@/components/icons/Icon';
 import { TextButton } from '@/components/base/TextButton';
 import { IconButton } from '@/components/base/IconButton';
 import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle } from '@/components/video/FullScreenVideoPlayer';
+import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { spacing } from '@/utils/spacing';
+import { sizes } from '@/utils/sizes';
 
 export default function WorkoutDetailScreen() {
     const colorScheme = useColorScheme();
@@ -22,7 +25,15 @@ export default function WorkoutDetailScreen() {
     const route = useRoute();
 
     const scrollY = useRef(new Animated.Value(0)).current;
-    const videoPlayerRef = useRef<VideoPlayerHandle>(null);
+    const videoPlayerRef = useRef<FullScreenVideoPlayerHandle>(null);
+
+    // Constants for milestone tracking and skip logic
+    const MILESTONES = [0.25, 0.5, 0.75, 1.0]; // Define milestones as percentages
+    const SKIP_THRESHOLD = 0.25; // Max allowed skip percentage
+
+    // State for tracking playback position
+    const [lastPlaybackPosition, setLastPlaybackPosition] = useState(0);
+    const reachedMilestones = useRef(new Set());
 
     React.useEffect(() => {
         navigation.setOptions({ headerShown: false });
@@ -41,28 +52,53 @@ export default function WorkoutDetailScreen() {
         }
     };
 
+    // Function to handle playback status updates from the video player
+    const handlePlaybackStatusUpdate = (status) => {
+        if (status.isLoaded) {
+            const duration = status.durationMillis;
+            const currentPosition = status.positionMillis;
+            const progress = currentPosition / duration;
+
+            // Check and log milestones
+            MILESTONES.forEach((milestone) => {
+                if (progress >= milestone && !reachedMilestones.current.has(milestone)) {
+                    console.log(`Milestone reached: ${milestone * 100}%`);
+                    reachedMilestones.current.add(milestone); // Mark this milestone as reached
+                }
+            });
+
+            // Check if a skip occurred
+            if (lastPlaybackPosition !== null && Math.abs(currentPosition - lastPlaybackPosition) > duration * SKIP_THRESHOLD) {
+                console.log(`Skip detected from ${lastPlaybackPosition / 1000}s to ${currentPosition / 1000}s`);
+            }
+
+            // Update the last playback position
+            setLastPlaybackPosition(currentPosition);
+
+            // when full screen is exited and a significant threshold is reached (like 75%), show a toast asking the user if they want to log their workout
+            // there needs to be some special logic built in here. we'll have to make a request to the backend to see if this should even be logged
+            // backend should check if this exercise was logged in the last x hours (maybe 1-2). if not, then get the app to show the toast
+            // this is a pseudo version of session tracking
+        }
+    };
+
     return (
         <ThemedView style={styles.container}>
             <CustomBackButton style={styles.backButton} iconColor={themeColors.white} />
-            <Animated.ScrollView
-                contentContainerStyle={{ flexGrow: 1 }}
-                showsVerticalScrollIndicator={false}
-                // bounces={false}
-                overScrollMode='never'
-            >
+            <Animated.ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false} overScrollMode='never'>
                 <ImageTextOverlay
                     photo={photo}
                     title={name}
                     titleType='titleXXLarge'
                     gradientColors={['transparent', 'rgba(0,0,0,0.4)']}
-                    containerStyle={{ height: 500, elevation: 5 }}
-                    textContainerStyle={{ bottom: 24 }}
+                    containerStyle={{ height: sizes.imageXXLHeight, elevation: 5 }}
+                    textContainerStyle={{ bottom: spacing.lg, left: spacing.lg }}
                 />
 
                 <ThemedView style={[styles.textContainer]}>
                     <ThemedView style={[styles.attributeRow]}>
                         <ThemedView style={[styles.attribute]}>
-                            <Icon name='stopwatch' size={18} color={themeColors.text} />
+                            <Icon name='stopwatch' size={moderateScale(18)} color={themeColors.text} />
                             <ThemedText type='body' style={[styles.attributeText]}>
                                 {length}
                             </ThemedText>
@@ -70,7 +106,7 @@ export default function WorkoutDetailScreen() {
                     </ThemedView>
                     <ThemedView style={[styles.attributeRow]}>
                         <ThemedView style={[styles.attribute]}>
-                            <Icon name={levelIcon} size={18} color={themeColors.text} />
+                            <Icon name={levelIcon} size={moderateScale(18)} color={themeColors.text} />
                             <ThemedText type='body' style={[styles.attributeText]}>
                                 {level}
                             </ThemedText>
@@ -78,8 +114,7 @@ export default function WorkoutDetailScreen() {
                     </ThemedView>
                     <ThemedView style={[styles.attributeRow]}>
                         <ThemedView style={[styles.attribute]}>
-                            <Icon name='dumbbell' size={18} color={themeColors.text} />
-
+                            <Icon name='dumbbell' size={moderateScale(18)} color={themeColors.text} />
                             <ThemedText type='body' style={[styles.attributeText]}>
                                 {equipment}
                             </ThemedText>
@@ -87,7 +122,7 @@ export default function WorkoutDetailScreen() {
                     </ThemedView>
                     <ThemedView style={[styles.attributeRow]}>
                         <ThemedView style={[styles.attribute]}>
-                            <Icon name='yoga' size={18} color={themeColors.text} />
+                            <Icon name='yoga' size={moderateScale(18)} color={themeColors.text} />
                             <ThemedText type='body' style={[styles.attributeText]}>
                                 {focusMultiText}
                             </ThemedText>
@@ -101,7 +136,11 @@ export default function WorkoutDetailScreen() {
                     </ThemedView>
                 </ThemedView>
             </Animated.ScrollView>
-            <FullScreenVideoPlayer ref={videoPlayerRef} source={{ uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' }} />
+            <FullScreenVideoPlayer
+                ref={videoPlayerRef}
+                source={{ uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' }}
+                onPlaybackStatusUpdate={handlePlaybackStatusUpdate} // Pass the handler
+            />
             <ThemedView style={styles.buttonContainer}>
                 <TextButton
                     text='Start Workout'
@@ -112,7 +151,7 @@ export default function WorkoutDetailScreen() {
                 <IconButton
                     iconName='notebook'
                     style={[styles.notesButton, { backgroundColor: themeColors.buttonSecondary }]}
-                    iconSize={24}
+                    iconSize={moderateScale(24)}
                     iconColor={themeColors.buttonPrimary}
                 />
             </ThemedView>
@@ -128,62 +167,60 @@ const styles = StyleSheet.create({
     gradientOverlay: {
         flex: 1,
         justifyContent: 'flex-end',
-        padding: 16,
-        paddingLeft: 24,
+        padding: spacing.md,
     },
     backButton: {
         position: 'absolute',
-        top: 40,
-        left: 15,
+        top: spacing.xxl,
+        left: spacing.md,
         zIndex: 10,
     },
     textContainer: {
         flex: 1,
-        paddingHorizontal: 24,
-        paddingTop: 30,
-        paddingBottom: 120,
+        paddingHorizontal: spacing.lg,
+        paddingTop: spacing.md,
+        paddingBottom: verticalScale(120),
         zIndex: 2,
     },
     attribute: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingBottom: 20,
+        paddingBottom: spacing.md,
     },
     attributeText: {
-        marginLeft: 12,
-        lineHeight: 24,
+        marginLeft: spacing.md,
+        lineHeight: spacing.lg,
     },
     attributeRow: {
         flexDirection: 'row',
         justifyContent: 'flex-start',
     },
     detailsContainer: {
-        paddingTop: 18,
-        paddingBottom: 36,
+        paddingTop: spacing.md,
+        paddingBottom: spacing.xl,
     },
     detailsText: {
-        lineHeight: 24,
+        lineHeight: spacing.lg,
     },
     buttonContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: '5%',
         position: 'absolute',
-        bottom: 30,
+        bottom: verticalScale(30),
         left: 0,
         right: 0,
         backgroundColor: 'transparent',
     },
     startButton: {
         width: '80%',
-        paddingVertical: 16,
+        paddingVertical: spacing.md,
         marginRight: '2%',
     },
     notesButton: {
         width: '18%', // Fixed width for the icon button
         height: '100%', // Fixed height for the icon button
         alignItems: 'center',
-        alignItems: 'center',
-        borderRadius: '100%', // Ensure the button is perfectly circular
+        borderRadius: moderateScale(100), // Ensure the button is perfectly circular
     },
 });

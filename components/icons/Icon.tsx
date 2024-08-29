@@ -5,6 +5,7 @@ import { Ionicons, MaterialCommunityIcons, MaterialIcons, Entypo, SimpleLineIcon
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { StyleProp, TextStyle } from 'react-native';
+import { moderateScale } from '@/utils/scaling';
 
 type IconProps = {
     name: string;
@@ -19,7 +20,7 @@ export const Icon: React.FC<IconProps> = ({ name, size = 18, color, style }) => 
     const iconColor = color || themeColors.subText; // Use provided color or default to theme color
 
     const commonProps = {
-        size,
+        size: moderateScale(size),
         color: iconColor,
         style, // Apply the optional style prop
     };
@@ -59,6 +60,10 @@ export const Icon: React.FC<IconProps> = ({ name, size = 18, color, style }) => 
             return <MaterialCommunityIcons name='notebook' {...commonProps} />;
         case 'close':
             return <Ionicons name='close-circle-outline' {...commonProps} />;
+        case 'radio-button-on':
+            return <Ionicons name='radio-button-on' {...commonProps} />;
+        case 'radio-button-off':
+            return <Ionicons name='radio-button-off' {...commonProps} />;
         default:
             return <Ionicons name='alert-circle-outline' s {...commonProps} />;
     }

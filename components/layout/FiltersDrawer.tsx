@@ -9,16 +9,17 @@ import { TextButton } from '@/components/base/TextButton';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Icon } from '@/components/icons/Icon';
+import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { spacing } from '@/utils/spacing';
 
 interface FiltersDrawerProps {
     visible: boolean;
     onClose: () => void;
     onApply: (filters: any) => void;
-    filterAttributes: Record<string, string[]>; // Attributes for filters (e.g., level, equipment)
-    initialFilters?: Record<string, string[]>; // Initial state for the filters
-    title: string; // Title of the drawer
-    calculateFilteredCount: (filters: Record<string, string[]>) => number; // Function to calculate the count of filtered items
-    itemLabel?: string; // Optional label for items (e.g., 'workout' instead of 'item')
+    filterAttributes: Record<string, string[]>;
+    initialFilters?: Record<string, string[]>;
+    calculateFilteredCount: (filters: Record<string, string[]>) => number;
+    itemLabel?: string;
 }
 
 export const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
@@ -27,9 +28,8 @@ export const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
     onApply,
     filterAttributes,
     initialFilters = {},
-    title,
     calculateFilteredCount,
-    itemLabel = 'item', // Default label is 'item'
+    itemLabel = 'item',
 }) => {
     const [temporaryFilters, setTemporaryFilters] = useState<any>(initialFilters);
     const colorScheme = useColorScheme();
@@ -70,7 +70,8 @@ export const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
         setTemporaryFilters({});
     };
 
-    const filteredCount = calculateFilteredCount(temporaryFilters); // Use the provided function to calculate filtered count
+    const hasFilters = Object.keys(temporaryFilters).length > 0;
+    const filteredCount = calculateFilteredCount(temporaryFilters);
 
     const calculateChipWidth = (count: number) => {
         if (count === 2) return '49%';
@@ -89,19 +90,36 @@ export const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
     return (
         <BottomDrawer visible={visible} onClose={onClose}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={handleReset} style={styles.resetButton} activeOpacity={0.1} hitSlop={{ top: 30, bottom: 30, left: 30, right: 30 }}>
-                    <ThemedText type='overline' style={{ color: themeColors.subText, fontSize: 12 }}>
+                <TouchableOpacity
+                    onPress={handleReset}
+                    style={styles.resetButton}
+                    activeOpacity={hasFilters ? 0.5 : 1}
+                    disabled={!hasFilters}
+                    hitSlop={{ top: scale(30), bottom: scale(30), left: scale(30), right: scale(30) }}
+                >
+                    <ThemedText
+                        type='overline'
+                        style={{
+                            color: hasFilters ? themeColors.subText : themeColors.systemBorderColor,
+                            fontSize: moderateScale(13),
+                        }}
+                    >
                         Reset
                     </ThemedText>
                 </TouchableOpacity>
                 <View style={styles.titleContainer}>
-                    <ThemedText type='title'>{title}</ThemedText>
-                    <ThemedText type='overline' style={{ color: themeColors.subText, fontSize: 12 }}>
+                    <ThemedText type='title'>Filters</ThemedText>
+                    <ThemedText type='overline' style={{ color: themeColors.subText, fontSize: moderateScale(12) }}>
                         {filteredCount} {filteredCount === 1 ? itemLabel : `${itemLabel}s`} found
                     </ThemedText>
                 </View>
-                <TouchableOpacity onPress={onClose} style={styles.closeButton} activeOpacity={0.8} hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
-                    <Icon name='close' size={26} color={themeColors.subText} />
+                <TouchableOpacity
+                    onPress={onClose}
+                    style={styles.closeButton}
+                    activeOpacity={0.8}
+                    hitSlop={{ top: scale(20), bottom: scale(20), left: scale(20), right: scale(20) }}
+                >
+                    <Icon name='close' size={moderateScale(22)} color={themeColors.subText} />
                 </TouchableOpacity>
             </View>
 
@@ -162,48 +180,49 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: 12,
-        paddingHorizontal: 64,
-        paddingBottom: 12,
+        marginTop: spacing.md,
+        paddingHorizontal: spacing.xxxl,
+        paddingBottom: spacing.sm,
     },
     titleContainer: {
         alignItems: 'center',
         flex: 1,
     },
     filterScroll: {
-        paddingVertical: 16,
+        paddingVertical: spacing.md,
     },
     resetButton: {
         position: 'absolute',
         left: 0,
-        padding: 8,
+        top: verticalScale(12),
     },
     closeButton: {
         position: 'absolute',
         right: 0,
-        padding: 8,
+        top: verticalScale(12),
     },
     categoryContainer: {
-        marginBottom: 20,
+        marginBottom: spacing.lg,
     },
     categoryTitle: {
-        marginBottom: 10,
+        marginBottom: spacing.sm,
         fontWeight: 'bold',
+        fontSize: moderateScale(14),
     },
     chipContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
     },
     chip: {
-        marginVertical: 4,
+        marginVertical: spacing.xs,
     },
     buttonContainer: {
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 30,
+        marginBottom: spacing.xl,
     },
     applyButton: {
-        paddingVertical: 16,
+        paddingVertical: spacing.md,
         width: '90%',
     },
 });
