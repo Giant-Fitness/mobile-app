@@ -11,9 +11,10 @@ import { Icon } from '@/components/icons/Icon';
 type WorkoutsBottomBarProps = {
     onSortPress: () => void;
     onFilterPress: () => void;
+    appliedFilterCount?: number;
 };
 
-export const WorkoutsBottomBar: React.FC<WorkoutsBottomBarProps> = ({ onSortPress, onFilterPress }) => {
+export const WorkoutsBottomBar: React.FC<WorkoutsBottomBarProps> = ({ onSortPress, onFilterPress, appliedFilterCount = 0 }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
@@ -25,6 +26,15 @@ export const WorkoutsBottomBar: React.FC<WorkoutsBottomBarProps> = ({ onSortPres
                     <ThemedText type='buttonSmall' style={[styles.text, { color: themeColors.text }]}>
                         Filter
                     </ThemedText>
+                    {appliedFilterCount > 0 && (
+                        <ThemedText type='buttonSmall' style={[styles.filterCount, { color: themeColors.subText }]}>
+                            {' ('}
+                            <ThemedText type='buttonSmall' style={[styles.number, { color: themeColors.subText }]}>
+                                {appliedFilterCount}
+                            </ThemedText>
+                            {')'}
+                        </ThemedText>
+                    )}
                 </View>
             </TouchableOpacity>
             <View style={[styles.divider, { backgroundColor: themeColors.text }]} />
@@ -75,5 +85,15 @@ const styles = StyleSheet.create({
         width: 0.5,
         height: '40%',
         alignSelf: 'center',
+    },
+    filterCount: {
+        marginLeft: 2,
+        lineHeight: 16,
+        fontSize: 12,
+    },
+    number: {
+        lineHeight: 16,
+        paddingTop: 1,
+        fontSize: 12,
     },
 });

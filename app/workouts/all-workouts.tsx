@@ -145,6 +145,9 @@ export default function AllWorkoutsScreen() {
     const workoutCount = filteredWorkouts.length;
     const workoutLabel = workoutCount === 1 ? 'workout' : 'workouts';
 
+    // Calculate the number of applied filters
+    const appliedFilterCount = Object.values(filters).reduce((count, filter) => count + filter.length, 0);
+
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
             <ThemedText type='overline' style={[styles.countContainer, { color: themeColors.subText }]}>
@@ -169,7 +172,7 @@ export default function AllWorkoutsScreen() {
                 </ThemedView>
             </ScrollView>
             {/* Bar with Sort and Filter buttons */}
-            <WorkoutsBottomBar onSortPress={handleSortPress} onFilterPress={handleFilterPress} />
+            <WorkoutsBottomBar onSortPress={handleSortPress} onFilterPress={handleFilterPress} appliedFilterCount={appliedFilterCount} />
             <WorkoutsFilterDrawer
                 visible={isFilterVisible}
                 onClose={() => setIsFilterVisible(false)}
