@@ -11,7 +11,7 @@ import { Icon } from '@/components/icons/Icon';
 type WorkoutsBottomBarProps = {
     onSortPress: () => void;
     onFilterPress: () => void;
-    appliedFilterCount?: number;
+    appliedFilterCount?: number; // New prop for count of applied filters
 };
 
 export const WorkoutsBottomBar: React.FC<WorkoutsBottomBarProps> = ({ onSortPress, onFilterPress, appliedFilterCount = 0 }) => {
@@ -27,13 +27,11 @@ export const WorkoutsBottomBar: React.FC<WorkoutsBottomBarProps> = ({ onSortPres
                         Filter
                     </ThemedText>
                     {appliedFilterCount > 0 && (
-                        <ThemedText type='buttonSmall' style={[styles.filterCount, { color: themeColors.subText }]}>
-                            {' ('}
-                            <ThemedText type='buttonSmall' style={[styles.number, { color: themeColors.subText }]}>
+                        <View style={[styles.badge, { backgroundColor: themeColors.subText }]}>
+                            <ThemedText type='buttonSmall' style={[styles.badgeText, { color: themeColors.background }]}>
                                 {appliedFilterCount}
                             </ThemedText>
-                            {')'}
-                        </ThemedText>
+                        </View>
                     )}
                 </View>
             </TouchableOpacity>
@@ -73,6 +71,7 @@ const styles = StyleSheet.create({
     iconAndText: {
         flexDirection: 'row',
         alignItems: 'center',
+        position: 'relative', // Allows positioning of the badge
     },
     icon: {
         alignSelf: 'center',
@@ -81,19 +80,24 @@ const styles = StyleSheet.create({
     text: {
         marginLeft: 4,
     },
+    badge: {
+        position: 'absolute',
+        top: -6, // Position above the "Filter" text
+        right: -14, // Position to the right of the "Filter" text
+        minWidth: 16,
+        height: 16,
+        borderRadius: 8,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 4,
+    },
+    badgeText: {
+        fontSize: 8,
+        lineHeight: 12,
+    },
     divider: {
         width: 0.5,
         height: '40%',
         alignSelf: 'center',
-    },
-    filterCount: {
-        marginLeft: 2,
-        lineHeight: 16,
-        fontSize: 12,
-    },
-    number: {
-        lineHeight: 16,
-        paddingTop: 1,
-        fontSize: 12,
     },
 });
