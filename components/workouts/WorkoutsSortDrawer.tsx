@@ -16,7 +16,5 @@ const workoutSortOptions = [
 ];
 
 export const WorkoutsSortDrawer: React.FC<WorkoutsSortDrawerProps> = ({ visible, onClose, onApply, initialSort }) => {
-    return (
-        <SortDrawer visible={visible} onClose={onClose} onApply={onApply} initialSort={initialSort} sortOptions={workoutSortOptions} title='Sort Workouts' />
-    );
+    return <SortDrawer visible={visible} onClose={onClose} onApply={onApply} initialSort={initialSort} sortOptions={workoutSortOptions} title='Sort' />;
 };

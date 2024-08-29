@@ -1,6 +1,4 @@
-// components/layout/SortDrawer.tsx
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { BottomDrawer } from '@/components/layout/BottomDrawer';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -36,6 +34,13 @@ export const SortDrawer: React.FC<SortDrawerProps> = ({ visible, onClose, onAppl
     const handleOptionSelect = (type: string, order: string) => {
         setSelectedSort({ type, order });
     };
+
+    // Reset selected sort when the drawer is closed without applying
+    useEffect(() => {
+        if (!visible) {
+            setSelectedSort(initialSort);
+        }
+    }, [visible, initialSort]);
 
     return (
         <BottomDrawer visible={visible} onClose={onClose} style={{ paddingHorizontal: 0 }}>
