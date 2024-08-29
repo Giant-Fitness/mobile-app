@@ -70,6 +70,8 @@ export const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
         setTemporaryFilters({});
     };
 
+    const hasFilters = Object.keys(temporaryFilters).length > 0;
+
     const filteredCount = calculateFilteredCount(temporaryFilters); // Use the provided function to calculate filtered count
 
     const calculateChipWidth = (count: number) => {
@@ -89,8 +91,20 @@ export const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
     return (
         <BottomDrawer visible={visible} onClose={onClose}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={handleReset} style={styles.resetButton} activeOpacity={0.1} hitSlop={{ top: 30, bottom: 30, left: 30, right: 30 }}>
-                    <ThemedText type='overline' style={{ color: themeColors.subText, fontSize: 12 }}>
+                <TouchableOpacity
+                    onPress={handleReset}
+                    style={styles.resetButton}
+                    activeOpacity={hasFilters ? 0.5 : 1} // No opacity change when inactive
+                    disabled={!hasFilters} // Disable the button when no filters are active
+                    hitSlop={{ top: 30, bottom: 30, left: 30, right: 30 }}
+                >
+                    <ThemedText
+                        type='overline'
+                        style={{
+                            color: hasFilters ? themeColors.subText : themeColors.systemBorderColor,
+                            fontSize: 13,
+                        }}
+                    >
                         Reset
                     </ThemedText>
                 </TouchableOpacity>
@@ -101,7 +115,7 @@ export const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
                     </ThemedText>
                 </View>
                 <TouchableOpacity onPress={onClose} style={styles.closeButton} activeOpacity={0.8} hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
-                    <Icon name='close' size={26} color={themeColors.subText} />
+                    <Icon name='close' size={22} color={themeColors.subText} />
                 </TouchableOpacity>
             </View>
 
@@ -176,12 +190,12 @@ const styles = StyleSheet.create({
     resetButton: {
         position: 'absolute',
         left: 0,
-        padding: 8,
+        top: 12,
     },
     closeButton: {
         position: 'absolute',
         right: 0,
-        padding: 8,
+        top: 12,
     },
     categoryContainer: {
         marginBottom: 20,
@@ -189,6 +203,7 @@ const styles = StyleSheet.create({
     categoryTitle: {
         marginBottom: 10,
         fontWeight: 'bold',
+        fontSize: 14,
     },
     chipContainer: {
         flexDirection: 'row',
