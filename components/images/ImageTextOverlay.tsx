@@ -8,6 +8,9 @@ import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Image } from 'expo-image';
+import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { spacing } from '@/utils/spacing';
+import { sizes } from '@/utils/sizes';
 
 type ImageTextOverlayProps = {
     photo: any;
@@ -74,17 +77,17 @@ const styles = StyleSheet.create({
     },
     textContainer: {
         position: 'absolute',
-        left: 24,
-        right: 24,
-        bottom: 24,
+        left: spacing.lg,
+        right: spacing.lg,
+        bottom: spacing.lg,
         zIndex: 3,
         backgroundColor: 'transparent',
     },
     title: {
         textShadowColor: 'rgba(0,0,0,0.75)',
-        textShadowRadius: 10,
-        marginRight: 48,
-        lineHeight: 40,
+        textShadowRadius: sizes.textShadowRadius,
+        marginRight: spacing.xxl,
+        lineHeight: spacing.xxl,
     },
     subtitle: {
         marginTop: 8,

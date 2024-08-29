@@ -12,6 +12,9 @@ import { ProgramDayOverviewCard } from '@/components/programs/ProgramDayOverview
 import { Collapsible } from '@/components/layout/Collapsible';
 import ProgressBar from '@/components/programs/ProgressBar';
 import { Icon } from '@/components/icons/Icon';
+import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { spacing } from '@/utils/spacing';
+import { sizes } from '@/utils/sizes';
 
 export default function ProgramsScreen() {
     const colorScheme = useColorScheme();
@@ -44,8 +47,8 @@ export default function ProgramsScreen() {
                 </ThemedView>
 
                 <ThemedView style={[styles.weekProgress]}>
-                    <ProgressBar completedParts={2} currentPart={3} parts={6} containerWidth={screenWidth - 48} />
-                    <ThemedText style={[{ color: themeColors.subText, marginTop: 12 }]}>Week 3 of 6</ThemedText>
+                    <ProgressBar completedParts={2} currentPart={3} parts={6} containerWidth={screenWidth - spacing.xxl} />
+                    <ThemedText style={[{ color: themeColors.subText, marginTop: spacing.md }]}>Week 3 of 6</ThemedText>
                 </ThemedView>
 
                 <ThemedView style={[styles.activeCardContainer]}>
@@ -70,18 +73,12 @@ export default function ProgramsScreen() {
                 </ThemedView>
 
                 <ThemedView style={[styles.menuContainer]}>
-                    {/*                <View
-                    style={{
-                        borderBottomColor: themeColors.systemBorderColor,
-                        borderBottomWidth: StyleSheet.hairlineWidth,
-                    }}
-                />*/}
                     <ThemedView>
                         <TouchableOpacity style={styles.menuItem}>
                             <ThemedText type='body' style={[{ color: themeColors.text }]}>
                                 Program Calendar
                             </ThemedText>
-                            <Icon name='chevron-forward' size={16} color={themeColors.iconDefault} />
+                            <Icon name='chevron-forward' size={moderateScale(16)} color={themeColors.iconDefault} />
                         </TouchableOpacity>
                         <View
                             style={{
@@ -95,7 +92,7 @@ export default function ProgramsScreen() {
                             <ThemedText type='body' style={[{ color: themeColors.text }]}>
                                 Program Overview
                             </ThemedText>
-                            <Icon name='chevron-forward' size={16} color={themeColors.iconDefault} />
+                            <Icon name='chevron-forward' size={moderateScale(16)} color={themeColors.iconDefault} />
                         </TouchableOpacity>
                         <View
                             style={{
@@ -109,7 +106,7 @@ export default function ProgramsScreen() {
                             <ThemedText type='body' style={[{ color: themeColors.text }]}>
                                 Browse Programs
                             </ThemedText>
-                            <Icon name='chevron-forward' size={16} color={themeColors.iconDefault} />
+                            <Icon name='chevron-forward' size={moderateScale(16)} color={themeColors.iconDefault} />
                         </TouchableOpacity>
                         <View
                             style={{
@@ -120,14 +117,14 @@ export default function ProgramsScreen() {
                     </ThemedView>
                     <ThemedView
                         style={{
-                            paddingBottom: 48,
+                            paddingBottom: spacing.xxl,
                         }}
                     >
                         <TouchableOpacity style={styles.menuItem}>
                             <ThemedText type='body' style={[{ color: themeColors.text }]}>
                                 End Program
                             </ThemedText>
-                            <Icon name='chevron-forward' size={16} color={themeColors.iconDefault} />
+                            <Icon name='chevron-forward' size={moderateScale(16)} color={themeColors.iconDefault} />
                         </TouchableOpacity>
                         <View
                             style={{
@@ -152,48 +149,48 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     subHeader: {
-        marginTop: 18,
-        marginBottom: 16,
+        marginTop: spacing.md,
+        marginBottom: spacing.md,
     },
     divider: {
-        height: 0.7,
+        height: verticalScale(0.7),
         width: '100%',
         alignSelf: 'center',
     },
     upNextContainer: {
         paddingBottom: 0,
-        paddingHorizontal: 24,
+        paddingHorizontal: spacing.lg,
     },
     menuItem: {
-        paddingTop: 24,
-        paddingBottom: 24,
+        paddingTop: spacing.lg,
+        paddingBottom: spacing.lg,
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
     quoteContainer: {
-        paddingTop: 24,
-        paddingBottom: 12,
-        marginHorizontal: 48,
+        paddingTop: spacing.md,
+        paddingBottom: spacing.sm,
+        marginHorizontal: spacing.xxl,
     },
     quoteText: {
         textAlign: 'center',
-        paddingBottom: 6,
+        paddingBottom: spacing.sm,
     },
     planHeader: {
-        marginBottom: 12,
-        paddingHorizontal: 24,
+        marginBottom: spacing.md,
+        paddingHorizontal: spacing.lg,
     },
     weekProgress: {
-        marginBottom: 24,
-        paddingHorizontal: 24,
+        marginBottom: spacing.md,
+        paddingHorizontal: spacing.lg,
     },
     activeCardContainer: {
-        paddingHorizontal: 24,
-        paddingBottom: 48,
+        paddingHorizontal: spacing.lg,
+        paddingBottom: spacing.xxl,
     },
     menuContainer: {
-        paddingHorizontal: 24,
-        paddingBottom: 12,
-        paddingTop: 18,
+        paddingHorizontal: spacing.lg,
+        paddingBottom: spacing.md,
+        paddingTop: spacing.md,
     },
 });

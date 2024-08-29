@@ -144,7 +144,7 @@ const DayWorkoutsScreen = () => {
 
 const styles = StyleSheet.create({
     contentContainer: {
-        paddingLeft: 18,
+        paddingRight: 8,
         paddingBottom: 90, // Add padding to ensure content doesn't overlap with the bottom bar
     },
     container: {

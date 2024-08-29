@@ -1,7 +1,8 @@
 // components/workouts/WorkoutsFilterDrawer.tsx
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiltersDrawer } from '@/components/layout/FiltersDrawer';
+import { scale, moderateScale, verticalScale } from '@/utils/scaling';
 
 const workoutFilterAttributes = {
     level: ['Beginner', 'Intermediate', 'Advanced'],
@@ -14,13 +15,12 @@ interface WorkoutsFilterDrawerProps {
     onClose: () => void;
     onApply: (filters: any) => void;
     workouts: Array<any>;
-    initialFilters?: Record<string, string[]>; // Accept initial filters as an optional prop
+    initialFilters?: Record<string, string[]>;
 }
 
 export const WorkoutsFilterDrawer: React.FC<WorkoutsFilterDrawerProps> = ({ visible, onClose, onApply, workouts, initialFilters = {} }) => {
     const [appliedFilters, setAppliedFilters] = useState<any>({});
 
-    // Sync with initial filters if they change
     useEffect(() => {
         setAppliedFilters(initialFilters);
     }, [initialFilters]);
@@ -30,7 +30,6 @@ export const WorkoutsFilterDrawer: React.FC<WorkoutsFilterDrawerProps> = ({ visi
         onApply(filters);
     };
 
-    // Filtering function specific to workouts
     const calculateFilteredCount = (filters: Record<string, string[]>) => {
         if (Object.keys(filters).length === 0) {
             return workouts.length;
@@ -54,7 +53,7 @@ export const WorkoutsFilterDrawer: React.FC<WorkoutsFilterDrawerProps> = ({ visi
             onApply={handleApply}
             filterAttributes={workoutFilterAttributes}
             initialFilters={appliedFilters}
-            calculateFilteredCount={calculateFilteredCount} // Pass the filtering function
+            calculateFilteredCount={calculateFilteredCount}
             itemLabel='workout'
         />
     );

@@ -2,98 +2,97 @@
 
 import React from 'react';
 import { Text, type TextProps, StyleSheet } from 'react-native';
-
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { moderateScale } from '@/utils/scaling'; // Use the customized moderateScale
 
-// typescript typings for props
 export type ThemedTextProps = TextProps & {
     lightColor?: string;
     darkColor?: string;
     type?: 'body' | 'titleLarge' | 'title' | 'subtitle' | 'caption' | 'link' | 'button' | 'overline';
 };
 
-// Styles for different text types using specific Inter fonts
+// Styles for different text types using specific Inter fonts with adjusted scaling
 const styles = StyleSheet.create({
     body: {
-        fontSize: 14,
-        lineHeight: 21,
+        fontSize: moderateScale(14), // Adjusted with moderate scaling
+        lineHeight: moderateScale(21),
         fontFamily: 'InterRegular',
     },
     bodyMedium: {
-        fontSize: 16,
-        lineHeight: 24,
+        fontSize: moderateScale(16),
+        lineHeight: moderateScale(24),
         fontFamily: 'InterMedium',
     },
     bodySmall: {
-        fontSize: 13,
-        lineHeight: 20,
+        fontSize: moderateScale(13),
+        lineHeight: moderateScale(20),
         fontFamily: 'InterRegular',
     },
     bodyXSmall: {
-        fontSize: 12,
-        lineHeight: 18,
+        fontSize: moderateScale(12),
+        lineHeight: moderateScale(18),
         fontFamily: 'InterRegular',
     },
     titleLarge: {
-        fontSize: 18,
+        fontSize: moderateScale(18),
+        lineHeight: moderateScale(27),
         fontFamily: 'InterSemiBold',
-        lineHeight: 27,
     },
     titleXLarge: {
-        fontSize: 21,
+        fontSize: moderateScale(21),
+        lineHeight: moderateScale(32),
         fontFamily: 'InterMedium',
-        lineHeight: 32,
     },
     titleXXLarge: {
-        fontSize: 24,
+        fontSize: moderateScale(24),
+        lineHeight: moderateScale(36),
         fontFamily: 'InterMedium',
-        lineHeight: 36,
     },
     title: {
-        fontSize: 16,
+        fontSize: moderateScale(16),
+        lineHeight: moderateScale(24),
         fontFamily: 'InterSemiBold',
-        lineHeight: 24,
     },
     subtitle: {
-        fontSize: 18,
+        fontSize: moderateScale(18),
+        lineHeight: moderateScale(27),
         fontFamily: 'InterRegular',
-        lineHeight: 27,
     },
     caption: {
-        fontSize: 12,
+        fontSize: moderateScale(12),
+        lineHeight: moderateScale(18),
         fontFamily: 'InterMedium',
-        lineHeight: 18,
     },
     link: {
-        fontSize: 16,
+        fontSize: moderateScale(16),
+        lineHeight: moderateScale(24),
         fontFamily: 'InterMedium',
-        lineHeight: 24,
     },
     button: {
-        fontSize: 18,
+        fontSize: moderateScale(18),
+        lineHeight: moderateScale(24),
         fontFamily: 'InterBold',
-        lineHeight: 24,
     },
     buttonSmall: {
-        fontSize: 13,
+        fontSize: moderateScale(13),
+        lineHeight: moderateScale(20),
         fontFamily: 'InterRegular',
-        lineHeight: 20,
     },
     overlineTransformed: {
-        fontSize: 13,
+        fontSize: moderateScale(13),
+        lineHeight: moderateScale(20),
         fontFamily: 'InterMedium',
         textTransform: 'uppercase',
-        lineHeight: 20,
     },
     overline: {
-        fontSize: 13,
+        fontSize: moderateScale(13),
+        lineHeight: moderateScale(20),
         fontFamily: 'InterMedium',
-        lineHeight: 20,
     },
     italic: {
-        fontSize: 12,
+        fontSize: moderateScale(12),
+        lineHeight: moderateScale(18),
         fontFamily: 'InterItalic',
-        lineHeight: 18,
     },
 });
 

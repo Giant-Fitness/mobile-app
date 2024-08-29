@@ -8,6 +8,9 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { TopImageInfoCard } from '@/components/layout/TopImageInfoCard';
 import { Icon } from '@/components/icons/Icon';
+import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { spacing } from '@/utils/spacing';
+import { sizes } from '@/utils/sizes';
 
 type ActiveProgramDayCardProps = {};
 
@@ -22,15 +25,15 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = ({}) =>
             subtitle='Week 3 Day 2'
             extraContent={
                 <ThemedView style={styles.attributeRow}>
-                    <Icon name='stopwatch' size={14} color={themeColors.highlightContainerText} />
-                    <ThemedText type='body' style={[styles.attributeText, { color: themeColors.highlightContainerText, paddingRight: 16 }]}>
+                    <Icon name='stopwatch' size={moderateScale(14)} color={themeColors.highlightContainerText} />
+                    <ThemedText type='body' style={[styles.attributeText, { color: themeColors.highlightContainerText, paddingRight: spacing.md }]}>
                         40 mins
                     </ThemedText>
-                    <Icon name='dumbbell' size={14} color={themeColors.highlightContainerText} />
-                    <ThemedText type='body' style={[styles.attributeText, { color: themeColors.highlightContainerText, marginLeft: 5 }]}>
+                    <Icon name='dumbbell' size={moderateScale(14)} color={themeColors.highlightContainerText} />
+                    <ThemedText type='body' style={[styles.attributeText, { color: themeColors.highlightContainerText, marginLeft: spacing.xs }]}>
                         Full Gym
                     </ThemedText>
-                    <Icon name='chevron-forward' size={16} color={themeColors.highlightContainerText} style={styles.chevronIcon} />
+                    <Icon name='chevron-forward' size={moderateScale(16)} color={themeColors.highlightContainerText} style={styles.chevronIcon} />
                 </ThemedView>
             }
             titleStyle={{ color: themeColors.highlightContainerText }}
@@ -43,13 +46,13 @@ const styles = StyleSheet.create({
     attributeRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 8,
+        marginBottom: spacing.sm,
         backgroundColor: 'transparent',
     },
     attributeText: {
-        marginLeft: 5,
-        fontSize: 13,
-        lineHeight: 16, // Ensures the text is aligned with the icon
+        marginLeft: spacing.xs,
+        fontSize: moderateScale(13),
+        lineHeight: spacing.md, // Ensures the text is aligned with the icon
     },
     chevronIcon: {
         position: 'absolute',

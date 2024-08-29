@@ -5,6 +5,7 @@ import { Ionicons, MaterialCommunityIcons, MaterialIcons, Entypo, SimpleLineIcon
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { StyleProp, TextStyle } from 'react-native';
+import { moderateScale } from '@/utils/scaling';
 
 type IconProps = {
     name: string;
@@ -19,7 +20,7 @@ export const Icon: React.FC<IconProps> = ({ name, size = 18, color, style }) => 
     const iconColor = color || themeColors.subText; // Use provided color or default to theme color
 
     const commonProps = {
-        size,
+        size: moderateScale(size),
         color: iconColor,
         style, // Apply the optional style prop
     };

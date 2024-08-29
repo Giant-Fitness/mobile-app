@@ -13,6 +13,9 @@ import { Icon } from '@/components/icons/Icon';
 import { TextButton } from '@/components/base/TextButton';
 import { IconButton } from '@/components/base/IconButton';
 import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle } from '@/components/video/FullScreenVideoPlayer';
+import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { spacing } from '@/utils/spacing';
+import { sizes } from '@/utils/sizes';
 
 export default function WorkoutDetailScreen() {
     const colorScheme = useColorScheme();
@@ -88,14 +91,14 @@ export default function WorkoutDetailScreen() {
                     title={name}
                     titleType='titleXXLarge'
                     gradientColors={['transparent', 'rgba(0,0,0,0.4)']}
-                    containerStyle={{ height: 500, elevation: 5 }}
-                    textContainerStyle={{ bottom: 24 }}
+                    containerStyle={{ height: sizes.imageXXLHeight, elevation: 5 }}
+                    textContainerStyle={{ bottom: spacing.lg, left: spacing.lg }}
                 />
 
                 <ThemedView style={[styles.textContainer]}>
                     <ThemedView style={[styles.attributeRow]}>
                         <ThemedView style={[styles.attribute]}>
-                            <Icon name='stopwatch' size={18} color={themeColors.text} />
+                            <Icon name='stopwatch' size={moderateScale(18)} color={themeColors.text} />
                             <ThemedText type='body' style={[styles.attributeText]}>
                                 {length}
                             </ThemedText>
@@ -103,7 +106,7 @@ export default function WorkoutDetailScreen() {
                     </ThemedView>
                     <ThemedView style={[styles.attributeRow]}>
                         <ThemedView style={[styles.attribute]}>
-                            <Icon name={levelIcon} size={18} color={themeColors.text} />
+                            <Icon name={levelIcon} size={moderateScale(18)} color={themeColors.text} />
                             <ThemedText type='body' style={[styles.attributeText]}>
                                 {level}
                             </ThemedText>
@@ -111,7 +114,7 @@ export default function WorkoutDetailScreen() {
                     </ThemedView>
                     <ThemedView style={[styles.attributeRow]}>
                         <ThemedView style={[styles.attribute]}>
-                            <Icon name='dumbbell' size={18} color={themeColors.text} />
+                            <Icon name='dumbbell' size={moderateScale(18)} color={themeColors.text} />
                             <ThemedText type='body' style={[styles.attributeText]}>
                                 {equipment}
                             </ThemedText>
@@ -119,7 +122,7 @@ export default function WorkoutDetailScreen() {
                     </ThemedView>
                     <ThemedView style={[styles.attributeRow]}>
                         <ThemedView style={[styles.attribute]}>
-                            <Icon name='yoga' size={18} color={themeColors.text} />
+                            <Icon name='yoga' size={moderateScale(18)} color={themeColors.text} />
                             <ThemedText type='body' style={[styles.attributeText]}>
                                 {focusMultiText}
                             </ThemedText>
@@ -148,7 +151,7 @@ export default function WorkoutDetailScreen() {
                 <IconButton
                     iconName='notebook'
                     style={[styles.notesButton, { backgroundColor: themeColors.buttonSecondary }]}
-                    iconSize={24}
+                    iconSize={moderateScale(24)}
                     iconColor={themeColors.buttonPrimary}
                 />
             </ThemedView>
@@ -164,61 +167,60 @@ const styles = StyleSheet.create({
     gradientOverlay: {
         flex: 1,
         justifyContent: 'flex-end',
-        padding: 16,
-        paddingLeft: 24,
+        padding: spacing.md,
     },
     backButton: {
         position: 'absolute',
-        top: 54,
-        left: 16,
+        top: spacing.xxl,
+        left: spacing.md,
         zIndex: 10,
     },
     textContainer: {
         flex: 1,
-        paddingHorizontal: 24,
-        paddingTop: 30,
-        paddingBottom: 120,
+        paddingHorizontal: spacing.lg,
+        paddingTop: spacing.md,
+        paddingBottom: verticalScale(120),
         zIndex: 2,
     },
     attribute: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingBottom: 20,
+        paddingBottom: spacing.md,
     },
     attributeText: {
-        marginLeft: 12,
-        lineHeight: 24,
+        marginLeft: spacing.md,
+        lineHeight: spacing.lg,
     },
     attributeRow: {
         flexDirection: 'row',
         justifyContent: 'flex-start',
     },
     detailsContainer: {
-        paddingTop: 18,
-        paddingBottom: 36,
+        paddingTop: spacing.md,
+        paddingBottom: spacing.xl,
     },
     detailsText: {
-        lineHeight: 24,
+        lineHeight: spacing.lg,
     },
     buttonContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: '5%',
         position: 'absolute',
-        bottom: 30,
+        bottom: verticalScale(30),
         left: 0,
         right: 0,
         backgroundColor: 'transparent',
     },
     startButton: {
         width: '80%',
-        paddingVertical: 16,
+        paddingVertical: spacing.md,
         marginRight: '2%',
     },
     notesButton: {
         width: '18%', // Fixed width for the icon button
         height: '100%', // Fixed height for the icon button
         alignItems: 'center',
-        borderRadius: 100, // Ensure the button is perfectly circular
+        borderRadius: moderateScale(100), // Ensure the button is perfectly circular
     },
 });
