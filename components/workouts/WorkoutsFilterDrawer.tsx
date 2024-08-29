@@ -54,7 +54,6 @@ export const WorkoutsFilterDrawer: React.FC<WorkoutsFilterDrawerProps> = ({ visi
             onApply={handleApply}
             filterAttributes={workoutFilterAttributes}
             initialFilters={appliedFilters}
-            title='Filters'
             calculateFilteredCount={calculateFilteredCount} // Pass the filtering function
             itemLabel='workout'
         />

@@ -16,7 +16,6 @@ interface FiltersDrawerProps {
     onApply: (filters: any) => void;
     filterAttributes: Record<string, string[]>; // Attributes for filters (e.g., level, equipment)
     initialFilters?: Record<string, string[]>; // Initial state for the filters
-    title: string; // Title of the drawer
     calculateFilteredCount: (filters: Record<string, string[]>) => number; // Function to calculate the count of filtered items
     itemLabel?: string; // Optional label for items (e.g., 'workout' instead of 'item')
 }
@@ -27,7 +26,6 @@ export const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
     onApply,
     filterAttributes,
     initialFilters = {},
-    title,
     calculateFilteredCount,
     itemLabel = 'item', // Default label is 'item'
 }) => {
@@ -109,7 +107,7 @@ export const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
                     </ThemedText>
                 </TouchableOpacity>
                 <View style={styles.titleContainer}>
-                    <ThemedText type='title'>{title}</ThemedText>
+                    <ThemedText type='title'>Filters</ThemedText>
                     <ThemedText type='overline' style={{ color: themeColors.subText, fontSize: 12 }}>
                         {filteredCount} {filteredCount === 1 ? itemLabel : `${itemLabel}s`} found
                     </ThemedText>
