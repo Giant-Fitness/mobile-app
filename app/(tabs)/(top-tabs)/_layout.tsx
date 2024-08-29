@@ -28,6 +28,7 @@ export default function TabLayout() {
                 tabBarLabelStyle: { textTransform: 'none', fontSize: 14 },
                 tabBarStyle: {
                     backgroundColor: themeColors.background,
+                    height: 45,
                 },
                 tabBarIndicatorStyle: {
                     backgroundColor: themeColors.text,

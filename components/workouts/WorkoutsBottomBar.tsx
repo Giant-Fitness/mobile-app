@@ -1,7 +1,7 @@
 // components/workouts/WorkoutsBottomBar.tsx
 
 import React from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Platform } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -11,7 +11,7 @@ import { Icon } from '@/components/icons/Icon';
 type WorkoutsBottomBarProps = {
     onSortPress: () => void;
     onFilterPress: () => void;
-    appliedFilterCount?: number; // New prop for count of applied filters
+    appliedFilterCount?: number;
 };
 
 export const WorkoutsBottomBar: React.FC<WorkoutsBottomBarProps> = ({ onSortPress, onFilterPress, appliedFilterCount = 0 }) => {
@@ -52,11 +52,20 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-        paddingTop: 10,
+        paddingTop: Platform.select({
+            ios: 10, // Height for iOS
+            android: 20, // Height for Android
+        }),
         paddingHorizontal: 20,
-        paddingBottom: 40,
+        paddingBottom: Platform.select({
+            ios: 40, // Height for iOS
+            android: 25, // Height for Android
+        }),
         borderTopWidth: 0.3,
-        height: 90,
+        height: Platform.select({
+            ios: 90, // Height for iOS
+            android: 70, // Height for Android
+        }),
         position: 'absolute',
         left: 0,
         right: 0,

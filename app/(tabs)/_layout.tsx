@@ -9,6 +9,7 @@ import { Entypo, MaterialIcons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Icon } from '@/components/icons/Icon';
+import { Platform } from 'react-native';
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
@@ -19,11 +20,23 @@ export default function TabLayout() {
         <Tabs
             screenOptions={{
                 tabBarActiveTintColor: themeColors.iconSelected,
-                tabBarStyle: {
-                    backgroundColor: themeColors.background,
-                    height: 90,
-                    paddingTop: 5,
-                    level: 100,
+                tabBarStyle: Platform.select({
+                    ios: {
+                        backgroundColor: themeColors.background,
+                        height: 90, // iOS specific height
+                        paddingTop: 5,
+                        level: 100,
+                    },
+                    android: {
+                        backgroundColor: themeColors.background,
+                        height: 70, // Android specific height
+                        paddingTop: 10,
+                        paddingBottom: 5, // Android specific padding
+                        level: 100,
+                    },
+                }),
+                tabBarLabelStyle: {
+                    marginBottom: Platform.OS === 'android' ? 10 : 0, // Adjusts label position for Android
                 },
                 headerTitleContainerStyle: {
                     paddingLeft: 8, // Add padding on the left
@@ -45,6 +58,7 @@ export default function TabLayout() {
                 options={{
                     headerStyle: {
                         backgroundColor: themeColors.background,
+                        height: 90,
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Home',
@@ -55,6 +69,7 @@ export default function TabLayout() {
                 name='(top-tabs)'
                 options={{
                     headerStyle: {
+                        height: 90,
                         backgroundColor: themeColors.background,
                         borderBottomWidth: 0, // Remove the border under the navbar
                         shadowOpacity: 0, // Remove the shadow for iOS
@@ -70,6 +85,7 @@ export default function TabLayout() {
                 options={{
                     headerStyle: {
                         backgroundColor: themeColors.background,
+                        height: 90,
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Nutrition',
@@ -81,6 +97,7 @@ export default function TabLayout() {
                 options={{
                     headerStyle: {
                         backgroundColor: themeColors.background,
+                        height: 90,
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Progress',
