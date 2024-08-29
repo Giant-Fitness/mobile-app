@@ -1,7 +1,7 @@
 // app/workouts/all-workouts.tsx
 
 import { useState, useEffect } from 'react';
-import { ScrollView, StyleSheet, Button, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { WorkoutDetailedCard } from '@/components/workouts/WorkoutDetailedCard';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -10,8 +10,8 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { WorkoutsBottomBar } from '@/components/workouts/WorkoutsBottomBar';
 import { CustomBackButton } from '@/components/base/CustomBackButton';
-import { Image } from 'expo-image';
 import { WorkoutsFilterDrawer } from '@/components/workouts/WorkoutsFilterDrawer';
+import { WorkoutsSortDrawer } from '@/components/workouts/WorkoutsSortDrawer';
 
 const workouts = [
     {
@@ -84,7 +84,10 @@ const workouts = [
 
 export default function AllWorkoutsScreen() {
     const [isFilterVisible, setIsFilterVisible] = useState(false);
+    const [isSortVisible, setIsSortVisible] = useState(false);
     const [filteredWorkouts, setFilteredWorkouts] = useState(workouts);
+    const [sortOption, setSortOption] = useState({ type: 'Length', order: 'Shortest' });
+
     const navigation = useNavigation();
     const route = useRoute();
 
@@ -92,7 +95,7 @@ export default function AllWorkoutsScreen() {
     const [filters, setFilters] = useState(initialFilters || {});
 
     const handleSortPress = () => {
-        // Handle sort action
+        setIsSortVisible(true);
     };
 
     const handleFilterPress = () => {
@@ -101,12 +104,13 @@ export default function AllWorkoutsScreen() {
 
     const applyFilters = (appliedFilters: any) => {
         setFilters(appliedFilters);
-        filterWorkouts(appliedFilters);
+        filterAndSortWorkouts(appliedFilters, sortOption); // Call combined filtering and sorting
     };
 
-    const filterWorkouts = (appliedFilters: any) => {
+    const filterAndSortWorkouts = (appliedFilters: any, sortOption: { type: string; order: string }) => {
         let filtered = workouts;
 
+        // Filtering logic
         if (appliedFilters.level?.length) {
             filtered = filtered.filter((workout) => appliedFilters.level.includes(workout.level));
         }
@@ -117,12 +121,32 @@ export default function AllWorkoutsScreen() {
             filtered = filtered.filter((workout) => appliedFilters.focus.includes(workout.focus));
         }
 
-        setFilteredWorkouts(filtered);
+        // Sorting logic
+        const parseLength = (length: string) => parseInt(length.replace(/\D/g, ''), 10);
+
+        if (sortOption.type === 'Length') {
+            filtered.sort((a, b) =>
+                sortOption.order === 'Shortest' ? parseLength(a.length) - parseLength(b.length) : parseLength(b.length) - parseLength(a.length),
+            );
+        } else if (sortOption.type === 'Name') {
+            filtered.sort((a, b) => (sortOption.order === 'A to Z' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)));
+        }
+
+        setFilteredWorkouts([...filtered]); // Update state with new sorted array
+    };
+
+    const applySort = (option: { type: string; order: string }) => {
+        setSortOption(option);
+        filterAndSortWorkouts(filters, option); // Apply sorting with current filters
     };
 
     useEffect(() => {
-        if (initialFilters) {
-            filterWorkouts(initialFilters); // Apply initial filters when component mounts
+        // Initialize filters and apply sorting
+        if (Object.keys(initialFilters).length > 0) {
+            setFilters(initialFilters);
+            filterAndSortWorkouts(initialFilters, sortOption); // Apply both filtering and sorting initially
+        } else {
+            filterAndSortWorkouts({}, sortOption); // Apply sorting with empty filters to trigger initial sort
         }
     }, [initialFilters]);
 
@@ -139,14 +163,11 @@ export default function AllWorkoutsScreen() {
             headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
             headerLeft: () => <CustomBackButton />,
         });
-    }, [navigation]);
+    }, [navigation, themeColors]);
 
     // Determine the correct label for workout count
     const workoutCount = filteredWorkouts.length;
     const workoutLabel = workoutCount === 1 ? 'workout' : 'workouts';
-
-    // Calculate the number of applied filters
-    const appliedFilterCount = Object.values(filters).reduce((count, filter) => count + filter.length, 0);
 
     // Count the number of filter types with active filters
     const activeFilterTypesCount = Object.keys(filters).filter((key) => filters[key].length > 0).length;
@@ -183,6 +204,7 @@ export default function AllWorkoutsScreen() {
                 workouts={workouts}
                 initialFilters={filters}
             />
+            <WorkoutsSortDrawer visible={isSortVisible} onClose={() => setIsSortVisible(false)} onApply={applySort} initialSort={sortOption} />
         </ThemedView>
     );
 }
