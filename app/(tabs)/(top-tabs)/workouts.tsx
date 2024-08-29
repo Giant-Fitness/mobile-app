@@ -61,15 +61,15 @@ export default function WorkoutsScreen() {
 
     const navigation = useNavigation();
 
-    const navigateToAllWorkouts = () => {
-        navigation.navigate('workouts/all-workouts');
+    const navigateToAllWorkouts = (initialFilters = {}) => {
+        navigation.navigate('workouts/all-workouts', { initialFilters });
     };
 
     // Define categories and their respective workout data
     const categories = [
-        { title: 'Endurance Workouts', workouts: recommendedWorkouts },
-        { title: 'Mobility Workouts', workouts: recommendedWorkouts },
-        { title: 'Strength Workouts', workouts: recommendedWorkouts },
+        { title: 'Endurance Workouts', workouts: recommendedWorkouts, type: 'Endurance' },
+        { title: 'Mobility Workouts', workouts: recommendedWorkouts, type: 'Mobility' },
+        { title: 'Strength Workouts', workouts: recommendedWorkouts, type: 'Strength' },
     ];
 
     return (
@@ -116,7 +116,7 @@ export default function WorkoutsScreen() {
                                     <TouchableOpacity
                                         activeOpacity={1}
                                         style={[styles.seeAllButton, { backgroundColor: themeColors.container }]}
-                                        onPress={() => console.log('Navigate to see all')}
+                                        onPress={() => navigateToAllWorkouts({ focus: [category.type] })}
                                     >
                                         <ThemedText type='body' style={[{ color: themeColors.text }]}>
                                             See All
@@ -142,7 +142,7 @@ export default function WorkoutsScreen() {
                             paddingBottom: 66,
                         }}
                     >
-                        <TouchableOpacity onPress={navigateToAllWorkouts} style={styles.allWorkouts}>
+                        <TouchableOpacity onPress={() => navigateToAllWorkouts()} style={styles.allWorkouts}>
                             <ThemedText type='body' style={[{ color: themeColors.text }]}>
                                 All Workouts
                             </ThemedText>

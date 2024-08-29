@@ -1,11 +1,11 @@
 // app/workouts/all-workouts.tsx
 
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ScrollView, StyleSheet, Button, TouchableOpacity, View } from 'react-native';
 import { WorkoutDetailedCard } from '@/components/workouts/WorkoutDetailedCard';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { WorkoutsBottomBar } from '@/components/workouts/WorkoutsBottomBar';
@@ -85,6 +85,11 @@ const workouts = [
 export default function AllWorkoutsScreen() {
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [filteredWorkouts, setFilteredWorkouts] = useState(workouts);
+    const navigation = useNavigation();
+    const route = useRoute();
+
+    const { initialFilters } = route.params || {}; // Get initial filters from route parameters
+    const [filters, setFilters] = useState(initialFilters || {});
 
     const handleSortPress = () => {
         // Handle sort action
@@ -94,28 +99,37 @@ export default function AllWorkoutsScreen() {
         setIsFilterVisible(true);
     };
 
-    const applyFilters = (filters: any) => {
+    const applyFilters = (appliedFilters: any) => {
+        setFilters(appliedFilters);
+        filterWorkouts(appliedFilters);
+    };
+
+    const filterWorkouts = (appliedFilters: any) => {
         let filtered = workouts;
 
-        if (filters.level?.length) {
-            filtered = filtered.filter((workout) => filters.level.includes(workout.level));
+        if (appliedFilters.level?.length) {
+            filtered = filtered.filter((workout) => appliedFilters.level.includes(workout.level));
         }
-        if (filters.equipment?.length) {
-            filtered = filtered.filter((workout) => filters.equipment.includes(workout.equipment));
+        if (appliedFilters.equipment?.length) {
+            filtered = filtered.filter((workout) => appliedFilters.equipment.includes(workout.equipment));
         }
-        if (filters.focus?.length) {
-            filtered = filtered.filter((workout) => filters.focus.includes(workout.focus));
+        if (appliedFilters.focus?.length) {
+            filtered = filtered.filter((workout) => appliedFilters.focus.includes(workout.focus));
         }
 
         setFilteredWorkouts(filtered);
     };
 
+    useEffect(() => {
+        if (initialFilters) {
+            filterWorkouts(initialFilters); // Apply initial filters when component mounts
+        }
+    }, [initialFilters]);
+
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
-    const navigation = useNavigation();
-
-    React.useEffect(() => {
+    useEffect(() => {
         navigation.setOptions({
             title: 'All Workouts',
             headerBackTitleVisible: false, // Hide the back button label
@@ -156,7 +170,13 @@ export default function AllWorkoutsScreen() {
             </ScrollView>
             {/* Bar with Sort and Filter buttons */}
             <WorkoutsBottomBar onSortPress={handleSortPress} onFilterPress={handleFilterPress} />
-            <WorkoutsFilterDrawer visible={isFilterVisible} onClose={() => setIsFilterVisible(false)} onApply={applyFilters} workouts={workouts} />
+            <WorkoutsFilterDrawer
+                visible={isFilterVisible}
+                onClose={() => setIsFilterVisible(false)}
+                onApply={applyFilters}
+                workouts={workouts}
+                initialFilters={filters}
+            />
         </ThemedView>
     );
 }

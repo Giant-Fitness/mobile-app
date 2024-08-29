@@ -1,6 +1,6 @@
 // components/workouts/WorkoutsFilterDrawer.tsx
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { FiltersDrawer } from '@/components/layout/FiltersDrawer';
 
 const workoutFilterAttributes = {
@@ -14,10 +14,16 @@ interface WorkoutsFilterDrawerProps {
     onClose: () => void;
     onApply: (filters: any) => void;
     workouts: Array<any>;
+    initialFilters?: Record<string, string[]>; // Accept initial filters as an optional prop
 }
 
-export const WorkoutsFilterDrawer: React.FC<WorkoutsFilterDrawerProps> = ({ visible, onClose, onApply, workouts }) => {
+export const WorkoutsFilterDrawer: React.FC<WorkoutsFilterDrawerProps> = ({ visible, onClose, onApply, workouts, initialFilters = {} }) => {
     const [appliedFilters, setAppliedFilters] = useState<any>({});
+
+    // Sync with initial filters if they change
+    useEffect(() => {
+        setAppliedFilters(initialFilters);
+    }, [initialFilters]);
 
     const handleApply = (filters: any) => {
         setAppliedFilters(filters);
