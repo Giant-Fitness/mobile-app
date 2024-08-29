@@ -148,6 +148,9 @@ export default function AllWorkoutsScreen() {
     // Calculate the number of applied filters
     const appliedFilterCount = Object.values(filters).reduce((count, filter) => count + filter.length, 0);
 
+    // Count the number of filter types with active filters
+    const activeFilterTypesCount = Object.keys(filters).filter((key) => filters[key].length > 0).length;
+
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
             <ThemedText type='overline' style={[styles.countContainer, { color: themeColors.subText }]}>
@@ -172,7 +175,7 @@ export default function AllWorkoutsScreen() {
                 </ThemedView>
             </ScrollView>
             {/* Bar with Sort and Filter buttons */}
-            <WorkoutsBottomBar onSortPress={handleSortPress} onFilterPress={handleFilterPress} appliedFilterCount={appliedFilterCount} />
+            <WorkoutsBottomBar onSortPress={handleSortPress} onFilterPress={handleFilterPress} appliedFilterCount={activeFilterTypesCount} />
             <WorkoutsFilterDrawer
                 visible={isFilterVisible}
                 onClose={() => setIsFilterVisible(false)}
