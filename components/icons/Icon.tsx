@@ -1,7 +1,7 @@
 // components/icons/Icon.tsx
 
 import React from 'react';
-import { Ionicons, MaterialCommunityIcons, MaterialIcons, Entypo, SimpleLineIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons, MaterialIcons, Entypo, SimpleLineIcons, Feather } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { StyleProp, TextStyle } from 'react-native';
@@ -64,6 +64,8 @@ export const Icon: React.FC<IconProps> = ({ name, size = 18, color, style }) => 
             return <Ionicons name='radio-button-on' {...commonProps} />;
         case 'radio-button-off':
             return <Ionicons name='radio-button-off' {...commonProps} />;
+        case 'plus':
+            return <Feather name='plus' {...commonProps} />
         default:
             return <Ionicons name='alert-circle-outline' s {...commonProps} />;
     }

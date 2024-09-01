@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Image, Button, TouchableOpacity, View, Text } from 'react-native';
+import { ScrollView, StyleSheet, Image, Button, TouchableOpacity, View, Text, TextInput } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -9,6 +9,9 @@ import { CustomBackButton } from '@/components/icons/CustomBackButton';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { TextButton } from '@/components/base/TextButton';
 import { BottomDrawer } from '@/components/layout/BottomDrawer';
+import { IconButton } from '@/components/base/IconButton';
+import { CenteredModal } from '@/components/layout/centeredModal';
+import { spacing } from '@/utils/spacing';
 
 const CustomHeader = ({ workoutName, numSets, lowerLimReps, higherLimReps, restPeriod, themeColors }) => {
     return (
@@ -37,7 +40,27 @@ const ProgramWorkoutDetailsScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
 
-    const [visible, setVisible] = useState(false);
+    const [drawerVisible, setDrawerVisible] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [weight, setWeight] = useState('');
+    const [reps, setReps] = useState('');
+    const [sets, setSets] = useState(data);
+
+    const onConfirm = () => {
+        // need to set better validation logic here to also display error message
+        if (!weight || !reps) {
+            setModalVisible(false);
+            return;
+        }
+
+        setSets((state) => [...state, {
+            weight: weight,
+            reps: reps
+        }]);
+
+        setModalVisible(false);
+    }
+
 
     const { workoutName, photo, numSets, lowerLimReps, higherLimReps, restPeriod, longText } = route.params;
 
@@ -70,29 +93,95 @@ const ProgramWorkoutDetailsScreen = () => {
                     <ThemedText>{longText}</ThemedText>
                 </ThemedView>
             </ScrollView>
-            <TextButton text='Log' onPress={() => setVisible(true)} style={styles.floatingLogButton} />
+            <TextButton text='Log' onPress={() => setDrawerVisible(true)} style={styles.floatingLogButton} />
             <BottomDrawer 
-                visible={visible} 
-                onClose={() => setVisible(!visible)}
+                visible={drawerVisible} 
+                onClose={() => setDrawerVisible(!drawerVisible)}
+                style={{
+                    height: '40%'
+                }}
             >
-                <View style={{ alignItems: 'center' }}>
+                <View style={{ alignItems: 'center', paddingBottom: '63%' }}>
                     <ThemedText style={[styles.titleModal, { color: themeColors.text }]}>Today</ThemedText>
                     <ThemedText style={{ fontSize: 13, color: themeColors.subText }}>{workoutName}</ThemedText>
+                    <View style={[styles.itemContainer, { 
+                        marginTop: '5%',
+                        marginBottom: 0
+                    }]}>
+                        <ThemedText style={[styles.itemHeaderText, { color: themeColors.text }]}>Weight</ThemedText>
+                        <View style={{
+                            width: StyleSheet.hairlineWidth,
+                            backgroundColor: themeColors.text
+                        }} />
+                        <ThemedText style={[styles.itemHeaderText, { color: themeColors.text }]}>Reps</ThemedText>
+                    </View>
 
-                    <ScrollView contentContainerStyle={styles.scrollViewContent} style={{
-                        paddingBottom: '20%'
-                    }}>
-                        {data.map((item, index) => (
+                    <ScrollView 
+                        contentContainerStyle={styles.scrollViewContent}
+                        style={{
+                            width: '100%'
+                        }}
+                    >
+                        {sets.map((item, index) => (
                             <View key={index} style={styles.itemContainer}>
-                                <Text style={[styles.itemText, { color: themeColors.text }]}>Weight: {item.weight}</Text>
-                                <Text style={[styles.itemText, { color: themeColors.text }]}>Reps: {item.reps}</Text>
+                                <Text style={[styles.itemText, { color: themeColors.text }]}>{item.weight}</Text>
+                                <Text style={[styles.itemText, { color: themeColors.text }]}>{item.reps}</Text>
                             </View>
                         ))}
                     </ScrollView>
-
-                    <TextButton text='Log' onPress={() => setVisible(false)} style={styles.floatingLogButton} />
+                    <View style={{ 
+                        width: '70%', 
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        marginTop: '2%'
+                    }}>
+                        <IconButton
+                            onPress={() => setModalVisible(true)}
+                            iconName='plus'
+                            iconColor='white'
+                            style={{
+                                width: 25,
+                                height: 25
+                            }}
+                        />
+                        <ThemedText style={{ 
+                            fontSize: 13, 
+                            color: themeColors.subText, 
+                            marginLeft: '3%'
+                        }}>Add Set</ThemedText>
+                    </View>
                 </View>
+                <TextButton 
+                    text='Log' 
+                    onPress={() => setDrawerVisible(false)} 
+                    style={styles.floatingLogButton} 
+                />
             </BottomDrawer>
+            <CenteredModal
+                visible={modalVisible} 
+                onClose={() => setModalVisible(!modalVisible)}
+            >
+                <ThemedView style={styles.inputContainer}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Weight (Kgs)"
+                        keyboardType="numeric"
+                        value={weight}
+                        onChangeText={setWeight}
+                    />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Reps"
+                        keyboardType="numeric"
+                        value={reps}
+                        onChangeText={setReps}
+                    />
+                    <TextButton 
+                        text='Confirm' 
+                        onPress={onConfirm} 
+                    />
+                </ThemedView>
+            </CenteredModal>
         </ThemedView>
     );
 }
@@ -143,16 +232,34 @@ const styles = StyleSheet.create({
         marginTop: '5%'
     },
     scrollViewContent: {
-        paddingVertical: 16,
+        paddingTop: '2%',
+        alignItems: 'center',
     },
     itemContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 8,
-        width: '90%',
+        width: '70%',
     },
     itemText: {
         fontSize: 15,
+    },
+    itemHeaderText: {
+        fontSize: 16,
+        fontWeight: '700'
+    },
+    inputContainer: {
+        width: '100%',
+        paddingHorizontal: spacing.md,
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: spacing.sm,
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.md,
+        marginBottom: spacing.md,
+        backgroundColor: '#fff',
     },
 });
 
