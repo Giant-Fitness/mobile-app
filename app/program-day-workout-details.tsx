@@ -12,6 +12,7 @@ import { BottomDrawer } from '@/components/layout/BottomDrawer';
 import { IconButton } from '@/components/base/IconButton';
 import { CenteredModal } from '@/components/layout/centeredModal';
 import { spacing } from '@/utils/spacing';
+import { useSelector } from 'react-redux';
 
 const CustomHeader = ({ workoutName, numSets, lowerLimReps, higherLimReps, restPeriod, themeColors }) => {
     return (
