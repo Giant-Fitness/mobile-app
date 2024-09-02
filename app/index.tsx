@@ -3,36 +3,13 @@
 import React from 'react';
 import { Button, View, StyleSheet, SafeAreaView, Pressable, Text } from 'react-native';
 import { Amplify } from 'aws-amplify';
-import { Authenticator, useAuthenticator } from '@aws-amplify/ui-react-native';
+import { Authenticator, useAuthenticator, withAuthenticator } from '@aws-amplify/ui-react-native';
 import { Link } from 'expo-router';
+import outputs from "../amplify_outputs.json";
+import { ThemedView } from '@/components/base/ThemedView';
 
-Amplify.configure({
-    Auth: {
-        Cognito: {
-            userPoolId: 'ap-south-1_IGoQb5wRf',
-            userPoolClientId: '60ps5arjs511dffmcu3arq902m',
-            identityPoolId: '<your-cognito-identity-pool-id>',
-            loginWith: {
-                email: true,
-                username: true,
-            },
-            signUpVerificationMethod: 'code',
-            userAttributes: {
-                email: {
-                    required: true,
-                },
-            },
-            allowGuestAccess: true,
-            passwordFormat: {
-                minLength: 8,
-                requireLowercase: true,
-                requireUppercase: true,
-                requireNumbers: true,
-                requireSpecialCharacters: true,
-            },
-        },
-    },
-});
+
+Amplify.configure(outputs);
 
 
 const SignOutButton = () => {
@@ -47,19 +24,26 @@ const SignOutButton = () => {
 
 const LoginPage = () => {
     return (
-        <Authenticator.Provider>
-            <Authenticator loginMechanisms={['email']}>
-                <SafeAreaView>
-                    <SignOutButton />
-                </SafeAreaView>
-            </Authenticator>
-        </Authenticator.Provider>
+        <ThemedView style={styles.titleContainer}>
+            <Link href={'/home'} replace asChild>
+                <Pressable style={styles.button}>
+                    <Text style={styles.buttonText}>Login</Text>
+                </Pressable>
+            </Link>
+            <SignOutButton />
+        </ThemedView>
     );
+
 };
 
 const styles = StyleSheet.create({
     signOutButton: {
         alignSelf: 'flex-end',
+    },
+    titleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
     },
     button: {
         paddingVertical: 10,
@@ -72,4 +56,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default LoginPage;
+export default withAuthenticator(LoginPage);
