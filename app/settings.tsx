@@ -1,9 +1,8 @@
 // app/settings.tsx
 
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { StyleSheet, Image, Platform } from 'react-native';
+import { StyleSheet, View, Button } from 'react-native';
 import React from 'react';
-import { Collapsible } from '@/components/layout/Collapsible';
 import ParallaxScrollView from '@/components/layout/ParallaxScrollView';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -11,6 +10,25 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { CustomBackButton } from '@/components/icons/CustomBackButton';
+import { signOut } from 'aws-amplify/auth';
+
+const SignOutButton = ({ navigation }) => {
+
+    const handleSignOut = async () => {
+        try {
+            await signOut();
+            navigation.navigate('index'); // Redirect to the index (login) page after signing out
+        } catch (error) {
+            console.error('Error signing out:', error);
+        }
+    };
+
+    return (
+        <View style={styles.signOutButton}>
+            <Button title='Sign Out' onPress={handleSignOut} />
+        </View>
+    );
+};
 
 export default function ProgressScreen() {
     const navigation = useNavigation();
@@ -37,6 +55,7 @@ export default function ProgressScreen() {
         >
             <ThemedView style={styles.titleContainer}>
                 <ThemedText type='title'>Explore</ThemedText>
+                <SignOutButton navigation={navigation} />
             </ThemedView>
             <ThemedText>This app includes example code to help you get started.</ThemedText>
         </ParallaxScrollView>
@@ -53,5 +72,8 @@ const styles = StyleSheet.create({
     titleContainer: {
         flexDirection: 'row',
         gap: 8,
+    },
+    signOutButton: {
+        alignSelf: 'flex-end',
     },
 });
