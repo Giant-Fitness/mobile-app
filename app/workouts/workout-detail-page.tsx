@@ -1,4 +1,4 @@
-// app/workouts/workout-details.tsx
+// app/workouts/workout-detail-page.tsx
 
 import React, { useRef, useState } from 'react';
 import { StyleSheet, Animated } from 'react-native';

@@ -31,7 +31,7 @@ export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, 
     const navigation = useNavigation();
 
     const navigateToWorkoutDetails = () => {
-        navigation.navigate('workouts/workout-details', { name, length, level, equipment, focus, photo, trainer, longText, focusMulti });
+        navigation.navigate('workouts/workout-detail-page', { name, length, level, equipment, focus, photo, trainer, longText, focusMulti });
     };
 
     const levelIcon = 'level-' + level.toLowerCase();
