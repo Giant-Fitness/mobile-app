@@ -19,7 +19,7 @@ const DayWorkoutCard = (props) => {
     const navigation = useNavigation();
 
     const navigateToWorkoutDetail = () => {
-        navigation.navigate('program-day-workout-details', props);
+        navigation.navigate('programs/program-day-workout-details', props);
     }
 
     return (

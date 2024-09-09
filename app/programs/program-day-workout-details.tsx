@@ -1,3 +1,5 @@
+// app/programs/program-day-workout-details.tsx
+
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Image, Button, TouchableOpacity, View, Text, TextInput } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
