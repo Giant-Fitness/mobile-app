@@ -11,27 +11,30 @@ import { Icon } from '@/components/icons/Icon';
 import { scale, moderateScale, verticalScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
 import { sizes } from '@/utils/sizes';
+import { ProgramDay } from '@/store/types';
 
-type ActiveProgramDayCardProps = {};
+type ActiveProgramDayCardProps = {
+    day: ProgramDay;
+};
 
-export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = ({}) => {
+export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = ({ day }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
     return (
         <TopImageInfoCard
-            image={{ uri: 'https://picsum.photos/id/177/700' }}
-            title='Full Body Blast'
-            subtitle='Week 3 Day 2'
+            image={{ uri: day.PhotoUrl }}
+            title={day.WorkoutDayTitle}
+            subtitle={`Week ${day.Week} Day ${day.Day}`}
             extraContent={
                 <ThemedView style={styles.attributeRow}>
                     <Icon name='stopwatch' size={moderateScale(14)} color={themeColors.highlightContainerText} />
                     <ThemedText type='body' style={[styles.attributeText, { color: themeColors.highlightContainerText, paddingRight: spacing.md }]}>
-                        40 mins
+                        {`${day.Time} mins`}
                     </ThemedText>
                     <Icon name='dumbbell' size={moderateScale(14)} color={themeColors.highlightContainerText} />
                     <ThemedText type='body' style={[styles.attributeText, { color: themeColors.highlightContainerText, marginLeft: spacing.xs }]}>
-                        Full Gym
+                        {day.EquipmentCategory}
                     </ThemedText>
                     <Icon name='chevron-forward' size={moderateScale(16)} color={themeColors.highlightContainerText} style={styles.chevronIcon} />
                 </ThemedView>

@@ -1,7 +1,7 @@
 // app/programs/active-program-home.tsx
 
 import { useDispatch, useSelector } from 'react-redux';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { ScrollView, StyleSheet, View, TouchableOpacity, Dimensions } from 'react-native';
 
@@ -18,7 +18,9 @@ import { scale, moderateScale, verticalScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
 import { sizes } from '@/utils/sizes';
 import { AppDispatch, RootState } from '@/store/rootReducer';
-import { getCurrentAndNextDaysAsync } from '@/store/programs/thunks';
+import { getCurrentDayAsync, getActiveProgramMetaAsync, getUserPlanProgressAsync, getNextDaysAsync } from '@/store/programs/thunks';
+import { BasicSplash } from '@/components/splashScreens/BasicSplash';
+import { REQUEST_STATE } from '@/store/utils';
 
 export default function ActiveProgramHome() {
     const colorScheme = useColorScheme();
@@ -27,20 +29,47 @@ export default function ActiveProgramHome() {
 
     const dispatch = useDispatch<AppDispatch>();
 
-    const { currentAndNextDays, currentAndNextDaysState, error } = useSelector((state: RootState) => state.programs);
+    const [isSplashVisible, setIsSplashVisible] = useState(true);
+
+    const { currentDay, currentDayState, activeProgram, activeProgramState, userPlanProgress, userPlanProgressState, nextDays, nextDaysState, error } =
+        useSelector((state: RootState) => state.programs);
 
     useEffect(() => {
-        // Dispatch the thunk to fetch the current and next days
-        dispatch(getCurrentAndNextDaysAsync());
+        dispatch(getCurrentDayAsync());
+        dispatch(getActiveProgramMetaAsync());
+        dispatch(getUserPlanProgressAsync());
     }, [dispatch]);
 
-    // console.log(currentAndNextDays, currentAndNextDaysState);
+    useEffect(() => {
+        // Once user progress is available, fetch the next 3 days starting from CurrentDay + 1
+        if (userPlanProgressState === REQUEST_STATE.FULFILLED && userPlanProgress) {
+            const nextDayId = (parseInt(userPlanProgress.CurrentDay) + 1).toString();
+            dispatch(getNextDaysAsync({ planId: userPlanProgress.WorkoutPlanId, startDayId: nextDayId, numDays: 3 }));
+        }
+    }, [userPlanProgress, userPlanProgressState, dispatch]);
 
-    const dummyDayPlans = [
-        { dayId: 1, Week: 3, Day: 3, workoutName: 'Upper Body A', length: '30 mins', photo: require('@/assets/images/vb.webp') },
-        { dayId: 2, Week: 3, Day: 4, workoutName: 'Upper Body B', length: '25 mins', photo: require('@/assets/images/vb.webp') },
-        { dayId: 3, Week: 3, Day: 5, workoutName: 'Upper Body C', length: '27 mins', photo: require('@/assets/images/vb.webp') },
-    ];
+    const handleLoadingComplete = () => {
+        setIsSplashVisible(false);
+    };
+
+    // Show the splash screen while either state is not fulfilled or splash is visible
+    if (
+        isSplashVisible ||
+        currentDayState !== REQUEST_STATE.FULFILLED ||
+        activeProgramState !== REQUEST_STATE.FULFILLED ||
+        userPlanProgressState !== REQUEST_STATE.FULFILLED ||
+        nextDaysState !== REQUEST_STATE.FULFILLED
+    ) {
+        return <BasicSplash onLoadingComplete={handleLoadingComplete} delay={500} />;
+    }
+
+    if (error) {
+        return (
+            <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
+                <ThemedText>Error: {error}</ThemedText>
+            </ThemedView>
+        );
+    }
 
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
@@ -56,35 +85,31 @@ export default function ActiveProgramHome() {
                         The only bad workout is the one that didn&apos;t happen.
                     </ThemedText>
                 </ThemedView>
-
                 <ThemedView style={styles.planHeader}>
-                    <ThemedText type='titleXLarge'>Lean Machine Challenge</ThemedText>
+                    <ThemedText type='titleXLarge'>{activeProgram.WorkoutPlanName}</ThemedText>
                 </ThemedView>
 
                 <ThemedView style={[styles.weekProgress]}>
-                    <ProgressBar completedParts={2} currentPart={3} parts={6} containerWidth={screenWidth - spacing.xxl} />
-                    <ThemedText style={[{ color: themeColors.subText, marginTop: spacing.md }]}>Week 3 of 6</ThemedText>
+                    <ProgressBar
+                        completedParts={userPlanProgress.Week - 1}
+                        currentPart={userPlanProgress.Week}
+                        parts={activeProgram.ProgramLength}
+                        containerWidth={screenWidth - spacing.xxl}
+                    />
+                    <ThemedText style={[{ color: themeColors.subText, marginTop: spacing.md }]}>
+                        Week {userPlanProgress.Week} of {activeProgram.ProgramLength}
+                    </ThemedText>
                 </ThemedView>
 
                 <ThemedView style={[styles.activeCardContainer]}>
-                    <ActiveProgramDayCard />
+                    <ActiveProgramDayCard day={currentDay} />
                 </ThemedView>
 
                 <ThemedView style={[styles.upNextContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
                     <ThemedText type='title' style={[styles.subHeader, { color: themeColors.text }]}>
                         Up Next
                     </ThemedText>
-                    {dummyDayPlans &&
-                        dummyDayPlans.map((plan, i) => (
-                            <ProgramDayOverviewCard
-                                key={plan.dayId}
-                                week={plan.Week}
-                                day={plan.Day}
-                                workout={plan.workoutName}
-                                length={plan.length}
-                                photo={plan.photo}
-                            />
-                        ))}
+                    {nextDays && nextDays.map((day, i) => <ProgramDayOverviewCard key={day.WorkoutDayId} day={day} />)}
                 </ThemedView>
 
                 <ThemedView style={[styles.menuContainer]}>

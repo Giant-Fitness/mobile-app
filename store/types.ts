@@ -6,8 +6,8 @@ export interface ProgramCalendarOverviewItem {
 }
 
 export interface Program {
-    ProgramId: string;
-    ProgramName: string;
+    WorkoutPlanId: string;
+    WorkoutPlanName: string;
     TrainerId?: string; // Optional field
     ProgramLength: number;
     Description: string;
@@ -47,8 +47,11 @@ export interface Exercise {
 }
 
 export interface ProgramDay {
-    PlanId: string;
-    DayId: string;
+    WorkoutPlanId: string;
+    WorkoutDayId: string;
+    Week: string;
+    Day: string;
+    WorkoutDayTitle: string;
     RestDay: boolean;
     Exercises: Exercise[];
     Notes: string;
@@ -59,4 +62,14 @@ export interface ProgramDay {
     MuscleGroups: string[];
     EquipmentCategory: string;
     Equipment: string[];
+}
+
+export interface UserWorkoutPlanProgress {
+    UserId: string;
+    WorkoutPlanId: string;
+    CurrentDay: string;
+    Week: string;
+    Day: string;
+    StartDate: string;
+    LastActivityDate: string;
 }

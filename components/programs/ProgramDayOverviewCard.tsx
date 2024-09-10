@@ -12,41 +12,43 @@ import { Icon } from '@/components/icons/Icon';
 import { scale, moderateScale, verticalScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
 import { sizes } from '@/utils/sizes';
+import { ProgramDay } from '@/store/types';
 
 type ProgramDayOverviewCardProps = {
-    week: number;
-    day: number;
-    workout: string;
-    length: string;
-    photo: ImageSourcePropType;
+    day: ProgramDay;
 };
 
-export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ week, day, workout, length, photo }) => {
+export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ day }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
     const navigation = useNavigation();
 
     const navigateToProgramDay = () => {
-        navigation.navigate('programs/program-day', { workout, week, day, length });
+        navigation.navigate('programs/program-day', {
+            workout: day.WorkoutDayTitle,
+            week: day.Week,
+            day: day.Day,
+            length: day.Time,
+        });
     };
 
     return (
         <LeftImageInfoCard
-            image={photo}
+            image={{ uri: day.PhotoUrl }}
             onPress={navigateToProgramDay}
-            title={workout}
+            title={day.WorkoutDayTitle}
             extraContent={
                 <ThemedView style={styles.attributeContainer}>
                     <ThemedView style={styles.attributeRow}>
                         <ThemedText type='bodySmall' style={[{ color: themeColors.text }]}>
-                            {`Week ${week} Day ${day}`}
+                            {`Week ${day.Week} Day ${day.Day}`}
                         </ThemedText>
                     </ThemedView>
 
                     <ThemedView style={styles.attributeRow}>
                         <Icon name='stopwatch' size={moderateScale(14)} color={themeColors.text} />
                         <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.text }]}>
-                            {length}
+                            {`${day.Time} mins`}
                         </ThemedText>
                     </ThemedView>
                 </ThemedView>

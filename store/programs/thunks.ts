@@ -3,16 +3,31 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { actionTypes } from '@/store/programs/actionTypes';
 import ProgramService from '@/store/programs/service';
-import { Program, ProgramDay } from '@/store/types';
+import { Program, ProgramDay, UserWorkoutPlanProgress } from '@/store/types';
 
 export const getAllProgramsAsync = createAsyncThunk<Program[], void>(actionTypes.GET_ALL_PROGRAMS, async () => {
     return await ProgramService.getAllPrograms();
 });
 
-export const getCurrentAndNextDaysAsync = createAsyncThunk<ProgramDay[], void>(actionTypes.GET_CURRENT_AND_NEXT_DAYS, async () => {
-    return await ProgramService.getCurrentAndNextDays();
+export const getCurrentDayAsync = createAsyncThunk<ProgramDay, void>(actionTypes.GET_CURRENT_DAY, async () => {
+    return await ProgramService.getCurrentDay();
 });
+
+export const getNextDaysAsync = createAsyncThunk<ProgramDay[], { planId: string; startDayId: string; numDays: number }>(
+    actionTypes.GET_NEXT_DAYS,
+    async ({ planId, startDayId, numDays }, thunkAPI) => {
+        return await ProgramService.getNextDays(planId, startDayId, numDays);
+    },
+);
 
 export const getAllProgramDaysAsync = createAsyncThunk<ProgramDay[], void>(actionTypes.GET_ALL_PROGRAM_DAYS, async (planId: string) => {
     return await ProgramService.getAllProgramDays(planId);
+});
+
+export const getActiveProgramMetaAsync = createAsyncThunk<Program[], void>(actionTypes.GET_ACTIVE_PROGRAM_META, async () => {
+    return await ProgramService.getActiveProgramMeta();
+});
+
+export const getUserPlanProgressAsync = createAsyncThunk<Program[], void>(actionTypes.GET_USER_PLAN_PROGRESS, async () => {
+    return await ProgramService.getUserPlanProgress();
 });

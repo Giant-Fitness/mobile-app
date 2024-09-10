@@ -1,6 +1,17 @@
 // store/programs/fakeData.ts
 
-import { ProgramDay, Exercise, Program } from '@/store/programs/types';
+import { ProgramDay, Exercise, Program, UserWorkoutPlanProgress } from '@/store/programs/types';
+
+// Sample user plan progress
+const sampleUserProgress: UserWorkoutPlanProgress = {
+    UserId: 'user1',
+    WorkoutPlanId: 'plan1',
+    CurrentDay: '22',
+    StartDate: '2024-07-01',
+    LastActivityDate: '2024-07-05',
+    Week: 4,
+    Day: 1,
+};
 
 // Define sample exercises
 const sampleExercises: Exercise[] = [
@@ -57,70 +68,82 @@ const sampleExercises: Exercise[] = [
 // Define sample program days
 const sampleProgramDays: ProgramDay[] = [
     {
-        PlanId: 'plan123',
-        DayId: '22',
+        WorkoutPlanId: 'plan1',
+        WorkoutDayId: '22',
+        WorkoutDayTitle: 'Full Body',
         RestDay: false,
         Exercises: sampleExercises,
         Notes: 'Welcome to Day 1! Today, we’ll focus on strength training.',
-        PhotoUrl: 'https://s3.amazonaws.com/fitnessapp/photos/day1.jpg',
+        PhotoUrl: 'https://images.pexels.com/photos/3253501/pexels-photo-3253501.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
         CreationDate: '2024-07-01',
         LastModified: '2024-07-12',
         Time: 60,
         MuscleGroups: ['Back', 'Chest'],
-        EquipmentCategory: 'Full',
+        EquipmentCategory: 'Full Gym',
         Equipment: ['Barbell', 'Dumbbells', 'Cable Machine'],
+        Week: 4,
+        Day: 1,
     },
     {
-        PlanId: 'plan123',
-        DayId: '23',
+        WorkoutPlanId: 'plan1',
+        WorkoutDayId: '23',
+        WorkoutDayTitle: 'Upper Body A',
         RestDay: false,
         Exercises: sampleExercises,
         Notes: 'Day 2 is focused on cardio and endurance.',
-        PhotoUrl: 'https://s3.amazonaws.com/fitnessapp/photos/day2.jpg',
+        PhotoUrl: 'https://images.pexels.com/photos/841130/pexels-photo-841130.jpeg',
         CreationDate: '2024-07-02',
         LastModified: '2024-07-12',
         Time: 45,
         MuscleGroups: ['Legs', 'Arms'],
-        EquipmentCategory: 'Basic',
+        EquipmentCategory: 'Basic Equipment',
         Equipment: ['Treadmill', 'Jump Rope'],
+        Week: 4,
+        Day: 2,
     },
     {
-        PlanId: 'plan123',
-        DayId: '24',
+        WorkoutPlanId: 'plan1',
+        WorkoutDayId: '24',
+        WorkoutDayTitle: 'Lower Body B',
         RestDay: true,
         Exercises: [],
         Notes: 'Rest day. Focus on recovery and stretching.',
-        PhotoUrl: 'https://s3.amazonaws.com/fitnessapp/photos/day3.jpg',
+        PhotoUrl: 'https://images.pexels.com/photos/1552252/pexels-photo-1552252.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
         CreationDate: '2024-07-03',
         LastModified: '2024-07-12',
-        Time: 0,
+        Time: 30,
         MuscleGroups: ['Chest', 'Shoulders'],
-        EquipmentCategory: 'Full',
+        EquipmentCategory: 'Full Gym',
         Equipment: ['Barbell', 'Dumbbells', 'Cable Machine'],
+        Week: 4,
+        Day: 3,
     },
     {
-        PlanId: 'plan123',
-        DayId: '25',
+        WorkoutPlanId: 'plan1',
+        WorkoutDayId: '25',
+        WorkoutDayTitle: 'Upper Body B',
         RestDay: false,
         Exercises: sampleExercises,
         Notes: 'Back to strength training with new exercises.',
-        PhotoUrl: 'https://s3.amazonaws.com/fitnessapp/photos/day4.jpg',
+        PhotoUrl: 'https://images.pexels.com/photos/2105493/pexels-photo-2105493.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2g',
         CreationDate: '2024-07-04',
         LastModified: '2024-07-12',
         Time: 60,
         MuscleGroups: ['Chest', 'Shoulders'],
-        EquipmentCategory: 'Full',
+        EquipmentCategory: 'Full Gym',
         Equipment: ['Barbell', 'Dumbbells', 'Cable Machine'],
+        Week: 4,
+        Day: 4,
     },
 ];
 
 const mockPrograms: Program[] = [
     {
-        ProgramId: 'program123',
-        ProgramName: 'Lean Machine Challenge',
+        WorkoutPlanId: 'plan1',
+        WorkoutPlanName: 'Lean Machine Challenge',
         TrainerId: 'trainer123',
-        ProgramLength: 12,
-        Description: 'A comprehensive 12-week challenge to build strength and endurance.',
+        ProgramLength: 6,
+        Description: 'A comprehensive 6-week challenge to build strength and endurance.',
         Level: 'All Levels',
         Type: 'Strength',
         Goal: 'Fat loss',
@@ -130,8 +153,8 @@ const mockPrograms: Program[] = [
         Archived: false,
         CalendarOverview: [
             { Title: 'Weeks 1-2', Description: 'We’ll ramp up onto the program by starting with lower weights and volume' },
-            { Title: 'Weeks 3-7', Description: 'Start to feel the difference in your body. Feel faster, stronger, and lighter on your feet' },
-            { Title: 'Week 8', Description: 'We’ll de-load this week and focus on muscle recovery - setting you up for a solid base to start your next plan' },
+            { Title: 'Weeks 3-5', Description: 'Start to feel the difference in your body. Feel faster, stronger, and lighter on your feet' },
+            { Title: 'Week 6', Description: 'We’ll de-load this week and focus on muscle recovery - setting you up for a solid base to start your next plan' },
         ],
         EquipmentCategory: 'Full Gym',
         Equipment: ['Dumbbells', 'Barbell', 'Cable Machine'],
@@ -139,8 +162,8 @@ const mockPrograms: Program[] = [
         DesignedFor: 'At the gym, for all levels: beginner or expert',
     },
     {
-        ProgramId: 'program124',
-        ProgramName: "Beginner's Yoga Flow",
+        WorkoutPlanId: 'plan2',
+        WorkoutPlanName: "Beginner's Yoga Flow",
         TrainerId: 'trainer124',
         ProgramLength: 8,
         Description: 'An 8-week introduction to yoga for beginners focusing on flexibility and relaxation.',
@@ -156,14 +179,14 @@ const mockPrograms: Program[] = [
             { Title: 'Weeks 3-5', Description: 'Building strength and flexibility with intermediate poses' },
             { Title: 'Weeks 6-8', Description: 'Advanced poses and combined flow sequences for relaxation' },
         ],
-        EquipmentCategory: 'Yoga Mat',
+        EquipmentCategory: 'Basic Equipment',
         Equipment: ['Yoga Mat', 'Block', 'Strap'],
         Frequency: '3x / week',
         DesignedFor: 'At home or at the studio, ideal for beginners',
     },
     {
-        ProgramId: 'program125',
-        ProgramName: 'Advanced HIIT Series',
+        WorkoutPlanId: 'plan3',
+        WorkoutPlanName: 'Advanced HIIT Series',
         TrainerId: 'trainer125',
         ProgramLength: 6,
         Description: 'A 6-week high-intensity interval training program designed for advanced athletes.',
@@ -186,4 +209,4 @@ const mockPrograms: Program[] = [
     },
 ];
 
-export { sampleProgramDays, mockPrograms };
+export { sampleProgramDays, mockPrograms, sampleUserProgress };
