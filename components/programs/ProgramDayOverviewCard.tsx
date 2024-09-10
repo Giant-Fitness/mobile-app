@@ -27,7 +27,7 @@ export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ 
     const navigation = useNavigation();
 
     const navigateToProgramDay = () => {
-        navigation.navigate('programs/program-day-workouts', { workout, week, day, length });
+        navigation.navigate('programs/program-day', { workout, week, day, length });
     };
 
     return (

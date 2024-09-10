@@ -25,9 +25,7 @@ export const CenteredModal: React.FC<CenteredModalProps> = ({ visible, onClose, 
                 <TouchableOpacity style={styles.overlay} onPress={onClose} activeOpacity={1}>
                     <BlurView intensity={50} style={styles.blur} tint='systemUltraThinMaterial' experimentalBlurMethod='dimezisBlurView' />
                 </TouchableOpacity>
-                <ThemedView style={[styles.modal, { backgroundColor: themeColors.background }, style]}>
-                    {children}
-                </ThemedView>
+                <ThemedView style={[styles.modal, { backgroundColor: themeColors.background }, style]}>{children}</ThemedView>
             </View>
         </Modal>
     );

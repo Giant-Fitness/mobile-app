@@ -1,4 +1,4 @@
-// app/programs/program-day-workouts.tsx
+// app/programs/program-day.tsx
 
 import React from 'react';
 import { ScrollView, StyleSheet, Image, Button, TouchableOpacity, View } from 'react-native';
@@ -10,7 +10,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { WorkoutsBottomBar } from '@/components/workouts/WorkoutsBottomBar';
 import { CustomBackButton } from '@/components/icons/CustomBackButton';
-import DayWorkoutCard from '@/components/programs/DayWorkoutCard';
+import ExerciseCard from '@/components/programs/ExerciseCard';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 const workouts = [
@@ -23,7 +23,8 @@ const workouts = [
         upperLimReps: 12,
         restPeriod: '2 min',
         introText: 'Alternate reps on each side. We’re aiming for 10-12 reps',
-        longText: 'Weight selection tip goes here. 0.6x 1RM. tell them to use calculator \n\nSet up tip goes here. Set up the rack to have the barbell at upper chest height. Position the bar high on the back of your shoulders. Dismount the bar from the rack, and \n\nposition yourself in a shoulder-width stance. Form tip goes here - Squat down by bending hips back, don’t bend your back and brace your core.'
+        longText:
+            'Weight selection tip goes here. 0.6x 1RM. tell them to use calculator \n\nSet up tip goes here. Set up the rack to have the barbell at upper chest height. Position the bar high on the back of your shoulders. Dismount the bar from the rack, and \n\nposition yourself in a shoulder-width stance. Form tip goes here - Squat down by bending hips back, don’t bend your back and brace your core.',
     },
     {
         id: '2',
@@ -34,7 +35,8 @@ const workouts = [
         upperLimReps: 12,
         restPeriod: '2 min',
         introText: 'Alternate reps on each side. We’re aiming for 10-12 reps',
-        longText: 'Weight selection tip goes here. 0.6x 1RM. tell them to use calculator \n\nSet up tip goes here. Set up the rack to have the barbell at upper chest height. Position the bar high on the back of your shoulders. Dismount the bar from the rack, and \n\nposition yourself in a shoulder-width stance. Form tip goes here - Squat down by bending hips back, don’t bend your back and brace your core.'
+        longText:
+            'Weight selection tip goes here. 0.6x 1RM. tell them to use calculator \n\nSet up tip goes here. Set up the rack to have the barbell at upper chest height. Position the bar high on the back of your shoulders. Dismount the bar from the rack, and \n\nposition yourself in a shoulder-width stance. Form tip goes here - Squat down by bending hips back, don’t bend your back and brace your core.',
     },
     {
         id: '3',
@@ -45,7 +47,8 @@ const workouts = [
         upperLimReps: 12,
         restPeriod: '2 min',
         introText: 'Alternate reps on each side. We’re aiming for 10-12 reps',
-        longText: 'Weight selection tip goes here. 0.6x 1RM. tell them to use calculator \n\nSet up tip goes here. Set up the rack to have the barbell at upper chest height. Position the bar high on the back of your shoulders. Dismount the bar from the rack, and \n\nposition yourself in a shoulder-width stance. Form tip goes here - Squat down by bending hips back, don’t bend your back and brace your core.'
+        longText:
+            'Weight selection tip goes here. 0.6x 1RM. tell them to use calculator \n\nSet up tip goes here. Set up the rack to have the barbell at upper chest height. Position the bar high on the back of your shoulders. Dismount the bar from the rack, and \n\nposition yourself in a shoulder-width stance. Form tip goes here - Squat down by bending hips back, don’t bend your back and brace your core.',
     },
     {
         id: '4',
@@ -56,7 +59,8 @@ const workouts = [
         upperLimReps: 12,
         restPeriod: '2 min',
         introText: 'Alternate reps on each side. We’re aiming for 10-12 reps',
-        longText: 'Weight selection tip goes here. 0.6x 1RM. tell them to use calculator \n\nSet up tip goes here. Set up the rack to have the barbell at upper chest height. Position the bar high on the back of your shoulders. Dismount the bar from the rack, and \n\nposition yourself in a shoulder-width stance. Form tip goes here - Squat down by bending hips back, don’t bend your back and brace your core.'
+        longText:
+            'Weight selection tip goes here. 0.6x 1RM. tell them to use calculator \n\nSet up tip goes here. Set up the rack to have the barbell at upper chest height. Position the bar high on the back of your shoulders. Dismount the bar from the rack, and \n\nposition yourself in a shoulder-width stance. Form tip goes here - Squat down by bending hips back, don’t bend your back and brace your core.',
     },
     {
         id: '5',
@@ -67,9 +71,10 @@ const workouts = [
         upperLimReps: 12,
         restPeriod: '2 min',
         introText: 'Alternate reps on each side. We’re aiming for 10-12 reps',
-        longText: 'Weight selection tip goes here. 0.6x 1RM. tell them to use calculator \n\nSet up tip goes here. Set up the rack to have the barbell at upper chest height. Position the bar high on the back of your shoulders. Dismount the bar from the rack, and \n\nposition yourself in a shoulder-width stance. Form tip goes here - Squat down by bending hips back, don’t bend your back and brace your core.'
-    }
-]
+        longText:
+            'Weight selection tip goes here. 0.6x 1RM. tell them to use calculator \n\nSet up tip goes here. Set up the rack to have the barbell at upper chest height. Position the bar high on the back of your shoulders. Dismount the bar from the rack, and \n\nposition yourself in a shoulder-width stance. Form tip goes here - Squat down by bending hips back, don’t bend your back and brace your core.',
+    },
+];
 
 const CustomHeader = ({ workout, themeColors, week, day, length }) => {
     return (
@@ -92,7 +97,7 @@ const CustomHeader = ({ workout, themeColors, week, day, length }) => {
     );
 };
 
-const DayWorkoutsScreen = () => {
+const ProgramDayScreen = () => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
@@ -117,19 +122,20 @@ const DayWorkoutsScreen = () => {
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
             <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
                 <ThemedView style={[styles.contentContainer, { backgroundColor: themeColors.background }]}>
-                    {workouts && workouts.map((workout) => (
-                        <DayWorkoutCard
-                            key={workout.id}
-                            photo={workout.photo}
-                            workoutName={workout.name}
-                            numSets={workout.numSets}
-                            lowerLimReps={workout.lowerLimReps}
-                            higherLimReps={workout.upperLimReps}
-                            restPeriod={workout.restPeriod}
-                            intro={workout.introText}
-                            longText={workout.longText}
-                        />
-                    ))}
+                    {workouts &&
+                        workouts.map((workout) => (
+                            <ExerciseCard
+                                key={workout.id}
+                                photo={workout.photo}
+                                workoutName={workout.name}
+                                numSets={workout.numSets}
+                                lowerLimReps={workout.lowerLimReps}
+                                higherLimReps={workout.upperLimReps}
+                                restPeriod={workout.restPeriod}
+                                intro={workout.introText}
+                                longText={workout.longText}
+                            />
+                        ))}
                 </ThemedView>
             </ScrollView>
         </ThemedView>
@@ -171,4 +177,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default DayWorkoutsScreen;
+export default ProgramDayScreen;

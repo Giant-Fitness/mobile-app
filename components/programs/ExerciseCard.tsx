@@ -1,4 +1,4 @@
-// components/programs/DayWorkoutCard.tsx
+// components/programs/ExerciseCard.tsx
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
@@ -13,14 +13,14 @@ import { scale, moderateScale, verticalScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
 import { sizes } from '@/utils/sizes';
 
-const DayWorkoutCard = (props) => {
+const ExerciseCard = (props) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
     const navigation = useNavigation();
 
     const navigateToWorkoutDetail = () => {
-        navigation.navigate('programs/program-day-workout-details', props);
-    }
+        navigation.navigate('programs/exercise-details', props);
+    };
 
     return (
         <LeftImageInfoCard
@@ -82,4 +82,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default DayWorkoutCard;
+export default ExerciseCard;

@@ -1,10 +1,9 @@
-// app/programs/program-day-workout-details.tsx
+// app/programs/exercise-details.tsx
 
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Image, Button, TouchableOpacity, View, Text, TextInput } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
-import { useNavigation, useRoute } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { CustomBackButton } from '@/components/icons/CustomBackButton';
@@ -15,6 +14,7 @@ import { IconButton } from '@/components/base/IconButton';
 import { CenteredModal } from '@/components/layout/centeredModal';
 import { spacing } from '@/utils/spacing';
 import { useSelector } from 'react-redux';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 const CustomHeader = ({ workoutName, numSets, lowerLimReps, higherLimReps, restPeriod, themeColors }) => {
     return (
@@ -23,20 +23,18 @@ const CustomHeader = ({ workoutName, numSets, lowerLimReps, higherLimReps, restP
             <ThemedText style={[styles.subText, { color: themeColors.text }]}>
                 {numSets} sets, {lowerLimReps} - {higherLimReps} reps
             </ThemedText>
-            <ThemedText style={[styles.subText, { color: themeColors.text, marginBottom: '5%'}]}>
-                {restPeriod} rest
-            </ThemedText>
+            <ThemedText style={[styles.subText, { color: themeColors.text, marginBottom: '5%' }]}>{restPeriod} rest</ThemedText>
         </ThemedView>
     );
 };
 
 const data = [
-    {weight : '60 kgs', reps: '3'},
-    {weight : '60 kgs', reps: '3'},
-    {weight : '60 kgs', reps: '3'},
-]
+    { weight: '60 kgs', reps: '3' },
+    { weight: '60 kgs', reps: '3' },
+    { weight: '60 kgs', reps: '3' },
+];
 
-const ProgramWorkoutDetailsScreen = () => {
+const ExerciseDetailsScreen = () => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
@@ -56,14 +54,16 @@ const ProgramWorkoutDetailsScreen = () => {
             return;
         }
 
-        setSets((state) => [...state, {
-            weight: weight,
-            reps: reps
-        }]);
+        setSets((state) => [
+            ...state,
+            {
+                weight: weight,
+                reps: reps,
+            },
+        ]);
 
         setModalVisible(false);
-    }
-
+    };
 
     const { workoutName, photo, numSets, lowerLimReps, higherLimReps, restPeriod, longText } = route.params;
 
@@ -74,12 +74,12 @@ const ProgramWorkoutDetailsScreen = () => {
                 backgroundColor: themeColors.background,
             },
             headerTitle: () => (
-                <CustomHeader 
-                    workoutName={workoutName} 
+                <CustomHeader
+                    workoutName={workoutName}
                     themeColors={Colors[colorScheme ?? 'light']}
                     lowerLimReps={lowerLimReps}
                     higherLimReps={higherLimReps}
-                    restPeriod={restPeriod} 
+                    restPeriod={restPeriod}
                     numSets={numSets}
                 />
             ),
@@ -97,32 +97,39 @@ const ProgramWorkoutDetailsScreen = () => {
                 </ThemedView>
             </ScrollView>
             <TextButton text='Log' onPress={() => setDrawerVisible(true)} style={styles.floatingLogButton} />
-            <BottomDrawer 
-                visible={drawerVisible} 
+            <BottomDrawer
+                visible={drawerVisible}
                 onClose={() => setDrawerVisible(!drawerVisible)}
                 style={{
-                    height: '40%'
+                    height: '40%',
                 }}
             >
                 <View style={{ alignItems: 'center', paddingBottom: '63%' }}>
                     <ThemedText style={[styles.titleModal, { color: themeColors.text }]}>Today</ThemedText>
                     <ThemedText style={{ fontSize: 13, color: themeColors.subText }}>{workoutName}</ThemedText>
-                    <View style={[styles.itemContainer, { 
-                        marginTop: '5%',
-                        marginBottom: 0
-                    }]}>
+                    <View
+                        style={[
+                            styles.itemContainer,
+                            {
+                                marginTop: '5%',
+                                marginBottom: 0,
+                            },
+                        ]}
+                    >
                         <ThemedText style={[styles.itemHeaderText, { color: themeColors.text }]}>Weight</ThemedText>
-                        <View style={{
-                            width: StyleSheet.hairlineWidth,
-                            backgroundColor: themeColors.text
-                        }} />
+                        <View
+                            style={{
+                                width: StyleSheet.hairlineWidth,
+                                backgroundColor: themeColors.text,
+                            }}
+                        />
                         <ThemedText style={[styles.itemHeaderText, { color: themeColors.text }]}>Reps</ThemedText>
                     </View>
 
-                    <ScrollView 
+                    <ScrollView
                         contentContainerStyle={styles.scrollViewContent}
                         style={{
-                            width: '100%'
+                            width: '100%',
                         }}
                     >
                         {sets.map((item, index) => (
@@ -132,66 +139,50 @@ const ProgramWorkoutDetailsScreen = () => {
                             </View>
                         ))}
                     </ScrollView>
-                    <View style={{ 
-                        width: '70%', 
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        marginTop: '2%'
-                    }}>
+                    <View
+                        style={{
+                            width: '70%',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            marginTop: '2%',
+                        }}
+                    >
                         <IconButton
                             onPress={() => setModalVisible(true)}
                             iconName='plus'
                             iconColor='white'
                             style={{
                                 width: 25,
-                                height: 25
+                                height: 25,
                             }}
                         />
-                        <ThemedText style={{ 
-                            fontSize: 13, 
-                            color: themeColors.subText, 
-                            marginLeft: '3%'
-                        }}>Add Set</ThemedText>
+                        <ThemedText
+                            style={{
+                                fontSize: 13,
+                                color: themeColors.subText,
+                                marginLeft: '3%',
+                            }}
+                        >
+                            Add Set
+                        </ThemedText>
                     </View>
                 </View>
-                <TextButton 
-                    text='Log' 
-                    onPress={() => setDrawerVisible(false)} 
-                    style={styles.floatingLogButton} 
-                />
+                <TextButton text='Log' onPress={() => setDrawerVisible(false)} style={styles.floatingLogButton} />
             </BottomDrawer>
-            <CenteredModal
-                visible={modalVisible} 
-                onClose={() => setModalVisible(!modalVisible)}
-            >
+            <CenteredModal visible={modalVisible} onClose={() => setModalVisible(!modalVisible)}>
                 <ThemedView style={styles.inputContainer}>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Weight (Kgs)"
-                        keyboardType="numeric"
-                        value={weight}
-                        onChangeText={setWeight}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Reps"
-                        keyboardType="numeric"
-                        value={reps}
-                        onChangeText={setReps}
-                    />
-                    <TextButton 
-                        text='Confirm' 
-                        onPress={onConfirm} 
-                    />
+                    <TextInput style={styles.input} placeholder='Weight (Kgs)' keyboardType='numeric' value={weight} onChangeText={setWeight} />
+                    <TextInput style={styles.input} placeholder='Reps' keyboardType='numeric' value={reps} onChangeText={setReps} />
+                    <TextButton text='Confirm' onPress={onConfirm} />
                 </ThemedView>
             </CenteredModal>
         </ThemedView>
     );
-}
+};
 
 const styles = StyleSheet.create({
     container: {
-        alignItems: 'center'
+        alignItems: 'center',
     },
     contentView: {
         width: '100%',
@@ -199,7 +190,7 @@ const styles = StyleSheet.create({
         paddingTop: '7%',
         alignItems: 'flex-start',
         justifyContent: 'flex-start',
-        paddingBottom: '30%'
+        paddingBottom: '30%',
     },
     title: {
         fontFamily: 'InterMedium',
@@ -211,7 +202,7 @@ const styles = StyleSheet.create({
     },
     image: {
         width: '100%',
-        height: 300
+        height: 300,
     },
     floatingLogButton: {
         position: 'absolute',
@@ -232,7 +223,7 @@ const styles = StyleSheet.create({
     },
     titleModal: {
         fontSize: 18,
-        marginTop: '5%'
+        marginTop: '5%',
     },
     scrollViewContent: {
         paddingTop: '2%',
@@ -249,7 +240,7 @@ const styles = StyleSheet.create({
     },
     itemHeaderText: {
         fontSize: 16,
-        fontWeight: '700'
+        fontWeight: '700',
     },
     inputContainer: {
         width: '100%',
@@ -266,4 +257,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ProgramWorkoutDetailsScreen;
+export default ExerciseDetailsScreen;
