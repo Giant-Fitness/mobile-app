@@ -10,7 +10,7 @@ import {
     getNextDaysAsync,
 } from '@/store/programs/thunks';
 import { REQUEST_STATE } from '@/store/utils';
-import { ProgramDay, Program, UserWorkoutPlanProgress } from '@/store/programs/types';
+import { ProgramDay, Program, UserWorkoutPlanProgress } from '@/store/types';
 
 // Define the initial state type
 interface ProgramState {

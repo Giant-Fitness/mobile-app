@@ -1,6 +1,6 @@
-// store/programs/fakeData.ts
+// store/programs/mockData.ts
 
-import { ProgramDay, Exercise, Program, UserWorkoutPlanProgress } from '@/store/programs/types';
+import { ProgramDay, Exercise, Program, UserWorkoutPlanProgress } from '@/store/types';
 
 // Sample user plan progress
 const sampleUserProgress: UserWorkoutPlanProgress = {
@@ -69,7 +69,7 @@ const sampleExercises: Exercise[] = [
 const sampleProgramDays: ProgramDay[] = [
     {
         WorkoutPlanId: 'plan1',
-        WorkoutDayId: '25',
+        WorkoutDayId: '22',
         WorkoutDayTitle: 'Full Body',
         RestDay: false,
         Exercises: sampleExercises,
@@ -82,7 +82,7 @@ const sampleProgramDays: ProgramDay[] = [
         EquipmentCategory: 'Full Gym',
         Equipment: ['Barbell', 'Dumbbells', 'Cable Machine'],
         Week: 4,
-        Day: 4,
+        Day: 1,
     },
     {
         WorkoutPlanId: 'plan1',
@@ -120,7 +120,7 @@ const sampleProgramDays: ProgramDay[] = [
     },
     {
         WorkoutPlanId: 'plan1',
-        WorkoutDayId: '22',
+        WorkoutDayId: '25',
         WorkoutDayTitle: 'Rest Day',
         RestDay: true,
         Exercises: [],
@@ -134,7 +134,7 @@ const sampleProgramDays: ProgramDay[] = [
         EquipmentCategory: 'None',
         Equipment: [],
         Week: 4,
-        Day: 1,
+        Day: 4,
     },
 ];
 

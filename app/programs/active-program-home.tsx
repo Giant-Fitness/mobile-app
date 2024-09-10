@@ -19,6 +19,7 @@ import { spacing } from '@/utils/spacing';
 import { sizes } from '@/utils/sizes';
 import { AppDispatch, RootState } from '@/store/rootReducer';
 import { getCurrentDayAsync, getActiveProgramMetaAsync, getUserPlanProgressAsync, getNextDaysAsync } from '@/store/programs/thunks';
+import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
 import { BasicSplash } from '@/components/splashScreens/BasicSplash';
 import { REQUEST_STATE } from '@/store/utils';
 
@@ -31,13 +32,26 @@ export default function ActiveProgramHome() {
 
     const [isSplashVisible, setIsSplashVisible] = useState(true);
 
-    const { currentDay, currentDayState, activeProgram, activeProgramState, userPlanProgress, userPlanProgressState, nextDays, nextDaysState, error } =
-        useSelector((state: RootState) => state.programs);
+    const {
+        currentDay,
+        currentDayState,
+        activeProgram,
+        activeProgramState,
+        userPlanProgress,
+        userPlanProgressState,
+        nextDays,
+        nextDaysState,
+        error: programError,
+    } = useSelector((state: RootState) => state.programs);
+
+    const { workoutQuote, workoutQuoteState, restDayQuote, restDayQuoteState, error: quoteError } = useSelector((state: RootState) => state.quotes);
 
     useEffect(() => {
         dispatch(getCurrentDayAsync());
         dispatch(getActiveProgramMetaAsync());
         dispatch(getUserPlanProgressAsync());
+        dispatch(getWorkoutQuoteAsync());
+        dispatch(getRestDayQuoteAsync());
     }, [dispatch]);
 
     useEffect(() => {
@@ -57,18 +71,24 @@ export default function ActiveProgramHome() {
         currentDayState !== REQUEST_STATE.FULFILLED ||
         activeProgramState !== REQUEST_STATE.FULFILLED ||
         userPlanProgressState !== REQUEST_STATE.FULFILLED ||
-        nextDaysState !== REQUEST_STATE.FULFILLED
+        nextDaysState !== REQUEST_STATE.FULFILLED ||
+        workoutQuoteState !== REQUEST_STATE.FULFILLED ||
+        restDayQuoteState !== REQUEST_STATE.FULFILLED
     ) {
         return <BasicSplash onLoadingComplete={handleLoadingComplete} delay={500} />;
     }
 
-    if (error) {
+    if (programError || quoteError) {
+        const errorMessage = programError ? programError : quoteError;
         return (
             <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
-                <ThemedText>Error: {error}</ThemedText>
+                <ThemedText>Error: {errorMessage}</ThemedText>
             </ThemedView>
         );
     }
+
+    // Determine which quote to display based on whether the current day is a rest day
+    const displayQuote = currentDay?.RestDay ? restDayQuote : workoutQuote;
 
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
@@ -81,7 +101,7 @@ export default function ActiveProgramHome() {
             >
                 <ThemedView style={styles.quoteContainer}>
                     <ThemedText type='italic' style={[styles.quoteText, { color: themeColors.subText }]}>
-                        The only bad workout is the one that didn&apos;t happen.
+                        {displayQuote.QuoteText}
                     </ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.planHeader}>
