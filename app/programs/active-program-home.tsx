@@ -43,8 +43,7 @@ export default function ActiveProgramHome() {
     useEffect(() => {
         // Once user progress is available, fetch the next 3 days starting from CurrentDay + 1
         if (userPlanProgressState === REQUEST_STATE.FULFILLED && userPlanProgress) {
-            const nextDayId = (parseInt(userPlanProgress.CurrentDay) + 1).toString();
-            dispatch(getNextDaysAsync({ planId: userPlanProgress.WorkoutPlanId, startDayId: nextDayId, numDays: 3 }));
+            dispatch(getNextDaysAsync({ planId: userPlanProgress.WorkoutPlanId, currentDayId: userPlanProgress.CurrentDay, numDays: 3 }));
         }
     }, [userPlanProgress, userPlanProgressState, dispatch]);
 

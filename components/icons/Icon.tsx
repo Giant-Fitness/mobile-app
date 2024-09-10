@@ -66,6 +66,8 @@ export const Icon: React.FC<IconProps> = ({ name, size = 18, color, style }) => 
             return <Ionicons name='radio-button-off' {...commonProps} />;
         case 'plus':
             return <Feather name='plus' {...commonProps} />;
+        case 'bed':
+            return <MaterialCommunityIcons name='bed-outline' {...commonProps} />;
         default:
             return <Ionicons name='alert-circle-outline' s {...commonProps} />;
     }

@@ -13,10 +13,10 @@ export const getCurrentDayAsync = createAsyncThunk<ProgramDay, void>(actionTypes
     return await ProgramService.getCurrentDay();
 });
 
-export const getNextDaysAsync = createAsyncThunk<ProgramDay[], { planId: string; startDayId: string; numDays: number }>(
+export const getNextDaysAsync = createAsyncThunk<ProgramDay[], { planId: string; currentDayId: string; numDays: number }>(
     actionTypes.GET_NEXT_DAYS,
-    async ({ planId, startDayId, numDays }, thunkAPI) => {
-        return await ProgramService.getNextDays(planId, startDayId, numDays);
+    async ({ planId, currentDayId, numDays }, thunkAPI) => {
+        return await ProgramService.getNextDays(planId, currentDayId, numDays);
     },
 );
 

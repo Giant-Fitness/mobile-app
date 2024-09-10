@@ -11,22 +11,26 @@ const getCurrentDay = async (): Promise<ProgramDay> => {
     return sampleProgramDays.find((day) => day.WorkoutDayId === '22');
 };
 
-const getNextDays = async (planId: string, startDayId: string, numDays: int): Promise<ProgramDay[]> => {
+const getDaysByIds = async (planId: string, dayIds: string[]): Promise<ProgramDay[]> => {
     // Step 1: Filter days by the given planId
-    const filteredDays = sampleProgramDays.filter((day) => day.WorkoutPlanId === planId);
+    const allDays = sampleProgramDays.filter((day) => day.WorkoutPlanId === planId);
 
-    // Step 2: Find the starting index for the given startingDayId
-    const startIndex = filteredDays.findIndex((day) => day.WorkoutDayId === startDayId);
+    // Filter only the days with IDs in dayIds
+    const filteredDays = allDays.filter((day) => dayIds.includes(day.WorkoutDayId));
 
-    // Step 3: If the startIndex is found, slice the array to get the desired number of days
-    if (startIndex !== -1) {
-        return filteredDays.slice(startIndex, startIndex + numDays);
-    }
+    // Assuming the result should be sorted by WorkoutDayId
+    return filteredDays.sort((a, b) => parseInt(a.WorkoutDayId) - parseInt(b.WorkoutDayId));
+};
 
-    // Return an empty array if startingDayId is not found
-    return [];
+const getNextDays = async (planId: string, currentDayId: string, numDays: number): Promise<ProgramDay[]> => {
+    // Fetch all days for the given plan
+    const allDays = await getAllProgramDays(planId);
 
-    return sampleProgramDays;
+    // Get the IDs of the next 'numDays' days
+    const dayIdsToFetch = Array.from({ length: numDays }, (_, i) => (parseInt(currentDayId) + i + 1).toString());
+
+    // Use getDaysByIds to fetch the specific days
+    return await getDaysByIds(planId, dayIdsToFetch);
 };
 
 const getAllProgramDays = async (planId: string): Promise<ProgramDay[]> => {

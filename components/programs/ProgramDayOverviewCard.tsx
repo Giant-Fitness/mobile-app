@@ -45,12 +45,31 @@ export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ 
                         </ThemedText>
                     </ThemedView>
 
-                    <ThemedView style={styles.attributeRow}>
-                        <Icon name='stopwatch' size={moderateScale(14)} color={themeColors.text} />
-                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.text }]}>
-                            {`${day.Time} mins`}
-                        </ThemedText>
-                    </ThemedView>
+                    {day.RestDay ? (
+                        // Display content for a rest day
+                        <ThemedView style={styles.contentContainer}>
+                            <ThemedView style={styles.attributeRow}>
+                                <Icon name='bed' size={moderateScale(16)} color={themeColors.subText} />
+                            </ThemedView>
+
+                            <ThemedView style={styles.attributeRow}>
+                                <ThemedText
+                                    type='bodySmall'
+                                    style={[styles.attributeText, { color: themeColors.subText, marginLeft: 0, marginTop: spacing.xs }]}
+                                >
+                                    {day.Notes}
+                                </ThemedText>
+                            </ThemedView>
+                        </ThemedView>
+                    ) : (
+                        // Display content for a workout day
+                        <ThemedView style={styles.attributeRow}>
+                            <Icon name='stopwatch' size={moderateScale(14)} color={themeColors.text} />
+                            <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.text }]}>
+                                {`${day.Time} mins`}
+                            </ThemedText>
+                        </ThemedView>
+                    )}
                 </ThemedView>
             }
             containerStyle={styles.container}

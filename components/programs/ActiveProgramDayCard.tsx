@@ -27,17 +27,29 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = ({ day 
             title={day.WorkoutDayTitle}
             subtitle={`Week ${day.Week} Day ${day.Day}`}
             extraContent={
-                <ThemedView style={styles.attributeRow}>
-                    <Icon name='stopwatch' size={moderateScale(14)} color={themeColors.highlightContainerText} />
-                    <ThemedText type='body' style={[styles.attributeText, { color: themeColors.highlightContainerText, paddingRight: spacing.md }]}>
-                        {`${day.Time} mins`}
-                    </ThemedText>
-                    <Icon name='dumbbell' size={moderateScale(14)} color={themeColors.highlightContainerText} />
-                    <ThemedText type='body' style={[styles.attributeText, { color: themeColors.highlightContainerText, marginLeft: spacing.xs }]}>
-                        {day.EquipmentCategory}
-                    </ThemedText>
-                    <Icon name='chevron-forward' size={moderateScale(16)} color={themeColors.highlightContainerText} style={styles.chevronIcon} />
-                </ThemedView>
+                day.RestDay ? (
+                    // Display content specific to a rest day
+                    <ThemedView style={[styles.attributeRow, { marginLeft: 0, marginTop: -spacing.xxs }]}>
+                        <Icon name='bed' size={moderateScale(18)} color={themeColors.highlightContainerText} />
+                        {/*                        <ThemedText type='body' style={[styles.attributeText, { color: themeColors.subTextSecondary, marginLeft: spacing.sm }]}>
+                            {day.Notes ? day.Notes : 'Take it easy today! Focus on recovery and hydration.'}
+                        </ThemedText>*/}
+                        <Icon name='chevron-forward' size={moderateScale(16)} color={themeColors.highlightContainerText} style={styles.chevronIcon} />
+                    </ThemedView>
+                ) : (
+                    // Display content specific to a workout day
+                    <ThemedView style={styles.attributeRow}>
+                        <Icon name='stopwatch' size={moderateScale(14)} color={themeColors.highlightContainerText} />
+                        <ThemedText type='body' style={[styles.attributeText, { color: themeColors.highlightContainerText, paddingRight: spacing.md }]}>
+                            {`${day.Time} mins`}
+                        </ThemedText>
+                        <Icon name='dumbbell' size={moderateScale(14)} color={themeColors.highlightContainerText} />
+                        <ThemedText type='body' style={[styles.attributeText, { color: themeColors.highlightContainerText, marginLeft: spacing.xs }]}>
+                            {day.EquipmentCategory}
+                        </ThemedText>
+                        <Icon name='chevron-forward' size={moderateScale(16)} color={themeColors.highlightContainerText} style={styles.chevronIcon} />
+                    </ThemedView>
+                )
             }
             titleStyle={{ color: themeColors.highlightContainerText }}
             subtitleStyle={{ color: themeColors.subTextSecondary }}
