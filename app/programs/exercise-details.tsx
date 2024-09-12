@@ -11,7 +11,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { TextButton } from '@/components/base/TextButton';
 import { BottomDrawer } from '@/components/layout/BottomDrawer';
 import { IconButton } from '@/components/base/IconButton';
-import { CenteredModal } from '@/components/layout/centeredModal';
+import { CenteredModal } from '@/components/layout/CenteredModal';
 import { spacing } from '@/utils/spacing';
 import { useSelector } from 'react-redux';
 import { useNavigation, useRoute } from '@react-navigation/native';

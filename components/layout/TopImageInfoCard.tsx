@@ -1,5 +1,3 @@
-// components/layout/TopImageInfoCard.tsx
-
 import React from 'react';
 import { StyleSheet, StyleProp, ViewStyle, TextStyle, ImageSourcePropType } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -15,6 +13,7 @@ type TopImageInfoCardProps = {
     image: ImageSourcePropType;
     title: string;
     subtitle?: string;
+    titleType?: string;
     extraContent?: React.ReactNode;
     containerStyle?: StyleProp<ViewStyle>;
     imageStyle?: StyleProp<ViewStyle>;
@@ -22,6 +21,7 @@ type TopImageInfoCardProps = {
     titleStyle?: StyleProp<TextStyle>;
     subtitleStyle?: StyleProp<TextStyle>;
     placeholder?: any;
+    titleFirst?: boolean; // New prop to control order
 };
 
 export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
@@ -34,7 +34,9 @@ export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
     contentContainerStyle,
     titleStyle,
     subtitleStyle,
+    titleType = 'title',
     placeholder = '@/assets/images/adaptive-icon.png',
+    titleFirst = false,
 }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
@@ -42,11 +44,23 @@ export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
     return (
         <ThemedView style={[styles.container, containerStyle]}>
             <Image source={image} style={[styles.image, imageStyle]} placeholder={placeholder} />
-            <ThemedView style={[styles.contentContainer, contentContainerStyle, { backgroundColor: themeColors.containerHighlight }]}>
-                {subtitle && <ThemedText style={[styles.subtitle, subtitleStyle]}>{subtitle}</ThemedText>}
-                <ThemedText type='title' style={[styles.title, titleStyle]}>
-                    {title}
-                </ThemedText>
+            <ThemedView style={[styles.contentContainer, { backgroundColor: themeColors.containerHighlight }, contentContainerStyle]}>
+                {/* Conditionally render title and subtitle based on the 'titleFirst' prop */}
+                {titleFirst ? (
+                    <>
+                        <ThemedText type={titleType} style={[styles.title, titleStyle]}>
+                            {title}
+                        </ThemedText>
+                        {subtitle && <ThemedText style={[styles.subtitle, subtitleStyle]}>{subtitle}</ThemedText>}
+                    </>
+                ) : (
+                    <>
+                        {subtitle && <ThemedText style={[styles.subtitle, subtitleStyle]}>{subtitle}</ThemedText>}
+                        <ThemedText type={titleType} style={[styles.title, titleStyle]}>
+                            {title}
+                        </ThemedText>
+                    </>
+                )}
                 {extraContent}
             </ThemedView>
         </ThemedView>
@@ -75,7 +89,7 @@ const styles = StyleSheet.create({
         marginBottom: spacing.sm,
     },
     subtitle: {
-        marginTop: spacing.xs,
+        marginTop: spacing.xxs,
         fontSize: moderateScale(14),
     },
 });

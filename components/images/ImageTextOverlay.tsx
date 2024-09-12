@@ -13,7 +13,7 @@ import { spacing } from '@/utils/spacing';
 import { sizes } from '@/utils/sizes';
 
 type ImageTextOverlayProps = {
-    photo: any;
+    image: any;
     title: string;
     subtitle?: string;
     titleStyle?: StyleProp<TextStyle>;
@@ -27,7 +27,7 @@ type ImageTextOverlayProps = {
 };
 
 export const ImageTextOverlay: React.FC<ImageTextOverlayProps> = ({
-    photo,
+    image,
     title,
     subtitle,
     titleStyle,
@@ -45,7 +45,7 @@ export const ImageTextOverlay: React.FC<ImageTextOverlayProps> = ({
     return (
         <ThemedView style={[containerStyle]}>
             <ThemedView style={styles.imageWrapper}>
-                <Image source={photo} style={styles.image} contentFit='cover' cachePolicy='memory-disk' placeholder={placeholder} />
+                <Image source={image} style={styles.image} contentFit='cover' cachePolicy='memory-disk' placeholder={placeholder} />
                 <LinearGradient colors={gradientColors} style={styles.gradientOverlay} />
                 <ThemedView style={[styles.textContainer, textContainerStyle]}>
                     <ThemedText type={titleType} style={[styles.title, titleStyle, { color: themeColors.white }]}>

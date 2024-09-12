@@ -45,7 +45,7 @@ export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, 
     return (
         <TouchableOpacity onPress={navigateToWorkoutDetails} style={styles.cardContainer} activeOpacity={1}>
             <ImageTextOverlay
-                photo={photo}
+                image={photo}
                 title={name}
                 subtitle={`${length}, ${level}`}
                 gradientColors={['transparent', 'rgba(0,0,0,0.6)']}

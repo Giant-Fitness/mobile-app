@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     titleXLarge: {
         fontSize: moderateScale(21),
         lineHeight: moderateScale(32),
-        fontFamily: 'InterMedium',
+        fontFamily: 'InterSemiBold',
     },
     titleXXLarge: {
         fontSize: moderateScale(24),

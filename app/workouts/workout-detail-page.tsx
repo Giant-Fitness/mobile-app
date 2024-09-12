@@ -1,7 +1,7 @@
 // app/workouts/workout-detail-page.tsx
 
 import React, { useRef, useState } from 'react';
-import { StyleSheet, Animated } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
@@ -16,6 +16,8 @@ import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle } from '@/components
 import { scale, moderateScale, verticalScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
 import { sizes } from '@/utils/sizes';
+import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
+import { AnimatedHeader } from '@/components/layout/AnimatedHeader';
 
 export default function WorkoutDetailScreen() {
     const colorScheme = useColorScheme();
@@ -24,7 +26,14 @@ export default function WorkoutDetailScreen() {
     const navigation = useNavigation();
     const route = useRoute();
 
-    const scrollY = useRef(new Animated.Value(0)).current;
+    const scrollY = useSharedValue(0);
+
+    const scrollHandler = useAnimatedScrollHandler({
+        onScroll: (event) => {
+            scrollY.value = event.contentOffset.y;
+        },
+    });
+
     const videoPlayerRef = useRef<FullScreenVideoPlayerHandle>(null);
 
     // Constants for milestone tracking and skip logic
@@ -84,10 +93,10 @@ export default function WorkoutDetailScreen() {
 
     return (
         <ThemedView style={styles.container}>
-            <CustomBackButton style={styles.backButton} iconColor={themeColors.white} />
+            <AnimatedHeader scrollY={scrollY} disableColorChange={true} />
             <Animated.ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false} overScrollMode='never'>
                 <ImageTextOverlay
-                    photo={photo}
+                    image={photo}
                     title={name}
                     titleType='titleXXLarge'
                     gradientColors={['transparent', 'rgba(0,0,0,0.4)']}

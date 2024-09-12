@@ -106,7 +106,7 @@ const sampleProgramDays: ProgramDay[] = [
         WorkoutDayId: '24',
         WorkoutDayTitle: 'Lower Body B',
         RestDay: false,
-        Exercises: [],
+        Exercises: sampleExercises,
         Notes: 'Back to strength training with new exercises.',
         PhotoUrl: 'https://images.pexels.com/photos/841130/pexels-photo-841130.jpeg',
         CreationDate: '2024-07-03',
