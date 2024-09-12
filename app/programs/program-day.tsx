@@ -82,7 +82,7 @@ const ProgramDayScreen = () => {
                         </ThemedView>
                     }
                 />
-                <ThemedView style={[styles.exercisesContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
+                <ThemedView style={[styles.exercisesContainer, { backgroundColor: themeColors.container }]}>
                     {day.Exercises && day.Exercises.map((exercise) => <ExerciseCard2 key={exercise.ExerciseId} exercise={exercise} />)}
                 </ThemedView>
             </Animated.ScrollView>

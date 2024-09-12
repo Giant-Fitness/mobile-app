@@ -21,7 +21,7 @@ type IconProps = {
     style?: StyleProp<TextStyle>;
 };
 
-export const Icon: React.FC<IconProps> = ({ name, size = 18, color, style }) => {
+export const Icon = React.forwardRef<any, IconProps>(({ name, size = 18, color, style }, ref) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
     const defaultColor = themeColors.white;
@@ -42,6 +42,7 @@ export const Icon: React.FC<IconProps> = ({ name, size = 18, color, style }) => 
     const commonProps = {
         size: moderateScale(size),
         style: [animatedStyle, style],
+        ref,
     };
 
     // Render the appropriate icon
@@ -93,4 +94,4 @@ export const Icon: React.FC<IconProps> = ({ name, size = 18, color, style }) => 
         default:
             return <AnimatedIonicons name='alert-circle-outline' {...commonProps} />;
     }
-};
+});

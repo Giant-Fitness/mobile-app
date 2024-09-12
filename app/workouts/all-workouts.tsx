@@ -9,11 +9,12 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { WorkoutsBottomBar } from '@/components/workouts/WorkoutsBottomBar';
-import { CustomBackButton } from '@/components/base/CustomBackButton';
 import { WorkoutsFilterDrawer } from '@/components/workouts/WorkoutsFilterDrawer';
 import { WorkoutsSortDrawer } from '@/components/workouts/WorkoutsSortDrawer';
-import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { verticalScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
+import { useSharedValue } from 'react-native-reanimated';
+import { AnimatedHeader } from '@/components/layout/AnimatedHeader';
 
 const workouts = [
     {
@@ -153,26 +154,19 @@ export default function AllWorkoutsScreen() {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
-    useEffect(() => {
-        navigation.setOptions({
-            title: 'All Workouts',
-            headerBackTitleVisible: false,
-            headerStyle: {
-                backgroundColor: themeColors.background,
-            },
-            headerShadowVisible: false, // Specifically disable shadow
-            headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
-            headerLeft: () => <CustomBackButton />,
-        });
-    }, [navigation, themeColors]);
+    React.useEffect(() => {
+        navigation.setOptions({ headerShown: false });
+    }, [navigation]);
 
     const workoutCount = filteredWorkouts.length;
     const workoutLabel = workoutCount === 1 ? 'workout' : 'workouts';
 
     const activeFilterTypesCount = Object.keys(filters).filter((key) => filters[key].length > 0).length;
+    const scrollY = useSharedValue(0);
 
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
+            <AnimatedHeader scrollY={scrollY} disableColorChange={true} title='All Workouts' />
             <ThemedText type='overline' style={[styles.countContainer, { color: themeColors.subText }]}>
                 {workoutCount} {workoutLabel}
             </ThemedText>
@@ -211,6 +205,7 @@ const styles = StyleSheet.create({
     countContainer: {
         padding: spacing.lg,
         paddingVertical: spacing.md,
+        paddingTop: 100,
     },
     contentContainer: {
         paddingTop: spacing.sm,

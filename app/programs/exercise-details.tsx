@@ -6,7 +6,6 @@ import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { CustomBackButton } from '@/components/icons/CustomBackButton';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { TextButton } from '@/components/base/TextButton';
 import { BottomDrawer } from '@/components/layout/BottomDrawer';

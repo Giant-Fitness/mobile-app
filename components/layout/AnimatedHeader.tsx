@@ -7,6 +7,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { CustomBackButton } from '@/components/base/CustomBackButton';
 import { spacing } from '@/utils/spacing';
+import { ThemedText } from '@/components/base/ThemedText';
 
 type AnimatedHeaderProps = {
     scrollY: Animated.SharedValue<number>;
@@ -14,6 +15,8 @@ type AnimatedHeaderProps = {
     headerInterpolationStart?: number;
     headerInterpolationEnd?: number;
     disableColorChange?: boolean;
+    title?: string; // Optional title prop
+    backButtonColor?: string;
 };
 
 export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
@@ -22,6 +25,8 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
     headerInterpolationStart = 100,
     headerInterpolationEnd = 170,
     disableColorChange = false,
+    title, // Destructure the title prop
+    backButtonColor,
 }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
@@ -43,7 +48,7 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
     // Determine icon color
     const animatedIconColor = useDerivedValue(() => {
         if (disableColorChange) {
-            return themeColors.text;
+            return backButtonColor || themeColors.text;
         }
 
         const color = interpolateColor(scrollY.value, [headerInterpolationStart, headerInterpolationEnd], [themeColors.white, themeColors.text]);
@@ -53,6 +58,11 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
     return (
         <Animated.View style={[styles.headerContainer, animatedHeaderStyle]}>
             <CustomBackButton style={styles.backButton} animatedColor={animatedIconColor} onBackPress={onBackPress} />
+            {title && (
+                <ThemedText type='link' style={[styles.title, { color: themeColors.text }]}>
+                    {title}
+                </ThemedText>
+            )}
         </Animated.View>
     );
 };
@@ -66,7 +76,7 @@ const styles = StyleSheet.create({
         height: 100,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'center', // Center content
         paddingHorizontal: spacing.md,
         paddingVertical: spacing.md,
         zIndex: 10,
@@ -76,6 +86,9 @@ const styles = StyleSheet.create({
         top: spacing.xxl,
         left: spacing.md,
         zIndex: 10,
+    },
+    title: {
+        top: spacing.md,
     },
 });
 

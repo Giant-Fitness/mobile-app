@@ -1,12 +1,14 @@
+// components/base/CustomBackButton.tsx
+
 import React from 'react';
 import { TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
-import Animated, { useAnimatedProps } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import { Icon } from '@/components/icons/Icon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { moderateScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
+import Animated, { useAnimatedProps } from 'react-native-reanimated';
 
 type CustomBackButtonProps = {
     style?: ViewStyle;
@@ -20,6 +22,7 @@ export const CustomBackButton: React.FC<CustomBackButtonProps> = ({ style, anima
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
     const defaultIconColor = themeColors.iconSelected;
+    const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 
     // Animated props to update the color dynamically if animatedColor is provided
     const animatedProps = animatedColor
@@ -28,14 +31,9 @@ export const CustomBackButton: React.FC<CustomBackButtonProps> = ({ style, anima
           }))
         : undefined; // No animated props if animatedColor is not provided
 
-    // Determine final color: use animated color if available, else use static color or default color
-    const finalColor = animatedColor ? undefined : staticColor || defaultIconColor;
-
     return (
         <TouchableOpacity style={[styles.button, style]} onPress={onBackPress || (() => navigation.goBack())}>
-            <Animated.View style={animatedProps ? animatedProps : {}}>
-                <Icon name='chevron-back' size={moderateScale(22)} color={finalColor} />
-            </Animated.View>
+            <AnimatedIcon name='chevron-back' size={moderateScale(22)} color={defaultIconColor} animatedProps={animatedProps} />
         </TouchableOpacity>
     );
 };

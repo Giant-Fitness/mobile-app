@@ -7,7 +7,6 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
-import { CustomBackButton } from '@/components/base/CustomBackButton';
 import { ImageTextOverlay } from '@/components/images/ImageTextOverlay';
 import { Icon } from '@/components/icons/Icon';
 import { TextButton } from '@/components/base/TextButton';
@@ -27,12 +26,6 @@ export default function WorkoutDetailScreen() {
     const route = useRoute();
 
     const scrollY = useSharedValue(0);
-
-    const scrollHandler = useAnimatedScrollHandler({
-        onScroll: (event) => {
-            scrollY.value = event.contentOffset.y;
-        },
-    });
 
     const videoPlayerRef = useRef<FullScreenVideoPlayerHandle>(null);
 
@@ -93,7 +86,7 @@ export default function WorkoutDetailScreen() {
 
     return (
         <ThemedView style={styles.container}>
-            <AnimatedHeader scrollY={scrollY} disableColorChange={true} />
+            <AnimatedHeader scrollY={scrollY} disableColorChange={true} backButtonColor={themeColors.white} />
             <Animated.ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false} overScrollMode='never'>
                 <ImageTextOverlay
                     image={photo}
