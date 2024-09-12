@@ -8,7 +8,21 @@ import { moderateScale } from '@/utils/scaling'; // Use the customized moderateS
 export type ThemedTextProps = TextProps & {
     lightColor?: string;
     darkColor?: string;
-    type?: 'body' | 'titleLarge' | 'title' | 'subtitle' | 'caption' | 'link' | 'button' | 'overline' | 'italic' | 'buttonSmall';
+    type?:
+        | 'body'
+        | 'titleLarge'
+        | 'title'
+        | 'subtitle'
+        | 'caption'
+        | 'link'
+        | 'button'
+        | 'overline'
+        | 'italic'
+        | 'buttonSmall'
+        | 'titleXLarge'
+        | 'bodyXSmall'
+        | 'bodyMedium'
+        | 'bodySmall';
 };
 
 // Styles for different text types using specific Inter fonts with adjusted scaling

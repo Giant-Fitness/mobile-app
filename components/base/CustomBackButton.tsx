@@ -19,8 +19,8 @@ type CustomBackButtonProps = {
 
 export const CustomBackButton: React.FC<CustomBackButtonProps> = ({ style, animatedColor, staticColor, onBackPress }) => {
     const navigation = useNavigation();
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
     const defaultIconColor = themeColors.iconSelected;
     const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 

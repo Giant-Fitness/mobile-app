@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View, StyleProp, ViewStyle, ImageSourcePropType, TextStyle } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, StyleProp, ViewStyle, ImageSourcePropType, TextStyle, ImageStyle } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -17,7 +17,7 @@ type LeftImageInfoCardProps = {
     extraContent?: React.ReactNode;
     onPress?: () => void;
     containerStyle?: StyleProp<ViewStyle>;
-    imageStyle?: StyleProp<ViewStyle>;
+    imageStyle?: StyleProp<ImageStyle>; // Change from ViewStyle to ImageStyle
     contentContainerStyle?: StyleProp<ViewStyle>;
     titleStyle?: StyleProp<TextStyle>;
     subtitleStyle?: StyleProp<TextStyle>;
@@ -39,8 +39,8 @@ export const LeftImageInfoCard: React.FC<LeftImageInfoCardProps> = ({
     gradientColors = ['transparent', 'rgba(0,0,0,0.4)'],
     placeholder = '@/assets/images/adaptive-icon.png',
 }) => {
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     return (
         <TouchableOpacity onPress={onPress} style={[styles.card, containerStyle]} activeOpacity={1}>

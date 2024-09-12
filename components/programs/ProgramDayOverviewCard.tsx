@@ -19,8 +19,8 @@ type ProgramDayOverviewCardProps = {
 };
 
 export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ day }) => {
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
     const navigation = useNavigation();
 
     const navigateToProgramDay = () => {

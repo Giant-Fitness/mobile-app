@@ -22,6 +22,7 @@ export const Colors = {
         red: '#cc4533', // Error color
         warning: '#FFA500', // Optional: Warning color (e.g., for alerts)
         info: '#1E90FF', // Optional: Info color (e.g., for badges)
+        transparent: 'rgba(255, 255, 255, 0)',
     },
     dark: {
         text: '#F6F8F6', // Main text color
@@ -44,5 +45,6 @@ export const Colors = {
         red: '#cc4533', // Error color
         warning: '#FF8C00', // Optional: Warning color (darker orange)
         info: '#4682B4', // Optional: Info color (muted blue)
+        transparent: 'rgba(0, 0, 0, 0)',
     },
 };

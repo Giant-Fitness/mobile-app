@@ -1,29 +1,35 @@
 // app/programs/program-day.tsx
 
 import React from 'react';
-import { ScrollView, StyleSheet, Image, Button, TouchableOpacity, View } from 'react-native';
-import { WorkoutDetailedCard } from '@/components/workouts/WorkoutDetailedCard';
+import { StyleSheet } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { WorkoutsBottomBar } from '@/components/workouts/WorkoutsBottomBar';
-import { ExerciseCard2 } from '@/components/programs/ExerciseCard2';
+import { ExerciseCard } from '@/components/programs/ExerciseCard';
 import { Icon } from '@/components/icons/Icon';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/layout/AnimatedHeader';
 import { TopImageInfoCard } from '@/components/layout/TopImageInfoCard';
-import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { moderateScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
 import { sizes } from '@/utils/sizes';
+import { RouteProp } from '@react-navigation/native';
+import { ProgramDay } from '@/store/types';
+
+type ProgramDayScreenParams = {
+    ProgramDay: {
+        day: ProgramDay;
+    };
+};
 
 const ProgramDayScreen = () => {
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     const navigation = useNavigation();
-    const route = useRoute();
+    const route = useRoute<RouteProp<ProgramDayScreenParams, 'ProgramDay'>>();
 
     const { day } = route.params;
 
@@ -40,10 +46,10 @@ const ProgramDayScreen = () => {
 
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
-            <AnimatedHeader scrollY={scrollY} headerInterpolationStart={sizes.imageLargeHeight} headerInterpolationEnd={sizes.imageLargeHeight + spacing.lg} />
+            <AnimatedHeader scrollY={scrollY} headerInterpolationStart={sizes.imageLargeHeight} headerInterpolationEnd={sizes.imageLargeHeight + spacing.xxl} />
             <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16}>
                 <TopImageInfoCard
-                    image={day.PhotoUrl}
+                    image={{ uri: day.PhotoUrl }}
                     title={day.WorkoutDayTitle}
                     subtitle={`Week ${day.Week} Day ${day.Day}`} // Updated subtitle
                     titleType='titleXLarge'
@@ -83,7 +89,7 @@ const ProgramDayScreen = () => {
                     }
                 />
                 <ThemedView style={[styles.exercisesContainer, { backgroundColor: themeColors.container }]}>
-                    {day.Exercises && day.Exercises.map((exercise) => <ExerciseCard2 key={exercise.ExerciseId} exercise={exercise} />)}
+                    {day.Exercises && day.Exercises.map((exercise) => <ExerciseCard key={exercise.ExerciseId} exercise={exercise} />)}
                 </ThemedView>
             </Animated.ScrollView>
         </ThemedView>

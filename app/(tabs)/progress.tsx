@@ -1,9 +1,8 @@
 // app/(tabs)/progress.tsx
 
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { StyleSheet, Image, Platform } from 'react-native';
+import { StyleSheet } from 'react-native';
 import React from 'react';
-import { Collapsible } from '@/components/layout/Collapsible';
 import ParallaxScrollView from '@/components/layout/ParallaxScrollView';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';

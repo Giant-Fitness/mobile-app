@@ -7,6 +7,7 @@ import { Colors } from '@/constants/Colors';
 import { ThemedText } from '@/components/base/ThemedText';
 import { moderateScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
+import { ThemedTextProps } from '@/components/base/ThemedText'; // Add this import
 
 type TextButtonProps = {
     onPress: () => void;
@@ -15,12 +16,12 @@ type TextButtonProps = {
     style?: StyleProp<ViewStyle>;
     textStyle?: StyleProp<TextStyle>;
     iconStyle?: StyleProp<ViewStyle>;
-    textType?: string;
+    textType?: ThemedTextProps['type'];
 };
 
 export const TextButton: React.FC<TextButtonProps> = ({ onPress, text, style, textStyle, textType }) => {
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     return (
         <TouchableOpacity style={[styles.button, { backgroundColor: themeColors.primary }, style]} onPress={onPress} activeOpacity={1}>

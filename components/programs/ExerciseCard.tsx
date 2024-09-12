@@ -1,86 +1,119 @@
 // components/programs/ExerciseCard.tsx
 
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
 import React from 'react';
-import { Ionicons } from '@expo/vector-icons';
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
-import { LeftImageInfoCard } from '@/components/layout/LeftImageInfoCard';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useNavigation } from '@react-navigation/native';
-import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { moderateScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
-import { sizes } from '@/utils/sizes';
+import { Exercise } from '@/store/types';
+import { Icon } from '@/components/icons/Icon';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/Colors';
+import { TouchableOpacity } from 'react-native';
 
-const ExerciseCard = (props) => {
+type ExerciseCardProps = {
+    exercise: Exercise;
+};
+
+export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
     const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const themeColors = Colors[colorScheme as 'light' | 'dark'];
+
     const navigation = useNavigation();
 
-    const navigateToWorkoutDetail = () => {
-        navigation.navigate('programs/exercise-details', props);
+    const navigateToExerciseDetail = () => {
+        navigation.navigate('programs/exercise-details', exercise);
     };
 
     return (
-        <LeftImageInfoCard
-            image={props.photo}
-            title={props.workoutName}
-            onPress={navigateToWorkoutDetail}
-            extraContent={
-                <ThemedView style={{ backgroundColor: 'transparent' }}>
-                    <ThemedView style={styles.attributeRow}>
-                        <ThemedText style={[styles.extraContentText, { color: themeColors.subText }]}>
-                            {`${props.numSets} sets x ${props.lowerLimReps} - ${props.higherLimReps} reps`}
-                        </ThemedText>
-                    </ThemedView>
-
-                    <ThemedView style={styles.attributeRow}>
-                        <ThemedText style={[styles.extraContentText, { color: themeColors.subText }]}>{`${props.restPeriod} rest`}</ThemedText>
-                    </ThemedView>
-
-                    <ThemedView style={styles.attributeRow}>
-                        <ThemedText style={[styles.extraContentText, { color: themeColors.subText }]}>{props.intro}</ThemedText>
-                    </ThemedView>
-                </ThemedView>
-            }
-            containerStyle={styles.container}
-            titleStyle={[styles.title, { color: themeColors.text }]}
-            extraContentStyle={styles.contentContainer}
-            imageStyle={styles.image}
-        />
+        <ThemedView style={styles.card}>
+            <ThemedText type='title' style={styles.title}>
+                {exercise.ExerciseName}
+            </ThemedText>
+            <View style={[styles.divider, { borderBottomColor: themeColors.systemBorderColor }]} />
+            <View style={styles.infoContainer}>
+                <ThemedText>
+                    Reps: {exercise.RepsLower}-{exercise.RepsUpper}
+                </ThemedText>
+                <ThemedText>Sets: {exercise.Sets}</ThemedText>
+                <ThemedText>Rest: {exercise.Rest} mins</ThemedText>
+            </View>
+            {exercise.QuickTip && (
+                <View style={styles.tipContainer}>
+                    <Icon name='bulb' size={moderateScale(14)} color={themeColors.text} style={{ marginTop: spacing.xs }} />
+                    <ThemedText type='italic' style={styles.quickTip}>
+                        {exercise.QuickTip}
+                    </ThemedText>
+                </View>
+            )}
+            <View style={[styles.divider, { borderBottomColor: themeColors.systemBorderColor }]} />
+            <View style={styles.buttonContainer}>
+                <TouchableOpacity style={[styles.playButton, { backgroundColor: themeColors.background }]} onPress={navigateToExerciseDetail}>
+                    <View style={styles.buttonContent}>
+                        <ThemedText style={[styles.viewDrillText, { color: themeColors.subText }]}>View Drill</ThemedText>
+                        <Icon name='chevron-forward' color={themeColors.subText} />
+                    </View>
+                </TouchableOpacity>
+            </View>
+        </ThemedView>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: 'transparent',
-        width: '100%',
+    card: {
+        padding: spacing.md,
+        borderRadius: spacing.sm,
         marginBottom: spacing.lg,
     },
     title: {
-        fontSize: moderateScale(14),
-        marginBottom: 0,
+        marginBottom: spacing.md,
+    },
+    divider: {
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        marginBottom: spacing.md,
+    },
+    infoContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: spacing.md,
+        marginTop: spacing.md,
+    },
+    tipContainer: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        marginBottom: spacing.lg,
+    },
+    quickTip: {
+        marginLeft: spacing.xs,
+        flex: 1,
+    },
+    detailsButton: {
+        paddingVertical: spacing.sm,
+        marginTop: spacing.sm,
+    },
+    buttonContainer: {
+        flexDirection: 'row',
         marginTop: spacing.xs,
     },
-    image: {
-        height: sizes.imageMediumHeight,
-        width: sizes.imageMediumWidth,
-        borderRadius: scale(2),
+    playButton: {
+        borderRadius: spacing.sm,
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.xs,
+        flex: 1,
     },
-    contentContainer: {
-        width: '100%',
-        backgroundColor: 'transparent',
+    viewDrillButton: {
+        flex: 1,
+        marginLeft: spacing.md,
+        justifyContent: 'center',
     },
-    attributeRow: {
+    viewDrillText: {
+        paddingRight: spacing.sm,
+    },
+    buttonContent: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'transparent',
-    },
-    attributeText: {},
-    extraContentText: {
-        fontSize: moderateScale(13),
+        width: '100%',
     },
 });
-
-export default ExerciseCard;

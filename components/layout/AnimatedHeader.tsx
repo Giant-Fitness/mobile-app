@@ -28,8 +28,8 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
     title, // Destructure the title prop
     backButtonColor,
 }) => {
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     // Determine background color style
     const animatedHeaderStyle = useAnimatedStyle(() => {
@@ -40,7 +40,7 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
         const backgroundColor = interpolateColor(
             scrollY.value,
             [headerInterpolationStart, headerInterpolationEnd],
-            ['rgba(255, 255, 255, 0)', themeColors.background],
+            [themeColors.transparent, themeColors.background],
         );
         return { backgroundColor };
     });

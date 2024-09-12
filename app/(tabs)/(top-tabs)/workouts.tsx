@@ -2,18 +2,24 @@
 
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { TouchableOpacity, StyleSheet, ScrollView, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { WorkoutOverviewCard } from '@/components/workouts/WorkoutOverviewCard';
 import { Collapsible } from '@/components/layout/Collapsible';
 import { Icon } from '@/components/icons/Icon';
-import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { moderateScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
 import { sizes } from '@/utils/sizes';
+
+type RootStackParamList = {
+    'workouts/all-workouts': { initialFilters: object };
+};
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const recommendedWorkouts = [
     {
@@ -58,10 +64,10 @@ const recommendedWorkouts = [
 ];
 
 export default function WorkoutsScreen() {
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
-    const navigation = useNavigation();
+    const navigation = useNavigation<NavigationProp>();
 
     const navigateToAllWorkouts = (initialFilters = {}) => {
         navigation.navigate('workouts/all-workouts', { initialFilters });

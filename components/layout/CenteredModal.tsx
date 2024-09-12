@@ -16,8 +16,8 @@ interface CenteredModalProps {
 }
 
 export const CenteredModal: React.FC<CenteredModalProps> = ({ visible, onClose, children, style }) => {
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     return (
         <Modal animationType='fade' transparent={true} visible={visible} onRequestClose={onClose}>

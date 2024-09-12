@@ -84,6 +84,12 @@ const workouts = [
     },
 ];
 
+import { RouteProp } from '@react-navigation/native';
+
+type RouteParams = {
+    initialFilters?: Record<string, any>;
+};
+
 export default function AllWorkoutsScreen() {
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isSortVisible, setIsSortVisible] = useState(false);
@@ -91,7 +97,7 @@ export default function AllWorkoutsScreen() {
     const [sortOption, setSortOption] = useState({ type: 'Length', order: 'Shortest' });
 
     const navigation = useNavigation();
-    const route = useRoute();
+    const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
 
     const { initialFilters } = route.params || {};
     const [filters, setFilters] = useState(initialFilters || {});
@@ -143,7 +149,7 @@ export default function AllWorkoutsScreen() {
     };
 
     useEffect(() => {
-        if (Object.keys(initialFilters).length > 0) {
+        if (initialFilters && Object.keys(initialFilters).length > 0) {
             setFilters(initialFilters);
             filterAndSortWorkouts(initialFilters, sortOption);
         } else {
@@ -151,8 +157,8 @@ export default function AllWorkoutsScreen() {
         }
     }, [initialFilters]);
 
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     React.useEffect(() => {
         navigation.setOptions({ headerShown: false });

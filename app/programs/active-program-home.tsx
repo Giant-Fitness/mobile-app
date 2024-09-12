@@ -2,7 +2,6 @@
 
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useEffect, useState } from 'react';
-import { StatusBar } from 'expo-status-bar';
 import { ScrollView, StyleSheet, View, TouchableOpacity, Dimensions } from 'react-native';
 
 import { ThemedText } from '@/components/base/ThemedText';
@@ -11,12 +10,10 @@ import { ActiveProgramDayCard } from '@/components/programs/ActiveProgramDayCard
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ProgramDayOverviewCard } from '@/components/programs/ProgramDayOverviewCard';
-import { Collapsible } from '@/components/layout/Collapsible';
 import ProgressBar from '@/components/programs/ProgressBar';
 import { Icon } from '@/components/icons/Icon';
-import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { moderateScale, verticalScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
-import { sizes } from '@/utils/sizes';
 import { AppDispatch, RootState } from '@/store/rootReducer';
 import { getCurrentDayAsync, getActiveProgramMetaAsync, getUserPlanProgressAsync, getNextDaysAsync } from '@/store/programs/thunks';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
@@ -24,8 +21,8 @@ import { BasicSplash } from '@/components/splashScreens/BasicSplash';
 import { REQUEST_STATE } from '@/store/utils';
 
 export default function ActiveProgramHome() {
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
     const screenWidth = Dimensions.get('window').width;
 
     const dispatch = useDispatch<AppDispatch>();
@@ -110,9 +107,9 @@ export default function ActiveProgramHome() {
 
                 <ThemedView style={[styles.weekProgress]}>
                     <ProgressBar
-                        completedParts={userPlanProgress.Week - 1}
-                        currentPart={userPlanProgress.Week}
-                        parts={activeProgram.ProgramLength}
+                        completedParts={Number(userPlanProgress.Week) - 1}
+                        currentPart={Number(userPlanProgress.Week)}
+                        parts={Number(activeProgram.ProgramLength)}
                         containerWidth={screenWidth - spacing.xxl}
                     />
                     <ThemedText style={[{ color: themeColors.subText, marginTop: spacing.md }]}>

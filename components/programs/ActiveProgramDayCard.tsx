@@ -8,9 +8,8 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { TopImageInfoCard } from '@/components/layout/TopImageInfoCard';
 import { Icon } from '@/components/icons/Icon';
-import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { moderateScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
-import { sizes } from '@/utils/sizes';
 import { ProgramDay } from '@/store/types';
 
 type ActiveProgramDayCardProps = {
@@ -18,8 +17,8 @@ type ActiveProgramDayCardProps = {
 };
 
 export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = ({ day }) => {
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     return (
         <TopImageInfoCard

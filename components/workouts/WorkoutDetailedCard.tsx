@@ -9,7 +9,7 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { useNavigation } from '@react-navigation/native';
 import { LeftImageInfoCard } from '@/components/layout/LeftImageInfoCard';
 import { Icon } from '@/components/icons/Icon';
-import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { scale, moderateScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
 
 type WorkoutDetailedCardProps = {
@@ -25,8 +25,8 @@ type WorkoutDetailedCardProps = {
 };
 
 export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, length, level, equipment, focus, photo, trainer, longText, focusMulti }) => {
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     const navigation = useNavigation();
 

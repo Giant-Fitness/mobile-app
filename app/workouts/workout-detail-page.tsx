@@ -12,15 +12,15 @@ import { Icon } from '@/components/icons/Icon';
 import { TextButton } from '@/components/base/TextButton';
 import { IconButton } from '@/components/base/IconButton';
 import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle } from '@/components/video/FullScreenVideoPlayer';
-import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { moderateScale, verticalScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
 import { sizes } from '@/utils/sizes';
-import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
+import Animated, { useSharedValue } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/layout/AnimatedHeader';
 
 export default function WorkoutDetailScreen() {
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     const navigation = useNavigation();
     const route = useRoute();

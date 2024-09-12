@@ -2,11 +2,9 @@
 
 import React from 'react';
 import { StyleSheet, ImageSourcePropType, TouchableOpacity } from 'react-native';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
 import { useNavigation } from '@react-navigation/native';
 import { ImageTextOverlay } from '@/components/images/ImageTextOverlay';
-import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { moderateScale } from '@/utils/scaling';
 import { sizes } from '@/utils/sizes';
 import { spacing } from '@/utils/spacing';
 
@@ -14,7 +12,7 @@ type WorkoutOverviewCardProps = {
     name: string;
     length: string;
     photo: ImageSourcePropType;
-    intensity: string;
+    level: string;
     equipment: string;
     focus: string;
     trainer: string;
@@ -23,9 +21,6 @@ type WorkoutOverviewCardProps = {
 };
 
 export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, length, level, equipment, focus, photo, trainer, longText, focusMulti }) => {
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
-
     const navigation = useNavigation();
 
     const navigateToWorkoutDetails = () => {

@@ -22,8 +22,8 @@ type IconProps = {
 };
 
 export const Icon = React.forwardRef<any, IconProps>(({ name, size = 18, color, style }, ref) => {
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
     const defaultColor = themeColors.white;
 
     // Derived value for color if it's animated

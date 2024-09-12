@@ -28,7 +28,6 @@ export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, Ful
             const configureAudio = async () => {
                 try {
                     await Audio.setAudioModeAsync({
-                        shouldDuckIOS: true,
                         playsInSilentModeIOS: true,
                         shouldDuckAndroid: true,
                         playThroughEarpieceAndroid: true,
@@ -70,16 +69,18 @@ export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, Ful
         // Callback when the video is loaded and ready to play
         const handleVideoLoad = async () => {
             setIsVideoLoaded(true);
-            try {
-                await video.current.playAsync();
-            } catch (error) {
-                Alert.alert('Error', 'An error occurred while playing the video.');
-                console.error('Error starting video playback:', error);
+            if (video.current) {
+                // Check if video.current is not null
+                try {
+                    await video.current.playAsync();
+                } catch (error) {
+                    Alert.alert('Error', 'An error occurred while playing the video.');
+                }
             }
         };
 
         // Function to handle fullscreen updates using integer values
-        const handleFullscreenUpdate = async ({ fullscreenUpdate }) => {
+        const handleFullscreenUpdate = async ({ fullscreenUpdate }: { fullscreenUpdate: number }) => {
             // Reset state when fullscreen is about to dismiss
             if (fullscreenUpdate === 2) {
                 // FULLSCREEN_UPDATE_PLAYER_WILL_DISMISS
