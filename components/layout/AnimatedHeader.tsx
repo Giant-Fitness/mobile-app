@@ -1,3 +1,5 @@
+// components/AnimatedHeader.tsx
+
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, { useAnimatedStyle, interpolateColor, useDerivedValue } from 'react-native-reanimated';
@@ -9,9 +11,9 @@ import { spacing } from '@/utils/spacing';
 type AnimatedHeaderProps = {
     scrollY: Animated.SharedValue<number>;
     onBackPress?: () => void;
-    headerInterpolationStart?: number; // Start point for header background animation
-    headerInterpolationEnd?: number; // End point for header background animation
-    disableColorChange?: boolean; // New prop to disable color change
+    headerInterpolationStart?: number;
+    headerInterpolationEnd?: number;
+    disableColorChange?: boolean;
 };
 
 export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
@@ -19,7 +21,7 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
     onBackPress,
     headerInterpolationStart = 100,
     headerInterpolationEnd = 170,
-    disableColorChange = false, // Default is false
+    disableColorChange = false,
 }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
@@ -27,11 +29,9 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
     // Determine background color style
     const animatedHeaderStyle = useAnimatedStyle(() => {
         if (disableColorChange) {
-            // If color change is disabled, use a fixed background color
-            return { backgroundColor: 'transparent' }; // Or use a specific color
+            return { backgroundColor: 'transparent' };
         }
 
-        // Otherwise, interpolate color based on scroll value
         const backgroundColor = interpolateColor(
             scrollY.value,
             [headerInterpolationStart, headerInterpolationEnd],
@@ -43,11 +43,9 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
     // Determine icon color
     const animatedIconColor = useDerivedValue(() => {
         if (disableColorChange) {
-            // If color change is disabled, use a fixed icon color
-            return themeColors.text; // Or any desired static color
+            return themeColors.text;
         }
 
-        // Otherwise, interpolate icon color based on scroll value
         const color = interpolateColor(scrollY.value, [headerInterpolationStart, headerInterpolationEnd], [themeColors.white, themeColors.text]);
         return color;
     });

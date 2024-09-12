@@ -28,7 +28,7 @@ const ExerciseCard = (props) => {
             title={props.workoutName}
             onPress={navigateToWorkoutDetail}
             extraContent={
-                <ThemedView>
+                <ThemedView style={{ backgroundColor: 'transparent' }}>
                     <ThemedView style={styles.attributeRow}>
                         <ThemedText style={[styles.extraContentText, { color: themeColors.subText }]}>
                             {`${props.numSets} sets x ${props.lowerLimReps} - ${props.higherLimReps} reps`}
@@ -75,6 +75,7 @@ const styles = StyleSheet.create({
     attributeRow: {
         flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: 'transparent',
     },
     attributeText: {},
     extraContentText: {

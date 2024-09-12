@@ -53,7 +53,9 @@ export interface Exercise {
     LastModified: string;
     Archived: boolean;
     Sets: number;
-    Reps: number;
+    RepsUpper: number;
+    RepsLower: number;
+    Rest: string;
     WeightInstructions: string;
 }
 

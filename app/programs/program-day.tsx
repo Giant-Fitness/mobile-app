@@ -9,7 +9,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { WorkoutsBottomBar } from '@/components/workouts/WorkoutsBottomBar';
-import ExerciseCard from '@/components/programs/ExerciseCard';
+import { ExerciseCard2 } from '@/components/programs/ExerciseCard2';
 import { Icon } from '@/components/icons/Icon';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/layout/AnimatedHeader';
@@ -41,15 +41,15 @@ const ProgramDayScreen = () => {
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
             <AnimatedHeader scrollY={scrollY} headerInterpolationStart={sizes.imageLargeHeight} headerInterpolationEnd={sizes.imageLargeHeight + spacing.lg} />
-            <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} contentContainerStyle={styles.scrollView}>
+            <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16}>
                 <TopImageInfoCard
                     image={day.PhotoUrl}
                     title={day.WorkoutDayTitle}
-                    subtitle={`Day ${day.Day} Week ${day.Week}`} // Updated subtitle
+                    subtitle={`Week ${day.Week} Day ${day.Day}`} // Updated subtitle
                     titleType='titleXLarge'
                     subtitleStyle={{ marginBottom: spacing.lg, color: themeColors.subText, marginTop: 0 }}
                     titleStyle={{ marginBottom: spacing.sm }}
-                    containerStyle={{ elevation: 5, marginBottom: spacing.xxl }}
+                    containerStyle={{ elevation: 5, marginBottom: spacing.sm }}
                     contentContainerStyle={{ backgroundColor: themeColors.background, paddingHorizontal: spacing.lg }}
                     imageStyle={{ height: sizes.imageXLargeHeight, elevation: 5 }}
                     titleFirst={true}
@@ -82,21 +82,8 @@ const ProgramDayScreen = () => {
                         </ThemedView>
                     }
                 />
-                <ThemedView>
-                    {day.Exercises &&
-                        day.Exercises.map((exercise) => (
-                            <ExerciseCard
-                                key={exercise.ExerciseId}
-                                photo={day.PhotoUrl}
-                                workoutName={exercise.ExerciseName}
-                                numSets={exercise.Sets}
-                                lowerLimReps={3}
-                                higherLimReps={exercise.Reps}
-                                restPeriod={3}
-                                intro={exercise.QuickTip}
-                                longText={exercise.InstructionsDetailed}
-                            />
-                        ))}
+                <ThemedView style={[styles.exercisesContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
+                    {day.Exercises && day.Exercises.map((exercise) => <ExerciseCard2 key={exercise.ExerciseId} exercise={exercise} />)}
                 </ThemedView>
             </Animated.ScrollView>
         </ThemedView>
@@ -144,6 +131,11 @@ const styles = StyleSheet.create({
     attributeRow: {
         flexDirection: 'row',
         justifyContent: 'flex-start',
+    },
+    exercisesContainer: {
+        paddingVertical: spacing.xxl,
+        marginBottom: 100,
+        paddingHorizontal: spacing.md,
     },
 });
 

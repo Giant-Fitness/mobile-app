@@ -3,13 +3,13 @@
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import React from 'react';
-import { StyleSheet, ImageSourcePropType } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { LeftImageInfoCard } from '@/components/layout/LeftImageInfoCard';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useNavigation } from '@react-navigation/native';
 import { Icon } from '@/components/icons/Icon';
-import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { moderateScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
 import { sizes } from '@/utils/sizes';
 import { ProgramDay } from '@/store/types';
