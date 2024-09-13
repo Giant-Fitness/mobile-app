@@ -16,7 +16,7 @@ import { TextButton } from '@/components/base/TextButton';
 import { moderateScale, verticalScale } from '@/utils/scaling';
 import { ThemedText } from '@/components/base/ThemedText';
 import { Icon } from '@/components/icons/Icon';
-import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle } from '@/components/video/FullScreenVideoPlayer';
+import { ThumbnailVideoPlayer } from '@/components/video/ThumbnailVideoPlayer';
 
 type ExerciseDetailsScreenParams = {
     Exercise: {
@@ -34,7 +34,6 @@ const ExerciseDetailsScreen = () => {
     const { exercise } = route.params;
 
     const scrollY = useSharedValue(0);
-    const videoPlayerRef = useRef<FullScreenVideoPlayerHandle>(null);
 
     React.useEffect(() => {
         navigation.setOptions({ headerShown: false });
@@ -44,20 +43,20 @@ const ExerciseDetailsScreen = () => {
         console.log('Log button pressed');
     };
     const handlePlaybackStatusUpdate = (status) => {
-        console.log('Video Played', status);
+        //console.log('Video Played', status);
     };
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
             <AnimatedHeader scrollY={scrollY} title={exercise.ExerciseName} disableColorChange={true} headerBackground={themeColors.background} />
             <Animated.ScrollView
-                contentContainerStyle={{ flexGrow: 1, paddingTop: sizes.imageSmall, paddingHorizontal: spacing.lg }}
+                contentContainerStyle={{ flexGrow: 1, paddingTop: sizes.imageSmall }}
                 showsVerticalScrollIndicator={false}
                 overScrollMode='never'
             >
-                <FullScreenVideoPlayer
-                    ref={videoPlayerRef}
-                    source={{ uri: exercise.VideoUrl }}
+                <ThumbnailVideoPlayer
+                    videoUrl={exercise.VideoUrl}
                     onPlaybackStatusUpdate={handlePlaybackStatusUpdate} // Pass the handler
+                    thumbnailUrl={exercise.BannerUrl}
                 />
                 <ThemedView style={styles.infoContainer}>
                     <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.backgroundSecondary }]}>
@@ -130,6 +129,8 @@ const styles = StyleSheet.create({
     },
     instructionContainer: {
         paddingTop: spacing.xl,
+        paddingBottom: verticalScale(120),
+        paddingHorizontal: spacing.lg,
     },
     infoContainer: {
         flexDirection: 'row',

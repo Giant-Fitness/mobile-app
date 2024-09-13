@@ -102,7 +102,7 @@ export default function ActiveProgramHome() {
                     </ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.planHeader}>
-                    <ThemedText type='titleXLarge'>{activeProgram.WorkoutPlanName}</ThemedText>
+                    <ThemedText type='titleLarge'>{activeProgram.WorkoutPlanName}</ThemedText>
                 </ThemedView>
 
                 <ThemedView style={[styles.weekProgress]}>
@@ -233,6 +233,7 @@ const styles = StyleSheet.create({
         paddingBottom: spacing.sm,
     },
     planHeader: {
+        marginTop: spacing.sm,
         marginBottom: spacing.md,
         paddingHorizontal: spacing.lg,
     },

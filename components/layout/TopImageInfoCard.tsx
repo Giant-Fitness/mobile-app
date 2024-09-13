@@ -82,6 +82,7 @@ const styles = StyleSheet.create({
     contentContainer: {
         width: '100%',
         paddingHorizontal: spacing.md,
+        marginTop: -spacing.xxs,
         paddingVertical: spacing.md,
         borderBottomLeftRadius: spacing.xs,
         borderBottomRightRadius: spacing.xs,

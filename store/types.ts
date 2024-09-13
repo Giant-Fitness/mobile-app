@@ -49,6 +49,7 @@ export interface Exercise {
     InstructionsDetailed: string;
     QuickTip: string;
     VideoUrl: string;
+    BannerUrl: string;
     CreationDate: string;
     LastModified: string;
     Archived: boolean;

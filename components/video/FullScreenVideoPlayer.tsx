@@ -9,6 +9,7 @@ interface FullScreenVideoPlayerProps {
     source: { uri: string };
     startInFullscreen?: boolean;
     onPlaybackStatusUpdate?: (status: any) => void; // Add callback for playback status updates
+    onDismiss?: () => void; // Add this prop
 }
 
 export interface FullScreenVideoPlayerHandle {
@@ -16,7 +17,7 @@ export interface FullScreenVideoPlayerHandle {
 }
 
 export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, FullScreenVideoPlayerProps>(
-    ({ source, startInFullscreen = false, onPlaybackStatusUpdate }, ref) => {
+    ({ source, startInFullscreen = false, onPlaybackStatusUpdate, onDismiss }, ref) => {
         const video = useRef<Video>(null);
         const [isFullScreen, setIsFullScreen] = useState(startInFullscreen);
         const [isVideoVisible, setIsVideoVisible] = useState(false);
@@ -86,6 +87,9 @@ export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, Ful
                 // FULLSCREEN_UPDATE_PLAYER_WILL_DISMISS
                 setIsFullscreenPresented(false); // Mark fullscreen as dismissed
                 setIsVideoVisible(false); // Ensure the video is hidden
+                if (onDismiss) {
+                    onDismiss();
+                }
             }
 
             // Fully reset state when fullscreen has been dismissed
@@ -137,6 +141,7 @@ FullScreenVideoPlayer.propTypes = {
     }).isRequired,
     startInFullscreen: PropTypes.bool,
     onPlaybackStatusUpdate: PropTypes.func, // Validation for the new prop
+    onDismiss: PropTypes.func,
 };
 
 const { width, height } = Dimensions.get('window');
