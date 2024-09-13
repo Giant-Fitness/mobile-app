@@ -75,30 +75,24 @@ const ExerciseDetailsScreen = () => {
                         <ThemedView style={styles.attributeRow}>
                             {/* Attribute 1: Reps */}
                             <ThemedView style={styles.attributeItem}>
-                                <ThemedText type='overline' style={[styles.bullet, { color: themeColors.subText }]}>
-                                    {'\u2022'}
-                                </ThemedText>
-                                <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.subText }]}>
+                                <Icon name='counter' style={[{ color: themeColors.text }]} size={verticalScale(14)} />
+                                <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.text }]}>
                                     Reps: {exercise.RepsLower}-{exercise.RepsUpper}
                                 </ThemedText>
                             </ThemedView>
 
                             {/* Attribute 2: Sets */}
                             <ThemedView style={styles.attributeItem}>
-                                <ThemedText type='overline' style={[styles.bullet, { color: themeColors.subText }]}>
-                                    {'\u2022'}
-                                </ThemedText>
-                                <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.subText }]}>
+                                <Icon name='repeat' style={[{ color: themeColors.text }]} size={verticalScale(14)} />
+                                <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.text }]}>
                                     Sets: {exercise.Sets}
                                 </ThemedText>
                             </ThemedView>
 
                             {/* Attribute 3: Rest */}
                             <ThemedView style={styles.attributeItem}>
-                                <ThemedText type='overline' style={[styles.bullet, { color: themeColors.subText }]}>
-                                    {'\u2022'}
-                                </ThemedText>
-                                <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.subText }]}>
+                                <Icon name='hourglass' style={[{ color: themeColors.text }]} size={verticalScale(12)} />
+                                <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.text }]}>
                                     Rest: {exercise.Rest}
                                 </ThemedText>
                             </ThemedView>
@@ -187,11 +181,11 @@ const styles = StyleSheet.create({
     attributeItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginRight: spacing.lg, // Space between attribute groups
+        marginRight: spacing.xl, // Space between attribute groups
         marginBottom: spacing.sm, // Space below if wrapped
     },
     attributeText: {
-        marginLeft: spacing.sm,
+        marginLeft: spacing.xs,
         lineHeight: spacing.lg,
     },
 });

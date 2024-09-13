@@ -106,15 +106,15 @@ export default function ActiveProgramHome() {
                 </ThemedView>
 
                 <ThemedView style={[styles.weekProgress]}>
-                    <ProgressBar
+                    <ThemedText style={[{ color: themeColors.subText }]}>
+                        Week {userPlanProgress.Week} of {activeProgram.ProgramLength}
+                    </ThemedText>
+                    {/*                    <ProgressBar
                         completedParts={Number(userPlanProgress.Week) - 1}
                         currentPart={Number(userPlanProgress.Week)}
                         parts={Number(activeProgram.ProgramLength)}
                         containerWidth={screenWidth - spacing.xxl}
-                    />
-                    <ThemedText style={[{ color: themeColors.subText, marginTop: spacing.md }]}>
-                        Week {userPlanProgress.Week} of {activeProgram.ProgramLength}
-                    </ThemedText>
+                    />*/}
                 </ThemedView>
 
                 <ThemedView style={[styles.activeCardContainer]}>
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     },
     upNextContainer: {
-        paddingBottom: 0,
+        paddingTop: spacing.sm,
         paddingHorizontal: spacing.lg,
     },
     menuItem: {
@@ -224,8 +224,8 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     quoteContainer: {
-        paddingTop: spacing.md,
-        paddingBottom: spacing.sm,
+        paddingTop: spacing.xl,
+        paddingBottom: spacing.md,
         marginHorizontal: spacing.xxl,
     },
     quoteText: {
@@ -233,12 +233,10 @@ const styles = StyleSheet.create({
         paddingBottom: spacing.sm,
     },
     planHeader: {
-        marginTop: spacing.sm,
-        marginBottom: spacing.md,
         paddingHorizontal: spacing.lg,
     },
     weekProgress: {
-        marginBottom: spacing.md,
+        marginBottom: spacing.sm,
         paddingHorizontal: spacing.lg,
     },
     activeCardContainer: {

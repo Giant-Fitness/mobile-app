@@ -24,9 +24,9 @@ export const Colors = {
         warning: '#FFA500', // Optional: Warning color (e.g., for alerts)
         info: '#1E90FF', // Optional: Info color (e.g., for badges)
         transparent: 'rgba(255, 255, 255, 0)',
-        tipBackground: 'rgba(76, 175, 80, 0.1)', // Highlighter green with transparency
-        tipIcon: '#4CAF50', // standard green
-        tipText: '#4CAF50', // standard green
+        tipBackground: 'rgba(0, 175, 0, 0.1)', // Highlighter green with transparency
+        tipIcon: '#408E44', // standard green
+        tipText: '#408E44', // standard green
     },
     dark: {
         text: '#F6F8F6', // Main text color

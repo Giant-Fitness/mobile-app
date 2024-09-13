@@ -1,7 +1,7 @@
 // components/icons/Icon.tsx
 
 import React from 'react';
-import { Ionicons, MaterialCommunityIcons, MaterialIcons, Entypo, Feather, AntDesign } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons, MaterialIcons, Entypo, Feather, AntDesign, FontAwesome } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { StyleProp, TextStyle } from 'react-native';
@@ -14,6 +14,7 @@ const AnimatedMaterialIcons = Animated.createAnimatedComponent(MaterialIcons);
 const AnimatedEntypo = Animated.createAnimatedComponent(Entypo);
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 const AnimatedAnt = Animated.createAnimatedComponent(AntDesign);
+const AnimatedFontAwesome = Animated.createAnimatedComponent(FontAwesome);
 
 type IconProps = {
     name: string;
@@ -66,14 +67,22 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = 18, color, 
             return <AnimatedIonicons name='chevron-back' {...commonProps} />;
         case 'person':
             return <AnimatedIonicons name='person-circle' {...commonProps} />;
-        case 'home':
-            return <AnimatedMaterialIcons name='home' {...commonProps} />;
-        case 'nutrition':
-            return <AnimatedEntypo name='leaf' {...commonProps} />;
-        case 'progress':
+        case 'home-active':
+            return <AnimatedMaterialCommunityIcons name='home-variant' {...commonProps} />;
+        case 'home-inactive':
+            return <AnimatedMaterialCommunityIcons name='home-variant' {...commonProps} />;
+        case 'nutrition-active':
+            return <AnimatedIonicons name='nutrition' {...commonProps} />;
+        case 'nutrition-inactive':
+            return <AnimatedIonicons name='nutrition-outline' {...commonProps} />;
+        case 'progress-active':
             return <AnimatedIonicons name='stats-chart' {...commonProps} />;
-        case 'exercise':
+        case 'progress-inactive':
+            return <AnimatedIonicons name='stats-chart' {...commonProps} />;
+        case 'exercise-active':
             return <AnimatedMaterialIcons name='sports-martial-arts' {...commonProps} />;
+        case 'exercise-inactive':
+            return <AnimatedMaterialIcons name='directions-run' {...commonProps} />;
         case 'filter':
             return <AnimatedIonicons name='options' {...commonProps} />;
         case 'sort':
@@ -96,6 +105,16 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = 18, color, 
             return <AnimatedMaterialCommunityIcons name='sleep' {...commonProps} />;
         case 'play':
             return <AnimatedAnt name='play' {...commonProps} />;
+        case 'kettlebell':
+            return <AnimatedMaterialCommunityIcons name='kettlebell' {...commonProps} />;
+        case 'hourglass':
+            return <AnimatedMaterialIcons name='hourglass-bottom' {...commonProps} />;
+        case 'counter':
+            return <AnimatedMaterialCommunityIcons name='counter' {...commonProps} />;
+        case 'repeat':
+            return <AnimatedMaterialCommunityIcons name='redo-variant' {...commonProps} />;
+        case 'check':
+            return <AnimatedMaterialCommunityIcons name='check-circle' {...commonProps} />;
         default:
             return <AnimatedIonicons name='alert-circle-outline' {...commonProps} />;
     }

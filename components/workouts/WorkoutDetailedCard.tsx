@@ -56,7 +56,7 @@ export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, 
                         </ThemedText>
                     </ThemedView>
                     <ThemedView style={styles.attributeRow}>
-                        <Icon name='dumbbell' size={moderateScale(14)} color={themeColors.iconDefault} />
+                        <Icon name='kettlebell' size={moderateScale(14)} color={themeColors.iconDefault} />
                         <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.subText }]}>
                             {equipment}
                         </ThemedText>

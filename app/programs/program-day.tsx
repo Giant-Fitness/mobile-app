@@ -94,7 +94,7 @@ const ProgramDayScreen = () => {
                                     </ThemedView>
                                     <ThemedView style={styles.attributeRow}>
                                         <ThemedView style={styles.attribute}>
-                                            <Icon name='dumbbell' size={moderateScale(18)} color={themeColors.text} />
+                                            <Icon name='kettlebell' size={moderateScale(18)} color={themeColors.text} />
                                             <ThemedText type='body' style={styles.attributeText}>
                                                 {day.Equipment.join(', ')}
                                             </ThemedText>
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
         paddingBottom: spacing.sm,
     },
     attributeText: {
-        marginLeft: spacing.md,
+        marginLeft: spacing.sm,
         lineHeight: spacing.lg,
     },
     attributeRow: {

@@ -116,7 +116,7 @@ export default function WorkoutDetailScreen() {
                         </View>
                         <View style={[styles.attributeRow]}>
                             <View style={[styles.attribute]}>
-                                <Icon name='dumbbell' size={moderateScale(18)} color={themeColors.text} />
+                                <Icon name='kettlebell' size={moderateScale(18)} color={themeColors.text} />
                                 <ThemedText type='body' style={[styles.attributeText]}>
                                     {equipment}
                                 </ThemedText>

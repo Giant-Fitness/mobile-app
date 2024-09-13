@@ -62,7 +62,7 @@ export default function TabLayout() {
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Home',
-                    tabBarIcon: ({ color }) => <Icon size={24} name='home' color={color} />,
+                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'home-active' : 'home-inactive'} size={24} color={color} />,
                 }}
             />
             <Tabs.Screen
@@ -77,7 +77,7 @@ export default function TabLayout() {
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Training',
-                    tabBarIcon: ({ color }) => <Icon name='exercise' size={24} color={color} />,
+                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'exercise-active' : 'exercise-inactive'} size={24} color={color} />,
                 }}
             />
             <Tabs.Screen
@@ -89,7 +89,7 @@ export default function TabLayout() {
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Nutrition',
-                    tabBarIcon: ({ color }) => <Icon name='nutrition' size={22} color={color} />,
+                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'nutrition-active' : 'nutrition-inactive'} size={22} color={color} />,
                 }}
             />
             <Tabs.Screen
@@ -101,7 +101,7 @@ export default function TabLayout() {
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Progress',
-                    tabBarIcon: ({ color }) => <Icon name='progress' size={21} color={color} />,
+                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'progress-active' : 'progress-inactive'} size={21} color={color} />,
                 }}
             />
         </Tabs>

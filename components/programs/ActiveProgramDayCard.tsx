@@ -49,7 +49,7 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = ({ day 
                             <ThemedText type='body' style={[styles.attributeText, { color: themeColors.highlightContainerText, paddingRight: spacing.md }]}>
                                 {`${day.Time} mins`}
                             </ThemedText>
-                            <Icon name='dumbbell' size={moderateScale(14)} color={themeColors.highlightContainerText} />
+                            <Icon name='kettlebell' size={moderateScale(14)} color={themeColors.highlightContainerText} />
                             <ThemedText type='body' style={[styles.attributeText, { color: themeColors.highlightContainerText, marginLeft: spacing.xs }]}>
                                 {day.EquipmentCategory}
                             </ThemedText>

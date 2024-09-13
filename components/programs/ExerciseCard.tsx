@@ -43,7 +43,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
             </ThemedView>
             <ThemedView style={styles.infoContainer}>
                 <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.tipBackground }]}>
-                    <ThemedText type='bodyMedium' style={[{ color: themeColors.accent }]}>
+                    <ThemedText type='bodyMedium' style={[{ color: themeColors.tipText }]}>
                         {exercise.Sets}
                     </ThemedText>
                     <ThemedText type='bodySmall' style={[{ color: themeColors.tipText }]}>
@@ -51,7 +51,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
                     </ThemedText>
                 </ThemedView>
                 <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.tipBackground }]}>
-                    <ThemedText type='bodyMedium' style={[{ color: themeColors.accent }]}>
+                    <ThemedText type='bodyMedium' style={[{ color: themeColors.tipText }]}>
                         {exercise.RepsLower}-{exercise.RepsUpper}
                     </ThemedText>
                     <ThemedText type='bodySmall' style={[{ color: themeColors.tipText }]}>
@@ -59,7 +59,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
                     </ThemedText>
                 </ThemedView>
                 <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.tipBackground }]}>
-                    <ThemedText type='bodyMedium' style={[{ color: themeColors.accent }]}>
+                    <ThemedText type='bodyMedium' style={[{ color: themeColors.tipText }]}>
                         {exercise.Rest}
                     </ThemedText>
                     <ThemedText type='bodySmall' style={[{ color: themeColors.tipText }]}>
