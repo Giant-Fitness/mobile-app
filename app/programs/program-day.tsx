@@ -57,7 +57,7 @@ const ProgramDayScreen = () => {
                     titleStyle={{ marginBottom: spacing.sm }}
                     containerStyle={{ elevation: 5, marginBottom: spacing.sm }}
                     contentContainerStyle={{ backgroundColor: themeColors.background, paddingHorizontal: spacing.lg }}
-                    imageStyle={{ height: sizes.imageXLargeHeight, elevation: 5 }}
+                    imageStyle={{ height: sizes.imageXLargeHeight }}
                     titleFirst={true}
                     extraContent={
                         <ThemedView>
@@ -88,7 +88,7 @@ const ProgramDayScreen = () => {
                         </ThemedView>
                     }
                 />
-                <ThemedView style={[styles.exercisesContainer, { backgroundColor: themeColors.container }]}>
+                <ThemedView style={[styles.exercisesContainer, { backgroundColor: themeColors.backgroundTertiary }]}>
                     {day.Exercises && day.Exercises.map((exercise) => <ExerciseCard key={exercise.ExerciseId} exercise={exercise} />)}
                 </ThemedView>
             </Animated.ScrollView>

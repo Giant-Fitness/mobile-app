@@ -9,8 +9,8 @@ const sampleUserProgress: UserWorkoutPlanProgress = {
     CurrentDay: '22',
     StartDate: '2024-07-01',
     LastActivityDate: '2024-07-05',
-    Week: 4,
-    Day: 1,
+    Week: '4',
+    Day: '1',
 };
 
 // Define sample exercises
@@ -30,7 +30,7 @@ const sampleExercises: Exercise[] = [
         Sets: 2,
         RepsUpper: 6,
         RepsLower: 4,
-        Rest: '1.5 - 2',
+        Rest: '90s',
         WeightInstructions: 'Use 90% of ORM',
     },
     {
@@ -45,9 +45,10 @@ const sampleExercises: Exercise[] = [
         CreationDate: '2024-08-22T12:00:00Z',
         LastModified: '2024-08-22T12:00:00Z',
         Archived: false,
+        Sets: 2,
         RepsUpper: 6,
         RepsLower: 4,
-        Rest: '1.5 - 2',
+        Rest: '90s',
         WeightInstructions: 'Use 90% of ORM',
     },
     {
@@ -62,9 +63,10 @@ const sampleExercises: Exercise[] = [
         CreationDate: '2024-08-22T12:00:00Z',
         LastModified: '2024-08-22T12:00:00Z',
         Archived: false,
+        Sets: 2,
         RepsUpper: 6,
         RepsLower: 4,
-        Rest: '1.5 - 2',
+        Rest: '90s',
         WeightInstructions: 'Use 90% of ORM',
     },
 ];
@@ -85,8 +87,8 @@ const sampleProgramDays: ProgramDay[] = [
         MuscleGroups: ['Back', 'Chest'],
         EquipmentCategory: 'Full Gym',
         Equipment: ['Barbell', 'Dumbbells', 'Cable Machine'],
-        Week: 4,
-        Day: 1,
+        Week: '4',
+        Day: '1',
     },
     {
         WorkoutPlanId: 'plan1',
@@ -102,8 +104,8 @@ const sampleProgramDays: ProgramDay[] = [
         MuscleGroups: ['Legs', 'Arms'],
         EquipmentCategory: 'Basic Equipment',
         Equipment: ['Treadmill', 'Jump Rope'],
-        Week: 4,
-        Day: 2,
+        Week: '4',
+        Day: '2',
     },
     {
         WorkoutPlanId: 'plan1',
@@ -119,8 +121,8 @@ const sampleProgramDays: ProgramDay[] = [
         MuscleGroups: ['Chest', 'Shoulders'],
         EquipmentCategory: 'Full Gym',
         Equipment: ['Barbell', 'Dumbbells', 'Cable Machine'],
-        Week: 4,
-        Day: 3,
+        Week: '4',
+        Day: '3',
     },
     {
         WorkoutPlanId: 'plan1',
@@ -137,8 +139,8 @@ const sampleProgramDays: ProgramDay[] = [
         MuscleGroups: [],
         EquipmentCategory: 'None',
         Equipment: [],
-        Week: 4,
-        Day: 4,
+        Week: '4',
+        Day: '4',
     },
 ];
 

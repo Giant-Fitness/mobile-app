@@ -7,13 +7,14 @@ export const Colors = {
         subTextSecondary: '#C6C6C6', // Tertiary text
         background: '#fcfcfc', // Main background
         backgroundSecondary: 'rgba(244, 247, 244, 0.95)', // Slightly adjusted for better contrast
+        backgroundTertiary: '#EDEEEE',
         primary: '#204D24', // Primary color (Green)
         secondary: '#EAEAEA', // Secondary elements
         accent: '#45A949', // Accent color
         systemBorderColor: 'rgba(0, 0, 0, 0.2)', // Lighter border for subtle dividers
         container: '#f7f7f5', // Container background
         containerHighlight: '#1e221e', // Slightly adjusted to avoid too dark
-        buttonPrimary: '#1A1A1A', // Darker button primary for contrast
+        buttonPrimary: '#1e221e', // Darker button primary for contrast
         buttonSecondary: '#f7f7f5', // Secondary button background
         iconDefault: '#687076', // Default icon color
         iconSelected: '#0f0f0f', // Adjusted for visibility
@@ -30,13 +31,14 @@ export const Colors = {
         subTextSecondary: '#D1D6D2', // Tertiary text
         background: '#191a19', // Main background
         backgroundSecondary: '#202220', // Secondary background
+        backgroundTertiary: '#313531',
         primary: '#204D24', // Primary color (Green)
         secondary: '#23312a', // Secondary elements
         accent: '#279E2C', // Accent color
         systemBorderColor: 'rgba(100, 100, 100, 0.5)', // Darker border for more contrast
         container: '#202220', // Container background
         containerHighlight: '#2d2f2d', // Highlighted container
-        buttonPrimary: '#F6F8F6', // Light button for contrast
+        buttonPrimary: '#fefefe', // Light button for contrast
         buttonSecondary: '#2f312f', // Secondary button background
         iconDefault: '#B0B0B0', // Slightly brighter for visibility
         iconSelected: '#F6F6F6', // Selected icon color
