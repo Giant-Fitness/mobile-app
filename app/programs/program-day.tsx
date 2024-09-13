@@ -49,7 +49,6 @@ const ProgramDayScreen = () => {
         },
     });
 
-    // Function to start the video playback
     const handleCompleteDay = () => {
         console.log('Complete Day button pressed');
     };

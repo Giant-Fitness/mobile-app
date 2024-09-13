@@ -28,7 +28,9 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
     const navigateToExerciseDetail = () => {
-        navigation.navigate('programs/exercise-details', exercise);
+        navigation.navigate('programs/exercise-details', {
+            exercise: exercise,
+        });
     };
 
     return (

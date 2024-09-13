@@ -17,6 +17,7 @@ type AnimatedHeaderProps = {
     disableColorChange?: boolean;
     title?: string; // Optional title prop
     backButtonColor?: string;
+    headerBackground?: string;
 };
 
 export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
@@ -27,6 +28,7 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
     disableColorChange = false,
     title, // Destructure the title prop
     backButtonColor,
+    headerBackground = 'transparent',
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
     const themeColors = Colors[colorScheme]; // Access theme-specific colors
@@ -34,7 +36,7 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
     // Determine background color style
     const animatedHeaderStyle = useAnimatedStyle(() => {
         if (disableColorChange) {
-            return { backgroundColor: 'transparent' };
+            return { backgroundColor: headerBackground || 'transparent' };
         }
 
         const backgroundColor = interpolateColor(
