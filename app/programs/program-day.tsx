@@ -12,11 +12,12 @@ import { Icon } from '@/components/icons/Icon';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/layout/AnimatedHeader';
 import { TopImageInfoCard } from '@/components/layout/TopImageInfoCard';
-import { moderateScale } from '@/utils/scaling';
+import { moderateScale, verticalScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
 import { sizes } from '@/utils/sizes';
 import { RouteProp } from '@react-navigation/native';
 import { ProgramDay } from '@/store/types';
+import { TextButton } from '@/components/base/TextButton';
 
 type ProgramDayScreenParams = {
     ProgramDay: {
@@ -43,6 +44,11 @@ const ProgramDayScreen = () => {
             scrollY.value = event.contentOffset.y;
         },
     });
+
+    // Function to start the video playback
+    const handleCompleteDay = () => {
+        console.log('Complete Day button pressed');
+    };
 
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
@@ -92,6 +98,14 @@ const ProgramDayScreen = () => {
                     {day.Exercises && day.Exercises.map((exercise) => <ExerciseCard key={exercise.ExerciseId} exercise={exercise} />)}
                 </ThemedView>
             </Animated.ScrollView>
+            <ThemedView style={styles.buttonContainer}>
+                <TextButton
+                    text='Mark Complete'
+                    textType='bodyMedium'
+                    style={[styles.completeButton, { backgroundColor: themeColors.buttonPrimary }]}
+                    onPress={handleCompleteDay}
+                />
+            </ThemedView>
         </ThemedView>
     );
 };
@@ -140,8 +154,22 @@ const styles = StyleSheet.create({
     },
     exercisesContainer: {
         paddingVertical: spacing.xxl,
-        marginBottom: 100,
+        paddingBottom: 120,
         paddingHorizontal: spacing.md,
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: '10%',
+        position: 'absolute',
+        bottom: verticalScale(30),
+        left: 0,
+        right: 0,
+        backgroundColor: 'transparent',
+    },
+    completeButton: {
+        width: '100%',
+        paddingVertical: spacing.md,
     },
 });
 

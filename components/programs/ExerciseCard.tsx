@@ -74,7 +74,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
                     text='View Drill'
                     onPress={navigateToExerciseDetail}
                     textStyle={[{ color: themeColors.text }]}
-                    textType='buttonSmall'
+                    textType='bodyMedium'
                     style={[
                         styles.viewDrillButton,
                         {
@@ -82,16 +82,16 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
                             backgroundColor: 'transparent',
                             borderColor: themeColors.text,
                             flex: 1,
-                            paddingVertical: spacing.sm + spacing.xs,
+                            paddingVertical: spacing.sm + spacing.xxs,
                         },
                     ]}
                 />
                 <TextButton
                     text='Log'
                     onPress={() => console.log(`Logging exercise: ${exercise.ExerciseName}`)}
-                    textType='buttonSmall'
+                    textType='bodyMedium'
                     textStyle={[{ color: themeColors.background }]}
-                    style={[{ flex: 1, paddingVertical: spacing.sm + spacing.xs, backgroundColor: themeColors.buttonPrimary }]}
+                    style={[{ flex: 1, paddingVertical: spacing.sm + spacing.xxs, backgroundColor: themeColors.buttonPrimary }]}
                 />
             </ThemedView>
         </ThemedView>
