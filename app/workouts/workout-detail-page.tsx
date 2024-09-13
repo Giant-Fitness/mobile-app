@@ -97,7 +97,7 @@ export default function WorkoutDetailScreen() {
                     textContainerStyle={{ bottom: spacing.lg, left: spacing.lg }}
                 />
                 <ThemedView style={[styles.textContainer]}>
-                    <ThemedView style={[styles.attributeContainer, {backgroundColor: themeColors.background}]}>
+                    <ThemedView style={[styles.attributeContainer, { backgroundColor: themeColors.background }]}>
                         <View style={[styles.attributeRow]}>
                             <View style={[styles.attribute]}>
                                 <Icon name='stopwatch' size={moderateScale(18)} color={themeColors.text} />
@@ -132,7 +132,7 @@ export default function WorkoutDetailScreen() {
                         </View>
                     </ThemedView>
 
-                    <ThemedView style={[styles.detailsContainer, {backgroundColor: themeColors.backgroundSecondary}]}>
+                    <ThemedView style={[styles.detailsContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
                         <ThemedText type='body' style={[styles.detailsText, { color: themeColors.buttonPrimary }]}>
                             {longText}
                         </ThemedText>

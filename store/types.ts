@@ -67,7 +67,6 @@ export interface ProgramDay {
     WorkoutDayTitle: string;
     RestDay: boolean;
     Exercises: Exercise[];
-    Notes: string;
     PhotoUrl: string;
     CreationDate: string;
     LastModified: string;

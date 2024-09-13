@@ -46,17 +46,17 @@ export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ 
                         // Display content for a rest day
                         <ThemedView style={styles.contentContainer}>
                             <ThemedView style={styles.attributeRow}>
-                                <Icon name='bed' size={moderateScale(16)} color={themeColors.subText} />
+                                <Icon name='sleep' size={moderateScale(16)} color={themeColors.subText} />
                             </ThemedView>
 
-                            <ThemedView style={styles.attributeRow}>
+                            {/* <ThemedView style={styles.attributeRow}>
                                 <ThemedText
                                     type='bodySmall'
                                     style={[styles.attributeText, { color: themeColors.subText, marginLeft: 0, marginTop: spacing.xs }]}
                                 >
                                     {day.Notes}
                                 </ThemedText>
-                            </ThemedView>
+                            </ThemedView> */}
                         </ThemedView>
                     ) : (
                         // Display content for a workout day
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
         marginTop: spacing.xs,
     },
     image: {
-        height: sizes.imageMediumHeight,
+        height: sizes.imageSmall,
         width: sizes.imageMediumWidth,
         borderRadius: spacing.xxs,
     },

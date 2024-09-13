@@ -71,7 +71,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
             )}
             <ThemedView style={styles.buttonContainer}>
                 <TextButton
-                    text='View Drill'
+                    text='View Guide'
                     onPress={navigateToExerciseDetail}
                     textStyle={[{ color: themeColors.text }]}
                     textType='bodyMedium'

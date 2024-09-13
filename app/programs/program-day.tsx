@@ -34,6 +34,10 @@ const ProgramDayScreen = () => {
 
     const { day } = route.params;
 
+    const navigateToAllWorkouts = (initialFilters = {}) => {
+        navigation.navigate('workouts/all-workouts', { initialFilters });
+    };
+
     React.useEffect(() => {
         navigation.setOptions({ headerShown: false });
     }, [navigation]);
@@ -67,44 +71,77 @@ const ProgramDayScreen = () => {
                     titleFirst={true}
                     extraContent={
                         <ThemedView>
-                            <ThemedView style={styles.attributeRow}>
-                                <ThemedView style={styles.attribute}>
-                                    <Icon name='stopwatch' size={moderateScale(18)} color={themeColors.text} />
-                                    <ThemedText type='body' style={styles.attributeText}>
-                                        {day.Time} mins
+                            {day.RestDay ? (
+                                <ThemedView style={styles.tipContainer}>
+                                    <Icon
+                                        name='sleep'
+                                        size={moderateScale(16)}
+                                        color={themeColors.subText}
+                                        style={{ marginRight: spacing.sm, marginTop: spacing.xs }}
+                                    />
+                                    <ThemedText type='body' style={{ color: themeColors.subText }}>
+                                        {'Take it easy today! Focus on recovery and hydration.'}
                                     </ThemedText>
                                 </ThemedView>
-                            </ThemedView>
-                            <ThemedView style={styles.attributeRow}>
-                                <ThemedView style={styles.attribute}>
-                                    <Icon name='dumbbell' size={moderateScale(18)} color={themeColors.text} />
-                                    <ThemedText type='body' style={styles.attributeText}>
-                                        {day.Equipment.join(', ')}
-                                    </ThemedText>
+                            ) : (
+                                <ThemedView>
+                                    <ThemedView style={styles.attributeRow}>
+                                        <ThemedView style={styles.attribute}>
+                                            <Icon name='stopwatch' size={moderateScale(18)} color={themeColors.text} />
+                                            <ThemedText type='body' style={styles.attributeText}>
+                                                {day.Time} mins
+                                            </ThemedText>
+                                        </ThemedView>
+                                    </ThemedView>
+                                    <ThemedView style={styles.attributeRow}>
+                                        <ThemedView style={styles.attribute}>
+                                            <Icon name='dumbbell' size={moderateScale(18)} color={themeColors.text} />
+                                            <ThemedText type='body' style={styles.attributeText}>
+                                                {day.Equipment.join(', ')}
+                                            </ThemedText>
+                                        </ThemedView>
+                                    </ThemedView>
+                                    <ThemedView style={styles.attributeRow}>
+                                        <ThemedView style={styles.attribute}>
+                                            <Icon name='yoga' size={moderateScale(18)} color={themeColors.text} />
+                                            <ThemedText type='body' style={styles.attributeText}>
+                                                {day.MuscleGroups.join(', ')}
+                                            </ThemedText>
+                                        </ThemedView>
+                                    </ThemedView>
                                 </ThemedView>
-                            </ThemedView>
-                            <ThemedView style={styles.attributeRow}>
-                                <ThemedView style={styles.attribute}>
-                                    <Icon name='yoga' size={moderateScale(18)} color={themeColors.text} />
-                                    <ThemedText type='body' style={styles.attributeText}>
-                                        {day.MuscleGroups.join(', ')}
-                                    </ThemedText>
-                                </ThemedView>
-                            </ThemedView>
+                            )}
                         </ThemedView>
                     }
                 />
-                <ThemedView style={[styles.exercisesContainer, { backgroundColor: themeColors.backgroundTertiary }]}>
-                    {day.Exercises && day.Exercises.map((exercise) => <ExerciseCard key={exercise.ExerciseId} exercise={exercise} />)}
-                </ThemedView>
+                {!day.RestDay && (
+                    <ThemedView style={[styles.exercisesContainer, { backgroundColor: themeColors.backgroundTertiary }]}>
+                        {day.Exercises && day.Exercises.map((exercise) => <ExerciseCard key={exercise.ExerciseId} exercise={exercise} />)}
+                    </ThemedView>
+                )}
             </Animated.ScrollView>
             <ThemedView style={styles.buttonContainer}>
                 <TextButton
-                    text='Mark Complete'
+                    text='Finish Day'
                     textType='bodyMedium'
                     style={[styles.completeButton, { backgroundColor: themeColors.buttonPrimary }]}
                     onPress={handleCompleteDay}
                 />
+                {day.RestDay && ( // Show mobility button only on rest day
+                    <TextButton
+                        text='Mobility Workouts'
+                        textStyle={[{ color: themeColors.text }]}
+                        textType='bodyMedium'
+                        style={[
+                            styles.mobilityButton,
+                            {
+                                backgroundColor: themeColors.background,
+                                borderColor: themeColors.text,
+                            },
+                        ]}
+                        onPress={() => navigateToAllWorkouts({ focus: ['Mobility'] })}
+                    />
+                )}
             </ThemedView>
         </ThemedView>
     );
@@ -158,7 +195,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
     },
     buttonContainer: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         alignItems: 'center',
         paddingHorizontal: '10%',
         position: 'absolute',
@@ -170,6 +207,18 @@ const styles = StyleSheet.create({
     completeButton: {
         width: '100%',
         paddingVertical: spacing.md,
+    },
+    mobilityButton: {
+        width: '100%',
+        borderWidth: StyleSheet.hairlineWidth,
+        paddingVertical: spacing.md,
+        marginTop: spacing.md,
+    },
+    tipContainer: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        paddingHorizontal: spacing.sm,
+        backgroundColor: 'transparent',
     },
 });
 
