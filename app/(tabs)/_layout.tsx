@@ -76,7 +76,7 @@ export default function TabLayout() {
                         elevation: 0, // Remove the elevation for Android
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
-                    title: 'Exercise',
+                    title: 'Training',
                     tabBarIcon: ({ color }) => <Icon name='exercise' size={24} color={color} />,
                 }}
             />

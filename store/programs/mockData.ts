@@ -20,8 +20,12 @@ const sampleExercises: Exercise[] = [
         ExerciseName: 'Barbell Squat',
         Category: 'Strength',
         MuscleGroups: { Primary: ['Glutes'], Secondary: ['Hips'] },
-        InstructionsDetailed:
-            '1. Stand with your feet shoulder-width apart.\n\n2. Position the barbell on your shoulders.\n\n3. Lower your body into a squat until your thighs are parallel to the floor.\n\n4. Push through your heels to return to the starting position.',
+        InstructionsDetailed: [
+            'Stand with your feet shoulder-width apart.',
+            'Position the barbell on your shoulders.',
+            'Lower your body into a squat until your thighs are parallel to the floor.',
+            'Push through your heels to return to the starting position.',
+        ],
         QuickTip: 'Use a 3 second down, 1 second hold, 1 second up tempo',
         VideoUrl: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
         BannerUrl: 'https://images.pexels.com/photos/371049/pexels-photo-371049.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
@@ -32,15 +36,19 @@ const sampleExercises: Exercise[] = [
         RepsUpper: 6,
         RepsLower: 4,
         Rest: '90s',
-        WeightInstructions: 'Use 90% of ORM',
+        WeightInstructions: '90% of your One-Rep-Max(ORM)',
     },
     {
         ExerciseId: 'ex-2',
         ExerciseName: 'Dumbbell Bench Press',
         Category: 'Strength',
         MuscleGroups: { Primary: ['Chest'], Secondary: ['Triceps'] },
-        InstructionsDetailed:
-            '1. Lie on a bench with a dumbbell in each hand.\n\n2. Push the dumbbells up until your arms are fully extended.\n\n3. Lower the dumbbells until your elbows are at a 90-degree angle.\n\n4. Push the dumbbells back up to the starting position.',
+        InstructionsDetailed: [
+            'Stand with your feet shoulder-width apart.',
+            'Position the barbell on your shoulders.',
+            'Lower your body into a squat until your thighs are parallel to the floor.',
+            'Push through your heels to return to the starting position.',
+        ],
         QuickTip: 'Keep your elbows slightly bent at the top of the movement',
         VideoUrl: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
         BannerUrl: 'https://images.pexels.com/photos/371049/pexels-photo-371049.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
@@ -51,15 +59,19 @@ const sampleExercises: Exercise[] = [
         RepsUpper: 6,
         RepsLower: 4,
         Rest: '90s',
-        WeightInstructions: 'Use 90% of ORM',
+        WeightInstructions: '90% of your One-Rep-Max(ORM)',
     },
     {
         ExerciseId: 'ex-3',
         ExerciseName: 'Pull-Up',
         Category: 'Strength',
         MuscleGroups: { Primary: ['Back'], Secondary: ['Biceps'] },
-        InstructionsDetailed:
-            '1. Grab the pull-up bar with an overhand grip.\n\n2. Hang from the bar with your arms fully extended.\n\n3. Pull yourself up until your chin is over the bar.\n\n4. Lower yourself back down to the starting position.',
+        InstructionsDetailed: [
+            'Stand with your feet shoulder-width apart.',
+            'Position the barbell on your shoulders.',
+            'Lower your body into a squat until your thighs are parallel to the floor.',
+            'Push through your heels to return to the starting position.',
+        ],
         QuickTip: 'Engage your shoulder blades before pulling up',
         VideoUrl: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
         BannerUrl: 'https://images.pexels.com/photos/371049/pexels-photo-371049.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
@@ -70,7 +82,7 @@ const sampleExercises: Exercise[] = [
         RepsUpper: 6,
         RepsLower: 4,
         Rest: '90s',
-        WeightInstructions: 'Use 90% of ORM',
+        WeightInstructions: '90% of your One-Rep-Max(ORM)',
     },
 ];
 

@@ -130,7 +130,6 @@ const styles = StyleSheet.create({
         position: 'relative',
         width: '100%',
         height: sizes.imageXLargeHeight, // Ensure this is a valid number
-        marginBottom: spacing.lg,
         backgroundColor: '#ccc', // Temporary background for debugging
     },
     thumbnail: {

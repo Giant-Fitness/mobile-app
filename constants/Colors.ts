@@ -24,6 +24,9 @@ export const Colors = {
         warning: '#FFA500', // Optional: Warning color (e.g., for alerts)
         info: '#1E90FF', // Optional: Info color (e.g., for badges)
         transparent: 'rgba(255, 255, 255, 0)',
+        tipBackground: 'rgba(76, 175, 80, 0.1)', // Highlighter green with transparency
+        tipIcon: '#4CAF50', // standard green
+        tipText: '#4CAF50', // standard green
     },
     dark: {
         text: '#F6F8F6', // Main text color
@@ -48,5 +51,8 @@ export const Colors = {
         warning: '#FF8C00', // Optional: Warning color (darker orange)
         info: '#4682B4', // Optional: Info color (muted blue)
         transparent: 'rgba(0, 0, 0, 0)',
+        tipBackground: 'rgba(39, 158, 44, 0.2)', // Highlighter green with increased opacity
+        tipIcon: '#279E2C', // Accent green
+        tipText: '#279E2C', // Accent green
     },
 };

@@ -12,6 +12,7 @@ import { Icon } from '@/components/icons/Icon';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { TextButton } from '@/components/base/TextButton';
+import { HighlightedTip } from '@/components/base/HighlightedTip';
 
 type ExerciseCardProps = {
     exercise: Exercise;
@@ -40,25 +41,28 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
                     {exercise.ExerciseName}
                 </ThemedText>
             </ThemedView>
-            <View style={[styles.divider, { borderBottomColor: themeColors.systemBorderColor }]} />
             <ThemedView style={styles.infoContainer}>
-                <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.backgroundSecondary }]}>
-                    <ThemedText type='bodyMedium'>{exercise.Sets}</ThemedText>
-                    <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
+                <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.tipBackground }]}>
+                    <ThemedText type='bodyMedium' style={[{ color: themeColors.accent }]}>
+                        {exercise.Sets}
+                    </ThemedText>
+                    <ThemedText type='bodySmall' style={[{ color: themeColors.tipText }]}>
                         Sets
                     </ThemedText>
                 </ThemedView>
-                <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.backgroundSecondary }]}>
-                    <ThemedText type='bodyMedium'>
+                <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.tipBackground }]}>
+                    <ThemedText type='bodyMedium' style={[{ color: themeColors.accent }]}>
                         {exercise.RepsLower}-{exercise.RepsUpper}
                     </ThemedText>
-                    <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
+                    <ThemedText type='bodySmall' style={[{ color: themeColors.tipText }]}>
                         Reps
                     </ThemedText>
                 </ThemedView>
-                <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.backgroundSecondary }]}>
-                    <ThemedText type='bodyMedium'>{exercise.Rest}</ThemedText>
-                    <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
+                <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.tipBackground }]}>
+                    <ThemedText type='bodyMedium' style={[{ color: themeColors.accent }]}>
+                        {exercise.Rest}
+                    </ThemedText>
+                    <ThemedText type='bodySmall' style={[{ color: themeColors.tipText }]}>
                         Rest
                     </ThemedText>
                 </ThemedView>
@@ -103,33 +107,28 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
 const styles = StyleSheet.create({
     card: {
         borderRadius: spacing.sm,
-        marginBottom: spacing.xl,
+        marginBottom: spacing.md,
         position: 'relative',
         paddingBottom: spacing.lg,
     },
     titleContainer: {
-        padding: spacing.md,
+        paddingHorizontal: spacing.lg,
         borderTopLeftRadius: spacing.sm,
         borderTopRightRadius: spacing.sm,
-        paddingBottom: spacing.sm,
-    },
-    divider: {
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        width: '90%',
-        alignSelf: 'center',
+        paddingTop: spacing.md,
     },
     infoContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingHorizontal: spacing.lg,
         paddingBottom: spacing.lg,
-        paddingTop: spacing.lg,
+        paddingTop: spacing.md,
         backgroundColor: 'transparent',
     },
     tipContainer: {
         flexDirection: 'row',
         alignItems: 'flex-start',
-        marginBottom: spacing.lg,
+        marginBottom: spacing.md,
         paddingHorizontal: spacing.lg,
         backgroundColor: 'transparent',
     },
@@ -157,7 +156,7 @@ const styles = StyleSheet.create({
     infoBox: {
         padding: spacing.lg,
         borderRadius: spacing.xs,
-        margin: spacing.xs,
+        marginHorizontal: spacing.xs,
         alignItems: 'center',
     },
 });

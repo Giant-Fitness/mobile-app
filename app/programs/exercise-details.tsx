@@ -1,6 +1,6 @@
 // app/programs/exercise-details.tsx
 
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
@@ -9,14 +9,16 @@ import { StyleSheet } from 'react-native';
 import { RouteProp } from '@react-navigation/native';
 import { Exercise } from '@/store/types';
 import { AnimatedHeader } from '@/components/layout/AnimatedHeader';
-import Animated, { useSharedValue } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { sizes } from '@/utils/sizes';
 import { spacing } from '@/utils/spacing';
 import { TextButton } from '@/components/base/TextButton';
 import { moderateScale, verticalScale } from '@/utils/scaling';
 import { ThemedText } from '@/components/base/ThemedText';
-import { Icon } from '@/components/icons/Icon';
 import { ThumbnailVideoPlayer } from '@/components/video/ThumbnailVideoPlayer';
+import { BulletedList } from '@/components/base/BulletedList';
+import { Icon } from '@/components/icons/Icon';
+import { HighlightedTip } from '@/components/base/HighlightedTip';
 
 type ExerciseDetailsScreenParams = {
     Exercise: {
@@ -25,8 +27,8 @@ type ExerciseDetailsScreenParams = {
 };
 
 const ExerciseDetailsScreen = () => {
-    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
-    const themeColors = Colors[colorScheme]; // Access theme-specific colors
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
 
     const navigation = useNavigation();
     const route = useRoute<RouteProp<ExerciseDetailsScreenParams, 'Exercise'>>();
@@ -34,6 +36,12 @@ const ExerciseDetailsScreen = () => {
     const { exercise } = route.params;
 
     const scrollY = useSharedValue(0);
+
+    const scrollHandler = useAnimatedScrollHandler({
+        onScroll: (event) => {
+            scrollY.value = event.contentOffset.y;
+        },
+    });
 
     React.useEffect(() => {
         navigation.setOptions({ headerShown: false });
@@ -43,54 +51,68 @@ const ExerciseDetailsScreen = () => {
         console.log('Log button pressed');
     };
     const handlePlaybackStatusUpdate = (status) => {
-        //console.log('Video Played', status);
+        // Handle video playback status if needed
     };
+
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
-            <AnimatedHeader scrollY={scrollY} title={exercise.ExerciseName} disableColorChange={true} headerBackground={themeColors.background} />
+            <AnimatedHeader scrollY={scrollY} headerInterpolationStart={sizes.imageLargeHeight} headerInterpolationEnd={sizes.imageLargeHeight + spacing.xxl} />
             <Animated.ScrollView
-                contentContainerStyle={{ flexGrow: 1, paddingTop: sizes.imageSmall }}
+                contentContainerStyle={{ flexGrow: 1 }}
                 showsVerticalScrollIndicator={false}
                 overScrollMode='never'
+                onScroll={scrollHandler}
+                scrollEventThrottle={16}
             >
-                <ThumbnailVideoPlayer
-                    videoUrl={exercise.VideoUrl}
-                    onPlaybackStatusUpdate={handlePlaybackStatusUpdate} // Pass the handler
-                    thumbnailUrl={exercise.BannerUrl}
-                />
-                <ThemedView style={styles.infoContainer}>
-                    <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.backgroundSecondary }]}>
-                        <ThemedText type='bodyMedium'>{exercise.Sets}</ThemedText>
-                        <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
-                            Sets
-                        </ThemedText>
-                    </ThemedView>
-                    <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.backgroundSecondary }]}>
-                        <ThemedText type='bodyMedium'>
-                            {exercise.RepsLower}-{exercise.RepsUpper}
-                        </ThemedText>
-                        <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
-                            Reps
-                        </ThemedText>
-                    </ThemedView>
-                    <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.backgroundSecondary }]}>
-                        <ThemedText type='bodyMedium'>{exercise.Rest}</ThemedText>
-                        <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
-                            Rest
-                        </ThemedText>
-                    </ThemedView>
-                </ThemedView>
-                <ThemedView style={styles.tipContainer}>
-                    <Icon name='bulb' size={moderateScale(16)} color={themeColors.subText} style={{ marginRight: spacing.sm, marginTop: spacing.xs }} />
-                    <ThemedText type='body' style={{ color: themeColors.subText }}>
-                        {exercise.WeightInstructions}
-                    </ThemedText>
-                </ThemedView>
+                <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.backgroundTertiary }]}>
+                    <ThumbnailVideoPlayer videoUrl={exercise.VideoUrl} onPlaybackStatusUpdate={handlePlaybackStatusUpdate} thumbnailUrl={exercise.BannerUrl} />
+                    <ThemedView style={[styles.topCard, { backgroundColor: themeColors.background }]}>
+                        <ThemedView style={styles.titleContainer}>
+                            <ThemedText type='titleLarge'>{exercise.ExerciseName}</ThemedText>
+                        </ThemedView>
 
-                <ThemedView style={styles.instructionContainer}>
-                    <ThemedText type='body' style={[]}>
-                        {exercise.InstructionsDetailed}
-                    </ThemedText>
+                        {/* Attributes in a Row with Bullets */}
+                        <ThemedView style={styles.attributeRow}>
+                            {/* Attribute 1: Reps */}
+                            <ThemedView style={styles.attributeItem}>
+                                <ThemedText type='overline' style={[styles.bullet, { color: themeColors.subText }]}>
+                                    {'\u2022'}
+                                </ThemedText>
+                                <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.subText }]}>
+                                    Reps: {exercise.RepsLower}-{exercise.RepsUpper}
+                                </ThemedText>
+                            </ThemedView>
+
+                            {/* Attribute 2: Sets */}
+                            <ThemedView style={styles.attributeItem}>
+                                <ThemedText type='overline' style={[styles.bullet, { color: themeColors.subText }]}>
+                                    {'\u2022'}
+                                </ThemedText>
+                                <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.subText }]}>
+                                    Sets: {exercise.Sets}
+                                </ThemedText>
+                            </ThemedView>
+
+                            {/* Attribute 3: Rest */}
+                            <ThemedView style={styles.attributeItem}>
+                                <ThemedText type='overline' style={[styles.bullet, { color: themeColors.subText }]}>
+                                    {'\u2022'}
+                                </ThemedText>
+                                <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.subText }]}>
+                                    Rest: {exercise.Rest}
+                                </ThemedText>
+                            </ThemedView>
+                        </ThemedView>
+                        <HighlightedTip iconName='bulb' tipText={exercise.WeightInstructions} />
+                    </ThemedView>
+
+                    <ThemedView style={styles.instructionContainer}>
+                        <ThemedText type='link' style={{ color: themeColors.text, paddingBottom: spacing.md }}>
+                            Instructions
+                        </ThemedText>
+                        {/* Render Instructions as a Bulleted List */}
+                        <BulletedList items={exercise.InstructionsDetailed} />
+                    </ThemedView>
                 </ThemedView>
             </Animated.ScrollView>
 
@@ -107,6 +129,17 @@ const ExerciseDetailsScreen = () => {
 };
 
 const styles = StyleSheet.create({
+    mainContainer: {
+        paddingBottom: verticalScale(120),
+    },
+    titleContainer: {
+        paddingHorizontal: spacing.lg,
+        paddingTop: spacing.md,
+    },
+    topCard: {
+        marginBottom: spacing.xl,
+        paddingBottom: spacing.lg,
+    },
     buttonContainer: {
         flexDirection: 'column',
         alignItems: 'center',
@@ -123,28 +156,43 @@ const styles = StyleSheet.create({
     },
     tipContainer: {
         flexDirection: 'row',
-        alignItems: 'flex-start',
-        backgroundColor: 'transparent',
-        paddingHorizontal: spacing.xl,
+        alignItems: 'center',
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.lg,
+        borderRadius: spacing.md,
+        // Shadow for iOS
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        // Elevation for Android
+        elevation: 2,
+        marginLeft: spacing.lg,
+        alignSelf: 'flex-start',
+    },
+    tipIcon: {
+        marginRight: spacing.sm,
     },
     instructionContainer: {
-        paddingTop: spacing.xl,
-        paddingBottom: verticalScale(120),
+        paddingVertical: spacing.md,
         paddingHorizontal: spacing.lg,
     },
-    infoContainer: {
+    attributeRow: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.lg,
-        paddingBottom: spacing.md,
-        paddingTop: spacing.lg,
-        backgroundColor: 'transparent',
-    },
-    infoBox: {
-        padding: spacing.lg,
-        borderRadius: spacing.xs,
-        margin: spacing.xs,
+        flexWrap: 'wrap', // Allow wrapping if needed
         alignItems: 'center',
+        paddingBottom: spacing.sm,
+        paddingHorizontal: spacing.lg,
+    },
+    attributeItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: spacing.lg, // Space between attribute groups
+        marginBottom: spacing.sm, // Space below if wrapped
+    },
+    attributeText: {
+        marginLeft: spacing.sm,
+        lineHeight: spacing.lg,
     },
 });
 

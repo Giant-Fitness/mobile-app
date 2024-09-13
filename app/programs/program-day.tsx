@@ -62,9 +62,9 @@ const ProgramDayScreen = () => {
                     title={day.WorkoutDayTitle}
                     subtitle={`Week ${day.Week} Day ${day.Day}`} // Updated subtitle
                     titleType='titleXLarge'
-                    subtitleStyle={{ marginBottom: spacing.lg, color: themeColors.subText, marginTop: 0 }}
-                    titleStyle={{ marginBottom: spacing.sm }}
-                    containerStyle={{ elevation: 5, marginBottom: spacing.sm }}
+                    subtitleStyle={{ marginBottom: spacing.md, color: themeColors.subText, marginTop: 0 }}
+                    titleStyle={{ marginBottom: spacing.xs }}
+                    containerStyle={{ elevation: 5, marginBottom: 0 }}
                     contentContainerStyle={{ backgroundColor: themeColors.background, paddingHorizontal: spacing.lg }}
                     imageStyle={{ height: sizes.imageXLargeHeight }}
                     titleFirst={true}
@@ -159,22 +159,6 @@ const styles = StyleSheet.create({
         fontFamily: 'InterMedium',
         fontSize: 18,
     },
-    subView: {
-        marginTop: 4, // Adjust as needed
-        alignItems: 'center',
-        width: '100%',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    subText: {
-        fontFamily: 'InterMedium',
-        fontSize: 12,
-    },
-    subTextView: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
     attribute: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -189,7 +173,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
     },
     exercisesContainer: {
-        paddingVertical: spacing.xxl,
+        paddingVertical: spacing.lg,
         paddingBottom: 120,
         paddingHorizontal: spacing.md,
     },
