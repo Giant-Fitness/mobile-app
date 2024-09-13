@@ -3,7 +3,7 @@
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { TopImageInfoCard } from '@/components/layout/TopImageInfoCard';
@@ -11,6 +11,7 @@ import { Icon } from '@/components/icons/Icon';
 import { moderateScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
 import { ProgramDay } from '@/store/types';
+import { useNavigation } from '@react-navigation/native';
 
 type ActiveProgramDayCardProps = {
     day: ProgramDay;
@@ -20,7 +21,16 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = ({ day 
     const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
     const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
+    const navigation = useNavigation();
+
+    const navigateToProgramDay = () => {
+        navigation.navigate('programs/program-day', {
+            day: day,
+        });
+    };
+
     return (
+        <TouchableOpacity activeOpacity={1} onPress={navigateToProgramDay}>
         <TopImageInfoCard
             image={{ uri: day.PhotoUrl }}
             title={day.WorkoutDayTitle}
@@ -53,6 +63,7 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = ({ day 
             titleStyle={{ color: themeColors.highlightContainerText }}
             subtitleStyle={{ color: themeColors.subTextSecondary }}
         />
+        </TouchableOpacity>
     );
 };
 
