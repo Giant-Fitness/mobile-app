@@ -1,7 +1,7 @@
 // app/workouts/workout-detail-page.tsx
 
 import React, { useRef, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
@@ -96,43 +96,44 @@ export default function WorkoutDetailScreen() {
                     containerStyle={{ height: sizes.imageXXLHeight, elevation: 5 }}
                     textContainerStyle={{ bottom: spacing.lg, left: spacing.lg }}
                 />
-
                 <ThemedView style={[styles.textContainer]}>
-                    <ThemedView style={[styles.attributeRow]}>
-                        <ThemedView style={[styles.attribute]}>
-                            <Icon name='stopwatch' size={moderateScale(18)} color={themeColors.text} />
-                            <ThemedText type='body' style={[styles.attributeText]}>
-                                {length}
-                            </ThemedText>
-                        </ThemedView>
-                    </ThemedView>
-                    <ThemedView style={[styles.attributeRow]}>
-                        <ThemedView style={[styles.attribute]}>
-                            <Icon name={levelIcon} size={moderateScale(18)} color={themeColors.text} />
-                            <ThemedText type='body' style={[styles.attributeText]}>
-                                {level}
-                            </ThemedText>
-                        </ThemedView>
-                    </ThemedView>
-                    <ThemedView style={[styles.attributeRow]}>
-                        <ThemedView style={[styles.attribute]}>
-                            <Icon name='dumbbell' size={moderateScale(18)} color={themeColors.text} />
-                            <ThemedText type='body' style={[styles.attributeText]}>
-                                {equipment}
-                            </ThemedText>
-                        </ThemedView>
-                    </ThemedView>
-                    <ThemedView style={[styles.attributeRow]}>
-                        <ThemedView style={[styles.attribute]}>
-                            <Icon name='yoga' size={moderateScale(18)} color={themeColors.text} />
-                            <ThemedText type='body' style={[styles.attributeText]}>
-                                {focusMultiText}
-                            </ThemedText>
-                        </ThemedView>
+                    <ThemedView style={[styles.attributeContainer, {backgroundColor: themeColors.background}]}>
+                        <View style={[styles.attributeRow]}>
+                            <View style={[styles.attribute]}>
+                                <Icon name='stopwatch' size={moderateScale(18)} color={themeColors.text} />
+                                <ThemedText type='body' style={[styles.attributeText]}>
+                                    {length}
+                                </ThemedText>
+                            </View>
+                        </View>
+                        <View style={[styles.attributeRow]}>
+                            <View style={[styles.attribute]}>
+                                <Icon name={levelIcon} size={moderateScale(18)} color={themeColors.text} />
+                                <ThemedText type='body' style={[styles.attributeText]}>
+                                    {level}
+                                </ThemedText>
+                            </View>
+                        </View>
+                        <View style={[styles.attributeRow]}>
+                            <View style={[styles.attribute]}>
+                                <Icon name='dumbbell' size={moderateScale(18)} color={themeColors.text} />
+                                <ThemedText type='body' style={[styles.attributeText]}>
+                                    {equipment}
+                                </ThemedText>
+                            </View>
+                        </View>
+                        <View style={[styles.attributeRow]}>
+                            <View style={[styles.attribute]}>
+                                <Icon name='yoga' size={moderateScale(18)} color={themeColors.text} />
+                                <ThemedText type='body' style={[styles.attributeText]}>
+                                    {focusMultiText}
+                                </ThemedText>
+                            </View>
+                        </View>
                     </ThemedView>
 
-                    <ThemedView style={[styles.detailsContainer]}>
-                        <ThemedText type='body' style={[styles.detailsText, { color: themeColors.subText }]}>
+                    <ThemedView style={[styles.detailsContainer, {backgroundColor: themeColors.backgroundSecondary}]}>
+                        <ThemedText type='body' style={[styles.detailsText, { color: themeColors.buttonPrimary }]}>
                             {longText}
                         </ThemedText>
                     </ThemedView>
@@ -179,15 +180,17 @@ const styles = StyleSheet.create({
     },
     textContainer: {
         flex: 1,
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.md,
-        paddingBottom: verticalScale(120),
         zIndex: 2,
+    },
+    attributeContainer: {
+        paddingHorizontal: spacing.lg,
+        paddingTop: spacing.lg,
+        paddingBottom: spacing.lg,
     },
     attribute: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingBottom: spacing.md,
+        paddingBottom: spacing.sm,
     },
     attributeText: {
         marginLeft: spacing.md,
@@ -198,8 +201,9 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
     },
     detailsContainer: {
-        paddingTop: spacing.md,
-        paddingBottom: spacing.xl,
+        paddingHorizontal: spacing.lg,
+        paddingTop: spacing.xl,
+        paddingBottom: verticalScale(120),
     },
     detailsText: {
         lineHeight: spacing.lg,
