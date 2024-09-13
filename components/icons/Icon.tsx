@@ -29,10 +29,12 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = 18, color, 
     // Derived value for color if it's animated
     const derivedColor = useDerivedValue(() => {
         const finalColor = typeof color === 'string' ? color : (color?.value ?? defaultColor);
+        console.log('Icon Component - Derived Color:', finalColor);
         return finalColor;
     });
 
     const animatedStyle = useAnimatedStyle(() => {
+        console.log('Icon Component - Animated Style Updated with Color:', derivedColor.value);
         return {
             color: derivedColor.value,
         };
@@ -95,3 +97,5 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = 18, color, 
             return <AnimatedIonicons name='alert-circle-outline' {...commonProps} />;
     }
 });
+
+Icon.displayName = 'Icon';
