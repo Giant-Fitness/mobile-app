@@ -27,7 +27,7 @@ const workouts = [
         focus: 'Strength',
         trainer: 'Viren Barman',
         longText:
-            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\nUse it as a standalone or pair it with a core session for a full-body workout.',
+            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\n\nUse it as a standalone or pair it with a core session for a full-body workout.',
         focusMulti: ['Arms', 'Legs', 'Chest'],
     },
     {
@@ -40,7 +40,7 @@ const workouts = [
         focus: 'Endurance',
         trainer: 'Viren Barman',
         longText:
-            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\nUse it as a standalone or pair it with a core session for a full-body workout.',
+            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\n\nUse it as a standalone or pair it with a core session for a full-body workout.',
         focusMulti: ['Arms', 'Legs', 'Chest'],
     },
     {
@@ -53,7 +53,7 @@ const workouts = [
         focus: 'Mobility',
         trainer: 'Viren Barman',
         longText:
-            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\nUse it as a standalone or pair it with a core session for a full-body workout.',
+            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\n\nUse it as a standalone or pair it with a core session for a full-body workout.',
         focusMulti: ['Arms', 'Legs', 'Chest'],
     },
     {
@@ -66,7 +66,7 @@ const workouts = [
         focus: 'Strength',
         trainer: 'Viren Barman',
         longText:
-            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\nUse it as a standalone or pair it with a core session for a full-body workout.',
+            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\n\nUse it as a standalone or pair it with a core session for a full-body workout.',
         focusMulti: ['Arms', 'Legs', 'Chest'],
     },
     {
@@ -79,7 +79,7 @@ const workouts = [
         focus: 'Mobility',
         trainer: 'Viren Barman',
         longText:
-            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\nUse it as a standalone or pair it with a core session for a full-body workout.',
+            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\n\nUse it as a standalone or pair it with a core session for a full-body workout.',
         focusMulti: ['Arms', 'Legs', 'Chest'],
     },
 ];

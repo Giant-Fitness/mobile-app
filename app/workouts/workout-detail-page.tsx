@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -10,27 +10,38 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { ImageTextOverlay } from '@/components/images/ImageTextOverlay';
 import { Icon } from '@/components/icons/Icon';
 import { TextButton } from '@/components/base/TextButton';
-import { IconButton } from '@/components/base/IconButton';
 import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle } from '@/components/video/FullScreenVideoPlayer';
 import { moderateScale, verticalScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
 import { sizes } from '@/utils/sizes';
-import Animated, { useSharedValue } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/layout/AnimatedHeader';
 
+type WorkoutDetailScreenParams = {
+    Workout: {
+        name: string;
+        length: string;
+        level: string;
+        equipment: string;
+        photo: string;
+        longText: string;
+        focusMulti: string[];
+    };
+};
+
 export default function WorkoutDetailScreen() {
-    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
-    const themeColors = Colors[colorScheme]; // Access theme-specific colors
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
 
     const navigation = useNavigation();
-    const route = useRoute();
+    const route = useRoute<RouteProp<WorkoutDetailScreenParams, 'Workout'>>();
 
     const scrollY = useSharedValue(0);
 
     const videoPlayerRef = useRef<FullScreenVideoPlayerHandle>(null);
 
     // Constants for milestone tracking and skip logic
-    const MILESTONES = [0.25, 0.5, 0.75, 1.0]; // Define milestones as percentages
+    const MILESTONES = [0.25, 0.5, 0.75, 1.0]; // Milestones as percentages
     const SKIP_THRESHOLD = 0.25; // Max allowed skip percentage
 
     // State for tracking playback position
@@ -41,7 +52,7 @@ export default function WorkoutDetailScreen() {
         navigation.setOptions({ headerShown: false });
     }, [navigation]);
 
-    const { name, length, level, equipment, focus, photo, trainer, longText, focusMulti } = route.params;
+    const { name, length, level, equipment, photo, longText, focusMulti } = route.params;
 
     // Convert focusMulti array to a comma-separated string
     const focusMultiText = focusMulti.join(', ');
@@ -50,7 +61,7 @@ export default function WorkoutDetailScreen() {
     // Function to start the video playback
     const handleStartWorkout = () => {
         if (videoPlayerRef.current) {
-            videoPlayerRef.current.startPlayback(); // Call the method to start playback
+            videoPlayerRef.current.startPlayback();
         }
     };
 
@@ -65,7 +76,7 @@ export default function WorkoutDetailScreen() {
             MILESTONES.forEach((milestone) => {
                 if (progress >= milestone && !reachedMilestones.current.has(milestone)) {
                     console.log(`Milestone reached: ${milestone * 100}%`);
-                    reachedMilestones.current.add(milestone); // Mark this milestone as reached
+                    reachedMilestones.current.add(milestone);
                 }
             });
 
@@ -77,63 +88,78 @@ export default function WorkoutDetailScreen() {
             // Update the last playback position
             setLastPlaybackPosition(currentPosition);
 
-            // when full screen is exited and a significant threshold is reached (like 75%), show a toast asking the user if they want to log their workout
-            // there needs to be some special logic built in here. we'll have to make a request to the backend to see if this should even be logged
-            // backend should check if this exercise was logged in the last x hours (maybe 1-2). if not, then get the app to show the toast
-            // this is a pseudo version of session tracking
+            // Additional session tracking logic can be implemented here
         }
     };
+
+    // Scroll Handler for Animated Header
+    const scrollHandler = useAnimatedScrollHandler({
+        onScroll: (event) => {
+            scrollY.value = event.contentOffset.y;
+        },
+    });
 
     return (
         <ThemedView style={styles.container}>
             <AnimatedHeader scrollY={scrollY} disableColorChange={true} backButtonColor={themeColors.white} />
-            <Animated.ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false} overScrollMode='never'>
+            <Animated.ScrollView
+                contentContainerStyle={{ flexGrow: 1 }}
+                showsVerticalScrollIndicator={false}
+                overScrollMode='never'
+                onScroll={scrollHandler}
+                scrollEventThrottle={16}
+            >
                 <ImageTextOverlay
                     image={photo}
-                    title={name}
-                    titleType='titleXXLarge'
                     gradientColors={['transparent', 'rgba(0,0,0,0.4)']}
-                    containerStyle={{ height: sizes.imageXXLHeight, elevation: 5 }}
-                    textContainerStyle={{ bottom: spacing.lg, left: spacing.lg }}
+                    containerStyle={{ height: sizes.imageXLargeHeight, elevation: 5 }}
                 />
-                <ThemedView style={[styles.textContainer]}>
-                    <ThemedView style={[styles.attributeContainer, { backgroundColor: themeColors.background }]}>
-                        <View style={[styles.attributeRow]}>
-                            <View style={[styles.attribute]}>
-                                <Icon name='stopwatch' size={moderateScale(18)} color={themeColors.text} />
-                                <ThemedText type='body' style={[styles.attributeText]}>
+                <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.backgroundTertiary }]}>
+                    {/* Exercise Name */}
+                    <ThemedView style={styles.topCard}>
+                        <ThemedView style={styles.titleContainer}>
+                            <ThemedText type='titleLarge'>{name}</ThemedText>
+                        </ThemedView>
+
+                        {/* Attributes in a Row */}
+                        <ThemedView style={[styles.attributeRow, { backgroundColor: themeColors.background }]}>
+                            {/* Attribute 1: Length */}
+                            <View style={styles.attributeItem}>
+                                <Icon name='stopwatch' size={verticalScale(18)} color={themeColors.text} />
+                                <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.text }]}>
                                     {length}
                                 </ThemedText>
                             </View>
-                        </View>
-                        <View style={[styles.attributeRow]}>
-                            <View style={[styles.attribute]}>
-                                <Icon name={levelIcon} size={moderateScale(18)} color={themeColors.text} />
-                                <ThemedText type='body' style={[styles.attributeText]}>
+
+                            {/* Attribute 2: Level */}
+                            <View style={styles.attributeItem}>
+                                <Icon name={levelIcon} size={verticalScale(18)} color={themeColors.text} />
+                                <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.text }]}>
                                     {level}
                                 </ThemedText>
                             </View>
-                        </View>
-                        <View style={[styles.attributeRow]}>
-                            <View style={[styles.attribute]}>
-                                <Icon name='kettlebell' size={moderateScale(18)} color={themeColors.text} />
-                                <ThemedText type='body' style={[styles.attributeText]}>
+
+                            {/* Attribute 3: Equipment */}
+                            <View style={styles.attributeItem}>
+                                <Icon name='kettlebell' size={verticalScale(18)} color={themeColors.text} />
+                                <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.text }]}>
                                     {equipment}
                                 </ThemedText>
                             </View>
-                        </View>
-                        <View style={[styles.attributeRow]}>
-                            <View style={[styles.attribute]}>
-                                <Icon name='yoga' size={moderateScale(18)} color={themeColors.text} />
-                                <ThemedText type='body' style={[styles.attributeText]}>
+
+                            {/* Attribute 4: Focus */}
+                            <View style={styles.attributeItem}>
+                                <Icon name='yoga' size={verticalScale(18)} color={themeColors.text} />
+                                <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.text }]}>
                                     {focusMultiText}
                                 </ThemedText>
                             </View>
-                        </View>
+                        </ThemedView>
                     </ThemedView>
 
-                    <ThemedView style={[styles.detailsContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
-                        <ThemedText type='body' style={[styles.detailsText, { color: themeColors.buttonPrimary }]}>
+                    {/* Description Container */}
+                    <ThemedView style={[styles.descriptionContainer, { backgroundColor: themeColors.background }]}>
+                        <ThemedText type='body' style={[{ color: themeColors.text }]}>
                             {longText}
                         </ThemedText>
                     </ThemedView>
@@ -142,7 +168,7 @@ export default function WorkoutDetailScreen() {
             <FullScreenVideoPlayer
                 ref={videoPlayerRef}
                 source={{ uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' }}
-                onPlaybackStatusUpdate={handlePlaybackStatusUpdate} // Pass the handler
+                onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
             />
             <ThemedView style={styles.buttonContainer}>
                 <TextButton
@@ -150,12 +176,6 @@ export default function WorkoutDetailScreen() {
                     textType='bodyMedium'
                     style={[styles.startButton, { backgroundColor: themeColors.buttonPrimary }]}
                     onPress={handleStartWorkout}
-                />
-                <IconButton
-                    iconName='notebook'
-                    style={[styles.notesButton, { backgroundColor: themeColors.buttonSecondary }]}
-                    iconSize={moderateScale(24)}
-                    iconColor={themeColors.buttonPrimary}
                 />
             </ThemedView>
         </ThemedView>
@@ -167,51 +187,42 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: 'none',
     },
-    gradientOverlay: {
-        flex: 1,
-        justifyContent: 'flex-end',
-        padding: spacing.md,
+    mainContainer: {
+        paddingBottom: verticalScale(120),
     },
-    backButton: {
-        position: 'absolute',
-        top: spacing.xxl,
-        left: spacing.md,
-        zIndex: 10,
-    },
-    textContainer: {
-        flex: 1,
-        zIndex: 2,
-    },
-    attributeContainer: {
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.lg,
+    topCard: {
+        marginBottom: spacing.xl,
         paddingBottom: spacing.lg,
     },
-    attribute: {
-        flexDirection: 'row',
-        alignItems: 'center',
+    titleContainer: {
+        paddingHorizontal: spacing.lg,
+        paddingTop: spacing.md,
         paddingBottom: spacing.sm,
-    },
-    attributeText: {
-        marginLeft: spacing.md,
-        lineHeight: spacing.lg,
     },
     attributeRow: {
         flexDirection: 'row',
-        justifyContent: 'flex-start',
-    },
-    detailsContainer: {
+        flexWrap: 'wrap', // Allow wrapping if needed
+        alignItems: 'center',
         paddingHorizontal: spacing.lg,
-        paddingTop: spacing.xl,
-        paddingBottom: verticalScale(120),
     },
-    detailsText: {
-        lineHeight: spacing.lg,
-    },
-    buttonContainer: {
+    attributeItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: '5%',
+        marginRight: spacing.xl, // Space between attribute groups
+        marginBottom: spacing.sm, // Space below if wrapped
+    },
+    attributeText: {
+        marginLeft: spacing.xs,
+        lineHeight: spacing.lg,
+    },
+    descriptionContainer: {
+        paddingHorizontal: spacing.lg,
+        paddingTop: spacing.xl,
+        paddingBottom: spacing.xxl,
+    },
+    buttonContainer: {
+        flexDirection: 'column', // Column for single button
+        alignItems: 'center', // Center horizontally
         position: 'absolute',
         bottom: verticalScale(30),
         left: 0,
@@ -221,12 +232,5 @@ const styles = StyleSheet.create({
     startButton: {
         width: '80%',
         paddingVertical: spacing.md,
-        marginRight: '2%',
-    },
-    notesButton: {
-        width: '18%', // Fixed width for the icon button
-        height: '100%', // Fixed height for the icon button
-        alignItems: 'center',
-        borderRadius: moderateScale(100), // Ensure the button is perfectly circular
     },
 });
