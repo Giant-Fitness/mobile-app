@@ -115,6 +115,8 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = 18, color, 
             return <AnimatedMaterialCommunityIcons name='redo-variant' {...commonProps} />;
         case 'check':
             return <AnimatedMaterialCommunityIcons name='check-circle' {...commonProps} />;
+        case 'list':
+            return <AnimatedIonicons name='list-circle' {...commonProps} />;
         default:
             return <AnimatedIonicons name='alert-circle-outline' {...commonProps} />;
     }

@@ -97,7 +97,7 @@ export default function ActiveProgramHome() {
                 showsVerticalScrollIndicator={false}
             >
                 <ThemedView style={styles.quoteContainer}>
-                    <ThemedText type='italic' style={[styles.quoteText, { color: themeColors.subText }]}>
+                    <ThemedText type='italic' style={[styles.quoteText, { color: themeColors.containerHighlight }]}>
                         {displayQuote.QuoteText}
                     </ThemedText>
                 </ThemedView>
@@ -180,14 +180,7 @@ export default function ActiveProgramHome() {
                             <ThemedText type='body' style={[{ color: themeColors.text }]}>
                                 End Program
                             </ThemedText>
-                            <Icon name='chevron-forward' size={moderateScale(16)} color={themeColors.iconDefault} />
                         </TouchableOpacity>
-                        <View
-                            style={{
-                                borderBottomColor: themeColors.systemBorderColor,
-                                borderBottomWidth: StyleSheet.hairlineWidth,
-                            }}
-                        />
                     </ThemedView>
                 </ThemedView>
             </ScrollView>
@@ -245,7 +238,7 @@ const styles = StyleSheet.create({
     },
     menuContainer: {
         paddingHorizontal: spacing.lg,
-        paddingBottom: spacing.md,
+        paddingBottom: 0,
         paddingTop: spacing.md,
     },
 });

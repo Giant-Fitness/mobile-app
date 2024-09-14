@@ -29,7 +29,7 @@ export const WorkoutsBottomBar: React.FC<WorkoutsBottomBarProps> = ({ onSortPres
                         Filter
                     </ThemedText>
                     {appliedFilterCount > 0 && (
-                        <View style={[styles.badge, { backgroundColor: themeColors.subText }]}>
+                        <View style={[styles.badge, { backgroundColor: themeColors.text }]}>
                             <ThemedText type='buttonSmall' style={[styles.badgeText, { color: themeColors.background }]}>
                                 {appliedFilterCount}
                             </ThemedText>

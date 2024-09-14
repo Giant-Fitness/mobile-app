@@ -1,3 +1,5 @@
+// components/layout/LeftImageInfoCard.tsx
+
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View, StyleProp, ViewStyle, ImageSourcePropType, TextStyle, ImageStyle } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -75,7 +77,6 @@ const styles = StyleSheet.create({
     imageBackground: {
         borderRadius: spacing.xxs,
         backgroundColor: 'transparent', // Adjust to your desired background color
-        marginRight: spacing.md,
     },
     roundedBackground: {
         borderRadius: spacing.xxs,
@@ -86,6 +87,7 @@ const styles = StyleSheet.create({
         width: sizes.imageMediumWidth,
     },
     textContainer: {
+        marginLeft: spacing.md,
         flex: 1,
         flexDirection: 'column',
         justifyContent: 'center',

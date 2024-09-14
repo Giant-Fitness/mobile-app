@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         width: '100%',
-        marginLeft: -spacing.sm,
+        marginLeft: spacing.sm,
         backgroundColor: 'transparent',
     },
     attributeRow: {

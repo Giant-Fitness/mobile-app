@@ -1,11 +1,11 @@
 // app/workouts/all-workouts.tsx
 
 import React, { useState, useEffect } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet } from 'react-native';
 import { WorkoutDetailedCard } from '@/components/workouts/WorkoutDetailedCard';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { WorkoutsBottomBar } from '@/components/workouts/WorkoutsBottomBar';
@@ -23,7 +23,7 @@ const workouts = [
         photo: require('@/assets/images/vb.webp'),
         length: '45 mins',
         level: 'Advanced',
-        equipment: 'Kettlebells',
+        equipment: 'None',
         focus: 'Strength',
         trainer: 'Viren Barman',
         longText:
@@ -36,7 +36,7 @@ const workouts = [
         photo: require('@/assets/images/vb.webp'),
         length: '30 mins',
         level: 'Intermediate',
-        equipment: 'Kettlebells',
+        equipment: 'None',
         focus: 'Endurance',
         trainer: 'Viren Barman',
         longText:
@@ -49,7 +49,7 @@ const workouts = [
         photo: require('@/assets/images/vb.webp'),
         length: '20 mins',
         level: 'Beginner',
-        equipment: 'None',
+        equipment: 'Basic',
         focus: 'Mobility',
         trainer: 'Viren Barman',
         longText:
@@ -62,7 +62,7 @@ const workouts = [
         photo: require('@/assets/images/vb.webp'),
         length: '30 mins',
         level: 'Advanced',
-        equipment: 'Dumbbells',
+        equipment: 'Full Gym',
         focus: 'Strength',
         trainer: 'Viren Barman',
         longText:
@@ -75,7 +75,7 @@ const workouts = [
         photo: require('@/assets/images/vb.webp'),
         length: '5 mins',
         level: 'Beginner',
-        equipment: 'None',
+        equipment: 'Basic',
         focus: 'Mobility',
         trainer: 'Viren Barman',
         longText:
@@ -83,8 +83,6 @@ const workouts = [
         focusMulti: ['Arms', 'Legs', 'Chest'],
     },
 ];
-
-import { RouteProp } from '@react-navigation/native';
 
 type RouteParams = {
     initialFilters?: Record<string, any>;
@@ -157,8 +155,8 @@ export default function AllWorkoutsScreen() {
         }
     }, [initialFilters]);
 
-    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
-    const themeColors = Colors[colorScheme]; // Access theme-specific colors
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
 
     React.useEffect(() => {
         navigation.setOptions({ headerShown: false });
@@ -170,30 +168,37 @@ export default function AllWorkoutsScreen() {
     const activeFilterTypesCount = Object.keys(filters).filter((key) => filters[key].length > 0).length;
     const scrollY = useSharedValue(0);
 
+    const renderItem = ({ item }: { item: (typeof workouts)[0] }) => (
+        <WorkoutDetailedCard
+            name={item.name}
+            photo={item.photo}
+            length={item.length}
+            level={item.level}
+            focus={item.focus}
+            equipment={item.equipment}
+            trainer={item.trainer}
+            longText={item.longText}
+            focusMulti={item.focusMulti}
+            cardColor={themeColors.card}
+            // Removed the style prop
+        />
+    );
+
+    const keyExtractor = (item: (typeof workouts)[0]) => item.id;
+
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
             <AnimatedHeader scrollY={scrollY} disableColorChange={true} title='All Workouts' />
             <ThemedText type='overline' style={[styles.countContainer, { color: themeColors.subText }]}>
                 {workoutCount} {workoutLabel}
             </ThemedText>
-            <ScrollView showsVerticalScrollIndicator={false}>
-                <ThemedView style={[styles.contentContainer, { backgroundColor: themeColors.background }]}>
-                    {filteredWorkouts.map((workout) => (
-                        <WorkoutDetailedCard
-                            key={workout.id}
-                            name={workout.name}
-                            photo={workout.photo}
-                            length={workout.length}
-                            level={workout.level}
-                            focus={workout.focus}
-                            equipment={workout.equipment}
-                            trainer={workout.trainer}
-                            longText={workout.longText}
-                            focusMulti={workout.focusMulti}
-                        />
-                    ))}
-                </ThemedView>
-            </ScrollView>
+            <FlatList
+                data={filteredWorkouts}
+                renderItem={renderItem}
+                keyExtractor={keyExtractor}
+                contentContainerStyle={[styles.contentContainer, { backgroundColor: themeColors.background, paddingHorizontal: spacing.sm }]}
+                showsVerticalScrollIndicator={false}
+            />
             <WorkoutsBottomBar onSortPress={handleSortPress} onFilterPress={handleFilterPress} appliedFilterCount={activeFilterTypesCount} />
             <WorkoutsFilterDrawer
                 visible={isFilterVisible}
@@ -214,8 +219,7 @@ const styles = StyleSheet.create({
         paddingTop: 100,
     },
     contentContainer: {
-        paddingTop: spacing.sm,
-        paddingLeft: spacing.md,
+        paddingTop: 0,
         paddingBottom: verticalScale(100),
     },
 });

@@ -11,6 +11,7 @@ import { LeftImageInfoCard } from '@/components/layout/LeftImageInfoCard';
 import { Icon } from '@/components/icons/Icon';
 import { scale, moderateScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
+import { sizes } from '@/utils/sizes';
 
 type WorkoutDetailedCardProps = {
     name: string;
@@ -42,14 +43,17 @@ export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, 
             title={name}
             titleStyle={{ fontSize: moderateScale(14) }}
             containerStyle={{ paddingBottom: spacing.lg }}
+            contentContainerStyle={{ marginLeft: spacing.sm + spacing.xs }}
             onPress={navigateToWorkoutDetails}
+            imageStyle={{ width: sizes.imageMediumHeight, height: sizes.imageMediumWidth }}
             extraContent={
                 <ThemedView style={styles.attributeContainer}>
                     <ThemedView style={styles.attributeRow}>
-                        <Icon name='yoga' size={moderateScale(14)} color={themeColors.iconDefault} />
-                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.subText, paddingRight: scale(10) }]}>
-                            {focus}
+                        <Icon name='stopwatch' size={moderateScale(14)} color={themeColors.iconDefault} />
+                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.subText, paddingRight: spacing.sm }]}>
+                            {length}
                         </ThemedText>
+
                         <Icon name={levelIcon} size={moderateScale(14)} color={themeColors.iconDefault} />
                         <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.subText, marginLeft: spacing.xxs }]}>
                             {level}
@@ -62,9 +66,9 @@ export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, 
                         </ThemedText>
                     </ThemedView>
                     <ThemedView style={styles.attributeRow}>
-                        <Icon name='stopwatch' size={moderateScale(14)} color={themeColors.iconDefault} />
-                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.subText }]}>
-                            {length}
+                        <Icon name='yoga' size={moderateScale(14)} color={themeColors.iconDefault} />
+                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.subText, paddingRight: spacing.sm }]}>
+                            {focus}
                         </ThemedText>
                     </ThemedView>
                 </ThemedView>
@@ -77,17 +81,17 @@ const styles = StyleSheet.create({
     attributeContainer: {
         flexDirection: 'column',
         justifyContent: 'flex-start',
-        marginTop: spacing.sm,
+        marginTop: spacing.xs,
         backgroundColor: 'transparent',
     },
     attributeRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: spacing.sm,
+        marginBottom: spacing.xs,
         backgroundColor: 'transparent',
     },
     attributeText: {
-        marginLeft: spacing.xs,
-        lineHeight: spacing.md, // Ensures the text is aligned with the icon
+        marginLeft: spacing.xxs,
+        lineHeight: spacing.md,
     },
 });

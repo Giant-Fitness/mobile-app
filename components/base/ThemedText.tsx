@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     buttonSmall: {
         fontSize: moderateScale(13),
         lineHeight: moderateScale(20),
-        fontFamily: 'InterRegular',
+        fontFamily: 'InterMedium',
     },
     overlineTransformed: {
         fontSize: moderateScale(13),

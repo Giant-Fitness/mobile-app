@@ -1,7 +1,7 @@
 // components/workouts/WorkoutOverviewCard.tsx
 
 import React from 'react';
-import { StyleSheet, ImageSourcePropType, TouchableOpacity } from 'react-native';
+import { StyleSheet, ImageSourcePropType, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ImageTextOverlay } from '@/components/images/ImageTextOverlay';
 import { moderateScale } from '@/utils/scaling';
@@ -38,34 +38,40 @@ export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, 
     };
 
     return (
-        <TouchableOpacity onPress={navigateToWorkoutDetails} style={styles.cardContainer} activeOpacity={1}>
-            <ImageTextOverlay
-                image={photo}
-                title={name}
-                subtitle={`${length}, ${level}`}
-                gradientColors={['transparent', 'rgba(0,0,0,0.6)']}
-                containerStyle={{ height: '100%', elevation: 5 }}
-                textContainerStyle={{ bottom: spacing.lg }}
-                subtitleType='bodySmall'
-                titleType='title'
-                titleStyle={{ marginRight: spacing.xl, lineHeight: moderateScale(20) }}
-                subtitleStyle={{ marginTop: 0 }}
-            />
-        </TouchableOpacity>
+        <View style={styles.shadowContainer}>
+            <TouchableOpacity onPress={navigateToWorkoutDetails} style={styles.cardContainer} activeOpacity={1}>
+                <ImageTextOverlay
+                    image={photo}
+                    title={name}
+                    subtitle={`${length}, ${level}`}
+                    gradientColors={['transparent', 'rgba(0,0,0,0.7)']}
+                    containerStyle={{ height: '100%' }}
+                    textContainerStyle={{ bottom: spacing.lg }}
+                    subtitleType='bodySmall'
+                    titleType='title'
+                    titleStyle={{ marginRight: spacing.xl, lineHeight: moderateScale(20) }}
+                    subtitleStyle={{ marginTop: 0 }}
+                />
+            </TouchableOpacity>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
+    shadowContainer: {
+        shadowColor: 'rgba(0,80,0,0.25)', // Use a more standard shadow color
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 1,
+        shadowRadius: 4,
+        elevation: 5, // For Android
+        borderRadius: spacing.sm, // Match the child border radius
+        marginRight: spacing.md,
+    },
     cardContainer: {
         width: sizes.imageXLargeWidth,
         height: sizes.imageXLargeHeight,
         overflow: 'hidden',
-        borderRadius: spacing.xxs,
-        marginHorizontal: spacing.xxs,
-        elevation: 5,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: spacing.xxs },
-        shadowOpacity: 0.3,
-        shadowRadius: spacing.xs,
+        borderRadius: spacing.sm,
+        // Remove shadow properties from here
     },
 });

@@ -82,6 +82,11 @@ export default function WorkoutsScreen() {
     return (
         <ScrollView style={[styles.container, { backgroundColor: themeColors.background }]} showsVerticalScrollIndicator={false}>
             <ThemedView>
+                <ThemedView style={styles.infoContainer}>
+                    <ThemedText type='bodyXSmall' style={[styles.infoText, { color: themeColors.containerHighlight }]}>
+                        {'Workouts are flexible one-off exercises that you can complete to meet your goals.'}
+                    </ThemedText>
+                </ThemedView>
                 <ThemedText type='title' style={[styles.header, { color: themeColors.text }]}>
                     Top Picks For You
                 </ThemedText>
@@ -120,15 +125,17 @@ export default function WorkoutsScreen() {
                                             focusMulti={workout.focusMulti}
                                         />
                                     ))}
-                                    <TouchableOpacity
-                                        activeOpacity={1}
-                                        style={[styles.seeAllButton, { backgroundColor: themeColors.container }]}
-                                        onPress={() => navigateToAllWorkouts({ focus: [category.type] })}
-                                    >
-                                        <ThemedText type='body' style={[{ color: themeColors.text }]}>
-                                            See All
-                                        </ThemedText>
-                                    </TouchableOpacity>
+                                    <View style={styles.shadowContainer}>
+                                        <TouchableOpacity
+                                            activeOpacity={1}
+                                            style={[styles.seeAllButton, { backgroundColor: themeColors.backgroundSecondary }]}
+                                            onPress={() => navigateToAllWorkouts({ focus: [category.type] })}
+                                        >
+                                            <ThemedText type='body' style={[{ color: themeColors.text }]}>
+                                                See All
+                                            </ThemedText>
+                                        </TouchableOpacity>
+                                    </View>
                                 </ScrollView>
                             </Collapsible>
                             {
@@ -145,21 +152,12 @@ export default function WorkoutsScreen() {
                         </ThemedView>
                     ))}
                     <ThemedView style={styles.allWorkoutsContainer}>
-                        <TouchableOpacity onPress={() => navigateToAllWorkouts()} style={styles.allWorkouts}>
+                        <TouchableOpacity onPress={() => navigateToAllWorkouts()} style={styles.allWorkouts} activeOpacity={0.5}>
+                            <Icon name='list' size={moderateScale(20)} color={themeColors.text} style={{ paddingRight: spacing.xs, marginTop: 1 }} />
                             <ThemedText type='body' style={[{ color: themeColors.text }]}>
                                 All Workouts
                             </ThemedText>
-                            <Icon name='chevron-forward' size={moderateScale(16)} color={themeColors.iconDefault} style={{ paddingTop: spacing.xxs }} />
                         </TouchableOpacity>
-                        <View
-                            style={[
-                                styles.divider,
-                                {
-                                    borderBottomColor: themeColors.systemBorderColor,
-                                    borderBottomWidth: StyleSheet.hairlineWidth,
-                                },
-                            ]}
-                        />
                     </ThemedView>
                 </ThemedView>
             </ThemedView>
@@ -168,16 +166,23 @@ export default function WorkoutsScreen() {
 }
 
 const styles = StyleSheet.create({
+    infoContainer: {
+        paddingTop: spacing.lg,
+        paddingBottom: 0,
+        marginHorizontal: spacing.xxxl,
+    },
+    infoText: {
+        textAlign: 'center',
+    },
     container: {
         flex: 1,
     },
     allWorkoutsContainer: {
-        paddingBottom: spacing.xxxl,
+        paddingBottom: spacing.xl,
     },
     allWorkouts: {
         padding: spacing.lg,
         flexDirection: 'row',
-        justifyContent: 'space-between',
     },
     mainScrollView: {
         marginLeft: spacing.lg,
@@ -186,7 +191,7 @@ const styles = StyleSheet.create({
     },
     header: {
         padding: spacing.md,
-        paddingTop: spacing.xl,
+        paddingTop: spacing.lg,
         paddingLeft: spacing.lg,
     },
     scrollView: {
@@ -209,7 +214,16 @@ const styles = StyleSheet.create({
         height: sizes.imageXLargeHeight,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: spacing.xxs,
+        borderRadius: spacing.sm,
         marginHorizontal: spacing.xxs,
+    },
+    shadowContainer: {
+        shadowColor: 'rgba(0,70,0,0.2)', // Use a more standard shadow color
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 1,
+        shadowRadius: 4,
+        elevation: 5, // For Android
+        borderRadius: spacing.sm, // Match the child border radius
+        marginRight: spacing.md,
     },
 });

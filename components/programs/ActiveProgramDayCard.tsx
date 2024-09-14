@@ -3,7 +3,7 @@
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import React from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { TopImageInfoCard } from '@/components/layout/TopImageInfoCard';
@@ -30,11 +30,12 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = ({ day 
     };
 
     return (
-        <TouchableOpacity activeOpacity={1} onPress={navigateToProgramDay}>
+        <View style={styles.shadowContainer}>
             <TopImageInfoCard
                 image={{ uri: day.PhotoUrl }}
                 title={day.WorkoutDayTitle}
                 subtitle={`Week ${day.Week} Day ${day.Day}`}
+                onPress={navigateToProgramDay}
                 extraContent={
                     day.RestDay ? (
                         // Display content specific to a rest day
@@ -60,11 +61,20 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = ({ day 
                 titleStyle={{ color: themeColors.highlightContainerText }}
                 subtitleStyle={{ color: themeColors.subTextSecondary }}
             />
-        </TouchableOpacity>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
+    shadowContainer: {
+        shadowColor: 'rgba(0,80,0,0.4)', // Use a more standard shadow color
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 1,
+        shadowRadius: 4,
+        elevation: 5, // For Android
+        borderRadius: spacing.sm, // Match the child border radius
+        marginRight: spacing.md,
+    },
     attributeRow: {
         flexDirection: 'row',
         alignItems: 'center',

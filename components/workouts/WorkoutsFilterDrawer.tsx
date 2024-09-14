@@ -5,7 +5,7 @@ import { FiltersDrawer } from '@/components/layout/FiltersDrawer';
 
 const workoutFilterAttributes = {
     level: ['Beginner', 'Intermediate', 'Advanced'],
-    equipment: ['None', 'Dumbbells', 'Kettlebells'],
+    equipment: ['None', 'Basic', 'Full Gym'],
     focus: ['Strength', 'Endurance', 'Mobility'],
 };
 

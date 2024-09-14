@@ -20,7 +20,7 @@ export function Collapsible({ children, title }: PropsWithChildren & { title: st
             <TouchableOpacity style={styles.heading} onPress={() => setIsOpen(!isOpen)} activeOpacity={0.8}>
                 <ThemedText type='body'>{title}</ThemedText>
                 <Ionicons
-                    name={isOpen ? 'chevron-down' : 'chevron-forward'}
+                    name={isOpen ? 'chevron-up' : 'chevron-down'}
                     size={moderateScale(16)}
                     color={themeColors.iconDefault}
                     style={{ paddingTop: spacing.xxs }}

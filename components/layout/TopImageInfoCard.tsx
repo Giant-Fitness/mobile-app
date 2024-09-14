@@ -1,5 +1,7 @@
+// components/layout/TopImageInfoCard.tsx
+
 import React from 'react';
-import { StyleSheet, StyleProp, ViewStyle, TextStyle, ImageSourcePropType, ImageStyle } from 'react-native';
+import { StyleSheet, StyleProp, ViewStyle, TextStyle, ImageSourcePropType, ImageStyle, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -23,6 +25,7 @@ type TopImageInfoCardProps = {
     subtitleStyle?: StyleProp<TextStyle>;
     placeholder?: any;
     titleFirst?: boolean;
+    onPress?: () => void;
 };
 
 export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
@@ -38,12 +41,13 @@ export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
     titleType = 'title',
     placeholder = '@/assets/images/adaptive-icon.png',
     titleFirst = false,
+    onPress,
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
     const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     return (
-        <ThemedView style={[styles.container, containerStyle]}>
+        <TouchableOpacity onPress={onPress} style={[styles.container, containerStyle]} activeOpacity={1}>
             <Image source={image} style={[styles.image, imageStyle]} placeholder={placeholder} />
             <ThemedView style={[styles.contentContainer, { backgroundColor: themeColors.containerHighlight }, contentContainerStyle]}>
                 {/* Conditionally render title and subtitle based on the 'titleFirst' prop */}
@@ -64,7 +68,7 @@ export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
                 )}
                 {extraContent}
             </ThemedView>
-        </ThemedView>
+        </TouchableOpacity>
     );
 };
 

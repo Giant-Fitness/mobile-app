@@ -1,7 +1,7 @@
 // components/base/HighlightedTip.tsx
 
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View, Platform } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
 import { Icon } from '@/components/icons/Icon';
@@ -20,35 +20,44 @@ export const HighlightedTip: React.FC<HighlightedTipProps> = ({ iconName, tipTex
     const themeColors = Colors[colorScheme];
 
     return (
-        <ThemedView style={[styles.tipContainer, { backgroundColor: themeColors.tipBackground }]}>
-            <Icon name={iconName} size={moderateScale(14)} color={themeColors.tipIcon} style={styles.tipIcon} />
-            <ThemedText type='bodySmall' style={[styles.tipText, { color: themeColors.tipText }]}>
-                {tipText}
-            </ThemedText>
-        </ThemedView>
+        <View style={[styles.container, styles.shadow]}>
+            <ThemedView style={[styles.tipContainer, { backgroundColor: themeColors.tipBackground }]}>
+                <Icon name={iconName} size={moderateScale(14)} color={themeColors.tipIcon} style={styles.tipIcon} />
+                <ThemedText type='bodySmall' style={[styles.tipText, { color: themeColors.tipText }]}>
+                    {tipText}
+                </ThemedText>
+            </ThemedView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
+    container: {
+        borderRadius: spacing.xl,
+        marginHorizontal: spacing.lg,
+        backgroundColor: Platform.OS === 'android' ? Colors.light.tipBackground : 'transparent', // Important for Android shadows
+    },
+    shadow: {
+        // iOS Shadow
+        shadowColor: 'rgba(0,80,0,0.25)',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 1,
+        shadowRadius: 4,
+        // Android Shadow
+        elevation: 5,
+    },
     tipContainer: {
         flexDirection: 'row',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         paddingVertical: spacing.sm,
         paddingHorizontal: spacing.lg,
-        borderRadius: spacing.xl,
-        // Shadow for iOS
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        // Elevation for Android
-        elevation: 2,
-        marginHorizontal: spacing.lg,
-        alignSelf: 'flex-start',
+        borderRadius: spacing.xl, // Must match the container's borderRadius
+        // Ensure no shadow properties here
     },
     tipIcon: {
         marginRight: spacing.sm,
-        marginTop: spacing.xs,
     },
-    tipText: {},
+    tipText: {
+        // Any additional text styling if needed
+    },
 });
