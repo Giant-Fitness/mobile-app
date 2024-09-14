@@ -1,23 +1,28 @@
-// components/layout/LeftImageInfoCard.tsx
-
 import React from 'react';
-import { Image, StyleSheet, TouchableOpacity, View, StyleProp, ViewStyle, ImageSourcePropType, TextStyle } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, StyleProp, ViewStyle, ImageSourcePropType, TextStyle } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
+import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { spacing } from '@/utils/spacing';
+import { sizes } from '@/utils/sizes';
 
 type LeftImageInfoCardProps = {
     image: ImageSourcePropType;
     title: string;
     subtitle?: string;
-    extraContent?: React.ReactNode; // For any additional content like icons or extra text
+    extraContent?: React.ReactNode;
     onPress?: () => void;
     containerStyle?: StyleProp<ViewStyle>;
     imageStyle?: StyleProp<ViewStyle>;
     contentContainerStyle?: StyleProp<ViewStyle>;
     titleStyle?: StyleProp<TextStyle>;
     subtitleStyle?: StyleProp<TextStyle>;
+    placeholder?: any;
+    gradientColors?: string[];
 };
 
 export const LeftImageInfoCard: React.FC<LeftImageInfoCardProps> = ({
@@ -31,13 +36,20 @@ export const LeftImageInfoCard: React.FC<LeftImageInfoCardProps> = ({
     contentContainerStyle,
     titleStyle,
     subtitleStyle,
+    gradientColors = ['transparent', 'rgba(0,0,0,0.4)'],
+    placeholder = '@/assets/images/adaptive-icon.png',
 }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
     return (
         <TouchableOpacity onPress={onPress} style={[styles.card, containerStyle]} activeOpacity={1}>
-            <Image source={image} style={[styles.image, imageStyle]} />
+            <View style={styles.imageBackground}>
+                <ThemedView style={styles.roundedBackground}>
+                    <Image source={image} style={[styles.image, imageStyle]} placeholder={placeholder} />
+                    <LinearGradient colors={gradientColors} style={styles.gradientOverlay} />
+                </ThemedView>
+            </View>
             <ThemedView style={[styles.textContainer, contentContainerStyle]}>
                 <ThemedText type='bodyMedium' style={[styles.title, titleStyle, { color: themeColors.text }]}>
                     {title}
@@ -60,24 +72,39 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         backgroundColor: 'transparent',
     },
+    imageBackground: {
+        borderRadius: spacing.xxs,
+        backgroundColor: 'transparent', // Adjust to your desired background color
+        marginRight: spacing.md,
+    },
+    roundedBackground: {
+        borderRadius: spacing.xxs,
+        overflow: 'hidden',
+    },
     image: {
-        borderRadius: 6,
-        height: 120,
-        width: 120,
-        marginRight: 16,
+        height: sizes.imageMediumHeight,
+        width: sizes.imageMediumWidth,
     },
     textContainer: {
         flex: 1,
         flexDirection: 'column',
         justifyContent: 'center',
+        backgroundColor: 'transparent',
     },
     title: {
-        marginBottom: 5,
-        lineHeight: 20,
-        marginRight: 48,
+        marginBottom: spacing.xs,
+        lineHeight: spacing.md,
+        marginRight: spacing.xxl,
     },
     subtitle: {
-        marginTop: 5,
-        lineHeight: 20,
+        marginTop: spacing.xs,
+        lineHeight: spacing.md,
+    },
+    extraContent: {
+        backgroundColor: 'transparent',
+    },
+    gradientOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        zIndex: 2,
     },
 });

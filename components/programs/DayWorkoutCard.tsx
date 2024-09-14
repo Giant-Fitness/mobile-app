@@ -1,53 +1,46 @@
-// components/programs/ProgramDayOverviewCard.tsx
+// components/programs/DayWorkoutCard.tsx
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import React from 'react';
-import { StyleSheet, ImageSourcePropType } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { LeftImageInfoCard } from '@/components/layout/LeftImageInfoCard';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useNavigation } from '@react-navigation/native';
-import { Icon } from '@/components/icons/Icon';
 import { scale, moderateScale, verticalScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
 import { sizes } from '@/utils/sizes';
 
-type ProgramDayOverviewCardProps = {
-    week: number;
-    day: number;
-    workout: string;
-    length: string;
-    photo: ImageSourcePropType;
-};
-
-export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ week, day, workout, length, photo }) => {
+const DayWorkoutCard = (props) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
     const navigation = useNavigation();
 
-    const navigateToProgramDay = () => {
-        navigation.navigate('programs/program-day-workouts', { workout, week, day, length });
-    };
+    const navigateToWorkoutDetail = () => {
+        navigation.navigate('programs/program-day-workout-details', props);
+    }
 
     return (
         <LeftImageInfoCard
-            image={photo}
-            onPress={navigateToProgramDay}
-            title={workout}
+            image={props.photo}
+            title={props.workoutName}
+            onPress={navigateToWorkoutDetail}
             extraContent={
-                <ThemedView style={styles.attributeContainer}>
+                <ThemedView>
                     <ThemedView style={styles.attributeRow}>
-                        <ThemedText type='bodySmall' style={[{ color: themeColors.text }]}>
-                            {`Week ${week} Day ${day}`}
+                        <ThemedText style={[styles.extraContentText, { color: themeColors.subText }]}>
+                            {`${props.numSets} sets x ${props.lowerLimReps} - ${props.higherLimReps} reps`}
                         </ThemedText>
                     </ThemedView>
 
                     <ThemedView style={styles.attributeRow}>
-                        <Icon name='stopwatch' size={moderateScale(14)} color={themeColors.text} />
-                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.text }]}>
-                            {length}
-                        </ThemedText>
+                        <ThemedText style={[styles.extraContentText, { color: themeColors.subText }]}>{`${props.restPeriod} rest`}</ThemedText>
+                    </ThemedView>
+
+                    <ThemedView style={styles.attributeRow}>
+                        <ThemedText style={[styles.extraContentText, { color: themeColors.subText }]}>{props.intro}</ThemedText>
                     </ThemedView>
                 </ThemedView>
             }
@@ -61,21 +54,19 @@ export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ 
 
 const styles = StyleSheet.create({
     container: {
-        flexDirection: 'row',
         backgroundColor: 'transparent',
         width: '100%',
-        marginBottom: spacing.xl,
+        marginBottom: spacing.lg,
     },
     title: {
         fontSize: moderateScale(14),
         marginBottom: 0,
-        marginLeft: spacing.xs,
         marginTop: spacing.xs,
     },
     image: {
         height: sizes.imageMediumHeight,
         width: sizes.imageMediumWidth,
-        borderRadius: spacing.xxs,
+        borderRadius: scale(2),
     },
     contentContainer: {
         width: '100%',
@@ -84,17 +75,11 @@ const styles = StyleSheet.create({
     attributeRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'transparent',
-        marginBottom: spacing.xs,
-        marginLeft: spacing.xs,
     },
-    attributeText: {
-        marginLeft: spacing.xs,
-        lineHeight: spacing.md,
-        backgroundColor: 'transparent',
-    },
-    attributeContainer: {
-        marginTop: spacing.xxs,
-        backgroundColor: 'transparent',
+    attributeText: {},
+    extraContentText: {
+        fontSize: moderateScale(13),
     },
 });
+
+export default DayWorkoutCard;

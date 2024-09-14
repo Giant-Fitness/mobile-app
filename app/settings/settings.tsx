@@ -1,4 +1,4 @@
-// app/settings.tsx
+// app/settings/settings.tsx
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, View, Button } from 'react-native';
@@ -9,7 +9,6 @@ import { ThemedView } from '@/components/base/ThemedView';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { CustomBackButton } from '@/components/icons/CustomBackButton';
 import { signOut } from 'aws-amplify/auth';
 
 const SignOutButton = ({ navigation }) => {
@@ -41,10 +40,9 @@ export default function ProgressScreen() {
             title: 'Settings',
             headerBackTitleVisible: false, // Hide the back button label
             headerStyle: {
-                backgroundColor: Colors[colorScheme ?? 'light'].background,
+                backgroundColor: themeColors.background,
             },
-            headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
-            headerLeft: () => <CustomBackButton />,
+            headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
         });
     }, [navigation]);
 

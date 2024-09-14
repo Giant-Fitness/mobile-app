@@ -2,165 +2,47 @@
 
 export const Colors = {
     light: {
-        text: '#0f0706',
-        textLight: '#687076',
-        subText: 'rgba(0, 0, 0, 0.5)',
-        textMedium: '#E2E4E6',
-        background: '#fdfcfb',
-        whiteText: '#fdfcfb',
-        backgroundLight: '#E2E4E6',
-        primary: '#cc4533',
-        borderColor: 'rgba(0, 0, 0, 0.3)',
-        // primary: '#206023',
-        secondary: '#e78e83',
-        accent: '#fa533d',
-        tabIconDefault: '#687076',
-        tabIconSelected: '#120907',
-        containerBorderColor: '#d8d8d8',
-        containerLightColor: '#daf1dd',
-        containerColor: '#e9fcea',
-        textShades: {
-            50: '#f8eeed',
-            100: '#f0dddb',
-            200: '#e2bbb6',
-            300: '#d39992',
-            400: '#c5776d',
-            500: '#b65549',
-            600: '#92443a',
-            700: '#6d332c',
-            800: '#49221d',
-            900: '#24110f',
-            950: '#120907',
-        },
-        backgroundShades: {
-            50: '#f8eeec',
-            100: '#f1ddda',
-            200: '#e4bbb4',
-            300: '#d6998f',
-            400: '#c97769',
-            500: '#bb5644',
-            600: '#964436',
-            700: '#703329',
-            800: '#4b221b',
-            900: '#25110e',
-            950: '#130907',
-        },
-        primaryShades: {
-            50: '#faeceb',
-            100: '#f5dad6',
-            200: '#ebb5ad',
-            300: '#e08f85',
-            400: '#d66a5c',
-            500: '#cc4533',
-            600: '#a33729',
-            700: '#7a291f',
-            800: '#521c14',
-            900: '#290e0a',
-            950: '#140705',
-        },
-        secondaryShades: {
-            50: '#fbecea',
-            100: '#f7d8d4',
-            200: '#efb1a9',
-            300: '#e78b7e',
-            400: '#de6454',
-            500: '#d63d29',
-            600: '#ab3121',
-            700: '#812518',
-            800: '#561810',
-            900: '#2b0c08',
-            950: '#150604',
-        },
-        accentShades: {
-            50: '#fee9e6',
-            100: '#fed3cd',
-            200: '#fca79c',
-            300: '#fb7b6a',
-            400: '#fa4f38',
-            500: '#f92306',
-            600: '#c71c05',
-            700: '#951504',
-            800: '#630e03',
-            900: '#320701',
-            950: '#190301',
-        },
+        text: '#0f0706', // Main text color
+        subText: '#5f5e5b', // Secondary text
+        subTextSecondary: '#C6C6C6', // Tertiary text
+        background: '#fcfcfc', // Main background
+        backgroundSecondary: 'rgba(244, 247, 244, 0.95)', // Slightly adjusted for better contrast
+        primary: '#204D24', // Primary color (Green)
+        secondary: '#EAEAEA', // Secondary elements
+        accent: '#45A949', // Accent color
+        systemBorderColor: 'rgba(0, 0, 0, 0.2)', // Lighter border for subtle dividers
+        container: '#f7f7f5', // Container background
+        containerHighlight: '#1e221e', // Slightly adjusted to avoid too dark
+        buttonPrimary: '#1A1A1A', // Darker button primary for contrast
+        buttonSecondary: '#f7f7f5', // Secondary button background
+        iconDefault: '#687076', // Default icon color
+        iconSelected: '#0f0f0f', // Adjusted for visibility
+        highlightContainerText: '#fafafa', // Text on highlighted containers
+        white: '#FEFEFE', // White
+        red: '#cc4533', // Error color
+        warning: '#FFA500', // Optional: Warning color (e.g., for alerts)
+        info: '#1E90FF', // Optional: Info color (e.g., for badges)
     },
     dark: {
-        text: '#f9f1f0',
-        textLight: '#969696',
-        subText: 'rgba(255, 255, 255, 0.5)',
-        containerBorderColor: '#272729',
-        background: '#0b0504',
-        borderColor: 'rgba(255, 255, 255, 0.3)',
-        primary: '#9fdfa3',
-        secondary: '#7c2318',
-        accent: '#c21b05',
-        tabIconDefault: '#f9f1f0',
-        tabIconSelected: '#f8eeed',
-        textShades: {
-            50: '#120907',
-            100: '#24110f',
-            200: '#49221d',
-            300: '#6d332c',
-            400: '#92443a',
-            500: '#b65549',
-            600: '#c5776d',
-            700: '#d39992',
-            800: '#e2bbb6',
-            900: '#f0dddb',
-            950: '#f8eeed',
-        },
-        backgroundShades: {
-            50: '#130907',
-            100: '#25110e',
-            200: '#4b221b',
-            300: '#703329',
-            400: '#964436',
-            500: '#bb5644',
-            600: '#c97769',
-            700: '#d6998f',
-            800: '#e4bbb4',
-            900: '#f1ddda',
-            950: '#f8eeec',
-        },
-        primaryShades: {
-            50: '#140705',
-            100: '#290e0a',
-            200: '#521c14',
-            300: '#7a291f',
-            400: '#a33729',
-            500: '#cc4533',
-            600: '#d66a5c',
-            700: '#e08f85',
-            800: '#ebb5ad',
-            900: '#f5dad6',
-            950: '#faeceb',
-        },
-        secondaryShades: {
-            50: '#150604',
-            100: '#2b0c08',
-            200: '#561810',
-            300: '#812518',
-            400: '#ab3121',
-            500: '#d63d29',
-            600: '#de6454',
-            700: '#e78b7e',
-            800: '#efb1a9',
-            900: '#f7d8d4',
-            950: '#fbecea',
-        },
-        accentShades: {
-            50: '#190301',
-            100: '#320701',
-            200: '#630e03',
-            300: '#951504',
-            400: '#c71c05',
-            500: '#f92306',
-            600: '#fa4f38',
-            700: '#fb7b6a',
-            800: '#fca79c',
-            900: '#fed3cd',
-            950: '#fee9e6',
-        },
+        text: '#F6F8F6', // Main text color
+        subText: '#9b9d9b', // Secondary text
+        subTextSecondary: '#D1D6D2', // Tertiary text
+        background: '#191a19', // Main background
+        backgroundSecondary: '#202220', // Secondary background
+        primary: '#204D24', // Primary color (Green)
+        secondary: '#23312a', // Secondary elements
+        accent: '#279E2C', // Accent color
+        systemBorderColor: 'rgba(100, 100, 100, 0.5)', // Darker border for more contrast
+        container: '#202220', // Container background
+        containerHighlight: '#2d2f2d', // Highlighted container
+        buttonPrimary: '#F6F8F6', // Light button for contrast
+        buttonSecondary: '#2f312f', // Secondary button background
+        iconDefault: '#B0B0B0', // Slightly brighter for visibility
+        iconSelected: '#F6F6F6', // Selected icon color
+        highlightContainerText: '#F6F8F6', // Text on highlighted containers
+        white: '#FEFEFE', // White
+        red: '#cc4533', // Error color
+        warning: '#FF8C00', // Optional: Warning color (darker orange)
+        info: '#4682B4', // Optional: Info color (muted blue)
     },
 };

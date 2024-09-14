@@ -4,13 +4,16 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { TouchableOpacity, StyleSheet, ScrollView, View, Text } from 'react-native';
+import { TouchableOpacity, StyleSheet, ScrollView, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { WorkoutOverviewCard } from '@/components/workouts/WorkoutOverviewCard';
 import { Collapsible } from '@/components/layout/Collapsible';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from '@/components/icons/Icon';
+import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { spacing } from '@/utils/spacing';
+import { sizes } from '@/utils/sizes';
 
 const recommendedWorkouts = [
     {
@@ -52,7 +55,6 @@ const recommendedWorkouts = [
             'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\nUse it as a standalone or pair it with a core session for a full-body workout.',
         focusMulti: ['Arms', 'Legs', 'Chest'],
     },
-    // fetch from the backend. caching?
 ];
 
 export default function WorkoutsScreen() {
@@ -61,21 +63,20 @@ export default function WorkoutsScreen() {
 
     const navigation = useNavigation();
 
-    const navigateToAllWorkouts = () => {
-        navigation.navigate('all-workouts');
+    const navigateToAllWorkouts = (initialFilters = {}) => {
+        navigation.navigate('workouts/all-workouts', { initialFilters });
     };
 
-    // Define categories and their respective workout data
     const categories = [
-        { title: 'Endurance Workouts', workouts: recommendedWorkouts },
-        { title: 'Mobility Workouts', workouts: recommendedWorkouts },
-        { title: 'Strength Workouts', workouts: recommendedWorkouts },
+        { title: 'Endurance Workouts', workouts: recommendedWorkouts, type: 'Endurance' },
+        { title: 'Mobility Workouts', workouts: recommendedWorkouts, type: 'Mobility' },
+        { title: 'Strength Workouts', workouts: recommendedWorkouts, type: 'Strength' },
     ];
 
     return (
         <ScrollView style={[styles.container, { backgroundColor: themeColors.background }]} showsVerticalScrollIndicator={false}>
             <ThemedView>
-                <ThemedText type='titleSmall' style={[styles.header, { color: themeColors.text }]}>
+                <ThemedText type='title' style={[styles.header, { color: themeColors.text }]}>
                     Top Picks For You
                 </ThemedText>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.mainScrollView}>
@@ -115,8 +116,8 @@ export default function WorkoutsScreen() {
                                     ))}
                                     <TouchableOpacity
                                         activeOpacity={1}
-                                        style={[styles.seeAllButton, { backgroundColor: themeColors.containerLightColor }]}
-                                        onPress={() => console.log('Navigate to see all')}
+                                        style={[styles.seeAllButton, { backgroundColor: themeColors.container }]}
+                                        onPress={() => navigateToAllWorkouts({ focus: [category.type] })}
                                     >
                                         <ThemedText type='body' style={[{ color: themeColors.text }]}>
                                             See All
@@ -129,7 +130,7 @@ export default function WorkoutsScreen() {
                                     style={[
                                         styles.dividerInterior,
                                         {
-                                            borderBottomColor: themeColors.containerBorderColor,
+                                            borderBottomColor: themeColors.systemBorderColor,
                                             borderBottomWidth: StyleSheet.hairlineWidth,
                                         },
                                     ]}
@@ -137,22 +138,18 @@ export default function WorkoutsScreen() {
                             }
                         </ThemedView>
                     ))}
-                    <ThemedView
-                        style={{
-                            paddingBottom: 48,
-                        }}
-                    >
-                        <TouchableOpacity onPress={navigateToAllWorkouts} style={styles.allWorkouts}>
+                    <ThemedView style={styles.allWorkoutsContainer}>
+                        <TouchableOpacity onPress={() => navigateToAllWorkouts()} style={styles.allWorkouts}>
                             <ThemedText type='body' style={[{ color: themeColors.text }]}>
                                 All Workouts
                             </ThemedText>
-                            <Ionicons name={'chevron-forward-outline'} size={16} color={themeColors.tabIconDefault} />
+                            <Icon name='chevron-forward' size={moderateScale(16)} color={themeColors.iconDefault} style={{ paddingTop: spacing.xxs }} />
                         </TouchableOpacity>
                         <View
                             style={[
                                 styles.divider,
                                 {
-                                    borderBottomColor: themeColors.containerBorderColor,
+                                    borderBottomColor: themeColors.systemBorderColor,
                                     borderBottomWidth: StyleSheet.hairlineWidth,
                                 },
                             ]}
@@ -167,32 +164,31 @@ export default function WorkoutsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingBottom: 32,
+    },
+    allWorkoutsContainer: {
+        paddingBottom: spacing.xxxl,
     },
     allWorkouts: {
-        padding: 24,
-        paddingTop: 24,
-        paddingLeft: 24,
-        paddingRight: 24,
+        padding: spacing.lg,
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
     mainScrollView: {
-        marginLeft: 21,
-        paddingRight: 48,
-        paddingBottom: 36,
+        marginLeft: spacing.lg,
+        paddingRight: spacing.xxl,
+        paddingBottom: spacing.xl,
     },
     header: {
-        padding: 16,
-        paddingTop: 36,
-        paddingLeft: 24,
+        padding: spacing.md,
+        paddingTop: spacing.xl,
+        paddingLeft: spacing.lg,
     },
     scrollView: {
-        paddingLeft: 24, // Starts content 24pts from the left
-        paddingBottom: 36,
+        paddingLeft: spacing.lg,
+        paddingBottom: spacing.lg,
     },
     collapsible: {
-        paddingTop: 12, // Starts content 24pts from the left
+        paddingTop: spacing.md,
     },
     divider: {
         width: '90%',
@@ -201,14 +197,13 @@ const styles = StyleSheet.create({
     dividerInterior: {
         width: '90%',
         alignSelf: 'center',
-        paddingTop: 12,
     },
     seeAllButton: {
-        width: 250,
-        height: 300,
+        width: sizes.imageXLargeWidth,
+        height: sizes.imageXLargeHeight,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 2,
-        marginHorizontal: 3,
+        borderRadius: spacing.xxs,
+        marginHorizontal: spacing.xxs,
     },
 });

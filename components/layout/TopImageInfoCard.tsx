@@ -1,11 +1,15 @@
 // components/layout/TopImageInfoCard.tsx
 
 import React from 'react';
-import { Image, StyleSheet, StyleProp, ViewStyle, TextStyle, ImageSourcePropType } from 'react-native';
+import { StyleSheet, StyleProp, ViewStyle, TextStyle, ImageSourcePropType } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import { Image } from 'expo-image';
+import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { spacing } from '@/utils/spacing';
+import { sizes } from '@/utils/sizes';
 
 type TopImageInfoCardProps = {
     image: ImageSourcePropType;
@@ -17,6 +21,7 @@ type TopImageInfoCardProps = {
     contentContainerStyle?: StyleProp<ViewStyle>;
     titleStyle?: StyleProp<TextStyle>;
     subtitleStyle?: StyleProp<TextStyle>;
+    placeholder?: any;
 };
 
 export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
@@ -29,16 +34,17 @@ export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
     contentContainerStyle,
     titleStyle,
     subtitleStyle,
+    placeholder = '@/assets/images/adaptive-icon.png',
 }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];
 
     return (
         <ThemedView style={[styles.container, containerStyle]}>
-            <Image source={image} style={[styles.image, imageStyle]} />
-            <ThemedView style={[styles.contentContainer, contentContainerStyle, { backgroundColor: themeColors.containerColor }]}>
-                {subtitle && <ThemedText style={[styles.subtitle, subtitleStyle, { color: themeColors.textLight }]}>{subtitle}</ThemedText>}
-                <ThemedText type='titleSmall' style={[styles.title, titleStyle, { color: themeColors.text }]}>
+            <Image source={image} style={[styles.image, imageStyle]} placeholder={placeholder} />
+            <ThemedView style={[styles.contentContainer, contentContainerStyle, { backgroundColor: themeColors.containerHighlight }]}>
+                {subtitle && <ThemedText style={[styles.subtitle, subtitleStyle]}>{subtitle}</ThemedText>}
+                <ThemedText type='title' style={[styles.title, titleStyle]}>
                     {title}
                 </ThemedText>
                 {extraContent}
@@ -50,27 +56,26 @@ export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
 const styles = StyleSheet.create({
     container: {
         backgroundColor: 'transparent',
-        borderRadius: 5,
         overflow: 'hidden',
     },
     image: {
         width: '100%',
-        height: 200,
-        borderTopRightRadius: 5,
-        borderTopLeftRadius: 5,
+        height: sizes.imageLargeHeight,
+        borderTopRightRadius: spacing.xs,
+        borderTopLeftRadius: spacing.xs,
     },
     contentContainer: {
         width: '100%',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        borderBottomLeftRadius: 5,
-        borderBottomRightRadius: 5,
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.md,
+        borderBottomLeftRadius: spacing.xs,
+        borderBottomRightRadius: spacing.xs,
     },
     title: {
-        marginBottom: 8,
+        marginBottom: spacing.sm,
     },
     subtitle: {
-        marginTop: 6,
-        fontSize: 14,
+        marginTop: spacing.xs,
+        fontSize: moderateScale(14),
     },
 });

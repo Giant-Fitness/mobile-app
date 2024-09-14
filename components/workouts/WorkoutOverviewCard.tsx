@@ -1,15 +1,14 @@
 // components/workouts/WorkoutOverviewCard.tsx
 
 import React from 'react';
-import { StyleSheet, Image, ImageSourcePropType, TouchableOpacity, ImageBackground } from 'react-native';
+import { StyleSheet, ImageSourcePropType, TouchableOpacity } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { ThemedView } from '@/components/base/ThemedView';
-import { ThemedText } from '@/components/base/ThemedText';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { ImageTextOverlay } from '@/components/images/ImageTextOverlay';
+import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { sizes } from '@/utils/sizes';
+import { spacing } from '@/utils/spacing';
 
 type WorkoutOverviewCardProps = {
     name: string;
@@ -20,7 +19,7 @@ type WorkoutOverviewCardProps = {
     focus: string;
     trainer: string;
     longText: string;
-    focusMulti: array;
+    focusMulti: string[];
 };
 
 export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, length, level, equipment, focus, photo, trainer, longText, focusMulti }) => {
@@ -30,7 +29,17 @@ export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, 
     const navigation = useNavigation();
 
     const navigateToWorkoutDetails = () => {
-        navigation.navigate('workout-details', { name, length, level, equipment, focus, photo, trainer, longText, focusMulti });
+        navigation.navigate('workouts/workout-details', {
+            name,
+            length,
+            level,
+            equipment,
+            focus,
+            photo,
+            trainer,
+            longText,
+            focusMulti,
+        });
     };
 
     return (
@@ -38,13 +47,13 @@ export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, 
             <ImageTextOverlay
                 photo={photo}
                 title={name}
-                subtitle={length + ', ' + level}
-                gradientColors={['transparent', 'rgba(0,0,0,0.8)']}
+                subtitle={`${length}, ${level}`}
+                gradientColors={['transparent', 'rgba(0,0,0,0.6)']}
                 containerStyle={{ height: '100%', elevation: 5 }}
-                textContainerStyle={{ bottom: 24 }}
+                textContainerStyle={{ bottom: spacing.lg }}
                 subtitleType='bodySmall'
-                titleType='titleSmall'
-                titleStyle={{ marginRight: 40, lineHeight: 20 }}
+                titleType='title'
+                titleStyle={{ marginRight: spacing.xl, lineHeight: moderateScale(20) }}
                 subtitleStyle={{ marginTop: 0 }}
             />
         </TouchableOpacity>
@@ -53,15 +62,15 @@ export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, 
 
 const styles = StyleSheet.create({
     cardContainer: {
-        width: 250,
-        height: 300,
+        width: sizes.imageXLargeWidth,
+        height: sizes.imageXLargeHeight,
         overflow: 'hidden',
-        borderRadius: 2,
-        marginHorizontal: 3,
+        borderRadius: spacing.xxs,
+        marginHorizontal: spacing.xxs,
         elevation: 5,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: spacing.xxs },
         shadowOpacity: 0.3,
-        shadowRadius: 4,
+        shadowRadius: spacing.xs,
     },
 });

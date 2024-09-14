@@ -3,87 +3,105 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 
-import { TabBarIcon } from '@/components/icons/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Entypo, MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { Entypo, MaterialIcons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Icon } from '@/components/icons/Icon';
+import { Platform } from 'react-native';
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
     const navigation = useNavigation();
+    const themeColors = Colors[colorScheme ?? 'light'];
 
     return (
         <Tabs
             screenOptions={{
-                tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tabIconSelected,
-                tabBarStyle: {
-                    backgroundColor: Colors[colorScheme ?? 'light'].background,
-                    height: 90,
-                    paddingTop: 5,
-                    level: 100,
+                tabBarActiveTintColor: themeColors.iconSelected,
+                tabBarStyle: Platform.select({
+                    ios: {
+                        backgroundColor: themeColors.background,
+                        height: 90, // iOS specific height
+                        paddingTop: 5,
+                        level: 100,
+                    },
+                    android: {
+                        backgroundColor: themeColors.background,
+                        height: 70, // Android specific height
+                        paddingTop: 10,
+                        paddingBottom: 5, // Android specific padding
+                        level: 100,
+                    },
+                }),
+                tabBarLabelStyle: {
+                    marginBottom: Platform.OS === 'android' ? 10 : 0, // Adjusts label position for Android
                 },
                 headerTitleContainerStyle: {
                     paddingLeft: 8, // Add padding on the left
                 },
-                headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
+                headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                 headerTitleAlign: 'left', // Align the title to the left
                 headerShown: true,
                 tabBarShowLabel: true,
                 headerRight: () => (
-                    <TouchableOpacity activeOpacity={1} onPress={() => navigation.navigate('settings')}>
-                        <Ionicons name='person-circle' size={26} color={Colors[colorScheme ?? 'light'].textLight} style={{ marginRight: 18 }} />
+                    <TouchableOpacity activeOpacity={1} onPress={() => navigation.navigate('settings/settings')}>
+                        <Icon name='person' size={26} color={themeColors.subText} style={{ marginRight: 18 }} />
                     </TouchableOpacity>
                 ),
             }}
-            sceneContainerStyle={{ backgroundColor: Colors[colorScheme ?? 'light'].background }}
+            sceneContainerStyle={{ backgroundColor: themeColors.background }}
         >
             <Tabs.Screen
                 name='home'
                 options={{
                     headerStyle: {
-                        backgroundColor: Colors[colorScheme ?? 'light'].background,
+                        backgroundColor: themeColors.background,
+                        height: 90,
                     },
-                    headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
+                    headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Home',
-                    tabBarIcon: ({ color, focused }) => <MaterialIcons size={24} name='home' color={color} />,
+                    tabBarIcon: ({ color, focused }) => <Icon size={24} name='home' color={color} />,
                 }}
             />
             <Tabs.Screen
                 name='(top-tabs)'
                 options={{
                     headerStyle: {
-                        backgroundColor: Colors[colorScheme ?? 'light'].background,
+                        height: 90,
+                        backgroundColor: themeColors.background,
                         borderBottomWidth: 0, // Remove the border under the navbar
                         shadowOpacity: 0, // Remove the shadow for iOS
                         elevation: 0, // Remove the elevation for Android
                     },
-                    headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
+                    headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Exercise',
-                    tabBarIcon: ({ color, focused }) => <MaterialIcons name='sports-martial-arts' size={24} color={color} />,
+                    tabBarIcon: ({ color, focused }) => <Icon name='exercise' size={24} color={color} />,
                 }}
             />
             <Tabs.Screen
                 name='nutrition'
                 options={{
                     headerStyle: {
-                        backgroundColor: Colors[colorScheme ?? 'light'].background,
+                        backgroundColor: themeColors.background,
+                        height: 90,
                     },
-                    headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
+                    headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Nutrition',
-                    tabBarIcon: ({ color, focused }) => <Entypo name='leaf' size={22} color={color} />,
+                    tabBarIcon: ({ color, focused }) => <Icon name='nutrition' size={22} color={color} />,
                 }}
             />
             <Tabs.Screen
                 name='progress'
                 options={{
                     headerStyle: {
-                        backgroundColor: Colors[colorScheme ?? 'light'].background,
+                        backgroundColor: themeColors.background,
+                        height: 90,
                     },
-                    headerTitleStyle: { color: Colors[colorScheme ?? 'light'].text, fontFamily: 'InterMedium' },
+                    headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Progress',
-                    tabBarIcon: ({ color, focused }) => <TabBarIcon name='stats-chart' size={21} color={color} />,
+                    tabBarIcon: ({ color, focused }) => <Icon name='progress' size={21} color={color} />,
                 }}
             />
         </Tabs>
