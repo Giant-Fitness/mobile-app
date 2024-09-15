@@ -6,7 +6,6 @@ import { ThemedView } from '@/components/base/ThemedView';
 import { BlurView } from 'expo-blur';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { scale, verticalScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
 
 interface BottomDrawerProps {
@@ -17,8 +16,8 @@ interface BottomDrawerProps {
 }
 
 export const BottomDrawer: React.FC<BottomDrawerProps> = ({ visible, onClose, children, style }) => {
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     return (
         <Modal animationType='fade' transparent={true} visible={visible} onRequestClose={onClose}>
@@ -48,7 +47,7 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: spacing.sm,
         borderTopRightRadius: spacing.sm,
         paddingHorizontal: spacing.lg,
-        maxHeight: '90%',
+        maxHeight: '80%',
         position: 'absolute',
         bottom: 0,
         width: '100%',

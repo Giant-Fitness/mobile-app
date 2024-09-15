@@ -1,13 +1,11 @@
 // components/programs/ProgressBar.tsx
 
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { scale, moderateScale, verticalScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
-import { sizes } from '@/utils/sizes';
 
 type ProgressBarProps = {
     parts: number; // Total number of parts/weeks
@@ -20,8 +18,8 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ parts = 8, currentPart = 0, c
     const margin = spacing.xs; // Margin between pills
     const totalMarginSpace = margin * (parts - 1); // Total space taken by margins
     const partWidth = Math.floor((containerWidth - totalMarginSpace) / parts); // Adjusted part width
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     return (
         <ThemedView style={[styles.container, { width: containerWidth }]}>

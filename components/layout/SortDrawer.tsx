@@ -8,7 +8,7 @@ import { TextButton } from '@/components/base/TextButton';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Icon } from '@/components/icons/Icon';
-import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { scale, moderateScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
 
 interface SortOption {
@@ -27,8 +27,8 @@ interface SortDrawerProps {
 
 export const SortDrawer: React.FC<SortDrawerProps> = ({ visible, onClose, onApply, initialSort = { type: '', order: '' }, sortOptions, title }) => {
     const [selectedSort, setSelectedSort] = useState<{ type: string; order: string }>(initialSort);
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     const handleApply = () => {
         onApply(selectedSort);
@@ -67,7 +67,7 @@ export const SortDrawer: React.FC<SortDrawerProps> = ({ visible, onClose, onAppl
                         <ThemedText type='bodyMedium' style={styles.sectionTitle}>
                             {type}
                         </ThemedText>
-                        <View style={[styles.options, { backgroundColor: themeColors.container }]}>
+                        <View style={[{ backgroundColor: themeColors.container }]}>
                             {orders.map((order) => (
                                 <TouchableOpacity key={order} style={styles.optionButton} onPress={() => handleOptionSelect(type, order)} activeOpacity={1}>
                                     <ThemedText type='bodySmall' style={{ color: themeColors.subText, flex: 1 }}>

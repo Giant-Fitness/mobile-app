@@ -1,11 +1,9 @@
 // app/(tabs)/(top-tabs)/_layout.tsx
 
 import React from 'react';
-import { StyleSheet } from 'react-native';
 import { MaterialTopTabNavigationEventMap, MaterialTopTabNavigationOptions, createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { withLayoutContext } from 'expo-router';
 import { ParamListBase, TabNavigationState } from '@react-navigation/native';
-import Constants from 'expo-constants';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 
@@ -19,7 +17,7 @@ export const MaterialTopTabs = withLayoutContext<
 >(Navigator);
 
 export default function TabLayout() {
-    const colorScheme = useColorScheme(); // Retrieve the current theme (light or dark)
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
     const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     return (

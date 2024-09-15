@@ -25,7 +25,9 @@ export default [
             '@typescript-eslint': typescriptEslint,
         },
         rules: {
-            //rules here
+            // Disable react/prop-types for TypeScript files
+            'react/prop-types': 'off',
+            // Add other rules as needed
         },
     },
     {

@@ -1,7 +1,7 @@
 // app/(tabs)/home.tsx
 
 import React from 'react';
-import { Image, StyleSheet, Platform } from 'react-native';
+import { Image, StyleSheet } from 'react-native';
 
 import ParallaxScrollView from '@/components/layout/ParallaxScrollView';
 import { ThemedText } from '@/components/base/ThemedText';

@@ -16,8 +16,8 @@ type IconButtonProps = {
 };
 
 export const IconButton: React.FC<IconButtonProps> = ({ onPress, iconName, iconSize = 16, iconColor, style }) => {
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     return (
         <TouchableOpacity style={[styles.button, { backgroundColor: themeColors.primary }, style]} onPress={onPress}>

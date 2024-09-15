@@ -3,57 +3,75 @@
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import React from 'react';
-import { StyleSheet, ImageSourcePropType } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { LeftImageInfoCard } from '@/components/layout/LeftImageInfoCard';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useNavigation } from '@react-navigation/native';
 import { Icon } from '@/components/icons/Icon';
-import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { moderateScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
 import { sizes } from '@/utils/sizes';
+import { ProgramDay } from '@/types/types';
 
 type ProgramDayOverviewCardProps = {
-    week: number;
-    day: number;
-    workout: string;
-    length: string;
-    photo: ImageSourcePropType;
+    day: ProgramDay;
 };
 
-export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ week, day, workout, length, photo }) => {
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ day }) => {
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
     const navigation = useNavigation();
 
     const navigateToProgramDay = () => {
-        navigation.navigate('programs/program-day-workouts', { workout, week, day, length });
+        navigation.navigate('programs/program-day', {
+            day: day,
+        });
     };
 
     return (
         <LeftImageInfoCard
-            image={photo}
+            image={{ uri: day.PhotoUrl }}
             onPress={navigateToProgramDay}
-            title={workout}
+            title={day.WorkoutDayTitle}
             extraContent={
                 <ThemedView style={styles.attributeContainer}>
                     <ThemedView style={styles.attributeRow}>
                         <ThemedText type='bodySmall' style={[{ color: themeColors.text }]}>
-                            {`Week ${week} Day ${day}`}
+                            {`Week ${day.Week} Day ${day.Day}`}
                         </ThemedText>
                     </ThemedView>
 
-                    <ThemedView style={styles.attributeRow}>
-                        <Icon name='stopwatch' size={moderateScale(14)} color={themeColors.text} />
-                        <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.text }]}>
-                            {length}
-                        </ThemedText>
-                    </ThemedView>
+                    {day.RestDay ? (
+                        // Display content for a rest day
+                        <ThemedView style={[{ backgroundColor: 'transparent' }]}>
+                            <ThemedView style={styles.attributeRow}>
+                                <Icon name='sleep' size={moderateScale(16)} color={themeColors.subText} />
+                            </ThemedView>
+
+                            {/* <ThemedView style={styles.attributeRow}>
+                                <ThemedText
+                                    type='bodySmall'
+                                    style={[styles.attributeText, { color: themeColors.subText, marginLeft: 0, marginTop: spacing.xs }]}
+                                >
+                                    {day.Notes}
+                                </ThemedText>
+                            </ThemedView> */}
+                        </ThemedView>
+                    ) : (
+                        // Display content for a workout day
+                        <ThemedView style={styles.attributeRow}>
+                            <Icon name='stopwatch' size={moderateScale(14)} color={themeColors.text} />
+                            <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.text }]}>
+                                {`${day.Time} mins`}
+                            </ThemedText>
+                        </ThemedView>
+                    )}
                 </ThemedView>
             }
             containerStyle={styles.container}
             titleStyle={[styles.title, { color: themeColors.text }]}
-            extraContentStyle={styles.contentContainer}
+            contentContainerStyle={styles.contentContainer}
             imageStyle={styles.image}
         />
     );
@@ -64,7 +82,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         backgroundColor: 'transparent',
         width: '100%',
-        marginBottom: spacing.xl,
+        marginBottom: spacing.lg,
     },
     title: {
         fontSize: moderateScale(14),
@@ -73,12 +91,13 @@ const styles = StyleSheet.create({
         marginTop: spacing.xs,
     },
     image: {
-        height: sizes.imageMediumHeight,
+        height: sizes.imageSmall,
         width: sizes.imageMediumWidth,
         borderRadius: spacing.xxs,
     },
     contentContainer: {
         width: '100%',
+        marginLeft: spacing.sm,
         backgroundColor: 'transparent',
     },
     attributeRow: {

@@ -1,72 +1,129 @@
 // components/icons/Icon.tsx
 
 import React from 'react';
-import { Ionicons, MaterialCommunityIcons, MaterialIcons, Entypo, SimpleLineIcons, Feather } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons, MaterialIcons, Entypo, Feather, AntDesign, FontAwesome } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { StyleProp, TextStyle } from 'react-native';
 import { moderateScale } from '@/utils/scaling';
+import Animated, { useAnimatedStyle, useDerivedValue } from 'react-native-reanimated';
+
+const AnimatedIonicons = Animated.createAnimatedComponent(Ionicons);
+const AnimatedMaterialCommunityIcons = Animated.createAnimatedComponent(MaterialCommunityIcons);
+const AnimatedMaterialIcons = Animated.createAnimatedComponent(MaterialIcons);
+const AnimatedEntypo = Animated.createAnimatedComponent(Entypo);
+const AnimatedFeather = Animated.createAnimatedComponent(Feather);
+const AnimatedAnt = Animated.createAnimatedComponent(AntDesign);
+const AnimatedFontAwesome = Animated.createAnimatedComponent(FontAwesome);
 
 type IconProps = {
     name: string;
     size?: number;
-    color?: string;
-    style?: StyleProp<TextStyle>; // Optional style prop
+    color?: string | Animated.SharedValue<string>; // Accept a normal string or an animated color
+    style?: StyleProp<TextStyle>;
 };
 
-export const Icon: React.FC<IconProps> = ({ name, size = 18, color, style }) => {
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
-    const iconColor = color || themeColors.subText; // Use provided color or default to theme color
+export const Icon = React.forwardRef<any, IconProps>(({ name, size = 18, color, style }, ref) => {
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
+    const defaultColor = themeColors.white;
 
+    // Derived value for color if it's animated
+    const derivedColor = useDerivedValue(() => {
+        const finalColor = typeof color === 'string' ? color : (color?.value ?? defaultColor);
+        return finalColor;
+    });
+
+    const animatedStyle = useAnimatedStyle(() => {
+        return {
+            color: derivedColor.value,
+        };
+    });
+
+    // Set common props for all icons
     const commonProps = {
         size: moderateScale(size),
-        color: iconColor,
-        style, // Apply the optional style prop
+        style: [animatedStyle, style],
+        ref,
     };
 
+    // Render the appropriate icon
     switch (name) {
         case 'stopwatch':
-            return <Ionicons name='stopwatch-outline' {...commonProps} />;
+            return <AnimatedIonicons name='stopwatch-outline' {...commonProps} />;
         case 'dumbbell':
-            return <MaterialCommunityIcons name='dumbbell' {...commonProps} />;
+            return <AnimatedMaterialCommunityIcons name='dumbbell' {...commonProps} />;
         case 'yoga':
-            return <MaterialCommunityIcons name='yoga' {...commonProps} />;
+            return <AnimatedMaterialCommunityIcons name='yoga' {...commonProps} />;
         case 'level-beginner':
-            return <MaterialCommunityIcons name='chevron-up' {...commonProps} />;
+            return <AnimatedMaterialCommunityIcons name='chevron-up' {...commonProps} />;
         case 'level-intermediate':
-            return <MaterialCommunityIcons name='chevron-double-up' {...commonProps} />;
+            return <AnimatedMaterialCommunityIcons name='chevron-double-up' {...commonProps} />;
         case 'level-advanced':
-            return <MaterialCommunityIcons name='chevron-triple-up' {...commonProps} />;
+            return <AnimatedMaterialCommunityIcons name='chevron-triple-up' {...commonProps} />;
         case 'chevron-forward':
-            return <Ionicons name='chevron-forward-outline' {...commonProps} />;
+            return <AnimatedIonicons name='chevron-forward-outline' {...commonProps} />;
         case 'chevron-back':
-            return <Ionicons name='chevron-back' {...commonProps} />;
+            return <AnimatedIonicons name='chevron-back' {...commonProps} />;
         case 'person':
-            return <Ionicons name='person-circle' {...commonProps} />;
-        case 'home':
-            return <MaterialIcons name='home' {...commonProps} />;
-        case 'nutrition':
-            return <Entypo name='leaf' {...commonProps} />;
-        case 'progress':
-            return <Ionicons name='stats-chart' {...commonProps} />;
-        case 'exercise':
-            return <MaterialIcons name='sports-martial-arts' {...commonProps} />;
+            return <AnimatedIonicons name='person-circle' {...commonProps} />;
+        case 'home-active':
+            return <AnimatedMaterialCommunityIcons name='home-variant' {...commonProps} />;
+        case 'home-inactive':
+            return <AnimatedMaterialCommunityIcons name='home-variant' {...commonProps} />;
+        case 'nutrition-active':
+            return <AnimatedIonicons name='nutrition' {...commonProps} />;
+        case 'nutrition-inactive':
+            return <AnimatedIonicons name='nutrition-outline' {...commonProps} />;
+        case 'progress-active':
+            return <AnimatedIonicons name='stats-chart' {...commonProps} />;
+        case 'progress-inactive':
+            return <AnimatedIonicons name='stats-chart' {...commonProps} />;
+        case 'exercise-active':
+            return <AnimatedMaterialIcons name='sports-martial-arts' {...commonProps} />;
+        case 'exercise-inactive':
+            return <AnimatedMaterialIcons name='directions-run' {...commonProps} />;
         case 'filter':
-            return <Ionicons name='options' {...commonProps} />;
+            return <AnimatedIonicons name='options' {...commonProps} />;
         case 'sort':
-            return <Ionicons name='swap-vertical' {...commonProps} />;
+            return <AnimatedIonicons name='swap-vertical' {...commonProps} />;
         case 'notebook':
-            return <MaterialCommunityIcons name='notebook' {...commonProps} />;
+            return <AnimatedMaterialCommunityIcons name='notebook' {...commonProps} />;
         case 'close':
-            return <Ionicons name='close-circle-outline' {...commonProps} />;
+            return <AnimatedIonicons name='close-circle-outline' {...commonProps} />;
+        case 'info':
+            return <AnimatedIonicons name='information-circle-outline' {...commonProps} />;
+        case 'warning':
+            return <AnimatedIonicons name='warning-outline' {...commonProps} />;
         case 'radio-button-on':
-            return <Ionicons name='radio-button-on' {...commonProps} />;
+            return <AnimatedIonicons name='radio-button-on' {...commonProps} />;
         case 'radio-button-off':
-            return <Ionicons name='radio-button-off' {...commonProps} />;
+            return <AnimatedIonicons name='radio-button-off' {...commonProps} />;
         case 'plus':
-            return <Feather name='plus' {...commonProps} />
+            return <AnimatedFeather name='plus' {...commonProps} />;
+        case 'bed':
+            return <AnimatedMaterialCommunityIcons name='bed-outline' {...commonProps} />;
+        case 'bulb':
+            return <AnimatedMaterialIcons name='lightbulb-outline' {...commonProps} />;
+        case 'sleep':
+            return <AnimatedMaterialCommunityIcons name='sleep' {...commonProps} />;
+        case 'play':
+            return <AnimatedAnt name='play' {...commonProps} />;
+        case 'kettlebell':
+            return <AnimatedMaterialCommunityIcons name='kettlebell' {...commonProps} />;
+        case 'hourglass':
+            return <AnimatedMaterialIcons name='hourglass-bottom' {...commonProps} />;
+        case 'counter':
+            return <AnimatedMaterialCommunityIcons name='counter' {...commonProps} />;
+        case 'repeat':
+            return <AnimatedMaterialCommunityIcons name='redo-variant' {...commonProps} />;
+        case 'check':
+            return <AnimatedMaterialCommunityIcons name='check-circle' {...commonProps} />;
+        case 'list':
+            return <AnimatedIonicons name='list-circle' {...commonProps} />;
         default:
-            return <Ionicons name='alert-circle-outline' s {...commonProps} />;
+            return <AnimatedIonicons name='alert-circle-outline' {...commonProps} />;
     }
-};
+});
+
+Icon.displayName = 'Icon';

@@ -7,13 +7,14 @@ export const Colors = {
         subTextSecondary: '#C6C6C6', // Tertiary text
         background: '#fcfcfc', // Main background
         backgroundSecondary: 'rgba(244, 247, 244, 0.95)', // Slightly adjusted for better contrast
+        backgroundTertiary: '#EDEEEE',
         primary: '#204D24', // Primary color (Green)
         secondary: '#EAEAEA', // Secondary elements
         accent: '#45A949', // Accent color
         systemBorderColor: 'rgba(0, 0, 0, 0.2)', // Lighter border for subtle dividers
         container: '#f7f7f5', // Container background
         containerHighlight: '#1e221e', // Slightly adjusted to avoid too dark
-        buttonPrimary: '#1A1A1A', // Darker button primary for contrast
+        buttonPrimary: '#1e221e', // Darker button primary for contrast
         buttonSecondary: '#f7f7f5', // Secondary button background
         iconDefault: '#687076', // Default icon color
         iconSelected: '#0f0f0f', // Adjusted for visibility
@@ -22,6 +23,11 @@ export const Colors = {
         red: '#cc4533', // Error color
         warning: '#FFA500', // Optional: Warning color (e.g., for alerts)
         info: '#1E90FF', // Optional: Info color (e.g., for badges)
+        transparent: 'rgba(255, 255, 255, 0)',
+        tipBackground: 'rgba(0, 175, 0, 0.1)', // Highlighter green with transparency
+        tipIcon: '#408E44', // standard green
+        tipText: '#408E44', // standard green
+        inputBackground: 'rgba(244, 255, 244, 0.95)',
     },
     dark: {
         text: '#F6F8F6', // Main text color
@@ -29,13 +35,14 @@ export const Colors = {
         subTextSecondary: '#D1D6D2', // Tertiary text
         background: '#191a19', // Main background
         backgroundSecondary: '#202220', // Secondary background
+        backgroundTertiary: '#313531',
         primary: '#204D24', // Primary color (Green)
         secondary: '#23312a', // Secondary elements
         accent: '#279E2C', // Accent color
         systemBorderColor: 'rgba(100, 100, 100, 0.5)', // Darker border for more contrast
         container: '#202220', // Container background
         containerHighlight: '#2d2f2d', // Highlighted container
-        buttonPrimary: '#F6F8F6', // Light button for contrast
+        buttonPrimary: '#fefefe', // Light button for contrast
         buttonSecondary: '#2f312f', // Secondary button background
         iconDefault: '#B0B0B0', // Slightly brighter for visibility
         iconSelected: '#F6F6F6', // Selected icon color
@@ -44,5 +51,9 @@ export const Colors = {
         red: '#cc4533', // Error color
         warning: '#FF8C00', // Optional: Warning color (darker orange)
         info: '#4682B4', // Optional: Info color (muted blue)
+        transparent: 'rgba(0, 0, 0, 0)',
+        tipBackground: 'rgba(39, 158, 44, 0.2)', // Highlighter green with increased opacity
+        tipIcon: '#279E2C', // Accent green
+        tipText: '#279E2C', // Accent green
     },
 };
