@@ -152,6 +152,10 @@ const styles = StyleSheet.create({
     },
     viewDrillButton: {
         borderWidth: StyleSheet.hairlineWidth,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0,
+        shadowRadius: 0,
+        elevation: 0,
     },
     infoBox: {
         padding: spacing.lg,

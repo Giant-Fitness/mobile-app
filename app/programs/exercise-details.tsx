@@ -1,11 +1,11 @@
 // app/programs/exercise-details.tsx
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { StyleSheet } from 'react-native';
+import { View, Button, StyleSheet } from 'react-native';
 import { RouteProp } from '@react-navigation/native';
 import { Exercise } from '@/types/types';
 import { AnimatedHeader } from '@/components/layout/AnimatedHeader';
@@ -19,6 +19,7 @@ import { ThumbnailVideoPlayer } from '@/components/video/ThumbnailVideoPlayer';
 import { BulletedList } from '@/components/base/BulletedList';
 import { Icon } from '@/components/icons/Icon';
 import { HighlightedTip } from '@/components/base/HighlightedTip';
+import { OneRepMaxCalculator } from '@/components/calculators/OneRepMaxCalculator';
 
 type ExerciseDetailsScreenParams = {
     Exercise: {
@@ -29,6 +30,7 @@ type ExerciseDetailsScreenParams = {
 const ExerciseDetailsScreen = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const [isCalculatorVisible, setCalculatorVisible] = useState<boolean>(false);
 
     const navigation = useNavigation();
     const route = useRoute<RouteProp<ExerciseDetailsScreenParams, 'Exercise'>>();
@@ -54,6 +56,14 @@ const ExerciseDetailsScreen = () => {
         // Handle video playback status if needed
     };
 
+    const openCalculator = () => {
+        setCalculatorVisible(true);
+    };
+
+    const closeCalculator = () => {
+        setCalculatorVisible(false);
+    };
+
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
             <AnimatedHeader scrollY={scrollY} headerInterpolationStart={sizes.imageLargeHeight} headerInterpolationEnd={sizes.imageLargeHeight + spacing.xxl} />
@@ -70,7 +80,10 @@ const ExerciseDetailsScreen = () => {
                         <ThemedView style={styles.titleContainer}>
                             <ThemedText type='titleLarge'>{exercise.ExerciseName}</ThemedText>
                         </ThemedView>
-
+                        <View style={styles.container}>
+                            <Button title='Open 1RM Calculator' onPress={openCalculator} />
+                            <OneRepMaxCalculator visible={isCalculatorVisible} onClose={closeCalculator} />
+                        </View>
                         {/* Attributes in a Row with Bullets */}
                         <ThemedView style={styles.attributeRow}>
                             {/* Attribute 1: Reps */}

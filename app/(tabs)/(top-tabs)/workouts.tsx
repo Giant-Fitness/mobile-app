@@ -84,7 +84,7 @@ export default function WorkoutsScreen() {
             <ThemedView>
                 <ThemedView style={styles.infoContainer}>
                     <ThemedText type='bodyXSmall' style={[styles.infoText, { color: themeColors.subText }]}>
-                        {'Workouts are flexible one-off sessions that you can complete to meet your goals.'}
+                        {'Workouts are flexible one-off sessions that you can complete to meet your goals'}
                     </ThemedText>
                 </ThemedView>
                 <ThemedText type='title' style={[styles.header, { color: themeColors.text }]}>
