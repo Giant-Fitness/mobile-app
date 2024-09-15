@@ -18,7 +18,7 @@ import { AppDispatch, RootState } from '@/store/rootReducer';
 import { getCurrentDayAsync, getActiveProgramMetaAsync, getUserPlanProgressAsync, getNextDaysAsync } from '@/store/programs/thunks';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
 import { BasicSplash } from '@/components/splashScreens/BasicSplash';
-import { REQUEST_STATE } from '@/store/utils';
+import { REQUEST_STATE } from '@/constants/requestStates';
 
 export default function ActiveProgramHome() {
     const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme

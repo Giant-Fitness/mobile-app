@@ -3,7 +3,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { actionTypes } from '@/store/programs/actionTypes';
 import ProgramService from '@/store/programs/service';
-import { Program, ProgramDay, UserWorkoutPlanProgress } from '@/store/types';
+import { Program, ProgramDay, UserWorkoutPlanProgress } from '@/type/types';
 
 export const getAllProgramsAsync = createAsyncThunk<Program[], void>(actionTypes.GET_ALL_PROGRAMS, async () => {
     return await ProgramService.getAllPrograms();

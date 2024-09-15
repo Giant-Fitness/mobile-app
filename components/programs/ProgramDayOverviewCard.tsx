@@ -12,7 +12,7 @@ import { Icon } from '@/components/icons/Icon';
 import { moderateScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
 import { sizes } from '@/utils/sizes';
-import { ProgramDay } from '@/store/types';
+import { ProgramDay } from '@/types/types';
 
 type ProgramDayOverviewCardProps = {
     day: ProgramDay;

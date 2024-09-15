@@ -1,4 +1,4 @@
-// store/utils.ts
+// constants/requestStates.ts
 
 export const REQUEST_STATE = {
     IDLE: 'IDLE',

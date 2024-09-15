@@ -3,7 +3,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { actionTypes } from '@/store/quotes/actionTypes';
 import QuoteService from '@/store/quotes/service';
-import { Quote } from '@/store/types';
+import { Quote } from '@/type/types';
 
 export const getWorkoutQuoteAsync = createAsyncThunk<Quote, void>(actionTypes.GET_WORKOUT_QUOTE, async () => {
     return await QuoteService.getWorkoutQuote();

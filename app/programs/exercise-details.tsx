@@ -7,7 +7,7 @@ import { Colors } from '@/constants/Colors';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { StyleSheet } from 'react-native';
 import { RouteProp } from '@react-navigation/native';
-import { Exercise } from '@/store/types';
+import { Exercise } from '@/types/types';
 import { AnimatedHeader } from '@/components/layout/AnimatedHeader';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { sizes } from '@/utils/sizes';

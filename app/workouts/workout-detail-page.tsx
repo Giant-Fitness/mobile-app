@@ -125,7 +125,7 @@ export default function WorkoutDetailScreen() {
                         <ThemedView style={[styles.attributeRow, { backgroundColor: themeColors.background }]}>
                             {/* Attribute 1: Length */}
                             <View style={styles.attributeItem}>
-                                <Icon name='stopwatch' size={verticalScale(18)} color={themeColors.text} />
+                                <Icon name='stopwatch' size={verticalScale(14)} color={themeColors.text} />
                                 <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.text }]}>
                                     {length}
                                 </ThemedText>
@@ -133,7 +133,7 @@ export default function WorkoutDetailScreen() {
 
                             {/* Attribute 2: Level */}
                             <View style={styles.attributeItem}>
-                                <Icon name={levelIcon} size={verticalScale(18)} color={themeColors.text} />
+                                <Icon name={levelIcon} size={verticalScale(12)} color={themeColors.text} />
                                 <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.text }]}>
                                     {level}
                                 </ThemedText>
@@ -141,7 +141,7 @@ export default function WorkoutDetailScreen() {
 
                             {/* Attribute 3: Equipment */}
                             <View style={styles.attributeItem}>
-                                <Icon name='kettlebell' size={verticalScale(18)} color={themeColors.text} />
+                                <Icon name='kettlebell' size={verticalScale(14)} color={themeColors.text} />
                                 <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.text }]}>
                                     {equipment}
                                 </ThemedText>
@@ -149,7 +149,7 @@ export default function WorkoutDetailScreen() {
 
                             {/* Attribute 4: Focus */}
                             <View style={styles.attributeItem}>
-                                <Icon name='yoga' size={verticalScale(18)} color={themeColors.text} />
+                                <Icon name='yoga' size={verticalScale(14)} color={themeColors.text} />
                                 <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.text }]}>
                                     {focusMultiText}
                                 </ThemedText>
@@ -160,7 +160,7 @@ export default function WorkoutDetailScreen() {
                     {/* Description Container */}
                     <ThemedView style={[styles.descriptionContainer, { backgroundColor: themeColors.background }]}>
                         <ThemedText type='link' style={{ color: themeColors.text, paddingBottom: spacing.md }}>
-                            About the Workout
+                            What to Expect
                         </ThemedText>
                         <ThemedText type='body' style={[{ color: themeColors.text }]}>
                             {longText}

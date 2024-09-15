@@ -83,12 +83,12 @@ export default function WorkoutsScreen() {
         <ScrollView style={[styles.container, { backgroundColor: themeColors.background }]} showsVerticalScrollIndicator={false}>
             <ThemedView>
                 <ThemedView style={styles.infoContainer}>
-                    <ThemedText type='bodyXSmall' style={[styles.infoText, { color: themeColors.containerHighlight }]}>
-                        {'Workouts are flexible one-off exercises that you can complete to meet your goals.'}
+                    <ThemedText type='bodyXSmall' style={[styles.infoText, { color: themeColors.subText }]}>
+                        {'Workouts are flexible one-off sessions that you can complete to meet your goals.'}
                     </ThemedText>
                 </ThemedView>
                 <ThemedText type='title' style={[styles.header, { color: themeColors.text }]}>
-                    Top Picks For You
+                    {'Top Picks For You'}
                 </ThemedText>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.mainScrollView}>
                     {recommendedWorkouts.map((workout) => (
@@ -155,7 +155,7 @@ export default function WorkoutsScreen() {
                         <TouchableOpacity onPress={() => navigateToAllWorkouts()} style={styles.allWorkouts} activeOpacity={0.5}>
                             <Icon name='list' size={moderateScale(20)} color={themeColors.text} style={{ paddingRight: spacing.xs, marginTop: 1 }} />
                             <ThemedText type='body' style={[{ color: themeColors.text }]}>
-                                All Workouts
+                                {'All Workouts'}
                             </ThemedText>
                         </TouchableOpacity>
                     </ThemedView>

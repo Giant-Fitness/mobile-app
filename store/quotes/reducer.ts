@@ -2,8 +2,8 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
-import { REQUEST_STATE } from '@/store/utils';
-import { Quote } from '@/store/types';
+import { REQUEST_STATE } from '@/constants/requestStates';
+import { Quote } from '@/type/types';
 
 // Define the initial state type
 interface QuoteState {

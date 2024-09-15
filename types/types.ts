@@ -1,4 +1,4 @@
-// store/types.ts
+// types/types.ts
 
 export interface ProgramCalendarOverviewItem {
     Title: string;

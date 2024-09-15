@@ -7,7 +7,7 @@ import { ThemedView } from '@/components/base/ThemedView';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { moderateScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
-import { Exercise } from '@/store/types';
+import { Exercise } from '@/types/types';
 import { Icon } from '@/components/icons/Icon';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';

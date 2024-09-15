@@ -1,11 +1,11 @@
 // store/quotes/mockData.ts
 
-import { Quote } from '@/store/types';
+import { Quote } from '@/type/types';
 
 const mockWorkoutQuote: Quote = {
     QuoteType: 'Motivation',
     QuoteId: 'quote001',
-    QuoteText: "\"The only bad workout is the one that didn't happen\"",
+    QuoteText: '"The only bad workout is the one that didn\'t happen"',
     Author: '',
     Context: 'Workout',
     Active: true,

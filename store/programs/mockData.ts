@@ -1,6 +1,6 @@
 // store/programs/mockData.ts
 
-import { ProgramDay, Exercise, Program, UserWorkoutPlanProgress } from '@/store/types';
+import { ProgramDay, Exercise, Program, UserWorkoutPlanProgress } from '@/types/types';
 
 // Sample user plan progress
 const sampleUserProgress: UserWorkoutPlanProgress = {

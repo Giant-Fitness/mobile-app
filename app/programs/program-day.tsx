@@ -16,7 +16,7 @@ import { moderateScale, verticalScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
 import { sizes } from '@/utils/sizes';
 import { RouteProp } from '@react-navigation/native';
-import { ProgramDay } from '@/store/types';
+import { ProgramDay } from '@/types/types';
 import { TextButton } from '@/components/base/TextButton';
 
 type ProgramDayScreenParams = {

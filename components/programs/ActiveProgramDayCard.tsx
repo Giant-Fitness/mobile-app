@@ -10,7 +10,7 @@ import { TopImageInfoCard } from '@/components/layout/TopImageInfoCard';
 import { Icon } from '@/components/icons/Icon';
 import { moderateScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
-import { ProgramDay } from '@/store/types';
+import { ProgramDay } from '@/types/types';
 import { useNavigation } from '@react-navigation/native';
 
 type ActiveProgramDayCardProps = {
