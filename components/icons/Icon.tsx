@@ -30,7 +30,7 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = 18, color, 
 
     // Derived value for color if it's animated
     const derivedColor = useDerivedValue(() => {
-        const finalColor = typeof color === 'string' ? color : (color?.value ?? defaultColor);
+        const finalColor = typeof color === 'string' ? color : color?.value ?? defaultColor;
         return finalColor;
     });
 

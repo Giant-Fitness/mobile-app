@@ -1,36 +1,43 @@
 // app/settings/settings.tsx
-
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { StyleSheet, View, Button } from 'react-native';
 import React from 'react';
-import ParallaxScrollView from '@/components/layout/ParallaxScrollView';
-import { ThemedText } from '@/components/base/ThemedText';
+import { StyleSheet, View, Button, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { ThemedView } from '@/components/base/ThemedView';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { signOut } from 'aws-amplify/auth';
 
-const SignOutButton = ({ navigation }) => {
+const SettingsScreen = () => {
+    const navigation = useNavigation();
+    const BYPASS_AUTH = true; // toggle this to false to enable real authentication handling
 
     const handleSignOut = async () => {
-        try {
-            await signOut();
-            navigation.navigate('index'); // Redirect to the index (login) page after signing out
-        } catch (error) {
-            console.error('Error signing out:', error);
+        if (BYPASS_AUTH) {
+            // Handle sign out when bypassing Amplify
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'index' }],
+            });
+        } else {
+            // Handle sign out using Amplify
+            try {
+                await signOut();
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'index' }],
+                });
+            } catch (error) {
+                console.error('Error signing out:', error);
+                Alert.alert('Sign out Error', error.message);
+            }
         }
     };
 
     return (
-        <View style={styles.signOutButton}>
+        <ThemedView>
             <Button title='Sign Out' onPress={handleSignOut} />
-        </View>
+        </ThemedView>
     );
 };
 
-const styles = StyleSheet.create({
-    signOutButton: {
-        alignSelf: 'flex-end',
-    },
-});
+const styles = StyleSheet.create({});
+
+export default SettingsScreen;

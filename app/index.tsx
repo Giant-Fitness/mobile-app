@@ -1,10 +1,10 @@
 // app/index.tsx
 
-import React from "react";
+import React from 'react';
 import { StyleSheet, Pressable, Text, SafeAreaView } from 'react-native';
-import { Amplify } from "aws-amplify";
-import { Authenticator, withAuthenticator } from "@aws-amplify/ui-react-native";
-import outputs from "../amplify_outputs.json";
+import { Amplify } from 'aws-amplify';
+import { Authenticator, withAuthenticator } from '@aws-amplify/ui-react-native';
+import outputs from '../amplify_outputs.json';
 import { Link, Redirect } from 'expo-router';
 import { ThemedView } from '@/components/base/ThemedView';
 
@@ -16,13 +16,13 @@ const BYPASS_AUTH = true; // Change this to false to enable authentication. You'
 const LoginPage = () => {
     if (BYPASS_AUTH) {
         return (
-        <SafeAreaView style={styles.titleContainer}>
-            <Link href={'/(tabs)/programs'} replace asChild>
-                <Pressable style={styles.button}>
-                    <Text style={styles.buttonText}>Login</Text>
-                </Pressable>
-            </Link>
-        </SafeAreaView>
+            <SafeAreaView style={styles.titleContainer}>
+                <Link href={'/(tabs)/programs'} replace asChild>
+                    <Pressable style={styles.button}>
+                        <Text style={styles.buttonText}>Login</Text>
+                    </Pressable>
+                </Link>
+            </SafeAreaView>
         );
     }
 
@@ -30,7 +30,7 @@ const LoginPage = () => {
     return (
         <Authenticator.Provider>
             <Authenticator>
-                <Redirect href="/(tabs)/home" />
+                <Redirect href='/(tabs)/home' />
             </Authenticator>
         </Authenticator.Provider>
     );
