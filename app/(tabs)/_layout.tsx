@@ -5,16 +5,16 @@ import React from 'react';
 
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Entypo, MaterialIcons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Icon } from '@/components/icons/Icon';
 import { Platform } from 'react-native';
 
 export default function TabLayout() {
-    const colorScheme = useColorScheme();
-    const navigation = useNavigation();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const navigation = useNavigation<NativeStackNavigationProp<any>>();
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     return (
         <Tabs
@@ -46,7 +46,7 @@ export default function TabLayout() {
                 headerShown: true,
                 tabBarShowLabel: true,
                 headerRight: () => (
-                    <TouchableOpacity activeOpacity={1} onPress={() => navigation.navigate('settings/settings')}>
+                    <TouchableOpacity activeOpacity={1} onPress={() => navigation.navigate('settings/settings' as any)}>
                         <Icon name='person' size={26} color={themeColors.subText} style={{ marginRight: 18 }} />
                     </TouchableOpacity>
                 ),
@@ -62,7 +62,7 @@ export default function TabLayout() {
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Home',
-                    tabBarIcon: ({ color, focused }) => <Icon size={24} name='home' color={color} />,
+                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'home-active' : 'home-inactive'} size={24} color={color} />,
                 }}
             />
             <Tabs.Screen
@@ -76,8 +76,8 @@ export default function TabLayout() {
                         elevation: 0, // Remove the elevation for Android
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
-                    title: 'Exercise',
-                    tabBarIcon: ({ color, focused }) => <Icon name='exercise' size={24} color={color} />,
+                    title: 'Training',
+                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'exercise-active' : 'exercise-inactive'} size={24} color={color} />,
                 }}
             />
             <Tabs.Screen
@@ -89,7 +89,7 @@ export default function TabLayout() {
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Nutrition',
-                    tabBarIcon: ({ color, focused }) => <Icon name='nutrition' size={22} color={color} />,
+                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'nutrition-active' : 'nutrition-inactive'} size={22} color={color} />,
                 }}
             />
             <Tabs.Screen
@@ -101,7 +101,7 @@ export default function TabLayout() {
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Progress',
-                    tabBarIcon: ({ color, focused }) => <Icon name='progress' size={21} color={color} />,
+                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'progress-active' : 'progress-inactive'} size={21} color={color} />,
                 }}
             />
         </Tabs>

@@ -2,11 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { FiltersDrawer } from '@/components/layout/FiltersDrawer';
-import { scale, moderateScale, verticalScale } from '@/utils/scaling';
 
 const workoutFilterAttributes = {
     level: ['Beginner', 'Intermediate', 'Advanced'],
-    equipment: ['None', 'Dumbbells', 'Kettlebells'],
+    equipment: ['None', 'Basic', 'Full Gym'],
     focus: ['Strength', 'Endurance', 'Mobility'],
 };
 

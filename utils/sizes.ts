@@ -3,7 +3,7 @@
 import { scale, verticalScale } from '@/utils/scaling';
 
 export const sizes = {
-    imageSmall: scale(50), // Small image size
+    imageSmall: scale(90), // Small image size
     imageMediumWidth: scale(110), // Medium image size
     imageMediumHeight: verticalScale(110), // Medium image size
     imageLargeHeight: verticalScale(150), // Large image size

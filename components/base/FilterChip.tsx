@@ -16,8 +16,8 @@ interface FilterChipProps {
 }
 
 export const FilterChip: React.FC<FilterChipProps> = ({ label, selected, onToggle, style }) => {
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     const chipStyle = [
         styles.chip,

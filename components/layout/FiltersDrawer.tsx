@@ -32,8 +32,8 @@ export const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
     itemLabel = 'item',
 }) => {
     const [temporaryFilters, setTemporaryFilters] = useState<any>(initialFilters);
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     useEffect(() => {
         if (visible) {

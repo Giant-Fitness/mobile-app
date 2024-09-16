@@ -8,7 +8,21 @@ import { moderateScale } from '@/utils/scaling'; // Use the customized moderateS
 export type ThemedTextProps = TextProps & {
     lightColor?: string;
     darkColor?: string;
-    type?: 'body' | 'titleLarge' | 'title' | 'subtitle' | 'caption' | 'link' | 'button' | 'overline';
+    type?:
+        | 'body'
+        | 'titleLarge'
+        | 'title'
+        | 'subtitle'
+        | 'caption'
+        | 'link'
+        | 'button'
+        | 'overline'
+        | 'italic'
+        | 'buttonSmall'
+        | 'titleXLarge'
+        | 'bodyXSmall'
+        | 'bodyMedium'
+        | 'bodySmall';
 };
 
 // Styles for different text types using specific Inter fonts with adjusted scaling
@@ -41,7 +55,7 @@ const styles = StyleSheet.create({
     titleXLarge: {
         fontSize: moderateScale(21),
         lineHeight: moderateScale(32),
-        fontFamily: 'InterMedium',
+        fontFamily: 'InterSemiBold',
     },
     titleXXLarge: {
         fontSize: moderateScale(24),
@@ -76,7 +90,7 @@ const styles = StyleSheet.create({
     buttonSmall: {
         fontSize: moderateScale(13),
         lineHeight: moderateScale(20),
-        fontFamily: 'InterRegular',
+        fontFamily: 'InterMedium',
     },
     overlineTransformed: {
         fontSize: moderateScale(13),

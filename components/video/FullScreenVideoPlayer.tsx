@@ -9,6 +9,7 @@ interface FullScreenVideoPlayerProps {
     source: { uri: string };
     startInFullscreen?: boolean;
     onPlaybackStatusUpdate?: (status: any) => void; // Add callback for playback status updates
+    onDismiss?: () => void; // Add this prop
 }
 
 export interface FullScreenVideoPlayerHandle {
@@ -16,7 +17,7 @@ export interface FullScreenVideoPlayerHandle {
 }
 
 export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, FullScreenVideoPlayerProps>(
-    ({ source, startInFullscreen = false, onPlaybackStatusUpdate }, ref) => {
+    ({ source, startInFullscreen = false, onPlaybackStatusUpdate, onDismiss }, ref) => {
         const video = useRef<Video>(null);
         const [isFullScreen, setIsFullScreen] = useState(startInFullscreen);
         const [isVideoVisible, setIsVideoVisible] = useState(false);
@@ -28,7 +29,6 @@ export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, Ful
             const configureAudio = async () => {
                 try {
                     await Audio.setAudioModeAsync({
-                        shouldDuckIOS: true,
                         playsInSilentModeIOS: true,
                         shouldDuckAndroid: true,
                         playThroughEarpieceAndroid: true,
@@ -70,21 +70,26 @@ export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, Ful
         // Callback when the video is loaded and ready to play
         const handleVideoLoad = async () => {
             setIsVideoLoaded(true);
-            try {
-                await video.current.playAsync();
-            } catch (error) {
-                Alert.alert('Error', 'An error occurred while playing the video.');
-                console.error('Error starting video playback:', error);
+            if (video.current) {
+                // Check if video.current is not null
+                try {
+                    await video.current.playAsync();
+                } catch (error) {
+                    Alert.alert('Error', 'An error occurred while playing the video.');
+                }
             }
         };
 
         // Function to handle fullscreen updates using integer values
-        const handleFullscreenUpdate = async ({ fullscreenUpdate }) => {
+        const handleFullscreenUpdate = async ({ fullscreenUpdate }: { fullscreenUpdate: number }) => {
             // Reset state when fullscreen is about to dismiss
             if (fullscreenUpdate === 2) {
                 // FULLSCREEN_UPDATE_PLAYER_WILL_DISMISS
                 setIsFullscreenPresented(false); // Mark fullscreen as dismissed
                 setIsVideoVisible(false); // Ensure the video is hidden
+                if (onDismiss) {
+                    onDismiss();
+                }
             }
 
             // Fully reset state when fullscreen has been dismissed
@@ -136,6 +141,7 @@ FullScreenVideoPlayer.propTypes = {
     }).isRequired,
     startInFullscreen: PropTypes.bool,
     onPlaybackStatusUpdate: PropTypes.func, // Validation for the new prop
+    onDismiss: PropTypes.func,
 };
 
 const { width, height } = Dimensions.get('window');

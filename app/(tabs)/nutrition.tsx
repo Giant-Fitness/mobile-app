@@ -1,6 +1,6 @@
 // app/(tabs)/nutrition.tsx
 
-import { Image, StyleSheet, Platform } from 'react-native';
+import { Image, StyleSheet } from 'react-native';
 import React from 'react';
 import ParallaxScrollView from '@/components/layout/ParallaxScrollView';
 import { ThemedText } from '@/components/base/ThemedText';

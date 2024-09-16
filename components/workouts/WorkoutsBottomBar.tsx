@@ -17,8 +17,8 @@ type WorkoutsBottomBarProps = {
 };
 
 export const WorkoutsBottomBar: React.FC<WorkoutsBottomBarProps> = ({ onSortPress, onFilterPress, appliedFilterCount = 0 }) => {
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
+    const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     return (
         <ThemedView style={[styles.container, { borderColor: themeColors.systemBorderColor }]}>
@@ -29,7 +29,7 @@ export const WorkoutsBottomBar: React.FC<WorkoutsBottomBarProps> = ({ onSortPres
                         Filter
                     </ThemedText>
                     {appliedFilterCount > 0 && (
-                        <View style={[styles.badge, { backgroundColor: themeColors.subText }]}>
+                        <View style={[styles.badge, { backgroundColor: themeColors.text }]}>
                             <ThemedText type='buttonSmall' style={[styles.badgeText, { color: themeColors.background }]}>
                                 {appliedFilterCount}
                             </ThemedText>
