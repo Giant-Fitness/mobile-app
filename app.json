@@ -14,7 +14,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "userInterfaceStyle": "automatic"
+      "userInterfaceStyle": "automatic",
+      "bundleIdentifier": "com.kusharora339.GiantFitness"
     },
     "android": {
       "adaptiveIcon": {
