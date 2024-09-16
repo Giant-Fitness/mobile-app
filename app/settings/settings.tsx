@@ -1,22 +1,36 @@
 // app/settings/settings.tsx
 
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { StyleSheet, View, Button } from 'react-native';
 import React from 'react';
+import ParallaxScrollView from '@/components/layout/ParallaxScrollView';
+import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { useNavigation } from '@react-navigation/native';
-import { AnimatedHeader } from '@/components/layout/AnimatedHeader';
-import { useSharedValue } from 'react-native-reanimated';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { signOut } from 'aws-amplify/auth';
 
-export default function ProgressScreen() {
-    const navigation = useNavigation();
-    const scrollY = useSharedValue(0);
+const SignOutButton = ({ navigation }) => {
 
-    React.useEffect(() => {
-        navigation.setOptions({ headerShown: false });
-    }, [navigation]);
+    const handleSignOut = async () => {
+        try {
+            await signOut();
+            navigation.navigate('index'); // Redirect to the index (login) page after signing out
+        } catch (error) {
+            console.error('Error signing out:', error);
+        }
+    };
 
     return (
-        <ThemedView>
-            <AnimatedHeader scrollY={scrollY} disableColorChange={true} title='Settings' />
-        </ThemedView>
+        <View style={styles.signOutButton}>
+            <Button title='Sign Out' onPress={handleSignOut} />
+        </View>
     );
-}
+};
+
+const styles = StyleSheet.create({
+    signOutButton: {
+        alignSelf: 'flex-end',
+    },
+});
