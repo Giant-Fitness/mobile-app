@@ -1,15 +1,32 @@
 // app/index.tsx
 
 import React from "react";
-import { StyleSheet, SafeAreaView } from "react-native";
+import { StyleSheet, Pressable, Text, SafeAreaView } from 'react-native';
 import { Amplify } from "aws-amplify";
 import { Authenticator, withAuthenticator } from "@aws-amplify/ui-react-native";
 import outputs from "../amplify_outputs.json";
-import { Redirect } from 'expo-router';
+import { Link, Redirect } from 'expo-router';
+import { ThemedView } from '@/components/base/ThemedView';
 
 Amplify.configure(outputs);
 
+// Set the flag to bypass authentication
+const BYPASS_AUTH = true; // Change this to false to enable authentication. You'll have to restart the expo server
+
 const LoginPage = () => {
+    if (BYPASS_AUTH) {
+        return (
+        <SafeAreaView style={styles.titleContainer}>
+            <Link href={'/(tabs)/programs'} replace asChild>
+                <Pressable style={styles.button}>
+                    <Text style={styles.buttonText}>Login</Text>
+                </Pressable>
+            </Link>
+        </SafeAreaView>
+        );
+    }
+
+    // Otherwise, render the authenticator provider
     return (
         <Authenticator.Provider>
             <Authenticator>
@@ -36,4 +53,5 @@ const styles = StyleSheet.create({
     },
 });
 
-export default withAuthenticator(LoginPage);
+// Conditionally export with or without the withAuthenticator HOC
+export default BYPASS_AUTH ? LoginPage : withAuthenticator(LoginPage);
