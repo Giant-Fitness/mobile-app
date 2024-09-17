@@ -1,13 +1,8 @@
-// store/rootReducer.js
+// store/rootReducer.ts
 
 import { configureStore } from '@reduxjs/toolkit';
 import programsReducer from '@/store/programs/reducer';
 import quotesReducer from '@/store/quotes/reducer';
-
-// Define the RootState type based on the reducers
-export type RootState = ReturnType<typeof store.getState>;
-// Define the AppDispatch type based on the store's dispatch
-export type AppDispatch = typeof store.dispatch;
 
 export const store = configureStore({
     reducer: {
@@ -16,3 +11,8 @@ export const store = configureStore({
     },
     devTools: true,
 });
+
+// Define the RootState type based on the reducers
+export type RootState = ReturnType<typeof store.getState>;
+// Define the AppDispatch type based on the store's dispatch
+export type AppDispatch = typeof store.dispatch;

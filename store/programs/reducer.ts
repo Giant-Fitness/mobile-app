@@ -2,46 +2,51 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
-    getCurrentDayAsync,
-    getAllProgramDaysAsync,
+    getUserProgramProgressAsync,
     getAllProgramsAsync,
-    getActiveProgramMetaAsync,
-    getUserPlanProgressAsync,
-    getNextDaysAsync,
+    getProgramAsync,
+    getProgramDayAsync,
+    getActiveProgramAsync,
+    getActiveProgramCurrentDayAsync,
+    getActiveProgramNextDaysAsync,
 } from '@/store/programs/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { ProgramDay, Program, UserWorkoutPlanProgress } from '@/type/types';
+import { ProgramDay, Program, UserProgramProgress } from '@/type/types';
 
 // Define the initial state type
 interface ProgramState {
+    userProgramProgress: UserProgramProgress | null;
+    userProgramProgressState: REQUEST_STATE;
     programs: Program[];
     allProgramsState: REQUEST_STATE;
-    activeProgram: Program;
+    program: Program | null;
+    programState: REQUEST_STATE;
+    programDay: ProgramDay | null;
+    programDayState: REQUEST_STATE;
+    activeProgram: Program | null;
     activeProgramState: REQUEST_STATE;
-    currentDay: ProgramDay;
-    currentDayState: REQUEST_STATE;
-    nextDays: ProgramDay[];
-    nextDaysState: REQUEST_STATE;
-    allProgramDays: ProgramDay[];
-    allProgramDaysState: REQUEST_STATE;
-    userPlanProgress: UserWorkoutPlanProgress;
-    userPlanProgressState: REQUEST_STATE;
+    activeProgramCurrentDay: ProgramDay | null;
+    activeProgramCurrentDayState: REQUEST_STATE;
+    activeProgramNextDays: ProgramDay[];
+    activeProgramNextDaysState: REQUEST_STATE;
     error: string | null;
 }
 
 const initialState: ProgramState = {
-    programs: [],
+    userProgramProgress: null,
+    userProgramProgressState: REQUEST_STATE.IDLE,
+    programs: [] as Program[],
     allProgramsState: REQUEST_STATE.IDLE,
+    program: null,
+    programState: REQUEST_STATE.IDLE,
+    programDay: null,
+    programDayState: REQUEST_STATE.IDLE,
     activeProgram: null,
     activeProgramState: REQUEST_STATE.IDLE,
-    currentDay: null,
-    currentDayState: REQUEST_STATE.IDLE,
-    nextDays: [],
-    nextDaysState: REQUEST_STATE.IDLE,
-    allProgramDays: [],
-    allProgramDaysState: REQUEST_STATE.IDLE,
-    userPlanProgress: null,
-    userPlanProgressState: REQUEST_STATE.IDLE,
+    activeProgramCurrentDay: null,
+    activeProgramCurrentDayState: REQUEST_STATE.IDLE,
+    activeProgramNextDays: [] as ProgramDay[],
+    activeProgramNextDaysState: REQUEST_STATE.IDLE,
     error: null,
 };
 
@@ -51,28 +56,16 @@ const programSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(getCurrentDayAsync.pending, (state) => {
-                state.currentDayState = REQUEST_STATE.PENDING;
+            .addCase(getUserProgramProgressAsync.pending, (state) => {
+                state.userProgramProgressState = REQUEST_STATE.PENDING;
                 state.error = null;
             })
-            .addCase(getCurrentDayAsync.fulfilled, (state, action: PayloadAction<ProgramDay[]>) => {
-                state.currentDayState = REQUEST_STATE.FULFILLED;
-                state.currentDay = action.payload;
+            .addCase(getUserProgramProgressAsync.fulfilled, (state, action: PayloadAction<UserProgramProgress>) => {
+                state.userProgramProgressState = REQUEST_STATE.FULFILLED;
+                state.userProgramProgress = action.payload || null;
             })
-            .addCase(getCurrentDayAsync.rejected, (state, action) => {
-                state.currentDayState = REQUEST_STATE.REJECTED;
-                state.error = action.error.message || 'An error occurred';
-            })
-            .addCase(getAllProgramDaysAsync.pending, (state) => {
-                state.allProgramDaysState = REQUEST_STATE.PENDING;
-                state.error = null;
-            })
-            .addCase(getAllProgramDaysAsync.fulfilled, (state, action: PayloadAction<ProgramDay[]>) => {
-                state.allProgramDaysState = REQUEST_STATE.FULFILLED;
-                state.allProgramDays = action.payload;
-            })
-            .addCase(getAllProgramDaysAsync.rejected, (state, action) => {
-                state.allProgramDaysState = REQUEST_STATE.REJECTED;
+            .addCase(getUserProgramProgressAsync.rejected, (state, action) => {
+                state.userProgramProgressState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'An error occurred';
             })
             .addCase(getAllProgramsAsync.pending, (state) => {
@@ -81,46 +74,70 @@ const programSlice = createSlice({
             })
             .addCase(getAllProgramsAsync.fulfilled, (state, action: PayloadAction<Program[]>) => {
                 state.allProgramsState = REQUEST_STATE.FULFILLED;
-                state.programs = action.payload;
+                state.programs = action.payload || [];
             })
             .addCase(getAllProgramsAsync.rejected, (state, action) => {
                 state.allProgramsState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'An error occurred';
             })
-            .addCase(getActiveProgramMetaAsync.pending, (state) => {
+            .addCase(getProgramAsync.pending, (state) => {
+                state.programState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(getProgramAsync.fulfilled, (state, action: PayloadAction<Program | undefined>) => {
+                state.programState = REQUEST_STATE.FULFILLED;
+                state.program = action.payload || null;
+            })
+            .addCase(getProgramAsync.rejected, (state, action) => {
+                state.programState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'An error occurred';
+            })
+            .addCase(getProgramDayAsync.pending, (state) => {
+                state.programDayState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(getProgramDayAsync.fulfilled, (state, action: PayloadAction<ProgramDay | undefined>) => {
+                state.programDayState = REQUEST_STATE.FULFILLED;
+                state.programDay = action.payload || null;
+            })
+            .addCase(getProgramDayAsync.rejected, (state, action) => {
+                state.programDayState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'An error occurred';
+            })
+            .addCase(getActiveProgramAsync.pending, (state) => {
                 state.activeProgramState = REQUEST_STATE.PENDING;
                 state.error = null;
             })
-            .addCase(getActiveProgramMetaAsync.fulfilled, (state, action: PayloadAction<Program[]>) => {
+            .addCase(getActiveProgramAsync.fulfilled, (state, action: PayloadAction<Program | undefined>) => {
                 state.activeProgramState = REQUEST_STATE.FULFILLED;
-                state.activeProgram = action.payload;
+                state.activeProgram = action.payload || null;
             })
-            .addCase(getActiveProgramMetaAsync.rejected, (state, action) => {
+            .addCase(getActiveProgramAsync.rejected, (state, action) => {
                 state.activeProgramState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'An error occurred';
             })
-            .addCase(getUserPlanProgressAsync.pending, (state) => {
-                state.userPlanProgressState = REQUEST_STATE.PENDING;
+            .addCase(getActiveProgramCurrentDayAsync.pending, (state) => {
+                state.activeProgramCurrentDayState = REQUEST_STATE.PENDING;
                 state.error = null;
             })
-            .addCase(getUserPlanProgressAsync.fulfilled, (state, action: PayloadAction<Program[]>) => {
-                state.userPlanProgressState = REQUEST_STATE.FULFILLED;
-                state.userPlanProgress = action.payload;
+            .addCase(getActiveProgramCurrentDayAsync.fulfilled, (state, action: PayloadAction<ProgramDay | undefined>) => {
+                state.activeProgramCurrentDayState = REQUEST_STATE.FULFILLED;
+                state.activeProgramCurrentDay = action.payload || null;
             })
-            .addCase(getUserPlanProgressAsync.rejected, (state, action) => {
-                state.userPlanProgressState = REQUEST_STATE.REJECTED;
+            .addCase(getActiveProgramCurrentDayAsync.rejected, (state, action) => {
+                state.activeProgramCurrentDayState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'An error occurred';
             })
-            .addCase(getNextDaysAsync.pending, (state) => {
-                state.nextDaysState = REQUEST_STATE.PENDING;
+            .addCase(getActiveProgramNextDaysAsync.pending, (state) => {
+                state.activeProgramNextDaysState = REQUEST_STATE.PENDING;
                 state.error = null;
             })
-            .addCase(getNextDaysAsync.fulfilled, (state, action: PayloadAction<Program[]>) => {
-                state.nextDaysState = REQUEST_STATE.FULFILLED;
-                state.nextDays = action.payload;
+            .addCase(getActiveProgramNextDaysAsync.fulfilled, (state, action: PayloadAction<ProgramDay[]>) => {
+                state.activeProgramNextDaysState = REQUEST_STATE.FULFILLED;
+                state.activeProgramNextDays = action.payload || [];
             })
-            .addCase(getNextDaysAsync.rejected, (state, action) => {
-                state.nextDaysState = REQUEST_STATE.REJECTED;
+            .addCase(getActiveProgramNextDaysAsync.rejected, (state, action) => {
+                state.activeProgramNextDaysState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'An error occurred';
             });
     },

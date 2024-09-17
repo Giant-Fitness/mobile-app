@@ -1,11 +1,11 @@
 // store/programs/mockData.ts
 
-import { ProgramDay, Exercise, Program, UserWorkoutPlanProgress } from '@/types/types';
+import { ProgramDay, Exercise, Program, UserProgramProgress } from '@/types/types';
 
-// Sample user plan progress
-const sampleUserProgress: UserWorkoutPlanProgress = {
+// Sample user program progress
+const sampleUserProgress: UserProgramProgress = {
     UserId: 'user1',
-    WorkoutPlanId: 'plan1',
+    ProgramId: 'program1',
     CurrentDay: '22',
     StartDate: '2024-07-01',
     LastActivityDate: '2024-07-05',
@@ -89,9 +89,9 @@ const sampleExercises: Exercise[] = [
 // Define sample program days
 const sampleProgramDays: ProgramDay[] = [
     {
-        WorkoutPlanId: 'plan1',
-        WorkoutDayId: '22',
-        WorkoutDayTitle: 'Full Body',
+        ProgramId: 'program1',
+        DayId: '22',
+        DayTitle: 'Full Body',
         RestDay: false,
         Exercises: sampleExercises,
         PhotoUrl: 'https://images.pexels.com/photos/3253501/pexels-photo-3253501.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
@@ -105,9 +105,9 @@ const sampleProgramDays: ProgramDay[] = [
         Day: '1',
     },
     {
-        WorkoutPlanId: 'plan1',
-        WorkoutDayId: '23',
-        WorkoutDayTitle: 'Upper Body A',
+        ProgramId: 'program1',
+        DayId: '23',
+        DayTitle: 'Upper Body A',
         RestDay: false,
         Exercises: sampleExercises,
         PhotoUrl: 'https://images.pexels.com/photos/1886487/pexels-photo-1886487.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
@@ -121,9 +121,9 @@ const sampleProgramDays: ProgramDay[] = [
         Day: '2',
     },
     {
-        WorkoutPlanId: 'plan1',
-        WorkoutDayId: '24',
-        WorkoutDayTitle: 'Lower Body B',
+        ProgramId: 'program1',
+        DayId: '24',
+        DayTitle: 'Lower Body B',
         RestDay: false,
         Exercises: sampleExercises,
         PhotoUrl: 'https://images.pexels.com/photos/841130/pexels-photo-841130.jpeg',
@@ -137,9 +137,9 @@ const sampleProgramDays: ProgramDay[] = [
         Day: '3',
     },
     {
-        WorkoutPlanId: 'plan1',
-        WorkoutDayId: '25',
-        WorkoutDayTitle: 'Rest Day',
+        ProgramId: 'program1',
+        DayId: '25',
+        DayTitle: 'Rest Day',
         RestDay: true,
         Exercises: [],
         PhotoUrl:
@@ -157,10 +157,11 @@ const sampleProgramDays: ProgramDay[] = [
 
 const mockPrograms: Program[] = [
     {
-        WorkoutPlanId: 'plan1',
-        WorkoutPlanName: 'Lean Machine Challenge',
+        ProgramId: 'program1',
+        ProgramName: 'Lean Machine Challenge',
         TrainerId: 'trainer123',
-        ProgramLength: 6,
+        Weeks: 6,
+        Days: 40,
         Description: 'A comprehensive 6-week challenge to build strength and endurance.',
         Level: 'All Levels',
         Type: 'Strength',
@@ -172,7 +173,10 @@ const mockPrograms: Program[] = [
         CalendarOverview: [
             { Title: 'Weeks 1-2', Description: 'We’ll ramp up onto the program by starting with lower weights and volume' },
             { Title: 'Weeks 3-5', Description: 'Start to feel the difference in your body. Feel faster, stronger, and lighter on your feet' },
-            { Title: 'Week 6', Description: 'We’ll de-load this week and focus on muscle recovery - setting you up for a solid base to start your next plan' },
+            {
+                Title: 'Week 6',
+                Description: 'We’ll de-load this week and focus on muscle recovery - setting you up for a solid base to start your next program',
+            },
         ],
         EquipmentCategory: 'Full Gym',
         Equipment: ['Dumbbells', 'Barbell', 'Cable Machine'],
@@ -180,10 +184,11 @@ const mockPrograms: Program[] = [
         DesignedFor: 'At the gym, for all levels: beginner or expert',
     },
     {
-        WorkoutPlanId: 'plan2',
-        WorkoutPlanName: "Beginner's Yoga Flow",
+        ProgramId: 'program2',
+        ProgramName: "Beginner's Yoga Flow",
         TrainerId: 'trainer124',
-        ProgramLength: 8,
+        Weeks: 8,
+        Days: 56,
         Description: 'An 8-week introduction to yoga for beginners focusing on flexibility and relaxation.',
         Level: 'Beginner',
         Type: 'Yoga',
@@ -203,10 +208,11 @@ const mockPrograms: Program[] = [
         DesignedFor: 'At home or at the studio, ideal for beginners',
     },
     {
-        WorkoutPlanId: 'plan3',
-        WorkoutPlanName: 'Advanced HIIT Series',
+        ProgramId: 'program3',
+        ProgramName: 'Advanced HIIT Series',
         TrainerId: 'trainer125',
-        ProgramLength: 6,
+        Weeks: 6,
+        Days: 42,
         Description: 'A 6-week high-intensity interval training program designed for advanced athletes.',
         Level: 'Advanced',
         Type: 'HIIT',

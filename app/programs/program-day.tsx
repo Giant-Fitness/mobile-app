@@ -59,7 +59,7 @@ const ProgramDayScreen = () => {
             <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16}>
                 <TopImageInfoCard
                     image={{ uri: day.PhotoUrl }}
-                    title={day.WorkoutDayTitle}
+                    title={day.DayTitle}
                     subtitle={`Week ${day.Week} Day ${day.Day}`} // Updated subtitle
                     titleType='titleXLarge'
                     subtitleStyle={{ marginBottom: spacing.md, color: themeColors.subText, marginTop: 0 }}
@@ -196,6 +196,10 @@ const styles = StyleSheet.create({
         borderWidth: StyleSheet.hairlineWidth,
         paddingVertical: spacing.md,
         marginTop: spacing.md,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0,
+        shadowRadius: 0,
+        elevation: 0,
     },
     tipContainer: {
         flexDirection: 'row',
