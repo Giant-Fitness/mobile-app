@@ -1,55 +1,44 @@
 // store/programs/service.ts
 
-import { Program, ProgramDay, UserWorkoutPlanProgress } from '@/type/types';
+import { Program, ProgramDay, UserProgramProgress } from '@/type/types';
 import { sampleProgramDays, mockPrograms, sampleUserProgress } from '@/store/programs/mockData';
+
+const getUserProgramProgress = async (): Promise<UserProgramProgress> => {
+    return sampleUserProgress;
+};
 
 const getAllPrograms = async (): Promise<Program[]> => {
     return mockPrograms;
 };
 
-const getCurrentDay = async (): Promise<ProgramDay> => {
-    return sampleProgramDays.find((day) => day.WorkoutDayId === '22');
+const getProgram = async (programId: string): Promise<Program | undefined> => {
+    return mockPrograms.find((program) => program.ProgramId === programId);
 };
 
-const getDaysByIds = async (planId: string, dayIds: string[]): Promise<ProgramDay[]> => {
-    // Step 1: Filter days by the given planId
-    const allDays = sampleProgramDays.filter((day) => day.WorkoutPlanId === planId);
+const getProgramDay = async (programId: string, dayId: string): Promise<ProgramDay | undefined> => {
+    return sampleProgramDays.find((day) => day.ProgramId === programId && day.DayId === dayId);
+};
+
+const getProgramDaysAll = async (programId: string): Promise<ProgramDay[]> => {
+    const allDays = sampleProgramDays.filter((day) => day.ProgramId === programId);
+    return allDays;
+};
+
+const getProgramDaysFiltered = async (programId: string, dayIds: string[]): Promise<ProgramDay[]> => {
+    // get all the days for a program
+    const allDays = sampleProgramDays.filter((day) => day.ProgramId === programId);
 
     // Filter only the days with IDs in dayIds
-    const filteredDays = allDays.filter((day) => dayIds.includes(day.WorkoutDayId));
+    const filteredDays = allDays.filter((day) => dayIds.includes(day.DayId));
 
-    // Assuming the result should be sorted by WorkoutDayId
-    return filteredDays.sort((a, b) => parseInt(a.WorkoutDayId) - parseInt(b.WorkoutDayId));
-};
-
-const getNextDays = async (planId: string, currentDayId: string, numDays: number): Promise<ProgramDay[]> => {
-    // Fetch all days for the given plan
-    const allDays = await getAllProgramDays(planId);
-
-    // Get the IDs of the next 'numDays' days
-    const dayIdsToFetch = Array.from({ length: numDays }, (_, i) => (parseInt(currentDayId) + i + 1).toString());
-
-    // Use getDaysByIds to fetch the specific days
-    return await getDaysByIds(planId, dayIdsToFetch);
-};
-
-const getAllProgramDays = async (planId: string): Promise<ProgramDay[]> => {
-    return sampleProgramDays;
-};
-
-const getActiveProgramMeta = async (): Promise<ProgramDay[]> => {
-    return mockPrograms.find((program) => program.WorkoutPlanId === 'plan1');
-};
-
-const getUserPlanProgress = async (): Promise<UserWorkoutPlanProgress> => {
-    return sampleUserProgress;
+    // Assuming the result should be sorted by DayId
+    return filteredDays.sort((a, b) => parseInt(a.DayId) - parseInt(b.DayId));
 };
 
 export default {
+    getUserProgramProgress,
     getAllPrograms,
-    getCurrentDay,
-    getNextDays,
-    getAllProgramDays,
-    getActiveProgramMeta,
-    getUserPlanProgress,
+    getProgram,
+    getProgramDay,
+    getProgramDaysFiltered,
 };

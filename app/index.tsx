@@ -17,7 +17,7 @@ const LoginPage = () => {
     if (BYPASS_AUTH) {
         return (
             <SafeAreaView style={styles.titleContainer}>
-                <Link href={'/(tabs)/programs'} replace asChild>
+                <Link href={'/(tabs)/home'} replace asChild>
                     <Pressable style={styles.button}>
                         <Text style={styles.buttonText}>Login</Text>
                     </Pressable>

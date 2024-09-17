@@ -1,10 +1,10 @@
 // app/programs/program-day.tsx
 
-import React from 'react';
-import { StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { StyleSheet, ActivityIndicator } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ExerciseCard } from '@/components/programs/ExerciseCard';
@@ -15,32 +15,62 @@ import { TopImageInfoCard } from '@/components/layout/TopImageInfoCard';
 import { moderateScale, verticalScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
 import { sizes } from '@/utils/sizes';
-import { RouteProp } from '@react-navigation/native';
-import { ProgramDay } from '@/types/types';
 import { TextButton } from '@/components/base/TextButton';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/store/rootReducer';
+import { getProgramDayAsync } from '@/store/programs/thunks';
+import { REQUEST_STATE } from '@/constants/requestStates';
 
 type ProgramDayScreenParams = {
     ProgramDay: {
-        day: ProgramDay;
+        dayId: string;
+        programId: string;
     };
 };
 
 const ProgramDayScreen = () => {
-    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
-    const themeColors = Colors[colorScheme]; // Access theme-specific colors
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
 
     const navigation = useNavigation();
     const route = useRoute<RouteProp<ProgramDayScreenParams, 'ProgramDay'>>();
+    const dispatch = useDispatch<AppDispatch>();
 
-    const { day } = route.params;
+    const { dayId, programId } = route.params;
 
     const navigateToAllWorkouts = (initialFilters = {}) => {
         navigation.navigate('workouts/all-workouts', { initialFilters });
     };
 
-    React.useEffect(() => {
+    const programDay = useSelector((state: RootState) => state.programs.programDays[programId]?.[dayId]);
+    const programDayState = useSelector((state: RootState) => state.programs.programDaysState[programId]?.[dayId]);
+
+    useEffect(() => {
+        if (!programDay && programDayState !== REQUEST_STATE.PENDING) {
+            dispatch(getProgramDayAsync({ programId, dayId }));
+        }
+    }, [programDay, programDayState, dispatch, programId, dayId]);
+
+    if (programDayState === REQUEST_STATE.PENDING || !programDay) {
+        return (
+            <ThemedView style={styles.loadingContainer}>
+                <ActivityIndicator size='large' color={themeColors.text} />
+            </ThemedView>
+        );
+    }
+
+    if (programDayState === REQUEST_STATE.REJECTED || !programDay) {
+        return (
+            <ThemedView style={styles.errorContainer}>
+                <ThemedText>Error loading the program day.</ThemedText>
+            </ThemedView>
+        );
+    }
+
+    useEffect(() => {
         navigation.setOptions({ headerShown: false });
     }, [navigation]);
+
     const scrollY = useSharedValue(0);
 
     const scrollHandler = useAnimatedScrollHandler({
@@ -58,19 +88,22 @@ const ProgramDayScreen = () => {
             <AnimatedHeader scrollY={scrollY} headerInterpolationStart={sizes.imageLargeHeight} headerInterpolationEnd={sizes.imageLargeHeight + spacing.xxl} />
             <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16}>
                 <TopImageInfoCard
-                    image={{ uri: day.PhotoUrl }}
-                    title={day.WorkoutDayTitle}
-                    subtitle={`Week ${day.Week} Day ${day.Day}`} // Updated subtitle
+                    image={{ uri: programDay.PhotoUrl }}
+                    title={programDay.DayTitle}
+                    subtitle={`Week ${programDay.Week} Day ${programDay.Day}`}
                     titleType='titleXLarge'
                     subtitleStyle={{ marginBottom: spacing.md, color: themeColors.subText, marginTop: 0 }}
                     titleStyle={{ marginBottom: spacing.xs }}
                     containerStyle={{ elevation: 5, marginBottom: 0 }}
-                    contentContainerStyle={{ backgroundColor: themeColors.background, paddingHorizontal: spacing.lg }}
+                    contentContainerStyle={{
+                        backgroundColor: themeColors.background,
+                        paddingHorizontal: spacing.lg,
+                    }}
                     imageStyle={{ height: sizes.imageXLargeHeight }}
                     titleFirst={true}
                     extraContent={
                         <ThemedView>
-                            {day.RestDay ? (
+                            {programDay.RestDay ? (
                                 <ThemedView style={styles.tipContainer}>
                                     <Icon
                                         name='sleep'
@@ -88,7 +121,7 @@ const ProgramDayScreen = () => {
                                         <ThemedView style={styles.attribute}>
                                             <Icon name='stopwatch' size={moderateScale(18)} color={themeColors.text} />
                                             <ThemedText type='body' style={styles.attributeText}>
-                                                {day.Time} mins
+                                                {programDay.Time} mins
                                             </ThemedText>
                                         </ThemedView>
                                     </ThemedView>
@@ -96,7 +129,7 @@ const ProgramDayScreen = () => {
                                         <ThemedView style={styles.attribute}>
                                             <Icon name='kettlebell' size={moderateScale(18)} color={themeColors.text} />
                                             <ThemedText type='body' style={styles.attributeText}>
-                                                {day.Equipment.join(', ')}
+                                                {programDay.Equipment.join(', ')}
                                             </ThemedText>
                                         </ThemedView>
                                     </ThemedView>
@@ -104,7 +137,7 @@ const ProgramDayScreen = () => {
                                         <ThemedView style={styles.attribute}>
                                             <Icon name='yoga' size={moderateScale(18)} color={themeColors.text} />
                                             <ThemedText type='body' style={styles.attributeText}>
-                                                {day.MuscleGroups.join(', ')}
+                                                {programDay.MuscleGroups.join(', ')}
                                             </ThemedText>
                                         </ThemedView>
                                     </ThemedView>
@@ -113,9 +146,9 @@ const ProgramDayScreen = () => {
                         </ThemedView>
                     }
                 />
-                {!day.RestDay && (
+                {!programDay.RestDay && (
                     <ThemedView style={[styles.exercisesContainer, { backgroundColor: themeColors.backgroundTertiary }]}>
-                        {day.Exercises && day.Exercises.map((exercise) => <ExerciseCard key={exercise.ExerciseId} exercise={exercise} />)}
+                        {programDay.Exercises && programDay.Exercises.map((exercise) => <ExerciseCard key={exercise.ExerciseId} exercise={exercise} />)}
                     </ThemedView>
                 )}
             </Animated.ScrollView>
@@ -126,7 +159,7 @@ const ProgramDayScreen = () => {
                     style={[styles.completeButton, { backgroundColor: themeColors.buttonPrimary }]}
                     onPress={handleCompleteDay}
                 />
-                {day.RestDay && ( // Show mobility button only on rest day
+                {programDay.RestDay && (
                     <TextButton
                         text='Mobility Workouts'
                         textStyle={[{ color: themeColors.text }]}
@@ -149,7 +182,7 @@ const ProgramDayScreen = () => {
 const styles = StyleSheet.create({
     contentContainer: {
         paddingRight: 8,
-        paddingBottom: 90, // Add padding to ensure content doesn't overlap with the bottom bar
+        paddingBottom: 90,
     },
     container: {
         marginRight: '27%',
@@ -196,12 +229,27 @@ const styles = StyleSheet.create({
         borderWidth: StyleSheet.hairlineWidth,
         paddingVertical: spacing.md,
         marginTop: spacing.md,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0,
+        shadowRadius: 0,
+        elevation: 0,
     },
     tipContainer: {
         flexDirection: 'row',
         alignItems: 'flex-start',
         paddingHorizontal: spacing.sm,
         backgroundColor: 'transparent',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: spacing.lg,
     },
 });
 

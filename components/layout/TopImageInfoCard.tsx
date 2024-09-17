@@ -45,7 +45,6 @@ export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
     const themeColors = Colors[colorScheme]; // Access theme-specific colors
-
     return (
         <TouchableOpacity onPress={onPress} style={[styles.container, containerStyle]} activeOpacity={1}>
             <Image source={image} style={[styles.image, imageStyle]} placeholder={placeholder} />
