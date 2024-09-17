@@ -21,14 +21,21 @@ interface ProgramState {
     allProgramsState: REQUEST_STATE;
     program: Program | null;
     programState: REQUEST_STATE;
-    programDay: ProgramDay | null;
-    programDayState: REQUEST_STATE;
     activeProgram: Program | null;
     activeProgramState: REQUEST_STATE;
-    activeProgramCurrentDay: ProgramDay | null;
-    activeProgramCurrentDayState: REQUEST_STATE;
-    activeProgramNextDays: ProgramDay[];
-    activeProgramNextDaysState: REQUEST_STATE;
+    programDays: {
+        [programId: string]: {
+            [dayId: string]: ProgramDay;
+        };
+    };
+    programDaysState: {
+        [programId: string]: {
+            [dayId: string]: REQUEST_STATE;
+        };
+    };
+    activeProgramCurrentDayId: string | null;
+    activeProgramNextDayIds: string[];
+    programDaysError: string | null;
     error: string | null;
 }
 
@@ -39,14 +46,13 @@ const initialState: ProgramState = {
     allProgramsState: REQUEST_STATE.IDLE,
     program: null,
     programState: REQUEST_STATE.IDLE,
-    programDay: null,
-    programDayState: REQUEST_STATE.IDLE,
     activeProgram: null,
     activeProgramState: REQUEST_STATE.IDLE,
-    activeProgramCurrentDay: null,
-    activeProgramCurrentDayState: REQUEST_STATE.IDLE,
-    activeProgramNextDays: [] as ProgramDay[],
-    activeProgramNextDaysState: REQUEST_STATE.IDLE,
+    programDays: {},
+    programDaysState: {},
+    activeProgramCurrentDayId: null,
+    activeProgramNextDayIds: [],
+    programDaysError: null,
     error: null,
 };
 
@@ -92,18 +98,6 @@ const programSlice = createSlice({
                 state.programState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'An error occurred';
             })
-            .addCase(getProgramDayAsync.pending, (state) => {
-                state.programDayState = REQUEST_STATE.PENDING;
-                state.error = null;
-            })
-            .addCase(getProgramDayAsync.fulfilled, (state, action: PayloadAction<ProgramDay | undefined>) => {
-                state.programDayState = REQUEST_STATE.FULFILLED;
-                state.programDay = action.payload || null;
-            })
-            .addCase(getProgramDayAsync.rejected, (state, action) => {
-                state.programDayState = REQUEST_STATE.REJECTED;
-                state.error = action.error.message || 'An error occurred';
-            })
             .addCase(getActiveProgramAsync.pending, (state) => {
                 state.activeProgramState = REQUEST_STATE.PENDING;
                 state.error = null;
@@ -116,29 +110,86 @@ const programSlice = createSlice({
                 state.activeProgramState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'An error occurred';
             })
-            .addCase(getActiveProgramCurrentDayAsync.pending, (state) => {
-                state.activeProgramCurrentDayState = REQUEST_STATE.PENDING;
-                state.error = null;
+            .addCase(getProgramDayAsync.pending, (state, action) => {
+                const { programId, dayId } = action.meta.arg;
+                if (!state.programDaysState[programId]) {
+                    state.programDaysState[programId] = {};
+                }
+                state.programDaysState[programId][dayId] = REQUEST_STATE.PENDING;
+                state.programDaysError = null;
             })
-            .addCase(getActiveProgramCurrentDayAsync.fulfilled, (state, action: PayloadAction<ProgramDay | undefined>) => {
-                state.activeProgramCurrentDayState = REQUEST_STATE.FULFILLED;
-                state.activeProgramCurrentDay = action.payload || null;
+            .addCase(getProgramDayAsync.fulfilled, (state, action) => {
+                const { programId, dayId } = action.meta.arg;
+                if (!state.programDays[programId]) {
+                    state.programDays[programId] = {};
+                }
+                state.programDays[programId][dayId] = action.payload;
+                state.programDaysState[programId][dayId] = REQUEST_STATE.FULFILLED;
+            })
+            .addCase(getProgramDayAsync.rejected, (state, action) => {
+                const { programId, dayId } = action.meta.arg;
+                state.programDaysState[programId][dayId] = REQUEST_STATE.REJECTED;
+                state.programDaysError = action.error.message || 'An error occurred';
+            })
+            // Update getActiveProgramCurrentDayAsync
+            .addCase(getActiveProgramCurrentDayAsync.pending, (state) => {
+                const programId = state.userProgramProgress?.ProgramId;
+                const dayId = state.userProgramProgress?.CurrentDay;
+                if (programId && dayId) {
+                    if (!state.programDaysState[programId]) {
+                        state.programDaysState[programId] = {};
+                    }
+                    state.programDaysState[programId][dayId] = REQUEST_STATE.PENDING;
+                    state.programDaysError = null;
+                }
+            })
+            .addCase(getActiveProgramCurrentDayAsync.fulfilled, (state, action) => {
+                const programId = state.userProgramProgress?.ProgramId;
+                const dayId = state.userProgramProgress?.CurrentDay;
+                if (programId && dayId) {
+                    if (!state.programDays[programId]) {
+                        state.programDays[programId] = {};
+                    }
+                    state.programDays[programId][dayId] = action.payload;
+                    state.programDaysState[programId][dayId] = REQUEST_STATE.FULFILLED;
+                    state.activeProgramCurrentDayId = dayId; // Store the current day ID
+                }
             })
             .addCase(getActiveProgramCurrentDayAsync.rejected, (state, action) => {
-                state.activeProgramCurrentDayState = REQUEST_STATE.REJECTED;
-                state.error = action.error.message || 'An error occurred';
+                const programId = state.userProgramProgress?.ProgramId;
+                const dayId = state.userProgramProgress?.CurrentDay;
+                if (programId && dayId) {
+                    state.programDaysState[programId][dayId] = REQUEST_STATE.REJECTED;
+                    state.programDaysError = action.error.message || 'An error occurred';
+                }
             })
             .addCase(getActiveProgramNextDaysAsync.pending, (state) => {
-                state.activeProgramNextDaysState = REQUEST_STATE.PENDING;
-                state.error = null;
+                const programId = state.userProgramProgress?.ProgramId;
+                if (programId) {
+                    if (!state.programDaysState[programId]) {
+                        state.programDaysState[programId] = {};
+                    }
+                    state.programDaysError = null;
+                }
             })
-            .addCase(getActiveProgramNextDaysAsync.fulfilled, (state, action: PayloadAction<ProgramDay[]>) => {
-                state.activeProgramNextDaysState = REQUEST_STATE.FULFILLED;
-                state.activeProgramNextDays = action.payload || [];
+            .addCase(getActiveProgramNextDaysAsync.fulfilled, (state, action) => {
+                const programId = state.userProgramProgress?.ProgramId;
+                if (programId) {
+                    if (!state.programDays[programId]) {
+                        state.programDays[programId] = {};
+                    }
+                    const nextDayIds: string[] = [];
+                    action.payload.forEach((programDay) => {
+                        const dayId = programDay.DayId;
+                        state.programDays[programId][dayId] = programDay;
+                        state.programDaysState[programId][dayId] = REQUEST_STATE.FULFILLED;
+                        nextDayIds.push(dayId);
+                    });
+                    state.activeProgramNextDayIds = nextDayIds; // Store next day IDs
+                }
             })
             .addCase(getActiveProgramNextDaysAsync.rejected, (state, action) => {
-                state.activeProgramNextDaysState = REQUEST_STATE.REJECTED;
-                state.error = action.error.message || 'An error occurred';
+                state.programDaysError = action.error.message || 'An error occurred';
             });
     },
 });

@@ -19,13 +19,14 @@ type ProgramDayOverviewCardProps = {
 };
 
 export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ day }) => {
-    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
-    const themeColors = Colors[colorScheme]; // Access theme-specific colors
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
     const navigation = useNavigation();
 
     const navigateToProgramDay = () => {
         navigation.navigate('programs/program-day', {
-            day: day,
+            programId: day.ProgramId,
+            dayId: day.DayId,
         });
     };
 
@@ -33,7 +34,7 @@ export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ 
         <LeftImageInfoCard
             image={{ uri: day.PhotoUrl }}
             onPress={navigateToProgramDay}
-            title={day.WorkoutDayTitle}
+            title={day.DayTitle}
             extraContent={
                 <ThemedView style={styles.attributeContainer}>
                     <ThemedView style={styles.attributeRow}>
@@ -48,15 +49,6 @@ export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ 
                             <ThemedView style={styles.attributeRow}>
                                 <Icon name='sleep' size={moderateScale(16)} color={themeColors.subText} />
                             </ThemedView>
-
-                            {/* <ThemedView style={styles.attributeRow}>
-                                <ThemedText
-                                    type='bodySmall'
-                                    style={[styles.attributeText, { color: themeColors.subText, marginLeft: 0, marginTop: spacing.xs }]}
-                                >
-                                    {day.Notes}
-                                </ThemedText>
-                            </ThemedView> */}
                         </ThemedView>
                     ) : (
                         // Display content for a workout day
