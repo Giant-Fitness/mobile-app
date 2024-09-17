@@ -10,13 +10,32 @@ export const getUserProgramProgressAsync = createAsyncThunk<UserProgramProgress,
     return await ProgramService.getUserProgramProgress();
 });
 
-export const getAllProgramsAsync = createAsyncThunk<Program[], void>(actionTypes.GET_ALL_PROGRAMS, async () => {
+export const getAllProgramsAsync = createAsyncThunk<Program[], void>(actionTypes.GET_ALL_PROGRAMS, async (_, { getState, rejectWithValue }) => {
+    const state = getState() as RootState;
+    // If programs are already loaded, return them
+    if (state.programs.allProgramsState === REQUEST_STATE.FULFILLED) {
+        return Object.values(state.programs.programs);
+    }
     return await ProgramService.getAllPrograms();
 });
 
-export const getProgramAsync = createAsyncThunk<Program | undefined, { programId: string }>(actionTypes.GET_PROGRAM, async ({ programId }, thunkAPI) => {
-    return await ProgramService.getProgram(programId);
-});
+export const getProgramAsync = createAsyncThunk<Program | undefined, { programId: string }, { state: RootState }>(
+    actionTypes.GET_PROGRAM,
+    async ({ programId }, { getState, rejectWithValue }) => {
+        const state = getState();
+        const existingProgram = state.programs.programs[programId];
+        if (existingProgram) {
+            // If already exists, return it
+            return existingProgram;
+        }
+
+        const program = await ProgramService.getProgram(programId);
+        if (!program) {
+            return rejectWithValue('Program not found.');
+        }
+        return program;
+    },
+);
 
 export const getProgramDayAsync = createAsyncThunk<ProgramDay, { programId: string; dayId: string }, { state: RootState }>(
     actionTypes.GET_PROGRAM_DAY,
@@ -46,6 +65,12 @@ export const getActiveProgramAsync = createAsyncThunk<Program | undefined, void,
 
         if (!programId) {
             return rejectWithValue('Program ID not found in user progress.');
+        }
+
+        const existingProgram = state.programs.programs[programId];
+        if (existingProgram) {
+            // If already exists, return it
+            return existingProgram;
         }
 
         return await ProgramService.getProgram(programId);

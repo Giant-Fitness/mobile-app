@@ -31,8 +31,9 @@ export default function ActiveProgramHome() {
     const {
         userProgramProgress,
         userProgramProgressState,
-        activeProgram,
-        activeProgramState,
+        programs,
+        programsState,
+        activeProgramId,
         programDays,
         programDaysState,
         activeProgramCurrentDayId,
@@ -42,7 +43,12 @@ export default function ActiveProgramHome() {
 
     const { workoutQuote, workoutQuoteState, restDayQuote, restDayQuoteState, error: quoteError } = useSelector((state: RootState) => state.quotes);
 
-    const programId = userProgramProgress?.ProgramId;
+    // Use activeProgramId directly
+    const programId = activeProgramId;
+
+    // Get the active program from the normalized state
+    const activeProgram = activeProgramId ? programs[activeProgramId] : null;
+    const activeProgramState = activeProgramId ? programsState[activeProgramId] : REQUEST_STATE.IDLE;
 
     // Get the current day from the normalized state
     const activeProgramCurrentDay = programId && activeProgramCurrentDayId ? programDays[programId]?.[activeProgramCurrentDayId] : null;
@@ -125,11 +131,11 @@ export default function ActiveProgramHome() {
                         Week {userProgramProgress?.Week} of {activeProgram?.Weeks}
                     </ThemedText>
                     {/* <ProgressBar
-                        completedParts={Number(userProgramProgress.Week) - 1}
-                        currentPart={Number(userProgramProgress.Week)}
-                        parts={Number(activeProgram.Weeks)}
-                        containerWidth={screenWidth - spacing.xxl}
-                    /> */}
+            completedParts={Number(userProgramProgress.Week) - 1}
+            currentPart={Number(userProgramProgress.Week)}
+            parts={Number(activeProgram.Weeks)}
+            containerWidth={screenWidth - spacing.xxl}
+          /> */}
                 </ThemedView>
 
                 <ThemedView style={[styles.activeCardContainer]}>

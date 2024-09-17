@@ -17,12 +17,15 @@ import { ProgramDay, Program, UserProgramProgress } from '@/type/types';
 interface ProgramState {
     userProgramProgress: UserProgramProgress | null;
     userProgramProgressState: REQUEST_STATE;
-    programs: Program[];
+    programs: {
+        [programId: string]: Program;
+    };
+    programsState: {
+        [programId: string]: REQUEST_STATE;
+    };
     allProgramsState: REQUEST_STATE;
-    program: Program | null;
-    programState: REQUEST_STATE;
-    activeProgram: Program | null;
-    activeProgramState: REQUEST_STATE;
+    activeProgramId: string | null;
+    selectedProgramId: string | null;
     programDays: {
         [programId: string]: {
             [dayId: string]: ProgramDay;
@@ -42,12 +45,11 @@ interface ProgramState {
 const initialState: ProgramState = {
     userProgramProgress: null,
     userProgramProgressState: REQUEST_STATE.IDLE,
-    programs: [] as Program[],
+    programs: {},
+    programsState: {},
     allProgramsState: REQUEST_STATE.IDLE,
-    program: null,
-    programState: REQUEST_STATE.IDLE,
-    activeProgram: null,
-    activeProgramState: REQUEST_STATE.IDLE,
+    activeProgramId: null,
+    selectedProgramId: null,
     programDays: {},
     programDaysState: {},
     activeProgramCurrentDayId: null,
@@ -80,34 +82,53 @@ const programSlice = createSlice({
             })
             .addCase(getAllProgramsAsync.fulfilled, (state, action: PayloadAction<Program[]>) => {
                 state.allProgramsState = REQUEST_STATE.FULFILLED;
-                state.programs = action.payload || [];
+                action.payload.forEach((program) => {
+                    state.programs[program.ProgramId] = program;
+                    state.programsState[program.ProgramId] = REQUEST_STATE.FULFILLED;
+                });
             })
             .addCase(getAllProgramsAsync.rejected, (state, action) => {
                 state.allProgramsState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'An error occurred';
             })
-            .addCase(getProgramAsync.pending, (state) => {
-                state.programState = REQUEST_STATE.PENDING;
+            .addCase(getProgramAsync.pending, (state, action) => {
+                const { programId } = action.meta.arg;
+                state.programsState[programId] = REQUEST_STATE.PENDING;
                 state.error = null;
             })
             .addCase(getProgramAsync.fulfilled, (state, action: PayloadAction<Program | undefined>) => {
-                state.programState = REQUEST_STATE.FULFILLED;
-                state.program = action.payload || null;
+                if (action.payload) {
+                    const program = action.payload;
+                    state.programs[program.ProgramId] = program;
+                    state.programsState[program.ProgramId] = REQUEST_STATE.FULFILLED;
+                    state.selectedProgramId = program.ProgramId; // Set the selected program ID
+                }
             })
             .addCase(getProgramAsync.rejected, (state, action) => {
-                state.programState = REQUEST_STATE.REJECTED;
+                const { programId } = action.meta.arg;
+                state.programsState[programId] = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'An error occurred';
             })
-            .addCase(getActiveProgramAsync.pending, (state) => {
-                state.activeProgramState = REQUEST_STATE.PENDING;
+            .addCase(getActiveProgramAsync.pending, (state, action) => {
+                const programId = state.userProgramProgress?.ProgramId;
+                if (programId) {
+                    state.programsState[programId] = REQUEST_STATE.PENDING;
+                }
                 state.error = null;
             })
             .addCase(getActiveProgramAsync.fulfilled, (state, action: PayloadAction<Program | undefined>) => {
-                state.activeProgramState = REQUEST_STATE.FULFILLED;
-                state.activeProgram = action.payload || null;
+                if (action.payload) {
+                    const program = action.payload;
+                    state.programs[program.ProgramId] = program;
+                    state.programsState[program.ProgramId] = REQUEST_STATE.FULFILLED;
+                    state.activeProgramId = program.ProgramId; // Set the active program ID
+                }
             })
             .addCase(getActiveProgramAsync.rejected, (state, action) => {
-                state.activeProgramState = REQUEST_STATE.REJECTED;
+                const programId = state.userProgramProgress?.ProgramId;
+                if (programId) {
+                    state.programsState[programId] = REQUEST_STATE.REJECTED;
+                }
                 state.error = action.error.message || 'An error occurred';
             })
             .addCase(getProgramDayAsync.pending, (state, action) => {
