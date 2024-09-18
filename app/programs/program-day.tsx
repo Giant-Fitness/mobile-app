@@ -29,6 +29,8 @@ type ProgramDayScreenParams = {
 };
 
 const ProgramDayScreen = () => {
+    // **1. All Hooks Called Unconditionally at the Top**
+
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
@@ -45,32 +47,19 @@ const ProgramDayScreen = () => {
     const programDay = useSelector((state: RootState) => state.programs.programDays[programId]?.[dayId]);
     const programDayState = useSelector((state: RootState) => state.programs.programDaysState[programId]?.[dayId]);
 
+    // **Data Fetching Hook**
     useEffect(() => {
         if (!programDay && programDayState !== REQUEST_STATE.PENDING) {
             dispatch(getProgramDayAsync({ programId, dayId }));
         }
     }, [programDay, programDayState, dispatch, programId, dayId]);
 
-    if (programDayState === REQUEST_STATE.PENDING || !programDay) {
-        return (
-            <ThemedView style={styles.loadingContainer}>
-                <ActivityIndicator size='large' color={themeColors.text} />
-            </ThemedView>
-        );
-    }
-
-    if (programDayState === REQUEST_STATE.REJECTED || !programDay) {
-        return (
-            <ThemedView style={styles.errorContainer}>
-                <ThemedText>Error loading the program day.</ThemedText>
-            </ThemedView>
-        );
-    }
-
+    // **Header Options Hook**
     useEffect(() => {
         navigation.setOptions({ headerShown: false });
     }, [navigation]);
 
+    // **Animated Hooks**
     const scrollY = useSharedValue(0);
 
     const scrollHandler = useAnimatedScrollHandler({
@@ -79,77 +68,98 @@ const ProgramDayScreen = () => {
         },
     });
 
+    // **Event Handlers**
     const handleCompleteDay = () => {
         console.log('Complete Day button pressed');
     };
 
+    // **2. Main Return with Conditional Rendering**
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
             <AnimatedHeader scrollY={scrollY} headerInterpolationStart={sizes.imageLargeHeight} headerInterpolationEnd={sizes.imageLargeHeight + spacing.xxl} />
-            <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} showsVerticalScrollIndicator={false}>
-                <TopImageInfoCard
-                    image={{ uri: programDay.PhotoUrl }}
-                    title={programDay.DayTitle}
-                    subtitle={`Week ${programDay.Week} Day ${programDay.Day}`}
-                    titleType='titleXLarge'
-                    subtitleStyle={{ marginBottom: spacing.md, color: themeColors.subText, marginTop: 0 }}
-                    titleStyle={{ marginBottom: spacing.xs }}
-                    containerStyle={{ elevation: 5, marginBottom: 0 }}
-                    contentContainerStyle={{
-                        backgroundColor: themeColors.background,
-                        paddingHorizontal: spacing.lg,
-                    }}
-                    imageStyle={{ height: sizes.imageXLargeHeight }}
-                    titleFirst={true}
-                    extraContent={
-                        <ThemedView>
-                            {programDay.RestDay ? (
-                                <ThemedView style={styles.tipContainer}>
-                                    <Icon
-                                        name='sleep'
-                                        size={moderateScale(16)}
-                                        color={themeColors.subText}
-                                        style={{ marginRight: spacing.sm, marginTop: spacing.xs }}
-                                    />
-                                    <ThemedText type='body' style={{ color: themeColors.subText }}>
-                                        {'Take it easy today! Focus on recovery and hydration.'}
-                                    </ThemedText>
-                                </ThemedView>
-                            ) : (
-                                <ThemedView>
-                                    <ThemedView style={styles.attributeRow}>
-                                        <ThemedView style={styles.attribute}>
-                                            <Icon name='stopwatch' size={moderateScale(18)} color={themeColors.text} />
-                                            <ThemedText type='body' style={styles.attributeText}>
-                                                {programDay.Time} mins
-                                            </ThemedText>
-                                        </ThemedView>
-                                    </ThemedView>
-                                    <ThemedView style={styles.attributeRow}>
-                                        <ThemedView style={styles.attribute}>
-                                            <Icon name='kettlebell' size={moderateScale(18)} color={themeColors.text} />
-                                            <ThemedText type='body' style={styles.attributeText}>
-                                                {programDay.Equipment.join(', ')}
-                                            </ThemedText>
-                                        </ThemedView>
-                                    </ThemedView>
-                                    <ThemedView style={styles.attributeRow}>
-                                        <ThemedView style={styles.attribute}>
-                                            <Icon name='yoga' size={moderateScale(18)} color={themeColors.text} />
-                                            <ThemedText type='body' style={styles.attributeText}>
-                                                {programDay.MuscleGroups.join(', ')}
-                                            </ThemedText>
-                                        </ThemedView>
-                                    </ThemedView>
-                                </ThemedView>
-                            )}
-                        </ThemedView>
-                    }
-                />
-                {!programDay.RestDay && (
-                    <ThemedView style={[styles.exercisesContainer, { backgroundColor: themeColors.backgroundTertiary }]}>
-                        {programDay.Exercises && programDay.Exercises.map((exercise) => <ExerciseCard key={exercise.ExerciseId} exercise={exercise} />)}
+            <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
+                {/* **Loading State** */}
+                {programDayState === REQUEST_STATE.PENDING && (
+                    <ThemedView style={styles.loadingContainer}>
+                        <ActivityIndicator size='large' color={themeColors.text} />
                     </ThemedView>
+                )}
+
+                {/* **Error State** */}
+                {programDayState === REQUEST_STATE.REJECTED && (
+                    <ThemedView style={styles.errorContainer}>
+                        <ThemedText>Error loading the program day.</ThemedText>
+                    </ThemedView>
+                )}
+
+                {/* **Loaded State** */}
+                {programDayState === REQUEST_STATE.FULFILLED && programDay && (
+                    <>
+                        <TopImageInfoCard
+                            image={{ uri: programDay.PhotoUrl }}
+                            title={programDay.DayTitle}
+                            subtitle={`Week ${programDay.Week} Day ${programDay.Day}`}
+                            titleType='titleXLarge'
+                            subtitleStyle={{ marginBottom: spacing.md, color: themeColors.subText, marginTop: 0 }}
+                            titleStyle={{ marginBottom: spacing.xs }}
+                            containerStyle={{ elevation: 5, marginBottom: 0 }}
+                            contentContainerStyle={{
+                                backgroundColor: themeColors.background,
+                                paddingHorizontal: spacing.lg,
+                            }}
+                            imageStyle={{ height: sizes.imageXLargeHeight }}
+                            titleFirst={true}
+                            extraContent={
+                                <ThemedView>
+                                    {programDay.RestDay ? (
+                                        <ThemedView style={styles.tipContainer}>
+                                            <Icon
+                                                name='sleep'
+                                                size={moderateScale(16)}
+                                                color={themeColors.subText}
+                                                style={{ marginRight: spacing.sm, marginTop: spacing.xs }}
+                                            />
+                                            <ThemedText type='body' style={{ color: themeColors.subText }}>
+                                                {'Take it easy today! Focus on recovery and hydration.'}
+                                            </ThemedText>
+                                        </ThemedView>
+                                    ) : (
+                                        <ThemedView>
+                                            <ThemedView style={styles.attributeRow}>
+                                                <ThemedView style={styles.attribute}>
+                                                    <Icon name='stopwatch' size={moderateScale(18)} color={themeColors.text} />
+                                                    <ThemedText type='body' style={styles.attributeText}>
+                                                        {programDay.Time} mins
+                                                    </ThemedText>
+                                                </ThemedView>
+                                            </ThemedView>
+                                            <ThemedView style={styles.attributeRow}>
+                                                <ThemedView style={styles.attribute}>
+                                                    <Icon name='kettlebell' size={moderateScale(18)} color={themeColors.text} />
+                                                    <ThemedText type='body' style={styles.attributeText}>
+                                                        {programDay.Equipment.join(', ')}
+                                                    </ThemedText>
+                                                </ThemedView>
+                                            </ThemedView>
+                                            <ThemedView style={styles.attributeRow}>
+                                                <ThemedView style={styles.attribute}>
+                                                    <Icon name='yoga' size={moderateScale(18)} color={themeColors.text} />
+                                                    <ThemedText type='body' style={styles.attributeText}>
+                                                        {programDay.MuscleGroups.join(', ')}
+                                                    </ThemedText>
+                                                </ThemedView>
+                                            </ThemedView>
+                                        </ThemedView>
+                                    )}
+                                </ThemedView>
+                            }
+                        />
+                        {!programDay.RestDay && (
+                            <ThemedView style={[styles.exercisesContainer, { backgroundColor: themeColors.backgroundTertiary }]}>
+                                {programDay.Exercises && programDay.Exercises.map((exercise) => <ExerciseCard key={exercise.ExerciseId} exercise={exercise} />)}
+                            </ThemedView>
+                        )}
+                    </>
                 )}
             </Animated.ScrollView>
             <ThemedView style={styles.buttonContainer}>
@@ -159,7 +169,7 @@ const ProgramDayScreen = () => {
                     style={[styles.completeButton, { backgroundColor: themeColors.buttonPrimary }]}
                     onPress={handleCompleteDay}
                 />
-                {programDay.RestDay && (
+                {programDay && programDay.RestDay && (
                     <TextButton
                         text='Mobility Workouts'
                         textStyle={[{ color: themeColors.text }]}

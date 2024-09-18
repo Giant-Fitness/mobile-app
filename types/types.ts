@@ -58,7 +58,7 @@ export interface Exercise {
     RepsUpper: number;
     RepsLower: number;
     Rest: string;
-    WeightInstructions: string;
+    ORMPercentage: number;
 }
 
 export interface ProgramDay {

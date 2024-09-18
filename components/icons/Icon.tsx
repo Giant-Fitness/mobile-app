@@ -124,7 +124,7 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = 18, color, 
         case 'star':
             return <AnimatedIonicons name='star' {...commonProps} />;
         case 'calculator':
-            return <AnimatedFontAwesome name='calculator' {...commonProps} />;
+            return <AnimatedAnt name='calculator' {...commonProps} />;
         default:
             return <AnimatedIonicons name='alert-circle-outline' {...commonProps} />;
     }
