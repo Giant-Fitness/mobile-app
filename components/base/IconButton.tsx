@@ -20,7 +20,11 @@ export const IconButton: React.FC<IconButtonProps> = ({ onPress, iconName, iconS
     const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     return (
-        <TouchableOpacity style={[styles.button, { backgroundColor: themeColors.primary }, style]} onPress={onPress}>
+        <TouchableOpacity
+            style={[styles.button, { backgroundColor: themeColors.background, borderColor: themeColors.systemBorderColor }, style]}
+            onPress={onPress}
+            activeOpacity={1}
+        >
             <Icon name={iconName} size={moderateScale(iconSize)} color={iconColor} />
         </TouchableOpacity>
     );
@@ -33,5 +37,6 @@ const styles = StyleSheet.create({
         width: moderateScale(30),
         height: moderateScale(30),
         borderRadius: moderateScale(15),
+        borderWidth: StyleSheet.hairlineWidth,
     },
 });

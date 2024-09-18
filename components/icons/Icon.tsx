@@ -1,7 +1,7 @@
 // components/icons/Icon.tsx
 
 import React from 'react';
-import { Ionicons, MaterialCommunityIcons, MaterialIcons, Entypo, Feather, AntDesign, FontAwesome } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons, MaterialIcons, Entypo, Feather, AntDesign, FontAwesome5 } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { StyleProp, TextStyle } from 'react-native';
@@ -14,7 +14,7 @@ const AnimatedMaterialIcons = Animated.createAnimatedComponent(MaterialIcons);
 const AnimatedEntypo = Animated.createAnimatedComponent(Entypo);
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 const AnimatedAnt = Animated.createAnimatedComponent(AntDesign);
-const AnimatedFontAwesome = Animated.createAnimatedComponent(FontAwesome);
+const AnimatedFontAwesome = Animated.createAnimatedComponent(FontAwesome5);
 
 type IconProps = {
     name: string;
@@ -123,6 +123,8 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = 18, color, 
             return <AnimatedIonicons name='list-circle' {...commonProps} />;
         case 'star':
             return <AnimatedIonicons name='star' {...commonProps} />;
+        case 'calculator':
+            return <AnimatedFontAwesome name='calculator' {...commonProps} />;
         default:
             return <AnimatedIonicons name='alert-circle-outline' {...commonProps} />;
     }

@@ -36,7 +36,7 @@ const sampleExercises: Exercise[] = [
         RepsUpper: 6,
         RepsLower: 4,
         Rest: '90s',
-        WeightInstructions: '90% of your One Rep Max (1RM)',
+        WeightInstructions: 'Use 90% of your One Rep Max (1RM)',
     },
     {
         ExerciseId: 'ex-2',
@@ -59,7 +59,7 @@ const sampleExercises: Exercise[] = [
         RepsUpper: 6,
         RepsLower: 4,
         Rest: '90s',
-        WeightInstructions: '90% of your One Rep Max (1RM)',
+        WeightInstructions: 'Use 90% of your One Rep Max (1RM)',
     },
     {
         ExerciseId: 'ex-3',
@@ -82,7 +82,7 @@ const sampleExercises: Exercise[] = [
         RepsUpper: 6,
         RepsLower: 4,
         Rest: '90s',
-        WeightInstructions: '90% of your One Rep Max (1RM)',
+        WeightInstructions: 'Use 90% of your One Rep Max (1RM)',
     },
 ];
 

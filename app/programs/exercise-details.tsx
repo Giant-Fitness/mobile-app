@@ -13,6 +13,7 @@ import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native
 import { sizes } from '@/utils/sizes';
 import { spacing } from '@/utils/spacing';
 import { TextButton } from '@/components/base/TextButton';
+import { IconButton } from '@/components/base/IconButton';
 import { moderateScale, verticalScale } from '@/utils/scaling';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThumbnailVideoPlayer } from '@/components/video/ThumbnailVideoPlayer';
@@ -80,10 +81,6 @@ const ExerciseDetailsScreen = () => {
                         <ThemedView style={styles.titleContainer}>
                             <ThemedText type='titleLarge'>{exercise.ExerciseName}</ThemedText>
                         </ThemedView>
-                        <View style={styles.container}>
-                            <Button title='Open 1RM Calculator' onPress={openCalculator} />
-                            <OneRepMaxCalculator visible={isCalculatorVisible} onClose={closeCalculator} />
-                        </View>
                         {/* Attributes in a Row with Bullets */}
                         <ThemedView style={styles.attributeRow}>
                             {/* Attribute 1: Reps */}
@@ -122,6 +119,7 @@ const ExerciseDetailsScreen = () => {
                     </ThemedView>
                 </ThemedView>
             </Animated.ScrollView>
+            <OneRepMaxCalculator visible={isCalculatorVisible} onClose={closeCalculator} />
 
             <ThemedView style={styles.buttonContainer}>
                 <TextButton
@@ -130,6 +128,7 @@ const ExerciseDetailsScreen = () => {
                     style={[styles.logButton, { backgroundColor: themeColors.buttonPrimary }]}
                     onPress={handleLogExercise}
                 />
+                <IconButton iconName='calculator' onPress={openCalculator} iconSize={spacing.lg} iconColor={themeColors.text} style={styles.calculatorButton} />
             </ThemedView>
         </ThemedView>
     );
@@ -148,18 +147,29 @@ const styles = StyleSheet.create({
         paddingBottom: spacing.lg,
     },
     buttonContainer: {
-        flexDirection: 'column',
-        alignItems: 'center',
-        paddingHorizontal: '10%',
         position: 'absolute',
         bottom: verticalScale(30),
-        left: 0,
         right: 0,
+        flexDirection: 'row',
+        alignItems: 'center',
         backgroundColor: 'transparent',
+        paddingHorizontal: spacing.md,
     },
     logButton: {
-        width: '100%',
+        width: '75%',
+        flexDirection: 'row',
+        alignItems: 'center',
         paddingVertical: spacing.md,
+        marginRight: spacing.sm,
+    },
+    calculatorButton: {
+        width: spacing.xxxl,
+        height: spacing.xxxl,
+        borderRadius: spacing.xxl,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0,
+        shadowRadius: 0,
+        elevation: 0,
     },
     tipContainer: {
         flexDirection: 'row',
