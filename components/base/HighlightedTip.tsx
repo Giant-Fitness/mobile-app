@@ -1,7 +1,7 @@
 // components/base/HighlightedTip.tsx
 
 import React from 'react';
-import { StyleSheet, View, Platform } from 'react-native';
+import { StyleSheet, View, Platform, ViewStyle } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
 import { Icon } from '@/components/icons/Icon';
@@ -13,30 +13,26 @@ import { spacing } from '@/utils/spacing';
 type HighlightedTipProps = {
     iconName: string;
     tipText: string;
+    disableIcon?: boolean;
+    textType?: string;
+    containerStyle?: ViewStyle;
 };
 
-export const HighlightedTip: React.FC<HighlightedTipProps> = ({ iconName, tipText }) => {
+export const HighlightedTip: React.FC<HighlightedTipProps> = ({ iconName, tipText, disableIcon = false, textType = 'bodySmall', containerStyle }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
     return (
-        <View style={[styles.container, styles.shadow]}>
-            <ThemedView style={[styles.tipContainer, { backgroundColor: themeColors.tipBackground }]}>
-                <Icon name={iconName} size={moderateScale(14)} color={themeColors.tipIcon} style={styles.tipIcon} />
-                <ThemedText type='bodySmall' style={[styles.tipText, { color: themeColors.tipText }]}>
-                    {tipText}
-                </ThemedText>
-            </ThemedView>
-        </View>
+        <ThemedView style={[styles.tipContainer, styles.shadow, { backgroundColor: themeColors.tipBackground }, containerStyle]}>
+            {!disableIcon && <Icon name={iconName} size={moderateScale(14)} color={themeColors.tipIcon} style={styles.tipIcon} />}
+            <ThemedText type={textType} style={[styles.tipText, { color: themeColors.tipText }]}>
+                {tipText}
+            </ThemedText>
+        </ThemedView>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        borderRadius: spacing.xl,
-        marginHorizontal: spacing.lg,
-        backgroundColor: Platform.OS === 'android' ? Colors.light.tipBackground : 'transparent', // Important for Android shadows
-    },
     shadow: {
         // iOS Shadow
         shadowColor: 'rgba(0,80,0,0.25)',
@@ -51,8 +47,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: spacing.sm,
         paddingHorizontal: spacing.lg,
+        marginHorizontal: spacing.lg,
         borderRadius: spacing.xl, // Must match the container's borderRadius
-        // Ensure no shadow properties here
     },
     tipIcon: {
         marginRight: spacing.sm,

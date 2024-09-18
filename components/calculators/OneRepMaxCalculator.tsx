@@ -10,6 +10,7 @@ import { Icon } from '@/components/icons/Icon';
 import { scale, moderateScale } from '@/utils/scaling';
 import { TextButton } from '@/components/base/TextButton';
 import MathView from 'react-native-math-view';
+import { HighlightedTip } from '@/components/base/HighlightedTip';
 
 interface OneRepMaxCalculatorProps {
     visible: boolean;
@@ -24,6 +25,7 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
     const [reps, setReps] = useState<string>('');
     const [oneRM, setOneRM] = useState<number | null>(null);
     const [error, setError] = useState<string>('');
+    const [isResultVisible, setIsResultVisible] = useState(false);
 
     // Reset state when the calculator is closed
     useEffect(() => {
@@ -41,12 +43,13 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
         if (isNaN(w) || isNaN(r) || r <= 0) {
             setError('Please enter valid numbers for weight and repetitions.');
             setOneRM(null);
+            setIsResultVisible(false);
             return;
         }
         setError('');
-        // Epley Formula: 1RM = w * (1 + r / 30)
         const calculatedOneRM = w * (1 + r / 30);
         setOneRM(Math.round(calculatedOneRM));
+        setIsResultVisible(true); // Show the result and hide the calculator
     };
 
     // Percentage table based on Epley formula
@@ -91,108 +94,126 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
                     </ThemedText>
                 </ThemedView>
 
-                <ThemedView style={[styles.calculator, { backgroundColor: themeColors.background, borderColor: themeColors.systemBorderColor }]}>
-                    {/* Input Fields */}
-                    <ThemedView style={styles.inputWrapper}>
-                        {/* Weight Input */}
-                        <ThemedView style={styles.inputRow}>
-                            <ThemedText type='buttonSmall' style={styles.label}>
-                                Weight (kgs)
-                            </ThemedText>
-                            <TextInput
-                                style={[
-                                    styles.input,
-                                    {
-                                        backgroundColor: themeColors.background,
-                                        color: themeColors.text,
-                                        borderColor: themeColors.systemBorderColor,
-                                    },
-                                ]}
-                                keyboardType='numeric'
-                                value={weight}
-                                onChangeText={setWeight}
-                                accessibilityLabel='Weight input'
-                                placeholder='0'
-                                placeholderTextColor={themeColors.subText}
-                            />
-                        </ThemedView>
-
-                        {/* Reps Input */}
-                        <ThemedView style={styles.inputRow}>
-                            <ThemedText type='buttonSmall' style={styles.label}>
-                                Reps
-                            </ThemedText>
-                            <TextInput
-                                style={[
-                                    styles.input,
-                                    {
-                                        backgroundColor: themeColors.background,
-                                        color: themeColors.text,
-                                        borderColor: themeColors.systemBorderColor,
-                                    },
-                                ]}
-                                keyboardType='numeric'
-                                value={reps}
-                                onChangeText={setReps}
-                                accessibilityLabel='Repetitions input'
-                                placeholder='0'
-                                placeholderTextColor={themeColors.subText}
-                            />
-                        </ThemedView>
-                    </ThemedView>
-
-                    {/* Error Message */}
-                    {error ? (
-                        <ThemedText type='bodySmall' style={[styles.errorText, { color: themeColors.red }]}>
-                            {error}
-                        </ThemedText>
-                    ) : null}
-
-                    {/* Calculate Button */}
-                    <View>
-                        <TextButton
-                            text='Calculate 1RM'
-                            textType='bodyMedium'
-                            style={[styles.button, { backgroundColor: themeColors.buttonPrimary }]}
-                            onPress={calculateOneRM}
-                        />
-                    </View>
-                </ThemedView>
-
-                {/* Results */}
-                {oneRM && (
+                {isResultVisible && oneRM ? (
                     <ThemedView style={styles.resultContainer}>
                         {/* Estimated 1RM */}
-                        <ThemedText type='subtitle' style={styles.resultTitle}>
-                            Your Estimated 1RM: {oneRM} kgs
-                        </ThemedText>
-
-                        {/* Percentage Table */}
-                        <ThemedText type='subtitle' style={styles.subtitle}>
-                            1RM Percentage Table
-                        </ThemedText>
-
-                        <ThemedView style={[styles.tableHeader, { borderBottomColor: themeColors.systemBorderColor }]}>
-                            <ThemedText type='body' style={[styles.tableHeaderText, { color: themeColors.text }]}>
-                                % of 1RM
-                            </ThemedText>
-                            <ThemedText type='body' style={[styles.tableHeaderText, { color: themeColors.text }]}>
-                                Weight (kgs)
-                            </ThemedText>
+                        <ThemedView style={styles.resultTitle}>
+                            <HighlightedTip
+                                tipText={`Your Estimated 1RM: ${oneRM} kgs`}
+                                disableIcon={true}
+                                textType='bodyMedium'
+                                containerStyle={{ marginHorizontal: 0, borderRadius: spacing.sm }}
+                            />
                         </ThemedView>
 
-                        {percentageTable.map((row) => (
-                            <ThemedView key={row.percentage} style={[styles.tableRow, { borderBottomColor: themeColors.systemBorderColor }]}>
-                                <ThemedText type='bodySmall' style={[styles.tableText, { color: themeColors.text }]}>
-                                    {row.percentage}%
+                        {/* Percentage Table */}
+                        <ThemedView style={[styles.resultTable, { backgroundColor: themeColors.background, borderColor: themeColors.systemBorderColor }]}>
+                            <ThemedView style={[styles.tableHeader, { borderBottomColor: themeColors.systemBorderColor, backgroundColor: 'transparent' }]}>
+                                <ThemedText type='overline' style={[styles.tableHeaderText, { color: themeColors.text }]}>
+                                    % of 1RM
                                 </ThemedText>
-                                <ThemedText type='bodySmall' style={[styles.tableText, { color: themeColors.text }]}>
-                                    {row.weight} kgs
+                                <ThemedText type='overline' style={[styles.tableHeaderText, { color: themeColors.text }]}>
+                                    Weight (kgs)
                                 </ThemedText>
                             </ThemedView>
-                        ))}
+
+                            {percentageTable.map((row) => (
+                                <ThemedView
+                                    key={row.percentage}
+                                    style={[styles.tableRow, { borderTopColor: themeColors.systemBorderColor, backgroundColor: 'transparent' }]}
+                                >
+                                    <ThemedText type='bodySmall' style={[styles.tableTextLeft, { color: themeColors.text }]}>
+                                        {row.percentage}%
+                                    </ThemedText>
+                                    <ThemedText type='bodySmall' style={[styles.tableTextRight, { color: themeColors.text }]}>
+                                        {row.weight}
+                                    </ThemedText>
+                                </ThemedView>
+                            ))}
+                        </ThemedView>
+
+                        <TextButton
+                            text='Recalculate'
+                            textType='bodyMedium'
+                            style={[
+                                styles.recalcButton,
+                                { backgroundColor: themeColors.background, borderColor: themeColors.text, borderRadius: spacing.sm, flex: 1 },
+                            ]}
+                            textStyle={[{ color: themeColors.text }]}
+                            onPress={() => setIsResultVisible(false)}
+                        />
+                    </ThemedView>
+                ) : (
+                    <ThemedView style={[styles.calculator, { backgroundColor: themeColors.background, borderColor: themeColors.systemBorderColor }]}>
+                        {/* Input Fields */}
+                        <ThemedView style={styles.inputWrapper}>
+                            {/* Weight Input */}
+                            <ThemedView style={styles.inputRow}>
+                                <ThemedText type='buttonSmall' style={styles.label}>
+                                    Weight (kgs)
+                                </ThemedText>
+                                <TextInput
+                                    style={[
+                                        styles.input,
+                                        {
+                                            backgroundColor: themeColors.background,
+                                            color: themeColors.text,
+                                            borderColor: themeColors.systemBorderColor,
+                                        },
+                                    ]}
+                                    keyboardType='numeric'
+                                    value={weight}
+                                    onChangeText={setWeight}
+                                    accessibilityLabel='Weight input'
+                                    placeholder='0'
+                                    placeholderTextColor={themeColors.subText}
+                                />
+                            </ThemedView>
+
+                            {/* Reps Input */}
+                            <ThemedView style={styles.inputRow}>
+                                <ThemedText type='buttonSmall' style={styles.label}>
+                                    Reps
+                                </ThemedText>
+                                <TextInput
+                                    style={[
+                                        styles.input,
+                                        {
+                                            backgroundColor: themeColors.background,
+                                            color: themeColors.text,
+                                            borderColor: themeColors.systemBorderColor,
+                                        },
+                                    ]}
+                                    keyboardType='numeric'
+                                    value={reps}
+                                    onChangeText={setReps}
+                                    accessibilityLabel='Repetitions input'
+                                    placeholder='0'
+                                    placeholderTextColor={themeColors.subText}
+                                />
+                            </ThemedView>
+                        </ThemedView>
+
+                        {/* Error Message */}
+                        {error ? (
+                            <ThemedText type='bodySmall' style={[styles.errorText, { color: themeColors.red }]}>
+                                {error}
+                            </ThemedText>
+                        ) : null}
+
+                        {/* Calculate Button */}
+                        <View>
+                            <TextButton
+                                text='Calculate 1RM'
+                                textType='bodyMedium'
+                                style={[styles.button, { backgroundColor: themeColors.buttonPrimary }]}
+                                onPress={calculateOneRM}
+                            />
+                        </View>
                     </ThemedView>
                 )}
+
+                {/* Results */}
                 {/* Instructions */}
                 <ThemedText type='bodyMedium' style={styles.subtitle}>
                     How to Use the Calculator
@@ -223,9 +244,7 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
 
                     {/* Styled Formula */}
                     <ThemedView style={[styles.formulaContainer, { backgroundColor: themeColors.container, borderColor: themeColors.systemBorderColor }]}>
-                        <MathView
-                            math={'1RM = Weight \\times (1 + \\frac{Reps}{30})'}
-                        />
+                        <MathView math={'1RM = Weight \\times (1 + \\frac{Reps}{30})'} />
                     </ThemedView>
 
                     <ThemedText type='bodySmall' style={styles.methodology}>
@@ -256,6 +275,28 @@ const styles = StyleSheet.create({
     closeButton: {
         position: 'absolute',
         right: 0,
+    },
+    resultTable: {
+        paddingHorizontal: spacing.md,
+        paddingTop: spacing.md,
+        paddingBottom: spacing.lg,
+        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: spacing.sm,
+        marginHorizontal: spacing.sm,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    recalcButton: {
+        borderWidth: StyleSheet.hairlineWidth,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0,
+        shadowRadius: 0,
+        elevation: 0,
+        width: '60%',
+        alignSelf: 'center',
+        marginTop: spacing.lg,
     },
     descriptionContainer: {
         flexDirection: 'row',
@@ -336,8 +377,9 @@ const styles = StyleSheet.create({
         marginTop: spacing.lg,
     },
     resultTitle: {
-        marginBottom: spacing.sm,
+        marginBottom: spacing.lg,
         textAlign: 'center',
+        alignSelf: 'center',
     },
     tableHeader: {
         flexDirection: 'row',
@@ -350,8 +392,17 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingVertical: spacing.xs,
-        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderTopWidth: StyleSheet.hairlineWidth,
         paddingHorizontal: spacing.lg,
+    },
+    tableTextLeft: {
+        flex: 1,
+        textAlign: 'left', // Align percentage text to the left
+        marginLeft: spacing.md,
+    },
+    tableTextRight: {
+        textAlign: 'left', // Align weight text to the right
+        marginRight: spacing.xl,
     },
     cautionTitle: {
         marginLeft: spacing.xs,
