@@ -14,7 +14,7 @@ type ProgressBarProps = {
     containerWidth: number; // Width of the parent container
 };
 
-const ProgressBar: React.FC<ProgressBarProps> = ({ parts = 8, currentPart = 0, completedParts = 0, containerWidth }) => {
+export const ProgressBar: React.FC<ProgressBarProps> = ({ parts = 8, currentPart = 0, completedParts = 0, containerWidth }) => {
     const margin = spacing.xs; // Margin between pills
     const totalMarginSpace = margin * (parts - 1); // Total space taken by margins
     const partWidth = Math.floor((containerWidth - totalMarginSpace) / parts); // Adjusted part width
@@ -61,5 +61,3 @@ const styles = StyleSheet.create({
         borderRadius: spacing.xxs,
     },
 });
-
-export default ProgressBar;

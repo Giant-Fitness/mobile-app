@@ -126,7 +126,7 @@ export default function WorkoutDetailScreen() {
                             {/* Attribute 1: Length */}
                             <View style={styles.attributeItem}>
                                 <Icon name='stopwatch' size={verticalScale(14)} color={themeColors.text} />
-                                <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.text }]}>
+                                <ThemedText type='buttonSmall' style={[styles.attributeText, { color: themeColors.text }]}>
                                     {length}
                                 </ThemedText>
                             </View>
@@ -134,7 +134,7 @@ export default function WorkoutDetailScreen() {
                             {/* Attribute 2: Level */}
                             <View style={styles.attributeItem}>
                                 <Icon name={levelIcon} size={verticalScale(12)} color={themeColors.text} />
-                                <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.text }]}>
+                                <ThemedText type='buttonSmall' style={[styles.attributeText, { color: themeColors.text }]}>
                                     {level}
                                 </ThemedText>
                             </View>
@@ -142,7 +142,7 @@ export default function WorkoutDetailScreen() {
                             {/* Attribute 3: Equipment */}
                             <View style={styles.attributeItem}>
                                 <Icon name='kettlebell' size={verticalScale(14)} color={themeColors.text} />
-                                <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.text }]}>
+                                <ThemedText type='buttonSmall' style={[styles.attributeText, { color: themeColors.text }]}>
                                     {equipment}
                                 </ThemedText>
                             </View>
@@ -150,7 +150,7 @@ export default function WorkoutDetailScreen() {
                             {/* Attribute 4: Focus */}
                             <View style={styles.attributeItem}>
                                 <Icon name='yoga' size={verticalScale(14)} color={themeColors.text} />
-                                <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.text }]}>
+                                <ThemedText type='buttonSmall' style={[styles.attributeText, { color: themeColors.text }]}>
                                     {focusMultiText}
                                 </ThemedText>
                             </View>

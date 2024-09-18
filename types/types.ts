@@ -64,8 +64,6 @@ export interface Exercise {
 export interface ProgramDay {
     ProgramId: string;
     DayId: string;
-    Week: string;
-    Day: string;
     DayTitle: string;
     RestDay: boolean;
     Exercises: Exercise[];
@@ -82,8 +80,6 @@ export interface UserProgramProgress {
     UserId: string;
     ProgramId: string;
     CurrentDay: string;
-    Week: string;
-    Day: string;
     StartDate: string;
     LastActivityDate: string;
 }

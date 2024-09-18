@@ -17,6 +17,7 @@ type TopImageInfoCardProps = {
     title: string;
     subtitle?: string;
     titleType?: ThemedTextProps['type']; // Use ThemedTextProps for titleType
+    subtitleType?: ThemedTextProps['type']; // Use ThemedTextProps for subtitleType
     extraContent?: React.ReactNode;
     containerStyle?: StyleProp<ViewStyle>;
     imageStyle?: StyleProp<ImageStyle>;
@@ -39,7 +40,8 @@ export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
     titleStyle,
     subtitleStyle,
     titleType = 'title',
-    placeholder = '@/assets/images/adaptive-icon.png',
+    subtitleType = 'body',
+    placeholder = '@/assets/images/vb.webp',
     titleFirst = false,
     onPress,
 }) => {
@@ -55,11 +57,19 @@ export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
                         <ThemedText type={titleType} style={[styles.title, titleStyle]}>
                             {title}
                         </ThemedText>
-                        {subtitle && <ThemedText style={[styles.subtitle, subtitleStyle]}>{subtitle}</ThemedText>}
+                        {subtitle && (
+                            <ThemedText type={subtitleType} style={[styles.subtitle, subtitleStyle]}>
+                                {subtitle}
+                            </ThemedText>
+                        )}
                     </>
                 ) : (
                     <>
-                        {subtitle && <ThemedText style={[styles.subtitle, subtitleStyle]}>{subtitle}</ThemedText>}
+                        {subtitle && (
+                            <ThemedText type={subtitleType} style={[styles.subtitle, subtitleStyle]}>
+                                {subtitle}
+                            </ThemedText>
+                        )}
                         <ThemedText type={titleType} style={[styles.title, titleStyle]}>
                             {title}
                         </ThemedText>
@@ -95,6 +105,5 @@ const styles = StyleSheet.create({
     },
     subtitle: {
         marginTop: spacing.xxs,
-        fontSize: moderateScale(14),
     },
 });

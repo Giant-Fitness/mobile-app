@@ -1,0 +1,120 @@
+// components/programs/ProgramDayDetailCard.tsx
+
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/Colors';
+import React from 'react';
+import { StyleSheet } from 'react-native';
+import { ThemedText } from '@/components/base/ThemedText';
+import { LeftImageInfoCard } from '@/components/layout/LeftImageInfoCard';
+import { ThemedView } from '@/components/base/ThemedView';
+import { useNavigation } from '@react-navigation/native';
+import { Icon } from '@/components/icons/Icon';
+import { moderateScale } from '@/utils/scaling';
+import { spacing } from '@/utils/spacing';
+import { sizes } from '@/utils/sizes';
+import { ProgramDay } from '@/types/types';
+import { getWeekNumber, getDayOfWeek } from '@/utils/calendar';
+
+type ProgramDayDetailCardProps = {
+    day: ProgramDay;
+};
+
+export const ProgramDayDetailCard: React.FC<ProgramDayDetailCardProps> = ({ day }) => {
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
+    const navigation = useNavigation();
+
+    const navigateToProgramDay = () => {
+        navigation.navigate('programs/program-day', {
+            programId: day.ProgramId,
+            dayId: day.DayId,
+        });
+    };
+
+    // **Calculate Current Week Based on dayId**
+    const currentDayNumber = parseInt(day.DayId, 10);
+    const currentWeek = getWeekNumber(currentDayNumber);
+    const dayOfWeek = getDayOfWeek(currentDayNumber);
+
+    return (
+        <LeftImageInfoCard
+            image={{ uri: day.PhotoUrl }}
+            onPress={navigateToProgramDay}
+            title={day.DayTitle}
+            extraContent={
+                <ThemedView style={styles.attributeContainer}>
+                    <ThemedView style={styles.attributeRow}>
+                        <ThemedText type='bodySmall' style={[{ color: themeColors.text }]}>
+                            {`Week ${currentWeek} Day ${dayOfWeek}`}
+                        </ThemedText>
+                    </ThemedView>
+
+                    {day.RestDay ? (
+                        // Display content for a rest day
+                        <ThemedView style={[{ backgroundColor: 'transparent' }]}>
+                            <ThemedView style={styles.attributeRow}>
+                                <Icon name='sleep' size={moderateScale(16)} color={themeColors.subText} />
+                            </ThemedView>
+                        </ThemedView>
+                    ) : (
+                        // Display content for a workout day
+                        <ThemedView style={styles.attributeRow}>
+                            <Icon name='stopwatch' size={moderateScale(14)} color={themeColors.text} />
+                            <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.text }]}>
+                                {`${day.Time} mins`}
+                            </ThemedText>
+                        </ThemedView>
+                    )}
+                </ThemedView>
+            }
+            containerStyle={styles.container}
+            titleStyle={[styles.title, { color: themeColors.text }]}
+            contentContainerStyle={styles.contentContainer}
+            imageStyle={styles.image}
+            imageContainerStyle={styles.imageContainer}
+        />
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flexDirection: 'row',
+        backgroundColor: 'transparent',
+        width: '100%',
+        marginBottom: spacing.lg,
+    },
+    title: {
+        fontSize: moderateScale(14),
+        marginBottom: 0,
+        marginLeft: spacing.xs,
+        marginTop: spacing.xs,
+    },
+    image: {
+        height: sizes.imageSmall,
+        width: sizes.imageMediumWidth,
+    },
+    imageContainer: {
+        borderRadius: spacing.xxs,
+    },
+    contentContainer: {
+        width: '100%',
+        marginLeft: spacing.sm,
+        backgroundColor: 'transparent',
+    },
+    attributeRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'transparent',
+        marginBottom: spacing.xs,
+        marginLeft: spacing.xs,
+    },
+    attributeText: {
+        marginLeft: spacing.xs,
+        lineHeight: spacing.md,
+        backgroundColor: 'transparent',
+    },
+    attributeContainer: {
+        marginTop: spacing.xxs,
+        backgroundColor: 'transparent',
+    },
+});

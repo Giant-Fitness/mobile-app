@@ -16,13 +16,14 @@ import { HighlightedTip } from '@/components/base/HighlightedTip';
 
 type ExerciseCardProps = {
     exercise: Exercise;
+    isEnrolled: boolean;
 };
 
 type RootStackParamList = {
     'programs/exercise-details': Exercise; // Define the expected parameter type
 };
 
-export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
+export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isEnrolled = false }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme as 'light' | 'dark'];
 
@@ -31,6 +32,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
     const navigateToExerciseDetail = () => {
         navigation.navigate('programs/exercise-details', {
             exercise: exercise,
+            isEnrolled: isEnrolled,
         });
     };
 
@@ -97,7 +99,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
                     text='Log'
                     onPress={() => console.log(`Logging exercise: ${exercise.ExerciseName}`)}
                     textType='bodyMedium'
-                    textStyle={[{ color: themeColors.background }]}
+                    textStyle={[{ color: themeColors.buttonPrimaryText }]}
                     style={[{ flex: 1, paddingVertical: spacing.sm + spacing.xxs, backgroundColor: themeColors.buttonPrimary, borderRadius: spacing.sm }]}
                 />
             </ThemedView>

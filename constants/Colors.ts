@@ -15,12 +15,14 @@ export const Colors = {
         container: '#f7f7f5', // Container background
         containerHighlight: '#1e221e', // Slightly adjusted to avoid too dark
         buttonPrimary: '#1e221e', // Darker button primary for contrast
+        buttonPrimaryText: '#fcfcfc', // Light button for contrast
         buttonSecondary: '#f7f7f5', // Secondary button background
         iconDefault: '#687076', // Default icon color
         iconSelected: '#0f0f0f', // Adjusted for visibility
         highlightContainerText: '#fafafa', // Text on highlighted containers
         white: '#FEFEFE', // White
         red: '#cc4533', // Error color
+        redTransparent: '#f7e5e3',
         warning: '#FFA500', // Optional: Warning color (e.g., for alerts)
         info: '#1E90FF', // Optional: Info color (e.g., for badges)
         transparent: 'rgba(255, 255, 255, 0)',
@@ -42,13 +44,15 @@ export const Colors = {
         systemBorderColor: 'rgba(100, 100, 100, 0.5)', // Darker border for more contrast
         container: '#202220', // Container background
         containerHighlight: '#2d2f2d', // Highlighted container
-        buttonPrimary: '#fefefe', // Light button for contrast
+        buttonPrimary: '#2d2f2d', // Light button for contrast
+        buttonPrimaryText: '#F6F8F6', // Light button for contrast
         buttonSecondary: '#2f312f', // Secondary button background
         iconDefault: '#B0B0B0', // Slightly brighter for visibility
         iconSelected: '#F6F6F6', // Selected icon color
         highlightContainerText: '#F6F8F6', // Text on highlighted containers
         white: '#FEFEFE', // White
         red: '#cc4533', // Error color
+        redTransparent: 'rgba(204, 69, 51, 0.5)',
         warning: '#FF8C00', // Optional: Warning color (darker orange)
         info: '#4682B4', // Optional: Info color (muted blue)
         transparent: 'rgba(0, 0, 0, 0)',

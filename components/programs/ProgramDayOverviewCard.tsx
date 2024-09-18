@@ -1,114 +1,66 @@
 // components/programs/ProgramDayOverviewCard.tsx
 
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
 import React from 'react';
-import { StyleSheet } from 'react-native';
-import { ThemedText } from '@/components/base/ThemedText';
-import { LeftImageInfoCard } from '@/components/layout/LeftImageInfoCard';
+import { StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
-import { useNavigation } from '@react-navigation/native';
-import { Icon } from '@/components/icons/Icon';
-import { moderateScale } from '@/utils/scaling';
+import { ThemedText } from '@/components/base/ThemedText';
+import { ProgramDay } from '@/type/types';
 import { spacing } from '@/utils/spacing';
 import { sizes } from '@/utils/sizes';
-import { ProgramDay } from '@/types/types';
+import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
-type ProgramDayOverviewCardProps = {
+interface ProgramDayOverviewCardProps {
     day: ProgramDay;
-};
+    onPress: () => void;
+    userProgramProgress?: UserProgramProgress;
+    isEnrolled: boolean;
+}
 
-export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ day }) => {
+const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ day, onPress, userProgramProgress, isEnrolled }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
-    const navigation = useNavigation();
 
-    const navigateToProgramDay = () => {
-        navigation.navigate('programs/program-day', {
-            programId: day.ProgramId,
-            dayId: day.DayId,
-        });
-    };
+    let backgroundColor = themeColors.background;
+    let borderColor = themeColors.systemBorderColor;
+    let textColor = themeColors.text;
+
+    if (isEnrolled && userProgramProgress) {
+        const dayNumber = parseInt(day.DayId);
+        const currentDayNumber = parseInt(userProgramProgress.CurrentDay);
+
+        if (dayNumber < currentDayNumber) {
+            backgroundColor = themeColors.tipBackground; // Completed
+            textColor = themeColors.subText;
+            borderColor = themeColors.backgroundTertiary;
+        } else if (dayNumber === currentDayNumber) {
+            backgroundColor = themeColors.accent; // Current Day
+            textColor = themeColors.white;
+        } else {
+            backgroundColor = themeColors.background; // Upcoming
+        }
+    } else {
+        backgroundColor = themeColors.background; // Non-enrolled users
+    }
 
     return (
-        <LeftImageInfoCard
-            image={{ uri: day.PhotoUrl }}
-            onPress={navigateToProgramDay}
-            title={day.DayTitle}
-            extraContent={
-                <ThemedView style={styles.attributeContainer}>
-                    <ThemedView style={styles.attributeRow}>
-                        <ThemedText type='bodySmall' style={[{ color: themeColors.text }]}>
-                            {`Week ${day.Week} Day ${day.Day}`}
-                        </ThemedText>
-                    </ThemedView>
-
-                    {day.RestDay ? (
-                        // Display content for a rest day
-                        <ThemedView style={[{ backgroundColor: 'transparent' }]}>
-                            <ThemedView style={styles.attributeRow}>
-                                <Icon name='sleep' size={moderateScale(16)} color={themeColors.subText} />
-                            </ThemedView>
-                        </ThemedView>
-                    ) : (
-                        // Display content for a workout day
-                        <ThemedView style={styles.attributeRow}>
-                            <Icon name='stopwatch' size={moderateScale(14)} color={themeColors.text} />
-                            <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.text }]}>
-                                {`${day.Time} mins`}
-                            </ThemedText>
-                        </ThemedView>
-                    )}
-                </ThemedView>
-            }
-            containerStyle={styles.container}
-            titleStyle={[styles.title, { color: themeColors.text }]}
-            contentContainerStyle={styles.contentContainer}
-            imageStyle={styles.image}
-            imageContainerStyle={styles.imageContainer}
-        />
+        <TouchableOpacity onPress={onPress} activeOpacity={1}>
+            <ThemedView style={[styles.card, { backgroundColor, borderColor, width: sizes.dayTile, height: sizes.dayTileHeight }]}>
+                <ThemedText style={[styles.dayNumber, { color: textColor }]}>{day.DayId}</ThemedText>
+            </ThemedView>
+        </TouchableOpacity>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-        backgroundColor: 'transparent',
-        width: '100%',
-        marginBottom: spacing.lg,
-    },
-    title: {
-        fontSize: moderateScale(14),
-        marginBottom: 0,
-        marginLeft: spacing.xs,
-        marginTop: spacing.xs,
-    },
-    image: {
-        height: sizes.imageSmall,
-        width: sizes.imageMediumWidth,
-    },
-    imageContainer: {
-        borderRadius: spacing.xxs,
-    },
-    contentContainer: {
-        width: '100%',
-        marginLeft: spacing.sm,
-        backgroundColor: 'transparent',
-    },
-    attributeRow: {
-        flexDirection: 'row',
+    card: {
+        borderRadius: spacing.xs,
         alignItems: 'center',
-        backgroundColor: 'transparent',
-        marginBottom: spacing.xs,
-        marginLeft: spacing.xs,
+        justifyContent: 'center',
+        marginHorizontal: 1,
+        borderWidth: StyleSheet.hairlineWidth,
     },
-    attributeText: {
-        marginLeft: spacing.xs,
-        lineHeight: spacing.md,
-        backgroundColor: 'transparent',
-    },
-    attributeContainer: {
-        marginTop: spacing.xxs,
-        backgroundColor: 'transparent',
-    },
+    dayNumber: {},
 });
+
+export default ProgramDayOverviewCard;
