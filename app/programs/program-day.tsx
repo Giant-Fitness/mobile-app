@@ -86,7 +86,7 @@ const ProgramDayScreen = () => {
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
             <AnimatedHeader scrollY={scrollY} headerInterpolationStart={sizes.imageLargeHeight} headerInterpolationEnd={sizes.imageLargeHeight + spacing.xxl} />
-            <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16}>
+            <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} showsVerticalScrollIndicator={false}>
                 <TopImageInfoCard
                     image={{ uri: programDay.PhotoUrl }}
                     title={programDay.DayTitle}

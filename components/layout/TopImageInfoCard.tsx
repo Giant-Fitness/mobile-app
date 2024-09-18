@@ -79,16 +79,16 @@ const styles = StyleSheet.create({
     image: {
         width: '100%',
         height: sizes.imageLargeHeight,
-        borderTopRightRadius: spacing.xs,
-        borderTopLeftRadius: spacing.xs,
+        borderTopRightRadius: spacing.sm,
+        borderTopLeftRadius: spacing.sm,
     },
     contentContainer: {
         width: '100%',
         paddingHorizontal: spacing.md,
         marginTop: -spacing.xxs,
         paddingVertical: spacing.md,
-        borderBottomLeftRadius: spacing.xs,
-        borderBottomRightRadius: spacing.xs,
+        borderBottomLeftRadius: spacing.sm,
+        borderBottomRightRadius: spacing.sm,
     },
     title: {
         marginBottom: spacing.sm,

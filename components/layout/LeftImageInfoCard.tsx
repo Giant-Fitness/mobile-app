@@ -21,6 +21,7 @@ type LeftImageInfoCardProps = {
     containerStyle?: StyleProp<ViewStyle>;
     imageStyle?: StyleProp<ImageStyle>; // Change from ViewStyle to ImageStyle
     contentContainerStyle?: StyleProp<ViewStyle>;
+    imageContainerStyle?: StyleProp<ViewStyle>;
     titleStyle?: StyleProp<TextStyle>;
     subtitleStyle?: StyleProp<TextStyle>;
     placeholder?: any;
@@ -36,6 +37,7 @@ export const LeftImageInfoCard: React.FC<LeftImageInfoCardProps> = ({
     containerStyle,
     imageStyle,
     contentContainerStyle,
+    imageContainerStyle,
     titleStyle,
     subtitleStyle,
     gradientColors = ['transparent', 'rgba(0,0,0,0.4)'],
@@ -46,8 +48,8 @@ export const LeftImageInfoCard: React.FC<LeftImageInfoCardProps> = ({
 
     return (
         <TouchableOpacity onPress={onPress} style={[styles.card, containerStyle]} activeOpacity={1}>
-            <View style={styles.imageBackground}>
-                <ThemedView style={styles.roundedBackground}>
+            <View style={[styles.imageBackground]}>
+                <ThemedView style={[styles.roundedBackground, imageContainerStyle]}>
                     <Image source={image} style={[styles.image, imageStyle]} placeholder={placeholder} />
                     <LinearGradient colors={gradientColors} style={styles.gradientOverlay} />
                 </ThemedView>

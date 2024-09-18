@@ -89,6 +89,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
                             borderColor: themeColors.text,
                             flex: 1,
                             paddingVertical: spacing.sm + spacing.xxs,
+                            borderRadius: spacing.sm,
                         },
                     ]}
                 />
@@ -97,7 +98,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
                     onPress={() => console.log(`Logging exercise: ${exercise.ExerciseName}`)}
                     textType='bodyMedium'
                     textStyle={[{ color: themeColors.background }]}
-                    style={[{ flex: 1, paddingVertical: spacing.sm + spacing.xxs, backgroundColor: themeColors.buttonPrimary }]}
+                    style={[{ flex: 1, paddingVertical: spacing.sm + spacing.xxs, backgroundColor: themeColors.buttonPrimary, borderRadius: spacing.sm }]}
                 />
             </ThemedView>
         </ThemedView>
@@ -159,7 +160,7 @@ const styles = StyleSheet.create({
     },
     infoBox: {
         padding: spacing.lg,
-        borderRadius: spacing.xs,
+        borderRadius: spacing.sm,
         marginHorizontal: spacing.xs,
         alignItems: 'center',
     },

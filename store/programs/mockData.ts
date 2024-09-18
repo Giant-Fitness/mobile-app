@@ -161,7 +161,7 @@ const mockPrograms: Program[] = [
         ProgramName: 'Lean Machine Challenge',
         TrainerId: 'trainer123',
         Weeks: 6,
-        Days: 40,
+        Days: 25,
         Description: 'A comprehensive 6-week challenge to build strength and endurance.',
         Level: 'All Levels',
         Type: 'Strength',
