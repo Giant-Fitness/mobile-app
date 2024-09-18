@@ -3,13 +3,13 @@
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View, TouchableOpacity, Dimensions } from 'react-native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ActiveProgramDayCard } from '@/components/programs/ActiveProgramDayCard';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { ProgramDayOverviewCard } from '@/components/programs/ProgramDayOverviewCard';
-import ProgressBar from '@/components/programs/ProgressBar';
+import { ProgramDayDetailCard } from '@/components/programs/ProgramDayDetailCard';
 import { Icon } from '@/components/icons/Icon';
 import { moderateScale, verticalScale } from '@/utils/scaling';
 import { spacing } from '@/utils/spacing';
@@ -19,12 +19,14 @@ import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunk
 import { BasicSplash } from '@/components/splashScreens/BasicSplash';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { HighlightedTip } from '@/components/base/HighlightedTip';
+import { getWeekNumber } from '@/utils/calendar';
 
 export default function ActiveProgramHome() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const screenWidth = Dimensions.get('window').width;
 
+    const navigation = useNavigation();
     const dispatch = useDispatch<AppDispatch>();
 
     const [isSplashVisible, setIsSplashVisible] = useState(true);
@@ -115,6 +117,18 @@ export default function ActiveProgramHome() {
         displayQuote = activeProgramCurrentDay?.RestDay ? restDayQuote : workoutQuote;
     }
 
+    const navigateToProgramCalendar = () => {
+        navigation.navigate('programs/program-calendar', {
+            programId: activeProgramId,
+        });
+    };
+
+    // Parse the CurrentDay to a number
+    const currentDayNumber = parseInt(userProgramProgress?.CurrentDay || '0', 10);
+
+    // Calculate the current week using the utility function
+    const currentWeek = getWeekNumber(currentDayNumber);
+
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
             <ScrollView
@@ -130,7 +144,7 @@ export default function ActiveProgramHome() {
                     </ThemedView>
                 ) : (
                     <ThemedView style={styles.quoteContainer}>
-                        <ThemedText type='italic' style={[styles.quoteText, { color: themeColors.containerHighlight }]}>
+                        <ThemedText type='italic' style={[styles.quoteText, { color: themeColors.subText }]}>
                             {displayQuote.QuoteText}
                         </ThemedText>
                     </ThemedView>
@@ -142,14 +156,8 @@ export default function ActiveProgramHome() {
 
                 <ThemedView style={[styles.weekProgress]}>
                     <ThemedText style={[{ color: themeColors.subText }]}>
-                        Week {userProgramProgress?.Week} of {activeProgram?.Weeks}
+                        Week {currentWeek} of {activeProgram?.Weeks}
                     </ThemedText>
-                    {/* <ProgressBar
-            completedParts={Number(userProgramProgress.Week) - 1}
-            currentPart={Number(userProgramProgress.Week)}
-            parts={Number(activeProgram.Weeks)}
-            containerWidth={screenWidth - spacing.xxl}
-          /> */}
                 </ThemedView>
 
                 <ThemedView style={[styles.activeCardContainer]}>
@@ -163,14 +171,14 @@ export default function ActiveProgramHome() {
                             Up Next
                         </ThemedText>
                         {activeProgramNextDays.map((day) => (
-                            <ProgramDayOverviewCard key={day.DayId} day={day} />
+                            <ProgramDayDetailCard key={day.DayId} day={day} />
                         ))}
                     </ThemedView>
                 )}
 
                 <ThemedView style={[styles.menuContainer]}>
                     <ThemedView>
-                        <TouchableOpacity style={styles.menuItem}>
+                        <TouchableOpacity style={styles.menuItem} activeOpacity={1} onPress={navigateToProgramCalendar}>
                             <ThemedText type='body' style={[{ color: themeColors.text }]}>
                                 Program Calendar
                             </ThemedText>

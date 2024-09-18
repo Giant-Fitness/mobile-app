@@ -20,6 +20,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/rootReducer';
 import { getProgramDayAsync } from '@/store/programs/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
+import { getWeekNumber, getDayOfWeek } from '@/utils/calendar';
 
 type ProgramDayScreenParams = {
     ProgramDay: {
@@ -46,6 +47,7 @@ const ProgramDayScreen = () => {
 
     const programDay = useSelector((state: RootState) => state.programs.programDays[programId]?.[dayId]);
     const programDayState = useSelector((state: RootState) => state.programs.programDaysState[programId]?.[dayId]);
+    const userProgramProgress = useSelector((state: RootState) => state.programs.userProgramProgress);
 
     // **Data Fetching Hook**
     useEffect(() => {
@@ -73,6 +75,12 @@ const ProgramDayScreen = () => {
         console.log('Complete Day button pressed');
     };
 
+    // **Calculate Current Week Based on dayId**
+    const currentDayNumber = parseInt(dayId, 10);
+    const currentWeek = getWeekNumber(currentDayNumber);
+    const dayOfWeek = getDayOfWeek(currentDayNumber);
+    const isEnrolled = userProgramProgress?.ProgramId === programId;
+
     // **2. Main Return with Conditional Rendering**
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
@@ -98,7 +106,7 @@ const ProgramDayScreen = () => {
                         <TopImageInfoCard
                             image={{ uri: programDay.PhotoUrl }}
                             title={programDay.DayTitle}
-                            subtitle={`Week ${programDay.Week} Day ${programDay.Day}`}
+                            subtitle={`Week ${currentWeek} Day ${dayOfWeek}`}
                             titleType='titleXLarge'
                             subtitleStyle={{ marginBottom: spacing.md, color: themeColors.subText, marginTop: 0 }}
                             titleStyle={{ marginBottom: spacing.xs }}
@@ -155,36 +163,47 @@ const ProgramDayScreen = () => {
                             }
                         />
                         {!programDay.RestDay && (
-                            <ThemedView style={[styles.exercisesContainer, { backgroundColor: themeColors.backgroundTertiary }]}>
-                                {programDay.Exercises && programDay.Exercises.map((exercise) => <ExerciseCard key={exercise.ExerciseId} exercise={exercise} />)}
+                            <ThemedView
+                                style={[
+                                    styles.exercisesContainer,
+                                    { backgroundColor: themeColors.backgroundTertiary },
+                                    isEnrolled && [{ paddingBottom: verticalScale(120) }],
+                                ]}
+                            >
+                                {programDay.Exercises &&
+                                    programDay.Exercises.map((exercise) => (
+                                        <ExerciseCard key={exercise.ExerciseId} exercise={exercise} isEnrolled={isEnrolled} />
+                                    ))}
                             </ThemedView>
                         )}
                     </>
                 )}
             </Animated.ScrollView>
-            <ThemedView style={styles.buttonContainer}>
-                <TextButton
-                    text='Finish Day'
-                    textType='bodyMedium'
-                    style={[styles.completeButton, { backgroundColor: themeColors.buttonPrimary }]}
-                    onPress={handleCompleteDay}
-                />
-                {programDay && programDay.RestDay && (
+            {isEnrolled && (
+                <ThemedView style={styles.buttonContainer}>
                     <TextButton
-                        text='Mobility Workouts'
-                        textStyle={[{ color: themeColors.text }]}
+                        text='Finish Day'
                         textType='bodyMedium'
-                        style={[
-                            styles.mobilityButton,
-                            {
-                                backgroundColor: themeColors.background,
-                                borderColor: themeColors.text,
-                            },
-                        ]}
-                        onPress={() => navigateToAllWorkouts({ focus: ['Mobility'] })}
+                        style={[styles.completeButton, { backgroundColor: themeColors.buttonPrimary }]}
+                        onPress={handleCompleteDay}
                     />
-                )}
-            </ThemedView>
+                    {programDay && programDay.RestDay && (
+                        <TextButton
+                            text='Mobility Workouts'
+                            textStyle={[{ color: themeColors.text }]}
+                            textType='bodyMedium'
+                            style={[
+                                styles.mobilityButton,
+                                {
+                                    backgroundColor: themeColors.background,
+                                    borderColor: themeColors.text,
+                                },
+                            ]}
+                            onPress={() => navigateToAllWorkouts({ focus: ['Mobility'] })}
+                        />
+                    )}
+                </ThemedView>
+            )}
         </ThemedView>
     );
 };
@@ -217,7 +236,7 @@ const styles = StyleSheet.create({
     },
     exercisesContainer: {
         paddingVertical: spacing.lg,
-        paddingBottom: 120,
+        paddingBottom: spacing.xxl,
         paddingHorizontal: spacing.md,
     },
     buttonContainer: {

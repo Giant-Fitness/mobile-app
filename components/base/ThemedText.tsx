@@ -99,12 +99,12 @@ const styles = StyleSheet.create({
         textTransform: 'uppercase',
     },
     overline: {
-        fontSize: moderateScale(13),
+        fontSize: moderateScale(14),
         lineHeight: moderateScale(20),
         fontFamily: 'InterMedium',
     },
     italic: {
-        fontSize: moderateScale(12),
+        fontSize: moderateScale(13),
         lineHeight: moderateScale(18),
         fontFamily: 'InterItalic',
     },

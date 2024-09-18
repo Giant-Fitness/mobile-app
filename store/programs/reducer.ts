@@ -9,6 +9,7 @@ import {
     getActiveProgramAsync,
     getActiveProgramCurrentDayAsync,
     getActiveProgramNextDaysAsync,
+    getAllProgramDaysAsync,
 } from '@/store/programs/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { ProgramDay, Program, UserProgramProgress } from '@/type/types';
@@ -211,6 +212,42 @@ const programSlice = createSlice({
             })
             .addCase(getActiveProgramNextDaysAsync.rejected, (state, action) => {
                 state.programDaysError = action.error.message || 'An error occurred';
+            })
+            .addCase(getAllProgramDaysAsync.pending, (state, action) => {
+                const { programId } = action.meta.arg;
+                if (!state.programDaysState[programId]) {
+                    state.programDaysState[programId] = {};
+                }
+                state.programDaysError = null;
+            })
+            .addCase(getAllProgramDaysAsync.fulfilled, (state, action: PayloadAction<ProgramDay[]>) => {
+                const { programId } = action.meta.arg;
+                if (programId) {
+                    if (!state.programDays[programId]) {
+                        state.programDays[programId] = {};
+                    }
+                    if (!state.programDaysState[programId]) {
+                        state.programDaysState[programId] = {};
+                    }
+                    action.payload.forEach((day) => {
+                        state.programDays[programId][day.DayId] = day;
+                        state.programDaysState[programId][day.DayId] = REQUEST_STATE.FULFILLED;
+                    });
+                }
+            })
+            .addCase(getAllProgramDaysAsync.rejected, (state, action) => {
+                const { programId } = action.meta.arg;
+                if (programId) {
+                    if (!state.programDaysState[programId]) {
+                        state.programDaysState[programId] = {};
+                    }
+                    // If the entire fetch failed, mark all as REJECTED
+                    Object.keys(state.programDays[programId] || {}).forEach((dayId) => {
+                        if (state.programDaysState[programId][dayId] === REQUEST_STATE.PENDING) {
+                            state.programDaysState[programId][dayId] = REQUEST_STATE.REJECTED;
+                        }
+                    });
+                }
             });
     },
 });

@@ -123,7 +123,7 @@ export const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
                 </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.filterScroll}>
+            <View style={styles.filterScroll}>
                 {Object.keys(filterAttributes).map((category) => {
                     const chips = filterAttributes[category];
                     const rows = splitIntoRows(chips);
@@ -161,7 +161,7 @@ export const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
                         </View>
                     );
                 })}
-            </ScrollView>
+            </View>
 
             <View style={styles.buttonContainer}>
                 <TextButton

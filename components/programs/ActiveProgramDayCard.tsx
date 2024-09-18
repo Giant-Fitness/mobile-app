@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/rootReducer';
 import { REQUEST_STATE } from '@/constants/requestStates';
+import { getWeekNumber, getDayOfWeek } from '@/utils/calendar';
 
 type ActiveProgramDayCardProps = {};
 
@@ -66,13 +67,17 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
     };
 
     const day = currentDay;
+    // **Calculate Current Week Based on dayId**
+    const currentDayNumber = parseInt(dayId, 10);
+    const currentWeek = getWeekNumber(currentDayNumber);
+    const dayOfWeek = getDayOfWeek(currentDayNumber);
 
     return (
         <View style={styles.shadowContainer}>
             <TopImageInfoCard
                 image={{ uri: day.PhotoUrl }}
                 title={day.DayTitle}
-                subtitle={`Week ${day.Week} Day ${day.Day}`}
+                subtitle={`Week ${currentWeek} Day ${dayOfWeek}`}
                 onPress={navigateToProgramDay}
                 extraContent={
                     day.RestDay ? (

@@ -25,6 +25,7 @@ import { OneRepMaxCalculator } from '@/components/calculators/OneRepMaxCalculato
 type ExerciseDetailsScreenParams = {
     Exercise: {
         exercise: Exercise;
+        isEnrolled: boolean;
     };
 };
 
@@ -36,7 +37,7 @@ const ExerciseDetailsScreen = () => {
     const navigation = useNavigation();
     const route = useRoute<RouteProp<ExerciseDetailsScreenParams, 'Exercise'>>();
 
-    const { exercise } = route.params;
+    const { exercise, isEnrolled } = route.params;
 
     const scrollY = useSharedValue(0);
 
@@ -64,7 +65,6 @@ const ExerciseDetailsScreen = () => {
     const closeCalculator = () => {
         setCalculatorVisible(false);
     };
-
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
             <AnimatedHeader scrollY={scrollY} headerInterpolationStart={sizes.imageLargeHeight} headerInterpolationEnd={sizes.imageLargeHeight + spacing.xxl} />
@@ -75,7 +75,9 @@ const ExerciseDetailsScreen = () => {
                 onScroll={scrollHandler}
                 scrollEventThrottle={16}
             >
-                <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.backgroundTertiary }]}>
+                <ThemedView
+                    style={[styles.mainContainer, { backgroundColor: themeColors.backgroundTertiary }, isEnrolled && [{ paddingBottom: verticalScale(120) }]]}
+                >
                     <ThumbnailVideoPlayer videoUrl={exercise.VideoUrl} onPlaybackStatusUpdate={handlePlaybackStatusUpdate} thumbnailUrl={exercise.BannerUrl} />
                     <ThemedView style={[styles.topCard, { backgroundColor: themeColors.background }]}>
                         <ThemedView style={styles.titleContainer}>
@@ -86,7 +88,7 @@ const ExerciseDetailsScreen = () => {
                             {/* Attribute 1: Reps */}
                             <ThemedView style={styles.attributeItem}>
                                 <Icon name='counter' style={[{ color: themeColors.text }]} size={verticalScale(14)} />
-                                <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.text }]}>
+                                <ThemedText type='buttonSmall' style={[styles.attributeText, { color: themeColors.text }]}>
                                     Reps: {exercise.RepsLower}-{exercise.RepsUpper}
                                 </ThemedText>
                             </ThemedView>
@@ -94,7 +96,7 @@ const ExerciseDetailsScreen = () => {
                             {/* Attribute 2: Sets */}
                             <ThemedView style={styles.attributeItem}>
                                 <Icon name='repeat' style={[{ color: themeColors.text }]} size={verticalScale(14)} />
-                                <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.text }]}>
+                                <ThemedText type='buttonSmall' style={[styles.attributeText, { color: themeColors.text }]}>
                                     Sets: {exercise.Sets}
                                 </ThemedText>
                             </ThemedView>
@@ -102,12 +104,12 @@ const ExerciseDetailsScreen = () => {
                             {/* Attribute 3: Rest */}
                             <ThemedView style={styles.attributeItem}>
                                 <Icon name='hourglass' style={[{ color: themeColors.text }]} size={verticalScale(12)} />
-                                <ThemedText type='overline' style={[styles.attributeText, { color: themeColors.text }]}>
+                                <ThemedText type='buttonSmall' style={[styles.attributeText, { color: themeColors.text }]}>
                                     Rest: {exercise.Rest}
                                 </ThemedText>
                             </ThemedView>
                         </ThemedView>
-                        <HighlightedTip iconName='bulb' tipText={'Quickly find your ideal lifting weight using the Calculator'} />
+                        {isEnrolled && <HighlightedTip iconName='bulb' tipText={'Quickly find your ideal lifting weight using the Calculator'} />}
                     </ThemedView>
 
                     <ThemedView style={styles.instructionContainer}>
@@ -121,28 +123,30 @@ const ExerciseDetailsScreen = () => {
             </Animated.ScrollView>
             <OneRepMaxCalculator visible={isCalculatorVisible} onClose={closeCalculator} ormPercentage={exercise.ORMPercentage} />
 
-            <ThemedView style={styles.buttonContainer}>
-                <TextButton
-                    text='Log'
-                    textType='bodyMedium'
-                    style={[styles.logButton, { backgroundColor: themeColors.buttonPrimary }]}
-                    onPress={handleLogExercise}
-                />
-                <IconButton
-                    iconName='calculator'
-                    onPress={openCalculator}
-                    iconSize={spacing.lg + spacing.xs}
-                    iconColor={themeColors.text}
-                    style={styles.calculatorButton}
-                />
-            </ThemedView>
+            {isEnrolled && (
+                <ThemedView style={styles.buttonContainer}>
+                    <TextButton
+                        text='Log'
+                        textType='bodyMedium'
+                        style={[styles.logButton, { backgroundColor: themeColors.buttonPrimary }]}
+                        onPress={handleLogExercise}
+                    />
+                    <IconButton
+                        iconName='calculator'
+                        onPress={openCalculator}
+                        iconSize={spacing.lg + spacing.xs}
+                        iconColor={themeColors.text}
+                        style={styles.calculatorButton}
+                    />
+                </ThemedView>
+            )}
         </ThemedView>
     );
 };
 
 const styles = StyleSheet.create({
     mainContainer: {
-        paddingBottom: verticalScale(120),
+        paddingBottom: spacing.xxl,
     },
     titleContainer: {
         paddingHorizontal: spacing.lg,

@@ -1,7 +1,7 @@
 // components/icons/Icon.tsx
 
 import React from 'react';
-import { Ionicons, MaterialCommunityIcons, MaterialIcons, Entypo, Feather, AntDesign, FontAwesome5 } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons, MaterialIcons, Entypo, Feather, AntDesign, FontAwesome6 } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { StyleProp, TextStyle } from 'react-native';
@@ -14,7 +14,7 @@ const AnimatedMaterialIcons = Animated.createAnimatedComponent(MaterialIcons);
 const AnimatedEntypo = Animated.createAnimatedComponent(Entypo);
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 const AnimatedAnt = Animated.createAnimatedComponent(AntDesign);
-const AnimatedFontAwesome = Animated.createAnimatedComponent(FontAwesome5);
+const AnimatedFontAwesome = Animated.createAnimatedComponent(FontAwesome6);
 
 type IconProps = {
     name: string;
@@ -65,6 +65,10 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = 18, color, 
             return <AnimatedIonicons name='chevron-forward-outline' {...commonProps} />;
         case 'chevron-back':
             return <AnimatedIonicons name='chevron-back' {...commonProps} />;
+        case 'chevron-up':
+            return <AnimatedIonicons name='chevron-up' {...commonProps} />;
+        case 'chevron-down':
+            return <AnimatedIonicons name='chevron-down' {...commonProps} />;
         case 'person':
             return <AnimatedIonicons name='person-circle' {...commonProps} />;
         case 'home-active':
@@ -72,9 +76,9 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = 18, color, 
         case 'home-inactive':
             return <AnimatedMaterialCommunityIcons name='home-variant' {...commonProps} />;
         case 'nutrition-active':
-            return <AnimatedIonicons name='nutrition' {...commonProps} />;
+            return <AnimatedFontAwesome name='plate-wheat' {...commonProps} />;
         case 'nutrition-inactive':
-            return <AnimatedIonicons name='nutrition-outline' {...commonProps} />;
+            return <AnimatedFontAwesome name='plate-wheat' {...commonProps} />;
         case 'progress-active':
             return <AnimatedIonicons name='stats-chart' {...commonProps} />;
         case 'progress-inactive':

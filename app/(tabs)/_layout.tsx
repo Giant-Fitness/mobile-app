@@ -47,7 +47,7 @@ export default function TabLayout() {
                 tabBarShowLabel: true,
                 headerRight: () => (
                     <TouchableOpacity activeOpacity={1} onPress={() => navigation.navigate('settings/settings' as any)}>
-                        <Icon name='person' size={26} color={themeColors.subText} style={{ marginRight: 18 }} />
+                        <Icon name='person' size={28} color={themeColors.subText} style={{ marginRight: 18 }} />
                     </TouchableOpacity>
                 ),
             }}
@@ -62,7 +62,7 @@ export default function TabLayout() {
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Home',
-                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'home-active' : 'home-inactive'} size={24} color={color} />,
+                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'home-active' : 'home-inactive'} size={25} color={color} />,
                 }}
             />
             <Tabs.Screen
@@ -77,7 +77,7 @@ export default function TabLayout() {
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Training',
-                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'exercise-active' : 'exercise-inactive'} size={24} color={color} />,
+                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'exercise-active' : 'exercise-inactive'} size={25} color={color} />,
                 }}
             />
             <Tabs.Screen
@@ -89,7 +89,7 @@ export default function TabLayout() {
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Nutrition',
-                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'nutrition-active' : 'nutrition-inactive'} size={22} color={color} />,
+                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'nutrition-active' : 'nutrition-inactive'} size={23} color={color} />,
                 }}
             />
             <Tabs.Screen
@@ -101,7 +101,7 @@ export default function TabLayout() {
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Progress',
-                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'progress-active' : 'progress-inactive'} size={21} color={color} />,
+                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'progress-active' : 'progress-inactive'} size={23} color={color} />,
                 }}
             />
         </Tabs>

@@ -6,11 +6,9 @@ import { ProgramDay, Exercise, Program, UserProgramProgress } from '@/types/type
 const sampleUserProgress: UserProgramProgress = {
     UserId: 'user1',
     ProgramId: 'program1',
-    CurrentDay: '22',
+    CurrentDay: '17',
     StartDate: '2024-07-01',
     LastActivityDate: '2024-07-05',
-    Week: '4',
-    Day: '1',
 };
 
 // Define sample exercises
@@ -86,89 +84,207 @@ const sampleExercises: Exercise[] = [
     },
 ];
 
-// Define sample program days
-const sampleProgramDays: ProgramDay[] = [
+// Define sample program days for program1 (Lean Machine Challenge)
+const sampleProgramDaysProgram1: ProgramDay[] = [
+    // Week 1
     {
         ProgramId: 'program1',
-        DayId: '22',
-        DayTitle: 'Full Body',
+        DayId: '1',
+        DayTitle: 'Introduction & Light Cardio',
         RestDay: false,
-        Exercises: sampleExercises,
+        Exercises: [sampleExercises[0], sampleExercises[1]],
         PhotoUrl: 'https://images.pexels.com/photos/3253501/pexels-photo-3253501.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
         CreationDate: '2024-07-01',
-        LastModified: '2024-07-12',
-        Time: 60,
-        MuscleGroups: ['Back', 'Chest'],
+        LastModified: '2024-07-01',
+        Time: 45,
+        MuscleGroups: ['Legs', 'Chest'],
         EquipmentCategory: 'Full Gym',
-        Equipment: ['Barbell', 'Dumbbells', 'Cable Machine'],
-        Week: '4',
-        Day: '1',
+        Equipment: ['Barbell', 'Dumbbells'],
     },
     {
         ProgramId: 'program1',
-        DayId: '23',
-        DayTitle: 'Upper Body A',
+        DayId: '2',
+        DayTitle: 'Upper Body Strength',
         RestDay: false,
-        Exercises: sampleExercises,
+        Exercises: [sampleExercises[1], sampleExercises[2]],
         PhotoUrl: 'https://images.pexels.com/photos/1886487/pexels-photo-1886487.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
         CreationDate: '2024-07-02',
-        LastModified: '2024-07-12',
-        Time: 45,
-        MuscleGroups: ['Legs', 'Arms'],
+        LastModified: '2024-07-02',
+        Time: 50,
+        MuscleGroups: ['Chest', 'Back'],
         EquipmentCategory: 'Basic Equipment',
-        Equipment: ['Treadmill', 'Jump Rope'],
-        Week: '4',
-        Day: '2',
+        Equipment: ['Dumbbells', 'Pull-Up Bar'],
     },
     {
         ProgramId: 'program1',
-        DayId: '24',
-        DayTitle: 'Lower Body B',
+        DayId: '3',
+        DayTitle: 'Lower Body Strength',
         RestDay: false,
-        Exercises: sampleExercises,
+        Exercises: [sampleExercises[0]],
         PhotoUrl: 'https://images.pexels.com/photos/841130/pexels-photo-841130.jpeg',
         CreationDate: '2024-07-03',
-        LastModified: '2024-07-12',
+        LastModified: '2024-07-03',
         Time: 60,
-        MuscleGroups: ['Chest', 'Shoulders'],
+        MuscleGroups: ['Legs'],
         EquipmentCategory: 'Full Gym',
-        Equipment: ['Barbell', 'Dumbbells', 'Cable Machine'],
-        Week: '4',
-        Day: '3',
+        Equipment: ['Barbell'],
     },
     {
         ProgramId: 'program1',
-        DayId: '25',
+        DayId: '4',
         DayTitle: 'Rest Day',
         RestDay: true,
         Exercises: [],
         PhotoUrl:
             'https://images.pexels.com/photos/27302737/pexels-photo-27302737/free-photo-of-a-woman-in-blue-and-white-is-doing-a-squat.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
         CreationDate: '2024-07-04',
-        LastModified: '2024-07-12',
+        LastModified: '2024-07-04',
         Time: 0,
         MuscleGroups: [],
         EquipmentCategory: 'None',
         Equipment: [],
-        Week: '4',
-        Day: '4',
     },
+    // Week 2
+    {
+        ProgramId: 'program1',
+        DayId: '5',
+        DayTitle: 'Full Body Circuit',
+        RestDay: false,
+        Exercises: [sampleExercises[0], sampleExercises[1], sampleExercises[2]],
+        PhotoUrl: 'https://images.pexels.com/photos/3253501/pexels-photo-3253501.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+        CreationDate: '2024-07-05',
+        LastModified: '2024-07-05',
+        Time: 60,
+        MuscleGroups: ['Legs', 'Chest', 'Back'],
+        EquipmentCategory: 'Full Gym',
+        Equipment: ['Barbell', 'Dumbbells', 'Pull-Up Bar'],
+    },
+    {
+        ProgramId: 'program1',
+        DayId: '6',
+        DayTitle: 'Upper Body Hypertrophy',
+        RestDay: false,
+        Exercises: [sampleExercises[1], sampleExercises[2]],
+        PhotoUrl: 'https://images.pexels.com/photos/1886487/pexels-photo-1886487.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+        CreationDate: '2024-07-06',
+        LastModified: '2024-07-06',
+        Time: 55,
+        MuscleGroups: ['Chest', 'Back'],
+        EquipmentCategory: 'Basic Equipment',
+        Equipment: ['Dumbbells', 'Pull-Up Bar'],
+    },
+    {
+        ProgramId: 'program1',
+        DayId: '7',
+        DayTitle: 'Lower Body Power',
+        RestDay: false,
+        Exercises: [sampleExercises[0]],
+        PhotoUrl: 'https://images.pexels.com/photos/841130/pexels-photo-841130.jpeg',
+        CreationDate: '2024-07-07',
+        LastModified: '2024-07-07',
+        Time: 65,
+        MuscleGroups: ['Legs'],
+        EquipmentCategory: 'Full Gym',
+        Equipment: ['Barbell'],
+    },
+    {
+        ProgramId: 'program1',
+        DayId: '8',
+        DayTitle: 'Rest Day',
+        RestDay: true,
+        Exercises: [],
+        PhotoUrl:
+            'https://images.pexels.com/photos/27302737/pexels-photo-27302737/free-photo-of-a-woman-in-blue-and-white-is-doing-a-squat.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+        CreationDate: '2024-07-08',
+        LastModified: '2024-07-08',
+        Time: 0,
+        MuscleGroups: [],
+        EquipmentCategory: 'None',
+        Equipment: [],
+    },
+    // Weeks 3 to 6 for program1...
+    // To keep the response concise, I'll provide a function to generate the remaining days.
 ];
 
+// Function to generate ProgramDays for a given program
+const generateProgramDays = (
+    programId: string,
+    totalWeeks: number,
+    totalDays: number,
+    exercises: Exercise[],
+    restDayFrequency: number, // e.g., every 4th day
+): ProgramDay[] => {
+    const programDays: ProgramDay[] = [];
+    let dayCounter = 1;
+
+    for (let week = 1; week <= totalWeeks; week++) {
+        for (let day = 1; day <= 7; day++) {
+            if (dayCounter > totalDays) break;
+
+            // Determine if it's a rest day
+            const isRestDay = dayCounter % restDayFrequency === 0;
+
+            programDays.push({
+                ProgramId: programId,
+                DayId: dayCounter.toString(),
+                DayTitle: isRestDay ? 'Rest Day' : `Workout Day ${dayCounter}`,
+                RestDay: isRestDay,
+                Exercises: isRestDay ? [] : exercises,
+                PhotoUrl: 'https://images.pexels.com/photos/3253501/pexels-photo-3253501.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+                CreationDate: `2024-07-${dayCounter < 10 ? '0' + dayCounter : dayCounter}`,
+                LastModified: `2024-07-${dayCounter < 10 ? '0' + dayCounter : dayCounter}`,
+                Time: isRestDay ? 0 : 60,
+                MuscleGroups: isRestDay ? [] : ['Back', 'Chest', 'Legs'],
+                EquipmentCategory: isRestDay ? 'None' : 'Full Gym',
+                Equipment: isRestDay ? [] : ['Barbell', 'Dumbbells', 'Pull-Up Bar'],
+            });
+
+            dayCounter++;
+        }
+    }
+
+    return programDays;
+};
+
+// Generate ProgramDays for program1 (Lean Machine Challenge)
+const fullProgramDaysProgram1 = [
+    ...sampleProgramDaysProgram1,
+    ...generateProgramDays('program1', 8, 56, sampleExercises, 4).filter((day) => parseInt(day.DayId) > 8),
+];
+
+// Define sample program days for program2 (Beginner's Yoga Flow)
+const sampleProgramDaysProgram2: ProgramDay[] = generateProgramDays('program2', 8, 56, sampleExercises, 7); // Yoga has rest days every 7th day
+
+// Define sample program days for program3 (Advanced HIIT Series)
+const sampleProgramDaysProgram3: ProgramDay[] = generateProgramDays('program3', 12, 84, sampleExercises, 4); // HIIT has rest days every 4th day
+
+// Combine all ProgramDays
+const sampleProgramDays: ProgramDay[] = [
+    // Program 1
+    ...fullProgramDaysProgram1,
+
+    // Program 2
+    ...sampleProgramDaysProgram2,
+
+    // Program 3
+    ...sampleProgramDaysProgram3,
+];
+
+// Define mock programs
 const mockPrograms: Program[] = [
     {
         ProgramId: 'program1',
         ProgramName: 'Lean Machine Challenge',
         TrainerId: 'trainer123',
-        Weeks: 6,
-        Days: 25,
-        Description: 'A comprehensive 6-week challenge to build strength and endurance.',
+        Weeks: 8,
+        Days: 56,
+        Description: 'A comprehensive 8-week challenge to build strength and endurance.',
         Level: 'All Levels',
         Type: 'Strength',
         Goal: 'Fat loss',
         CreationDate: '2024-07-01',
         LastModified: '2024-07-12',
-        PhotoUrl: 'https://s3.amazonaws.com/fitnessapp/images/lean_machine_challenge.jpg',
+        PhotoUrl: 'https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
         Archived: false,
         CalendarOverview: [
             { Title: 'Weeks 1-2', Description: 'We’ll ramp up onto the program by starting with lower weights and volume' },
@@ -195,7 +311,7 @@ const mockPrograms: Program[] = [
         Goal: 'Flexibility',
         CreationDate: '2024-06-01',
         LastModified: '2024-06-15',
-        PhotoUrl: 'https://s3.amazonaws.com/fitnessapp/images/beginners_yoga_flow.jpg',
+        PhotoUrl: 'https://images.pexels.com/photos/1375883/pexels-photo-1375883.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
         Archived: false,
         CalendarOverview: [
             { Title: 'Weeks 1-2', Description: 'Introduction to basic yoga poses and breathing techniques' },
@@ -211,15 +327,15 @@ const mockPrograms: Program[] = [
         ProgramId: 'program3',
         ProgramName: 'Advanced HIIT Series',
         TrainerId: 'trainer125',
-        Weeks: 6,
-        Days: 42,
-        Description: 'A 6-week high-intensity interval training program designed for advanced athletes.',
+        Weeks: 12,
+        Days: 84,
+        Description: 'A 12-week high-intensity interval training program designed for advanced athletes.',
         Level: 'Advanced',
         Type: 'HIIT',
         Goal: 'Cardio and Strength',
         CreationDate: '2024-08-01',
         LastModified: '2024-08-10',
-        PhotoUrl: 'https://s3.amazonaws.com/fitnessapp/images/advanced_hiit_series.jpg',
+        PhotoUrl: 'https://images.pexels.com/photos/2294403/pexels-photo-2294403.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
         Archived: false,
         CalendarOverview: [
             { Title: 'Weeks 1-2', Description: 'High-intensity interval training focusing on strength and conditioning' },

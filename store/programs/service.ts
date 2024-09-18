@@ -39,6 +39,7 @@ export default {
     getUserProgramProgress,
     getAllPrograms,
     getProgram,
+    getProgramDaysAll,
     getProgramDay,
     getProgramDaysFiltered,
 };

@@ -37,6 +37,21 @@ export const getProgramAsync = createAsyncThunk<Program | undefined, { programId
     },
 );
 
+export const getAllProgramDaysAsync = createAsyncThunk<ProgramDay[], { programId: string }, { state: RootState }>(
+    actionTypes.GET_ALL_PROGRAM_DAYS,
+    async ({ programId }, { rejectWithValue }) => {
+        try {
+            const programDays = await ProgramService.getProgramDaysAll(programId);
+            if (!programDays || programDays.length === 0) {
+                return rejectWithValue('No program days found.');
+            }
+            return programDays;
+        } catch (error) {
+            return rejectWithValue('Error fetching program days.');
+        }
+    },
+);
+
 export const getProgramDayAsync = createAsyncThunk<ProgramDay, { programId: string; dayId: string }, { state: RootState }>(
     actionTypes.GET_PROGRAM_DAY,
     async ({ programId, dayId }, { getState, rejectWithValue }) => {
