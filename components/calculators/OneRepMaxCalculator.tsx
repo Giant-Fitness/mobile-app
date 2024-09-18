@@ -1,5 +1,3 @@
-// components/calculators/OneRepMaxCalculator.tsx
-
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, TextInput, View, TouchableOpacity, ScrollView } from 'react-native';
 import { BottomDrawer } from '@/components/layout/BottomDrawer';
@@ -11,6 +9,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Icon } from '@/components/icons/Icon';
 import { scale, moderateScale } from '@/utils/scaling';
 import { TextButton } from '@/components/base/TextButton';
+import MathView from 'react-native-math-view';
 
 interface OneRepMaxCalculatorProps {
     visible: boolean;
@@ -194,7 +193,6 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
                         ))}
                     </ThemedView>
                 )}
-
                 {/* Instructions */}
                 <ThemedText type='bodyMedium' style={styles.subtitle}>
                     How to Use the Calculator
@@ -222,10 +220,16 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
                     <ThemedText type='bodyMedium' style={styles.subtitle}>
                         Methodology
                     </ThemedText>
+
+                    {/* Styled Formula */}
+                    <ThemedView style={[styles.formulaContainer, { backgroundColor: themeColors.container, borderColor: themeColors.systemBorderColor }]}>
+                        <MathView
+                            math={'1RM = Weight \\times (1 + \\frac{Reps}{30})'}
+                        />
+                    </ThemedView>
+
                     <ThemedText type='bodySmall' style={styles.methodology}>
-                        We use the Epley Formula to estimate your 1RM:
-                        {'\n'}
-                        1RM = Weight × (1 + Reps / 30)
+                        We use the Epley Formula to estimate your 1RM.
                     </ThemedText>
                 </ThemedView>
             </ScrollView>
@@ -272,21 +276,13 @@ const styles = StyleSheet.create({
         marginTop: spacing.lg,
         marginBottom: spacing.sm,
         textAlign: 'left',
-        fontWeight: '600',
     },
-    instructions: {
-        marginBottom: spacing.sm,
-        textAlign: 'left',
-    },
-    cautionTitle: {
-        marginLeft: spacing.xs,
-        fontWeight: '600',
-    },
-    caution: {
-        marginBottom: spacing.sm,
-        textAlign: 'left',
-        flex: 1,
-        flexWrap: 'wrap',
+    formulaContainer: {
+        padding: spacing.sm,
+        borderRadius: spacing.xs,
+        borderWidth: StyleSheet.hairlineWidth,
+        marginVertical: spacing.sm,
+        alignItems: 'center', // Center the formula horizontally
     },
     methodology: {
         marginBottom: spacing.sm,
@@ -307,7 +303,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     input: {
-        paddingVertical: spacing.sm,
+        paddingVertical: spacing.md,
         borderRadius: spacing.xs,
         marginHorizontal: spacing.md,
         borderWidth: StyleSheet.hairlineWidth,
@@ -340,7 +336,6 @@ const styles = StyleSheet.create({
         marginTop: spacing.lg,
     },
     resultTitle: {
-        fontWeight: '700',
         marginBottom: spacing.sm,
         textAlign: 'center',
     },
@@ -351,12 +346,25 @@ const styles = StyleSheet.create({
         paddingVertical: spacing.xs,
         paddingHorizontal: spacing.lg,
     },
-    tableHeaderText: {},
     tableRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingVertical: spacing.xs,
         borderBottomWidth: StyleSheet.hairlineWidth,
         paddingHorizontal: spacing.lg,
+    },
+    cautionTitle: {
+        marginLeft: spacing.xs,
+    },
+    caution: {
+        marginBottom: spacing.sm,
+        textAlign: 'left',
+        flex: 1,
+        flexWrap: 'wrap',
+    },
+
+    instructions: {
+        marginBottom: spacing.sm,
+        textAlign: 'left',
     },
 });
