@@ -18,6 +18,7 @@ import { getActiveProgramAsync, getActiveProgramCurrentDayAsync, getActiveProgra
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
 import { BasicSplash } from '@/components/splashScreens/BasicSplash';
 import { REQUEST_STATE } from '@/constants/requestStates';
+import { HighlightedTip } from '@/components/base/HighlightedTip';
 
 export default function ActiveProgramHome() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -105,8 +106,14 @@ export default function ActiveProgramHome() {
         );
     }
 
-    // Determine which quote to display based on whether the current day is a rest day
-    const displayQuote = activeProgramCurrentDay?.RestDay ? restDayQuote : workoutQuote;
+    // Determine if current day is the last day of the program
+    const isLastDay = activeProgram && activeProgramCurrentDayId && activeProgram.Days && Number(activeProgramCurrentDayId) === activeProgram.Days;
+
+    // Determine which quote to display
+    let displayQuote;
+    if (!isLastDay) {
+        displayQuote = activeProgramCurrentDay?.RestDay ? restDayQuote : workoutQuote;
+    }
 
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
@@ -117,11 +124,18 @@ export default function ActiveProgramHome() {
                 }}
                 showsVerticalScrollIndicator={false}
             >
-                <ThemedView style={styles.quoteContainer}>
-                    <ThemedText type='italic' style={[styles.quoteText, { color: themeColors.containerHighlight }]}>
-                        {displayQuote.QuoteText}
-                    </ThemedText>
-                </ThemedView>
+                {isLastDay ? (
+                    <ThemedView style={{ marginHorizontal: spacing.sm, marginTop: spacing.xl, marginBottom: spacing.lg }}>
+                        <HighlightedTip iconName='star' tipText='The finish line is here, one last push!' />
+                    </ThemedView>
+                ) : (
+                    <ThemedView style={styles.quoteContainer}>
+                        <ThemedText type='italic' style={[styles.quoteText, { color: themeColors.containerHighlight }]}>
+                            {displayQuote.QuoteText}
+                        </ThemedText>
+                    </ThemedView>
+                )}
+
                 <ThemedView style={styles.planHeader}>
                     <ThemedText type='titleLarge'>{activeProgram?.ProgramName}</ThemedText>
                 </ThemedView>
@@ -142,12 +156,17 @@ export default function ActiveProgramHome() {
                     <ActiveProgramDayCard />
                 </ThemedView>
 
-                <ThemedView style={[styles.upNextContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
-                    <ThemedText type='title' style={[styles.subHeader, { color: themeColors.text }]}>
-                        Up Next
-                    </ThemedText>
-                    {activeProgramNextDays && activeProgramNextDays.map((day) => <ProgramDayOverviewCard key={day.DayId} day={day} />)}
-                </ThemedView>
+                {/* Only render "Up Next" section if there are next days */}
+                {activeProgramNextDays.length > 0 && (
+                    <ThemedView style={[styles.upNextContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
+                        <ThemedText type='title' style={[styles.subHeader, { color: themeColors.text }]}>
+                            Up Next
+                        </ThemedText>
+                        {activeProgramNextDays.map((day) => (
+                            <ProgramDayOverviewCard key={day.DayId} day={day} />
+                        ))}
+                    </ThemedView>
+                )}
 
                 <ThemedView style={[styles.menuContainer]}>
                     <ThemedView>
