@@ -1,6 +1,6 @@
 // components/calculators/OneRepMaxCalculator.tsx
 
-import React, { useState, useEffect } from 'react'; // Added useEffect
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, TextInput, View, TouchableOpacity, ScrollView } from 'react-native';
 import { BottomDrawer } from '@/components/layout/BottomDrawer';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -9,7 +9,7 @@ import { spacing } from '@/utils/spacing';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Icon } from '@/components/icons/Icon';
-import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { scale, moderateScale } from '@/utils/scaling';
 import { TextButton } from '@/components/base/TextButton';
 
 interface OneRepMaxCalculatorProps {
@@ -26,7 +26,7 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
     const [oneRM, setOneRM] = useState<number | null>(null);
     const [error, setError] = useState<string>('');
 
-    // useEffect to reset state when the calculator is closed
+    // Reset state when the calculator is closed
     useEffect(() => {
         if (!visible) {
             setWeight('');
@@ -93,7 +93,7 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
                 </ThemedView>
 
                 <ThemedView style={[styles.calculator, { backgroundColor: themeColors.background, borderColor: themeColors.systemBorderColor }]}>
-                    {/* Input Fields in a Row */}
+                    {/* Input Fields */}
                     <ThemedView style={styles.inputWrapper}>
                         {/* Weight Input */}
                         <ThemedView style={styles.inputRow}>
@@ -103,12 +103,18 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
                             <TextInput
                                 style={[
                                     styles.input,
-                                    { backgroundColor: themeColors.background, color: themeColors.subText, borderColor: themeColors.systemBorderColor },
+                                    {
+                                        backgroundColor: themeColors.background,
+                                        color: themeColors.text,
+                                        borderColor: themeColors.systemBorderColor,
+                                    },
                                 ]}
                                 keyboardType='numeric'
                                 value={weight}
                                 onChangeText={setWeight}
                                 accessibilityLabel='Weight input'
+                                placeholder='0'
+                                placeholderTextColor={themeColors.subText}
                             />
                         </ThemedView>
 
@@ -120,19 +126,25 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
                             <TextInput
                                 style={[
                                     styles.input,
-                                    { backgroundColor: themeColors.background, color: themeColors.subText, borderColor: themeColors.systemBorderColor },
+                                    {
+                                        backgroundColor: themeColors.background,
+                                        color: themeColors.text,
+                                        borderColor: themeColors.systemBorderColor,
+                                    },
                                 ]}
                                 keyboardType='numeric'
                                 value={reps}
                                 onChangeText={setReps}
                                 accessibilityLabel='Repetitions input'
+                                placeholder='0'
+                                placeholderTextColor={themeColors.subText}
                             />
                         </ThemedView>
                     </ThemedView>
 
                     {/* Error Message */}
                     {error ? (
-                        <ThemedText type='bodySmall' style={styles.errorText}>
+                        <ThemedText type='bodySmall' style={[styles.errorText, { color: themeColors.red }]}>
                             {error}
                         </ThemedText>
                     ) : null}
@@ -147,6 +159,7 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
                         />
                     </View>
                 </ThemedView>
+
                 {/* Results */}
                 {oneRM && (
                     <ThemedView style={styles.resultContainer}>
@@ -160,7 +173,7 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
                             1RM Percentage Table
                         </ThemedText>
 
-                        <ThemedView style={styles.tableHeader}>
+                        <ThemedView style={[styles.tableHeader, { borderBottomColor: themeColors.systemBorderColor }]}>
                             <ThemedText type='body' style={[styles.tableHeaderText, { color: themeColors.text }]}>
                                 % of 1RM
                             </ThemedText>
@@ -170,7 +183,7 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
                         </ThemedView>
 
                         {percentageTable.map((row) => (
-                            <ThemedView key={row.percentage} style={styles.tableRow}>
+                            <ThemedView key={row.percentage} style={[styles.tableRow, { borderBottomColor: themeColors.systemBorderColor }]}>
                                 <ThemedText type='bodySmall' style={[styles.tableText, { color: themeColors.text }]}>
                                     {row.percentage}%
                                 </ThemedText>
@@ -188,7 +201,7 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
                 </ThemedText>
 
                 <ThemedText type='bodySmall' style={styles.instructions}>
-                    Just do a set to failure on any exercise, then enter in how much weight you did and how many reps you finished into the calculator
+                    Do a set to failure on any exercise, then enter the weight lifted and the number of reps completed into the calculator.
                 </ThemedText>
 
                 {/* Methodology */}
@@ -197,22 +210,23 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
                         Methodology
                     </ThemedText>
                     <ThemedText type='bodySmall' style={styles.methodology}>
-                        We use the Epley Formula to estimate your 1RM:{'\n'}
+                        We use the Epley Formula to estimate your 1RM:
+                        {'\n'}
                         1RM = Weight × (1 + Reps / 30)
                     </ThemedText>
                 </ThemedView>
 
                 {/* Caution */}
-                <ThemedView>
-                    <ThemedText type='bodyMedium' style={[styles.subtitle, { color: themeColors.red }]}>
-                        Caution
-                    </ThemedText>
-                    <ThemedView style={[{ flexDirection: 'row' }]}>
-                        <Icon name='warning' size={16} color={themeColors.red} style={[{ marginTop: spacing.xs }]} />
-                        <ThemedText type='bodySmall' style={[styles.caution, { color: themeColors.red }]}>
-                            Testing your 1RM is not recommended for beginners and should only be performed with an experienced spotter to ensure safety.
+                <ThemedView style={{ marginBottom: spacing.md }}>
+                    <ThemedView style={{ flexDirection: 'row', marginTop: spacing.lg, alignItems: 'center' }}>
+                        <Icon name='warning' size={14} color={themeColors.red} />
+                        <ThemedText type='bodyMedium' style={[styles.cautionTitle, { color: themeColors.red }]}>
+                            Caution
                         </ThemedText>
                     </ThemedView>
+                    <ThemedText type='bodySmall' style={[styles.caution, { color: themeColors.red }]}>
+                        Testing your 1RM is not recommended for beginners and should only be performed with an experienced spotter to ensure safety.
+                    </ThemedText>
                 </ThemedView>
             </ScrollView>
         </BottomDrawer>
@@ -225,7 +239,9 @@ const styles = StyleSheet.create({
         paddingBottom: spacing.xl,
     },
     header: {
-        marginBottom: spacing.sm,
+        marginBottom: spacing.md,
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     headerTitle: {
         textAlign: 'left',
@@ -249,21 +265,25 @@ const styles = StyleSheet.create({
     description: {
         marginBottom: spacing.md,
         textAlign: 'left',
-        flex: 1, // Ensures the text takes up remaining space
-        flexWrap: 'wrap', // Allows the text to wrap to the next line
+        flex: 1,
+        flexWrap: 'wrap',
     },
     subtitle: {
         marginTop: spacing.lg,
-        marginBottom: spacing.xs,
+        marginBottom: spacing.sm,
         textAlign: 'left',
+        fontWeight: '600',
     },
     instructions: {
         marginBottom: spacing.sm,
         textAlign: 'left',
     },
+    cautionTitle: {
+        marginLeft: spacing.xs,
+        fontWeight: '600',
+    },
     caution: {
         marginBottom: spacing.sm,
-        marginLeft: spacing.xs,
         textAlign: 'left',
         flex: 1,
         flexWrap: 'wrap',
@@ -278,76 +298,65 @@ const styles = StyleSheet.create({
         marginBottom: spacing.lg,
         paddingHorizontal: spacing.md,
         alignItems: 'center',
-        backgroundColor: 'transparent',
     },
     inputRow: {
         flex: 1,
-        backgroundColor: 'transparent',
     },
     label: {
-        marginBottom: spacing.sm,
+        marginBottom: spacing.xs,
         textAlign: 'center',
-        backgroundColor: 'transparent',
     },
     input: {
-        paddingVertical: spacing.xl,
+        paddingVertical: spacing.sm,
         borderRadius: spacing.xs,
         marginHorizontal: spacing.md,
-        alignItems: 'center',
         borderWidth: StyleSheet.hairlineWidth,
-    },
-    infoBox: {
-        padding: spacing.lg,
-        borderRadius: spacing.xs,
-        marginHorizontal: spacing.xs,
-        alignItems: 'center',
+        textAlign: 'center',
     },
     calculator: {
         borderRadius: spacing.md,
         borderWidth: StyleSheet.hairlineWidth,
-        paddingTop: spacing.xl,
-        paddingBottom: spacing.xl,
+        paddingTop: spacing.lg,
+        paddingBottom: spacing.lg,
         marginHorizontal: spacing.sm,
         marginTop: spacing.sm,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,
         elevation: 3,
+        marginBottom: spacing.md,
     },
     button: {
         paddingVertical: spacing.sm + spacing.xs,
-        width: '66%',
+        width: '80%',
         alignSelf: 'center',
+        borderRadius: spacing.sm,
     },
     errorText: {
-        color: 'red',
         marginBottom: spacing.sm,
-        textAlign: 'left',
+        textAlign: 'center',
     },
     resultContainer: {
         marginTop: spacing.lg,
     },
     resultTitle: {
-        fontWeight: '600',
+        fontWeight: '700',
         marginBottom: spacing.sm,
-        textAlign: 'left',
+        textAlign: 'center',
     },
     tableHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
+        borderBottomWidth: StyleSheet.hairlineWidth,
         paddingVertical: spacing.xs,
+        paddingHorizontal: spacing.lg,
     },
     tableHeaderText: {},
     tableRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingVertical: spacing.xs,
-        borderBottomWidth: 0.5,
-        borderBottomColor: '#eee',
-    },
-    tableText: {
-        fontSize: 14,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        paddingHorizontal: spacing.lg,
     },
 });
