@@ -107,7 +107,7 @@ const ExerciseDetailsScreen = () => {
                                 </ThemedText>
                             </ThemedView>
                         </ThemedView>
-                        <HighlightedTip iconName='bulb' tipText={exercise.WeightInstructions} />
+                        <HighlightedTip iconName='bulb' tipText={'Quickly find your ideal lifting weight using the Calculator'} />
                     </ThemedView>
 
                     <ThemedView style={styles.instructionContainer}>
@@ -119,7 +119,7 @@ const ExerciseDetailsScreen = () => {
                     </ThemedView>
                 </ThemedView>
             </Animated.ScrollView>
-            <OneRepMaxCalculator visible={isCalculatorVisible} onClose={closeCalculator} />
+            <OneRepMaxCalculator visible={isCalculatorVisible} onClose={closeCalculator} ormPercentage={exercise.ORMPercentage} />
 
             <ThemedView style={styles.buttonContainer}>
                 <TextButton
@@ -128,7 +128,13 @@ const ExerciseDetailsScreen = () => {
                     style={[styles.logButton, { backgroundColor: themeColors.buttonPrimary }]}
                     onPress={handleLogExercise}
                 />
-                <IconButton iconName='calculator' onPress={openCalculator} iconSize={spacing.lg} iconColor={themeColors.text} style={styles.calculatorButton} />
+                <IconButton
+                    iconName='calculator'
+                    onPress={openCalculator}
+                    iconSize={spacing.lg + spacing.xs}
+                    iconColor={themeColors.text}
+                    style={styles.calculatorButton}
+                />
             </ThemedView>
         </ThemedView>
     );

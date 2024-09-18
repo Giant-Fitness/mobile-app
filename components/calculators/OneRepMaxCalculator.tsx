@@ -1,3 +1,5 @@
+// components/calculators/OneRepMaxCalculator.tsx
+
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, TextInput, View, TouchableOpacity, ScrollView } from 'react-native';
 import { BottomDrawer } from '@/components/layout/BottomDrawer';
@@ -15,9 +17,10 @@ import { HighlightedTip } from '@/components/base/HighlightedTip';
 interface OneRepMaxCalculatorProps {
     visible: boolean;
     onClose: () => void;
+    ormPercentage: number;
 }
 
-export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visible, onClose }) => {
+export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visible, onClose, ormPercentage }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
@@ -47,30 +50,18 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
             return;
         }
         setError('');
-        const calculatedOneRM = w * (1 + r / 30);
+        const calculatedOneRM = (w * (1 + r / 30) * ormPercentage) / 100;
         setOneRM(Math.round(calculatedOneRM));
         setIsResultVisible(true); // Show the result and hide the calculator
     };
 
-    // Percentage table based on Epley formula
-    const percentageTable = oneRM
-        ? [
-              { percentage: 65, weight: Math.round(oneRM * 0.65) },
-              { percentage: 75, weight: Math.round(oneRM * 0.75) },
-              { percentage: 85, weight: Math.round(oneRM * 0.85) },
-              { percentage: 90, weight: Math.round(oneRM * 0.9) },
-              { percentage: 95, weight: Math.round(oneRM * 0.95) },
-              { percentage: 100, weight: oneRM },
-          ]
-        : [];
-
     return (
-        <BottomDrawer visible={visible} onClose={onClose}>
+        <BottomDrawer visible={visible} onClose={onClose} style={[{ maxHeight: '60%' }]}>
             <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
                 {/* Header with Title and Close Button */}
                 <ThemedView style={styles.header}>
                     <ThemedText type='title' style={styles.headerTitle}>
-                        One Rep Max (1RM) Calculator
+                        {`Weight Calculator`}
                     </ThemedText>
                     <TouchableOpacity
                         onPress={onClose}
@@ -84,56 +75,24 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
                     </TouchableOpacity>
                 </ThemedView>
 
-                {/* Explanation of 1RM */}
-                <ThemedView style={styles.descriptionContainer}>
-                    <ThemedView style={styles.infoIcon}>
-                        <Icon name='info' size={14} color={themeColors.subText} />
-                    </ThemedView>
-                    <ThemedText type='bodySmall' style={[styles.description, { color: themeColors.subText }]}>
-                        1RM is the maximum weight that you can lift in a single repetition of an exercise.
-                    </ThemedText>
-                </ThemedView>
+                <ThemedText type='bodySmall' style={styles.instructions}>
+                    {'Choose a light weight and do as many reps as you can.\nEnter the weight you lifted and the number of reps completed.'}
+                </ThemedText>
 
                 {isResultVisible && oneRM ? (
                     <ThemedView style={styles.resultContainer}>
                         {/* Estimated 1RM */}
                         <ThemedView style={styles.resultTitle}>
                             <HighlightedTip
-                                tipText={`Your Estimated 1RM: ${oneRM} kgs`}
+                                tipText={`Recommended weight: ${oneRM} kgs`}
                                 disableIcon={true}
                                 textType='bodyMedium'
                                 containerStyle={{ marginHorizontal: 0, borderRadius: spacing.sm }}
                             />
                         </ThemedView>
 
-                        {/* Percentage Table */}
-                        <ThemedView style={[styles.resultTable, { backgroundColor: themeColors.background, borderColor: themeColors.systemBorderColor }]}>
-                            <ThemedView style={[styles.tableHeader, { borderBottomColor: themeColors.systemBorderColor, backgroundColor: 'transparent' }]}>
-                                <ThemedText type='overline' style={[styles.tableHeaderText, { color: themeColors.text }]}>
-                                    % of 1RM
-                                </ThemedText>
-                                <ThemedText type='overline' style={[styles.tableHeaderText, { color: themeColors.text }]}>
-                                    Weight (kgs)
-                                </ThemedText>
-                            </ThemedView>
-
-                            {percentageTable.map((row) => (
-                                <ThemedView
-                                    key={row.percentage}
-                                    style={[styles.tableRow, { borderTopColor: themeColors.systemBorderColor, backgroundColor: 'transparent' }]}
-                                >
-                                    <ThemedText type='bodySmall' style={[styles.tableTextLeft, { color: themeColors.text }]}>
-                                        {row.percentage}%
-                                    </ThemedText>
-                                    <ThemedText type='bodySmall' style={[styles.tableTextRight, { color: themeColors.text }]}>
-                                        {row.weight}
-                                    </ThemedText>
-                                </ThemedView>
-                            ))}
-                        </ThemedView>
-
                         <TextButton
-                            text='Recalculate'
+                            text='Calculate Again'
                             textType='bodyMedium'
                             style={[
                                 styles.recalcButton,
@@ -204,7 +163,7 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
                         {/* Calculate Button */}
                         <View>
                             <TextButton
-                                text='Calculate 1RM'
+                                text='Calculate'
                                 textType='bodyMedium'
                                 style={[styles.button, { backgroundColor: themeColors.buttonPrimary }]}
                                 onPress={calculateOneRM}
@@ -213,43 +172,22 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
                     </ThemedView>
                 )}
 
-                {/* Results */}
-                {/* Instructions */}
-                <ThemedText type='bodyMedium' style={styles.subtitle}>
-                    How to Use the Calculator
-                </ThemedText>
-
-                <ThemedText type='bodySmall' style={styles.instructions}>
-                    Do a set to failure on any exercise, then enter the weight lifted and the number of reps completed into the calculator.
-                </ThemedText>
-
-                {/* Caution */}
-                <ThemedView>
-                    <ThemedView style={{ flexDirection: 'row', marginTop: spacing.lg, alignItems: 'center' }}>
-                        <Icon name='warning' size={14} color={themeColors.red} />
-                        <ThemedText type='bodyMedium' style={[styles.cautionTitle, { color: themeColors.red }]}>
-                            Caution
+                {/* Methodology */}
+                <ThemedView style={{ marginBottom: spacing.md, marginTop: spacing.lg }}>
+                    <ThemedView style={{ flexDirection: 'row', marginBottom: spacing.xs, alignItems: 'center' }}>
+                        <Icon name='info' size={16} color={themeColors.text} style={styles.infoIcon} />
+                        <ThemedText type='buttonSmall' style={styles.subtitle}>
+                            How it works
                         </ThemedText>
                     </ThemedView>
-                    <ThemedText type='bodySmall' style={[styles.caution, { color: themeColors.red }]}>
-                        Testing your 1RM is not recommended for beginners and should only be performed with an experienced spotter to ensure safety.
+                    <ThemedText type='bodySmall' style={styles.methodology}>
+                        We use the Epley Formula to estimate your one-rep-max (1RM) and calculate how much weight you should lift based on the intensity of
+                        today's workout.
                     </ThemedText>
-                </ThemedView>
-
-                {/* Methodology */}
-                <ThemedView style={{ marginBottom: spacing.md }}>
-                    <ThemedText type='bodyMedium' style={styles.subtitle}>
-                        Methodology
-                    </ThemedText>
-
                     {/* Styled Formula */}
                     <ThemedView style={[styles.formulaContainer, { backgroundColor: themeColors.container, borderColor: themeColors.systemBorderColor }]}>
                         <MathView math={'1RM = Weight \\times (1 + \\frac{Reps}{30})'} />
                     </ThemedView>
-
-                    <ThemedText type='bodySmall' style={styles.methodology}>
-                        We use the Epley Formula to estimate your 1RM.
-                    </ThemedText>
                 </ThemedView>
             </ScrollView>
         </BottomDrawer>
@@ -276,18 +214,6 @@ const styles = StyleSheet.create({
         position: 'absolute',
         right: 0,
     },
-    resultTable: {
-        paddingHorizontal: spacing.md,
-        paddingTop: spacing.md,
-        paddingBottom: spacing.lg,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderRadius: spacing.sm,
-        marginHorizontal: spacing.sm,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 3,
-    },
     recalcButton: {
         borderWidth: StyleSheet.hairlineWidth,
         shadowOffset: { width: 0, height: 0 },
@@ -297,25 +223,12 @@ const styles = StyleSheet.create({
         width: '60%',
         alignSelf: 'center',
         marginTop: spacing.lg,
-    },
-    descriptionContainer: {
-        flexDirection: 'row',
-        width: '100%',
-        alignItems: 'flex-start',
+        marginBottom: spacing.lg,
     },
     infoIcon: {
         paddingRight: spacing.xs,
-        marginTop: spacing.xs,
-    },
-    description: {
-        marginBottom: spacing.md,
-        textAlign: 'left',
-        flex: 1,
-        flexWrap: 'wrap',
     },
     subtitle: {
-        marginTop: spacing.lg,
-        marginBottom: spacing.sm,
         textAlign: 'left',
     },
     formulaContainer: {
@@ -381,41 +294,8 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         alignSelf: 'center',
     },
-    tableHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        paddingVertical: spacing.xs,
-        paddingHorizontal: spacing.lg,
-    },
-    tableRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingVertical: spacing.xs,
-        borderTopWidth: StyleSheet.hairlineWidth,
-        paddingHorizontal: spacing.lg,
-    },
-    tableTextLeft: {
-        flex: 1,
-        textAlign: 'left', // Align percentage text to the left
-        marginLeft: spacing.md,
-    },
-    tableTextRight: {
-        textAlign: 'left', // Align weight text to the right
-        marginRight: spacing.xl,
-    },
-    cautionTitle: {
-        marginLeft: spacing.xs,
-    },
-    caution: {
-        marginBottom: spacing.sm,
-        textAlign: 'left',
-        flex: 1,
-        flexWrap: 'wrap',
-    },
-
     instructions: {
-        marginBottom: spacing.sm,
+        marginBottom: spacing.md,
         textAlign: 'left',
     },
 });
