@@ -204,20 +204,8 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
                     Do a set to failure on any exercise, then enter the weight lifted and the number of reps completed into the calculator.
                 </ThemedText>
 
-                {/* Methodology */}
-                <ThemedView>
-                    <ThemedText type='bodyMedium' style={styles.subtitle}>
-                        Methodology
-                    </ThemedText>
-                    <ThemedText type='bodySmall' style={styles.methodology}>
-                        We use the Epley Formula to estimate your 1RM:
-                        {'\n'}
-                        1RM = Weight × (1 + Reps / 30)
-                    </ThemedText>
-                </ThemedView>
-
                 {/* Caution */}
-                <ThemedView style={{ marginBottom: spacing.md }}>
+                <ThemedView>
                     <ThemedView style={{ flexDirection: 'row', marginTop: spacing.lg, alignItems: 'center' }}>
                         <Icon name='warning' size={14} color={themeColors.red} />
                         <ThemedText type='bodyMedium' style={[styles.cautionTitle, { color: themeColors.red }]}>
@@ -226,6 +214,18 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
                     </ThemedView>
                     <ThemedText type='bodySmall' style={[styles.caution, { color: themeColors.red }]}>
                         Testing your 1RM is not recommended for beginners and should only be performed with an experienced spotter to ensure safety.
+                    </ThemedText>
+                </ThemedView>
+
+                {/* Methodology */}
+                <ThemedView style={{ marginBottom: spacing.md }}>
+                    <ThemedText type='bodyMedium' style={styles.subtitle}>
+                        Methodology
+                    </ThemedText>
+                    <ThemedText type='bodySmall' style={styles.methodology}>
+                        We use the Epley Formula to estimate your 1RM:
+                        {'\n'}
+                        1RM = Weight × (1 + Reps / 30)
                     </ThemedText>
                 </ThemedView>
             </ScrollView>
@@ -314,10 +314,10 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     calculator: {
-        borderRadius: spacing.md,
+        borderRadius: spacing.sm,
         borderWidth: StyleSheet.hairlineWidth,
-        paddingTop: spacing.lg,
-        paddingBottom: spacing.lg,
+        paddingTop: spacing.xl,
+        paddingBottom: spacing.xl,
         marginHorizontal: spacing.sm,
         marginTop: spacing.sm,
         shadowOffset: { width: 0, height: 2 },

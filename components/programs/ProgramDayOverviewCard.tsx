@@ -65,6 +65,7 @@ export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ 
             titleStyle={[styles.title, { color: themeColors.text }]}
             contentContainerStyle={styles.contentContainer}
             imageStyle={styles.image}
+            imageContainerStyle={styles.imageContainer}
         />
     );
 };
@@ -85,6 +86,8 @@ const styles = StyleSheet.create({
     image: {
         height: sizes.imageSmall,
         width: sizes.imageMediumWidth,
+    },
+    imageContainer: {
         borderRadius: spacing.xxs,
     },
     contentContainer: {

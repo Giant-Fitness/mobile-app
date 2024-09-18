@@ -152,7 +152,7 @@ export default function WorkoutsScreen() {
                         </ThemedView>
                     ))}
                     <ThemedView style={styles.allWorkoutsContainer}>
-                        <TouchableOpacity onPress={() => navigateToAllWorkouts()} style={styles.allWorkouts} activeOpacity={0.5}>
+                        <TouchableOpacity onPress={() => navigateToAllWorkouts()} style={styles.allWorkouts} activeOpacity={1}>
                             <Icon name='list' size={moderateScale(20)} color={themeColors.text} style={{ paddingRight: spacing.xs, marginTop: 1 }} />
                             <ThemedText type='body' style={[{ color: themeColors.text }]}>
                                 {'All Workouts'}
