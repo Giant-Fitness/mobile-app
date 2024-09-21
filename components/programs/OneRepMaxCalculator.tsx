@@ -84,10 +84,16 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
                     {isResultVisible && oneRM ? (
                         <ThemedView style={styles.resultContainer}>
                             <HighlightedTip
-                                tipText={`Recommended weight: ${oneRM} kgs`}
+                                tipText={`Suggested Weight: ${oneRM} kgs`}
                                 disableIcon={true}
-                                textType='bodyMedium'
-                                containerStyle={{ marginHorizontal: 0, borderRadius: Spaces.SM }}
+                                textType='link'
+                                containerStyle={{
+                                    marginHorizontal: 0,
+                                    borderRadius: Spaces.SM,
+                                    alignSelf: 'center',
+                                    textAlign: 'center',
+                                    paddingVertical: Spaces.XL,
+                                }}
                             />
                             <TextButton
                                 text='Calculate Again'
@@ -252,7 +258,7 @@ const styles = StyleSheet.create({
         marginBottom: Spaces.SM,
     },
     formulaContainer: {
-        padding: Spaces.SM,
+        padding: Spaces.LG,
         borderWidth: StyleSheet.hairlineWidth,
         borderRadius: Spaces.XS,
         marginVertical: Spaces.SM,

@@ -74,8 +74,8 @@ export const TextButton: React.FC<TextButtonProps & AccessibilityProps> = ({
                 <Icon
                     name={iconName}
                     size={moderateScale(iconSize)}
-                    color={iconColor || themeColors.buttonPrimaryText}
-                    style={[styles.icon, iconStyle, { marginRight: Spaces.XS }]}
+                    color={iconColor || themeColors.text}
+                    style={[styles.icon, iconStyle, { marginRight: Spaces.SM, marginBottom: Spaces.XXS }]}
                 />
             )}
 
@@ -87,7 +87,7 @@ export const TextButton: React.FC<TextButtonProps & AccessibilityProps> = ({
                 <Icon
                     name={iconName}
                     size={moderateScale(iconSize)}
-                    color={iconColor || themeColors.buttonPrimaryText}
+                    color={iconColor || themeColors.text}
                     style={[styles.icon, iconStyle, { marginLeft: Spaces.XS }]}
                 />
             )}
