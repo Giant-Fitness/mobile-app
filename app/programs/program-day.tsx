@@ -172,30 +172,31 @@ const ProgramDayScreen = () => {
                                     ))}
                             </ThemedView>
                         )}
+                        {isEnrolled && (
+                            <View style={styles.buttonContainer}>
+                                <PrimaryButton
+                                    text='Finish Day'
+                                    textType='bodyMedium'
+                                    style={[styles.completeButton, { backgroundColor: themeColors.buttonPrimary }]}
+                                    onPress={handleCompleteDay}
+                                    iconName='check'
+                                    size={'LG'}
+                                />
+                                {programDay && programDay.RestDay && (
+                                    <TextButton
+                                        text='Mobility Workouts'
+                                        textStyle={[{ color: themeColors.text }]}
+                                        textType='bodyMedium'
+                                        style={[styles.mobilityButton]}
+                                        size={'LG'}
+                                        onPress={() => navigateToAllWorkouts({ focus: ['Mobility'] })}
+                                    />
+                                )}
+                            </View>
+                        )}
                     </>
                 )}
             </Animated.ScrollView>
-            {isEnrolled && (
-                <View style={styles.buttonContainer}>
-                    <PrimaryButton
-                        text='Finish Day'
-                        textType='bodyMedium'
-                        style={[styles.completeButton, { backgroundColor: themeColors.buttonPrimary }]}
-                        onPress={handleCompleteDay}
-                        size={'LG'}
-                    />
-                    {programDay && programDay.RestDay && (
-                        <TextButton
-                            text='Mobility Workouts'
-                            textStyle={[{ color: themeColors.text }]}
-                            textType='bodyMedium'
-                            style={[styles.mobilityButton]}
-                            size={'LG'}
-                            onPress={() => navigateToAllWorkouts({ focus: ['Mobility'] })}
-                        />
-                    )}
-                </View>
-            )}
         </ThemedView>
     );
 };
@@ -203,7 +204,7 @@ const ProgramDayScreen = () => {
 const styles = StyleSheet.create({
     contentContainer: {
         paddingRight: Spaces.SM,
-        paddingBottom: Sizes.bottomSpaceMedium,
+        paddingBottom: Spaces.LG,
     },
     container: {
         marginRight: '27%',
@@ -223,8 +224,8 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
     },
     exercisesContainer: {
-        paddingVertical: Spaces.LG,
-        paddingBottom: Spaces.XXL,
+        paddingTop: Spaces.LG,
+        paddingBottom: 0,
         paddingHorizontal: Spaces.MD,
     },
     buttonContainer: {
@@ -232,7 +233,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: '10%',
         position: 'absolute',
-        bottom: Spaces.XL,
+        bottom: Spaces.XXXL,
         left: 0,
         right: 0,
     },

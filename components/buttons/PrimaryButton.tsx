@@ -74,7 +74,7 @@ export const PrimaryButton: React.FC<PrimaryButtonProps & AccessibilityProps> = 
                     name={iconName}
                     size={moderateScale(iconSize)}
                     color={iconColor || themeColors.buttonPrimaryText}
-                    style={[styles.icon, iconStyle, { marginRight: Spaces.XS }]}
+                    style={[styles.icon, iconStyle, { marginRight: Spaces.SM }]}
                 />
             )}
 
