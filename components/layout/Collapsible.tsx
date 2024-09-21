@@ -1,14 +1,15 @@
 // components/layout/Collapsible.tsx
 
 import React, { PropsWithChildren, useState } from 'react';
-import { Icon } from '@/components/icons/Icon';
+import { Icon } from '@/components/base/Icon';
 import { StyleSheet, TouchableOpacity, TextStyle, ViewStyle } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { moderateScale } from '@/utils/scaling';
-import { spacing } from '@/utils/spacing';
+import { Spaces } from '@/constants/Spaces';
+import { Sizes } from '@/constants/Sizes';
 
 interface CollapsibleProps extends PropsWithChildren {
     title: string;
@@ -41,9 +42,9 @@ export function Collapsible({
                 </ThemedText>
                 <Icon
                     name={isOpen ? 'chevron-up' : 'chevron-down'}
-                    size={moderateScale(16)}
+                    size={Sizes.iconSizeSM}
                     color={themeColors.iconDefault}
-                    style={[{ paddingTop: spacing.xxs }, iconStyle]}
+                    style={[{ paddingTop: Spaces.XXS }, iconStyle]}
                 />
             </TouchableOpacity>
             {isOpen && <ThemedView style={styles.content}>{children}</ThemedView>}
@@ -53,16 +54,16 @@ export function Collapsible({
 
 const styles = StyleSheet.create({
     container: {
-        marginBottom: spacing.md,
+        marginBottom: Spaces.MD,
     },
     heading: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.lg,
+        paddingVertical: Spaces.SM,
+        paddingHorizontal: Spaces.LG,
         alignItems: 'center',
     },
     content: {
-        marginTop: spacing.sm,
+        marginTop: Spaces.SM,
     },
 });

@@ -1,21 +1,21 @@
-// components/programs/ProgressBar.tsx
+// components/programs/ProgramProgressPillBar.tsx
 
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { spacing } from '@/utils/spacing';
+import { Spaces } from '@/constants/Spaces';
 
-type ProgressBarProps = {
+type ProgramProgressPillBarProps = {
     parts: number; // Total number of parts/weeks
     currentPart: number; // Current week
     completedParts: number; // Number of completed weeks
     containerWidth: number; // Width of the parent container
 };
 
-export const ProgressBar: React.FC<ProgressBarProps> = ({ parts = 8, currentPart = 0, completedParts = 0, containerWidth }) => {
-    const margin = spacing.xs; // Margin between pills
+export const ProgramProgressPillBar: React.FC<ProgramProgressPillBarProps> = ({ parts = 8, currentPart = 0, completedParts = 0, containerWidth }) => {
+    const margin = Spaces.XS; // Margin between pills
     const totalMarginSpace = margin * (parts - 1); // Total space taken by margins
     const partWidth = Math.floor((containerWidth - totalMarginSpace) / parts); // Adjusted part width
     const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
@@ -54,10 +54,10 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ parts = 8, currentPart
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
-        height: spacing.xs,
+        height: Spaces.XS,
     },
     part: {
         height: '100%',
-        borderRadius: spacing.xxs,
+        borderRadius: Spaces.XXS,
     },
 });

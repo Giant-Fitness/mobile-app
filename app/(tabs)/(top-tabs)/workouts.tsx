@@ -10,10 +10,10 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { WorkoutOverviewCard } from '@/components/workouts/WorkoutOverviewCard';
 import { Collapsible } from '@/components/layout/Collapsible';
-import { Icon } from '@/components/icons/Icon';
+import { Icon } from '@/components/base/Icon';
 import { moderateScale } from '@/utils/scaling';
-import { spacing } from '@/utils/spacing';
-import { sizes } from '@/utils/sizes';
+import { Spaces } from '@/constants/Spaces';
+import { Sizes } from '@/constants/Sizes';
 
 type RootStackParamList = {
     'workouts/all-workouts': { initialFilters: object };
@@ -153,7 +153,7 @@ export default function WorkoutsScreen() {
                     ))}
                     <ThemedView style={styles.allWorkoutsContainer}>
                         <TouchableOpacity onPress={() => navigateToAllWorkouts()} style={styles.allWorkouts} activeOpacity={1}>
-                            <Icon name='list' size={moderateScale(20)} color={themeColors.text} style={{ paddingRight: spacing.xs, marginTop: 1 }} />
+                            <Icon name='list' size={Sizes.iconSizeMD} color={themeColors.text} style={{ paddingRight: Spaces.XS }} />
                             <ThemedText type='body' style={[{ color: themeColors.text }]}>
                                 {'All Workouts'}
                             </ThemedText>
@@ -167,9 +167,9 @@ export default function WorkoutsScreen() {
 
 const styles = StyleSheet.create({
     infoContainer: {
-        paddingTop: spacing.lg,
+        paddingTop: Spaces.LG,
         paddingBottom: 0,
-        marginHorizontal: spacing.xxxl,
+        marginHorizontal: Spaces.XXXL,
     },
     infoText: {
         textAlign: 'center',
@@ -178,28 +178,28 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     allWorkoutsContainer: {
-        paddingBottom: spacing.xl,
+        paddingBottom: Spaces.XL,
     },
     allWorkouts: {
-        padding: spacing.lg,
+        padding: Spaces.LG,
         flexDirection: 'row',
     },
     mainScrollView: {
-        marginLeft: spacing.lg,
-        paddingRight: spacing.xxl,
-        paddingBottom: spacing.xl,
+        marginLeft: Spaces.LG,
+        paddingRight: Spaces.XXL,
+        paddingBottom: Spaces.XL,
     },
     header: {
-        padding: spacing.md,
-        paddingTop: spacing.lg,
-        paddingLeft: spacing.lg,
+        padding: Spaces.MD,
+        paddingTop: Spaces.LG,
+        paddingLeft: Spaces.LG,
     },
     scrollView: {
-        paddingLeft: spacing.lg,
-        paddingBottom: spacing.lg,
+        paddingLeft: Spaces.LG,
+        paddingBottom: Spaces.LG,
     },
     collapsible: {
-        paddingTop: spacing.md,
+        paddingTop: Spaces.MD,
     },
     divider: {
         width: '90%',
@@ -210,12 +210,12 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     },
     seeAllButton: {
-        width: sizes.imageXLargeWidth,
-        height: sizes.imageXLargeHeight,
+        width: Sizes.imageXLWidth,
+        height: Sizes.imageXLHeight,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: spacing.sm,
-        marginHorizontal: spacing.xxs,
+        borderRadius: Spaces.SM,
+        marginHorizontal: Spaces.XXS,
     },
     shadowContainer: {
         shadowColor: 'rgba(0,70,0,0.2)', // Use a more standard shadow color
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 1,
         shadowRadius: 4,
         elevation: 5, // For Android
-        borderRadius: spacing.sm, // Match the child border radius
-        marginRight: spacing.md,
+        borderRadius: Spaces.SM, // Match the child border radius
+        marginRight: Spaces.MD,
     },
 });

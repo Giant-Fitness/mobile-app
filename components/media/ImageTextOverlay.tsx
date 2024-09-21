@@ -1,4 +1,4 @@
-// components/images/ImageTextOverlay.tsx
+// components/media/ImageTextOverlay.tsx
 
 import React from 'react';
 import { StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
@@ -9,8 +9,8 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Image } from 'expo-image';
 import { scale, moderateScale, verticalScale } from '@/utils/scaling';
-import { spacing } from '@/utils/spacing';
-import { sizes } from '@/utils/sizes';
+import { Spaces } from '@/constants/Spaces';
+import { Sizes } from '@/constants/Sizes';
 
 type ImageTextOverlayProps = {
     image: any;
@@ -77,17 +77,17 @@ const styles = StyleSheet.create({
     },
     textContainer: {
         position: 'absolute',
-        left: spacing.lg,
-        right: spacing.lg,
-        bottom: spacing.lg,
+        left: Spaces.LG,
+        right: Spaces.LG,
+        bottom: Spaces.LG,
         zIndex: 3,
         backgroundColor: 'transparent',
     },
     title: {
         textShadowColor: 'rgba(0,0,0,0.75)',
-        textShadowRadius: sizes.textShadowRadius,
-        marginRight: spacing.xxl,
-        lineHeight: spacing.xxl,
+        textShadowRadius: Sizes.textShadowRadius,
+        marginRight: Spaces.XXL,
+        lineHeight: Spaces.XXL,
     },
     subtitle: {
         marginTop: 8,

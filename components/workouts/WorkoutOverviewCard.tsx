@@ -3,10 +3,10 @@
 import React from 'react';
 import { StyleSheet, ImageSourcePropType, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { ImageTextOverlay } from '@/components/images/ImageTextOverlay';
+import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
 import { moderateScale } from '@/utils/scaling';
-import { sizes } from '@/utils/sizes';
-import { spacing } from '@/utils/spacing';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
 
 type WorkoutOverviewCardProps = {
     name: string;
@@ -46,10 +46,10 @@ export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, 
                     subtitle={`${length}, ${level}`}
                     gradientColors={['transparent', 'rgba(0,0,0,0.7)']}
                     containerStyle={{ height: '100%' }}
-                    textContainerStyle={{ bottom: spacing.lg }}
+                    textContainerStyle={{ bottom: Spaces.LG }}
                     subtitleType='bodySmall'
                     titleType='title'
-                    titleStyle={{ marginRight: spacing.xl, lineHeight: moderateScale(20) }}
+                    titleStyle={{ marginRight: Spaces.XL, lineHeight: moderateScale(20) }}
                     subtitleStyle={{ marginTop: 0 }}
                 />
             </TouchableOpacity>
@@ -64,14 +64,14 @@ const styles = StyleSheet.create({
         shadowOpacity: 1,
         shadowRadius: 4,
         elevation: 5, // For Android
-        borderRadius: spacing.sm, // Match the child border radius
-        marginRight: spacing.md,
+        borderRadius: Spaces.SM, // Match the child border radius
+        marginRight: Spaces.MD,
     },
     cardContainer: {
-        width: sizes.imageXLargeWidth,
-        height: sizes.imageXLargeHeight,
+        width: Sizes.imageXLWidth,
+        height: Sizes.imageXLHeight,
         overflow: 'hidden',
-        borderRadius: spacing.sm,
+        borderRadius: Spaces.SM,
         // Remove shadow properties from here
     },
 });

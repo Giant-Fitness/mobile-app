@@ -6,10 +6,10 @@ import React from 'react';
 import { StyleSheet, View, ActivityIndicator } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { TopImageInfoCard } from '@/components/layout/TopImageInfoCard';
-import { Icon } from '@/components/icons/Icon';
+import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
+import { Icon } from '@/components/base/Icon';
 import { moderateScale } from '@/utils/scaling';
-import { spacing } from '@/utils/spacing';
+import { Spaces } from '@/constants/Spaces';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/rootReducer';
@@ -82,7 +82,7 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
                 extraContent={
                     day.RestDay ? (
                         // Display content specific to a rest day
-                        <ThemedView style={[styles.attributeRow, { marginLeft: 0, marginTop: -spacing.xxs }]}>
+                        <ThemedView style={[styles.attributeRow, { marginLeft: 0, marginTop: -Spaces.XXS }]}>
                             <Icon name='bed' size={moderateScale(18)} color={themeColors.highlightContainerText} />
                             <Icon name='chevron-forward' size={moderateScale(16)} color={themeColors.highlightContainerText} style={styles.chevronIcon} />
                         </ThemedView>
@@ -90,11 +90,11 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
                         // Display content specific to a workout day
                         <ThemedView style={styles.attributeRow}>
                             <Icon name='stopwatch' size={moderateScale(14)} color={themeColors.highlightContainerText} />
-                            <ThemedText type='body' style={[styles.attributeText, { color: themeColors.highlightContainerText, paddingRight: spacing.md }]}>
+                            <ThemedText type='body' style={[styles.attributeText, { color: themeColors.highlightContainerText, paddingRight: Spaces.MD }]}>
                                 {`${day.Time} mins`}
                             </ThemedText>
                             <Icon name='kettlebell' size={moderateScale(14)} color={themeColors.highlightContainerText} />
-                            <ThemedText type='body' style={[styles.attributeText, { color: themeColors.highlightContainerText, marginLeft: spacing.xs }]}>
+                            <ThemedText type='body' style={[styles.attributeText, { color: themeColors.highlightContainerText, marginLeft: Spaces.XS }]}>
                                 {day.EquipmentCategory}
                             </ThemedText>
                             <Icon name='chevron-forward' size={moderateScale(16)} color={themeColors.highlightContainerText} style={styles.chevronIcon} />
@@ -115,18 +115,18 @@ const styles = StyleSheet.create({
         shadowOpacity: 1,
         shadowRadius: 4,
         elevation: 5, // For Android
-        borderRadius: spacing.sm, // Match the child border radius
+        borderRadius: Spaces.SM, // Match the child border radius
     },
     attributeRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: spacing.sm,
+        marginBottom: Spaces.SM,
         backgroundColor: 'transparent',
     },
     attributeText: {
-        marginLeft: spacing.xs,
+        marginLeft: Spaces.XS,
         fontSize: moderateScale(13),
-        lineHeight: spacing.md,
+        lineHeight: Spaces.MD,
     },
     chevronIcon: {
         position: 'absolute',
@@ -136,11 +136,11 @@ const styles = StyleSheet.create({
     errorContainer: {
         justifyContent: 'center',
         alignItems: 'center',
-        padding: spacing.lg,
+        padding: Spaces.LG,
     },
     loadingContainer: {
         justifyContent: 'center',
         alignItems: 'center',
-        padding: spacing.lg,
+        padding: Spaces.LG,
     },
 });

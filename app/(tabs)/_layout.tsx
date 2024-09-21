@@ -8,7 +8,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Icon } from '@/components/icons/Icon';
+import { Icon } from '@/components/base/Icon';
 import { Platform } from 'react-native';
 
 export default function TabLayout() {
@@ -76,7 +76,7 @@ export default function TabLayout() {
                         elevation: 0, // Remove the elevation for Android
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
-                    title: 'Training',
+                    title: 'Train',
                     tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'exercise-active' : 'exercise-inactive'} size={25} color={color} />,
                 }}
             />

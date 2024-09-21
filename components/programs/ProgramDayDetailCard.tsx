@@ -5,13 +5,13 @@ import { Colors } from '@/constants/Colors';
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
-import { LeftImageInfoCard } from '@/components/layout/LeftImageInfoCard';
+import { LeftImageInfoCard } from '@/components/media/LeftImageInfoCard';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useNavigation } from '@react-navigation/native';
-import { Icon } from '@/components/icons/Icon';
+import { Icon } from '@/components/base/Icon';
 import { moderateScale } from '@/utils/scaling';
-import { spacing } from '@/utils/spacing';
-import { sizes } from '@/utils/sizes';
+import { Spaces } from '@/constants/Spaces';
+import { Sizes } from '@/constants/Sizes';
 import { ProgramDay } from '@/types/types';
 import { getWeekNumber, getDayOfWeek } from '@/utils/calendar';
 
@@ -81,40 +81,40 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         backgroundColor: 'transparent',
         width: '100%',
-        marginBottom: spacing.lg,
+        marginBottom: Spaces.LG,
     },
     title: {
         fontSize: moderateScale(14),
         marginBottom: 0,
-        marginLeft: spacing.xs,
-        marginTop: spacing.xs,
+        marginLeft: Spaces.XS,
+        marginTop: Spaces.XS,
     },
     image: {
-        height: sizes.imageSmall,
-        width: sizes.imageMediumWidth,
+        height: Sizes.imageSM,
+        width: Sizes.imageMDWidth,
     },
     imageContainer: {
-        borderRadius: spacing.xxs,
+        borderRadius: Spaces.XXS,
     },
     contentContainer: {
         width: '100%',
-        marginLeft: spacing.sm,
+        marginLeft: Spaces.SM,
         backgroundColor: 'transparent',
     },
     attributeRow: {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: 'transparent',
-        marginBottom: spacing.xs,
-        marginLeft: spacing.xs,
+        marginBottom: Spaces.XS,
+        marginLeft: Spaces.XS,
     },
     attributeText: {
-        marginLeft: spacing.xs,
-        lineHeight: spacing.md,
+        marginLeft: Spaces.XS,
+        lineHeight: Spaces.MD,
         backgroundColor: 'transparent',
     },
     attributeContainer: {
-        marginTop: spacing.xxs,
+        marginTop: Spaces.XXS,
         backgroundColor: 'transparent',
     },
 });

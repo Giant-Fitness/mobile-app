@@ -1,20 +1,20 @@
-// components/programs/WeekRow.tsx
+// components/programs/ProgramWeekRow.tsx
 
 import React from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { ProgramDay, UserProgramProgress } from '@/type/types';
-import ProgramDayOverviewCard from '@/components/programs/ProgramDayOverviewCard';
-import { spacing } from '@/utils/spacing';
-import { sizes } from '@/utils/sizes';
+import { ProgramDayOverviewCard } from '@/components/programs/ProgramDayOverviewCard';
+import { Spaces } from '@/constants/Spaces';
+import { Sizes } from '@/constants/Sizes';
 
-interface WeekRowProps {
+interface ProgramWeekRowProps {
     week: (ProgramDay | null)[];
     onDayPress: (dayId: string) => void;
     userProgramProgress: UserProgramProgress | null;
     isEnrolled: boolean;
 }
 
-const WeekRow: React.FC<WeekRowProps> = ({ week, onDayPress, userProgramProgress, isEnrolled = false }) => {
+export const ProgramWeekRow: React.FC<ProgramWeekRowProps> = ({ week, onDayPress, userProgramProgress, isEnrolled = false }) => {
     return (
         <View style={styles.weekContainer}>
             {week.map((day, index) => {
@@ -40,13 +40,11 @@ const styles = StyleSheet.create({
     weekContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: spacing.xs,
+        marginBottom: Spaces.XS,
     },
     emptyDay: {
-        height: sizes.dayTile,
-        width: sizes.dayTile,
+        height: Sizes.dayTile,
+        width: Sizes.dayTile,
         marginHorizontal: 1,
     },
 });
-
-export default WeekRow;

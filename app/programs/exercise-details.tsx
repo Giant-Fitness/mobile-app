@@ -8,19 +8,19 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { View, Button, StyleSheet } from 'react-native';
 import { RouteProp } from '@react-navigation/native';
 import { Exercise } from '@/types/types';
-import { AnimatedHeader } from '@/components/layout/AnimatedHeader';
+import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
-import { sizes } from '@/utils/sizes';
-import { spacing } from '@/utils/spacing';
-import { TextButton } from '@/components/base/TextButton';
-import { IconButton } from '@/components/base/IconButton';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { PrimaryButton } from '@/components/buttons/PrimaryButton';
+import { IconButton } from '@/components/buttons/IconButton';
 import { moderateScale, verticalScale } from '@/utils/scaling';
 import { ThemedText } from '@/components/base/ThemedText';
-import { ThumbnailVideoPlayer } from '@/components/video/ThumbnailVideoPlayer';
-import { BulletedList } from '@/components/base/BulletedList';
-import { Icon } from '@/components/icons/Icon';
-import { HighlightedTip } from '@/components/base/HighlightedTip';
-import { OneRepMaxCalculator } from '@/components/calculators/OneRepMaxCalculator';
+import { ThumbnailVideoPlayer } from '@/components/media/ThumbnailVideoPlayer';
+import { BulletedList } from '@/components/layout/BulletedList';
+import { Icon } from '@/components/base/Icon';
+import { HighlightedTip } from '@/components/alerts/HighlightedTip';
+import { OneRepMaxCalculator } from '@/components/programs/OneRepMaxCalculator';
 
 type ExerciseDetailsScreenParams = {
     Exercise: {
@@ -67,7 +67,7 @@ const ExerciseDetailsScreen = () => {
     };
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
-            <AnimatedHeader scrollY={scrollY} headerInterpolationStart={sizes.imageLargeHeight} headerInterpolationEnd={sizes.imageLargeHeight + spacing.xxl} />
+            <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Sizes.imageLGHeight} headerInterpolationEnd={Sizes.imageLGHeight + Spaces.XXL} />
             <Animated.ScrollView
                 contentContainerStyle={{ flexGrow: 1 }}
                 showsVerticalScrollIndicator={false}
@@ -76,7 +76,11 @@ const ExerciseDetailsScreen = () => {
                 scrollEventThrottle={16}
             >
                 <ThemedView
-                    style={[styles.mainContainer, { backgroundColor: themeColors.backgroundTertiary }, isEnrolled && [{ paddingBottom: verticalScale(120) }]]}
+                    style={[
+                        styles.mainContainer,
+                        { backgroundColor: themeColors.backgroundTertiary },
+                        isEnrolled && [{ paddingBottom: Sizes.bottomSpaceLarge }],
+                    ]}
                 >
                     <ThumbnailVideoPlayer videoUrl={exercise.VideoUrl} onPlaybackStatusUpdate={handlePlaybackStatusUpdate} thumbnailUrl={exercise.BannerUrl} />
                     <ThemedView style={[styles.topCard, { backgroundColor: themeColors.background }]}>
@@ -87,7 +91,7 @@ const ExerciseDetailsScreen = () => {
                         <ThemedView style={styles.attributeRow}>
                             {/* Attribute 1: Reps */}
                             <ThemedView style={styles.attributeItem}>
-                                <Icon name='counter' style={[{ color: themeColors.text }]} size={verticalScale(14)} />
+                                <Icon name='counter' style={[{ color: themeColors.text }]} size={Sizes.iconSizeSM} />
                                 <ThemedText type='buttonSmall' style={[styles.attributeText, { color: themeColors.text }]}>
                                     Reps: {exercise.RepsLower}-{exercise.RepsUpper}
                                 </ThemedText>
@@ -95,7 +99,7 @@ const ExerciseDetailsScreen = () => {
 
                             {/* Attribute 2: Sets */}
                             <ThemedView style={styles.attributeItem}>
-                                <Icon name='repeat' style={[{ color: themeColors.text }]} size={verticalScale(14)} />
+                                <Icon name='repeat' style={[{ color: themeColors.text }]} size={Sizes.iconSizeSM} />
                                 <ThemedText type='buttonSmall' style={[styles.attributeText, { color: themeColors.text }]}>
                                     Sets: {exercise.Sets}
                                 </ThemedText>
@@ -103,7 +107,7 @@ const ExerciseDetailsScreen = () => {
 
                             {/* Attribute 3: Rest */}
                             <ThemedView style={styles.attributeItem}>
-                                <Icon name='hourglass' style={[{ color: themeColors.text }]} size={verticalScale(12)} />
+                                <Icon name='hourglass' style={[{ color: themeColors.text }]} size={Sizes.iconSizeSM} />
                                 <ThemedText type='buttonSmall' style={[styles.attributeText, { color: themeColors.text }]}>
                                     Rest: {exercise.Rest}
                                 </ThemedText>
@@ -113,7 +117,7 @@ const ExerciseDetailsScreen = () => {
                     </ThemedView>
 
                     <ThemedView style={styles.instructionContainer}>
-                        <ThemedText type='link' style={{ color: themeColors.text, paddingBottom: spacing.md }}>
+                        <ThemedText type='link' style={{ color: themeColors.text, paddingBottom: Spaces.MD }}>
                             Instructions
                         </ThemedText>
                         {/* Render Instructions as a Bulleted List */}
@@ -125,18 +129,14 @@ const ExerciseDetailsScreen = () => {
 
             {isEnrolled && (
                 <ThemedView style={styles.buttonContainer}>
-                    <TextButton
-                        text='Log'
-                        textType='bodyMedium'
-                        style={[styles.logButton, { backgroundColor: themeColors.buttonPrimary }]}
-                        onPress={handleLogExercise}
-                    />
+                    <PrimaryButton text='Log' textType='bodyMedium' style={[styles.logButton]} onPress={handleLogExercise} size={'LG'} />
                     <IconButton
                         iconName='calculator'
                         onPress={openCalculator}
-                        iconSize={spacing.lg + spacing.xs}
+                        iconSize={Spaces.LG + Spaces.XS}
                         iconColor={themeColors.text}
                         style={styles.calculatorButton}
+                        size={'LG'}
                     />
                 </ThemedView>
             )}
@@ -146,47 +146,38 @@ const ExerciseDetailsScreen = () => {
 
 const styles = StyleSheet.create({
     mainContainer: {
-        paddingBottom: spacing.xxl,
+        paddingBottom: Spaces.XXL,
     },
     titleContainer: {
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.md,
+        paddingHorizontal: Spaces.LG,
+        paddingTop: Spaces.MD,
     },
     topCard: {
-        marginBottom: spacing.xl,
-        paddingBottom: spacing.lg,
+        marginBottom: Spaces.XL,
+        paddingBottom: Spaces.LG,
     },
     buttonContainer: {
         position: 'absolute',
-        bottom: verticalScale(30),
+        bottom: Spaces.XL,
         right: 0,
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: 'transparent',
-        paddingHorizontal: spacing.md,
+        paddingHorizontal: Spaces.MD,
     },
     logButton: {
         width: '75%',
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: spacing.md,
-        marginRight: spacing.sm,
+        marginRight: Spaces.SM,
     },
-    calculatorButton: {
-        width: spacing.xxxl,
-        height: spacing.xxxl,
-        borderRadius: spacing.xxl,
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0,
-        shadowRadius: 0,
-        elevation: 0,
-    },
+    calculatorButton: {},
     tipContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.lg,
-        borderRadius: spacing.md,
+        paddingVertical: Spaces.SM,
+        paddingHorizontal: Spaces.LG,
+        borderRadius: Spaces.MD,
         // Shadow for iOS
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
@@ -194,32 +185,32 @@ const styles = StyleSheet.create({
         shadowRadius: 2,
         // Elevation for Android
         elevation: 2,
-        marginLeft: spacing.lg,
+        marginLeft: Spaces.LG,
         alignSelf: 'flex-start',
     },
     tipIcon: {
-        marginRight: spacing.sm,
+        marginRight: Spaces.SM,
     },
     instructionContainer: {
-        paddingVertical: spacing.md,
-        paddingHorizontal: spacing.lg,
+        paddingVertical: Spaces.MD,
+        paddingHorizontal: Spaces.LG,
     },
     attributeRow: {
         flexDirection: 'row',
         flexWrap: 'wrap', // Allow wrapping if needed
         alignItems: 'center',
-        paddingBottom: spacing.sm,
-        paddingHorizontal: spacing.lg,
+        paddingBottom: Spaces.SM,
+        paddingHorizontal: Spaces.LG,
     },
     attributeItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginRight: spacing.xl, // Space between attribute groups
-        marginBottom: spacing.sm, // Space below if wrapped
+        marginRight: Spaces.XL, // Space between attribute groups
+        marginBottom: Spaces.SM, // Space below if wrapped
     },
     attributeText: {
-        marginLeft: spacing.xs,
-        lineHeight: spacing.lg,
+        marginLeft: Spaces.XS,
+        lineHeight: Spaces.LG,
     },
 });
 

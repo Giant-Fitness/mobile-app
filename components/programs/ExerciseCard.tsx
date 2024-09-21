@@ -6,13 +6,14 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { moderateScale } from '@/utils/scaling';
-import { spacing } from '@/utils/spacing';
+import { Spaces } from '@/constants/Spaces';
+import { Sizes } from '@/constants/Sizes';
 import { Exercise } from '@/types/types';
-import { Icon } from '@/components/icons/Icon';
+import { Icon } from '@/components/base/Icon';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { TextButton } from '@/components/base/TextButton';
-import { HighlightedTip } from '@/components/base/HighlightedTip';
+import { TextButton } from '@/components/buttons/TextButton';
+import { HighlightedTip } from '@/components/alerts/HighlightedTip';
 
 type ExerciseCardProps = {
     exercise: Exercise;
@@ -71,27 +72,23 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isEnrolled
             </ThemedView>
             {exercise.QuickTip && (
                 <ThemedView style={styles.tipContainer}>
-                    <Icon name='bulb' size={moderateScale(14)} color={themeColors.text} style={{ marginTop: spacing.xs }} />
+                    <Icon name='bulb' size={Sizes.fontSizeDefault} color={themeColors.text} style={{ marginTop: Spaces.XS }} />
                     <ThemedText type='italic' style={styles.quickTip}>
                         {exercise.QuickTip}
                     </ThemedText>
                 </ThemedView>
             )}
-            <ThemedView style={styles.buttonContainer}>
+            <View style={styles.buttonContainer}>
                 <TextButton
                     text='View Guide'
                     onPress={navigateToExerciseDetail}
                     textStyle={[{ color: themeColors.text }]}
                     textType='bodyMedium'
                     style={[
-                        styles.viewDrillButton,
                         {
-                            marginRight: spacing.lg,
-                            backgroundColor: 'transparent',
-                            borderColor: themeColors.text,
+                            marginRight: Spaces.LG,
                             flex: 1,
-                            paddingVertical: spacing.sm + spacing.xxs,
-                            borderRadius: spacing.sm,
+                            borderRadius: Spaces.SM,
                         },
                     ]}
                 />
@@ -100,70 +97,60 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isEnrolled
                     onPress={() => console.log(`Logging exercise: ${exercise.ExerciseName}`)}
                     textType='bodyMedium'
                     textStyle={[{ color: themeColors.buttonPrimaryText }]}
-                    style={[{ flex: 1, paddingVertical: spacing.sm + spacing.xxs, backgroundColor: themeColors.buttonPrimary, borderRadius: spacing.sm }]}
+                    style={[{ flex: 1, backgroundColor: themeColors.subText, borderRadius: Spaces.SM }]}
                 />
-            </ThemedView>
+            </View>
         </ThemedView>
     );
 };
 
 const styles = StyleSheet.create({
     card: {
-        borderRadius: spacing.sm,
-        marginBottom: spacing.md,
+        borderRadius: Spaces.SM,
+        marginBottom: Spaces.MD,
         position: 'relative',
-        paddingBottom: spacing.lg,
+        paddingBottom: Spaces.LG,
     },
     titleContainer: {
-        paddingHorizontal: spacing.lg,
-        borderTopLeftRadius: spacing.sm,
-        borderTopRightRadius: spacing.sm,
-        paddingTop: spacing.md,
+        paddingHorizontal: Spaces.LG,
+        borderTopLeftRadius: Spaces.SM,
+        borderTopRightRadius: Spaces.SM,
+        paddingTop: Spaces.MD,
     },
     infoContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingHorizontal: spacing.lg,
-        paddingBottom: spacing.lg,
-        paddingTop: spacing.md,
-        backgroundColor: 'transparent',
+        paddingHorizontal: Spaces.LG,
+        paddingBottom: Spaces.LG,
+        paddingTop: Spaces.MD,
     },
     tipContainer: {
         flexDirection: 'row',
         alignItems: 'flex-start',
-        marginBottom: spacing.md,
-        paddingHorizontal: spacing.lg,
-        backgroundColor: 'transparent',
+        marginBottom: Spaces.MD,
+        paddingHorizontal: Spaces.LG,
     },
     quickTip: {
-        marginLeft: spacing.xs,
+        marginLeft: Spaces.XS,
         flex: 1,
     },
     detailsButton: {
-        paddingVertical: spacing.sm,
-        marginTop: spacing.sm,
+        paddingVertical: Spaces.SM,
+        marginTop: Spaces.SM,
     },
     buttonContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: spacing.sm,
-        marginHorizontal: spacing.sm,
-        paddingHorizontal: spacing.md,
-        backgroundColor: 'transparent',
-        paddingBottom: spacing.sm,
-    },
-    viewDrillButton: {
-        borderWidth: StyleSheet.hairlineWidth,
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0,
-        shadowRadius: 0,
-        elevation: 0,
+        marginTop: Spaces.SM,
+        marginHorizontal: Spaces.SM,
+        paddingHorizontal: Spaces.MD,
+        paddingBottom: Spaces.SM,
     },
     infoBox: {
-        padding: spacing.lg,
-        borderRadius: spacing.sm,
-        marginHorizontal: spacing.xs,
+        padding: Spaces.LG,
+        borderRadius: Spaces.SM,
+        marginHorizontal: Spaces.XS,
         alignItems: 'center',
     },
 });

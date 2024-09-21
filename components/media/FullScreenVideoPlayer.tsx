@@ -1,4 +1,4 @@
-// components/video/FullScreenVideoPlayer.tsx
+// components/media/FullScreenVideoPlayer.tsx
 
 import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { View, StyleSheet, Alert, Animated, Dimensions } from 'react-native';

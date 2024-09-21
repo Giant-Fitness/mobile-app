@@ -1,7 +1,7 @@
 // components/workouts/WorkoutsFilterDrawer.tsx
 
 import React, { useState, useEffect } from 'react';
-import { FiltersDrawer } from '@/components/layout/FiltersDrawer';
+import { FiltersDrawer } from '@/components/overlays/FiltersDrawer';
 
 const workoutFilterAttributes = {
     level: ['Beginner', 'Intermediate', 'Advanced'],

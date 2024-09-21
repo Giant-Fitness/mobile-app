@@ -12,9 +12,10 @@ import { WorkoutsBottomBar } from '@/components/workouts/WorkoutsBottomBar';
 import { WorkoutsFilterDrawer } from '@/components/workouts/WorkoutsFilterDrawer';
 import { WorkoutsSortDrawer } from '@/components/workouts/WorkoutsSortDrawer';
 import { verticalScale } from '@/utils/scaling';
-import { spacing } from '@/utils/spacing';
+import { Spaces } from '@/constants/Spaces';
+import { Sizes } from '@/constants/Sizes';
 import { useSharedValue } from 'react-native-reanimated';
-import { AnimatedHeader } from '@/components/layout/AnimatedHeader';
+import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 
 const workouts = [
     {
@@ -196,7 +197,7 @@ export default function AllWorkoutsScreen() {
                 data={filteredWorkouts}
                 renderItem={renderItem}
                 keyExtractor={keyExtractor}
-                contentContainerStyle={[styles.contentContainer, { backgroundColor: themeColors.background, paddingHorizontal: spacing.sm }]}
+                contentContainerStyle={[styles.contentContainer, { backgroundColor: themeColors.background, paddingHorizontal: Spaces.SM }]}
                 showsVerticalScrollIndicator={false}
             />
             <WorkoutsBottomBar onSortPress={handleSortPress} onFilterPress={handleFilterPress} appliedFilterCount={activeFilterTypesCount} />
@@ -214,12 +215,12 @@ export default function AllWorkoutsScreen() {
 
 const styles = StyleSheet.create({
     countContainer: {
-        padding: spacing.lg,
-        paddingVertical: spacing.md,
-        paddingTop: 100,
+        padding: Spaces.LG,
+        paddingVertical: Spaces.MD,
+        paddingTop: Sizes.bottomSpaceMedium,
     },
     contentContainer: {
         paddingTop: 0,
-        paddingBottom: verticalScale(100),
+        paddingBottom: Sizes.bottomSpaceMedium,
     },
 });

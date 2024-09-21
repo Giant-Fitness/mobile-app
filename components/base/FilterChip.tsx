@@ -6,7 +6,7 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { moderateScale } from '@/utils/scaling';
-import { spacing } from '@/utils/spacing';
+import { Spaces } from '@/constants/Spaces';
 
 interface FilterChipProps {
     label: string;
@@ -43,9 +43,9 @@ export const FilterChip: React.FC<FilterChipProps> = ({ label, selected, onToggl
 
 const styles = StyleSheet.create({
     chip: {
-        paddingVertical: spacing.sm,
+        paddingVertical: Spaces.SM,
         borderWidth: moderateScale(0.8),
-        borderRadius: spacing.xxs,
+        borderRadius: Spaces.XXS,
         alignItems: 'center',
         justifyContent: 'center',
     },

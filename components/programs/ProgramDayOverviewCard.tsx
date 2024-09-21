@@ -5,8 +5,8 @@ import { StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ProgramDay } from '@/type/types';
-import { spacing } from '@/utils/spacing';
-import { sizes } from '@/utils/sizes';
+import { Spaces } from '@/constants/Spaces';
+import { Sizes } from '@/constants/Sizes';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
@@ -17,7 +17,7 @@ interface ProgramDayOverviewCardProps {
     isEnrolled: boolean;
 }
 
-const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ day, onPress, userProgramProgress, isEnrolled }) => {
+export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ day, onPress, userProgramProgress, isEnrolled }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
@@ -45,7 +45,7 @@ const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ day, on
 
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={1}>
-            <ThemedView style={[styles.card, { backgroundColor, borderColor, width: sizes.dayTile, height: sizes.dayTileHeight }]}>
+            <ThemedView style={[styles.card, { backgroundColor, borderColor, width: Sizes.dayTile, height: Sizes.dayTileHeight }]}>
                 <ThemedText style={[styles.dayNumber, { color: textColor }]}>{day.DayId}</ThemedText>
             </ThemedView>
         </TouchableOpacity>
@@ -54,7 +54,7 @@ const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ day, on
 
 const styles = StyleSheet.create({
     card: {
-        borderRadius: spacing.xs,
+        borderRadius: Spaces.XS,
         alignItems: 'center',
         justifyContent: 'center',
         marginHorizontal: 1,
@@ -62,5 +62,3 @@ const styles = StyleSheet.create({
     },
     dayNumber: {},
 });
-
-export default ProgramDayOverviewCard;

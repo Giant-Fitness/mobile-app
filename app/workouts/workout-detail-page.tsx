@@ -7,15 +7,15 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
-import { ImageTextOverlay } from '@/components/images/ImageTextOverlay';
-import { Icon } from '@/components/icons/Icon';
-import { TextButton } from '@/components/base/TextButton';
-import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle } from '@/components/video/FullScreenVideoPlayer';
+import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
+import { Icon } from '@/components/base/Icon';
+import { PrimaryButton } from '@/components/buttons/PrimaryButton';
+import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle } from '@/components/media/FullScreenVideoPlayer';
 import { moderateScale, verticalScale } from '@/utils/scaling';
-import { spacing } from '@/utils/spacing';
-import { sizes } from '@/utils/sizes';
+import { Spaces } from '@/constants/Spaces';
+import { Sizes } from '@/constants/Sizes';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
-import { AnimatedHeader } from '@/components/layout/AnimatedHeader';
+import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 
 type WorkoutDetailScreenParams = {
     Workout: {
@@ -101,7 +101,7 @@ export default function WorkoutDetailScreen() {
 
     return (
         <ThemedView style={styles.container}>
-            <AnimatedHeader scrollY={scrollY} disableColorChange={true} backButtonColor={themeColors.white} />
+            <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Sizes.imageLGHeight} headerInterpolationEnd={Sizes.imageLGHeight + Spaces.XXL} />
             <Animated.ScrollView
                 contentContainerStyle={{ flexGrow: 1 }}
                 showsVerticalScrollIndicator={false}
@@ -109,57 +109,61 @@ export default function WorkoutDetailScreen() {
                 onScroll={scrollHandler}
                 scrollEventThrottle={16}
             >
-                <ImageTextOverlay
+                <TopImageInfoCard
                     image={photo}
-                    gradientColors={['transparent', 'rgba(0,0,0,0.4)']}
-                    containerStyle={{ height: sizes.imageXLargeHeight, elevation: 5 }}
+                    title={name}
+                    titleType='titleLarge'
+                    titleStyle={{ marginBottom: Spaces.XS }}
+                    containerStyle={{ elevation: 5, marginBottom: 0 }}
+                    contentContainerStyle={{
+                        backgroundColor: themeColors.background,
+                        paddingHorizontal: Spaces.LG,
+                    }}
+                    imageStyle={{ height: Sizes.imageXLHeight }}
+                    titleFirst={true}
+                    extraContent={
+                        <ThemedView>
+                            {/* Attributes in a Row */}
+                            <ThemedView style={[styles.attributeRow]}>
+                                {/* Attribute 1: Length */}
+                                <View style={styles.attributeItem}>
+                                    <Icon name='stopwatch' color={themeColors.text} />
+                                    <ThemedText type='buttonSmall' style={[styles.attributeText]}>
+                                        {length}
+                                    </ThemedText>
+                                </View>
+
+                                {/* Attribute 2: Level */}
+                                <View style={styles.attributeItem}>
+                                    <Icon name={levelIcon} size={verticalScale(12)} color={themeColors.text} />
+                                    <ThemedText type='buttonSmall' style={[styles.attributeText]}>
+                                        {level}
+                                    </ThemedText>
+                                </View>
+
+                                {/* Attribute 3: Equipment */}
+                                <View style={styles.attributeItem}>
+                                    <Icon name='kettlebell' color={themeColors.text} />
+                                    <ThemedText type='buttonSmall' style={[styles.attributeText]}>
+                                        {equipment}
+                                    </ThemedText>
+                                </View>
+
+                                {/* Attribute 4: Focus */}
+                                <View style={styles.attributeItem}>
+                                    <Icon name='yoga' color={themeColors.text} />
+                                    <ThemedText type='buttonSmall' style={[styles.attributeText]}>
+                                        {focusMultiText}
+                                    </ThemedText>
+                                </View>
+                            </ThemedView>
+                        </ThemedView>
+                    }
                 />
                 <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.backgroundTertiary }]}>
-                    {/* Exercise Name */}
-                    <ThemedView style={styles.topCard}>
-                        <ThemedView style={styles.titleContainer}>
-                            <ThemedText type='titleLarge'>{name}</ThemedText>
-                        </ThemedView>
-
-                        {/* Attributes in a Row */}
-                        <ThemedView style={[styles.attributeRow, { backgroundColor: themeColors.background }]}>
-                            {/* Attribute 1: Length */}
-                            <View style={styles.attributeItem}>
-                                <Icon name='stopwatch' size={verticalScale(14)} color={themeColors.text} />
-                                <ThemedText type='buttonSmall' style={[styles.attributeText, { color: themeColors.text }]}>
-                                    {length}
-                                </ThemedText>
-                            </View>
-
-                            {/* Attribute 2: Level */}
-                            <View style={styles.attributeItem}>
-                                <Icon name={levelIcon} size={verticalScale(12)} color={themeColors.text} />
-                                <ThemedText type='buttonSmall' style={[styles.attributeText, { color: themeColors.text }]}>
-                                    {level}
-                                </ThemedText>
-                            </View>
-
-                            {/* Attribute 3: Equipment */}
-                            <View style={styles.attributeItem}>
-                                <Icon name='kettlebell' size={verticalScale(14)} color={themeColors.text} />
-                                <ThemedText type='buttonSmall' style={[styles.attributeText, { color: themeColors.text }]}>
-                                    {equipment}
-                                </ThemedText>
-                            </View>
-
-                            {/* Attribute 4: Focus */}
-                            <View style={styles.attributeItem}>
-                                <Icon name='yoga' size={verticalScale(14)} color={themeColors.text} />
-                                <ThemedText type='buttonSmall' style={[styles.attributeText, { color: themeColors.text }]}>
-                                    {focusMultiText}
-                                </ThemedText>
-                            </View>
-                        </ThemedView>
-                    </ThemedView>
-
                     {/* Description Container */}
                     <ThemedView style={[styles.descriptionContainer, { backgroundColor: themeColors.background }]}>
-                        <ThemedText type='link' style={{ color: themeColors.text, paddingBottom: spacing.md }}>
+                        <ThemedText type='link' style={{ color: themeColors.text, paddingBottom: Spaces.MD }}>
                             What to Expect
                         </ThemedText>
                         <ThemedText type='body' style={[{ color: themeColors.text }]}>
@@ -174,12 +178,7 @@ export default function WorkoutDetailScreen() {
                 onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
             />
             <ThemedView style={styles.buttonContainer}>
-                <TextButton
-                    text='Start Workout'
-                    textType='bodyMedium'
-                    style={[styles.startButton, { backgroundColor: themeColors.buttonPrimary }]}
-                    onPress={handleStartWorkout}
-                />
+                <PrimaryButton text='Start Workout' textType='bodyMedium' style={[styles.startButton]} onPress={handleStartWorkout} size={'LG'} />
             </ThemedView>
         </ThemedView>
     );
@@ -191,49 +190,49 @@ const styles = StyleSheet.create({
         backgroundColor: 'none',
     },
     mainContainer: {
-        paddingBottom: verticalScale(120),
+        marginTop: Spaces.LG,
+        paddingBottom: Sizes.bottomSpaceLarge,
     },
     topCard: {
-        marginBottom: spacing.xl,
-        paddingBottom: spacing.lg,
+        marginBottom: Spaces.XL,
+        paddingBottom: Spaces.LG,
     },
     titleContainer: {
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.md,
-        paddingBottom: spacing.sm,
+        paddingHorizontal: Spaces.LG,
+        paddingTop: Spaces.MD,
+        paddingBottom: Spaces.SM,
     },
     attributeRow: {
         flexDirection: 'row',
         flexWrap: 'wrap', // Allow wrapping if needed
         alignItems: 'center',
-        paddingHorizontal: spacing.lg,
     },
     attributeItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginRight: spacing.xl, // Space between attribute groups
-        marginBottom: spacing.sm, // Space below if wrapped
+        marginRight: Spaces.XL, // Space between attribute groups
+        marginBottom: Spaces.SM, // Space below if wrapped
     },
     attributeText: {
-        marginLeft: spacing.xs,
-        lineHeight: spacing.lg,
+        marginLeft: Spaces.XS,
+        lineHeight: Spaces.LG,
     },
     descriptionContainer: {
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.xl,
-        paddingBottom: spacing.xxl,
+        paddingHorizontal: Spaces.LG,
+        paddingTop: Spaces.MD,
+        paddingBottom: Spaces.XL,
     },
     buttonContainer: {
         flexDirection: 'column', // Column for single button
         alignItems: 'center', // Center horizontally
         position: 'absolute',
-        bottom: verticalScale(30),
+        bottom: Spaces.XL,
         left: 0,
         right: 0,
         backgroundColor: 'transparent',
+        paddingHorizontal: '10%',
     },
     startButton: {
-        width: '80%',
-        paddingVertical: spacing.md,
+        width: '100%',
     },
 });

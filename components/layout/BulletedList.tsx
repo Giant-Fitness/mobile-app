@@ -1,13 +1,13 @@
-// components/base/BulletedList.tsx
+// components/layout/BulletedList.tsx
 
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
-import { spacing } from '@/utils/spacing';
+import { Spaces } from '@/constants/Spaces';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { Icon } from '@/components/icons/Icon';
+import { Icon } from '@/components/base/Icon';
 import { moderateScale } from '@/utils/scaling';
 
 type BulletedListProps = {
@@ -37,12 +37,12 @@ const styles = StyleSheet.create({
     bulletItem: {
         flexDirection: 'row',
         alignItems: 'flex-start',
-        paddingBottom: spacing.md,
-        borderRadius: spacing.xs,
+        paddingBottom: Spaces.MD,
+        borderRadius: Spaces.XS,
     },
     bulletPoint: {
-        marginRight: spacing.sm + spacing.xs,
-        marginTop: spacing.xs + spacing.xxs,
+        marginRight: Spaces.SM + Spaces.XS,
+        marginTop: Spaces.XS + Spaces.XXS,
     },
     bulletText: {
         flex: 1,

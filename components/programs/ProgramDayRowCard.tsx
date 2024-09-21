@@ -4,10 +4,10 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { Icon } from '@/components/icons/Icon';
+import { Icon } from '@/components/base/Icon';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { spacing } from '@/utils/spacing';
+import { Spaces } from '@/constants/Spaces';
 import { ProgramDay } from '@/types/types';
 import { moderateScale } from '@/utils/scaling';
 
@@ -63,8 +63,8 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.lg,
+        paddingVertical: Spaces.SM,
+        paddingHorizontal: Spaces.LG,
         backgroundColor: 'transparent',
         marginTop: -StyleSheet.hairlineWidth,
         opacity: 1,
@@ -73,13 +73,13 @@ const styles = StyleSheet.create({
         opacity: 0.5,
     },
     dayIdContainer: {
-        width: spacing.xxl,
-        height: spacing.xl,
-        borderBottomRightRadius: spacing.md,
-        borderTopRightRadius: spacing.md,
+        width: Spaces.XXL,
+        height: Spaces.XL,
+        borderBottomRightRadius: Spaces.MD,
+        borderTopRightRadius: Spaces.MD,
         alignItems: 'center',
         justifyContent: 'center',
-        marginRight: spacing.md,
+        marginRight: Spaces.MD,
     },
     dayTitle: {
         flex: 1,
@@ -88,6 +88,6 @@ const styles = StyleSheet.create({
         opacity: 1,
     },
     checkIcon: {
-        marginRight: spacing.sm,
+        marginRight: Spaces.SM,
     },
 });

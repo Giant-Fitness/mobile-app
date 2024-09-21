@@ -1,15 +1,15 @@
-// components/layout/SortDrawer.tsx
+// components/overlays/SortDrawer.tsx
 
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { BottomDrawer } from '@/components/layout/BottomDrawer';
+import { BottomSheet } from '@/components/overlays/BottomSheet';
 import { ThemedText } from '@/components/base/ThemedText';
-import { TextButton } from '@/components/base/TextButton';
+import { TextButton } from '@/components/buttons/TextButton';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { Icon } from '@/components/icons/Icon';
+import { Icon } from '@/components/base/Icon';
 import { scale, moderateScale } from '@/utils/scaling';
-import { spacing } from '@/utils/spacing';
+import { Spaces } from '@/constants/Spaces';
 
 interface SortOption {
     type: string;
@@ -46,7 +46,7 @@ export const SortDrawer: React.FC<SortDrawerProps> = ({ visible, onClose, onAppl
     }, [visible, initialSort]);
 
     return (
-        <BottomDrawer visible={visible} onClose={onClose} style={{ paddingHorizontal: 0 }}>
+        <BottomSheet visible={visible} onClose={onClose} style={{ paddingHorizontal: 0 }}>
             <View style={styles.header}>
                 <View style={styles.titleContainer}>
                     <ThemedText type='title'>{title}</ThemedText>
@@ -86,14 +86,9 @@ export const SortDrawer: React.FC<SortDrawerProps> = ({ visible, onClose, onAppl
             </View>
 
             <View style={styles.buttonContainer}>
-                <TextButton
-                    text='Apply'
-                    textType='bodyMedium'
-                    style={[styles.applyButton, { backgroundColor: themeColors.buttonPrimary }]}
-                    onPress={handleApply}
-                />
+                <TextButton text='Apply' style={[styles.applyButton]} onPress={handleApply} size={'LG'} />
             </View>
-        </BottomDrawer>
+        </BottomSheet>
     );
 };
 
@@ -102,8 +97,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: spacing.lg,
-        paddingBottom: spacing.lg,
+        marginTop: Spaces.LG,
+        paddingBottom: Spaces.LG,
     },
     titleContainer: {
         alignItems: 'center',
@@ -111,38 +106,38 @@ const styles = StyleSheet.create({
     },
     closeButton: {
         position: 'absolute',
-        right: spacing.lg,
-        top: spacing.xs,
+        right: Spaces.LG,
+        top: Spaces.XS,
     },
     optionContainer: {
-        paddingBottom: spacing.md,
+        paddingBottom: Spaces.MD,
     },
     section: {
-        marginBottom: spacing.lg,
+        marginBottom: Spaces.LG,
     },
     sectionTitle: {
-        marginBottom: spacing.sm,
+        marginBottom: Spaces.SM,
         fontWeight: 'bold',
         fontSize: moderateScale(14),
-        paddingHorizontal: spacing.xl,
+        paddingHorizontal: Spaces.XL,
     },
     optionButton: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: spacing.sm,
-        paddingLeft: spacing.xl,
-        paddingRight: spacing.lg,
-        borderRadius: spacing.xs,
-        marginVertical: spacing.xs,
+        paddingVertical: Spaces.SM,
+        paddingLeft: Spaces.XL,
+        paddingRight: Spaces.LG,
+        borderRadius: Spaces.XS,
+        marginVertical: Spaces.XS,
     },
     buttonContainer: {
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: spacing.lg,
+        marginBottom: Spaces.XL,
+        paddingHorizontal: '10%',
     },
     applyButton: {
-        paddingVertical: spacing.md,
-        width: '90%',
+        width: '80%',
     },
 });

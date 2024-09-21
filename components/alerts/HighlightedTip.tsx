@@ -1,14 +1,15 @@
-// components/base/HighlightedTip.tsx
+// components/alerts/HighlightedTip.tsx
 
 import React from 'react';
 import { StyleSheet, View, Platform, ViewStyle } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
-import { Icon } from '@/components/icons/Icon';
+import { Icon } from '@/components/base/Icon';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { moderateScale } from '@/utils/scaling';
-import { spacing } from '@/utils/spacing';
+import { Spaces } from '@/constants/Spaces';
+import { Sizes } from '@/constants/Sizes';
 
 type HighlightedTipProps = {
     iconName: string;
@@ -24,7 +25,7 @@ export const HighlightedTip: React.FC<HighlightedTipProps> = ({ iconName, tipTex
 
     return (
         <ThemedView style={[styles.tipContainer, styles.shadow, { backgroundColor: themeColors.tipBackground }, containerStyle]}>
-            {!disableIcon && <Icon name={iconName} size={moderateScale(14)} color={themeColors.tipIcon} style={styles.tipIcon} />}
+            {!disableIcon && <Icon name={iconName} size={Sizes.iconSizeSM} color={themeColors.tipIcon} style={styles.tipIcon} />}
             <ThemedText type={textType} style={[styles.tipText, { color: themeColors.tipText }]}>
                 {tipText}
             </ThemedText>
@@ -45,13 +46,13 @@ const styles = StyleSheet.create({
     tipContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.lg,
-        marginHorizontal: spacing.lg,
-        borderRadius: spacing.xl, // Must match the container's borderRadius
+        paddingVertical: Spaces.SM,
+        paddingHorizontal: Spaces.LG,
+        marginHorizontal: Spaces.LG,
+        borderRadius: Spaces.XL, // Must match the container's borderRadius
     },
     tipIcon: {
-        marginRight: spacing.sm,
+        marginRight: Spaces.SM,
     },
     tipText: {
         // Any additional text styling if needed
