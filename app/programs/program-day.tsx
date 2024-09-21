@@ -189,13 +189,7 @@ const ProgramDayScreen = () => {
                             text='Mobility Workouts'
                             textStyle={[{ color: themeColors.text }]}
                             textType='bodyMedium'
-                            style={[
-                                styles.mobilityButton,
-                                {
-                                    backgroundColor: themeColors.background,
-                                    borderColor: themeColors.text,
-                                },
-                            ]}
+                            style={[styles.mobilityButton]}
                             size={'LG'}
                             onPress={() => navigateToAllWorkouts({ focus: ['Mobility'] })}
                         />

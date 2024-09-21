@@ -255,7 +255,9 @@ const ProgramCalendarScreen = () => {
                 </ThemedView>
             </Animated.ScrollView>
             <ThemedView style={styles.buttonContainer}>
-                {!isEnrolled && <PrimaryButton text='Start Program' style={[styles.startButton]} onPress={handleStartProgram} size='LG' />}
+                {!isEnrolled && (
+                    <PrimaryButton text='Start Program' textType='bodyMedium' style={[styles.startButton]} onPress={handleStartProgram} size='LG' />
+                )}
                 {/*        {isEnrolled && (
           <PrimaryButton
             text="Reset Program"

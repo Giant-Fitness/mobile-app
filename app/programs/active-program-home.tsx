@@ -123,8 +123,8 @@ export default function ActiveProgramHome() {
         });
     };
 
-    const navigateToProgramDetails = () => {
-        navigation.navigate('programs/program-details', {
+    const navigateToProgramOverview = () => {
+        navigation.navigate('programs/program-overview', {
             programId: activeProgramId,
         });
     };
@@ -198,7 +198,7 @@ export default function ActiveProgramHome() {
                         />
                     </ThemedView>
                     <ThemedView>
-                        <TouchableOpacity style={styles.menuItem}>
+                        <TouchableOpacity style={styles.menuItem} activeOpacity={1} onPress={navigateToProgramOverview}>
                             <ThemedText type='body' style={[{ color: themeColors.text }]}>
                                 Program Overview
                             </ThemedText>

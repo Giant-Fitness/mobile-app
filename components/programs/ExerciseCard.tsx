@@ -97,7 +97,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isEnrolled
                     onPress={() => console.log(`Logging exercise: ${exercise.ExerciseName}`)}
                     textType='bodyMedium'
                     textStyle={[{ color: themeColors.buttonPrimaryText }]}
-                    style={[{ flex: 1, backgroundColor: themeColors.subText, borderRadius: Spaces.SM }]}
+                    style={[{ flex: 1, backgroundColor: themeColors.buttonPrimary, borderRadius: Spaces.SM }]}
                 />
             </View>
         </ThemedView>

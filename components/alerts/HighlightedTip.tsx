@@ -36,12 +36,12 @@ export const HighlightedTip: React.FC<HighlightedTipProps> = ({ iconName, tipTex
 const styles = StyleSheet.create({
     shadow: {
         // iOS Shadow
-        shadowColor: 'rgba(0,80,0,0.25)',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 1,
-        shadowRadius: 4,
-        // Android Shadow
-        elevation: 5,
+        // shadowColor: 'rgba(0,80,0,0.25)',
+        // shadowOffset: { width: 0, height: 2 },
+        // shadowOpacity: 1,
+        // shadowRadius: 4,
+        // // Android Shadow
+        // elevation: 5,
     },
     tipContainer: {
         flexDirection: 'row',

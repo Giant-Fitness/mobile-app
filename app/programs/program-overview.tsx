@@ -1,7 +1,7 @@
-// app/programs/program-details.tsx
+// app/programs/program-overview.tsx
 
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, ActivityIndicator, View, TouchableOpacity, Dimensions } from 'react-native';
+import { StyleSheet, View, Dimensions } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
@@ -9,36 +9,34 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/rootReducer';
-import { getProgramAsync, getAllProgramDaysAsync } from '@/store/programs/thunks';
+import { getProgramAsync } from '@/store/programs/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { ProgramMonthView } from '@/components/programs/ProgramMonthView';
 import { Spaces } from '@/constants/Spaces';
-import { groupProgramDaysIntoWeeks, groupWeeksIntoMonths, getWeekNumber, getDayOfWeek } from '@/utils/calendar';
 import { Icon } from '@/components/base/Icon';
-import { ProgramDay } from '@/types/types';
-import { ProgramDayRowCard } from '@/components/programs/ProgramDayRowCard';
-import { moderateScale, verticalScale } from '@/utils/scaling';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { Sizes } from '@/constants/Sizes';
 import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
-import { ProgramProgressPillBar } from '@/components/programs/ProgramProgressPillBar';
-import { Collapsible } from '@/components/layout/Collapsible'; // Import Collapsible
+import { BasicSplash } from '@/components/base/BasicSplash';
+import { TextButton } from '@/components/buttons/TextButton';
 
-type ProgramDetailsScreenParams = {
+type ProgramOverviewScreenParams = {
     programId: string;
 };
 
-const ProgramDetailsScreen = () => {
+const ProgramOverviewScreen = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const dispatch = useDispatch<AppDispatch>();
+    const screenWidth = Dimensions.get('window').width;
 
     const navigation = useNavigation();
 
-    const route = useRoute<RouteProp<Record<string, ProgramDetailsScreenParams>, string>>();
+    const route = useRoute<RouteProp<Record<string, ProgramOverviewScreenParams>, string>>();
     const { programId } = route.params;
+
+    const [isSplashVisible, setIsSplashVisible] = useState(true);
 
     const scrollY = useSharedValue(0);
 
@@ -48,7 +46,11 @@ const ProgramDetailsScreen = () => {
         },
     });
 
-    React.useEffect(() => {
+    const handleLoadingComplete = () => {
+        setIsSplashVisible(false);
+    };
+
+    useEffect(() => {
         navigation.setOptions({ headerShown: false });
     }, [navigation]);
 
@@ -56,6 +58,7 @@ const ProgramDetailsScreen = () => {
     const program = useSelector((state: RootState) => state.programs.programs[programId]);
     const programState = useSelector((state: RootState) => state.programs.programsState[programId]);
     const userProgramProgress = useSelector((state: RootState) => state.programs.userProgramProgress);
+    const userProgramProgressState = useSelector((state: RootState) => state.programs.userProgramProgressState);
 
     useEffect(() => {
         if (programState !== REQUEST_STATE.FULFILLED) {
@@ -67,16 +70,12 @@ const ProgramDetailsScreen = () => {
 
     const navigateToProgramCalendar = () => {
         navigation.navigate('programs/program-calendar', {
-            programId: activeProgramId,
+            programId: programId,
         });
     };
 
-    if (programState === REQUEST_STATE.PENDING || !program || !programDays) {
-        return (
-            <ThemedView style={styles.loadingContainer}>
-                <ActivityIndicator size='large' color={themeColors.text} />
-            </ThemedView>
-        );
+    if (isSplashVisible || programState === REQUEST_STATE.PENDING || userProgramProgressState === REQUEST_STATE.PENDING || !program) {
+        return <BasicSplash onLoadingComplete={handleLoadingComplete} delay={0} />;
     }
 
     if (programState === REQUEST_STATE.REJECTED) {
@@ -87,51 +86,36 @@ const ProgramDetailsScreen = () => {
         );
     }
 
-    if (months.length === 0) {
-        return (
-            <ThemedView style={styles.loadingContainer}>
-                <ActivityIndicator size='large' color={themeColors.text} />
-            </ThemedView>
-        );
-    }
+    // Extract program details
+    const { ProgramName, PhotoUrl, Weeks, Frequency, Goal, Level, Description, Equipment, DesignedFor, CalendarOverview } = program;
 
-    const totalMonths = months.length;
-
-    const handlePrevMonth = () => {
-        if (currentMonthIndex > 0) {
-            setCurrentMonthIndex(currentMonthIndex - 1);
+    // Function to get the level icon
+    const getLevelIcon = (level: string) => {
+        switch (level.toLowerCase()) {
+            case 'beginner':
+                return 'level-beginner';
+            case 'intermediate':
+                return 'level-intermediate';
+            case 'advanced':
+                return 'level-advanced';
+            case 'all levels':
+            default:
+                return 'people'; // Use a default icon
         }
     };
-
-    const handleNextMonth = () => {
-        if (currentMonthIndex < totalMonths - 1) {
-            setCurrentMonthIndex(currentMonthIndex + 1);
-        }
-    };
-
-    const currentMonthWeeks = months[currentMonthIndex];
-
-    if (!currentMonthWeeks) {
-        return (
-            <ThemedView style={styles.loadingContainer}>
-                <ActivityIndicator size='large' color={themeColors.text} />
-            </ThemedView>
-        );
-    }
-
-    const userCurrentDayNumber = isEnrolled && userProgramProgress ? parseInt(userProgramProgress.CurrentDay) : null;
-    const userCurrentWeekNumber = userCurrentDayNumber ? getWeekNumber(userCurrentDayNumber) : null;
 
     // Handle the Start Program action
     const handleStartProgram = () => {
         // Start the program
-        console.log('program started');
+        console.log('Program started');
+        // Implement your start program logic here
     };
 
     // Handle the Reset Program action
     const handleResetProgram = () => {
         // Reset the program
-        console.log('program reset');
+        console.log('Program reset');
+        // Implement your reset program logic here
     };
 
     return (
@@ -147,15 +131,14 @@ const ProgramDetailsScreen = () => {
                 <ThemedView
                     style={[
                         {
-                            backgroundColor: themeColors.background,
+                            backgroundColor: themeColors.backgroundTertiary,
                         },
                         !isEnrolled && { marginBottom: Sizes.bottomSpaceLarge },
-                        isEnrolled && { marginBottom: Spaces.XXL },
                     ]}
                 >
                     <TopImageInfoCard
-                        image={{ uri: program.PhotoUrl }}
-                        title={program.ProgramName}
+                        image={{ uri: PhotoUrl }}
+                        title={ProgramName}
                         titleType='titleLarge'
                         titleStyle={{ marginBottom: Spaces.XS }}
                         contentContainerStyle={{
@@ -164,107 +147,101 @@ const ProgramDetailsScreen = () => {
                             paddingBottom: Spaces.XXS,
                         }}
                         imageStyle={{ height: Sizes.imageXLHeight }}
+                        extraContent={
+                            <ThemedView>
+                                {/* Attributes in a Row */}
+                                <ThemedView style={[styles.attributeRow]}>
+                                    {/* Attribute 1: Length */}
+                                    <View style={styles.attributeItem}>
+                                        <Icon name='stopwatch' size={Sizes.fontSizeDefault} color={themeColors.text} />
+                                        <ThemedText type='buttonSmall' style={[styles.attributeText]}>
+                                            {Weeks} Weeks
+                                        </ThemedText>
+                                    </View>
+
+                                    {/* Attribute 2: Frequency */}
+                                    <View style={styles.attributeItem}>
+                                        <Icon name='calendar' size={Sizes.fontSizeDefault} color={themeColors.text} />
+                                        <ThemedText type='buttonSmall' style={[styles.attributeText]}>
+                                            {Frequency}
+                                        </ThemedText>
+                                    </View>
+
+                                    {/* Attribute 3: Goal */}
+                                    <View style={styles.attributeItem}>
+                                        <Icon name='target' size={Sizes.fontSizeDefault} color={themeColors.text} />
+                                        <ThemedText type='buttonSmall' style={[styles.attributeText]}>
+                                            {Goal}
+                                        </ThemedText>
+                                    </View>
+
+                                    {/* Attribute 4: Level */}
+                                    <View style={styles.attributeItem}>
+                                        <Icon name={getLevelIcon(Level)} color={themeColors.text} />
+                                        <ThemedText type='buttonSmall' style={[styles.attributeText]}>
+                                            {Level}
+                                        </ThemedText>
+                                    </View>
+                                </ThemedView>
+                                {/* Short Description */}
+                                <ThemedText type='italic' style={[{ paddingBottom: Spaces.LG, paddingTop: Spaces.MD }]}>
+                                    {Description}
+                                </ThemedText>
+                            </ThemedView>
+                        }
                     />
-                    {isEnrolled && (
-                        <ThemedView style={[styles.progress]}>
-                            <ThemedText type='overline' style={[{ color: themeColors.subText, paddingBottom: Spaces.MD }]}>
-                                Day {userCurrentDayNumber}/{program?.Days}
+                    <ThemedView style={([styles.mainContainer], { backgroundColor: themeColors.backgroundTertiary })}>
+                        {/* Description Container */}
+                        <ThemedView style={[styles.descriptionContainer]}>
+                            {/* Equipment Required */}
+                            <ThemedText type='button' style={{ paddingBottom: Spaces.XS }}>
+                                Equipment Required:
                             </ThemedText>
-                            <ProgramProgressPillBar
-                                completedParts={Number(userCurrentWeekNumber - 1)}
-                                currentPart={Number(userCurrentWeekNumber)}
-                                parts={Number(program.Weeks)}
-                                containerWidth={screenWidth - Spaces.XXL}
+                            <ThemedText type='body' style={[{ marginBottom: Spaces.LG }]}>
+                                {Equipment.join(', ')}
+                            </ThemedText>
+
+                            {/* Designed For */}
+                            <ThemedText type='button' style={{ paddingBottom: Spaces.XS }}>
+                                Designed For:
+                            </ThemedText>
+                            <ThemedText type='body' style={[{ marginBottom: Spaces.XL }]}>
+                                {DesignedFor}
+                            </ThemedText>
+                            <View
+                                style={{
+                                    borderBottomColor: themeColors.systemBorderColor,
+                                    borderBottomWidth: StyleSheet.hairlineWidth,
+                                    marginBottom: Spaces.MD,
+                                }}
+                            />
+                            {CalendarOverview.map((item, index) => (
+                                <ThemedView key={index} style={{ marginTop: Spaces.MD }}>
+                                    <ThemedText type='button' style={{ paddingBottom: Spaces.XS }}>
+                                        {item.Title}:
+                                    </ThemedText>
+                                    <ThemedText type='body' style={{}}>
+                                        {item.Description}
+                                    </ThemedText>
+                                </ThemedView>
+                            ))}
+                        </ThemedView>
+                        <ThemedView style={styles.bottomButtonContainer}>
+                            <TextButton
+                                text='Program Calendar'
+                                onPress={navigateToProgramCalendar}
+                                textType='bodyMedium'
+                                size={'LG'}
+                                style={[styles.calendarButton]}
                             />
                         </ThemedView>
-                    )}
-                    <ThemedView style={[styles.calendarContainer, { backgroundColor: themeColors.background }]}>
-                        <ThemedView style={styles.header}>
-                            {currentMonthIndex > 0 ? (
-                                <TouchableOpacity onPress={handlePrevMonth}>
-                                    <Icon name='chevron-back' color={themeColors.text} />
-                                </TouchableOpacity>
-                            ) : (
-                                <View style={{ width: Spaces.XL }} /> // Placeholder to maintain layout
-                            )}
-                            <ThemedText type='overline' style={styles.monthTitle}>
-                                Month {currentMonthIndex + 1}
-                            </ThemedText>
-                            {currentMonthIndex < totalMonths - 1 ? (
-                                <TouchableOpacity onPress={handleNextMonth}>
-                                    <Icon name='chevron-forward' color={themeColors.text} />
-                                </TouchableOpacity>
-                            ) : (
-                                <ThemedView style={{ width: Spaces.XL }} /> // Placeholder to maintain layout
-                            )}
-                        </ThemedView>
-                        <ThemedView style={styles.calendar}>
-                            <ProgramMonthView
-                                weeks={months[currentMonthIndex]}
-                                onDayPress={navigateToProgramDay}
-                                userProgramProgress={userProgramProgress}
-                                isEnrolled={isEnrolled}
-                            />
-                        </ThemedView>
-                    </ThemedView>
-                    <ThemedView style={[styles.weekByWeekContainer]}>
-                        {currentMonthWeeks.map((week, weekIndex) => {
-                            // Filter out null days (placeholders)
-                            const daysInWeek = week.filter((day) => day !== null) as ProgramDay[];
-
-                            if (daysInWeek.length === 0) return null;
-
-                            // Get the week number from the first day in the week
-                            const weekNumber = getWeekNumber(parseInt(daysInWeek[0].DayId));
-                            // Determine if this is the current week
-                            const isCurrentWeek = userCurrentWeekNumber === weekNumber;
-                            const isPastWeek = userCurrentWeekNumber > weekNumber;
-
-                            return (
-                                <Collapsible
-                                    key={`week-${weekNumber}`}
-                                    title={`Week ${weekNumber}`}
-                                    isOpen={isCurrentWeek} // Open current week by default
-                                    activeOpacity={1}
-                                    titleStyle={[
-                                        styles.weekHeaderText,
-                                        { color: themeColors.text },
-                                        isCurrentWeek && { color: themeColors.white },
-                                        isPastWeek && [{ color: themeColors.subText, textDecorationLine: 'line-through' }],
-                                    ]}
-                                    headingStyle={[
-                                        styles.weekHeader,
-                                        { backgroundColor: themeColors.background },
-                                        isCurrentWeek && { backgroundColor: themeColors.primary },
-                                        isPastWeek && [{ backgroundColor: themeColors.background }],
-                                    ]}
-                                    iconStyle={[isCurrentWeek && { color: themeColors.white }]}
-                                >
-                                    <ThemedView>
-                                        {daysInWeek.map((day) => {
-                                            // Determine if the day is completed
-                                            const dayNumber = parseInt(day.DayId);
-                                            const isCompleted = userCurrentDayNumber ? dayNumber < userCurrentDayNumber : false;
-                                            const isCurrentDay = userCurrentDayNumber ? dayNumber === userCurrentDayNumber : false;
-                                            return (
-                                                <ProgramDayRowCard
-                                                    key={`day-${day.DayId}`}
-                                                    day={day}
-                                                    onPress={() => navigateToProgramDay(day.DayId)}
-                                                    isCompleted={isCompleted}
-                                                    isCurrentDay={isCurrentDay}
-                                                />
-                                            );
-                                        })}
-                                    </ThemedView>
-                                </Collapsible>
-                            );
-                        })}
                     </ThemedView>
                 </ThemedView>
             </Animated.ScrollView>
             <ThemedView style={styles.buttonContainer}>
-                {!isEnrolled && <PrimaryButton text='Start Program' style={[styles.startButton]} onPress={handleStartProgram} size={'LG'} />}
+                {!isEnrolled && (
+                    <PrimaryButton text='Start Program' textType='bodyMedium' style={[styles.startButton]} onPress={handleStartProgram} size='LG' />
+                )}
             </ThemedView>
         </ThemedView>
     );
@@ -274,49 +251,12 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    scrollContainer: {
-        flex: 1,
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
     errorContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         padding: Spaces.LG,
     },
-    flatList: {
-        flex: 1,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: Spaces.LG,
-        paddingBottom: Spaces.MD,
-        paddingTop: Spaces.LG,
-    },
-    calendarContainer: {
-        borderRadius: Spaces.SM,
-        paddingTop: Spaces.LG,
-    },
-    calendar: {
-        paddingBottom: Spaces.LG,
-    },
-    monthTitle: {},
-    weekByWeekContainer: {
-        paddingTop: Spaces.LG,
-        paddingBottom: Spaces.LG,
-    },
-    weekContainer: {},
-    weekHeader: {
-        paddingVertical: Spaces.SM + Spaces.XS,
-        paddingHorizontal: Spaces.XL,
-    },
-    weekHeaderText: {},
     buttonContainer: {
         position: 'absolute',
         bottom: Spaces.XL,
@@ -326,9 +266,39 @@ const styles = StyleSheet.create({
         marginHorizontal: '10%',
     },
     startButton: {},
-    progress: {
-        marginHorizontal: Spaces.LG,
+    mainContainer: {
+        marginTop: Spaces.LG,
+    },
+    descriptionContainer: {
+        paddingHorizontal: Spaces.LG,
+        marginTop: Spaces.XL,
+        paddingTop: Spaces.XL,
+        paddingBottom: Spaces.XL,
+    },
+    attributeRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+    },
+    attributeItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: Spaces.XL,
+        marginBottom: Spaces.SM,
+    },
+    attributeText: {
+        marginLeft: Spaces.XS,
+        lineHeight: Spaces.LG,
+    },
+    bottomButtonContainer: {
+        alignItems: 'center',
+        flex: 1,
+        paddingHorizontal: '20%',
+    },
+    calendarButton: {
+        width: '100%',
+        marginBottom: Spaces.XXXL,
     },
 });
 
-export default ProgramDetailsScreen;
+export default ProgramOverviewScreen;

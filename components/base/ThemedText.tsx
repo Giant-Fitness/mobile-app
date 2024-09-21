@@ -84,9 +84,9 @@ const styles = StyleSheet.create({
         fontFamily: 'InterMedium',
     },
     button: {
-        fontSize: moderateScale(18),
+        fontSize: moderateScale(14),
         lineHeight: moderateScale(24),
-        fontFamily: 'InterBold',
+        fontFamily: 'InterSemiBold',
     },
     buttonSmall: {
         fontSize: moderateScale(13),
