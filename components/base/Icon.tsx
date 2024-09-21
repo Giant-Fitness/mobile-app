@@ -1,4 +1,4 @@
-// components/icons/Icon.tsx
+// components/base/Icon.tsx
 
 import React from 'react';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons, Entypo, Feather, AntDesign, FontAwesome6 } from '@expo/vector-icons';
@@ -6,6 +6,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { StyleProp, TextStyle } from 'react-native';
 import { moderateScale } from '@/utils/scaling';
+import { Sizes } from '@/constants/Sizes';
 import Animated, { useAnimatedStyle, useDerivedValue } from 'react-native-reanimated';
 
 const AnimatedIonicons = Animated.createAnimatedComponent(Ionicons);
@@ -23,7 +24,7 @@ type IconProps = {
     style?: StyleProp<TextStyle>;
 };
 
-export const Icon = React.forwardRef<any, IconProps>(({ name, size = 18, color, style }, ref) => {
+export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconSizeDefault, color, style }, ref) => {
     const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
     const themeColors = Colors[colorScheme]; // Access theme-specific colors
     const defaultColor = themeColors.white;

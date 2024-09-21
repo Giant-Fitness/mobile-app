@@ -1,21 +1,22 @@
 // app/programs/program-day.tsx
 
 import React, { useEffect } from 'react';
-import { StyleSheet, ActivityIndicator } from 'react-native';
+import { StyleSheet, ActivityIndicator, View } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ExerciseCard } from '@/components/programs/ExerciseCard';
-import { Icon } from '@/components/icons/Icon';
+import { Icon } from '@/components/base/Icon';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
-import { AnimatedHeader } from '@/components/layout/AnimatedHeader';
-import { TopImageInfoCard } from '@/components/layout/TopImageInfoCard';
+import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
+import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
 import { moderateScale, verticalScale } from '@/utils/scaling';
-import { spacing } from '@/utils/spacing';
-import { sizes } from '@/utils/sizes';
-import { TextButton } from '@/components/base/TextButton';
+import { Spaces } from '@/constants/Spaces';
+import { Sizes } from '@/constants/Sizes';
+import { TextButton } from '@/components/buttons/TextButton';
+import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/rootReducer';
 import { getProgramDayAsync } from '@/store/programs/thunks';
@@ -84,7 +85,7 @@ const ProgramDayScreen = () => {
     // **2. Main Return with Conditional Rendering**
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
-            <AnimatedHeader scrollY={scrollY} headerInterpolationStart={sizes.imageLargeHeight} headerInterpolationEnd={sizes.imageLargeHeight + spacing.xxl} />
+            <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Sizes.imageLGHeight} headerInterpolationEnd={Sizes.imageLGHeight + Spaces.XXL} />
             <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
                 {/* **Loading State** */}
                 {programDayState === REQUEST_STATE.PENDING && (
@@ -108,25 +109,20 @@ const ProgramDayScreen = () => {
                             title={programDay.DayTitle}
                             subtitle={`Week ${currentWeek} Day ${dayOfWeek}`}
                             titleType='titleXLarge'
-                            subtitleStyle={{ marginBottom: spacing.md, color: themeColors.subText, marginTop: 0 }}
-                            titleStyle={{ marginBottom: spacing.xs }}
+                            subtitleStyle={{ marginBottom: Spaces.MD, color: themeColors.subText, marginTop: 0 }}
+                            titleStyle={{ marginBottom: Spaces.XS }}
                             containerStyle={{ elevation: 5, marginBottom: 0 }}
                             contentContainerStyle={{
                                 backgroundColor: themeColors.background,
-                                paddingHorizontal: spacing.lg,
+                                paddingHorizontal: Spaces.LG,
                             }}
-                            imageStyle={{ height: sizes.imageXLargeHeight }}
+                            imageStyle={{ height: Sizes.imageXLHeight }}
                             titleFirst={true}
                             extraContent={
                                 <ThemedView>
                                     {programDay.RestDay ? (
                                         <ThemedView style={styles.tipContainer}>
-                                            <Icon
-                                                name='sleep'
-                                                size={moderateScale(16)}
-                                                color={themeColors.subText}
-                                                style={{ marginRight: spacing.sm, marginTop: spacing.xs }}
-                                            />
+                                            <Icon name='sleep' color={themeColors.subText} style={{ marginRight: Spaces.SM, marginTop: Spaces.XS }} />
                                             <ThemedText type='body' style={{ color: themeColors.subText }}>
                                                 {'Take it easy today! Focus on recovery and hydration.'}
                                             </ThemedText>
@@ -135,7 +131,7 @@ const ProgramDayScreen = () => {
                                         <ThemedView>
                                             <ThemedView style={styles.attributeRow}>
                                                 <ThemedView style={styles.attribute}>
-                                                    <Icon name='stopwatch' size={moderateScale(18)} color={themeColors.text} />
+                                                    <Icon name='stopwatch' color={themeColors.text} />
                                                     <ThemedText type='body' style={styles.attributeText}>
                                                         {programDay.Time} mins
                                                     </ThemedText>
@@ -143,7 +139,7 @@ const ProgramDayScreen = () => {
                                             </ThemedView>
                                             <ThemedView style={styles.attributeRow}>
                                                 <ThemedView style={styles.attribute}>
-                                                    <Icon name='kettlebell' size={moderateScale(18)} color={themeColors.text} />
+                                                    <Icon name='kettlebell' color={themeColors.text} />
                                                     <ThemedText type='body' style={styles.attributeText}>
                                                         {programDay.Equipment.join(', ')}
                                                     </ThemedText>
@@ -151,7 +147,7 @@ const ProgramDayScreen = () => {
                                             </ThemedView>
                                             <ThemedView style={styles.attributeRow}>
                                                 <ThemedView style={styles.attribute}>
-                                                    <Icon name='yoga' size={moderateScale(18)} color={themeColors.text} />
+                                                    <Icon name='yoga' color={themeColors.text} />
                                                     <ThemedText type='body' style={styles.attributeText}>
                                                         {programDay.MuscleGroups.join(', ')}
                                                     </ThemedText>
@@ -167,7 +163,7 @@ const ProgramDayScreen = () => {
                                 style={[
                                     styles.exercisesContainer,
                                     { backgroundColor: themeColors.backgroundTertiary },
-                                    isEnrolled && [{ paddingBottom: verticalScale(120) }],
+                                    isEnrolled && [{ paddingBottom: Sizes.bottomSpaceLarge }],
                                 ]}
                             >
                                 {programDay.Exercises &&
@@ -180,12 +176,13 @@ const ProgramDayScreen = () => {
                 )}
             </Animated.ScrollView>
             {isEnrolled && (
-                <ThemedView style={styles.buttonContainer}>
-                    <TextButton
+                <View style={styles.buttonContainer}>
+                    <PrimaryButton
                         text='Finish Day'
                         textType='bodyMedium'
                         style={[styles.completeButton, { backgroundColor: themeColors.buttonPrimary }]}
                         onPress={handleCompleteDay}
+                        size={'LG'}
                     />
                     {programDay && programDay.RestDay && (
                         <TextButton
@@ -199,10 +196,11 @@ const ProgramDayScreen = () => {
                                     borderColor: themeColors.text,
                                 },
                             ]}
+                            size={'LG'}
                             onPress={() => navigateToAllWorkouts({ focus: ['Mobility'] })}
                         />
                     )}
-                </ThemedView>
+                </View>
             )}
         </ThemedView>
     );
@@ -210,63 +208,51 @@ const ProgramDayScreen = () => {
 
 const styles = StyleSheet.create({
     contentContainer: {
-        paddingRight: 8,
-        paddingBottom: 90,
+        paddingRight: Spaces.SM,
+        paddingBottom: Sizes.bottomSpaceMedium,
     },
     container: {
         marginRight: '27%',
         alignItems: 'center',
     },
-    title: {
-        fontFamily: 'InterMedium',
-        fontSize: 18,
-    },
     attribute: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingBottom: spacing.sm,
+        paddingBottom: Spaces.SM,
     },
     attributeText: {
-        marginLeft: spacing.sm,
-        lineHeight: spacing.lg,
+        marginLeft: Spaces.SM,
+        lineHeight: Spaces.LG,
     },
     attributeRow: {
         flexDirection: 'row',
         justifyContent: 'flex-start',
     },
     exercisesContainer: {
-        paddingVertical: spacing.lg,
-        paddingBottom: spacing.xxl,
-        paddingHorizontal: spacing.md,
+        paddingVertical: Spaces.LG,
+        paddingBottom: Spaces.XXL,
+        paddingHorizontal: Spaces.MD,
     },
     buttonContainer: {
         flexDirection: 'column',
         alignItems: 'center',
         paddingHorizontal: '10%',
         position: 'absolute',
-        bottom: verticalScale(30),
+        bottom: Spaces.XL,
         left: 0,
         right: 0,
-        backgroundColor: 'transparent',
     },
     completeButton: {
         width: '100%',
-        paddingVertical: spacing.md,
     },
     mobilityButton: {
         width: '100%',
-        borderWidth: StyleSheet.hairlineWidth,
-        paddingVertical: spacing.md,
-        marginTop: spacing.md,
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0,
-        shadowRadius: 0,
-        elevation: 0,
+        marginTop: Spaces.MD,
     },
     tipContainer: {
         flexDirection: 'row',
         alignItems: 'flex-start',
-        paddingHorizontal: spacing.sm,
+        paddingHorizontal: Spaces.SM,
         backgroundColor: 'transparent',
     },
     loadingContainer: {
@@ -278,7 +264,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        padding: spacing.lg,
+        padding: Spaces.LG,
     },
 });
 

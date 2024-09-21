@@ -11,19 +11,19 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/rootReducer';
 import { getProgramAsync, getAllProgramDaysAsync } from '@/store/programs/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import MonthView from '@/components/programs/MonthView';
-import { spacing } from '@/utils/spacing';
+import { ProgramMonthView } from '@/components/programs/ProgramMonthView';
+import { Spaces } from '@/constants/Spaces';
 import { groupProgramDaysIntoWeeks, groupWeeksIntoMonths, getWeekNumber, getDayOfWeek } from '@/utils/calendar';
-import { Icon } from '@/components/icons/Icon';
+import { Icon } from '@/components/base/Icon';
 import { ProgramDay } from '@/types/types';
 import { ProgramDayRowCard } from '@/components/programs/ProgramDayRowCard';
 import { moderateScale, verticalScale } from '@/utils/scaling';
-import { TextButton } from '@/components/base/TextButton';
+import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
-import { AnimatedHeader } from '@/components/layout/AnimatedHeader';
-import { sizes } from '@/utils/sizes';
-import { TopImageInfoCard } from '@/components/layout/TopImageInfoCard';
-import { ProgressBar } from '@/components/programs/ProgressBar';
+import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
+import { Sizes } from '@/constants/Sizes';
+import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
+import { ProgramProgressPillBar } from '@/components/programs/ProgramProgressPillBar';
 import { Collapsible } from '@/components/layout/Collapsible'; // Import Collapsible
 
 type ProgramCalendarScreenParams = {
@@ -185,7 +185,7 @@ const ProgramCalendarScreen = () => {
 
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.backgroundTertiary }]}>
-            <AnimatedHeader scrollY={scrollY} headerInterpolationStart={sizes.imageLargeHeight} headerInterpolationEnd={sizes.imageLargeHeight + spacing.xxl} />
+            <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Sizes.imageLGHeight} headerInterpolationEnd={Sizes.imageLGHeight + Spaces.XXL} />
             <Animated.ScrollView
                 contentContainerStyle={[{ flexGrow: 1 }]}
                 showsVerticalScrollIndicator={false}
@@ -198,32 +198,32 @@ const ProgramCalendarScreen = () => {
                         {
                             backgroundColor: themeColors.background,
                         },
-                        !isEnrolled && { marginBottom: verticalScale(120) },
-                        isEnrolled && { marginBottom: spacing.xxl },
+                        !isEnrolled && { marginBottom: Sizes.bottomSpaceLarge },
+                        isEnrolled && { marginBottom: Spaces.XXL },
                     ]}
                 >
                     <TopImageInfoCard
                         image={{ uri: program.PhotoUrl }}
                         title={program.ProgramName}
                         titleType='titleLarge'
-                        titleStyle={{ marginBottom: spacing.xs }}
+                        titleStyle={{ marginBottom: Spaces.XS }}
                         contentContainerStyle={{
                             backgroundColor: themeColors.background,
-                            paddingHorizontal: spacing.lg,
-                            paddingBottom: spacing.xxs,
+                            paddingHorizontal: Spaces.LG,
+                            paddingBottom: Spaces.XXS,
                         }}
-                        imageStyle={{ height: sizes.imageXLargeHeight }}
+                        imageStyle={{ height: Sizes.imageXLHeight }}
                     />
                     {isEnrolled && (
                         <ThemedView style={[styles.progress]}>
-                            <ThemedText type='overline' style={[{ color: themeColors.subText, paddingBottom: spacing.md }]}>
+                            <ThemedText type='overline' style={[{ color: themeColors.subText, paddingBottom: Spaces.MD }]}>
                                 Day {userCurrentDayNumber}/{program?.Days}
                             </ThemedText>
-                            <ProgressBar
+                            <ProgramProgressPillBar
                                 completedParts={Number(userCurrentWeekNumber - 1)}
                                 currentPart={Number(userCurrentWeekNumber)}
                                 parts={Number(program.Weeks)}
-                                containerWidth={screenWidth - spacing.xxl}
+                                containerWidth={screenWidth - Spaces.XXL}
                             />
                         </ThemedView>
                     )}
@@ -234,7 +234,7 @@ const ProgramCalendarScreen = () => {
                                     <Icon name='chevron-back' color={themeColors.text} />
                                 </TouchableOpacity>
                             ) : (
-                                <View style={{ width: spacing.xl }} /> // Placeholder to maintain layout
+                                <View style={{ width: Spaces.XL }} /> // Placeholder to maintain layout
                             )}
                             <ThemedText type='overline' style={styles.monthTitle}>
                                 Month {currentMonthIndex + 1}
@@ -244,11 +244,11 @@ const ProgramCalendarScreen = () => {
                                     <Icon name='chevron-forward' color={themeColors.text} />
                                 </TouchableOpacity>
                             ) : (
-                                <ThemedView style={{ width: spacing.xl }} /> // Placeholder to maintain layout
+                                <ThemedView style={{ width: Spaces.XL }} /> // Placeholder to maintain layout
                             )}
                         </ThemedView>
                         <ThemedView style={styles.calendar}>
-                            <MonthView
+                            <ProgramMonthView
                                 weeks={months[currentMonthIndex]}
                                 onDayPress={navigateToProgramDay}
                                 userProgramProgress={userProgramProgress}
@@ -313,7 +313,7 @@ const ProgramCalendarScreen = () => {
                 </ThemedView>
             </Animated.ScrollView>
             <ThemedView style={styles.buttonContainer}>
-                {!isEnrolled && <TextButton text='Start Program' textType='bodyMedium' style={[styles.startButton]} onPress={handleStartProgram} />}
+                {!isEnrolled && <PrimaryButton text='Start Program' style={[styles.startButton]} onPress={handleStartProgram} size={'LG'} />}
             </ThemedView>
         </ThemedView>
     );
@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        padding: spacing.lg,
+        padding: Spaces.LG,
     },
     flatList: {
         flex: 1,
@@ -344,42 +344,39 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: spacing.lg,
-        paddingBottom: spacing.md,
-        paddingTop: spacing.lg,
+        paddingHorizontal: Spaces.LG,
+        paddingBottom: Spaces.MD,
+        paddingTop: Spaces.LG,
     },
     calendarContainer: {
-        borderRadius: spacing.sm,
-        paddingTop: spacing.lg,
+        borderRadius: Spaces.SM,
+        paddingTop: Spaces.LG,
     },
     calendar: {
-        paddingBottom: spacing.lg,
+        paddingBottom: Spaces.LG,
     },
     monthTitle: {},
     weekByWeekContainer: {
-        paddingTop: spacing.lg,
-        paddingBottom: spacing.lg,
+        paddingTop: Spaces.LG,
+        paddingBottom: Spaces.LG,
     },
     weekContainer: {},
     weekHeader: {
-        paddingVertical: spacing.sm + spacing.xs,
-        paddingHorizontal: spacing.xl,
-        // borderRadius: spacing.sm,
+        paddingVertical: Spaces.SM + Spaces.XS,
+        paddingHorizontal: Spaces.XL,
     },
     weekHeaderText: {},
     buttonContainer: {
         position: 'absolute',
-        bottom: verticalScale(30),
+        bottom: Spaces.XL,
         right: 0,
         left: 0,
         backgroundColor: 'transparent',
         marginHorizontal: '10%',
     },
-    startButton: {
-        paddingVertical: spacing.md,
-    },
+    startButton: {},
     progress: {
-        marginHorizontal: spacing.lg,
+        marginHorizontal: Spaces.LG,
     },
 });
 

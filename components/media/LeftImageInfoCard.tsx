@@ -1,4 +1,4 @@
-// components/layout/LeftImageInfoCard.tsx
+// components/media/LeftImageInfoCard.tsx
 
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View, StyleProp, ViewStyle, ImageSourcePropType, TextStyle, ImageStyle } from 'react-native';
@@ -9,8 +9,8 @@ import { Colors } from '@/constants/Colors';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { scale, moderateScale, verticalScale } from '@/utils/scaling';
-import { spacing } from '@/utils/spacing';
-import { sizes } from '@/utils/sizes';
+import { Spaces } from '@/constants/Spaces';
+import { Sizes } from '@/constants/Sizes';
 
 type LeftImageInfoCardProps = {
     image: ImageSourcePropType;
@@ -77,32 +77,32 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
     },
     imageBackground: {
-        borderRadius: spacing.xxs,
+        borderRadius: Spaces.XXS,
         backgroundColor: 'transparent', // Adjust to your desired background color
     },
     roundedBackground: {
-        borderRadius: spacing.xxs,
+        borderRadius: Spaces.XXS,
         overflow: 'hidden',
     },
     image: {
-        height: sizes.imageMediumHeight,
-        width: sizes.imageMediumWidth,
+        height: Sizes.imageMDHeight,
+        width: Sizes.imageMDWidth,
     },
     textContainer: {
-        marginLeft: spacing.md,
+        marginLeft: Spaces.MD,
         flex: 1,
         flexDirection: 'column',
         justifyContent: 'center',
         backgroundColor: 'transparent',
     },
     title: {
-        marginBottom: spacing.xs,
-        lineHeight: spacing.md,
-        marginRight: spacing.xxl,
+        marginBottom: Spaces.XS,
+        lineHeight: Spaces.MD,
+        marginRight: Spaces.XXL,
     },
     subtitle: {
-        marginTop: spacing.xs,
-        lineHeight: spacing.md,
+        marginTop: Spaces.XS,
+        lineHeight: Spaces.MD,
     },
     extraContent: {
         backgroundColor: 'transparent',

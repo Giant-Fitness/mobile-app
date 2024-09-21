@@ -10,15 +10,16 @@ import { ActiveProgramDayCard } from '@/components/programs/ActiveProgramDayCard
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ProgramDayDetailCard } from '@/components/programs/ProgramDayDetailCard';
-import { Icon } from '@/components/icons/Icon';
+import { Icon } from '@/components/base/Icon';
 import { moderateScale, verticalScale } from '@/utils/scaling';
-import { spacing } from '@/utils/spacing';
+import { Spaces } from '@/constants/Spaces';
+import { Sizes } from '@/constants/Sizes';
 import { AppDispatch, RootState } from '@/store/rootReducer';
 import { getActiveProgramAsync, getActiveProgramCurrentDayAsync, getActiveProgramNextDaysAsync } from '@/store/programs/thunks';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
-import { BasicSplash } from '@/components/splashScreens/BasicSplash';
+import { BasicSplash } from '@/components/base/BasicSplash';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { HighlightedTip } from '@/components/base/HighlightedTip';
+import { HighlightedTip } from '@/components/alerts/HighlightedTip';
 import { getWeekNumber } from '@/utils/calendar';
 
 export default function ActiveProgramHome() {
@@ -139,7 +140,7 @@ export default function ActiveProgramHome() {
                 showsVerticalScrollIndicator={false}
             >
                 {isLastDay ? (
-                    <ThemedView style={{ marginHorizontal: spacing.sm, marginTop: spacing.xl, marginBottom: spacing.lg }}>
+                    <ThemedView style={{ marginHorizontal: Spaces.SM, marginTop: Spaces.XL, marginBottom: Spaces.LG }}>
                         <HighlightedTip iconName='star' tipText='The finish line is here, one last push!' />
                     </ThemedView>
                 ) : (
@@ -182,7 +183,7 @@ export default function ActiveProgramHome() {
                             <ThemedText type='body' style={[{ color: themeColors.text }]}>
                                 Program Calendar
                             </ThemedText>
-                            <Icon name='chevron-forward' size={moderateScale(16)} color={themeColors.iconDefault} />
+                            <Icon name='chevron-forward' size={Sizes.iconSizeSM} color={themeColors.iconDefault} />
                         </TouchableOpacity>
                         <View
                             style={{
@@ -196,7 +197,7 @@ export default function ActiveProgramHome() {
                             <ThemedText type='body' style={[{ color: themeColors.text }]}>
                                 Program Overview
                             </ThemedText>
-                            <Icon name='chevron-forward' size={moderateScale(16)} color={themeColors.iconDefault} />
+                            <Icon name='chevron-forward' size={Sizes.iconSizeSM} color={themeColors.iconDefault} />
                         </TouchableOpacity>
                         <View
                             style={{
@@ -210,7 +211,7 @@ export default function ActiveProgramHome() {
                             <ThemedText type='body' style={[{ color: themeColors.text }]}>
                                 Browse Programs
                             </ThemedText>
-                            <Icon name='chevron-forward' size={moderateScale(16)} color={themeColors.iconDefault} />
+                            <Icon name='chevron-forward' size={Sizes.iconSizeSM} color={themeColors.iconDefault} />
                         </TouchableOpacity>
                         <View
                             style={{
@@ -221,7 +222,7 @@ export default function ActiveProgramHome() {
                     </ThemedView>
                     <ThemedView
                         style={{
-                            paddingBottom: spacing.xxl,
+                            paddingBottom: Spaces.XXL,
                         }}
                     >
                         <TouchableOpacity style={styles.menuItem}>
@@ -244,42 +245,42 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     subHeader: {
-        marginTop: spacing.md,
-        marginBottom: spacing.md,
+        marginTop: Spaces.MD,
+        marginBottom: Spaces.MD,
     },
     upNextContainer: {
-        paddingTop: spacing.sm,
-        paddingHorizontal: spacing.lg,
+        paddingTop: Spaces.SM,
+        paddingHorizontal: Spaces.LG,
     },
     menuItem: {
-        paddingTop: spacing.lg,
-        paddingBottom: spacing.lg,
+        paddingTop: Spaces.LG,
+        paddingBottom: Spaces.LG,
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
     quoteContainer: {
-        paddingTop: spacing.xl,
-        paddingBottom: spacing.md,
-        marginHorizontal: spacing.xxl,
+        paddingTop: Spaces.XL,
+        paddingBottom: Spaces.MD,
+        marginHorizontal: Spaces.XXL,
     },
     quoteText: {
         textAlign: 'center',
-        paddingBottom: spacing.sm,
+        paddingBottom: Spaces.SM,
     },
     planHeader: {
-        paddingHorizontal: spacing.lg,
+        paddingHorizontal: Spaces.LG,
     },
     weekProgress: {
-        marginBottom: spacing.sm,
-        paddingHorizontal: spacing.lg,
+        marginBottom: Spaces.SM,
+        paddingHorizontal: Spaces.LG,
     },
     activeCardContainer: {
-        paddingHorizontal: spacing.lg,
-        paddingBottom: spacing.xxl,
+        paddingHorizontal: Spaces.LG,
+        paddingBottom: Spaces.XXL,
     },
     menuContainer: {
-        paddingHorizontal: spacing.lg,
+        paddingHorizontal: Spaces.LG,
         paddingBottom: 0,
-        paddingTop: spacing.md,
+        paddingTop: Spaces.MD,
     },
 });

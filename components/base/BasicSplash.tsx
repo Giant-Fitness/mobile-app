@@ -1,10 +1,11 @@
-// components/splashScreens/BasicSplash.tsx
+// components/base/BasicSplash.tsx
 
 import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import { Spaces } from '@/constants/Spaces';
 
 interface SplashScreenProps {
     onLoadingComplete: () => void;
@@ -49,6 +50,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     text: {
-        marginTop: 20,
+        marginTop: Spaces.MD,
     },
 });

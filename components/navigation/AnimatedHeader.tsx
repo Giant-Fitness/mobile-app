@@ -1,12 +1,12 @@
-// components/AnimatedHeader.tsx
+// components/navigation/AnimatedHeader.tsx
 
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, { useAnimatedStyle, interpolateColor, useDerivedValue } from 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { CustomBackButton } from '@/components/base/CustomBackButton';
-import { spacing } from '@/utils/spacing';
+import { BackButton } from '@/components/navigation/BackButton';
+import { Spaces } from '@/constants/Spaces';
 import { ThemedText } from '@/components/base/ThemedText';
 
 type AnimatedHeaderProps = {
@@ -59,7 +59,7 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
 
     return (
         <Animated.View style={[styles.headerContainer, animatedHeaderStyle]}>
-            <CustomBackButton style={styles.backButton} animatedColor={animatedIconColor} onBackPress={onBackPress} />
+            <BackButton style={styles.backButton} animatedColor={animatedIconColor} onBackPress={onBackPress} />
             {title && (
                 <ThemedText type='link' style={[styles.title, { color: themeColors.text }]}>
                     {title}
@@ -79,18 +79,18 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center', // Center content
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.md,
+        paddingHorizontal: Spaces.MD,
+        paddingVertical: Spaces.MD,
         zIndex: 10,
     },
     backButton: {
         position: 'absolute',
-        top: spacing.xxl,
-        left: spacing.md,
+        top: Spaces.XXL,
+        left: Spaces.MD,
         zIndex: 10,
     },
     title: {
-        top: spacing.md,
+        top: Spaces.MD,
     },
 });
 

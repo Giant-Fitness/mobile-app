@@ -1,14 +1,14 @@
-// components/video/ThumbnailVideoPlayer.tsx
+// components/media/ThumbnailVideoPlayer.tsx
 
 import React, { useRef, useState } from 'react';
 import { StyleSheet, TouchableOpacity, Image, View, Animated, Modal, ActivityIndicator } from 'react-native';
-import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle } from '@/components/video/FullScreenVideoPlayer';
-import { spacing } from '@/utils/spacing';
+import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle } from '@/components/media/FullScreenVideoPlayer';
+import { Spaces } from '@/constants/Spaces';
 import { moderateScale } from '@/utils/scaling';
-import { Icon } from '@/components/icons/Icon';
+import { Icon } from '@/components/base/Icon';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { sizes } from '@/utils/sizes';
+import { Sizes } from '@/constants/Sizes';
 import SkeletonPlaceholder from 'expo-skeleton-placeholder';
 
 type ThumbnailVideoPlayerProps = {
@@ -84,7 +84,7 @@ export const ThumbnailVideoPlayer: React.FC<ThumbnailVideoPlayerProps> = ({ vide
                 {isLoading && (
                     <View style={styles.skeletonContainer}>
                         <SkeletonPlaceholder highlightColor='#e1e9ee' backgroundColor='#f2f8fc'>
-                            <SkeletonPlaceholder.Item width='100%' height='100%' borderRadius={spacing.xxs} />
+                            <SkeletonPlaceholder.Item width='100%' height='100%' borderRadius={Spaces.XXS} />
                         </SkeletonPlaceholder>
                         {/* Optional: Add an ActivityIndicator for debugging */}
                         {/* <ActivityIndicator size="small" color="#0000ff" style={styles.activityIndicator} /> */}
@@ -93,7 +93,7 @@ export const ThumbnailVideoPlayer: React.FC<ThumbnailVideoPlayerProps> = ({ vide
 
                 {/* Play Button */}
                 <View style={styles.playButtonContainer}>
-                    <Icon name='play' size={spacing.xxl} color={themeColors.white} />
+                    <Icon name='play' size={Spaces.XXL} color={themeColors.white} />
                 </View>
             </TouchableOpacity>
 
@@ -129,13 +129,13 @@ const styles = StyleSheet.create({
     container: {
         position: 'relative',
         width: '100%',
-        height: sizes.imageXLargeHeight, // Ensure this is a valid number
+        height: Sizes.imageXLHeight, // Ensure this is a valid number
         backgroundColor: '#ccc', // Temporary background for debugging
     },
     thumbnail: {
         width: '100%',
         height: '100%',
-        borderRadius: spacing.xxs,
+        borderRadius: Spaces.XXS,
     },
     skeletonContainer: {
         position: 'absolute',
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
         left: 0,
         width: '100%',
         height: '100%',
-        borderRadius: spacing.xxs,
+        borderRadius: Spaces.XXS,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'transparent', // Ensure background doesn't block the skeleton
@@ -152,13 +152,13 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: '50%',
         left: '50%',
-        width: spacing.xxxl,
-        height: spacing.xxxl,
+        width: Spaces.XXXL,
+        height: Spaces.XXXL,
         justifyContent: 'center',
         alignItems: 'center',
         transform: [
-            { translateX: -spacing.xl }, // Half of width
-            { translateY: -spacing.xl }, // Half of height
+            { translateX: -Spaces.XL }, // Half of width
+            { translateY: -Spaces.XL }, // Half of height
         ],
     },
     fadeOverlay: {

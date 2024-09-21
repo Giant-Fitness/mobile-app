@@ -6,7 +6,7 @@ import { ThemedView } from '@/components/base/ThemedView';
 import { BlurView } from 'expo-blur';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { spacing } from '@/utils/spacing';
+import { Spaces } from '@/constants/Spaces';
 
 interface BottomDrawerProps {
     visible: boolean;
@@ -15,7 +15,7 @@ interface BottomDrawerProps {
     style?: ViewStyle;
 }
 
-export const BottomDrawer: React.FC<BottomDrawerProps> = ({ visible, onClose, children, style }) => {
+export const BottomSheet: React.FC<BottomDrawerProps> = ({ visible, onClose, children, style }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
     const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
@@ -44,9 +44,9 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.1)',
     },
     drawer: {
-        borderTopLeftRadius: spacing.sm,
-        borderTopRightRadius: spacing.sm,
-        paddingHorizontal: spacing.lg,
+        borderTopLeftRadius: Spaces.SM,
+        borderTopRightRadius: Spaces.SM,
+        paddingHorizontal: Spaces.LG,
         maxHeight: '80%',
         position: 'absolute',
         bottom: 0,

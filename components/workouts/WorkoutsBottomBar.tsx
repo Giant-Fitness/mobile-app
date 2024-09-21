@@ -6,9 +6,9 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
-import { Icon } from '@/components/icons/Icon';
+import { Icon } from '@/components/base/Icon';
 import { scale, moderateScale, verticalScale } from '@/utils/scaling';
-import { spacing } from '@/utils/spacing';
+import { Spaces } from '@/constants/Spaces';
 
 type WorkoutsBottomBarProps = {
     onSortPress: () => void;
@@ -24,7 +24,7 @@ export const WorkoutsBottomBar: React.FC<WorkoutsBottomBarProps> = ({ onSortPres
         <ThemedView style={[styles.container, { borderColor: themeColors.systemBorderColor }]}>
             <TouchableOpacity style={styles.button} onPress={onFilterPress}>
                 <View style={styles.iconAndText}>
-                    <Icon name='filter' style={[styles.icon, { marginRight: spacing.xs }]} color={themeColors.text} size={moderateScale(15)} />
+                    <Icon name='filter' style={[styles.icon, { marginRight: Spaces.XS }]} color={themeColors.text} size={moderateScale(15)} />
                     <ThemedText type='buttonSmall' style={[styles.text, { color: themeColors.text }]}>
                         Filter
                     </ThemedText>
@@ -40,7 +40,7 @@ export const WorkoutsBottomBar: React.FC<WorkoutsBottomBarProps> = ({ onSortPres
             <View style={[styles.divider, { backgroundColor: themeColors.text }]} />
             <TouchableOpacity style={styles.button} onPress={onSortPress}>
                 <View style={styles.iconAndText}>
-                    <Icon name='sort' style={[styles.icon, { marginRight: spacing.xs }]} color={themeColors.text} size={moderateScale(16)} />
+                    <Icon name='sort' style={[styles.icon, { marginRight: Spaces.XS }]} color={themeColors.text} size={moderateScale(16)} />
                     <ThemedText type='buttonSmall' style={[styles.text, { color: themeColors.text }]}>
                         Sort
                     </ThemedText>
@@ -55,13 +55,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         paddingTop: Platform.select({
-            ios: spacing.sm, // Adjusted for scaling
-            android: spacing.md, // Adjusted for scaling
+            ios: Spaces.SM, // Adjusted for scaling
+            android: Spaces.MD, // Adjusted for scaling
         }),
-        paddingHorizontal: spacing.md,
+        paddingHorizontal: Spaces.MD,
         paddingBottom: Platform.select({
-            ios: spacing.xl, // Adjusted for scaling
-            android: spacing.lg, // Adjusted for scaling
+            ios: Spaces.XL, // Adjusted for scaling
+            android: Spaces.LG, // Adjusted for scaling
         }),
         borderTopWidth: scale(0.3),
         height: Platform.select({
@@ -88,21 +88,21 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     },
     text: {
-        marginLeft: spacing.xs,
+        marginLeft: Spaces.XS,
     },
     badge: {
         position: 'absolute',
         top: verticalScale(-6),
         right: scale(-14),
-        minWidth: spacing.md,
-        height: spacing.md,
-        borderRadius: spacing.md,
+        minWidth: Spaces.MD,
+        height: Spaces.MD,
+        borderRadius: Spaces.MD,
         justifyContent: 'center',
         alignItems: 'center',
-        paddingHorizontal: spacing.xs,
+        paddingHorizontal: Spaces.XS,
     },
     badgeText: {
-        fontSize: spacing.sm,
+        fontSize: Spaces.SM,
         lineHeight: verticalScale(12),
     },
     divider: {

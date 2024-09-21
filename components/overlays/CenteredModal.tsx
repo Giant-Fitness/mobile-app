@@ -1,12 +1,13 @@
-// components/layout/CenteredModal.tsx
+// components/overlays/CenteredModal.tsx
 
 import React from 'react';
-import { Modal, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { BlurView } from 'expo-blur';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { spacing } from '@/utils/spacing';
+import { Spaces } from '@/constants/Spaces';
+import { Modal } from '@/components/overlays/Modal'; // Importing the reusable Modal
 
 interface CenteredModalProps {
     visible: boolean;
@@ -16,11 +17,13 @@ interface CenteredModalProps {
 }
 
 export const CenteredModal: React.FC<CenteredModalProps> = ({ visible, onClose, children, style }) => {
-    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
-    const themeColors = Colors[colorScheme]; // Access theme-specific colors
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
 
     return (
-        <Modal animationType='fade' transparent={true} visible={visible} onRequestClose={onClose}>
+        <Modal visible={visible} onClose={onClose} overlay={false}>
+            {' '}
+            {/* Reusing the new Modal */}
             <View style={styles.container}>
                 <TouchableOpacity style={styles.overlay} onPress={onClose} activeOpacity={1}>
                     <BlurView intensity={50} style={styles.blur} tint='systemUltraThinMaterial' experimentalBlurMethod='dimezisBlurView' />
@@ -45,8 +48,8 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.1)',
     },
     modal: {
-        borderRadius: spacing.sm,
-        padding: spacing.lg,
+        borderRadius: Spaces.SM,
+        padding: Spaces.LG,
         maxWidth: '80%',
         width: '80%',
         maxHeight: '60%',

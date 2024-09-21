@@ -1,4 +1,4 @@
-// components/layout/TopImageInfoCard.tsx
+// components/media/TopImageInfoCard.tsx
 
 import React from 'react';
 import { StyleSheet, StyleProp, ViewStyle, TextStyle, ImageSourcePropType, ImageStyle, TouchableOpacity } from 'react-native';
@@ -8,8 +8,8 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Image } from 'expo-image';
 import { moderateScale } from '@/utils/scaling';
-import { spacing } from '@/utils/spacing';
-import { sizes } from '@/utils/sizes';
+import { Spaces } from '@/constants/Spaces';
+import { Sizes } from '@/constants/Sizes';
 import { ThemedTextProps } from '@/components/base/ThemedText';
 
 type TopImageInfoCardProps = {
@@ -41,7 +41,7 @@ export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
     subtitleStyle,
     titleType = 'title',
     subtitleType = 'body',
-    placeholder = '@/assets/images/vb.webp',
+    placeholder = '@/assets/images/adaptive-icon.png',
     titleFirst = false,
     onPress,
 }) => {
@@ -88,22 +88,22 @@ const styles = StyleSheet.create({
     },
     image: {
         width: '100%',
-        height: sizes.imageLargeHeight,
-        borderTopRightRadius: spacing.sm,
-        borderTopLeftRadius: spacing.sm,
+        height: Sizes.imageLGHeight,
+        borderTopRightRadius: Spaces.SM,
+        borderTopLeftRadius: Spaces.SM,
     },
     contentContainer: {
         width: '100%',
-        paddingHorizontal: spacing.md,
-        marginTop: -spacing.xxs,
-        paddingVertical: spacing.md,
-        borderBottomLeftRadius: spacing.sm,
-        borderBottomRightRadius: spacing.sm,
+        paddingHorizontal: Spaces.MD,
+        marginTop: -Spaces.XXS,
+        paddingVertical: Spaces.MD,
+        borderBottomLeftRadius: Spaces.SM,
+        borderBottomRightRadius: Spaces.SM,
     },
     title: {
-        marginBottom: spacing.sm,
+        marginBottom: Spaces.SM,
     },
     subtitle: {
-        marginTop: spacing.xxs,
+        marginTop: Spaces.XXS,
     },
 });

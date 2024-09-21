@@ -6,7 +6,7 @@ import { getUserProgramProgressAsync } from '@/store/programs/thunks';
 import { AppDispatch, RootState } from '@/store/rootReducer';
 import { View, Text } from 'react-native';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { BasicSplash } from '@/components/splashScreens/BasicSplash';
+import { BasicSplash } from '@/components/base/BasicSplash';
 
 import ActiveProgramHome from '@/app/programs/active-program-home';
 

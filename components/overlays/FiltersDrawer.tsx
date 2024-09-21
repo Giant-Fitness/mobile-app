@@ -1,16 +1,17 @@
-// components/layout/FiltersDrawer.tsx
+// components/overlays/FiltersDrawer.tsx
 
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { BottomDrawer } from '@/components/layout/BottomDrawer';
+import { BottomSheet } from '@/components/overlays/BottomSheet';
 import { FilterChip } from '@/components/base/FilterChip';
 import { ThemedText } from '@/components/base/ThemedText';
-import { TextButton } from '@/components/base/TextButton';
+import { TextButton } from '@/components/buttons/TextButton';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { Icon } from '@/components/icons/Icon';
+import { Icon } from '@/components/base/Icon';
 import { scale, moderateScale, verticalScale } from '@/utils/scaling';
-import { spacing } from '@/utils/spacing';
+import { Spaces } from '@/constants/Spaces';
+import { Sizes } from '@/constants/Sizes';
 
 interface FiltersDrawerProps {
     visible: boolean;
@@ -88,7 +89,7 @@ export const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
     };
 
     return (
-        <BottomDrawer visible={visible} onClose={onClose}>
+        <BottomSheet visible={visible} onClose={onClose}>
             <View style={styles.header}>
                 <TouchableOpacity
                     onPress={handleReset}
@@ -119,7 +120,7 @@ export const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
                     activeOpacity={0.8}
                     hitSlop={{ top: scale(20), bottom: scale(20), left: scale(20), right: scale(20) }}
                 >
-                    <Icon name='close' size={moderateScale(22)} color={themeColors.subText} />
+                    <Icon name='close' size={Sizes.iconSizeMD} color={themeColors.subText} />
                 </TouchableOpacity>
             </View>
 
@@ -164,14 +165,9 @@ export const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
             </View>
 
             <View style={styles.buttonContainer}>
-                <TextButton
-                    text='Apply'
-                    textType='bodyMedium'
-                    style={[styles.applyButton, { backgroundColor: themeColors.buttonPrimary }]}
-                    onPress={handleApply}
-                />
+                <TextButton text='Apply' style={[styles.applyButton]} onPress={handleApply} size={'LG'} />
             </View>
-        </BottomDrawer>
+        </BottomSheet>
     );
 };
 
@@ -180,16 +176,16 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: spacing.md,
-        paddingHorizontal: spacing.xxxl,
-        paddingBottom: spacing.sm,
+        marginTop: Spaces.MD,
+        paddingHorizontal: Spaces.XXXL,
+        paddingBottom: Spaces.SM,
     },
     titleContainer: {
         alignItems: 'center',
         flex: 1,
     },
     filterScroll: {
-        paddingVertical: spacing.md,
+        paddingVertical: Spaces.MD,
     },
     resetButton: {
         position: 'absolute',
@@ -202,27 +198,27 @@ const styles = StyleSheet.create({
         top: verticalScale(12),
     },
     categoryContainer: {
-        marginBottom: spacing.lg,
+        marginBottom: Spaces.LG,
     },
     categoryTitle: {
-        marginBottom: spacing.sm,
+        marginBottom: Spaces.SM,
         fontWeight: 'bold',
-        fontSize: moderateScale(14),
+        fontSize: Sizes.fontSizeDefault,
     },
     chipContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
     },
     chip: {
-        marginVertical: spacing.xs,
+        marginVertical: Spaces.XS,
     },
     buttonContainer: {
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: spacing.xl,
+        marginBottom: Spaces.XL,
+        paddingHorizontal: '10%',
     },
     applyButton: {
-        paddingVertical: spacing.md,
-        width: '90%',
+        width: '80%',
     },
 });

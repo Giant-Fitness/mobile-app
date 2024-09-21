@@ -4,6 +4,7 @@ import React from 'react';
 import { Text, type TextProps, StyleSheet } from 'react-native';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { moderateScale } from '@/utils/scaling'; // Use the customized moderateScale
+import { Sizes } from '@/constants/Sizes';
 
 export type ThemedTextProps = TextProps & {
     lightColor?: string;
@@ -28,8 +29,8 @@ export type ThemedTextProps = TextProps & {
 // Styles for different text types using specific Inter fonts with adjusted scaling
 const styles = StyleSheet.create({
     body: {
-        fontSize: moderateScale(14), // Adjusted with moderate scaling
-        lineHeight: moderateScale(21),
+        fontSize: Sizes.fontSizeDefault,
+        lineHeight: Sizes.fontSizeDefault * 1.5,
         fontFamily: 'InterRegular',
     },
     bodyMedium: {
