@@ -25,7 +25,6 @@ import { getWeekNumber } from '@/utils/calendar';
 export default function ActiveProgramHome() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
-    const screenWidth = Dimensions.get('window').width;
 
     const navigation = useNavigation();
     const dispatch = useDispatch<AppDispatch>();
@@ -97,7 +96,7 @@ export default function ActiveProgramHome() {
         workoutQuoteState !== REQUEST_STATE.FULFILLED ||
         restDayQuoteState !== REQUEST_STATE.FULFILLED
     ) {
-        return <BasicSplash onLoadingComplete={handleLoadingComplete} delay={500} />;
+        return <BasicSplash onLoadingComplete={handleLoadingComplete} delay={0} />;
     }
 
     if (programError || quoteError) {
@@ -120,6 +119,12 @@ export default function ActiveProgramHome() {
 
     const navigateToProgramCalendar = () => {
         navigation.navigate('programs/program-calendar', {
+            programId: activeProgramId,
+        });
+    };
+
+    const navigateToProgramDetails = () => {
+        navigation.navigate('programs/program-details', {
             programId: activeProgramId,
         });
     };
