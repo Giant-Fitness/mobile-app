@@ -40,8 +40,6 @@ const ProgramCalendarScreen = () => {
     const route = useRoute<RouteProp<Record<string, ProgramCalendarScreenParams>, string>>();
     const { programId } = route.params;
 
-    const [isSplashVisible, setIsSplashVisible] = useState(true);
-
     const scrollY = useSharedValue(0);
 
     const scrollHandler = useAnimatedScrollHandler({
@@ -49,10 +47,6 @@ const ProgramCalendarScreen = () => {
             scrollY.value = event.contentOffset.y;
         },
     });
-
-    const handleLoadingComplete = () => {
-        setIsSplashVisible(false);
-    };
 
     useEffect(() => {
         navigation.setOptions({ headerShown: false });
@@ -128,8 +122,8 @@ const ProgramCalendarScreen = () => {
     // Consolidated loading logic
     const currentMonthWeeks = months[currentMonthIndex];
 
-    if (isSplashVisible || programState === REQUEST_STATE.PENDING || !program || !programDays || months.length === 0 || !currentMonthWeeks) {
-        return <BasicSplash onLoadingComplete={handleLoadingComplete} delay={0} />;
+    if (programState === REQUEST_STATE.PENDING || !program || !programDays || months.length === 0 || !currentMonthWeeks) {
+        return <BasicSplash />;
     }
 
     if (programState === REQUEST_STATE.REJECTED) {

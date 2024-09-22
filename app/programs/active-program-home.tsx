@@ -29,8 +29,6 @@ export default function ActiveProgramHome() {
     const navigation = useNavigation();
     const dispatch = useDispatch<AppDispatch>();
 
-    const [isSplashVisible, setIsSplashVisible] = useState(true);
-
     const {
         userProgramProgress,
         userProgramProgressState,
@@ -82,13 +80,8 @@ export default function ActiveProgramHome() {
         }
     }, [userProgramProgress, userProgramProgressState, dispatch]);
 
-    const handleLoadingComplete = () => {
-        setIsSplashVisible(false);
-    };
-
     // Show the splash screen while data is loading or splash is visible
     if (
-        isSplashVisible ||
         activeProgramState !== REQUEST_STATE.FULFILLED ||
         userProgramProgressState !== REQUEST_STATE.FULFILLED ||
         activeProgramCurrentDayState !== REQUEST_STATE.FULFILLED ||
@@ -96,7 +89,7 @@ export default function ActiveProgramHome() {
         workoutQuoteState !== REQUEST_STATE.FULFILLED ||
         restDayQuoteState !== REQUEST_STATE.FULFILLED
     ) {
-        return <BasicSplash onLoadingComplete={handleLoadingComplete} delay={0} />;
+        return <BasicSplash />;
     }
 
     if (programError || quoteError) {

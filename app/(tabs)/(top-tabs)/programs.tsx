@@ -12,21 +12,16 @@ import ActiveProgramHome from '@/app/programs/active-program-home';
 
 export default function ProgramsScreen() {
     const dispatch = useDispatch<AppDispatch>();
+
     const userProgramProgress = useSelector((state: RootState) => state.programs.userProgramProgress);
     const userProgramProgressState = useSelector((state: RootState) => state.programs.userProgramProgressState);
-
-    const [isSplashVisible, setIsSplashVisible] = useState(true);
 
     useEffect(() => {
         dispatch(getUserProgramProgressAsync());
     }, [dispatch]);
 
-    const handleLoadingComplete = () => {
-        setIsSplashVisible(false);
-    };
-
     if (userProgramProgressState !== REQUEST_STATE.FULFILLED) {
-        return <BasicSplash onLoadingComplete={handleLoadingComplete} delay={0} />;
+        return <BasicSplash />;
     } else if (userProgramProgressState === REQUEST_STATE.FULFILLED && !userProgramProgress) {
         console.log('User program progress is empty or null');
     }

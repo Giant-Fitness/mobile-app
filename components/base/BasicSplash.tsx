@@ -1,6 +1,6 @@
 // components/base/BasicSplash.tsx
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -12,35 +12,16 @@ interface SplashScreenProps {
     delay?: number; // Optional delay prop in milliseconds (default to 2 seconds)
 }
 
-export const BasicSplash: React.FC<SplashScreenProps> = ({ onLoadingComplete, delay = 2000 }) => {
-    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
-    const themeColors = Colors[colorScheme]; // Access theme-specific colors
+export const BasicSplash: React.FC = () => {
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
 
-    const [isWaiting, setIsWaiting] = useState(true);
-
-    useEffect(() => {
-        // Set a timeout to add a delay before calling onLoadingComplete
-        const timer = setTimeout(() => {
-            setIsWaiting(false);
-            onLoadingComplete(); // Call the completion handler
-        }, delay);
-
-        // Cleanup the timer when the component unmounts
-        return () => clearTimeout(timer);
-    }, [delay, onLoadingComplete]);
-
-    // Show the splash screen while waiting
-    if (isWaiting) {
-        return (
-            <View style={[styles.container, { backgroundColor: themeColors.background }]}>
-                <ActivityIndicator size='large' color={themeColors.text} />
-                <ThemedText style={styles.text}>Loading...</ThemedText>
-            </View>
-        );
-    }
-
-    // Return null or an empty view when splash is no longer needed
-    return null;
+    return (
+        <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+            <ActivityIndicator size='large' color={themeColors.text} />
+            <ThemedText style={styles.text}>Loading...</ThemedText>
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
