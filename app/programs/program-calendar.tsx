@@ -15,7 +15,7 @@ import { ProgramMonthView } from '@/components/programs/ProgramMonthView';
 import { Spaces } from '@/constants/Spaces';
 import { groupProgramDaysIntoWeeks, groupWeeksIntoMonths, getWeekNumber, getDayOfWeek } from '@/utils/calendar';
 import { Icon } from '@/components/base/Icon';
-import { ProgramDay } from '@/types/types';
+import { ProgramDay } from '@/types';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';

@@ -8,7 +8,7 @@ import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
-import { Exercise } from '@/types/types';
+import { Exercise } from '@/types';
 import { Icon } from '@/components/base/Icon';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';

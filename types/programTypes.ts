@@ -1,4 +1,4 @@
-// types/types.ts
+// types/programTypes.ts
 
 export interface ProgramCalendarOverviewItem {
     Title: string;
@@ -24,17 +24,6 @@ export interface Program {
     Equipment: string[];
     Frequency: string;
     DesignedFor: string;
-}
-
-export interface Quote {
-    QuoteType: string;
-    QuoteId: string;
-    QuoteText: string;
-    Author?: string;
-    Context: string;
-    Active: boolean;
-    CreatedDate: string;
-    LastModifiedDate: string;
 }
 
 export interface MuscleGroups {
@@ -74,12 +63,4 @@ export interface ProgramDay {
     MuscleGroups: string[];
     EquipmentCategory: string;
     Equipment: string[];
-}
-
-export interface UserProgramProgress {
-    UserId: string;
-    ProgramId: string;
-    CurrentDay: string;
-    StartDate: string;
-    LastActivityDate: string;
 }

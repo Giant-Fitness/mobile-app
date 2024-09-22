@@ -8,7 +8,7 @@ import { Icon } from '@/components/base/Icon';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
-import { ProgramDay } from '@/types/types';
+import { ProgramDay } from '@/types';
 import { moderateScale } from '@/utils/scaling';
 
 interface ProgramDayRowCardProps {

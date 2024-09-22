@@ -12,7 +12,7 @@ import { Icon } from '@/components/base/Icon';
 import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
-import { ProgramDay } from '@/types/types';
+import { ProgramDay } from '@/types';
 import { getWeekNumber, getDayOfWeek } from '@/utils/calendar';
 
 type ProgramDayDetailCardProps = {
