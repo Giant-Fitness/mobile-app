@@ -53,7 +53,6 @@ export default function ActiveProgramHome() {
 
     // Get the current day from the normalized state
     const activeProgramCurrentDay = programId && activeProgramCurrentDayId ? programDays[programId]?.[activeProgramCurrentDayId] : null;
-
     const activeProgramCurrentDayState = programId && activeProgramCurrentDayId ? programDaysState[programId]?.[activeProgramCurrentDayId] : REQUEST_STATE.IDLE;
 
     // Get the next days from the normalized state

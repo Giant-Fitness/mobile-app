@@ -22,9 +22,9 @@ export default function ProgramsScreen() {
 
     if (userProgramProgressState !== REQUEST_STATE.FULFILLED) {
         return <BasicSplash />;
-    } else if (userProgramProgressState === REQUEST_STATE.FULFILLED && !userProgramProgress) {
+    } else if (userProgramProgressState === REQUEST_STATE.FULFILLED && !userProgramProgress.ProgramId) {
         console.log('User program progress is empty or null');
+    } else {
+        return <ActiveProgramHome />;
     }
-
-    return <ActiveProgramHome />;
 }

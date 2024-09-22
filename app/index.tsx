@@ -17,7 +17,7 @@ const LoginPage = () => {
     if (BYPASS_AUTH) {
         return (
             <SafeAreaView style={styles.titleContainer}>
-                <Link href={'/(tabs)/home'} replace asChild>
+                <Link href={'/initialization'} replace asChild>
                     <Pressable style={styles.button}>
                         <Text style={styles.buttonText}>Login</Text>
                     </Pressable>
@@ -30,7 +30,7 @@ const LoginPage = () => {
     return (
         <Authenticator.Provider>
             <Authenticator>
-                <Redirect href='/(tabs)/home' />
+                <Redirect href='/initialization' />
             </Authenticator>
         </Authenticator.Provider>
     );
