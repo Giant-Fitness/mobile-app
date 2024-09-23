@@ -30,6 +30,14 @@ export const selectActiveProgramCurrentDay = createSelector([selectProgramsState
     return activeProgramId && activeProgramCurrentDayId ? programDays[activeProgramId]?.[activeProgramCurrentDayId] : null;
 });
 
+export const selectAllProgramDays = createSelector(
+    [selectProgramsState, (_state, programId: string) => programId],
+    (programsState, programId) => programsState.programDays[programId] || {},
+);
+
+export const selectProgramDaysLoadingState = (programId: string) =>
+    createSelector([selectProgramsState], (programsState) => programsState.programDaysState[programId] || REQUEST_STATE.IDLE);
+
 export const selectActiveProgramNextDays = createSelector([selectProgramsState], (programsState) => {
     const { activeProgramId, activeProgramNextDayIds, programDays } = programsState;
     return activeProgramId ? activeProgramNextDayIds.map((dayId) => programDays[activeProgramId]?.[dayId]).filter(Boolean) : [];

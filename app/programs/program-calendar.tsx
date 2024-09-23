@@ -9,7 +9,6 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/rootReducer';
-import { getProgramAsync, getAllProgramDaysAsync } from '@/store/programs/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { ProgramMonthView } from '@/components/programs/ProgramMonthView';
 import { Spaces } from '@/constants/Spaces';
@@ -24,6 +23,14 @@ import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
 import { ProgramProgressPillBar } from '@/components/programs/ProgramProgressPillBar';
 import { BasicSplash } from '@/components/base/BasicSplash';
 import { ProgramWeekList } from '@/components/programs/ProgramWeekList';
+import { getProgramAsync, getAllProgramDaysAsync } from '@/store/programs/thunks';
+import {
+    selectProgramById,
+    selectProgramLoadingState,
+    selectAllProgramDays,
+    selectUserProgramProgress,
+    selectProgramDaysLoadingState,
+} from '@/store/programs/selectors';
 
 type ProgramCalendarScreenParams = {
     programId: string;
@@ -53,10 +60,11 @@ const ProgramCalendarScreen = () => {
     }, [navigation]);
 
     // Redux Selectors
-    const program = useSelector((state: RootState) => state.programs.programs[programId]);
-    const programState = useSelector((state: RootState) => state.programs.programsState[programId]);
-    const userProgramProgress = useSelector((state: RootState) => state.programs.userProgramProgress);
-    const programDays = useSelector((state: RootState) => state.programs.programDays[programId]);
+    const program = useSelector(selectProgramById(programId));
+    const programState = useSelector(selectProgramLoadingState(programId));
+    const userProgramProgress = useSelector(selectUserProgramProgress);
+    const programDays = useSelector((state) => selectAllProgramDays(state, programId));
+    const programDaysState = useSelector(selectProgramDaysLoadingState(programId));
 
     // Local State
     const [months, setMonths] = useState<ProgramDay[][][]>([]); // Array of months, each month is array of weeks
@@ -122,7 +130,14 @@ const ProgramCalendarScreen = () => {
     // Consolidated loading logic
     const currentMonthWeeks = months[currentMonthIndex];
 
-    if (programState === REQUEST_STATE.PENDING || !program || !programDays || months.length === 0 || !currentMonthWeeks) {
+    if (
+        programState === REQUEST_STATE.PENDING ||
+        programDaysState === REQUEST_STATE.PENDING ||
+        !program ||
+        Object.keys(programDays).length === 0 ||
+        months.length === 0 ||
+        !currentMonthWeeks
+    ) {
         return <BasicSplash />;
     }
 

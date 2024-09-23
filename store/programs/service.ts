@@ -4,7 +4,7 @@ import { Program, ProgramDay, UserProgramProgress } from '@/types';
 import { sampleProgramDays, mockPrograms, sampleUserProgress } from '@/store/programs/mockData';
 
 // Utility function to simulate network delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Simulate a random delay between 200ms and 1000ms
 const simulateNetworkDelay = async () => {
