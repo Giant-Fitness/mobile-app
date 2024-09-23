@@ -86,19 +86,20 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isEnrolled
                     textType='bodyMedium'
                     style={[
                         {
-                            marginRight: Spaces.LG,
                             flex: 1,
                             borderRadius: Spaces.SM,
                         },
                     ]}
                 />
-                <TextButton
-                    text='Log'
-                    onPress={() => console.log(`Logging exercise: ${exercise.ExerciseName}`)}
-                    textType='bodyMedium'
-                    textStyle={[{ color: themeColors.buttonPrimaryText }]}
-                    style={[{ flex: 1, backgroundColor: themeColors.buttonPrimary, borderRadius: Spaces.SM }]}
-                />
+                {isEnrolled && (
+                    <TextButton
+                        text='Log'
+                        onPress={() => console.log(`Logging exercise: ${exercise.ExerciseName}`)}
+                        textType='bodyMedium'
+                        textStyle={[{ color: themeColors.buttonPrimaryText }]}
+                        style={[{ flex: 1, backgroundColor: themeColors.buttonPrimary, borderRadius: Spaces.SM, marginLeft: Spaces.LG }]}
+                    />
+                )}
             </View>
         </ThemedView>
     );
