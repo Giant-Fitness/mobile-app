@@ -1,8 +1,8 @@
 // store/store.ts
 
 import { configureStore } from '@reduxjs/toolkit';
-import programsReducer from '@/store/programs/reducer';
-import quotesReducer from '@/store/quotes/quotesSlice'; // Updated import
+import programsReducer from '@/store/programs/programsSlice';
+import quotesReducer from '@/store/quotes/quotesSlice';
 
 export const store = configureStore({
     reducer: {
