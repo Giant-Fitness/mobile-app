@@ -1,20 +1,19 @@
-// store/quotes/reducer.ts
+// store/quotes/quotesSlice.ts
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { Quote } from '@/type/types';
+import { Quote } from '@/types';
 
-// Define the initial state type
 interface QuoteState {
-    workoutQuote: Quote;
+    workoutQuote: Quote | null;
     workoutQuoteState: REQUEST_STATE;
-    restDayQuote: Quote;
+    restDayQuote: Quote | null;
     restDayQuoteState: REQUEST_STATE;
     error: string | null;
 }
 
-const initialState: ProgramState = {
+const initialState: QuoteState = {
     workoutQuote: null,
     workoutQuoteState: REQUEST_STATE.IDLE,
     restDayQuote: null,
@@ -25,7 +24,15 @@ const initialState: ProgramState = {
 const quoteSlice = createSlice({
     name: 'quotes',
     initialState,
-    reducers: {},
+    reducers: {
+        resetQuotes: (state) => {
+            state.workoutQuote = null;
+            state.workoutQuoteState = REQUEST_STATE.IDLE;
+            state.restDayQuote = null;
+            state.restDayQuoteState = REQUEST_STATE.IDLE;
+            state.error = null;
+        },
+    },
     extraReducers: (builder) => {
         builder
             .addCase(getWorkoutQuoteAsync.pending, (state) => {
@@ -54,5 +61,7 @@ const quoteSlice = createSlice({
             });
     },
 });
+
+export const { resetQuotes } = quoteSlice.actions;
 
 export default quoteSlice.reducer;

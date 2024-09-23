@@ -1,6 +1,6 @@
 // store/quotes/mockData.ts
 
-import { Quote } from '@/type/types';
+import { Quote } from '@/types';
 
 const mockWorkoutQuote: Quote = {
     QuoteType: 'Motivation',

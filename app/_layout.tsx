@@ -9,7 +9,7 @@ import 'react-native-reanimated';
 import React from 'react';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Provider } from 'react-redux';
-import { store } from '../store/rootReducer';
+import { store } from '@/store/store';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();

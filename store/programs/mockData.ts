@@ -249,7 +249,7 @@ const generateProgramDays = (
 // Generate ProgramDays for program1 (Lean Machine Challenge)
 const fullProgramDaysProgram1 = [
     ...sampleProgramDaysProgram1,
-    ...generateProgramDays('program1', 8, 56, sampleExercises, 4).filter((day) => parseInt(day.DayId) > 8),
+    ...generateProgramDays('program1', 4, 28, sampleExercises, 4).filter((day) => parseInt(day.DayId) > 8),
 ];
 
 // Define sample program days for program2 (Beginner's Yoga Flow)
@@ -276,8 +276,8 @@ const mockPrograms: Program[] = [
         ProgramId: 'program1',
         ProgramName: 'Lean Machine Challenge',
         TrainerId: 'trainer123',
-        Weeks: 8,
-        Days: 56,
+        Weeks: 4,
+        Days: 28,
         Description: 'A comprehensive 8-week challenge to build strength and endurance.',
         Level: 'All Levels',
         Type: 'Strength',

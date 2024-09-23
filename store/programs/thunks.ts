@@ -1,16 +1,16 @@
 // store/programs/thunks.ts
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { actionTypes } from '@/store/programs/actionTypes';
 import ProgramService from '@/store/programs/service';
-import { Program, ProgramDay, UserProgramProgress } from '@/type/types';
+import { Program, ProgramDay, UserProgramProgress } from '@/types';
 import { RootState } from '@/store/rootReducer';
+import { REQUEST_STATE } from '@/constants/requestStates';
 
-export const getUserProgramProgressAsync = createAsyncThunk<UserProgramProgress, void>(actionTypes.GET_USER_PROGRAM_PROGRESS, async () => {
+export const getUserProgramProgressAsync = createAsyncThunk<UserProgramProgress, void>('programs/getUserProgramProgress', async () => {
     return await ProgramService.getUserProgramProgress();
 });
 
-export const getAllProgramsAsync = createAsyncThunk<Program[], void>(actionTypes.GET_ALL_PROGRAMS, async (_, { getState, rejectWithValue }) => {
+export const getAllProgramsAsync = createAsyncThunk<Program[], void>('programs/getAllPrograms', async (_, { getState, rejectWithValue }) => {
     const state = getState() as RootState;
     // If programs are already loaded, return them
     if (state.programs.allProgramsState === REQUEST_STATE.FULFILLED) {
@@ -20,7 +20,7 @@ export const getAllProgramsAsync = createAsyncThunk<Program[], void>(actionTypes
 });
 
 export const getProgramAsync = createAsyncThunk<Program | undefined, { programId: string }, { state: RootState }>(
-    actionTypes.GET_PROGRAM,
+    'programs/getProgram',
     async ({ programId }, { getState, rejectWithValue }) => {
         const state = getState();
         const existingProgram = state.programs.programs[programId];
@@ -38,7 +38,7 @@ export const getProgramAsync = createAsyncThunk<Program | undefined, { programId
 );
 
 export const getAllProgramDaysAsync = createAsyncThunk<ProgramDay[], { programId: string }, { state: RootState }>(
-    actionTypes.GET_ALL_PROGRAM_DAYS,
+    'programs/getAllProgramDays',
     async ({ programId }, { rejectWithValue }) => {
         try {
             const programDays = await ProgramService.getProgramDaysAll(programId);
@@ -53,7 +53,7 @@ export const getAllProgramDaysAsync = createAsyncThunk<ProgramDay[], { programId
 );
 
 export const getProgramDayAsync = createAsyncThunk<ProgramDay, { programId: string; dayId: string }, { state: RootState }>(
-    actionTypes.GET_PROGRAM_DAY,
+    'programs/getProgramDay',
     async ({ programId, dayId }, { getState, rejectWithValue }) => {
         const state = getState();
         // Check if the program day already exists in the state
@@ -73,7 +73,7 @@ export const getProgramDayAsync = createAsyncThunk<ProgramDay, { programId: stri
 );
 
 export const getActiveProgramAsync = createAsyncThunk<Program | undefined, void, { state: RootState }>(
-    actionTypes.GET_ACTIVE_PROGRAM,
+    'programs/getActiveProgram',
     async (_, { getState, rejectWithValue }) => {
         const state = getState();
         const programId = state.programs.userProgramProgress?.ProgramId;
@@ -93,7 +93,7 @@ export const getActiveProgramAsync = createAsyncThunk<Program | undefined, void,
 );
 
 export const getActiveProgramCurrentDayAsync = createAsyncThunk<ProgramDay, void, { state: RootState }>(
-    actionTypes.GET_ACTIVE_PROGRAM_CURRENT_DAY,
+    'programs/getActiveProgramCurrentDay',
     async (_, { getState, rejectWithValue }) => {
         const state = getState();
         const programId = state.programs.userProgramProgress?.ProgramId;
@@ -119,7 +119,7 @@ export const getActiveProgramCurrentDayAsync = createAsyncThunk<ProgramDay, void
 );
 
 export const getActiveProgramNextDaysAsync = createAsyncThunk<ProgramDay[], { numDays: number }, { state: RootState }>(
-    actionTypes.GET_ACTIVE_PROGRAM_NEXT_DAYS,
+    'programs/getActiveProgramNextDays',
     async ({ numDays }, { getState, rejectWithValue }) => {
         const state = getState();
         const programId = state.programs.userProgramProgress?.ProgramId;

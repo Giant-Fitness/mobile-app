@@ -22,6 +22,7 @@ import { AppDispatch, RootState } from '@/store/rootReducer';
 import { getProgramDayAsync } from '@/store/programs/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { getWeekNumber, getDayOfWeek } from '@/utils/calendar';
+import { selectProgramDayById, selectProgramDayLoadingState, selectUserProgramProgress } from '@/store/programs/selectors';
 
 type ProgramDayScreenParams = {
     ProgramDay: {
@@ -46,9 +47,9 @@ const ProgramDayScreen = () => {
         navigation.navigate('workouts/all-workouts', { initialFilters });
     };
 
-    const programDay = useSelector((state: RootState) => state.programs.programDays[programId]?.[dayId]);
-    const programDayState = useSelector((state: RootState) => state.programs.programDaysState[programId]?.[dayId]);
-    const userProgramProgress = useSelector((state: RootState) => state.programs.userProgramProgress);
+    const programDay = useSelector(selectProgramDayById(programId, dayId));
+    const programDayState = useSelector(selectProgramDayLoadingState(programId, dayId));
+    const userProgramProgress = useSelector(selectUserProgramProgress);
 
     // **Data Fetching Hook**
     useEffect(() => {
@@ -163,6 +164,7 @@ const ProgramDayScreen = () => {
                                 style={[
                                     styles.exercisesContainer,
                                     { backgroundColor: themeColors.backgroundTertiary },
+                                    [{ paddingBottom: Spaces.XL }],
                                     isEnrolled && [{ paddingBottom: Sizes.bottomSpaceLarge }],
                                 ]}
                             >

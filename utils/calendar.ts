@@ -1,6 +1,6 @@
 // utils/calendar.ts
 
-import { ProgramDay } from '@/type/types';
+import { ProgramDay } from '@/types';
 
 /**
  * Groups program days into weeks (arrays of ProgramDay)
