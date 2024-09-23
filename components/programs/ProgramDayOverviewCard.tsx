@@ -4,7 +4,7 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
-import { ProgramDay } from '@/type/types';
+import { ProgramDay } from '@/types';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { Colors } from '@/constants/Colors';

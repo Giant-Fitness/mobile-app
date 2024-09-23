@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { ProgramDay, UserProgramProgress } from '@/type/types';
+import { ProgramDay, UserProgramProgress } from '@/types';
 import { ProgramWeekRow } from '@/components/programs/ProgramWeekRow';
 import { Spaces } from '@/constants/Spaces';
 

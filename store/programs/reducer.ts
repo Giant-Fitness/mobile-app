@@ -12,7 +12,7 @@ import {
     getAllProgramDaysAsync,
 } from '@/store/programs/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { ProgramDay, Program, UserProgramProgress } from '@/type/types';
+import { ProgramDay, Program, UserProgramProgress } from '@/types';
 
 // Define the initial state type
 interface ProgramState {

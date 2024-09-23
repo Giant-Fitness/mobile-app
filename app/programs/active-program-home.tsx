@@ -14,20 +14,27 @@ import { Icon } from '@/components/base/Icon';
 import { moderateScale, verticalScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
-import { AppDispatch, RootState } from '@/store/rootReducer';
+import { AppDispatch, RootState } from '@/store/store';
 import { getActiveProgramAsync, getActiveProgramCurrentDayAsync, getActiveProgramNextDaysAsync } from '@/store/programs/thunks';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
 import { BasicSplash } from '@/components/base/BasicSplash';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { HighlightedTip } from '@/components/alerts/HighlightedTip';
 import { getWeekNumber } from '@/utils/calendar';
+import { selectWorkoutQuote, selectWorkoutQuoteState, selectRestDayQuote, selectRestDayQuoteState, selectQuoteError } from '@/store/quotes/selectors';
 
 export default function ActiveProgramHome() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
     const navigation = useNavigation();
+
     const dispatch = useDispatch<AppDispatch>();
+    const workoutQuote = useSelector(selectWorkoutQuote);
+    const workoutQuoteState = useSelector(selectWorkoutQuoteState);
+    const restDayQuote = useSelector(selectRestDayQuote);
+    const restDayQuoteState = useSelector(selectRestDayQuoteState);
+    const quoteError = useSelector(selectQuoteError);
 
     const {
         userProgramProgress,
@@ -41,8 +48,6 @@ export default function ActiveProgramHome() {
         activeProgramNextDayIds,
         error: programError,
     } = useSelector((state: RootState) => state.programs);
-
-    const { workoutQuote, workoutQuoteState, restDayQuote, restDayQuoteState, error: quoteError } = useSelector((state: RootState) => state.quotes);
 
     // Use activeProgramId directly
     const programId = activeProgramId;

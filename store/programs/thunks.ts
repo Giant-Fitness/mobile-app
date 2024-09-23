@@ -3,7 +3,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { actionTypes } from '@/store/programs/actionTypes';
 import ProgramService from '@/store/programs/service';
-import { Program, ProgramDay, UserProgramProgress } from '@/type/types';
+import { Program, ProgramDay, UserProgramProgress } from '@/types';
 import { RootState } from '@/store/rootReducer';
 
 export const getUserProgramProgressAsync = createAsyncThunk<UserProgramProgress, void>(actionTypes.GET_USER_PROGRAM_PROGRESS, async () => {

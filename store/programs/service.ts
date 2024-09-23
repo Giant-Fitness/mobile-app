@@ -1,6 +1,6 @@
 // store/programs/service.ts
 
-import { Program, ProgramDay, UserProgramProgress } from '@/type/types';
+import { Program, ProgramDay, UserProgramProgress } from '@/types';
 import { sampleProgramDays, mockPrograms, sampleUserProgress } from '@/store/programs/mockData';
 
 const getUserProgramProgress = async (): Promise<UserProgramProgress> => {

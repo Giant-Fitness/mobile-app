@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
-import { ProgramDay, UserProgramProgress } from '@/type/types';
+import { ProgramDay, UserProgramProgress } from '@/types';
 import { ProgramDayOverviewCard } from '@/components/programs/ProgramDayOverviewCard';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
