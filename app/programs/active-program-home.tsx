@@ -41,6 +41,7 @@ export default function ActiveProgramHome() {
     const navigation = useNavigation();
 
     const dispatch = useDispatch<AppDispatch>();
+
     const workoutQuote = useSelector(selectWorkoutQuote);
     const workoutQuoteState = useSelector(selectWorkoutQuoteState);
     const restDayQuote = useSelector(selectRestDayQuote);

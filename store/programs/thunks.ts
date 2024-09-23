@@ -4,6 +4,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import ProgramService from '@/store/programs/service';
 import { Program, ProgramDay, UserProgramProgress } from '@/types';
 import { RootState } from '@/store/rootReducer';
+import { REQUEST_STATE } from '@/constants/requestStates';
 
 export const getUserProgramProgressAsync = createAsyncThunk<UserProgramProgress, void>('programs/getUserProgramProgress', async () => {
     return await ProgramService.getUserProgramProgress();
