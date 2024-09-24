@@ -22,17 +22,6 @@ import { getWeekNumber } from '@/utils/calendar';
 import { getActiveProgramAsync, getActiveProgramCurrentDayAsync, getActiveProgramNextDaysAsync } from '@/store/programs/thunks';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
 import { selectWorkoutQuote, selectWorkoutQuoteState, selectRestDayQuote, selectRestDayQuoteState, selectQuoteError } from '@/store/quotes/selectors';
-import {
-    selectUserProgramProgress,
-    selectUserProgramProgressLoadingState,
-    selectActiveProgram,
-    selectActiveProgramLoadingState,
-    selectActiveProgramCurrentDay,
-    selectActiveProgramCurrentDayLoadingState,
-    selectActiveProgramNextDays,
-    selectActiveProgramNextDaysLoadingState,
-    selectProgramsError,
-} from '@/store/programs/selectors';
 
 export default function ActiveProgramHome() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -48,15 +37,39 @@ export default function ActiveProgramHome() {
     const restDayQuoteState = useSelector(selectRestDayQuoteState);
     const quoteError = useSelector(selectQuoteError);
 
-    const userProgramProgress = useSelector(selectUserProgramProgress);
-    const userProgramProgressState = useSelector(selectUserProgramProgressLoadingState);
-    const activeProgram = useSelector(selectActiveProgram);
-    const activeProgramState = useSelector(selectActiveProgramLoadingState);
-    const activeProgramCurrentDay = useSelector(selectActiveProgramCurrentDay);
-    const activeProgramCurrentDayState = useSelector(selectActiveProgramCurrentDayLoadingState);
-    const activeProgramNextDays = useSelector(selectActiveProgramNextDays);
-    const activeProgramNextDaysState = useSelector(selectActiveProgramNextDaysLoadingState);
-    const programError = useSelector(selectProgramsError);
+    const {
+        userProgramProgress,
+        userProgramProgressState,
+        programs,
+        programsState,
+        activeProgramId,
+        programDays,
+        programDaysState,
+        activeProgramCurrentDayId,
+        activeProgramNextDayIds,
+        error: programError,
+    } = useSelector((state: RootState) => state.programs);
+
+    // Get the active program from the normalized state
+    const activeProgram = activeProgramId ? programs[activeProgramId] : null;
+    const activeProgramState = activeProgramId ? programsState[activeProgramId] : REQUEST_STATE.IDLE;
+    // Get the current day from the normalized state
+    const activeProgramCurrentDay =
+        userProgramProgress?.ProgramId && activeProgramCurrentDayId ? programDays[userProgramProgress?.ProgramId]?.[activeProgramCurrentDayId] : null;
+    const activeProgramCurrentDayState =
+        userProgramProgress?.ProgramId && activeProgramCurrentDayId
+            ? programDaysState[userProgramProgress?.ProgramId]?.[activeProgramCurrentDayId]
+            : REQUEST_STATE.IDLE;
+    // Get the next days from the normalized state
+    const activeProgramNextDays =
+        userProgramProgress?.ProgramId && activeProgramNextDayIds
+            ? activeProgramNextDayIds.map((dayId) => programDays[userProgramProgress?.ProgramId]?.[dayId]).filter((day) => day !== undefined)
+            : [];
+    const activeProgramNextDaysStates =
+        userProgramProgress?.ProgramId && activeProgramNextDayIds
+            ? activeProgramNextDayIds.map((dayId) => programDaysState[userProgramProgress?.ProgramId]?.[dayId])
+            : [];
+    const areNextDaysLoaded = activeProgramNextDaysStates.every((state) => state === REQUEST_STATE.FULFILLED);
 
     useEffect(() => {
         // Fetch quotes
@@ -78,7 +91,7 @@ export default function ActiveProgramHome() {
         activeProgramState !== REQUEST_STATE.FULFILLED ||
         userProgramProgressState !== REQUEST_STATE.FULFILLED ||
         activeProgramCurrentDayState !== REQUEST_STATE.FULFILLED ||
-        activeProgramNextDaysState !== REQUEST_STATE.FULFILLED ||
+        !areNextDaysLoaded ||
         workoutQuoteState !== REQUEST_STATE.FULFILLED ||
         restDayQuoteState !== REQUEST_STATE.FULFILLED
     ) {
@@ -94,7 +107,7 @@ export default function ActiveProgramHome() {
         );
     }
 
-    const isLastDay = activeProgram && activeProgramCurrentDay && activeProgram.Days && Number(activeProgramCurrentDay.DayId) === activeProgram.Days;
+    const isLastDay = activeProgram && activeProgramCurrentDayId && activeProgram.Days && Number(activeProgramCurrentDayId) === activeProgram.Days;
     const currentDayNumber = parseInt(userProgramProgress?.CurrentDay || '0', 10);
     const currentWeek = getWeekNumber(currentDayNumber);
 

@@ -24,13 +24,6 @@ import { ProgramProgressPillBar } from '@/components/programs/ProgramProgressPil
 import { BasicSplash } from '@/components/base/BasicSplash';
 import { ProgramWeekList } from '@/components/programs/ProgramWeekList';
 import { getProgramAsync, getAllProgramDaysAsync } from '@/store/programs/thunks';
-import {
-    selectProgramById,
-    selectProgramLoadingState,
-    selectAllProgramDays,
-    selectUserProgramProgress,
-    selectProgramDaysLoadingState,
-} from '@/store/programs/selectors';
 
 type ProgramCalendarScreenParams = {
     programId: string;
@@ -60,11 +53,11 @@ const ProgramCalendarScreen = () => {
     }, [navigation]);
 
     // Redux Selectors
-    const program = useSelector(selectProgramById(programId));
-    const programState = useSelector(selectProgramLoadingState(programId));
-    const userProgramProgress = useSelector(selectUserProgramProgress);
-    const programDays = useSelector((state) => selectAllProgramDays(state, programId));
-    const programDaysState = useSelector(selectProgramDaysLoadingState(programId));
+    const program = useSelector((state: RootState) => state.programs.programs[programId]);
+    const programState = useSelector((state: RootState) => state.programs.programsState[programId]);
+    const userProgramProgress = useSelector((state: RootState) => state.programs.userProgramProgress);
+    const programDays = useSelector((state: RootState) => state.programs.programDays[programId]);
+    const programDaysState = useSelector((state: RootState) => state.programs.programDaysState[programId]);
 
     // Local State
     const [months, setMonths] = useState<ProgramDay[][][]>([]); // Array of months, each month is array of weeks
@@ -129,12 +122,14 @@ const ProgramCalendarScreen = () => {
 
     // Consolidated loading logic
     const currentMonthWeeks = months[currentMonthIndex];
+    const programDaysStates = programDaysState && Object.values(programDaysState);
+    const isProgramDaysLoading = programDaysStates && programDaysStates.some((state) => state === REQUEST_STATE.PENDING);
 
     if (
         programState === REQUEST_STATE.PENDING ||
-        programDaysState === REQUEST_STATE.PENDING ||
+        isProgramDaysLoading ||
         !program ||
-        Object.keys(programDays).length === 0 ||
+        (programDays && Object.keys(programDays).length !== program.Days) ||
         months.length === 0 ||
         !currentMonthWeeks
     ) {

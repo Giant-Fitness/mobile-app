@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { SafeAreaView, Text, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { BasicSplash } from '@/components/base/BasicSplash';
-import { AppDispatch } from '@/store/store';
+import { AppDispatch, RootState } from '@/store/rootReducer';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { Redirect } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
@@ -13,28 +13,14 @@ import {
     getActiveProgramNextDaysAsync,
     getAllProgramsAsync,
 } from '@/store/programs/thunks';
-import {
-    selectUserProgramProgress,
-    selectUserProgramProgressLoadingState,
-    selectActiveProgramLoadingState,
-    selectActiveProgramCurrentDayLoadingState,
-    selectActiveProgramNextDaysLoadingState,
-    selectProgramsLoadingState,
-    selectProgramsError,
-} from '@/store/programs/selectors';
 
 const Initialization: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const navigation = useNavigation();
     const [splashMinimumTimePassed, setSplashMinimumTimePassed] = useState(false);
+    const [activeProgramLoaded, setActiveProgramLoaded] = useState(false);
 
-    const userProgramProgress = useSelector(selectUserProgramProgress);
-    const userProgramProgressState = useSelector(selectUserProgramProgressLoadingState);
-    const activeProgramState = useSelector(selectActiveProgramLoadingState);
-    const activeProgramCurrentDayState = useSelector(selectActiveProgramCurrentDayLoadingState);
-    const activeProgramNextDaysState = useSelector(selectActiveProgramNextDaysLoadingState);
-    const allProgramsState = useSelector(selectProgramsLoadingState);
-    const programError = useSelector(selectProgramsError);
+    const { userProgramProgress, userProgramProgressState, error: programError } = useSelector((state: RootState) => state.programs);
 
     useEffect(() => {
         navigation.setOptions({ headerShown: false });
@@ -45,7 +31,6 @@ const Initialization: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             await dispatch(getUserProgramProgressAsync());
-            await dispatch(getAllProgramsAsync());
 
             // Only fetch active program data if the user is on a program
             if (userProgramProgress && Object.keys(userProgramProgress).length > 0) {
@@ -54,18 +39,16 @@ const Initialization: React.FC = () => {
                     dispatch(getActiveProgramCurrentDayAsync()),
                     dispatch(getActiveProgramNextDaysAsync({ numDays: 3 })),
                 ]);
+            } else {
+                await dispatch(getAllProgramsAsync());
             }
+
+            setActiveProgramLoaded(true);
         };
         fetchData();
-    }, [dispatch, userProgramProgress]);
+    }, [dispatch]);
 
-    const isDataLoaded =
-        userProgramProgressState === REQUEST_STATE.FULFILLED &&
-        allProgramsState === REQUEST_STATE.FULFILLED &&
-        (Object.keys(userProgramProgress || {}).length === 0 ||
-            (activeProgramState === REQUEST_STATE.FULFILLED &&
-                activeProgramCurrentDayState === REQUEST_STATE.FULFILLED &&
-                activeProgramNextDaysState === REQUEST_STATE.FULFILLED));
+    const isDataLoaded = userProgramProgressState === REQUEST_STATE.FULFILLED && activeProgramLoaded;
 
     if (!splashMinimumTimePassed || !isDataLoaded) {
         return <BasicSplash />;
@@ -78,7 +61,11 @@ const Initialization: React.FC = () => {
             </SafeAreaView>
         );
     }
-
+    // return (
+    //     <SafeAreaView style={styles.container}>
+    //         <Text style={styles.errorText}>{userProgramProgress.ProgramId}</Text>
+    //     </SafeAreaView>
+    // );
     return <Redirect href='/(tabs)/home' />;
 };
 
