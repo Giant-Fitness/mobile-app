@@ -1,19 +1,19 @@
 // app/(tabs)/(top-tabs)/programs.tsx
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUserProgramProgressAsync } from '@/store/programs/thunks';
-import { AppDispatch } from '@/store/store';
+import { AppDispatch, RootState } from '@/store/rootReducer';
 import { View, Text } from 'react-native';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { BasicSplash } from '@/components/base/BasicSplash';
 import ActiveProgramHome from '@/app/programs/active-program-home';
-import { selectUserProgramProgress, selectUserProgramProgressLoadingState } from '@/store/programs/selectors';
 
 export default function ProgramsScreen() {
     const dispatch = useDispatch<AppDispatch>();
-    const userProgramProgress = useSelector(selectUserProgramProgress);
-    const userProgramProgressState = useSelector(selectUserProgramProgressLoadingState);
+
+    const userProgramProgress = useSelector((state: RootState) => state.programs.userProgramProgress);
+    const userProgramProgressState = useSelector((state: RootState) => state.programs.userProgramProgressState);
 
     useEffect(() => {
         dispatch(getUserProgramProgressAsync());

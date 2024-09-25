@@ -20,7 +20,6 @@ import { Sizes } from '@/constants/Sizes';
 import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
 import { BasicSplash } from '@/components/base/BasicSplash';
 import { TextButton } from '@/components/buttons/TextButton';
-import { selectProgramById, selectProgramLoadingState, selectUserProgramProgress, selectUserProgramProgressLoadingState } from '@/store/programs/selectors';
 
 type ProgramOverviewScreenParams = {
     programId: string;
@@ -50,10 +49,10 @@ const ProgramOverviewScreen = () => {
     }, [navigation]);
 
     // Redux Selectors
-    const program = useSelector(selectProgramById(programId));
-    const programState = useSelector(selectProgramLoadingState(programId));
-    const userProgramProgress = useSelector(selectUserProgramProgress);
-    const userProgramProgressState = useSelector(selectUserProgramProgressLoadingState);
+    const program = useSelector((state: RootState) => state.programs.programs[programId]);
+    const programState = useSelector((state: RootState) => state.programs.programsState[programId]);
+    const userProgramProgress = useSelector((state: RootState) => state.programs.userProgramProgress);
+    const userProgramProgressState = useSelector((state: RootState) => state.programs.userProgramProgressState);
 
     useEffect(() => {
         if (programState !== REQUEST_STATE.FULFILLED) {

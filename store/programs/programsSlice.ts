@@ -7,10 +7,8 @@ import {
     getAllProgramsAsync,
     getProgramAsync,
     getProgramDayAsync,
-    getActiveProgramAsync,
-    getActiveProgramCurrentDayAsync,
-    getActiveProgramNextDaysAsync,
     getAllProgramDaysAsync,
+    getMultipleProgramDaysAsync,
 } from '@/store/programs/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { Program, ProgramDay, UserProgramProgress } from '@/types';
@@ -19,12 +17,8 @@ const programSlice = createSlice({
     name: 'programs',
     initialState,
     reducers: {
-        setSelectedProgram: (state, action: PayloadAction<string>) => {
-            state.selectedProgramId = action.payload;
-        },
         clearError: (state) => {
             state.error = null;
-            state.programDaysError = null;
         },
     },
     extraReducers: (builder) => {
@@ -70,7 +64,6 @@ const programSlice = createSlice({
                 const program = action.payload;
                 state.programs[program.ProgramId] = program;
                 state.programsState[program.ProgramId] = REQUEST_STATE.FULFILLED;
-                state.selectedProgramId = program.ProgramId;
             })
             .addCase(getProgramAsync.rejected, (state, action) => {
                 const { programId } = action.meta.arg;
@@ -78,34 +71,12 @@ const programSlice = createSlice({
                 state.error = action.error.message || 'Failed to fetch program';
             })
 
-            // Active Program
-            .addCase(getActiveProgramAsync.pending, (state) => {
-                const programId = state.userProgramProgress?.ProgramId;
-                if (programId) {
-                    state.programsState[programId] = REQUEST_STATE.PENDING;
-                }
-                state.error = null;
-            })
-            .addCase(getActiveProgramAsync.fulfilled, (state, action: PayloadAction<Program>) => {
-                const program = action.payload;
-                state.programs[program.ProgramId] = program;
-                state.programsState[program.ProgramId] = REQUEST_STATE.FULFILLED;
-                state.activeProgramId = program.ProgramId;
-            })
-            .addCase(getActiveProgramAsync.rejected, (state, action) => {
-                const programId = state.userProgramProgress?.ProgramId;
-                if (programId) {
-                    state.programsState[programId] = REQUEST_STATE.REJECTED;
-                }
-                state.error = action.error.message || 'Failed to fetch active program';
-            })
-
             // Program Day
             .addCase(getProgramDayAsync.pending, (state, action) => {
                 const { programId, dayId } = action.meta.arg;
                 state.programDaysState[programId] = state.programDaysState[programId] || {};
                 state.programDaysState[programId][dayId] = REQUEST_STATE.PENDING;
-                state.programDaysError = null;
+                state.error = null;
             })
             .addCase(getProgramDayAsync.fulfilled, (state, action: PayloadAction<ProgramDay>) => {
                 const { programId, dayId } = action.meta.arg;
@@ -116,69 +87,14 @@ const programSlice = createSlice({
             .addCase(getProgramDayAsync.rejected, (state, action) => {
                 const { programId, dayId } = action.meta.arg;
                 state.programDaysState[programId][dayId] = REQUEST_STATE.REJECTED;
-                state.programDaysError = action.error.message || 'Failed to fetch program day';
-            })
-
-            // Active Program Current Day
-            .addCase(getActiveProgramCurrentDayAsync.pending, (state) => {
-                const programId = state.userProgramProgress?.ProgramId;
-                const dayId = state.userProgramProgress?.CurrentDay;
-                if (programId && dayId) {
-                    state.programDaysState[programId] = state.programDaysState[programId] || {};
-                    state.programDaysState[programId][dayId] = REQUEST_STATE.PENDING;
-                    state.programDaysError = null;
-                }
-            })
-            .addCase(getActiveProgramCurrentDayAsync.fulfilled, (state, action: PayloadAction<ProgramDay>) => {
-                const programId = state.userProgramProgress?.ProgramId;
-                const dayId = state.userProgramProgress?.CurrentDay;
-                if (programId && dayId) {
-                    state.programDays[programId] = state.programDays[programId] || {};
-                    state.programDays[programId][dayId] = action.payload;
-                    state.programDaysState[programId][dayId] = REQUEST_STATE.FULFILLED;
-                    state.activeProgramCurrentDayId = dayId;
-                }
-            })
-            .addCase(getActiveProgramCurrentDayAsync.rejected, (state, action) => {
-                const programId = state.userProgramProgress?.ProgramId;
-                const dayId = state.userProgramProgress?.CurrentDay;
-                if (programId && dayId) {
-                    state.programDaysState[programId][dayId] = REQUEST_STATE.REJECTED;
-                    state.programDaysError = action.error.message || 'Failed to fetch active program current day';
-                }
-            })
-
-            // Active Program Next Days
-            .addCase(getActiveProgramNextDaysAsync.pending, (state) => {
-                const programId = state.userProgramProgress?.ProgramId;
-                if (programId) {
-                    state.programDaysState[programId] = state.programDaysState[programId] || {};
-                    state.programDaysError = null;
-                }
-            })
-            .addCase(getActiveProgramNextDaysAsync.fulfilled, (state, action: PayloadAction<ProgramDay[]>) => {
-                const programId = state.userProgramProgress?.ProgramId;
-                if (programId) {
-                    state.programDays[programId] = state.programDays[programId] || {};
-                    const nextDayIds: string[] = [];
-                    action.payload.forEach((programDay) => {
-                        const dayId = programDay.DayId;
-                        state.programDays[programId][dayId] = programDay;
-                        state.programDaysState[programId][dayId] = REQUEST_STATE.FULFILLED;
-                        nextDayIds.push(dayId);
-                    });
-                    state.activeProgramNextDayIds = nextDayIds;
-                }
-            })
-            .addCase(getActiveProgramNextDaysAsync.rejected, (state, action) => {
-                state.programDaysError = action.error.message || 'Failed to fetch active program next days';
+                state.error = action.error.message || 'Failed to fetch program day';
             })
 
             // All Program Days
             .addCase(getAllProgramDaysAsync.pending, (state, action) => {
                 const { programId } = action.meta.arg;
                 state.programDaysState[programId] = state.programDaysState[programId] || {};
-                state.programDaysError = null;
+                state.error = null;
             })
             .addCase(getAllProgramDaysAsync.fulfilled, (state, action: PayloadAction<ProgramDay[]>) => {
                 const { programId } = action.meta.arg;
@@ -199,10 +115,37 @@ const programSlice = createSlice({
                         }
                     });
                 }
-                state.programDaysError = action.error.message || 'Failed to fetch all program days';
+                state.error = action.error.message || 'Failed to fetch all program days';
+            })
+
+            // Multiple Program Days
+            .addCase(getMultipleProgramDaysAsync.pending, (state, action) => {
+                const { programId, dayIds } = action.meta.arg;
+                state.programDaysState[programId] = state.programDaysState[programId] || {};
+                dayIds.forEach((dayId) => {
+                    state.programDaysState[programId][dayId] = REQUEST_STATE.PENDING;
+                });
+                state.programDaysError = null;
+            })
+            .addCase(getMultipleProgramDaysAsync.fulfilled, (state, action: PayloadAction<ProgramDay[]>) => {
+                const { programId } = action.meta.arg;
+                state.programDays[programId] = state.programDays[programId] || {};
+                state.programDaysState[programId] = state.programDaysState[programId] || {};
+                action.payload.forEach((day) => {
+                    state.programDays[programId][day.DayId] = day;
+                    state.programDaysState[programId][day.DayId] = REQUEST_STATE.FULFILLED;
+                });
+            })
+            .addCase(getMultipleProgramDaysAsync.rejected, (state, action) => {
+                const { programId, dayIds } = action.meta.arg;
+                state.programDaysState[programId] = state.programDaysState[programId] || {};
+                dayIds.forEach((dayId) => {
+                    state.programDaysState[programId][dayId] = REQUEST_STATE.REJECTED;
+                });
+                state.programDaysError = action.error.message || 'Failed to fetch multiple program days';
             });
     },
 });
 
-export const { setSelectedProgram, clearError } = programSlice.actions;
+export const { clearError } = programSlice.actions;
 export default programSlice.reducer;

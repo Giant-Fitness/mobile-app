@@ -13,32 +13,38 @@ const simulateNetworkDelay = async () => {
 };
 
 const getUserProgramProgress = async (): Promise<UserProgramProgress> => {
+    console.log('service: getUserProgramProgress');
     await simulateNetworkDelay();
     return sampleUserProgress;
 };
 
 const getAllPrograms = async (): Promise<Program[]> => {
+    console.log('service: getAllPrograms');
     await simulateNetworkDelay();
     return mockPrograms;
 };
 
 const getProgram = async (programId: string): Promise<Program | undefined> => {
+    console.log('service: getProgram');
     await simulateNetworkDelay();
     return mockPrograms.find((program) => program.ProgramId === programId);
 };
 
 const getProgramDay = async (programId: string, dayId: string): Promise<ProgramDay | undefined> => {
+    console.log('service: getProgramDay');
     await simulateNetworkDelay();
     return sampleProgramDays.find((day) => day.ProgramId === programId && day.DayId === dayId);
 };
 
 const getProgramDaysAll = async (programId: string): Promise<ProgramDay[]> => {
+    console.log('service: getProgramDaysAll');
     await simulateNetworkDelay();
     const allDays = sampleProgramDays.filter((day) => day.ProgramId === programId);
     return allDays;
 };
 
 const getProgramDaysFiltered = async (programId: string, dayIds: string[]): Promise<ProgramDay[]> => {
+    console.log('service: getProgramDaysFiltered');
     await simulateNetworkDelay();
     // get all the days for a program
     const allDays = sampleProgramDays.filter((day) => day.ProgramId === programId);

@@ -29,12 +29,11 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
         userProgramProgressState,
         programDays,
         programDaysState,
-        activeProgramCurrentDayId,
         error: programError,
     } = useSelector((state: RootState) => state.programs);
 
     const programId = userProgramProgress?.ProgramId;
-    const dayId = activeProgramCurrentDayId;
+    const dayId = userProgramProgress?.CurrentDay;
 
     const currentDay = programId && dayId ? programDays[programId]?.[dayId] : null;
     const currentDayState = programId && dayId ? programDaysState[programId]?.[dayId] : REQUEST_STATE.IDLE;
