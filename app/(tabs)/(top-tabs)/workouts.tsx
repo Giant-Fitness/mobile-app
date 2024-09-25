@@ -83,7 +83,7 @@ export default function WorkoutsScreen() {
         <ScrollView style={[styles.container, { backgroundColor: themeColors.background }]} showsVerticalScrollIndicator={false}>
             <ThemedView>
                 <ThemedView style={styles.infoContainer}>
-                    <ThemedText type='bodyXSmall' style={[styles.infoText, { color: themeColors.subText }]}>
+                    <ThemedText type='bodySmall' style={[styles.infoText, { color: themeColors.subText }]}>
                         {'Workouts are flexible one-off sessions that you can complete to meet your goals'}
                     </ThemedText>
                 </ThemedView>
@@ -131,7 +131,7 @@ export default function WorkoutsScreen() {
                                             style={[styles.seeAllButton, { backgroundColor: themeColors.backgroundSecondary }]}
                                             onPress={() => navigateToAllWorkouts({ focus: [category.type] })}
                                         >
-                                            <ThemedText type='body' style={[{ color: themeColors.text }]}>
+                                            <ThemedText type='overline' style={[{ color: themeColors.text }]}>
                                                 See All
                                             </ThemedText>
                                         </TouchableOpacity>
@@ -210,8 +210,8 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     },
     seeAllButton: {
-        width: Sizes.imageXLWidth,
-        height: Sizes.imageXLHeight,
+        width: Sizes.imageXXLWidth,
+        height: Sizes.imageXXLHeight,
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: Spaces.SM,

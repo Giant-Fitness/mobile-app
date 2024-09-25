@@ -91,6 +91,7 @@ export default function WorkoutDetailScreen() {
             // Additional session tracking logic can be implemented here
         }
     };
+    const handleDismiss = () => {};
 
     // Scroll Handler for Animated Header
     const scrollHandler = useAnimatedScrollHandler({
@@ -119,7 +120,7 @@ export default function WorkoutDetailScreen() {
                         backgroundColor: themeColors.background,
                         paddingHorizontal: Spaces.LG,
                     }}
-                    imageStyle={{ height: Sizes.imageXLHeight }}
+                    imageStyle={{ height: Sizes.imageXXLHeight }}
                     titleFirst={true}
                     extraContent={
                         <ThemedView>
@@ -176,6 +177,7 @@ export default function WorkoutDetailScreen() {
                 ref={videoPlayerRef}
                 source={{ uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' }}
                 onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+                onDismiss={handleDismiss} // Pass the dismiss handler
             />
             <ThemedView style={styles.buttonContainer}>
                 <PrimaryButton text='Start Workout' textType='bodyMedium' style={[styles.startButton]} onPress={handleStartWorkout} size={'LG'} />

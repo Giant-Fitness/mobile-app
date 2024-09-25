@@ -96,8 +96,9 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
                         </ThemedView>
                     )
                 }
-                titleStyle={{ color: themeColors.highlightContainerText }}
-                subtitleStyle={{ color: themeColors.subTextSecondary }}
+                titleStyle={[{ color: themeColors.highlightContainerText, marginBottom: Spaces.XXS }]}
+                subtitleStyle={[{ color: themeColors.subTextSecondary, marginBottom: Spaces.SM }]}
+                titleFirst={true}
             />
         </View>
     );

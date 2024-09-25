@@ -1,15 +1,13 @@
-// components/media/FullScreenVideoPlayer.tsx
-
 import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { View, StyleSheet, Alert, Animated, Dimensions } from 'react-native';
-import { Video, ResizeMode, Audio } from 'expo-av';
-import PropTypes from 'prop-types'; // Import PropTypes for validation
+import { Video, ResizeMode, Audio, AVPlaybackStatus } from 'expo-av';
+import PropTypes from 'prop-types';
 
 interface FullScreenVideoPlayerProps {
     source: { uri: string };
     startInFullscreen?: boolean;
-    onPlaybackStatusUpdate?: (status: any) => void; // Add callback for playback status updates
-    onDismiss?: () => void; // Add this prop
+    onPlaybackStatusUpdate?: (status: AVPlaybackStatus) => void;
+    onDismiss?: () => void;
 }
 
 export interface FullScreenVideoPlayerHandle {
@@ -19,11 +17,11 @@ export interface FullScreenVideoPlayerHandle {
 export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, FullScreenVideoPlayerProps>(
     ({ source, startInFullscreen = false, onPlaybackStatusUpdate, onDismiss }, ref) => {
         const video = useRef<Video>(null);
-        const [isFullScreen, setIsFullScreen] = useState(startInFullscreen);
         const [isVideoVisible, setIsVideoVisible] = useState(false);
         const [isVideoLoaded, setIsVideoLoaded] = useState(false);
-        const [isFullscreenPresented, setIsFullscreenPresented] = useState(false); // Track fullscreen state
+        const [isFullscreenPresented, setIsFullscreenPresented] = useState(false);
         const fadeAnim = useRef(new Animated.Value(0)).current;
+        const dismissTimer = useRef<NodeJS.Timeout | null>(null);
 
         useEffect(() => {
             const configureAudio = async () => {
@@ -38,19 +36,23 @@ export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, Ful
                 }
             };
             configureAudio();
+
+            return () => {
+                if (dismissTimer.current) {
+                    clearTimeout(dismissTimer.current);
+                }
+            };
         }, []);
 
-        // Expose startPlayback method to the parent component
         useImperativeHandle(ref, () => ({
             startPlayback: handleFullScreen,
         }));
 
-        // Function to handle full screen mode
         const handleFullScreen = async () => {
-            if (isFullscreenPresented) return; // Prevent multiple requests to enter fullscreen
+            if (isFullscreenPresented) return;
 
             setIsVideoVisible(true);
-            setIsFullscreenPresented(true); // Mark fullscreen as being presented
+            setIsFullscreenPresented(true);
             Animated.timing(fadeAnim, {
                 toValue: 1,
                 duration: 500,
@@ -58,20 +60,18 @@ export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, Ful
             }).start(async () => {
                 if (video.current) {
                     try {
-                        await video.current.presentFullscreenPlayer(); // Present the video in fullscreen
+                        await video.current.presentFullscreenPlayer();
                     } catch (error) {
-                        setIsFullscreenPresented(false); // Reset if presenting fails
+                        setIsFullscreenPresented(false);
                         console.error('Error presenting fullscreen:', error);
                     }
                 }
             });
         };
 
-        // Callback when the video is loaded and ready to play
         const handleVideoLoad = async () => {
             setIsVideoLoaded(true);
             if (video.current) {
-                // Check if video.current is not null
                 try {
                     await video.current.playAsync();
                 } catch (error) {
@@ -80,33 +80,45 @@ export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, Ful
             }
         };
 
-        // Function to handle fullscreen updates using integer values
         const handleFullscreenUpdate = async ({ fullscreenUpdate }: { fullscreenUpdate: number }) => {
-            // Reset state when fullscreen is about to dismiss
-            if (fullscreenUpdate === 2) {
-                // FULLSCREEN_UPDATE_PLAYER_WILL_DISMISS
-                setIsFullscreenPresented(false); // Mark fullscreen as dismissed
-                setIsVideoVisible(false); // Ensure the video is hidden
+            if (fullscreenUpdate === 3) {
+                // FULLSCREEN_UPDATE_PLAYER_DID_DISMISS
+                await dismissVideo();
+            }
+        };
+
+        const dismissVideo = async () => {
+            try {
+                if (dismissTimer.current) {
+                    clearTimeout(dismissTimer.current);
+                    dismissTimer.current = null;
+                }
+                if (video.current) {
+                    await video.current.stopAsync();
+                    await video.current.setPositionAsync(0);
+                }
+                setIsFullscreenPresented(false);
+                setIsVideoVisible(false);
+                setIsVideoLoaded(false);
+                fadeAnim.setValue(0);
                 if (onDismiss) {
                     onDismiss();
                 }
+            } catch (error) {
+                Alert.alert('Error', 'An error occurred while resetting the video.');
+                console.error('Error resetting video state:', error);
             }
+        };
 
-            // Fully reset state when fullscreen has been dismissed
-            if (fullscreenUpdate === 3) {
-                // FULLSCREEN_UPDATE_PLAYER_DID_DISMISS
-                try {
-                    if (video.current) {
-                        await video.current.stopAsync();
-                        await video.current.setPositionAsync(0);
-                    }
-                    setIsFullScreen(false);
-                    setIsVideoLoaded(false);
-                    fadeAnim.setValue(0); // Ensure fade is reset
-                } catch (error) {
-                    Alert.alert('Error', 'An error occurred while resetting the video.');
-                    console.error('Error resetting video state:', error);
-                }
+        const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
+            if (status.isLoaded && status.didJustFinish) {
+                // Start the 3-second timer when the video finishes
+                dismissTimer.current = setTimeout(() => {
+                    dismissVideo();
+                }, 3000);
+            }
+            if (onPlaybackStatusUpdate) {
+                onPlaybackStatusUpdate(status);
             }
         };
 
@@ -115,14 +127,14 @@ export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, Ful
                 {isVideoVisible && (
                     <Video
                         ref={video}
-                        style={isVideoVisible ? styles.video : { width: 0, height: 0 }} // Forcefully hide the video if not visible
+                        style={isVideoVisible ? styles.video : { width: 0, height: 0 }}
                         source={source}
                         useNativeControls
                         resizeMode={ResizeMode.CONTAIN}
                         isLooping={false}
                         onLoad={handleVideoLoad}
                         onFullscreenUpdate={handleFullscreenUpdate}
-                        onPlaybackStatusUpdate={onPlaybackStatusUpdate} // Pass playback status updates to the handler
+                        onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
                     />
                 )}
                 {isVideoVisible && <Animated.View style={[styles.overlay, { opacity: fadeAnim }]} />}
@@ -131,16 +143,14 @@ export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, Ful
     },
 );
 
-// Adding a display name for better debugging and linting
 FullScreenVideoPlayer.displayName = 'FullScreenVideoPlayer';
 
-// Adding PropTypes validation to handle ESLint warnings
 FullScreenVideoPlayer.propTypes = {
     source: PropTypes.shape({
         uri: PropTypes.string.isRequired,
     }).isRequired,
     startInFullscreen: PropTypes.bool,
-    onPlaybackStatusUpdate: PropTypes.func, // Validation for the new prop
+    onPlaybackStatusUpdate: PropTypes.func,
     onDismiss: PropTypes.func,
 };
 
