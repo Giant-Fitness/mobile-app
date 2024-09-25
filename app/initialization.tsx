@@ -6,7 +6,8 @@ import { AppDispatch, RootState } from '@/store/rootReducer';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { Redirect } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
-import { getUserProgramProgressAsync, getProgramAsync, getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/thunks';
+import { getProgramAsync, getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/thunks';
+import { getUserProgramProgressAsync } from '@/store/user/thunks';
 
 const Initialization: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -14,7 +15,8 @@ const Initialization: React.FC = () => {
     const [splashMinimumTimePassed, setSplashMinimumTimePassed] = useState(false);
     const [activeProgramLoaded, setActiveProgramLoaded] = useState(false);
 
-    const { userProgramProgress, userProgramProgressState, error: programError } = useSelector((state: RootState) => state.programs);
+    const { userProgramProgress, userProgramProgressState, error: userError } = useSelector((state: RootState) => state.user);
+    const { error: programError } = useSelector((state: RootState) => state.programs);
 
     useEffect(() => {
         navigation.setOptions({ headerShown: false });
@@ -51,10 +53,10 @@ const Initialization: React.FC = () => {
         return <BasicSplash />;
     }
 
-    if (programError) {
+    if (userError || programError) {
         return (
             <SafeAreaView style={styles.container}>
-                <Text style={styles.errorText}>Error: {programError || 'An unexpected error occurred.'}</Text>
+                <Text style={styles.errorText}>Error: {userError || programError || 'An unexpected error occurred.'}</Text>
             </SafeAreaView>
         );
     }

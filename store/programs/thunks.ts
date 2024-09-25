@@ -2,20 +2,9 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import ProgramService from '@/store/programs/service';
-import { Program, ProgramDay, UserProgramProgress } from '@/types';
+import { Program, ProgramDay } from '@/types';
 import { RootState } from '@/store/rootReducer';
 import { REQUEST_STATE } from '@/constants/requestStates';
-
-export const getUserProgramProgressAsync = createAsyncThunk<UserProgramProgress, void>(
-    'programs/getUserProgramProgress',
-    async (_, { getState, rejectWithValue }) => {
-        const state = getState();
-        if (state.programs.userProgramProgress) {
-            return state.programs.userProgramProgress;
-        }
-        return await ProgramService.getUserProgramProgress();
-    },
-);
 
 export const getAllProgramsAsync = createAsyncThunk<Program[], void>('programs/getAllPrograms', async (_, { getState, rejectWithValue }) => {
     const state = getState() as RootState;
