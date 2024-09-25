@@ -1,7 +1,7 @@
 // store/programs/service.ts
 
-import { Program, ProgramDay, UserProgramProgress } from '@/types';
-import { sampleProgramDays, mockPrograms, sampleUserProgress } from '@/store/programs/mockData';
+import { Program, ProgramDay } from '@/types';
+import { sampleProgramDays, mockPrograms } from '@/store/programs/mockData';
 
 // Utility function to simulate network delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -10,12 +10,6 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const simulateNetworkDelay = async () => {
     const randomDelay = Math.floor(Math.random() * (1000 - 200 + 1) + 200);
     await delay(randomDelay);
-};
-
-const getUserProgramProgress = async (): Promise<UserProgramProgress> => {
-    console.log('service: getUserProgramProgress');
-    await simulateNetworkDelay();
-    return sampleUserProgress;
 };
 
 const getAllPrograms = async (): Promise<Program[]> => {
@@ -55,7 +49,6 @@ const getProgramDaysFiltered = async (programId: string, dayIds: string[]): Prom
 };
 
 export default {
-    getUserProgramProgress,
     getAllPrograms,
     getProgram,
     getProgramDaysAll,

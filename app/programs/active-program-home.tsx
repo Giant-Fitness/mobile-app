@@ -19,7 +19,8 @@ import { BasicSplash } from '@/components/base/BasicSplash';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { HighlightedTip } from '@/components/alerts/HighlightedTip';
 import { getWeekNumber, getNextDayIds } from '@/utils/calendar';
-import { getUserProgramProgressAsync, getProgramAsync, getMultipleProgramDaysAsync, getProgramDayAsync } from '@/store/programs/thunks';
+import { getProgramAsync, getMultipleProgramDaysAsync, getProgramDayAsync } from '@/store/programs/thunks';
+import { getUserProgramProgressAsync } from '@/store/user/thunks';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
 import { selectWorkoutQuote, selectWorkoutQuoteState, selectRestDayQuote, selectRestDayQuoteState, selectQuoteError } from '@/store/quotes/selectors';
 
@@ -37,15 +38,9 @@ export default function ActiveProgramHome() {
     const restDayQuoteState = useSelector(selectRestDayQuoteState);
     const quoteError = useSelector(selectQuoteError);
 
-    const {
-        userProgramProgress,
-        userProgramProgressState,
-        programs,
-        programsState,
-        programDays,
-        programDaysState,
-        error: programError,
-    } = useSelector((state: RootState) => state.programs);
+    const { userProgramProgress, userProgramProgressState, error: userError } = useSelector((state: RootState) => state.user);
+
+    const { programs, programsState, programDays, programDaysState, error: programError } = useSelector((state: RootState) => state.programs);
 
     // Get the active program from the normalized state
     const activeProgram = userProgramProgress?.ProgramId ? programs[userProgramProgress?.ProgramId] : null;
@@ -103,8 +98,8 @@ export default function ActiveProgramHome() {
         return <BasicSplash />;
     }
 
-    if (programError || quoteError) {
-        const errorMessage = programError ? programError : quoteError;
+    if (programError || quoteError || userError) {
+        const errorMessage = programError ? programError : quoteError ? quoteError : userError;
         return (
             <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
                 <ThemedText>Error: {errorMessage}</ThemedText>

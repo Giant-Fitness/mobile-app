@@ -51,8 +51,8 @@ const ProgramOverviewScreen = () => {
     // Redux Selectors
     const program = useSelector((state: RootState) => state.programs.programs[programId]);
     const programState = useSelector((state: RootState) => state.programs.programsState[programId]);
-    const userProgramProgress = useSelector((state: RootState) => state.programs.userProgramProgress);
-    const userProgramProgressState = useSelector((state: RootState) => state.programs.userProgramProgressState);
+    const userProgramProgress = useSelector((state: RootState) => state.user.userProgramProgress);
+    const userProgramProgressState = useSelector((state: RootState) => state.user.userProgramProgressState);
 
     useEffect(() => {
         if (programState !== REQUEST_STATE.FULFILLED) {

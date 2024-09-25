@@ -1,11 +1,9 @@
 // store/programs/programsState.ts
 
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { Program, ProgramDay, UserProgramProgress } from '@/types';
+import { Program, ProgramDay } from '@/types';
 
 export interface ProgramState {
-    userProgramProgress: UserProgramProgress | null;
-    userProgramProgressState: REQUEST_STATE;
     programs: Record<string, Program>;
     programsState: Record<string, REQUEST_STATE>;
     allProgramsState: REQUEST_STATE;
@@ -15,8 +13,6 @@ export interface ProgramState {
 }
 
 export const initialState: ProgramState = {
-    userProgramProgress: null,
-    userProgramProgressState: REQUEST_STATE.IDLE,
     programs: {},
     programsState: {},
     allProgramsState: REQUEST_STATE.IDLE,

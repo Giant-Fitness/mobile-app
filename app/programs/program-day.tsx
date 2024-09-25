@@ -48,7 +48,7 @@ const ProgramDayScreen = () => {
 
     const programDay = useSelector((state: RootState) => state.programs.programDays[programId]?.[dayId]);
     const programDayState = useSelector((state: RootState) => state.programs.programDaysState[programId]?.[dayId]);
-    const userProgramProgress = useSelector((state: RootState) => state.programs.userProgramProgress);
+    const userProgramProgress = useSelector((state: RootState) => state.user.userProgramProgress);
 
     // **Data Fetching Hook**
     useEffect(() => {

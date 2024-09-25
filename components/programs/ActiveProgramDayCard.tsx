@@ -24,13 +24,9 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
 
     const navigation = useNavigation();
 
-    const {
-        userProgramProgress,
-        userProgramProgressState,
-        programDays,
-        programDaysState,
-        error: programError,
-    } = useSelector((state: RootState) => state.programs);
+    const { userProgramProgress, userProgramProgressState, error: userError } = useSelector((state: RootState) => state.user);
+
+    const { programDays, programDaysState, error: programError } = useSelector((state: RootState) => state.programs);
 
     const programId = userProgramProgress?.ProgramId;
     const dayId = userProgramProgress?.CurrentDay;

@@ -55,7 +55,7 @@ const ProgramCalendarScreen = () => {
     // Redux Selectors
     const program = useSelector((state: RootState) => state.programs.programs[programId]);
     const programState = useSelector((state: RootState) => state.programs.programsState[programId]);
-    const userProgramProgress = useSelector((state: RootState) => state.programs.userProgramProgress);
+    const userProgramProgress = useSelector((state: RootState) => state.user.userProgramProgress);
     const programDays = useSelector((state: RootState) => state.programs.programDays[programId]);
     const programDaysState = useSelector((state: RootState) => state.programs.programDaysState[programId]);
 

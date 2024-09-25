@@ -2,16 +2,9 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ProgramState, initialState } from '@/store/programs/programsState';
-import {
-    getUserProgramProgressAsync,
-    getAllProgramsAsync,
-    getProgramAsync,
-    getProgramDayAsync,
-    getAllProgramDaysAsync,
-    getMultipleProgramDaysAsync,
-} from '@/store/programs/thunks';
+import { getAllProgramsAsync, getProgramAsync, getProgramDayAsync, getAllProgramDaysAsync, getMultipleProgramDaysAsync } from '@/store/programs/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { Program, ProgramDay, UserProgramProgress } from '@/types';
+import { Program, ProgramDay } from '@/types';
 
 const programSlice = createSlice({
     name: 'programs',
@@ -23,20 +16,6 @@ const programSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // User Program Progress
-            .addCase(getUserProgramProgressAsync.pending, (state) => {
-                state.userProgramProgressState = REQUEST_STATE.PENDING;
-                state.error = null;
-            })
-            .addCase(getUserProgramProgressAsync.fulfilled, (state, action: PayloadAction<UserProgramProgress>) => {
-                state.userProgramProgressState = REQUEST_STATE.FULFILLED;
-                state.userProgramProgress = action.payload;
-            })
-            .addCase(getUserProgramProgressAsync.rejected, (state, action) => {
-                state.userProgramProgressState = REQUEST_STATE.REJECTED;
-                state.error = action.error.message || 'Failed to fetch user program progress';
-            })
-
             // All Programs
             .addCase(getAllProgramsAsync.pending, (state) => {
                 state.allProgramsState = REQUEST_STATE.PENDING;
