@@ -129,6 +129,10 @@ export default function ActiveProgramHome() {
         });
     };
 
+    const navigateToBrowsePrograms = () => {
+        navigation.navigate('programs/browse-programs');
+    };
+
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
             <ScrollView
@@ -206,7 +210,7 @@ export default function ActiveProgramHome() {
                         />
                     </ThemedView>
                     <ThemedView>
-                        <TouchableOpacity style={styles.menuItem}>
+                        <TouchableOpacity style={styles.menuItem} activeOpacity={1} onPress={navigateToBrowsePrograms}>
                             <ThemedText type='body' style={[{ color: themeColors.text }]}>
                                 Browse Programs
                             </ThemedText>
