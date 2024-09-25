@@ -18,8 +18,8 @@ import { AppDispatch } from '@/store/store';
 import { BasicSplash } from '@/components/base/BasicSplash';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { HighlightedTip } from '@/components/alerts/HighlightedTip';
-import { getWeekNumber } from '@/utils/calendar';
-import { getActiveProgramAsync, getActiveProgramCurrentDayAsync, getActiveProgramNextDaysAsync } from '@/store/programs/thunks';
+import { getWeekNumber, getNextDayIds } from '@/utils/calendar';
+import { getUserProgramProgressAsync, getProgramAsync, getMultipleProgramDaysAsync, getProgramDayAsync } from '@/store/programs/thunks';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
 import { selectWorkoutQuote, selectWorkoutQuoteState, selectRestDayQuote, selectRestDayQuoteState, selectQuoteError } from '@/store/quotes/selectors';
 
@@ -42,24 +42,23 @@ export default function ActiveProgramHome() {
         userProgramProgressState,
         programs,
         programsState,
-        activeProgramId,
         programDays,
         programDaysState,
-        activeProgramCurrentDayId,
-        activeProgramNextDayIds,
         error: programError,
     } = useSelector((state: RootState) => state.programs);
 
     // Get the active program from the normalized state
-    const activeProgram = activeProgramId ? programs[activeProgramId] : null;
-    const activeProgramState = activeProgramId ? programsState[activeProgramId] : REQUEST_STATE.IDLE;
+    const activeProgram = userProgramProgress?.ProgramId ? programs[userProgramProgress?.ProgramId] : null;
+    const activeProgramState = userProgramProgress?.ProgramId ? programsState[userProgramProgress?.ProgramId] : REQUEST_STATE.IDLE;
     // Get the current day from the normalized state
-    const activeProgramCurrentDay =
-        userProgramProgress?.ProgramId && activeProgramCurrentDayId ? programDays[userProgramProgress?.ProgramId]?.[activeProgramCurrentDayId] : null;
-    const activeProgramCurrentDayState =
-        userProgramProgress?.ProgramId && activeProgramCurrentDayId
-            ? programDaysState[userProgramProgress?.ProgramId]?.[activeProgramCurrentDayId]
-            : REQUEST_STATE.IDLE;
+    const activeProgramCurrentDay = userProgramProgress?.ProgramId ? programDays[userProgramProgress?.ProgramId]?.[userProgramProgress?.CurrentDay] : null;
+    const activeProgramCurrentDayState = userProgramProgress?.ProgramId
+        ? programDaysState[userProgramProgress?.ProgramId]?.[userProgramProgress?.CurrentDay]
+        : REQUEST_STATE.IDLE;
+
+    const activeProgramNextDayIds =
+        userProgramProgress?.CurrentDay && activeProgram?.Days ? getNextDayIds(userProgramProgress.CurrentDay, activeProgram.Days, 3) : null;
+
     // Get the next days from the normalized state
     const activeProgramNextDays =
         userProgramProgress?.ProgramId && activeProgramNextDayIds
@@ -80,11 +79,17 @@ export default function ActiveProgramHome() {
     useEffect(() => {
         // Once user program progress is available, fetch the active program data
         if (userProgramProgressState === REQUEST_STATE.FULFILLED && userProgramProgress) {
-            dispatch(getActiveProgramAsync());
-            dispatch(getActiveProgramCurrentDayAsync());
-            dispatch(getActiveProgramNextDaysAsync({ numDays: 3 }));
+            dispatch(getProgramAsync({ programId: userProgramProgress.ProgramId }));
+            dispatch(getProgramDayAsync({ programId: userProgramProgress.ProgramId, dayId: userProgramProgress.CurrentDay }));
         }
     }, [userProgramProgress, userProgramProgressState, dispatch]);
+
+    useEffect(() => {
+        // Once active program is fetched, get next days
+        if (activeProgramState === REQUEST_STATE.FULFILLED) {
+            dispatch(getMultipleProgramDaysAsync({ programId: userProgramProgress.ProgramId, dayIds: activeProgramNextDayIds }));
+        }
+    }, [activeProgram, dispatch]);
 
     // Show the splash screen while data is loading or splash is visible
     if (
@@ -107,7 +112,7 @@ export default function ActiveProgramHome() {
         );
     }
 
-    const isLastDay = activeProgram && activeProgramCurrentDayId && activeProgram.Days && Number(activeProgramCurrentDayId) === activeProgram.Days;
+    const isLastDay = activeProgram && userProgramProgress && activeProgram.Days && Number(userProgramProgress.CurrentDay) === activeProgram.Days;
     const currentDayNumber = parseInt(userProgramProgress?.CurrentDay || '0', 10);
     const currentWeek = getWeekNumber(currentDayNumber);
 

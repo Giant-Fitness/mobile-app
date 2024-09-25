@@ -6,13 +6,7 @@ import { AppDispatch, RootState } from '@/store/rootReducer';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { Redirect } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
-import {
-    getUserProgramProgressAsync,
-    getActiveProgramAsync,
-    getActiveProgramCurrentDayAsync,
-    getActiveProgramNextDaysAsync,
-    getAllProgramsAsync,
-} from '@/store/programs/thunks';
+import { getUserProgramProgressAsync, getProgramAsync, getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/thunks';
 
 const Initialization: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -31,22 +25,25 @@ const Initialization: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             await dispatch(getUserProgramProgressAsync());
+        };
+        fetchData();
+    }, [dispatch]);
 
-            // Only fetch active program data if the user is on a program
-            if (userProgramProgress && Object.keys(userProgramProgress).length > 0) {
+    useEffect(() => {
+        const fetchData = async () => {
+            if (userProgramProgressState === REQUEST_STATE.FULFILLED && userProgramProgress && Object.keys(userProgramProgress).length > 0) {
                 await Promise.all([
-                    dispatch(getActiveProgramAsync()),
-                    dispatch(getActiveProgramCurrentDayAsync()),
-                    dispatch(getActiveProgramNextDaysAsync({ numDays: 3 })),
+                    dispatch(getProgramAsync({ programId: userProgramProgress.ProgramId })),
+                    dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId })),
                 ]);
-            } else {
+            } else if (userProgramProgressState === REQUEST_STATE.FULFILLED) {
                 await dispatch(getAllProgramsAsync());
             }
 
             setActiveProgramLoaded(true);
         };
         fetchData();
-    }, [dispatch]);
+    }, [userProgramProgressState, dispatch]);
 
     const isDataLoaded = userProgramProgressState === REQUEST_STATE.FULFILLED && activeProgramLoaded;
 
@@ -61,11 +58,6 @@ const Initialization: React.FC = () => {
             </SafeAreaView>
         );
     }
-    // return (
-    //     <SafeAreaView style={styles.container}>
-    //         <Text style={styles.errorText}>{userProgramProgress.ProgramId}</Text>
-    //     </SafeAreaView>
-    // );
     return <Redirect href='/(tabs)/home' />;
 };
 

@@ -9,13 +9,8 @@ export interface ProgramState {
     programs: Record<string, Program>;
     programsState: Record<string, REQUEST_STATE>;
     allProgramsState: REQUEST_STATE;
-    activeProgramId: string | null;
-    selectedProgramId: string | null;
     programDays: Record<string, Record<string, ProgramDay>>;
     programDaysState: Record<string, Record<string, REQUEST_STATE>>;
-    activeProgramCurrentDayId: string | null;
-    activeProgramNextDayIds: string[];
-    programDaysError: string | null;
     error: string | null;
 }
 
@@ -25,12 +20,7 @@ export const initialState: ProgramState = {
     programs: {},
     programsState: {},
     allProgramsState: REQUEST_STATE.IDLE,
-    activeProgramId: null,
-    selectedProgramId: null,
     programDays: {},
     programDaysState: {},
-    activeProgramCurrentDayId: null,
-    activeProgramNextDayIds: [],
-    programDaysError: null,
     error: null,
 };

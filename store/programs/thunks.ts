@@ -6,9 +6,16 @@ import { Program, ProgramDay, UserProgramProgress } from '@/types';
 import { RootState } from '@/store/rootReducer';
 import { REQUEST_STATE } from '@/constants/requestStates';
 
-export const getUserProgramProgressAsync = createAsyncThunk<UserProgramProgress, void>('programs/getUserProgramProgress', async () => {
-    return await ProgramService.getUserProgramProgress();
-});
+export const getUserProgramProgressAsync = createAsyncThunk<UserProgramProgress, void>(
+    'programs/getUserProgramProgress',
+    async (_, { getState, rejectWithValue }) => {
+        const state = getState();
+        if (state.programs.userProgramProgress) {
+            return state.programs.userProgramProgress;
+        }
+        return await ProgramService.getUserProgramProgress();
+    },
+);
 
 export const getAllProgramsAsync = createAsyncThunk<Program[], void>('programs/getAllPrograms', async (_, { getState, rejectWithValue }) => {
     const state = getState() as RootState;
@@ -39,8 +46,16 @@ export const getProgramAsync = createAsyncThunk<Program | undefined, { programId
 
 export const getAllProgramDaysAsync = createAsyncThunk<ProgramDay[], { programId: string }, { state: RootState }>(
     'programs/getAllProgramDays',
-    async ({ programId }, { rejectWithValue }) => {
+    async ({ programId }, { getState, rejectWithValue }) => {
         try {
+            const state = getState();
+            const existingDays = state.programs.programDays[programId];
+            const expectedDayCount = state.programs.programs[programId]?.Days;
+
+            if (existingDays && expectedDayCount && Object.keys(existingDays).length === expectedDayCount) {
+                return Object.values(existingDays);
+            }
+
             const programDays = await ProgramService.getProgramDaysAll(programId);
             if (!programDays || programDays.length === 0) {
                 return rejectWithValue('No program days found.');
@@ -72,79 +87,27 @@ export const getProgramDayAsync = createAsyncThunk<ProgramDay, { programId: stri
     },
 );
 
-export const getActiveProgramAsync = createAsyncThunk<Program | undefined, void, { state: RootState }>(
-    'programs/getActiveProgram',
-    async (_, { getState, rejectWithValue }) => {
+export const getMultipleProgramDaysAsync = createAsyncThunk<ProgramDay[], { programId: string; dayIds: string[] }, { state: RootState }>(
+    'programs/getMultipleProgramDays',
+    async ({ programId, dayIds }, { getState, rejectWithValue }) => {
         const state = getState();
-        const programId = state.programs.userProgramProgress?.ProgramId;
 
-        if (!programId) {
-            return rejectWithValue('Program ID not found in user progress.');
+        const existingDays = dayIds.map((dayId) => state.programs.programDays[programId]?.[dayId]).filter((day) => day !== undefined);
+        if (existingDays.length === dayIds.length) {
+            // If all days exist in the state, return them
+            return existingDays as ProgramDay[];
         }
 
-        const existingProgram = state.programs.programs[programId];
-        if (existingProgram) {
-            // If already exists, return it
-            return existingProgram;
+        // Fetch missing days
+        const missingDayIds = dayIds.filter((dayId) => !state.programs.programDays[programId]?.[dayId]);
+        try {
+            const fetchedDays = await ProgramService.getProgramDaysFiltered(programId, missingDayIds);
+            if (!fetchedDays || fetchedDays.length === 0) {
+                return rejectWithValue('Program days not found.');
+            }
+            return [...existingDays, ...fetchedDays];
+        } catch (error) {
+            return rejectWithValue('Error fetching program days.');
         }
-
-        return await ProgramService.getProgram(programId);
-    },
-);
-
-export const getActiveProgramCurrentDayAsync = createAsyncThunk<ProgramDay, void, { state: RootState }>(
-    'programs/getActiveProgramCurrentDay',
-    async (_, { getState, rejectWithValue }) => {
-        const state = getState();
-        const programId = state.programs.userProgramProgress?.ProgramId;
-        const dayId = state.programs.userProgramProgress?.CurrentDay;
-
-        if (!programId || !dayId) {
-            return rejectWithValue('Program ID or Day ID not found in user progress.');
-        }
-
-        // Check if the program day already exists in the state
-        const existingDay = state.programs.programDays[programId]?.[dayId];
-        if (existingDay) {
-            return existingDay;
-        }
-
-        // Fetch from the service
-        const programDay = await ProgramService.getProgramDay(programId, dayId);
-        if (!programDay) {
-            return rejectWithValue('Program day not found.');
-        }
-        return programDay;
-    },
-);
-
-export const getActiveProgramNextDaysAsync = createAsyncThunk<ProgramDay[], { numDays: number }, { state: RootState }>(
-    'programs/getActiveProgramNextDays',
-    async ({ numDays }, { getState, rejectWithValue }) => {
-        const state = getState();
-        const programId = state.programs.userProgramProgress?.ProgramId;
-        const dayId = state.programs.userProgramProgress?.CurrentDay;
-
-        if (!programId || !dayId) {
-            return rejectWithValue('Program ID or Day ID not found in user progress.');
-        }
-
-        const startDay = parseInt(dayId, 10);
-        const dayIdsToFetch = Array.from({ length: numDays }, (_, i) => (startDay + i + 1).toString());
-
-        // Filter out dayIds that already exist in state
-        const dayIdsNotInState = dayIdsToFetch.filter((id) => !state.programs.programDays[programId]?.[id]);
-
-        if (dayIdsNotInState.length === 0) {
-            // All days are already in state
-            return dayIdsToFetch.map((id) => state.programs.programDays[programId][id]);
-        }
-
-        // Fetch from the service
-        const programDays = await ProgramService.getProgramDaysFiltered(programId, dayIdsNotInState);
-        if (!programDays || programDays.length === 0) {
-            return rejectWithValue('Program days not found.');
-        }
-        return programDays;
     },
 );

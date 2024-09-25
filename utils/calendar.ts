@@ -64,3 +64,10 @@ export const getDayOfWeek = (dayId: number): number => {
 
     return dayOfWeek;
 };
+
+export const getNextDayIds = (currentDayId: string, totalProgramDays: number, numDays: number): string[] => {
+    const currentDayNumber = parseInt(currentDayId, 10);
+    const daysToFetch = Math.min(numDays, totalProgramDays - currentDayNumber);
+    const dayIds = Array.from({ length: daysToFetch }, (_, index) => (currentDayNumber + index + 1).toString());
+    return dayIds;
+};
