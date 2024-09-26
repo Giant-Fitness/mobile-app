@@ -261,6 +261,10 @@ const ProgramCalendarScreen = () => {
                                             {program.Level}
                                         </ThemedText>
                                     </View>
+                                    {/* Short Description */}
+                                    <ThemedText type='italic' style={[{ paddingBottom: Spaces.SM, paddingTop: Spaces.MD }]}>
+                                        {program.DescriptionShort}
+                                    </ThemedText>
                                 </ThemedView>
                             </View>
                         }

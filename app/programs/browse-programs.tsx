@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     contentContainer: {
         flexGrow: 1,
         paddingBottom: Spaces.MD,
-        marginHorizontal: Spaces.LG,
+        marginHorizontal: Spaces.MD,
     },
     infoContainer: {
         paddingTop: Spaces.MD,
