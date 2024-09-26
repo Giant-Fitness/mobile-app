@@ -46,6 +46,7 @@ const ProgramDayScreen = () => {
         navigation.navigate('workouts/all-workouts', { initialFilters });
     };
 
+    const program = useSelector((state: RootState) => state.programs.programs[programId]);
     const programDay = useSelector((state: RootState) => state.programs.programDays[programId]?.[dayId]);
     const programDayState = useSelector((state: RootState) => state.programs.programDaysState[programId]?.[dayId]);
     const userProgramProgress = useSelector((state: RootState) => state.user.userProgramProgress);
@@ -106,10 +107,11 @@ const ProgramDayScreen = () => {
                     <>
                         <TopImageInfoCard
                             image={{ uri: programDay.PhotoUrl }}
-                            title={programDay.DayTitle}
-                            subtitle={`Week ${currentWeek} Day ${dayOfWeek}`}
+                            subtitle={`${programDay.DayTitle}\n${program.ProgramName}`}
+                            title={`Week ${currentWeek} Day ${dayOfWeek}`}
                             titleType='titleXLarge'
-                            subtitleStyle={{ marginBottom: Spaces.MD, color: themeColors.subText, marginTop: 0 }}
+                            subtitleType='link'
+                            subtitleStyle={{ marginBottom: Spaces.SM, color: themeColors.subText, marginTop: 0 }}
                             titleStyle={{ marginBottom: Spaces.XS }}
                             containerStyle={{ elevation: 5, marginBottom: 0 }}
                             contentContainerStyle={{

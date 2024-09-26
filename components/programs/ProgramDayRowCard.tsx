@@ -32,12 +32,19 @@ export const ProgramDayRowCard: React.FC<ProgramDayRowCardProps> = ({ day, onPre
     const containerStyle = [
         styles.container,
         isCompleted && styles.completedContainer,
-        isCurrentDay && [styles.currentContainer, { borderColor: themeColors.accent, backgroundColor: themeColors.tipBackground }],
+        isCurrentDay && !day.RestDay && [styles.currentContainer, { borderColor: themeColors.accent, backgroundColor: themeColors.tipBackground }],
+        isCurrentDay && day.RestDay && [styles.currentContainer, { borderColor: themeColors.blueSolid, backgroundColor: themeColors.blueTransparent }],
     ];
 
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={1} style={containerStyle}>
-            <View style={[dayIdContainerStyle, isCurrentDay && [{ backgroundColor: themeColors.accent }]]}>
+            <View
+                style={[
+                    dayIdContainerStyle,
+                    isCurrentDay && !day.RestDay && [{ backgroundColor: themeColors.accent }],
+                    isCurrentDay && day.RestDay && [{ backgroundColor: themeColors.blueSolid }],
+                ]}
+            >
                 <ThemedText
                     type='buttonSmall'
                     style={[
@@ -51,7 +58,11 @@ export const ProgramDayRowCard: React.FC<ProgramDayRowCardProps> = ({ day, onPre
             </View>
             <ThemedText
                 type='buttonSmall'
-                style={[styles.dayTitle, isCurrentDay && [{ color: themeColors.tipText }], isCompleted && { textDecorationLine: 'line-through' }]}
+                style={[
+                    styles.dayTitle,
+                    isCurrentDay && !day.RestDay && [{ color: themeColors.tipText }],
+                    isCompleted && { textDecorationLine: 'line-through' },
+                ]}
             >
                 {day.DayTitle}
             </ThemedText>

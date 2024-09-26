@@ -78,7 +78,7 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
                     day.RestDay ? (
                         // Display content specific to a rest day
                         <ThemedView style={[styles.attributeRow, { marginLeft: 0, marginTop: -Spaces.XXS }]}>
-                            <Icon name='bed' size={moderateScale(18)} color={themeColors.highlightContainerText} />
+                            <Icon name='power-sleep' size={moderateScale(18)} color={themeColors.highlightContainerText} />
                             <Icon name='chevron-forward' size={moderateScale(16)} color={themeColors.highlightContainerText} style={styles.chevronIcon} />
                         </ThemedView>
                     ) : (

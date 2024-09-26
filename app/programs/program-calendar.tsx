@@ -175,6 +175,21 @@ const ProgramCalendarScreen = () => {
         // Implement your reset program logic here
     };
 
+    // Function to get the level icon
+    const getLevelIcon = (level: string) => {
+        switch (level.toLowerCase()) {
+            case 'beginner':
+                return 'level-beginner';
+            case 'intermediate':
+                return 'level-intermediate';
+            case 'advanced':
+                return 'level-advanced';
+            case 'all levels':
+            default:
+                return 'people'; // Use a default icon
+        }
+    };
+
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.backgroundTertiary }]}>
             <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Sizes.imageLGHeight} headerInterpolationEnd={Sizes.imageLGHeight + Spaces.XXL} />
@@ -205,6 +220,44 @@ const ProgramCalendarScreen = () => {
                             paddingBottom: Spaces.XXS,
                         }}
                         imageStyle={{ height: Sizes.imageXXLHeight }}
+                        extraContent={
+                            <View>
+                                {/* Attributes in a Row */}
+                                <ThemedView style={[styles.attributeRow]}>
+                                    {/* Attribute 1: Length */}
+                                    <View style={styles.attributeItem}>
+                                        <Icon name='stopwatch' size={Sizes.fontSizeDefault} color={themeColors.text} />
+                                        <ThemedText type='buttonSmall' style={[styles.attributeText]}>
+                                            {program.Weeks} Weeks
+                                        </ThemedText>
+                                    </View>
+
+                                    {/* Attribute 2: Frequency */}
+                                    <View style={styles.attributeItem}>
+                                        <Icon name='calendar' size={Sizes.fontSizeDefault} color={themeColors.text} />
+                                        <ThemedText type='buttonSmall' style={[styles.attributeText]}>
+                                            {program.Frequency}
+                                        </ThemedText>
+                                    </View>
+
+                                    {/* Attribute 3: Goal */}
+                                    <View style={styles.attributeItem}>
+                                        <Icon name='target' size={Sizes.fontSizeDefault} color={themeColors.text} />
+                                        <ThemedText type='buttonSmall' style={[styles.attributeText]}>
+                                            {program.Goal}
+                                        </ThemedText>
+                                    </View>
+
+                                    {/* Attribute 4: Level */}
+                                    <View style={styles.attributeItem}>
+                                        <Icon name={getLevelIcon(program.Level)} color={themeColors.text} />
+                                        <ThemedText type='buttonSmall' style={[styles.attributeText]}>
+                                            {program.Level}
+                                        </ThemedText>
+                                    </View>
+                                </ThemedView>
+                            </View>
+                        }
                     />
                     {isEnrolled && (
                         <ThemedView style={[styles.progress]}>
@@ -296,7 +349,6 @@ const styles = StyleSheet.create({
     },
     calendarContainer: {
         borderRadius: Spaces.SM,
-        paddingTop: Spaces.LG,
     },
     calendar: {
         paddingBottom: Spaces.LG,
@@ -316,6 +368,22 @@ const styles = StyleSheet.create({
     },
     progress: {
         marginHorizontal: Spaces.LG,
+        paddingTop: Spaces.LG,
+    },
+    attributeRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+    },
+    attributeItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: Spaces.XL,
+        marginBottom: Spaces.SM,
+    },
+    attributeText: {
+        marginLeft: Spaces.XS,
+        lineHeight: Spaces.LG,
     },
 });
 
