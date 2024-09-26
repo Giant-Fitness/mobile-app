@@ -74,6 +74,9 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({ program, isActive, act
                 </View>
 
                 <ThemedView style={[styles.contentContainer, { backgroundColor: cardBackgroundColor }]}>
+                    <ThemedText type='bodySmall' style={[{ paddingBottom: Spaces.MD, color: textColor }]}>
+                        {program.DescriptionShort}
+                    </ThemedText>
                     <View style={styles.attributeRow}>
                         <View style={styles.attributeItem}>
                             <Icon name='stopwatch' size={Sizes.fontSizeDefault} color={textColor} />
@@ -141,7 +144,7 @@ const styles = StyleSheet.create({
         borderBottomRightRadius: Spaces.SM,
     },
     contentContainer: {
-        paddingHorizontal: Spaces.LG,
+        paddingHorizontal: Spaces.MD,
         paddingVertical: Spaces.MD,
         marginTop: -Spaces.XXS,
     },

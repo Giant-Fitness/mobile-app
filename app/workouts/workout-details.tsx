@@ -120,7 +120,7 @@ export default function WorkoutDetailScreen() {
                         backgroundColor: themeColors.background,
                         paddingHorizontal: Spaces.LG,
                     }}
-                    imageStyle={{ height: Sizes.imageXXLHeight }}
+                    imageStyle={{ height: Sizes.image3XLHeight }}
                     titleFirst={true}
                     extraContent={
                         <ThemedView>

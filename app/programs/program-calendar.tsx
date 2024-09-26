@@ -225,7 +225,7 @@ const ProgramCalendarScreen = () => {
                             paddingHorizontal: Spaces.LG,
                             paddingBottom: Spaces.XXS,
                         }}
-                        imageStyle={{ height: Sizes.imageXXLHeight }}
+                        imageStyle={{ height: Sizes.image3XLHeight }}
                         extraContent={
                             <View>
                                 {/* Attributes in a Row */}
@@ -261,6 +261,10 @@ const ProgramCalendarScreen = () => {
                                             {program.Level}
                                         </ThemedText>
                                     </View>
+                                    {/* Short Description */}
+                                    <ThemedText type='italic' style={[{ paddingBottom: Spaces.SM, paddingTop: Spaces.MD }]}>
+                                        {program.DescriptionShort}
+                                    </ThemedText>
                                 </ThemedView>
                             </View>
                         }

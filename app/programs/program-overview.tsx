@@ -88,7 +88,7 @@ const ProgramOverviewScreen = () => {
     }
 
     // Extract program details
-    const { ProgramName, PhotoUrl, Weeks, Frequency, Goal, Level, Description, Equipment, DesignedFor, CalendarOverview } = program;
+    const { ProgramName, PhotoUrl, Weeks, Frequency, Goal, Level, DescriptionShort, DescriptionLong, Equipment, DesignedFor, CalendarOverview } = program;
 
     // Function to get the level icon
     const getLevelIcon = (level: string) => {
@@ -118,6 +118,7 @@ const ProgramOverviewScreen = () => {
         console.log('Program reset');
         // Implement your reset program logic here
     };
+    console.log(program);
 
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.backgroundTertiary }]}>
@@ -147,7 +148,7 @@ const ProgramOverviewScreen = () => {
                             paddingHorizontal: Spaces.LG,
                             paddingBottom: Spaces.XXS,
                         }}
-                        imageStyle={{ height: Sizes.imageXXLHeight }}
+                        imageStyle={{ height: Sizes.image3XLHeight }}
                         extraContent={
                             <ThemedView>
                                 {/* Attributes in a Row */}
@@ -186,7 +187,7 @@ const ProgramOverviewScreen = () => {
                                 </ThemedView>
                                 {/* Short Description */}
                                 <ThemedText type='italic' style={[{ paddingBottom: Spaces.LG, paddingTop: Spaces.MD }]}>
-                                    {Description}
+                                    {DescriptionLong}
                                 </ThemedText>
                             </ThemedView>
                         }

@@ -107,12 +107,12 @@ const ProgramDayScreen = () => {
                     <>
                         <TopImageInfoCard
                             image={{ uri: programDay.PhotoUrl }}
-                            subtitle={`${programDay.DayTitle}\n${program.ProgramName}`}
-                            title={`Week ${currentWeek} Day ${dayOfWeek}`}
-                            titleType='titleXLarge'
+                            title={`${programDay.DayTitle}`}
+                            subtitle={`Week ${currentWeek} Day ${dayOfWeek}`}
+                            titleType='titleLarge'
                             subtitleType='link'
                             subtitleStyle={{ marginBottom: Spaces.SM, color: themeColors.subText, marginTop: 0 }}
-                            titleStyle={{ marginBottom: Spaces.XS }}
+                            titleStyle={{ marginBottom: 0 }}
                             containerStyle={{ elevation: 5, marginBottom: 0 }}
                             contentContainerStyle={{
                                 backgroundColor: themeColors.background,

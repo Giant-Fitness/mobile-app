@@ -11,7 +11,8 @@ export interface Program {
     TrainerId?: string;
     Weeks: number;
     Days: number;
-    Description: string;
+    DescriptionShort: string;
+    DescriptionLong: string;
     Level: string;
     Type: string;
     Goal: string;
