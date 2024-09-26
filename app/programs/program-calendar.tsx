@@ -21,9 +21,10 @@ import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { Sizes } from '@/constants/Sizes';
 import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
 import { ProgramProgressPillBar } from '@/components/programs/ProgramProgressPillBar';
-import { BasicSplash } from '@/components/base/BasicSplash';
+import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { ProgramWeekList } from '@/components/programs/ProgramWeekList';
 import { getProgramAsync, getAllProgramDaysAsync } from '@/store/programs/thunks';
+import { useSplashScreen } from '@/hooks/useSplashScreen';
 
 type ProgramCalendarScreenParams = {
     programId: string;
@@ -125,15 +126,20 @@ const ProgramCalendarScreen = () => {
     const programDaysStates = programDaysState && Object.values(programDaysState);
     const isProgramDaysLoading = programDaysStates && programDaysStates.some((state) => state === REQUEST_STATE.PENDING);
 
-    if (
+    const isDataLoading =
         programState === REQUEST_STATE.PENDING ||
         isProgramDaysLoading ||
         !program ||
         (programDays && Object.keys(programDays).length !== program.Days) ||
         months.length === 0 ||
-        !currentMonthWeeks
-    ) {
-        return <BasicSplash />;
+        !currentMonthWeeks;
+
+    const { showSplash, handleSplashComplete } = useSplashScreen({
+        dataLoadedState: !isDataLoading ? REQUEST_STATE.FULFILLED : REQUEST_STATE.PENDING,
+    });
+
+    if (showSplash) {
+        return <DumbbellSplash onAnimationComplete={handleSplashComplete} isDataLoaded={!isDataLoading} />;
     }
 
     if (programState === REQUEST_STATE.REJECTED) {

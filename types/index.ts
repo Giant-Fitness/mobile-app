@@ -1,4 +1,4 @@
-// src/types/index.ts
+// types/index.ts
 
 export * from './programTypes';
 export * from './userTypes';

@@ -9,7 +9,6 @@ import { Spaces } from '@/constants/Spaces';
 
 interface SplashScreenProps {
     onLoadingComplete: () => void;
-    delay?: number; // Optional delay prop in milliseconds (default to 2 seconds)
 }
 
 export const BasicSplash: React.FC = () => {

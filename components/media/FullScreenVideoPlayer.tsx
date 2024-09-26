@@ -1,3 +1,5 @@
+// components/media/FullScreenVideoPlayer.tsx
+
 import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { View, StyleSheet, Alert, Animated, Dimensions } from 'react-native';
 import { Video, ResizeMode, Audio, AVPlaybackStatus } from 'expo-av';

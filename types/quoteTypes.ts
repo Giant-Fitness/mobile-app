@@ -1,4 +1,4 @@
-// src/types/quoteTypes.ts
+// types/quoteTypes.ts
 
 export interface Quote {
     QuoteType: string;

@@ -22,7 +22,6 @@ export const CenteredModal: React.FC<CenteredModalProps> = ({ visible, onClose, 
 
     return (
         <Modal visible={visible} onClose={onClose} overlay={false}>
-            {' '}
             {/* Reusing the new Modal */}
             <View style={styles.container}>
                 <TouchableOpacity style={styles.overlay} onPress={onClose} activeOpacity={1}>

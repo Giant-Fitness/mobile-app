@@ -1,3 +1,5 @@
+// components/programs/ProgramCard.tsx
+
 import React from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
