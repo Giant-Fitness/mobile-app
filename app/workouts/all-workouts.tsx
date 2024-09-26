@@ -110,16 +110,7 @@ export default function AllWorkoutsScreen() {
     const renderItem = useCallback(
         ({ item }: ListRenderItemInfo<Workout>) => (
             <MemoizedWorkoutDetailedCard
-                name={item.WorkoutName}
-                photo={{ uri: item.PhotoUrl }}
-                length={`${item.Time} mins`}
-                level={item.Level}
-                focus={item.WorkoutType}
-                equipment={item.EquipmentCategory}
-                trainer={item.TrainerId || 'Unknown'}
-                longText={item.DescriptionLong}
-                focusMulti={item.TargetedMuscles}
-                cardColor={themeColors.card}
+                workout={item}
             />
         ),
         [themeColors.card],

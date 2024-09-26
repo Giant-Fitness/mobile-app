@@ -118,7 +118,6 @@ const ProgramOverviewScreen = () => {
         console.log('Program reset');
         // Implement your reset program logic here
     };
-    console.log(program);
 
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.backgroundTertiary }]}>
