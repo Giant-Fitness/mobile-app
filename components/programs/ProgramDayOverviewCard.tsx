@@ -48,6 +48,10 @@ export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ 
         }
     } else {
         backgroundColor = themeColors.background; // Non-enrolled users
+        if (day.RestDay) {
+            backgroundColor = themeColors.blueTransparent;
+            displayRest = true;
+        }
     }
 
     return (
