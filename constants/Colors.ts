@@ -23,6 +23,8 @@ export const Colors = {
         white: '#FEFEFE', // White
         red: '#cc4533', // Error color
         redTransparent: '#f7e5e3',
+        blueTransparent: 'rgba(135, 206, 235, 0.2)',
+        blueSolid: '#5DADE2',
         warning: '#FFA500', // Optional: Warning color (e.g., for alerts)
         info: '#1E90FF', // Optional: Info color (e.g., for badges)
         transparent: 'rgba(255, 255, 255, 0)',
@@ -53,6 +55,8 @@ export const Colors = {
         white: '#FEFEFE', // White
         red: '#cc4533', // Error color
         redTransparent: 'rgba(204, 69, 51, 0.5)',
+        blueTransparent: 'rgba(135, 206, 235, 0.2)',
+        blueSolid: '#5DADE2',
         warning: '#FF8C00', // Optional: Warning color (darker orange)
         info: '#4682B4', // Optional: Info color (muted blue)
         transparent: 'rgba(0, 0, 0, 0)',

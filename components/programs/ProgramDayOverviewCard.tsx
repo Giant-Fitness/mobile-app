@@ -9,6 +9,7 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { Icon } from '@/components/base/Icon';
 
 interface ProgramDayOverviewCardProps {
     day: ProgramDay;
@@ -24,18 +25,24 @@ export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ 
     let backgroundColor = themeColors.background;
     let borderColor = themeColors.systemBorderColor;
     let textColor = themeColors.text;
-
+    let displayRest = false;
     if (isEnrolled && userProgramProgress) {
         const dayNumber = parseInt(day.DayId);
         const currentDayNumber = parseInt(userProgramProgress.CurrentDay);
-
         if (dayNumber < currentDayNumber) {
             backgroundColor = themeColors.tipBackground; // Completed
             textColor = themeColors.subText;
             borderColor = themeColors.backgroundTertiary;
         } else if (dayNumber === currentDayNumber) {
-            backgroundColor = themeColors.accent; // Current Day
+            if (day.RestDay) {
+                backgroundColor = themeColors.blueSolid;
+            } else {
+                backgroundColor = themeColors.accent;
+            }
             textColor = themeColors.white;
+        } else if (day.RestDay) {
+            backgroundColor = themeColors.blueTransparent;
+            displayRest = true;
         } else {
             backgroundColor = themeColors.background; // Upcoming
         }
@@ -46,7 +53,11 @@ export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ 
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={1}>
             <ThemedView style={[styles.card, { backgroundColor, borderColor, width: Sizes.dayTile, height: Sizes.dayTileHeight }]}>
-                <ThemedText style={[styles.dayNumber, { color: textColor }]}>{day.DayId}</ThemedText>
+                {displayRest ? (
+                    <Icon name='power-sleep' color={textColor} />
+                ) : (
+                    <ThemedText style={[styles.dayNumber, { color: textColor }]}>{day.DayId}</ThemedText>
+                )}
             </ThemedView>
         </TouchableOpacity>
     );
