@@ -68,8 +68,8 @@ const styles = StyleSheet.create({
         marginRight: Spaces.MD,
     },
     cardContainer: {
-        width: Sizes.imageXLWidth,
-        height: Sizes.imageXLHeight,
+        width: Sizes.imageXXLWidth,
+        height: Sizes.imageXXLHeight,
         overflow: 'hidden',
         borderRadius: Spaces.SM,
         // Remove shadow properties from here

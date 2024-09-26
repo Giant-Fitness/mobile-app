@@ -204,7 +204,7 @@ const ProgramCalendarScreen = () => {
                             paddingHorizontal: Spaces.LG,
                             paddingBottom: Spaces.XXS,
                         }}
-                        imageStyle={{ height: Sizes.imageXLHeight }}
+                        imageStyle={{ height: Sizes.imageXXLHeight }}
                     />
                     {isEnrolled && (
                         <ThemedView style={[styles.progress]}>

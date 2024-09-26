@@ -8,6 +8,7 @@ import { View, Text } from 'react-native';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { BasicSplash } from '@/components/base/BasicSplash';
 import ActiveProgramHome from '@/app/programs/active-program-home';
+import BrowseProgramsScreen from '@/app/programs/browse-programs';
 
 export default function ProgramsScreen() {
     const dispatch = useDispatch<AppDispatch>();
@@ -16,20 +17,14 @@ export default function ProgramsScreen() {
     const userProgramProgressState = useSelector((state: RootState) => state.user.userProgramProgressState);
 
     useEffect(() => {
-        dispatch(getUserProgramProgressAsync());
-    }, [dispatch]);
+        if (userProgramProgressState === REQUEST_STATE.IDLE) {
+            dispatch(getUserProgramProgressAsync());
+        }
+    }, [dispatch, userProgramProgressState]);
 
     if (userProgramProgressState !== REQUEST_STATE.FULFILLED) {
         return <BasicSplash />;
     }
 
-    if (!userProgramProgress?.ProgramId) {
-        return (
-            <View>
-                <Text>No active program found. Please select a program to start.</Text>
-            </View>
-        );
-    }
-
-    return <ActiveProgramHome />;
+    return userProgramProgress?.ProgramId ? <ActiveProgramHome /> : <BrowseProgramsScreen />;
 }

@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     container: {
         position: 'relative',
         width: '100%',
-        height: Sizes.imageXLHeight, // Ensure this is a valid number
+        height: Sizes.imageXXLHeight, // Ensure this is a valid number
         backgroundColor: '#ccc', // Temporary background for debugging
     },
     thumbnail: {

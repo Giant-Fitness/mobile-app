@@ -140,7 +140,7 @@ const ProgramOverviewScreen = () => {
                             paddingHorizontal: Spaces.LG,
                             paddingBottom: Spaces.XXS,
                         }}
-                        imageStyle={{ height: Sizes.imageXLHeight }}
+                        imageStyle={{ height: Sizes.imageXXLHeight }}
                         extraContent={
                             <ThemedView>
                                 {/* Attributes in a Row */}

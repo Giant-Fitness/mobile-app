@@ -116,7 +116,7 @@ const ProgramDayScreen = () => {
                                 backgroundColor: themeColors.background,
                                 paddingHorizontal: Spaces.LG,
                             }}
-                            imageStyle={{ height: Sizes.imageXLHeight }}
+                            imageStyle={{ height: Sizes.imageXXLHeight }}
                             titleFirst={true}
                             extraContent={
                                 <ThemedView>
