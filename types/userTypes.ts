@@ -1,4 +1,4 @@
-// src/types/userTypes.ts
+// types/userTypes.ts
 
 export interface UserProgramProgress {
     UserId: string;

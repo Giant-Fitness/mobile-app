@@ -1,5 +1,7 @@
 // components/media/TopImageInfoCard.tsx
 
+// components/media/TopImageInfoCard.tsx
+
 import React from 'react';
 import { StyleSheet, StyleProp, ViewStyle, TextStyle, ImageSourcePropType, ImageStyle, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';

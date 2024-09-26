@@ -18,8 +18,9 @@ import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { Sizes } from '@/constants/Sizes';
 import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
-import { BasicSplash } from '@/components/base/BasicSplash';
+import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { TextButton } from '@/components/buttons/TextButton';
+import { useSplashScreen } from '@/hooks/useSplashScreen';
 
 type ProgramOverviewScreenParams = {
     programId: string;
@@ -68,8 +69,14 @@ const ProgramOverviewScreen = () => {
         });
     };
 
-    if (programState === REQUEST_STATE.PENDING || userProgramProgressState === REQUEST_STATE.PENDING || !program) {
-        return <BasicSplash />;
+    const isDataLoading = programState === REQUEST_STATE.PENDING || userProgramProgressState === REQUEST_STATE.PENDING || !program;
+
+    const { showSplash, handleSplashComplete } = useSplashScreen({
+        dataLoadedState: !isDataLoading ? REQUEST_STATE.FULFILLED : REQUEST_STATE.PENDING,
+    });
+
+    if (showSplash) {
+        return <DumbbellSplash onAnimationComplete={handleSplashComplete} isDataLoaded={!isDataLoading} />;
     }
 
     if (programState === REQUEST_STATE.REJECTED) {
