@@ -1,0 +1,19 @@
+// types/workoutTypes.ts
+
+export interface Workout {
+    WorkoutId: string;
+    WorkoutName: string;
+    Time: number;
+    Level: string;
+    WorkoutType: string;
+    TargetedMuscles: string[];
+    TrainerId?: string;
+    DescriptionLong: string;
+    CreatedAt: string;
+    UpdatedAt: string;
+    EquipmentCategory: string;
+    Equipment?: string[];
+    PhotoUrl: string;
+    VideoUrl: string;
+    Archived: boolean;
+}
