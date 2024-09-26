@@ -4,12 +4,14 @@ import { configureStore } from '@reduxjs/toolkit';
 import programsReducer from '@/store/programs/programsSlice';
 import quotesReducer from '@/store/quotes/quotesSlice';
 import userReducer from '@/store/user/userSlice';
+import workoutsReducer from '@/store/workouts/workoutsSlice';
 
 export const store = configureStore({
     reducer: {
         programs: programsReducer,
         quotes: quotesReducer,
         user: userReducer,
+        workouts: workoutsReducer,
     },
     devTools: true,
 });

@@ -37,9 +37,9 @@ export const WorkoutsFilterDrawer: React.FC<WorkoutsFilterDrawerProps> = ({ visi
         return workouts.filter((workout) => {
             const { level, equipment, focus } = filters;
 
-            const matchesLevel = !level || level.includes(workout.level);
-            const matchesEquipment = !equipment || equipment.includes(workout.equipment);
-            const matchesFocus = !focus || focus.includes(workout.focus);
+            const matchesLevel = !level || level.includes(workout.Level);
+            const matchesEquipment = !equipment || equipment.includes(workout.EquipmentCategory);
+            const matchesFocus = !focus || focus.includes(workout.WorkoutType);
 
             return matchesLevel && matchesEquipment && matchesFocus;
         }).length;

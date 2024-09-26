@@ -11,6 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { getProgramAsync, getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/thunks';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
 import { getUserProgramProgressAsync } from '@/store/user/thunks';
+import { getAllWorkoutsAsync } from '@/store/workouts/thunks';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 
 const Initialization: React.FC = () => {
@@ -34,7 +35,7 @@ const Initialization: React.FC = () => {
             } else {
                 await dispatch(getAllProgramsAsync());
             }
-            await Promise.all([dispatch(getWorkoutQuoteAsync()), dispatch(getRestDayQuoteAsync())]);
+            await Promise.all([dispatch(getWorkoutQuoteAsync()), dispatch(getRestDayQuoteAsync()), dispatch(getAllWorkoutsAsync())]);
             return REQUEST_STATE.FULFILLED;
         } catch (error) {
             console.error('Error fetching data:', error);
