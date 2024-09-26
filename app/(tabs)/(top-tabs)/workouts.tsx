@@ -110,7 +110,7 @@ export default function WorkoutsScreen() {
                     {categories.map((category, index) => (
                         <ThemedView key={index} style={styles.collapsible}>
                             <Collapsible title={category.title}>
-                                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollView}>
+                                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.collapsibleScrollView}>
                                     {category.workouts.map((workout) => (
                                         <WorkoutOverviewCard
                                             key={workout.id}
@@ -125,7 +125,7 @@ export default function WorkoutsScreen() {
                                             focusMulti={workout.focusMulti}
                                         />
                                     ))}
-                                    <View style={styles.shadowContainer}>
+                                    {/*                                    <View style={styles.shadowContainer}>
                                         <TouchableOpacity
                                             activeOpacity={1}
                                             style={[styles.seeAllButton, { backgroundColor: themeColors.backgroundSecondary }]}
@@ -135,7 +135,8 @@ export default function WorkoutsScreen() {
                                                 See All
                                             </ThemedText>
                                         </TouchableOpacity>
-                                    </View>
+                                    </View>*/}
+                                    <View style={styles.endPadding} />
                                 </ScrollView>
                             </Collapsible>
                             {
@@ -186,7 +187,7 @@ const styles = StyleSheet.create({
     },
     mainScrollView: {
         marginLeft: Spaces.LG,
-        paddingRight: Spaces.XXL,
+        paddingRight: Spaces.XL,
         paddingBottom: Spaces.XL,
     },
     header: {
@@ -194,9 +195,13 @@ const styles = StyleSheet.create({
         paddingTop: Spaces.LG,
         paddingLeft: Spaces.LG,
     },
-    scrollView: {
+    collapsibleScrollView: {
         paddingLeft: Spaces.LG,
+        paddingRight: Spaces.LG,
         paddingBottom: Spaces.LG,
+    },
+    endPadding: {
+        width: Spaces.XL,
     },
     collapsible: {
         paddingTop: Spaces.MD,
@@ -218,7 +223,7 @@ const styles = StyleSheet.create({
         marginHorizontal: Spaces.XXS,
     },
     shadowContainer: {
-        shadowColor: 'rgba(0,70,0,0.2)', // Use a more standard shadow color
+        shadowColor: 'rgba(0,0,0,0.2)', // Use a more standard shadow color
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 1,
         shadowRadius: 4,

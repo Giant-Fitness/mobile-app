@@ -197,7 +197,7 @@ export default function AllWorkoutsScreen() {
                 data={filteredWorkouts}
                 renderItem={renderItem}
                 keyExtractor={keyExtractor}
-                contentContainerStyle={[styles.contentContainer, { backgroundColor: themeColors.background, paddingHorizontal: Spaces.SM }]}
+                contentContainerStyle={[styles.contentContainer, { backgroundColor: themeColors.background, paddingHorizontal: Spaces.MD }]}
                 showsVerticalScrollIndicator={false}
             />
             <WorkoutsBottomBar onSortPress={handleSortPress} onFilterPress={handleFilterPress} appliedFilterCount={activeFilterTypesCount} />

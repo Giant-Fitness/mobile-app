@@ -10,6 +10,7 @@ import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
 import { Icon } from '@/components/base/Icon';
 import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
+import { Sizes } from '@/constants/Sizes';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/rootReducer';
@@ -97,6 +98,7 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
                     )
                 }
                 titleStyle={[{ color: themeColors.highlightContainerText, marginBottom: Spaces.XXS }]}
+                imageStyle={{ height: Sizes.imageLGHeight }}
                 subtitleStyle={[{ color: themeColors.subTextSecondary, marginBottom: Spaces.SM }]}
                 titleFirst={true}
             />

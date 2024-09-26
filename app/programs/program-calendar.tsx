@@ -225,7 +225,7 @@ const ProgramCalendarScreen = () => {
                             paddingHorizontal: Spaces.LG,
                             paddingBottom: Spaces.XXS,
                         }}
-                        imageStyle={{ height: Sizes.imageXXLHeight }}
+                        imageStyle={{ height: Sizes.image3XLHeight }}
                         extraContent={
                             <View>
                                 {/* Attributes in a Row */}

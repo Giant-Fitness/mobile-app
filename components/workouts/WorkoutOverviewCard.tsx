@@ -44,13 +44,13 @@ export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, 
                     image={photo}
                     title={name}
                     subtitle={`${length}, ${level}`}
-                    gradientColors={['transparent', 'rgba(0,0,0,0.7)']}
+                    gradientColors={['transparent', 'rgba(0,0,0,0.65)']}
                     containerStyle={{ height: '100%' }}
                     textContainerStyle={{ bottom: Spaces.LG }}
                     subtitleType='bodySmall'
                     titleType='title'
-                    titleStyle={{ marginRight: Spaces.XL, lineHeight: moderateScale(20) }}
-                    subtitleStyle={{ marginTop: 0 }}
+                    titleStyle={{ marginRight: Spaces.LG, lineHeight: moderateScale(20) }}
+                    subtitleStyle={{ marginTop: Spaces.XS }}
                 />
             </TouchableOpacity>
         </View>
