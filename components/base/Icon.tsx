@@ -51,7 +51,7 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
     // Render the appropriate icon
     switch (name) {
         case 'stopwatch':
-            return <AnimatedIonicons name='stopwatch-outline' {...commonProps} />;
+            return <AnimatedIonicons name='stopwatch' {...commonProps} />;
         case 'dumbbell':
             return <AnimatedMaterialCommunityIcons name='dumbbell' {...commonProps} />;
         case 'yoga':
