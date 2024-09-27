@@ -7,33 +7,18 @@ import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
 import { moderateScale } from '@/utils/scaling';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
+import { Workout } from '@/types';
 
 type WorkoutOverviewCardProps = {
-    name: string;
-    length: string;
-    photo: ImageSourcePropType;
-    level: string;
-    equipment: string;
-    focus: string;
-    trainer: string;
-    longText: string;
-    focusMulti: string[];
+    workout: Workout;
 };
 
-export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, length, level, equipment, focus, photo, trainer, longText, focusMulti }) => {
+export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ workout }) => {
     const navigation = useNavigation();
 
     const navigateToWorkoutDetails = () => {
         navigation.navigate('workouts/workout-details', {
-            name,
-            length,
-            level,
-            equipment,
-            focus,
-            photo,
-            trainer,
-            longText,
-            focusMulti,
+            workoutId: workout.WorkoutId,
         });
     };
 
@@ -41,9 +26,9 @@ export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ name, 
         <View style={styles.shadowContainer}>
             <TouchableOpacity onPress={navigateToWorkoutDetails} style={styles.cardContainer} activeOpacity={1}>
                 <ImageTextOverlay
-                    image={photo}
-                    title={name}
-                    subtitle={`${length}, ${level}`}
+                    image={workout.PhotoUrl}
+                    title={workout.WorkoutName}
+                    subtitle={`${workout.Time} mins, ${workout.Level}`}
                     gradientColors={['transparent', 'rgba(0,0,0,0.65)']}
                     containerStyle={{ height: '100%' }}
                     textContainerStyle={{ bottom: Spaces.LG }}
