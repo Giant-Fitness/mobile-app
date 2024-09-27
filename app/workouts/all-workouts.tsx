@@ -107,14 +107,7 @@ export default function AllWorkoutsScreen() {
         filterAndSortWorkouts(filters, option);
     };
 
-    const renderItem = useCallback(
-        ({ item }: ListRenderItemInfo<Workout>) => (
-            <MemoizedWorkoutDetailedCard
-                workout={item}
-            />
-        ),
-        [themeColors.card],
-    );
+    const renderItem = useCallback(({ item }: ListRenderItemInfo<Workout>) => <MemoizedWorkoutDetailedCard workout={item} />, [themeColors.card]);
 
     const keyExtractor = (item: Workout) => item.WorkoutId;
 

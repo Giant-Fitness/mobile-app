@@ -5,14 +5,14 @@ import { Workout } from '@/types';
 
 export interface WorkoutState {
     workouts: Record<string, Workout>;
-    workoutsState: Record<string, REQUEST_STATE>;
+    workoutStates: Record<string, REQUEST_STATE>;
     allWorkoutsState: REQUEST_STATE;
     error: string | null;
 }
 
 export const initialState: WorkoutState = {
     workouts: {},
-    workoutsState: {},
+    workoutStates: {},
     allWorkoutsState: REQUEST_STATE.IDLE,
     error: null,
 };

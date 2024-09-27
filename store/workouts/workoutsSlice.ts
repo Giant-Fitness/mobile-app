@@ -25,7 +25,7 @@ const workoutSlice = createSlice({
                 state.allWorkoutsState = REQUEST_STATE.FULFILLED;
                 action.payload.forEach((workout) => {
                     state.workouts[workout.WorkoutId] = workout;
-                    state.workoutsState[workout.WorkoutId] = REQUEST_STATE.FULFILLED;
+                    state.workoutStates[workout.WorkoutId] = REQUEST_STATE.FULFILLED;
                 });
             })
             .addCase(getAllWorkoutsAsync.rejected, (state, action) => {
