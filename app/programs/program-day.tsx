@@ -86,7 +86,7 @@ const ProgramDayScreen = () => {
     // **2. Main Return with Conditional Rendering**
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
-            <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Sizes.imageLGHeight} headerInterpolationEnd={Sizes.imageLGHeight + Spaces.XXL} />
+            <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Spaces.XXL} headerInterpolationEnd={Sizes.imageLGHeight} />
             <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
                 {/* **Loading State** */}
                 {programDayState === REQUEST_STATE.PENDING && (

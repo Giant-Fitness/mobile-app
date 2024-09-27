@@ -118,11 +118,10 @@ const ProgramOverviewScreen = () => {
         console.log('Program reset');
         // Implement your reset program logic here
     };
-    console.log(program);
 
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.backgroundTertiary }]}>
-            <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Sizes.imageLGHeight} headerInterpolationEnd={Sizes.imageLGHeight + Spaces.XXL} />
+            <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Spaces.XXL} headerInterpolationEnd={Sizes.imageLGHeight} />
             <Animated.ScrollView
                 contentContainerStyle={[{ flexGrow: 1 }]}
                 showsVerticalScrollIndicator={false}
@@ -186,7 +185,7 @@ const ProgramOverviewScreen = () => {
                                     </View>
                                 </ThemedView>
                                 {/* Short Description */}
-                                <ThemedText type='italic' style={[{ paddingBottom: Spaces.LG, paddingTop: Spaces.MD }]}>
+                                <ThemedText type='bodySmall' style={[{ paddingBottom: Spaces.LG, paddingTop: Spaces.MD }]}>
                                     {DescriptionLong}
                                 </ThemedText>
                             </ThemedView>

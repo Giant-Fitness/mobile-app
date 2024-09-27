@@ -4,6 +4,6 @@ export interface UserProgramProgress {
     UserId: string;
     ProgramId: string;
     CurrentDay: string;
-    StartDate: string;
-    LastActivityDate: string;
+    StartAt: string;
+    LastActivityAt: string;
 }

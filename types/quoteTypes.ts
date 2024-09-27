@@ -7,6 +7,6 @@ export interface Quote {
     Author?: string;
     Context: string;
     Active: boolean;
-    CreatedDate: string;
-    LastModifiedDate: string;
+    CreatedAt: string;
+    UpdatedAt: string;
 }

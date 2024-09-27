@@ -9,8 +9,8 @@ const mockWorkoutQuote: Quote = {
     Author: '',
     Context: 'Workout',
     Active: true,
-    CreatedDate: '2024-08-01',
-    LastModifiedDate: '2024-08-05',
+    CreatedAt: '2024-08-01',
+    UpdatedAt: '2024-08-05',
 };
 
 const mockRestDayQuote: Quote = {
@@ -20,8 +20,8 @@ const mockRestDayQuote: Quote = {
     Author: '',
     Context: 'Rest',
     Active: true,
-    CreatedDate: '2024-08-01',
-    LastModifiedDate: '2024-08-05',
+    CreatedAt: '2024-08-01',
+    UpdatedAt: '2024-08-05',
 };
 
 export { mockWorkoutQuote, mockRestDayQuote };

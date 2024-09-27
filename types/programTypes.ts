@@ -16,8 +16,8 @@ export interface Program {
     Level: string;
     Type: string;
     Goal: string;
-    CreationDate: string;
-    LastModified: string;
+    CreatedAt: string;
+    UpdatedAt: string;
     PhotoUrl: string;
     Archived: boolean;
     CalendarOverview: ProgramCalendarOverviewItem[];
@@ -41,8 +41,8 @@ export interface Exercise {
     QuickTip: string;
     VideoUrl: string;
     BannerUrl: string;
-    CreationDate: string;
-    LastModified: string;
+    CreatedAt: string;
+    UpdatedAt: string;
     Archived: boolean;
     Sets: number;
     RepsUpper: number;
@@ -58,8 +58,8 @@ export interface ProgramDay {
     RestDay: boolean;
     Exercises: Exercise[];
     PhotoUrl: string;
-    CreationDate: string;
-    LastModified: string;
+    CreatedAt: string;
+    UpdatedAt: string;
     Time: number; // Time in minutes
     MuscleGroups: string[];
     EquipmentCategory: string;

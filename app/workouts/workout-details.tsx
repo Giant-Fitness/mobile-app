@@ -1,8 +1,9 @@
 // app/workouts/workout-detail-page.tsx
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useSelector, useDispatch } from 'react-redux';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -16,16 +17,15 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
+import { AppDispatch, RootState } from '@/store/rootReducer';
+import { getWorkoutAsync } from '@/store/workouts/thunks';
+import { REQUEST_STATE } from '@/constants/requestStates';
+import { useSplashScreen } from '@/hooks/useSplashScreen';
+import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 
 type WorkoutDetailScreenParams = {
     Workout: {
-        name: string;
-        length: string;
-        level: string;
-        equipment: string;
-        photo: string;
-        longText: string;
-        focusMulti: string[];
+        workoutId: string;
     };
 };
 
@@ -34,10 +34,14 @@ export default function WorkoutDetailScreen() {
     const themeColors = Colors[colorScheme];
 
     const navigation = useNavigation();
+    const dispatch = useDispatch<AppDispatch>();
     const route = useRoute<RouteProp<WorkoutDetailScreenParams, 'Workout'>>();
 
     const scrollY = useSharedValue(0);
 
+    const { workoutId } = route.params;
+    const workout = useSelector((state: RootState) => state.workouts.workouts[workoutId]);
+    const workoutState = useSelector((state: RootState) => state.workouts.workoutStates[workoutId]);
     const videoPlayerRef = useRef<FullScreenVideoPlayerHandle>(null);
 
     // Constants for milestone tracking and skip logic
@@ -46,22 +50,35 @@ export default function WorkoutDetailScreen() {
 
     // State for tracking playback position
     const [lastPlaybackPosition, setLastPlaybackPosition] = useState(0);
-    const reachedMilestones = useRef(new Set());
+    const [reachedMilestones, setReachedMilestones] = useState(new Set());
 
-    React.useEffect(() => {
+    useEffect(() => {
         navigation.setOptions({ headerShown: false });
-    }, [navigation]);
+        if (workoutState !== REQUEST_STATE.FULFILLED) {
+            dispatch(getWorkoutAsync({ workoutId }));
+        }
+    }, [navigation, dispatch, workoutId, workoutState]);
 
-    const { name, length, level, equipment, photo, longText, focusMulti } = route.params;
+    const { showSplash, handleSplashComplete } = useSplashScreen({
+        dataLoadedState: workoutState,
+    });
 
-    // Convert focusMulti array to a comma-separated string
-    const focusMultiText = focusMulti.join(', ');
-    const levelIcon = 'level-' + level.toLowerCase();
+    if (showSplash) {
+        return <DumbbellSplash isDataLoaded={false} />;
+    }
+
+    const { WorkoutName, Time, Level, EquipmentCategory, PhotoUrl, DescriptionLong, VideoUrl, WorkoutType, TargetedMuscles } = workout;
+
+    const targetMuscles = TargetedMuscles.join(', ');
+    const levelIcon = 'level-' + Level.toLowerCase();
 
     // Function to start the video playback
     const handleStartWorkout = () => {
         if (videoPlayerRef.current) {
             videoPlayerRef.current.startPlayback();
+            // Reset milestones when starting the workout
+            setReachedMilestones(new Set());
+            setLastPlaybackPosition(0);
         }
     };
 
@@ -72,16 +89,21 @@ export default function WorkoutDetailScreen() {
             const currentPosition = status.positionMillis;
             const progress = currentPosition / duration;
 
+            // Check if video has restarted
+            if (currentPosition < lastPlaybackPosition) {
+                setReachedMilestones(new Set());
+            }
+
             // Check and log milestones
             MILESTONES.forEach((milestone) => {
-                if (progress >= milestone && !reachedMilestones.current.has(milestone)) {
+                if (progress >= milestone && !reachedMilestones.has(milestone)) {
                     console.log(`Milestone reached: ${milestone * 100}%`);
-                    reachedMilestones.current.add(milestone);
+                    setReachedMilestones((prev) => new Set(prev).add(milestone));
                 }
             });
 
             // Check if a skip occurred
-            if (lastPlaybackPosition !== null && Math.abs(currentPosition - lastPlaybackPosition) > duration * SKIP_THRESHOLD) {
+            if (lastPlaybackPosition !== 0 && Math.abs(currentPosition - lastPlaybackPosition) > duration * SKIP_THRESHOLD) {
                 console.log(`Skip detected from ${lastPlaybackPosition / 1000}s to ${currentPosition / 1000}s`);
             }
 
@@ -91,6 +113,7 @@ export default function WorkoutDetailScreen() {
             // Additional session tracking logic can be implemented here
         }
     };
+
     const handleDismiss = () => {};
 
     // Scroll Handler for Animated Header
@@ -102,7 +125,7 @@ export default function WorkoutDetailScreen() {
 
     return (
         <ThemedView style={styles.container}>
-            <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Sizes.imageLGHeight} headerInterpolationEnd={Sizes.imageLGHeight + Spaces.XXL} />
+            <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Spaces.XXL} headerInterpolationEnd={Sizes.imageLGHeight} />
             <Animated.ScrollView
                 contentContainerStyle={{ flexGrow: 1 }}
                 showsVerticalScrollIndicator={false}
@@ -111,8 +134,8 @@ export default function WorkoutDetailScreen() {
                 scrollEventThrottle={16}
             >
                 <TopImageInfoCard
-                    image={photo}
-                    title={name}
+                    image={PhotoUrl}
+                    title={WorkoutName}
                     titleType='titleLarge'
                     titleStyle={{ marginBottom: Spaces.XS }}
                     containerStyle={{ elevation: 5, marginBottom: 0 }}
@@ -130,7 +153,7 @@ export default function WorkoutDetailScreen() {
                                 <View style={styles.attributeItem}>
                                     <Icon name='stopwatch' color={themeColors.text} />
                                     <ThemedText type='buttonSmall' style={[styles.attributeText]}>
-                                        {length}
+                                        {Time} mins
                                     </ThemedText>
                                 </View>
 
@@ -138,7 +161,7 @@ export default function WorkoutDetailScreen() {
                                 <View style={styles.attributeItem}>
                                     <Icon name={levelIcon} size={verticalScale(12)} color={themeColors.text} />
                                     <ThemedText type='buttonSmall' style={[styles.attributeText]}>
-                                        {level}
+                                        {Level}
                                     </ThemedText>
                                 </View>
 
@@ -146,7 +169,7 @@ export default function WorkoutDetailScreen() {
                                 <View style={styles.attributeItem}>
                                     <Icon name='kettlebell' color={themeColors.text} />
                                     <ThemedText type='buttonSmall' style={[styles.attributeText]}>
-                                        {equipment}
+                                        {EquipmentCategory}
                                     </ThemedText>
                                 </View>
 
@@ -154,7 +177,7 @@ export default function WorkoutDetailScreen() {
                                 <View style={styles.attributeItem}>
                                     <Icon name='yoga' color={themeColors.text} />
                                     <ThemedText type='buttonSmall' style={[styles.attributeText]}>
-                                        {focusMultiText}
+                                        {targetMuscles}
                                     </ThemedText>
                                 </View>
                             </ThemedView>
@@ -168,14 +191,14 @@ export default function WorkoutDetailScreen() {
                             What to Expect
                         </ThemedText>
                         <ThemedText type='body' style={[{ color: themeColors.text }]}>
-                            {longText}
+                            {DescriptionLong}
                         </ThemedText>
                     </ThemedView>
                 </ThemedView>
             </Animated.ScrollView>
             <FullScreenVideoPlayer
                 ref={videoPlayerRef}
-                source={{ uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' }}
+                source={{ uri: VideoUrl }}
                 onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
                 onDismiss={handleDismiss} // Pass the dismiss handler
             />

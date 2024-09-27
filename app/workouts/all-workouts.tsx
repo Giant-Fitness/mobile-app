@@ -1,105 +1,69 @@
 // app/workouts/all-workouts.tsx
 
-import React, { useState, useEffect } from 'react';
-import { FlatList, StyleSheet } from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { FlatList, StyleSheet, ListRenderItemInfo } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { WorkoutDetailedCard } from '@/components/workouts/WorkoutDetailedCard';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { WorkoutsBottomBar } from '@/components/workouts/WorkoutsBottomBar';
 import { WorkoutsFilterDrawer } from '@/components/workouts/WorkoutsFilterDrawer';
 import { WorkoutsSortDrawer } from '@/components/workouts/WorkoutsSortDrawer';
-import { verticalScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { useSharedValue } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
-
-const workouts = [
-    {
-        id: '1',
-        name: 'Full Body Workout',
-        photo: require('@/assets/images/vb.webp'),
-        length: '45 mins',
-        level: 'Advanced',
-        equipment: 'None',
-        focus: 'Strength',
-        trainer: 'Viren Barman',
-        longText:
-            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\n\nUse it as a standalone or pair it with a core session for a full-body workout.',
-        focusMulti: ['Arms', 'Legs', 'Chest'],
-    },
-    {
-        id: '2',
-        name: 'Cardio Blast',
-        photo: require('@/assets/images/vb.webp'),
-        length: '30 mins',
-        level: 'Intermediate',
-        equipment: 'None',
-        focus: 'Endurance',
-        trainer: 'Viren Barman',
-        longText:
-            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\n\nUse it as a standalone or pair it with a core session for a full-body workout.',
-        focusMulti: ['Arms', 'Legs', 'Chest'],
-    },
-    {
-        id: '3',
-        name: 'Morning Flexibility',
-        photo: require('@/assets/images/vb.webp'),
-        length: '20 mins',
-        level: 'Beginner',
-        equipment: 'Basic',
-        focus: 'Mobility',
-        trainer: 'Viren Barman',
-        longText:
-            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\n\nUse it as a standalone or pair it with a core session for a full-body workout.',
-        focusMulti: ['Arms', 'Legs', 'Chest'],
-    },
-    {
-        id: '4',
-        name: 'Tank Top Arms',
-        photo: require('@/assets/images/vb.webp'),
-        length: '30 mins',
-        level: 'Advanced',
-        equipment: 'Full Gym',
-        focus: 'Strength',
-        trainer: 'Viren Barman',
-        longText:
-            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\n\nUse it as a standalone or pair it with a core session for a full-body workout.',
-        focusMulti: ['Arms', 'Legs', 'Chest'],
-    },
-    {
-        id: '5',
-        name: '5 minute Calming Breath',
-        photo: require('@/assets/images/vb.webp'),
-        length: '5 mins',
-        level: 'Beginner',
-        equipment: 'Basic',
-        focus: 'Mobility',
-        trainer: 'Viren Barman',
-        longText:
-            'Get yourself ready for tank top summer. This workout will smoke your arms and shoulders.\n\nUse it as a standalone or pair it with a core session for a full-body workout.',
-        focusMulti: ['Arms', 'Legs', 'Chest'],
-    },
-];
+import { AppDispatch, RootState } from '@/store/rootReducer';
+import { getAllWorkoutsAsync } from '@/store/workouts/thunks';
+import { REQUEST_STATE } from '@/constants/requestStates';
+import { DumbbellSplash } from '@/components/base/DumbbellSplash';
+import { Workout } from '@/types';
+import { useSplashScreen } from '@/hooks/useSplashScreen';
 
 type RouteParams = {
     initialFilters?: Record<string, any>;
 };
 
+const MemoizedWorkoutDetailedCard = React.memo(WorkoutDetailedCard);
+
 export default function AllWorkoutsScreen() {
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isSortVisible, setIsSortVisible] = useState(false);
-    const [filteredWorkouts, setFilteredWorkouts] = useState(workouts);
+    const [filteredWorkouts, setFilteredWorkouts] = useState<Workout[]>([]);
     const [sortOption, setSortOption] = useState({ type: 'Length', order: 'Shortest' });
 
     const navigation = useNavigation();
     const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
+    const dispatch = useDispatch<AppDispatch>();
 
     const { initialFilters } = route.params || {};
     const [filters, setFilters] = useState(initialFilters || {});
+
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
+
+    const { workouts, allWorkoutsState } = useSelector((state: RootState) => state.workouts);
+    const scrollY = useSharedValue(0);
+
+    const fetchData = useCallback(async () => {
+        if (allWorkoutsState !== REQUEST_STATE.FULFILLED) {
+            await dispatch(getAllWorkoutsAsync());
+        }
+    }, [dispatch, workouts]);
+
+    useEffect(() => {
+        navigation.setOptions({ headerShown: false });
+        fetchData();
+    }, [navigation, fetchData]);
+
+    useEffect(() => {
+        if (allWorkoutsState === REQUEST_STATE.FULFILLED) {
+            filterAndSortWorkouts(filters, sortOption);
+        }
+    }, [workouts, filters, sortOption, allWorkoutsState]);
 
     const handleSortPress = () => {
         setIsSortVisible(true);
@@ -115,28 +79,24 @@ export default function AllWorkoutsScreen() {
     };
 
     const filterAndSortWorkouts = (appliedFilters: any, sortOption: { type: string; order: string }) => {
-        let filtered = workouts;
+        let filtered = Object.values(workouts);
 
         // Filtering logic
         if (appliedFilters.level?.length) {
-            filtered = filtered.filter((workout) => appliedFilters.level.includes(workout.level));
+            filtered = filtered.filter((workout) => appliedFilters.level.includes(workout.Level));
         }
         if (appliedFilters.equipment?.length) {
-            filtered = filtered.filter((workout) => appliedFilters.equipment.includes(workout.equipment));
+            filtered = filtered.filter((workout) => appliedFilters.equipment.includes(workout.EquipmentCategory));
         }
         if (appliedFilters.focus?.length) {
-            filtered = filtered.filter((workout) => appliedFilters.focus.includes(workout.focus));
+            filtered = filtered.filter((workout) => appliedFilters.focus.includes(workout.WorkoutType));
         }
 
         // Sorting logic
-        const parseLength = (length: string) => parseInt(length.replace(/\D/g, ''), 10);
-
         if (sortOption.type === 'Length') {
-            filtered.sort((a, b) =>
-                sortOption.order === 'Shortest' ? parseLength(a.length) - parseLength(b.length) : parseLength(b.length) - parseLength(a.length),
-            );
+            filtered.sort((a, b) => (sortOption.order === 'Shortest' ? a.Time - b.Time : b.Time - a.Time));
         } else if (sortOption.type === 'Name') {
-            filtered.sort((a, b) => (sortOption.order === 'A to Z' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)));
+            filtered.sort((a, b) => (sortOption.order === 'A to Z' ? a.WorkoutName.localeCompare(b.WorkoutName) : b.WorkoutName.localeCompare(a.WorkoutName)));
         }
 
         setFilteredWorkouts([...filtered]);
@@ -147,45 +107,30 @@ export default function AllWorkoutsScreen() {
         filterAndSortWorkouts(filters, option);
     };
 
-    useEffect(() => {
-        if (initialFilters && Object.keys(initialFilters).length > 0) {
-            setFilters(initialFilters);
-            filterAndSortWorkouts(initialFilters, sortOption);
-        } else {
-            filterAndSortWorkouts({}, sortOption);
-        }
-    }, [initialFilters]);
+    const renderItem = useCallback(({ item }: ListRenderItemInfo<Workout>) => <MemoizedWorkoutDetailedCard workout={item} />, [themeColors.card]);
 
-    const colorScheme = useColorScheme() as 'light' | 'dark';
-    const themeColors = Colors[colorScheme];
+    const keyExtractor = (item: Workout) => item.WorkoutId;
 
-    React.useEffect(() => {
-        navigation.setOptions({ headerShown: false });
-    }, [navigation]);
+    const getItemLayout = useCallback(
+        (data: Workout[] | null | undefined, index: number) => ({
+            length: Sizes.workoutCardHeight + Spaces.MD, // Adjust this value based on your card's height + margin
+            offset: (Sizes.workoutCardHeight + Spaces.MD) * index,
+            index,
+        }),
+        [],
+    );
+
+    const { showSplash, handleSplashComplete } = useSplashScreen({
+        dataLoadedState: allWorkoutsState,
+    });
+
+    if (showSplash) {
+        return <DumbbellSplash isDataLoaded={false} />;
+    }
 
     const workoutCount = filteredWorkouts.length;
     const workoutLabel = workoutCount === 1 ? 'workout' : 'workouts';
-
     const activeFilterTypesCount = Object.keys(filters).filter((key) => filters[key].length > 0).length;
-    const scrollY = useSharedValue(0);
-
-    const renderItem = ({ item }: { item: (typeof workouts)[0] }) => (
-        <WorkoutDetailedCard
-            name={item.name}
-            photo={item.photo}
-            length={item.length}
-            level={item.level}
-            focus={item.focus}
-            equipment={item.equipment}
-            trainer={item.trainer}
-            longText={item.longText}
-            focusMulti={item.focusMulti}
-            cardColor={themeColors.card}
-            // Removed the style prop
-        />
-    );
-
-    const keyExtractor = (item: (typeof workouts)[0]) => item.id;
 
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
@@ -197,6 +142,11 @@ export default function AllWorkoutsScreen() {
                 data={filteredWorkouts}
                 renderItem={renderItem}
                 keyExtractor={keyExtractor}
+                removeClippedSubviews={true}
+                maxToRenderPerBatch={10}
+                updateCellsBatchingPeriod={50}
+                initialNumToRender={5}
+                windowSize={10}
                 contentContainerStyle={[styles.contentContainer, { backgroundColor: themeColors.background, paddingHorizontal: Spaces.MD }]}
                 showsVerticalScrollIndicator={false}
             />
@@ -205,7 +155,7 @@ export default function AllWorkoutsScreen() {
                 visible={isFilterVisible}
                 onClose={() => setIsFilterVisible(false)}
                 onApply={applyFilters}
-                workouts={workouts}
+                workouts={Object.values(workouts)}
                 initialFilters={filters}
             />
             <WorkoutsSortDrawer visible={isSortVisible} onClose={() => setIsSortVisible(false)} onApply={applySort} initialSort={sortOption} />

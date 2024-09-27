@@ -12,35 +12,30 @@ import { Icon } from '@/components/base/Icon';
 import { scale, moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
+import { Workout } from '@/types';
 
 type WorkoutDetailedCardProps = {
-    name: string;
-    length: string;
-    photo: ImageSourcePropType;
-    level: string;
-    equipment: string;
-    focus: string;
-    trainer: string;
-    longText: string;
-    focusMulti: string[];
+    workout: Workout;
 };
 
-export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, length, level, equipment, focus, photo, trainer, longText, focusMulti }) => {
+export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ workout }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
     const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     const navigation = useNavigation();
 
     const navigateToWorkoutDetails = () => {
-        navigation.navigate('workouts/workout-details', { name, length, level, equipment, focus, photo, trainer, longText, focusMulti });
+        navigation.navigate('workouts/workout-details', {
+            workoutId: workout.WorkoutId,
+        });
     };
 
-    const levelIcon = 'level-' + level.toLowerCase();
+    const levelIcon = 'level-' + workout.Level.toLowerCase();
 
     return (
         <LeftImageInfoCard
-            image={photo}
-            title={name}
+            image={workout.PhotoUrl}
+            title={workout.WorkoutName}
             titleStyle={{ fontSize: moderateScale(14) }}
             containerStyle={{ paddingBottom: Spaces.LG }}
             contentContainerStyle={{ marginLeft: Spaces.SM + Spaces.XS }}
@@ -51,24 +46,24 @@ export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ name, 
                     <ThemedView style={styles.attributeRow}>
                         <Icon name='stopwatch' size={moderateScale(14)} color={themeColors.iconDefault} />
                         <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.subText, paddingRight: Spaces.SM }]}>
-                            {length}
+                            {workout.Time} mins
                         </ThemedText>
 
                         <Icon name={levelIcon} size={moderateScale(14)} color={themeColors.iconDefault} />
                         <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.subText, marginLeft: Spaces.XXS }]}>
-                            {level}
+                            {workout.Level}
                         </ThemedText>
                     </ThemedView>
                     <ThemedView style={styles.attributeRow}>
                         <Icon name='kettlebell' size={moderateScale(14)} color={themeColors.iconDefault} />
                         <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.subText }]}>
-                            {equipment}
+                            {workout.EquipmentCategory}
                         </ThemedText>
                     </ThemedView>
                     <ThemedView style={styles.attributeRow}>
                         <Icon name='yoga' size={moderateScale(14)} color={themeColors.iconDefault} />
                         <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.subText, paddingRight: Spaces.SM }]}>
-                            {focus}
+                            {workout.WorkoutType}
                         </ThemedText>
                     </ThemedView>
                 </ThemedView>
