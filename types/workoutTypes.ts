@@ -17,3 +17,8 @@ export interface Workout {
     VideoUrl: string;
     Archived: boolean;
 }
+
+interface WorkoutRecommendations {
+    RecommendationType: string; // "Spotlight", "Endurance", "Mobility", "Strength"
+    WorkoutIds: string[];
+}

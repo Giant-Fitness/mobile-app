@@ -1,6 +1,6 @@
 // app/initialization.tsx
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { SafeAreaView, Text, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
@@ -11,7 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { getProgramAsync, getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/thunks';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
 import { getUserProgramProgressAsync } from '@/store/user/thunks';
-import { getAllWorkoutsAsync } from '@/store/workouts/thunks';
+import { getMultipleWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 
 const Initialization: React.FC = () => {
@@ -19,11 +19,12 @@ const Initialization: React.FC = () => {
     const navigation = useNavigation();
     const { userProgramProgress, userProgramProgressState, error: userError } = useSelector((state: RootState) => state.user);
     const { error: programError } = useSelector((state: RootState) => state.programs);
+    const { spotlightWorkouts, spotlightWorkoutsState, error: workoutError } = useSelector((state: RootState) => state.workouts);
+    const [dataLoaded, setDataLoaded] = useState(false);
 
     const fetchData = useCallback(async () => {
         try {
             await dispatch(getUserProgramProgressAsync());
-
             while (userProgramProgressState !== REQUEST_STATE.FULFILLED) {
                 await new Promise((resolve) => setTimeout(resolve, 50));
             }
@@ -35,31 +36,37 @@ const Initialization: React.FC = () => {
             } else {
                 await dispatch(getAllProgramsAsync());
             }
-            await Promise.all([dispatch(getWorkoutQuoteAsync()), dispatch(getRestDayQuoteAsync()), dispatch(getAllWorkoutsAsync())]);
+            await Promise.all([dispatch(getWorkoutQuoteAsync()), dispatch(getRestDayQuoteAsync()), dispatch(getSpotlightWorkoutsAsync())]);
+            setDataLoaded(REQUEST_STATE.FULFILLED);
             return REQUEST_STATE.FULFILLED;
         } catch (error) {
-            console.error('Error fetching data:', error);
             return REQUEST_STATE.REJECTED;
         }
     }, [dispatch, userProgramProgress]);
-
-    const { showSplash, handleSplashComplete } = useSplashScreen({
-        dataLoadedState: userProgramProgressState,
-    });
 
     useEffect(() => {
         navigation.setOptions({ headerShown: false });
         fetchData();
     }, [navigation, fetchData]);
 
+    useEffect(() => {
+        if (spotlightWorkoutsState === REQUEST_STATE.FULFILLED && spotlightWorkouts) {
+            dispatch(getMultipleWorkoutsAsync({ workoutIds: spotlightWorkouts.WorkoutIds }));
+        }
+    }, [spotlightWorkouts, dispatch]);
+
+    const { showSplash, handleSplashComplete } = useSplashScreen({
+        dataLoadedState: dataLoaded,
+    });
+
     if (showSplash) {
-        return <DumbbellSplash onAnimationComplete={handleSplashComplete} isDataLoaded={userProgramProgressState === REQUEST_STATE.FULFILLED} />;
+        return <DumbbellSplash isDataLoaded={false} />;
     }
 
-    if (userError || programError) {
+    if (userError || programError || workoutError) {
         return (
             <SafeAreaView style={styles.container}>
-                <Text style={styles.errorText}>Error: {userError || programError || 'An unexpected error occurred.'}</Text>
+                <Text style={styles.errorText}>Error: {userError || programError || workoutError || 'An unexpected error occurred.'}</Text>
             </SafeAreaView>
         );
     }

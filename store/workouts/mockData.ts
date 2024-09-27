@@ -1,6 +1,11 @@
 // store/workouts/mockData.ts
 
-import { Workouts } from '@/types';
+import { Workouts, WorkoutRecommendations } from '@/types';
+
+const sampleSpotlightRecommendations: WorkoutRecommendations = {
+    RecommendationType: 'Spotlight',
+    WorkoutIds: ['001', '002', '003'],
+};
 
 const sampleWorkouts: Workout[] = [
     {
@@ -500,4 +505,4 @@ const sampleWorkouts: Workout[] = [
     },
 ];
 
-export { sampleWorkouts };
+export { sampleWorkouts, sampleSpotlightRecommendations };

@@ -52,7 +52,7 @@ export default function AllWorkoutsScreen() {
         if (allWorkoutsState !== REQUEST_STATE.FULFILLED) {
             await dispatch(getAllWorkoutsAsync());
         }
-    }, [dispatch, allWorkoutsState]);
+    }, [dispatch, workouts]);
 
     useEffect(() => {
         navigation.setOptions({ headerShown: false });

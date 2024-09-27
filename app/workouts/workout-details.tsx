@@ -98,7 +98,7 @@ export default function WorkoutDetailScreen() {
             MILESTONES.forEach((milestone) => {
                 if (progress >= milestone && !reachedMilestones.has(milestone)) {
                     console.log(`Milestone reached: ${milestone * 100}%`);
-                    setReachedMilestones(prev => new Set(prev).add(milestone));
+                    setReachedMilestones((prev) => new Set(prev).add(milestone));
                 }
             });
 

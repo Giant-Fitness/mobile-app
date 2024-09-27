@@ -1,7 +1,7 @@
 // store/workouts/service.ts
 
-import { Workout } from '@/types';
-import { sampleWorkouts } from '@/store/workouts/mockData';
+import { Workout, WorkoutRecommendations } from '@/types';
+import { sampleWorkouts, sampleSpotlightRecommendations } from '@/store/workouts/mockData';
 
 // Utility function to simulate network delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -24,7 +24,22 @@ const getWorkout = async (workoutId: string): Promise<Workout | undefined> => {
     return sampleWorkouts.find((workout) => workout.WorkoutId === workoutId);
 };
 
+const getWorkouts = async (workoutIds: string[]): Promise<Workout[]> => {
+    console.log('service: getWorkouts');
+    await simulateNetworkDelay();
+    const filteredWorkouts = sampleWorkouts.filter((workout) => workoutIds.includes(workout.WorkoutId));
+    return filteredWorkouts;
+};
+
+const getSpotlightWorkouts = async (): Promise<WorkoutRecommendations> => {
+    console.log('service: getSpotlightWorkouts');
+    await simulateNetworkDelay();
+    return sampleSpotlightRecommendations;
+};
+
 export default {
     getAllWorkouts,
     getWorkout,
+    getWorkouts,
+    getSpotlightWorkouts,
 };
