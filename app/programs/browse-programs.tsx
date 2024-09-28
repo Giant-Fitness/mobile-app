@@ -32,7 +32,7 @@ export default function BrowseProgramsScreen() {
         if (allProgramsState !== REQUEST_STATE.FULFILLED) {
             await dispatch(getAllProgramsAsync());
         }
-    }, [dispatch, allProgramsState]);
+    }, [dispatch, programs]);
 
     const { showSplash, handleSplashComplete } = useSplashScreen({
         dataLoadedState: allProgramsState,

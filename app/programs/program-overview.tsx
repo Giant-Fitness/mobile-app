@@ -21,6 +21,7 @@ import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { TextButton } from '@/components/buttons/TextButton';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
+import { SlideUpActionButton } from '@/components/buttons/SlideUpActionButton';
 
 type ProgramOverviewScreenParams = {
     programId: string;
@@ -61,7 +62,8 @@ const ProgramOverviewScreen = () => {
         }
     }, [programState, dispatch, programId]);
 
-    const isEnrolled = userProgramProgress?.ProgramId === programId;
+    const isOnThisProgram = userProgramProgress?.ProgramId === programId;
+    const isOnAProgram = userProgramProgress?.ProgramId;
 
     const navigateToProgramCalendar = () => {
         navigation.navigate('programs/program-calendar', {
@@ -134,7 +136,6 @@ const ProgramOverviewScreen = () => {
                         {
                             backgroundColor: themeColors.backgroundTertiary,
                         },
-                        !isEnrolled && { marginBottom: Sizes.bottomSpaceLarge },
                     ]}
                 >
                     <TopImageInfoCard
@@ -235,15 +236,24 @@ const ProgramOverviewScreen = () => {
                                 size={'LG'}
                                 style={[styles.calendarButton]}
                             />
+                            {isOnAProgram && !isOnThisProgram && (
+                                <TextButton
+                                    text='Start Program'
+                                    onPress={handleStartProgram}
+                                    textType='bodyMedium'
+                                    size={'LG'}
+                                    style={[styles.calendarButton, { marginTop: Spaces.MD }]}
+                                />
+                            )}
                         </ThemedView>
                     </ThemedView>
                 </ThemedView>
             </Animated.ScrollView>
-            <ThemedView style={styles.buttonContainer}>
-                {!isEnrolled && (
-                    <PrimaryButton text='Start Program' textType='bodyMedium' style={[styles.startButton]} onPress={handleStartProgram} size='LG' />
-                )}
-            </ThemedView>
+            {!isOnAProgram && (
+                <SlideUpActionButton scrollY={scrollY} slideUpThreshold={Spaces.LG}>
+                    <PrimaryButton text='Start Program' textType='bodyMedium' style={styles.startButton} onPress={handleStartProgram} size='LG' />
+                </SlideUpActionButton>
+            )}
         </ThemedView>
     );
 };
@@ -295,10 +305,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flex: 1,
         paddingHorizontal: '20%',
+        marginBottom: Spaces.XXXL,
+        paddingBottom: Spaces.XXXL,
     },
     calendarButton: {
         width: '100%',
-        marginBottom: Spaces.XXXL,
     },
 });
 
