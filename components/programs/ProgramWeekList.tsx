@@ -17,10 +17,17 @@ interface ProgramWeekListProps {
     currentMonthWeeks: ProgramDay[][];
     userCurrentWeekNumber: number | null;
     userCurrentDayNumber: number | null;
+    completedDays: string[];
     navigateToProgramDay: (dayId: string) => void;
 }
 
-export const ProgramWeekList: React.FC<ProgramWeekListProps> = ({ currentMonthWeeks, userCurrentWeekNumber, userCurrentDayNumber, navigateToProgramDay }) => {
+export const ProgramWeekList: React.FC<ProgramWeekListProps> = ({
+    currentMonthWeeks,
+    userCurrentWeekNumber,
+    userCurrentDayNumber,
+    completedDays,
+    navigateToProgramDay,
+}) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
@@ -62,7 +69,7 @@ export const ProgramWeekList: React.FC<ProgramWeekListProps> = ({ currentMonthWe
                             {daysInWeek.map((day) => {
                                 // Determine if the day is completed
                                 const dayNumber = parseInt(day.DayId);
-                                const isCompleted = userCurrentDayNumber ? dayNumber < userCurrentDayNumber : false;
+                                const isCompleted = completedDays.includes(day.DayId);
                                 const isCurrentDay = userCurrentDayNumber ? dayNumber === userCurrentDayNumber : false;
                                 return (
                                     <ProgramDayRowCard

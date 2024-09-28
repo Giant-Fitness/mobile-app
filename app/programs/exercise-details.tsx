@@ -131,7 +131,7 @@ const ExerciseDetailsScreen = () => {
             {isEnrolled && (
                 <SlideUpActionButton scrollY={scrollY} slideUpThreshold={0}>
                     <View style={styles.buttonContainer}>
-                        <PrimaryButton text='Log' textType='bodyMedium' style={[styles.logButton]} onPress={handleLogExercise} size={'LG'} />
+                        {/*                        <PrimaryButton text='Log' textType='bodyMedium' style={[styles.logButton]} onPress={handleLogExercise} size={'LG'} />
                         <IconButton
                             iconName='calculator'
                             onPress={openCalculator}
@@ -139,7 +139,8 @@ const ExerciseDetailsScreen = () => {
                             iconColor={themeColors.text}
                             style={styles.calculatorButton}
                             size={'LG'}
-                        />
+                        />*/}
+                        <PrimaryButton text='Calculator' textType='bodyMedium' style={[{ width: '100%' }]} onPress={openCalculator} size={'LG'} />
                     </View>
                 </SlideUpActionButton>
             )}

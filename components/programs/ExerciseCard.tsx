@@ -91,7 +91,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isEnrolled
                         },
                     ]}
                 />
-                {isEnrolled && (
+                {/*                {isEnrolled && (
                     <TextButton
                         text='Log'
                         onPress={() => console.log(`Logging exercise: ${exercise.ExerciseName}`)}
@@ -99,7 +99,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isEnrolled
                         textStyle={[{ color: themeColors.buttonPrimaryText }]}
                         style={[{ flex: 1, backgroundColor: themeColors.buttonPrimary, borderRadius: Spaces.SM, marginLeft: Spaces.LG }]}
                     />
-                )}
+                )}*/}
             </View>
         </ThemedView>
     );

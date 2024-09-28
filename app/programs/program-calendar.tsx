@@ -320,6 +320,7 @@ const ProgramCalendarScreen = () => {
                         userCurrentWeekNumber={userCurrentWeekNumber}
                         userCurrentDayNumber={userCurrentDayNumber}
                         navigateToProgramDay={navigateToProgramDay}
+                        completedDays={userProgramProgress.CompletedDays}
                     />
                 </ThemedView>
             </Animated.ScrollView>

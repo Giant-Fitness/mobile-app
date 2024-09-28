@@ -77,11 +77,16 @@ const ProgramDayScreen = () => {
         console.log('Complete Day button pressed');
     };
 
+    const handleAlreadyCompletedDay = () => {
+        console.log('Un-finish day button pressed');
+    };
+
     // **Calculate Current Week Based on dayId**
     const currentDayNumber = parseInt(dayId, 10);
     const currentWeek = getWeekNumber(currentDayNumber);
     const dayOfWeek = getDayOfWeek(currentDayNumber);
     const isEnrolled = userProgramProgress?.ProgramId === programId;
+    const isDayCompleted = userProgramProgress?.CompletedDays.includes(dayId);
 
     // **2. Main Return with Conditional Rendering**
     return (
@@ -177,14 +182,27 @@ const ProgramDayScreen = () => {
                         )}
                         {isEnrolled && (
                             <View style={styles.buttonContainer}>
-                                <PrimaryButton
-                                    text='Finish Day'
-                                    textType='bodyMedium'
-                                    style={[styles.completeButton, { backgroundColor: themeColors.buttonPrimary }]}
-                                    onPress={handleCompleteDay}
-                                    iconName='check'
-                                    size={'LG'}
-                                />
+                                {isDayCompleted ? (
+                                    <PrimaryButton
+                                        text='Day Completed'
+                                        textType='bodyMedium'
+                                        style={[styles.completeButton, { backgroundColor: themeColors.background }]}
+                                        textStyle={[{ color: themeColors.text }]}
+                                        iconColor={themeColors.text}
+                                        onPress={handleAlreadyCompletedDay}
+                                        iconName='check-outline'
+                                        size={'LG'}
+                                    />
+                                ) : (
+                                    <PrimaryButton
+                                        text='Finish Day'
+                                        textType='bodyMedium'
+                                        style={[styles.completeButton, { backgroundColor: themeColors.buttonPrimary }]}
+                                        onPress={handleCompleteDay}
+                                        iconName='check'
+                                        size={'LG'}
+                                    />
+                                )}
                                 {programDay && programDay.RestDay && (
                                     <TextButton
                                         text='Mobility Workouts'
