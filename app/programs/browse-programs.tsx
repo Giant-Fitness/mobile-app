@@ -68,7 +68,7 @@ export default function BrowseProgramsScreen() {
     const renderHeader = () => (
         <ThemedView style={[styles.infoContainer, { marginTop: Spaces.SM }, userProgramProgress?.ProgramId && { marginTop: insets.top + Spaces.XXL }]}>
             <ThemedText type='bodySmall' style={[styles.infoText, { color: themeColors.subText }]}>
-                Programs are multi-week routines, designed to help you achieve your goals
+                Level up your fitness! Follow these structured, multi-week adventures to unlock your full potential
             </ThemedText>
         </ThemedView>
     );
