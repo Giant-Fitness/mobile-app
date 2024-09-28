@@ -21,6 +21,7 @@ import { BulletedList } from '@/components/layout/BulletedList';
 import { Icon } from '@/components/base/Icon';
 import { HighlightedTip } from '@/components/alerts/HighlightedTip';
 import { OneRepMaxCalculator } from '@/components/programs/OneRepMaxCalculator';
+import { SlideUpActionButton } from '@/components/buttons/SlideUpActionButton';
 
 type ExerciseDetailsScreenParams = {
     Exercise: {
@@ -128,17 +129,19 @@ const ExerciseDetailsScreen = () => {
             <OneRepMaxCalculator visible={isCalculatorVisible} onClose={closeCalculator} ormPercentage={exercise.ORMPercentage} />
 
             {isEnrolled && (
-                <ThemedView style={styles.buttonContainer}>
-                    <PrimaryButton text='Log' textType='bodyMedium' style={[styles.logButton]} onPress={handleLogExercise} size={'LG'} />
-                    <IconButton
-                        iconName='calculator'
-                        onPress={openCalculator}
-                        iconSize={Spaces.LG + Spaces.XS}
-                        iconColor={themeColors.text}
-                        style={styles.calculatorButton}
-                        size={'LG'}
-                    />
-                </ThemedView>
+                <SlideUpActionButton scrollY={scrollY} slideUpThreshold={0}>
+                    <View style={styles.buttonContainer}>
+                        <PrimaryButton text='Log' textType='bodyMedium' style={[styles.logButton]} onPress={handleLogExercise} size={'LG'} />
+                        <IconButton
+                            iconName='calculator'
+                            onPress={openCalculator}
+                            iconSize={Spaces.LG + Spaces.XS}
+                            iconColor={themeColors.text}
+                            style={styles.calculatorButton}
+                            size={'LG'}
+                        />
+                    </View>
+                </SlideUpActionButton>
             )}
         </ThemedView>
     );
@@ -157,18 +160,12 @@ const styles = StyleSheet.create({
         paddingBottom: Spaces.LG,
     },
     buttonContainer: {
-        position: 'absolute',
-        bottom: Spaces.XL,
-        right: 0,
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'transparent',
-        paddingHorizontal: Spaces.MD,
     },
     logButton: {
-        width: '75%',
+        width: '80%',
         flexDirection: 'row',
-        alignItems: 'center',
         marginRight: Spaces.SM,
     },
     calculatorButton: {},

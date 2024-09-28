@@ -53,7 +53,7 @@ export const IconButton: React.FC<IconButtonProps & AccessibilityProps> = ({
             ]}
             onPress={onPress}
             accessibilityLabel={accessibilityLabel}
-            activeOpacity={Opacities.buttonActiveOpacity}
+            activeOpacity={1}
         >
             <Icon name={iconName} size={moderateScale(iconSize)} color={iconColor || themeColors.iconDefault} />
         </TouchableOpacity>

@@ -28,7 +28,7 @@ const Initialization: React.FC = () => {
             while (userProgramProgressState !== REQUEST_STATE.FULFILLED) {
                 await new Promise((resolve) => setTimeout(resolve, 50));
             }
-            if (userProgramProgress && Object.keys(userProgramProgress).length > 0) {
+            if (userProgramProgress && userProgramProgress.ProgramId) {
                 await Promise.all([
                     dispatch(getProgramAsync({ programId: userProgramProgress.ProgramId })),
                     dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId })),

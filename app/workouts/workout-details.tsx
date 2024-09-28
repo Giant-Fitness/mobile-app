@@ -22,6 +22,7 @@ import { getWorkoutAsync } from '@/store/workouts/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
+import { SlideUpActionButton } from '@/components/buttons/SlideUpActionButton';
 
 type WorkoutDetailScreenParams = {
     Workout: {
@@ -202,9 +203,9 @@ export default function WorkoutDetailScreen() {
                 onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
                 onDismiss={handleDismiss} // Pass the dismiss handler
             />
-            <ThemedView style={styles.buttonContainer}>
-                <PrimaryButton text='Start Workout' textType='bodyMedium' style={[styles.startButton]} onPress={handleStartWorkout} size={'LG'} />
-            </ThemedView>
+            <SlideUpActionButton scrollY={scrollY} slideUpThreshold={Spaces.MD}>
+                <PrimaryButton text='Start Workout' textType='bodyMedium' style={styles.startButton} onPress={handleStartWorkout} size='LG' />
+            </SlideUpActionButton>
         </ThemedView>
     );
 }

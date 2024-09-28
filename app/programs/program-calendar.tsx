@@ -25,6 +25,7 @@ import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { ProgramWeekList } from '@/components/programs/ProgramWeekList';
 import { getProgramAsync, getAllProgramDaysAsync } from '@/store/programs/thunks';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
+import { SlideUpActionButton } from '@/components/buttons/SlideUpActionButton';
 
 type ProgramCalendarScreenParams = {
     programId: string;
@@ -97,20 +98,21 @@ const ProgramCalendarScreen = () => {
         }
     }, [program, programDays]);
 
-    const isEnrolled = userProgramProgress?.ProgramId === programId;
+    const isOnThisProgram = userProgramProgress?.ProgramId === programId;
+    const isOnAProgram = userProgramProgress?.ProgramId;
 
     const [currentMonthIndex, setCurrentMonthIndex] = useState(0);
 
     useEffect(() => {
         if (months.length > 0) {
             let initialIndex = 0;
-            if (isEnrolled && userProgramProgress) {
+            if (isOnThisProgram && userProgramProgress) {
                 initialIndex = Math.floor((parseInt(userProgramProgress.CurrentDay) - 1) / 28);
                 initialIndex = Math.min(initialIndex, months.length - 1);
             }
             setCurrentMonthIndex(initialIndex);
         }
-    }, [months, userProgramProgress, isEnrolled]);
+    }, [months, userProgramProgress, isOnThisProgram]);
 
     const navigateToProgramDay = (dayId: string) => {
         if (programId && dayId) {
@@ -164,7 +166,7 @@ const ProgramCalendarScreen = () => {
         }
     };
 
-    const userCurrentDayNumber = isEnrolled && userProgramProgress ? parseInt(userProgramProgress.CurrentDay) : null;
+    const userCurrentDayNumber = isOnThisProgram && userProgramProgress ? parseInt(userProgramProgress.CurrentDay) : null;
     const userCurrentWeekNumber = userCurrentDayNumber ? getWeekNumber(userCurrentDayNumber) : null;
 
     // Handle the Start Program action
@@ -211,8 +213,8 @@ const ProgramCalendarScreen = () => {
                         {
                             backgroundColor: themeColors.background,
                         },
-                        !isEnrolled && { marginBottom: Sizes.bottomSpaceLarge },
-                        isEnrolled && { marginBottom: Spaces.XXL },
+                        !isOnThisProgram && { marginBottom: Sizes.bottomSpaceLarge },
+                        isOnThisProgram && { marginBottom: Spaces.XXL },
                     ]}
                 >
                     <TopImageInfoCard
@@ -269,7 +271,7 @@ const ProgramCalendarScreen = () => {
                             </View>
                         }
                     />
-                    {isEnrolled && (
+                    {isOnThisProgram && (
                         <ThemedView style={[styles.progress]}>
                             <ThemedText type='overline' style={[{ color: themeColors.subText, paddingBottom: Spaces.MD }]}>
                                 Day {userCurrentDayNumber}/{program?.Days}
@@ -307,7 +309,7 @@ const ProgramCalendarScreen = () => {
                                 weeks={months[currentMonthIndex]}
                                 onDayPress={navigateToProgramDay}
                                 userProgramProgress={userProgramProgress}
-                                isEnrolled={isEnrolled}
+                                isEnrolled={isOnThisProgram}
                             />
                         </ThemedView>
                     </ThemedView>
@@ -321,11 +323,13 @@ const ProgramCalendarScreen = () => {
                     />
                 </ThemedView>
             </Animated.ScrollView>
-            <ThemedView style={styles.buttonContainer}>
-                {!isEnrolled && (
-                    <PrimaryButton text='Start Program' textType='bodyMedium' style={[styles.startButton]} onPress={handleStartProgram} size='LG' />
+            <View style={styles.buttonContainer}>
+                {!isOnThisProgram && !isOnAProgram && (
+                    <SlideUpActionButton scrollY={scrollY} slideUpThreshold={Spaces.LG}>
+                        <PrimaryButton text='Start Program' textType='bodyMedium' style={[styles.startButton]} onPress={handleStartProgram} size='LG' />
+                    </SlideUpActionButton>
                 )}
-                {/*        {isEnrolled && (
+                {/*        {isOnThisProgram && (
           <PrimaryButton
             text="Reset Program"
             style={[styles.resetButton]}
@@ -334,7 +338,7 @@ const ProgramCalendarScreen = () => {
             textStyle={{ color: themeColors.error }}
           />
         )}*/}
-            </ThemedView>
+            </View>
         </ThemedView>
     );
 };
@@ -364,14 +368,7 @@ const styles = StyleSheet.create({
         paddingBottom: Spaces.LG,
     },
     monthTitle: {},
-    buttonContainer: {
-        position: 'absolute',
-        bottom: Spaces.XL,
-        right: 0,
-        left: 0,
-        backgroundColor: 'transparent',
-        marginHorizontal: '10%',
-    },
+    buttonContainer: {},
     startButton: {},
     resetButton: {
         borderWidth: 1,
