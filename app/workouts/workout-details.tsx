@@ -204,13 +204,7 @@ export default function WorkoutDetailScreen() {
                 onDismiss={handleDismiss} // Pass the dismiss handler
             />
             <SlideUpActionButton scrollY={scrollY} slideUpThreshold={Spaces.MD}>
-                <PrimaryButton 
-                    text='Start Workout' 
-                    textType='bodyMedium' 
-                    style={styles.startButton} 
-                    onPress={handleStartWorkout} 
-                    size='LG'
-                />
+                <PrimaryButton text='Start Workout' textType='bodyMedium' style={styles.startButton} onPress={handleStartWorkout} size='LG' />
             </SlideUpActionButton>
         </ThemedView>
     );
