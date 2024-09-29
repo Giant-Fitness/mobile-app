@@ -89,7 +89,7 @@ export default function AllWorkoutsScreen() {
             filtered = filtered.filter((workout) => appliedFilters.equipment.includes(workout.EquipmentCategory));
         }
         if (appliedFilters.focus?.length) {
-            filtered = filtered.filter((workout) => appliedFilters.focus.includes(workout.WorkoutType));
+            filtered = filtered.filter((workout) => appliedFilters.focus.includes(workout.WorkoutCategory));
         }
 
         // Sorting logic

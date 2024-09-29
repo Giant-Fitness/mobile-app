@@ -5,6 +5,7 @@ export interface Workout {
     WorkoutName: string;
     Time: number;
     Level: string;
+    WorkoutCategory: string;
     WorkoutType: string;
     TargetedMuscles: string[];
     TrainerId?: string;

@@ -63,7 +63,7 @@ export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ workou
                     <ThemedView style={styles.attributeRow}>
                         <Icon name='yoga' size={moderateScale(14)} color={themeColors.iconDefault} />
                         <ThemedText type='bodySmall' style={[styles.attributeText, { color: themeColors.subText, paddingRight: Spaces.SM }]}>
-                            {workout.WorkoutType}
+                            {workout.WorkoutCategory}
                         </ThemedText>
                     </ThemedView>
                 </ThemedView>
