@@ -45,8 +45,8 @@ const getWorkouts = async (workoutIds: string[]): Promise<Workout[]> => {
         const workoutIdsString = workoutIds.join(',');
         const response = await axios.get(`${API_BASE_URL}/workouts/batch`, {
             params: {
-                workoutIds: workoutIdsString
-            }
+                workoutIds: workoutIdsString,
+            },
         });
         const parsedBody = JSON.parse(response.data.body);
         return parsedBody.workouts || [];
@@ -58,8 +58,14 @@ const getWorkouts = async (workoutIds: string[]): Promise<Workout[]> => {
 
 const getSpotlightWorkouts = async (): Promise<WorkoutRecommendations> => {
     console.log('service: getSpotlightWorkouts');
-    await simulateNetworkDelay();
-    return sampleSpotlightRecommendations;
+    try {
+        const response = await axios.get(`${API_BASE_URL}/recommendations/workouts/spotlight`);
+        const parsedBody = JSON.parse(response.data.body);
+        return parsedBody;
+    } catch (error) {
+        console.error('Error fetching spotlight workouts:', error);
+        throw error;
+    }
 };
 
 export default {
