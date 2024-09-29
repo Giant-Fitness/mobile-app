@@ -4,7 +4,7 @@ import { Workouts, WorkoutRecommendations } from '@/types';
 
 const sampleSpotlightRecommendations: WorkoutRecommendations = {
     RecommendationType: 'Spotlight',
-    WorkoutIds: ['001', '002', '003'],
+    WorkoutIds: ['3862ee02-e556-4fc4-91a5-e139096fcd1b', 'dcf63605-be41-40e7-a7f1-2905defc3972', '39153ee9-0512-4cb5-8341-48d1d979ded4'],
 };
 
 const sampleWorkouts: Workout[] = [
