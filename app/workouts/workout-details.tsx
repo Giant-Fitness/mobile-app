@@ -68,7 +68,7 @@ export default function WorkoutDetailScreen() {
         return <DumbbellSplash isDataLoaded={false} />;
     }
 
-    const { WorkoutName, Time, Level, EquipmentCategory, PhotoUrl, DescriptionLong, VideoUrl, WorkoutType, TargetedMuscles } = workout;
+    const { WorkoutName, Time, Level, EquipmentCategory, PhotoUrl, DescriptionLong, VideoUrl, TargetedMuscles } = workout;
 
     const targetMuscles = TargetedMuscles.join(', ');
     const levelIcon = 'level-' + Level.toLowerCase();

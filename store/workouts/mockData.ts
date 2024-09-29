@@ -13,7 +13,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Bodyweight Basics',
         Time: 30,
         Level: 'Beginner',
-        WorkoutType: 'Strength',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Strength',
         TargetedMuscles: ['Full Body'],
         DescriptionLong:
             "No equipment? No problem! This bodyweight bonanza will have you feeling the burn from head to toe.\n\nWe'll squat, push, pull, and plank our way to fitness glory. It's like building a human sculpture, and you're the artist AND the clay!\n\nBring nothing but your body and a can-do attitude. Let's show gravity who's boss!",
@@ -29,7 +30,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Couch to 5K Kickoff',
         Time: 20,
         Level: 'Beginner',
-        WorkoutType: 'Endurance',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Endurance',
         TargetedMuscles: ['Legs', 'Core'],
         DescriptionLong:
             "Ready to graduate from couch potato to road warrior? This workout is your first class at Running U!\n\nWe'll alternate between brisk walks and light jogs, building your endurance without building blisters. It's like teaching your legs a new language – the language of awesome!\n\nAll you need is a pair of sneakers and the willingness to occasionally move faster than a sloth. Let's hit the road!",
@@ -45,7 +47,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Flexible Foundations',
         Time: 25,
         Level: 'Beginner',
-        WorkoutType: 'Mobility',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Mobility',
         TargetedMuscles: ['Full Body'],
         DescriptionLong:
             "Stiff as a board? Let's turn you into a bendy straw! This beginner-friendly mobility session is like WD-40 for your joints.\n\nWe'll stretch, we'll breathe, we'll probably make some interesting noises. By the end, you'll be reaching for your toes like they're holding the TV remote.\n\nNo equipment needed – just bring your body and whatever flexibility you currently have. Trust us, you'll leave with more!",
@@ -61,7 +64,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Dumbbell Debut',
         Time: 35,
         Level: 'Beginner',
-        WorkoutType: 'Strength',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Strength',
         TargetedMuscles: ['Arms', 'Shoulders', 'Chest'],
         DescriptionLong:
             "Time to pick things up and put them down – with style! This dumbbell workout is your ticket to Tone Town.\n\nWe'll curl, press, and lift our way to stronger arms and shoulders. It's like a theme park for your muscles, and every ride is awesome!\n\nGrab a pair of light dumbbells and prepare for your arms to send you a thank-you card tomorrow.",
@@ -78,7 +82,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Resistance Band Rumble',
         Time: 30,
         Level: 'Beginner',
-        WorkoutType: 'Endurance',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Endurance',
         TargetedMuscles: ['Full Body'],
         DescriptionLong:
             "Get ready to snap into shape with this elastic fantastic workout! We're bringing the resistance, you bring the persistence.\n\nUsing just a simple band, we'll work every muscle from head to toe. It's like yoga met strength training and had a bouncy baby!\n\nAll you need is a resistance band and the willingness to occasionally look like you're wrestling a rubber octopus. Let's get stretchy!",
@@ -95,7 +100,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Gym Newbie Navigator',
         Time: 40,
         Level: 'Beginner',
-        WorkoutType: 'Strength',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Strength',
         TargetedMuscles: ['Full Body'],
         DescriptionLong:
             "Welcome to the iron jungle, rookie! This workout is your map to navigating the gym without feeling like a lost tourist.\n\nWe'll introduce you to the major players: Mr. Treadmill, the Dumbbell Twins, and the mysterious Weight Machine family. By the end, you'll be high-fiving equipment like old friends!\n\nBring your gym membership card and a sense of adventure. Let's demystify this fitness wonderland!",
@@ -112,7 +118,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Cardio Kickboxing',
         Time: 45,
         Level: 'Intermediate',
-        WorkoutType: 'Endurance',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Endurance',
         TargetedMuscles: ['Full Body'],
         DescriptionLong:
             "Unleash your inner fighter with this high-energy cardio kickboxing session! We'll punch, kick, and jab our way to fitness glory.\n\nNo actual fighting experience required – just bring your best Rocky impression and prepare to sweat. It's like dancing, but with more attitude and fewer disco balls.\n\nGloves optional, swagger mandatory. Let's float like butterflies and sting like very sweaty bees!",
@@ -128,7 +135,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Powerlifting 101',
         Time: 60,
         Level: 'Intermediate',
-        WorkoutType: 'Strength',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Strength',
         TargetedMuscles: ['Legs', 'Back', 'Chest'],
         DescriptionLong:
             "Ready to lift heavy and leave humanity behind? Welcome to Powerlifting 101, where we separate the beast from the least!\n\nWe'll squat, bench, and deadlift our way to superhero status. It's like moving furniture, but with better form and more high-fives.\n\nBring your belt, your chalk, and your war face. Let's show these weights who's boss!",
@@ -145,7 +153,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Yoga for Desk Jockeys',
         Time: 30,
         Level: 'Beginner',
-        WorkoutType: 'Mobility',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Mobility',
         TargetedMuscles: ['Back', 'Neck', 'Hips'],
         DescriptionLong:
             "Attention all keyboard warriors and mouse musketeers! It's time to undo the damage of your desk-bound battles.\n\nWe'll stretch, twist, and breathe our way to better posture and fewer office-induced aches. It's like hitting the 'refresh' button on your body!\n\nNo yoga experience needed – just bring your stiffest joints and your willingness to occasionally topple over. Let's turn that chair-shaped body back into a human shape!",
@@ -161,7 +170,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'HIIT the Ground Running',
         Time: 25,
         Level: 'Advanced',
-        WorkoutType: 'Endurance',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Endurance',
         TargetedMuscles: ['Full Body'],
         DescriptionLong:
             "Buckle up, buttercup! This HIIT session is about to take you on a roller coaster ride of cardio madness.\n\nWe'll sprint, jump, and gasp our way through intervals that'll make your heart pound and your endorphins soar. It's like stuffing an hour of cardio into a half-hour burrito of burn!\n\nNo equipment needed, just bring your lung power and a willingness to temporarily hate the inventor of burpees. Let's get breathless!",
@@ -177,7 +187,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Kettlebell Khaos',
         Time: 40,
         Level: 'Intermediate',
-        WorkoutType: 'Strength',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Strength',
         TargetedMuscles: ['Full Body'],
         DescriptionLong:
             "Ready to swing your way to fitness glory? This kettlebell workout is about to bell your world!\n\nWe'll swing, snatch, and Turkish get-up our way to a stronger, leaner you. It's like cardio and strength had a baby, and that baby is surprisingly heavy and has handles.\n\nGrab a kettlebell (or two if you're feeling saucy) and prepare to become a swinging sensation. Let's ring that bell of gainz!",
@@ -194,7 +205,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Pilates Power Hour',
         Time: 60,
         Level: 'Intermediate',
-        WorkoutType: 'Mobility',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Mobility',
         TargetedMuscles: ['Core', 'Back', 'Hips'],
         DescriptionLong:
             "Core enthusiasts, unite! This Pilates session is about to take your abs from flab to fab.\n\nWe'll roll, stretch, and engage our way to a stronger, more stable you. It's like yoga and bodyweight training had a very coordinated, very core-focused baby.\n\nBring a mat, your best concentration face, and prepare to discover muscles you didn't know you had. Let's make Joseph Pilates proud!",
@@ -211,7 +223,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Functional Fitness Frenzy',
         Time: 45,
         Level: 'Intermediate',
-        WorkoutType: 'Strength',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Strength',
         TargetedMuscles: ['Full Body'],
         DescriptionLong:
             "Time to train for the sport of life! This functional fitness workout will have you ready to tackle anything – from wrangling toddlers to battling grocery bags.\n\nWe'll squat, lift, push, and pull our way to everyday superhero status. It's like preparing for an obstacle course, but the obstacle course is your life!\n\nBring your can-do attitude and get ready to functional-ize your fitness. Let's make daily tasks tremble in fear!",
@@ -228,7 +241,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Zen and the Art of Bodyweight',
         Time: 40,
         Level: 'Beginner',
-        WorkoutType: 'Mobility',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Mobility',
         TargetedMuscles: ['Full Body'],
         DescriptionLong:
             "Find your inner peace... and your outer strength! This zen-inspired bodyweight workout brings mindfulness to muscle-building.\n\nWe'll flow through movements that challenge both body and mind, finding balance in more ways than one. It's like meditation, but with more sweat and less 'om'.\n\nBring your focus, your breath, and your willingness to wobble occasionally. Let's turn your body into a temple... a very fit temple!",
@@ -244,7 +258,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Barbell Brigade',
         Time: 55,
         Level: 'Advanced',
-        WorkoutType: 'Strength',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Strength',
         TargetedMuscles: ['Legs', 'Back', 'Chest', 'Shoulders'],
         DescriptionLong:
             "Attention, iron warriors! The Barbell Brigade is calling, and it's time to answer with every ounce of your strength.\n\nWe're talking big lifts, big weights, and even bigger gains. It's like a heavy metal concert, but instead of head-banging, we're bar-banging!\n\nBring your grit, your chalk, and your favorite power anthem. Let's show these barbells who's the boss!",
@@ -261,7 +276,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Cardio Dance Party',
         Time: 30,
         Level: 'Beginner',
-        WorkoutType: 'Endurance',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Endurance',
         TargetedMuscles: ['Full Body'],
         DescriptionLong:
             "Who says cardio can't be a party? Get ready to boogie your way to better health with this dance-inspired sweat session!\n\nWe'll shimmy, shake, and groove our way through calories like it's Studio 54. It's like a night out dancing, but with more water and less questionable decision-making.\n\nBring your rhythm (or lack thereof) and your party spirit. Let's turn this cardio into a cardi-OH YEAH!",
@@ -277,7 +293,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Suspension Training Thriller',
         Time: 45,
         Level: 'Intermediate',
-        WorkoutType: 'Strength',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Strength',
         TargetedMuscles: ['Full Body'],
         DescriptionLong:
             "Defy gravity and your limits with this suspension training spectacular! Get ready to hang tough and build strength from head to toe.\n\nWe'll pull, push, and balance our way to a stronger core and leaner physique. It's like being a circus performer, but with less sparkly outfits and more functional strength.\n\nBring your best balancing act and prepare to suspend your disbelief about what your body can do. Let's hang in there... literally!",
@@ -294,7 +311,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Medicine Ball Madness',
         Time: 35,
         Level: 'Intermediate',
-        WorkoutType: 'Strength',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Strength',
         TargetedMuscles: ['Core', 'Arms', 'Shoulders'],
         DescriptionLong:
             "Get ready for a dose of fitness insanity with this medicine ball workout! We're prescribing a heavy dose of fun with a side of gains.\n\nWe'll slam, throw, and twist our way to a stronger, more powerful you. It's like playing catch with yourself, but way more intense and slightly less lonely.\n\nBring your best throwing arm and your willingness to chase after runaway balls. Let's have a ball while getting fit!",
@@ -311,7 +329,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Bodyweight EMOM Challenge',
         Time: 30,
         Level: 'Advanced',
-        WorkoutType: 'Endurance',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Endurance',
         TargetedMuscles: ['Full Body'],
         DescriptionLong:
             "Every Minute On the Minute, we're turning up the heat! This EMOM workout will have you racing against the clock and your own limits.\n\nWe'll crush through a series of bodyweight exercises, testing your strength and stamina with each passing minute. It's like a game of fitness chicken – how long can you keep up?\n\nBring your A-game, a reliable timer, and maybe a backup set of lungs. Let's show those 60 seconds who's boss!",
@@ -327,7 +346,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Foam Roller Release',
         Time: 20,
         Level: 'Beginner',
-        WorkoutType: 'Mobility',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Mobility',
         TargetedMuscles: ['Full Body'],
         DescriptionLong:
             "Ready to roll away your aches and pains? This foam roller session is like a spa day for your muscles – just slightly more torturous.\n\nWe'll knead, press, and roll our way to looser muscles and better mobility. It's like ironing out the wrinkles in your body, but the iron is made of foam and you're the wrinkly shirt.\n\nBring your foam roller and your highest pain threshold. Let's roll out the red carpet for better recovery!",
@@ -344,7 +364,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Plyometric Power Hour',
         Time: 45,
         Level: 'Advanced',
-        WorkoutType: 'Strength',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Strength',
         TargetedMuscles: ['Legs', 'Core'],
         DescriptionLong:
             "Gravity lovers, beware! This plyometric powerhouse is about to have you defying the laws of physics.\n\nPrepare for jumps, bounds, and explosive movements that'll have your neighbors wondering if you've taken up kangaroo boxing. It's like turning your legs into rocket boosters!\n\nBring your springiest spirit and maybe warn the people who live below you. Let's blast off to Muscle Moon!",
@@ -360,7 +381,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Dumbbell Demolition',
         Time: 50,
         Level: 'Intermediate',
-        WorkoutType: 'Strength',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Strength',
         TargetedMuscles: ['Full Body'],
         DescriptionLong:
             "Time to turn those dumbbells into smartbells! This full-body dumbbell workout will leave no muscle unturned.\n\nWe'll lift, press, and curl our way to a stronger, more sculpted you. It's like a treasure hunt for gains, and X marks the spot on every muscle!\n\nGrab a pair of dumbbells and your sense of adventure. Let's show those weights who's the real boss!",
@@ -377,7 +399,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Core Crusher Challenge',
         Time: 25,
         Level: 'Intermediate',
-        WorkoutType: 'Strength',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Strength',
         TargetedMuscles: ['Core', 'Abs', 'Obliques'],
         DescriptionLong:
             "Attention, ab enthusiasts and midsection molders! It's time to turn that six-pack into a full case with our Core Crusher Challenge.\n\nWe've packed 25 minutes so full of crunches, planks, and twists, you'll swear your abs are throwing a party. Your core will be burning, but your ego will be soaring!\n\nBring your best effort and a willingness to never look at sit-ups the same way again. Let's crush this core workout!",
@@ -393,7 +416,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Bodyweight Tabata Blitz',
         Time: 20,
         Level: 'Advanced',
-        WorkoutType: 'Endurance',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Endurance',
         TargetedMuscles: ['Full Body'],
         DescriptionLong:
             "Brace yourself for the Tabata Tornado! This whirlwind workout is about to sweep you off your feet (and possibly onto your back, gasping for air).\n\n20 seconds of all-out effort followed by 10 seconds of sweet, sweet rest. Rinse and repeat until you're not sure if you're sweating or crying. It's like stuffing a marathon into your lunch break!\n\nNo equipment required, just bring your timer and a willingness to question your life choices. Let's stir up a storm of sweat!",
@@ -409,7 +433,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Kettlebell Flow',
         Time: 40,
         Level: 'Intermediate',
-        WorkoutType: 'Strength',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Strength',
         TargetedMuscles: ['Full Body'],
         DescriptionLong:
             "Get ready to flow with the iron! This kettlebell workout combines strength, grace, and a tiny bit of danger.\n\nWe'll swing, clean, and snatch our way through a series of flowing movements that'll leave you stronger, more coordinated, and possibly a little in love with a piece of iron. It's like dancing with a very heavy partner!\n\nBring your kettlebell and your sense of rhythm. Let's make these bells sing!",
@@ -426,7 +451,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Yoga for Athletes',
         Time: 45,
         Level: 'Intermediate',
-        WorkoutType: 'Mobility',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Mobility',
         TargetedMuscles: ['Full Body'],
         DescriptionLong:
             "Calling all weekend warriors and gym rats! It's time to bend it like a yogi and recover like a pro.\n\nWe'll stretch, breathe, and pose our way to better flexibility and reduced risk of injury. It's like giving your muscles a spa day, but you're the masseur AND the client.\n\nBring your mat, your tightest muscles, and your willingness to try new twists. Let's turn those tight hamstrings into happy-strings!",
@@ -442,7 +468,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Battle Rope Beatdown',
         Time: 30,
         Level: 'Advanced',
-        WorkoutType: 'Endurance',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Endurance',
         TargetedMuscles: ['Arms', 'Shoulders', 'Core'],
         DescriptionLong:
             "Ahoy, fitness mateys! Prepare to battle the ropes in this high-seas adventure for your muscles.\n\nWe'll slam, wave, and whip these ropes until your arms feel like overcooked spaghetti. It's like tug-of-war, but the only opponent is your own endurance!\n\nBring your pirate spirit and prepare to hoist these rope sails. Let's make some waves... and gains!",
@@ -459,7 +486,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Bodyweight Ladder Challenge',
         Time: 35,
         Level: 'Intermediate',
-        WorkoutType: 'Endurance',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Endurance',
         TargetedMuscles: ['Full Body'],
         DescriptionLong:
             "Ready to climb the ladder of fitness? This bodyweight challenge will have you ascending to new heights of endurance!\n\nWe'll work our way up and down a ladder of exercises, increasing and decreasing reps as we go. It's like playing hopscotch with your muscles... if hopscotch made you sweat buckets.\n\nNo equipment needed, just bring your counting skills and a willingness to embrace the burn. Let's start climbing!",
@@ -475,7 +503,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Resistance Band Total Body Tone',
         Time: 40,
         Level: 'Beginner',
-        WorkoutType: 'Strength',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Strength',
         TargetedMuscles: ['Full Body'],
         DescriptionLong:
             "Get ready to put the 'elastic' in 'fantastic' with this full-body resistance band workout!\n\nWe'll pull, push, and stretch our way to a toned physique using nothing but a humble band. It's like having a whole gym in your hands, minus the sweaty equipment and questionable locker room smells.\n\nBring your resistance band and your stretchiest attitude. Let's band together for better fitness!",
@@ -492,7 +521,8 @@ const sampleWorkouts: Workout[] = [
         WorkoutName: 'Mindful Movement Meditation',
         Time: 25,
         Level: 'Beginner',
-        WorkoutType: 'Mobility',
+        WorkoutType: 'video',
+        WorkoutCategory: 'Mobility',
         TargetedMuscles: ['Full Body'],
         DescriptionLong:
             "Namaste, fitness friends! It's time to find your zen... and your abs... in this mindful movement session.\n\nWe'll flow through gentle exercises that connect body and mind, improving both flexibility and focus. It's like a massage for your muscles and a vacation for your brain.\n\nBring your breath, your balance, and your inner peace (don't worry if you left it in your other pants, we'll find it). Let's om our way to awesome!",
