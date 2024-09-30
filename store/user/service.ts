@@ -1,7 +1,7 @@
 // store/user/service.ts
 
-import { UserProgramProgress } from '@/types';
-import { sampleUserProgress } from '@/store/user/mockData';
+import { UserProgramProgress, User } from '@/types';
+import { sampleUserProgress, sampleUser } from '@/store/user/mockData';
 
 // Utility function to simulate network delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -12,6 +12,12 @@ const simulateNetworkDelay = async () => {
     await delay(randomDelay);
 };
 
+const getUser = async (): Promise<User> => {
+    console.log('service: getUser');
+    await simulateNetworkDelay();
+    return sampleUser;
+};
+
 const getUserProgramProgress = async (): Promise<UserProgramProgress> => {
     console.log('service: getUserProgramProgress');
     await simulateNetworkDelay();
@@ -20,4 +26,5 @@ const getUserProgramProgress = async (): Promise<UserProgramProgress> => {
 
 export default {
     getUserProgramProgress,
+    getUser,
 };

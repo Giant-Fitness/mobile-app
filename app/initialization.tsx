@@ -10,44 +10,80 @@ import { Redirect } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
 import { getProgramAsync, getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/thunks';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
-import { getUserProgramProgressAsync } from '@/store/user/thunks';
+import { getUserAsync, getUserProgramProgressAsync } from '@/store/user/thunks';
 import { getMultipleWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 
 const Initialization: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const navigation = useNavigation();
-    const { userProgramProgress, userProgramProgressState, error: userError } = useSelector((state: RootState) => state.user);
+    const { user, userState, userProgramProgress, userProgramProgressState, error: userError } = useSelector((state: RootState) => state.user);
     const { error: programError } = useSelector((state: RootState) => state.programs);
     const { spotlightWorkouts, spotlightWorkoutsState, error: workoutError } = useSelector((state: RootState) => state.workouts);
-    const [dataLoaded, setDataLoaded] = useState(false);
+    const [dataLoaded, setDataLoaded] = useState(REQUEST_STATE.PENDING);
 
-    const fetchData = useCallback(async () => {
+    const fetchUserData = useCallback(async () => {
         try {
-            await dispatch(getUserProgramProgressAsync());
+            await dispatch(getUserAsync());
+            while (userState !== REQUEST_STATE.FULFILLED) {
+                await new Promise((resolve) => setTimeout(resolve, 50));
+            }
+            return REQUEST_STATE.FULFILLED;
+        } catch (error) {
+            return REQUEST_STATE.REJECTED;
+        }
+    }, [dispatch, user]);
+
+    const fetchOtherData = useCallback(async () => {
+        try {
+            if (!user || !user.UserId) {
+                throw new Error('User data not available');
+            }
+
+            await dispatch(getUserProgramProgressAsync(user.UserId));
             while (userProgramProgressState !== REQUEST_STATE.FULFILLED) {
                 await new Promise((resolve) => setTimeout(resolve, 50));
             }
+
             if (userProgramProgress && userProgramProgress.ProgramId) {
                 await Promise.all([
                     dispatch(getProgramAsync({ programId: userProgramProgress.ProgramId })),
                     dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId })),
                 ]);
+
+                await Promise.all([
+                    dispatch(getWorkoutQuoteAsync()),
+                    dispatch(getRestDayQuoteAsync()),
+                    dispatch(getSpotlightWorkoutsAsync()),
+                    dispatch(getProgramAsync({ programId: userProgramProgress.ProgramId })),
+                    dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId })),
+                ]);
             } else {
-                await dispatch(getAllProgramsAsync());
+                await Promise.all([
+                    dispatch(getWorkoutQuoteAsync()),
+                    dispatch(getRestDayQuoteAsync()),
+                    dispatch(getSpotlightWorkoutsAsync()),
+                    dispatch(getAllProgramsAsync()),
+                ]);
             }
-            await Promise.all([dispatch(getWorkoutQuoteAsync()), dispatch(getRestDayQuoteAsync()), dispatch(getSpotlightWorkoutsAsync())]);
+
             setDataLoaded(REQUEST_STATE.FULFILLED);
             return REQUEST_STATE.FULFILLED;
         } catch (error) {
             return REQUEST_STATE.REJECTED;
         }
-    }, [dispatch, userProgramProgress]);
+    }, [dispatch, user, userProgramProgress]);
 
     useEffect(() => {
         navigation.setOptions({ headerShown: false });
-        fetchData();
-    }, [navigation, fetchData]);
+        const initializeData = async () => {
+            const userDataState = await fetchUserData();
+            if (userDataState === REQUEST_STATE.FULFILLED) {
+                await fetchOtherData();
+            }
+        };
+        initializeData();
+    }, [navigation, fetchUserData, fetchOtherData]);
 
     useEffect(() => {
         if (spotlightWorkoutsState === REQUEST_STATE.FULFILLED && spotlightWorkouts) {
