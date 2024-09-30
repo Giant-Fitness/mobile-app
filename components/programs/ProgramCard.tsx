@@ -74,7 +74,7 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({ program, isActive, act
                 </View>
 
                 <ThemedView style={[styles.contentContainer, { backgroundColor: cardBackgroundColor }]}>
-                    <ThemedText type='bodySmall' style={[{ paddingBottom: Spaces.MD, color: textColor }]}>
+                    <ThemedText type='bodySmall' style={[{ paddingBottom: Spaces.XS, color: textColor }]}>
                         {program.DescriptionShort}
                     </ThemedText>
                     <View style={styles.attributeRow}>

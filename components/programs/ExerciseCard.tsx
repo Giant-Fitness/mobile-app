@@ -63,7 +63,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isEnrolled
                 </ThemedView>
                 <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.tipBackground }]}>
                     <ThemedText type='bodyMedium' style={[{ color: themeColors.tipText }]}>
-                        {exercise.Rest}
+                        {exercise.Rest}s
                     </ThemedText>
                     <ThemedText type='bodySmall' style={[{ color: themeColors.tipText }]}>
                         Rest

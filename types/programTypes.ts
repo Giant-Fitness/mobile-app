@@ -40,19 +40,19 @@ export interface Exercise {
     InstructionsDetailed: string[];
     QuickTip: string;
     VideoUrl: string;
-    BannerUrl: string;
+    PhotoUrl: string;
     CreatedAt: string;
     UpdatedAt: string;
     Archived: boolean;
     Sets: number;
     RepsUpper: number;
     RepsLower: number;
-    Rest: string;
+    Rest: number;
     ORMPercentage: number;
 }
 
 export interface ProgramDay {
-    ProgramId: string;
+    ProgramId: number;
     DayId: string;
     DayTitle: string;
     RestDay: boolean;

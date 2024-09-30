@@ -80,10 +80,10 @@ const ExerciseDetailsScreen = () => {
                     style={[
                         styles.mainContainer,
                         { backgroundColor: themeColors.backgroundTertiary },
-                        isEnrolled && [{ paddingBottom: Sizes.bottomSpaceLarge }],
+                        isEnrolled && exercise.ORMPercentage && [{ paddingBottom: Sizes.bottomSpaceLarge }],
                     ]}
                 >
-                    <ThumbnailVideoPlayer videoUrl={exercise.VideoUrl} onPlaybackStatusUpdate={handlePlaybackStatusUpdate} thumbnailUrl={exercise.BannerUrl} />
+                    <ThumbnailVideoPlayer videoUrl={exercise.VideoUrl} onPlaybackStatusUpdate={handlePlaybackStatusUpdate} thumbnailUrl={exercise.PhotoUrl} />
                     <ThemedView style={[styles.topCard, { backgroundColor: themeColors.background }]}>
                         <ThemedView style={styles.titleContainer}>
                             <ThemedText type='titleLarge'>{exercise.ExerciseName}</ThemedText>
@@ -110,11 +110,11 @@ const ExerciseDetailsScreen = () => {
                             <ThemedView style={styles.attributeItem}>
                                 <Icon name='hourglass' style={[{ color: themeColors.text }]} size={Sizes.iconSizeSM} />
                                 <ThemedText type='buttonSmall' style={[styles.attributeText, { color: themeColors.text }]}>
-                                    Rest: {exercise.Rest}
+                                    Rest: {exercise.Rest}s
                                 </ThemedText>
                             </ThemedView>
                         </ThemedView>
-                        {isEnrolled && <HighlightedTip iconName='bulb' tipText={'Quickly find your ideal lifting weight using the Calculator'} />}
+                        {isEnrolled && exercise.ORMPercentage && <HighlightedTip iconName='bulb' tipText={'Quickly find your ideal lifting weight using the Calculator'} />}
                     </ThemedView>
 
                     <ThemedView style={styles.instructionContainer}>
@@ -128,7 +128,7 @@ const ExerciseDetailsScreen = () => {
             </Animated.ScrollView>
             <OneRepMaxCalculator visible={isCalculatorVisible} onClose={closeCalculator} ormPercentage={exercise.ORMPercentage} />
 
-            {isEnrolled && (
+            {isEnrolled && exercise.ORMPercentage && (
                 <SlideUpActionButton scrollY={scrollY} slideUpThreshold={0}>
                     <View style={styles.buttonContainer}>
                         {/*                        <PrimaryButton text='Log' textType='bodyMedium' style={[styles.logButton]} onPress={handleLogExercise} size={'LG'} />
