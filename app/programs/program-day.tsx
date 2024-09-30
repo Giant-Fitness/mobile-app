@@ -183,7 +183,7 @@ const ProgramDayScreen = () => {
                         {isEnrolled && (
                             <View style={styles.buttonContainer}>
                                 {isDayCompleted ? (
-                                    <PrimaryButton
+                                    <TextButton
                                         text='Day Completed'
                                         textType='bodyMedium'
                                         style={[styles.completeButton, { backgroundColor: themeColors.background }]}

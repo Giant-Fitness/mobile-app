@@ -2,6 +2,9 @@
 
 import { Program, ProgramDay } from '@/types';
 import { sampleProgramDays, mockPrograms } from '@/store/programs/mockData';
+import axios from 'axios';
+
+const API_BASE_URL = 'https://5kwqdlbqo5.execute-api.ap-south-1.amazonaws.com/prod';
 
 // Utility function to simulate network delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -14,38 +17,68 @@ const simulateNetworkDelay = async () => {
 
 const getAllPrograms = async (): Promise<Program[]> => {
     console.log('service: getAllPrograms');
-    await simulateNetworkDelay();
-    return mockPrograms;
+    try {
+        const response = await axios.get(`${API_BASE_URL}/programs`);
+        const parsedBody = JSON.parse(response.data.body);
+        return parsedBody.programs || [];
+    } catch (error) {
+        console.error('Error fetching all programs:', error);
+        throw error;
+    }
 };
 
 const getProgram = async (programId: string): Promise<Program | undefined> => {
     console.log('service: getProgram');
-    await simulateNetworkDelay();
-    return mockPrograms.find((program) => program.ProgramId === programId);
+    try {
+        const response = await axios.get(`${API_BASE_URL}/programs/${programId}`);
+        const parsedBody = JSON.parse(response.data.body);
+        return parsedBody.program;
+    } catch (error) {
+        console.error(`Error fetching program ${programId}:`, error);
+        throw error;
+    }
 };
 
 const getProgramDay = async (programId: string, dayId: string): Promise<ProgramDay | undefined> => {
     console.log('service: getProgramDay');
-    await simulateNetworkDelay();
-    return sampleProgramDays.find((day) => day.ProgramId === programId && day.DayId === dayId);
+    try {
+        const response = await axios.get(`${API_BASE_URL}/programs/${programId}/days/${dayId}`);
+        const parsedBody = JSON.parse(response.data.body);
+        return parsedBody.programDay;
+    } catch (error) {
+        console.error(`Error fetching programDay ${programId} ${dayId}:`, error);
+        throw error;
+    }
 };
 
 const getProgramDaysAll = async (programId: string): Promise<ProgramDay[]> => {
     console.log('service: getProgramDaysAll');
-    await simulateNetworkDelay();
-    const allDays = sampleProgramDays.filter((day) => day.ProgramId === programId);
-    return allDays;
+    try {
+        const response = await axios.get(`${API_BASE_URL}/programs/${programId}/days`);
+        const parsedBody = JSON.parse(response.data.body);
+        return parsedBody.programDays || [];
+    } catch (error) {
+        console.error(`Error fetching programDays ${programId}:`, error);
+        throw error;
+    }
 };
 
 const getProgramDaysFiltered = async (programId: string, dayIds: string[]): Promise<ProgramDay[]> => {
     console.log('service: getProgramDaysFiltered');
-    await simulateNetworkDelay();
-    // get all the days for a program
-    const allDays = sampleProgramDays.filter((day) => day.ProgramId === programId);
-    // Filter only the days with IDs in dayIds
-    const filteredDays = allDays.filter((day) => dayIds.includes(day.DayId));
-    // Assuming the result should be sorted by DayId
     return filteredDays.sort((a, b) => parseInt(a.DayId) - parseInt(b.DayId));
+    try {
+        const dayIdsString = dayIds.join(',');
+        const response = await axios.get(`${API_BASE_URL}/programs/${programId}/days/batch`, {
+            params: {
+                dayIds: dayIdsString,
+            },
+        });
+        const parsedBody = JSON.parse(response.data.body);
+        return parsedBody.programDays || [];
+    } catch (error) {
+        console.error('Error fetching multiple program days:', error);
+        throw error;
+    }
 };
 
 export default {
