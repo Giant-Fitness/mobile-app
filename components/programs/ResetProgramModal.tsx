@@ -1,4 +1,4 @@
-// components/programs/EndProgramModal.tsx
+// components/programs/ResetProgramModal.tsx
 
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
@@ -12,13 +12,13 @@ import { Sizes } from '@/constants/Sizes';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-type EndProgramModalProps = {
+type ResetProgramModalProps = {
     visible: boolean;
     onClose: () => void;
     onConfirm: () => void;
 };
 
-export const EndProgramModal: React.FC<EndProgramModalProps> = ({ visible, onClose, onConfirm }) => {
+export const ResetProgramModal: React.FC<ResetProgramModalProps> = ({ visible, onClose, onConfirm }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
@@ -29,14 +29,14 @@ export const EndProgramModal: React.FC<EndProgramModalProps> = ({ visible, onClo
                     <Icon name='warning' color={themeColors.red} size={24} />
                 </View>
                 <ThemedText type='title' style={styles.title}>
-                    End Program
+                    Reset Program
                 </ThemedText>
                 <ThemedText type='bodySmall' style={styles.message}>
-                    You're about to end the program early. Are you sure?
+                    You're about to reset your progress and lose any ongoing streaks. Are you sure?
                 </ThemedText>
                 <View style={styles.buttonContainer}>
                     <TextButton
-                        text='Yes, End!'
+                        text='Yes, Reset!'
                         onPress={onConfirm}
                         style={[styles.button, { backgroundColor: themeColors.red, borderWidth: 0 }]}
                         textType='bodyXSmall'

@@ -18,12 +18,14 @@ import { HighlightedTip } from '@/components/alerts/HighlightedTip';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { useProgramData } from '@/hooks/useProgramData';
 import { EndProgramModal } from '@/components/programs/EndProgramModal';
+import { ResetProgramModal } from '@/components/programs/ResetProgramModal';
 
 export default function ActiveProgramHome() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const navigation = useNavigation();
     const [isEndProgramModalVisible, setIsEndProgramModalVisible] = useState(false);
+    const [isResetProgramModalVisible, setIsResetProgramModalVisible] = useState(false);
 
     const {
         userProgramProgress,
@@ -73,6 +75,11 @@ export default function ActiveProgramHome() {
     const handleEndProgramConfirm = () => {
         endProgram();
         setIsEndProgramModalVisible(false);
+    };
+
+    const handleResetProgramConfirm = () => {
+        resetProgram();
+        setIsResetProgramModalVisible(false);
     };
 
     return (
@@ -128,7 +135,7 @@ export default function ActiveProgramHome() {
                         { title: 'Program Calendar', onPress: navigateToProgramCalendar },
                         { title: 'Program Overview', onPress: navigateToProgramOverview },
                         { title: 'Browse Programs', onPress: navigateToBrowsePrograms },
-                        { title: 'Reset Program', onPress: resetProgram },
+                        { title: 'Reset Program', onPress: () => setIsResetProgramModalVisible(true) },
                         { title: 'End Program', onPress: () => setIsEndProgramModalVisible(true) },
                     ].map((item, index) => (
                         <ThemedView key={item.title}>
@@ -150,7 +157,11 @@ export default function ActiveProgramHome() {
                     ))}
                 </ThemedView>
             </ScrollView>
-
+            <ResetProgramModal
+                visible={isResetProgramModalVisible}
+                onClose={() => setIsResetProgramModalVisible(false)}
+                onConfirm={handleResetProgramConfirm}
+            />
             <EndProgramModal visible={isEndProgramModalVisible} onClose={() => setIsEndProgramModalVisible(false)} onConfirm={handleEndProgramConfirm} />
         </ThemedView>
     );
