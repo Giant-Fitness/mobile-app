@@ -80,8 +80,29 @@ export const endProgramAsync = createAsyncThunk<UserProgramProgress, void>('user
         return rejectWithValue({ errorMessage: 'User ID not available' });
     }
     try {
+        await UserService.endProgram(userId);
         return {};
     } catch (error) {
         return rejectWithValue({ errorMessage: 'Failed to end program' });
+    }
+});
+
+export const startProgramAsync = createAsyncThunk<
+    UserProgramProgress,
+    { programId: string },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/startProgram', async ({ programId }, { getState, rejectWithValue }) => {
+    const state = getState();
+    const userId = state.user.user?.UserId;
+    if (!userId) {
+        return rejectWithValue({ errorMessage: 'User ID not available' });
+    }
+    try {
+        return await UserService.startProgram(userId, programId);
+    } catch (error) {
+        return rejectWithValue({ errorMessage: 'Failed to start program' });
     }
 });

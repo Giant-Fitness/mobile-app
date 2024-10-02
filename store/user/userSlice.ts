@@ -2,7 +2,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { UserState, initialState } from '@/store/user/userState';
-import { getUserProgramProgressAsync, getUserAsync, completeDayAsync, uncompleteDayAsync, endProgramAsync } from '@/store/user/thunks';
+import { getUserProgramProgressAsync, getUserAsync, completeDayAsync, uncompleteDayAsync, endProgramAsync, startProgramAsync } from '@/store/user/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { UserProgramProgress, User } from '@/types';
 
@@ -82,6 +82,20 @@ const userSlice = createSlice({
                 state.userProgramProgress = action.payload;
             })
             .addCase(endProgramAsync.rejected, (state, action) => {
+                state.userProgramProgressState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to end program';
+            })
+
+            // Start Program
+            .addCase(startProgramAsync.pending, (state) => {
+                state.userProgramProgressState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(startProgramAsync.fulfilled, (state, action: PayloadAction<UserProgramProgress>) => {
+                state.userProgramProgressState = REQUEST_STATE.FULFILLED;
+                state.userProgramProgress = action.payload;
+            })
+            .addCase(startProgramAsync.rejected, (state, action) => {
                 state.userProgramProgressState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'Failed to end program';
             });

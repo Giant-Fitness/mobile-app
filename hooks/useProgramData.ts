@@ -3,7 +3,7 @@
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/rootReducer';
-import { getUserAsync, getUserProgramProgressAsync, completeDayAsync, uncompleteDayAsync, endProgramAsync } from '@/store/user/thunks';
+import { getUserAsync, getUserProgramProgressAsync, completeDayAsync, uncompleteDayAsync, endProgramAsync, startProgramAsync } from '@/store/user/thunks';
 import { getProgramAsync, getAllProgramDaysAsync, getProgramDayAsync, getMultipleProgramDaysAsync } from '@/store/programs/thunks';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
 import { selectWorkoutQuote, selectWorkoutQuoteState, selectRestDayQuote, selectRestDayQuoteState, selectQuoteError } from '@/store/quotes/selectors';
@@ -109,21 +109,12 @@ export const useProgramData = (
             if (dayId && programDayState === REQUEST_STATE.IDLE) {
                 dispatch(getProgramDayAsync({ programId, dayId }));
             }
-            // Conditionally fetch all program days based on options
-            if (options.fetchAllDays && !specificDayId && Object.keys(programDaysState[programId] || {}).length === 0) {
+            // Fetch all program days if fetchAllDays is true or if it's a new program (no current day)
+            if ((options.fetchAllDays || !userProgramProgress?.CurrentDay) && Object.keys(programDaysState[programId] || {}).length === 0) {
                 dispatch(getAllProgramDaysAsync({ programId }));
             }
         }
-    }, [
-        dispatch,
-        specificProgramId,
-        specificDayId,
-        userProgramProgress,
-        activeProgramState,
-        programDayState,
-        programDaysState,
-        options.fetchAllDays, // Updated dependency
-    ]);
+    }, [dispatch, specificProgramId, specificDayId, userProgramProgress, activeProgramState, programDayState, programDaysState, options.fetchAllDays]);
 
     useEffect(() => {
         if (workoutQuoteState !== REQUEST_STATE.FULFILLED) {
@@ -233,6 +224,14 @@ export const useProgramData = (
         dispatch(endProgramAsync());
     };
 
+    const startProgram = () => {
+        if (specificProgramId) {
+            dispatch(startProgramAsync({ programId: specificProgramId }));
+            // Fetch all program days when starting a new program
+            dispatch(getAllProgramDaysAsync({ programId: specificProgramId }));
+        }
+    };
+
     return {
         user,
         userProgramProgress,
@@ -250,6 +249,7 @@ export const useProgramData = (
         handleCompleteDay,
         handleUncompleteDay,
         endProgram,
+        startProgram,
         error: programError || quoteError,
     };
 };

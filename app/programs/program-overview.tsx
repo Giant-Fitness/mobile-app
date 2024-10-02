@@ -32,7 +32,7 @@ const ProgramOverviewScreen = () => {
     const route = useRoute<RouteProp<Record<string, ProgramOverviewScreenParams>, string>>();
     const { programId } = route.params;
 
-    const { activeProgram: program, userProgramProgress, dataLoadedState, error } = useProgramData(programId, undefined, { fetchAllDays: false });
+    const { activeProgram: program, userProgramProgress, dataLoadedState, startProgram, error } = useProgramData(programId, undefined, { fetchAllDays: false });
 
     const scrollY = useSharedValue(0);
     const scrollHandler = useAnimatedScrollHandler({
@@ -85,11 +85,6 @@ const ProgramOverviewScreen = () => {
             default:
                 return 'people';
         }
-    };
-
-    const handleStartProgram = () => {
-        console.log('Program started');
-        // Implement your start program logic here
     };
 
     const navigateToProgramCalendar = () => {
@@ -179,7 +174,7 @@ const ProgramOverviewScreen = () => {
                             {isOnAProgram && !isOnThisProgram && (
                                 <TextButton
                                     text='Start Program'
-                                    onPress={handleStartProgram}
+                                    onPress={startProgram}
                                     textType='bodyMedium'
                                     size='LG'
                                     style={[styles.calendarButton, { marginTop: Spaces.MD }]}
@@ -190,8 +185,8 @@ const ProgramOverviewScreen = () => {
                 </ThemedView>
             </Animated.ScrollView>
             {!isOnAProgram && (
-                <SlideUpActionButton scrollY={scrollY} slideUpThreshold={Spaces.LG}>
-                    <PrimaryButton text='Start Program' textType='bodyMedium' style={styles.startButton} onPress={handleStartProgram} size='LG' />
+                <SlideUpActionButton scrollY={scrollY} slideUpThreshold={0}>
+                    <PrimaryButton text='Start Program' textType='bodyMedium' style={styles.startButton} onPress={startProgram} size='LG' />
                 </SlideUpActionButton>
             )}
         </ThemedView>
