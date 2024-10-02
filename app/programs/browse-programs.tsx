@@ -1,6 +1,6 @@
 // app/programs/browse-programs.tsx
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
@@ -19,6 +19,9 @@ import { ProgramCard } from '@/components/programs/ProgramCard';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { useProgramData } from '@/hooks/useProgramData';
 
+// Wrap ProgramCard with React.memo
+const MemoizedProgramCard = React.memo(ProgramCard);
+
 export default function BrowseProgramsScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -33,7 +36,7 @@ export default function BrowseProgramsScreen() {
         if (allProgramsState !== REQUEST_STATE.FULFILLED) {
             await dispatch(getAllProgramsAsync());
         }
-    }, [dispatch, programs]);
+    }, [dispatch, allProgramsState]);
 
     const { showSplash, handleSplashComplete } = useSplashScreen({
         dataLoadedState: allProgramsState,
@@ -44,35 +47,35 @@ export default function BrowseProgramsScreen() {
         fetchData();
     }, [navigation, fetchData]);
 
-    if (showSplash) {
-        return <DumbbellSplash onAnimationComplete={handleSplashComplete} isDataLoaded={allProgramsState === REQUEST_STATE.FULFILLED} />;
-    }
-
-    const navigateToProgramOverview = (programId: string) => {
+    const navigateToProgramOverview = useCallback((programId: string) => {
         navigation.navigate('programs/program-overview', {
             programId: programId,
         });
-    };
+    }, [navigation]);
 
-    const keyExtractor = (item: any) => item.ProgramId;
+    const keyExtractor = useCallback((item: any) => item.ProgramId, []);
 
-    const renderItem = ({ item }: { item: any }) => (
-        <ProgramCard
+    const renderItem = useCallback(({ item }: { item: any }) => (
+        <MemoizedProgramCard
             program={item}
             isActive={item.ProgramId === userProgramProgress?.ProgramId}
             onPress={() => navigateToProgramOverview(item.ProgramId)}
             activeProgramUser={userProgramProgress?.ProgramId}
             recommendedProgram={false}
         />
-    );
+    ), [userProgramProgress, navigateToProgramOverview]);
 
-    const renderHeader = () => (
+    const renderHeader = useMemo(() => (
         <ThemedView style={[styles.infoContainer, { marginTop: Spaces.SM }, userProgramProgress?.ProgramId && { marginTop: insets.top + Spaces.XXL }]}>
             <ThemedText type='bodySmall' style={[styles.infoText, { color: themeColors.subText }]}>
                 Level up your fitness! Follow these structured, multi-week adventures to unlock your full potential
             </ThemedText>
         </ThemedView>
-    );
+    ), [userProgramProgress, insets.top, themeColors.subText]);
+
+    if (showSplash) {
+        return <DumbbellSplash onAnimationComplete={handleSplashComplete} isDataLoaded={allProgramsState === REQUEST_STATE.FULFILLED} />;
+    }
 
     return (
         <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.background }]}>
@@ -88,6 +91,9 @@ export default function BrowseProgramsScreen() {
                     userProgramProgress?.ProgramId && { paddingBottom: Spaces.XXL },
                 ]}
                 showsVerticalScrollIndicator={false}
+                maxToRenderPerBatch={10}
+                updateCellsBatchingPeriod={50}
+                windowSize={5}
             />
         </ThemedView>
     );
