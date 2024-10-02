@@ -23,7 +23,7 @@ export default function ActiveProgramHome() {
     const themeColors = Colors[colorScheme];
     const navigation = useNavigation();
 
-    const { userProgramProgress, activeProgram, activeProgramNextDays, dataLoadedState, isLastDay, currentWeek, displayQuote, endProgram, error } =
+    const { userProgramProgress, activeProgram, activeProgramNextDays, dataLoadedState, isLastDay, currentWeek, displayQuote, endProgram, resetProgram, error } =
         useProgramData(undefined, undefined, { fetchAllDays: true });
 
     const { showSplash, handleSplashComplete } = useSplashScreen({
@@ -111,6 +111,7 @@ export default function ActiveProgramHome() {
                         { title: 'Program Calendar', onPress: navigateToProgramCalendar },
                         { title: 'Program Overview', onPress: navigateToProgramOverview },
                         { title: 'Browse Programs', onPress: navigateToBrowsePrograms },
+                        { title: 'Reset Program', onPress: resetProgram },
                         { title: 'End Program', onPress: endProgram },
                     ].map((item, index) => (
                         <ThemedView key={item.title}>
@@ -120,7 +121,7 @@ export default function ActiveProgramHome() {
                                 </ThemedText>
                                 <Icon name='chevron-forward' size={Sizes.iconSizeSM} color={themeColors.iconDefault} />
                             </TouchableOpacity>
-                            {index < 3 && (
+                            {index < 4 && (
                                 <View
                                     style={{
                                         borderBottomColor: themeColors.systemBorderColor,

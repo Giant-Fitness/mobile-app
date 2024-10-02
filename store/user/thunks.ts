@@ -106,3 +106,16 @@ export const startProgramAsync = createAsyncThunk<
         return rejectWithValue({ errorMessage: 'Failed to start program' });
     }
 });
+
+export const resetProgramAsync = createAsyncThunk<UserProgramProgress, void>('user/resetProgram', async (_, { getState, rejectWithValue }) => {
+    const state = getState();
+    const userId = state.user.user?.UserId;
+    if (!userId) {
+        return rejectWithValue({ errorMessage: 'User ID not available' });
+    }
+    try {
+        return UserService.resetProgram(userId);
+    } catch (error) {
+        return rejectWithValue({ errorMessage: 'Failed to reset program' });
+    }
+});
