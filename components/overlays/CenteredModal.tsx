@@ -23,7 +23,7 @@ export const CenteredModal: React.FC<CenteredModalProps> = ({ visible, onClose, 
         <RNModal visible={visible} transparent={true} animationType='fade' onRequestClose={onClose}>
             <View style={styles.overlay}>
                 <BlurView intensity={50} style={StyleSheet.absoluteFill} tint={'dark'} />
-                <ThemedView style={[styles.modal, { backgroundColor: themeColors.background }, style]}>{children}</ThemedView>
+                <ThemedView style={[styles.modal, { backgroundColor: themeColors.background }, styles.shadow, style]}>{children}</ThemedView>
             </View>
         </RNModal>
     );
@@ -44,5 +44,12 @@ const styles = StyleSheet.create({
         maxHeight: height * 0.8,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    shadow: {
+        shadowColor: 'rgba(0,0,0,0.2)',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 1,
+        shadowRadius: 4,
+        elevation: 5, // For Android
     },
 });

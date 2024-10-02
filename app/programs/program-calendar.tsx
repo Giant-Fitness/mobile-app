@@ -313,14 +313,13 @@ const ProgramCalendarScreen = () => {
                             />
                         </ThemedView>
                     </ThemedView>
-
                     {/* Week-by-Week View */}
                     <ProgramWeekList
                         currentMonthWeeks={currentMonthWeeks}
                         userCurrentWeekNumber={userCurrentWeekNumber}
                         userCurrentDayNumber={userCurrentDayNumber}
                         navigateToProgramDay={navigateToProgramDay}
-                        completedDays={userProgramProgress.CompletedDays}
+                        completedDays={userProgramProgress.CompletedDays || []}
                     />
                 </ThemedView>
             </Animated.ScrollView>

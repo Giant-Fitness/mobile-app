@@ -118,15 +118,7 @@ export const useProgramData = (
                 dispatch(getProgramDayAsync({ programId, dayId }));
             }
 
-            // Fetch all program days if:
-            // 1. It's the active program from user's progress
-            // 2. fetchAllDays option is true
-            // 3. It's a new program (no current day)
-            // 4. We haven't fetched all days yet
-            if (
-                (programId === userProgramProgress?.ProgramId || options.fetchAllDays || !userProgramProgress?.CurrentDay) &&
-                Object.keys(programDaysState[programId] || {}).length === 0
-            ) {
+            if (options.fetchAllDays && Object.keys(programDaysState[programId] || {}).length === 0) {
                 dispatch(getAllProgramDaysAsync({ programId }));
             }
         }
