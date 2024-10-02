@@ -3,7 +3,7 @@
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/rootReducer';
-import { getUserAsync, getUserProgramProgressAsync, completeDayAsync, uncompleteDayAsync } from '@/store/user/thunks';
+import { getUserAsync, getUserProgramProgressAsync, completeDayAsync, uncompleteDayAsync, endProgramAsync } from '@/store/user/thunks';
 import { getProgramAsync, getAllProgramDaysAsync, getProgramDayAsync, getMultipleProgramDaysAsync } from '@/store/programs/thunks';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
 import { selectWorkoutQuote, selectWorkoutQuoteState, selectRestDayQuote, selectRestDayQuoteState, selectQuoteError } from '@/store/quotes/selectors';
@@ -204,12 +204,18 @@ export const useProgramData = (
 
     // Additional computed values
     const currentDayNumber = specificDayId ? parseInt(specificDayId, 10) : parseInt(userProgramProgress?.CurrentDay || '0', 10);
-    const currentWeek = getWeekNumber(currentDayNumber);
-    const dayOfWeek = getDayOfWeek(currentDayNumber);
-    const isLastDay = activeProgram && userProgramProgress && activeProgram.Days && currentDayNumber === activeProgram.Days;
+
+    const currentWeek = userProgramProgress?.CurrentDay ? getWeekNumber(currentDayNumber) : null;
+
+    const dayOfWeek = userProgramProgress?.CurrentDay ? getDayOfWeek(currentDayNumber) : null;
+
+    const isLastDay = activeProgram && userProgramProgress && activeProgram.Days ? currentDayNumber === activeProgram.Days : false;
+
     const displayQuote = !isLastDay ? (programDay?.RestDay ? restDayQuote : workoutQuote) : null;
-    const isEnrolled = userProgramProgress?.ProgramId === specificProgramId;
-    const isDayCompleted = userProgramProgress?.CompletedDays.includes(specificDayId);
+
+    const isEnrolled = !!userProgramProgress?.ProgramId && userProgramProgress.ProgramId === specificProgramId;
+
+    const isDayCompleted = userProgramProgress?.CompletedDays?.includes(specificDayId) || false;
 
     const handleCompleteDay = () => {
         if (specificDayId) {
@@ -221,6 +227,10 @@ export const useProgramData = (
         if (specificDayId) {
             dispatch(uncompleteDayAsync({ dayId: specificDayId }));
         }
+    };
+
+    const endProgram = () => {
+        dispatch(endProgramAsync());
     };
 
     return {
@@ -239,6 +249,7 @@ export const useProgramData = (
         isDayCompleted,
         handleCompleteDay,
         handleUncompleteDay,
+        endProgram,
         error: programError || quoteError,
     };
 };

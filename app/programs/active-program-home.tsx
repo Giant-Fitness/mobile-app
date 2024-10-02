@@ -23,11 +23,8 @@ export default function ActiveProgramHome() {
     const themeColors = Colors[colorScheme];
     const navigation = useNavigation();
 
-    const { userProgramProgress, activeProgram, activeProgramNextDays, dataLoadedState, isLastDay, currentWeek, displayQuote, error } = useProgramData(
-        undefined,
-        undefined,
-        { fetchAllDays: true },
-    );
+    const { userProgramProgress, activeProgram, activeProgramNextDays, dataLoadedState, isLastDay, currentWeek, displayQuote, endProgram, error } =
+        useProgramData(undefined, undefined, { fetchAllDays: true });
 
     const { showSplash, handleSplashComplete } = useSplashScreen({
         dataLoadedState,
@@ -114,7 +111,7 @@ export default function ActiveProgramHome() {
                         { title: 'Program Calendar', onPress: navigateToProgramCalendar },
                         { title: 'Program Overview', onPress: navigateToProgramOverview },
                         { title: 'Browse Programs', onPress: navigateToBrowsePrograms },
-                        { title: 'End Program', onPress: () => {} },
+                        { title: 'End Program', onPress: endProgram },
                     ].map((item, index) => (
                         <ThemedView key={item.title}>
                             <TouchableOpacity style={styles.menuItem} activeOpacity={1} onPress={item.onPress}>

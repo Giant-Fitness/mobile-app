@@ -72,3 +72,16 @@ export const uncompleteDayAsync = createAsyncThunk<
         return rejectWithValue({ errorMessage: 'Failed to uncomplete day' });
     }
 });
+
+export const endProgramAsync = createAsyncThunk<UserProgramProgress, void>('user/endProgram', async (_, { getState, rejectWithValue }) => {
+    const state = getState();
+    const userId = state.user.user?.UserId;
+    if (!userId) {
+        return rejectWithValue({ errorMessage: 'User ID not available' });
+    }
+    try {
+        return {};
+    } catch (error) {
+        return rejectWithValue({ errorMessage: 'Failed to end program' });
+    }
+});
