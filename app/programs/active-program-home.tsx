@@ -1,6 +1,6 @@
 // app/programs/active-program-home.tsx
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ScrollView, StyleSheet, View, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -17,14 +17,28 @@ import { REQUEST_STATE } from '@/constants/requestStates';
 import { HighlightedTip } from '@/components/alerts/HighlightedTip';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { useProgramData } from '@/hooks/useProgramData';
+import { EndProgramModal } from '@/components/programs/EndProgramModal';
+import { ResetProgramModal } from '@/components/programs/ResetProgramModal';
 
 export default function ActiveProgramHome() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const navigation = useNavigation();
+    const [isEndProgramModalVisible, setIsEndProgramModalVisible] = useState(false);
+    const [isResetProgramModalVisible, setIsResetProgramModalVisible] = useState(false);
 
-    const { userProgramProgress, activeProgram, activeProgramNextDays, dataLoadedState, isLastDay, currentWeek, displayQuote, endProgram, resetProgram, error } =
-        useProgramData(undefined, undefined, { fetchAllDays: true });
+    const {
+        userProgramProgress,
+        activeProgram,
+        activeProgramNextDays,
+        dataLoadedState,
+        isLastDay,
+        currentWeek,
+        displayQuote,
+        endProgram,
+        resetProgram,
+        error,
+    } = useProgramData(undefined, undefined, { fetchAllDays: true });
 
     const { showSplash, handleSplashComplete } = useSplashScreen({
         dataLoadedState,
@@ -56,6 +70,16 @@ export default function ActiveProgramHome() {
 
     const navigateToBrowsePrograms = () => {
         navigation.navigate('programs/browse-programs');
+    };
+
+    const handleEndProgramConfirm = () => {
+        endProgram();
+        setIsEndProgramModalVisible(false);
+    };
+
+    const handleResetProgramConfirm = () => {
+        resetProgram();
+        setIsResetProgramModalVisible(false);
     };
 
     return (
@@ -111,8 +135,8 @@ export default function ActiveProgramHome() {
                         { title: 'Program Calendar', onPress: navigateToProgramCalendar },
                         { title: 'Program Overview', onPress: navigateToProgramOverview },
                         { title: 'Browse Programs', onPress: navigateToBrowsePrograms },
-                        { title: 'Reset Program', onPress: resetProgram },
-                        { title: 'End Program', onPress: endProgram },
+                        { title: 'Reset Program', onPress: () => setIsResetProgramModalVisible(true) },
+                        { title: 'End Program', onPress: () => setIsEndProgramModalVisible(true) },
                     ].map((item, index) => (
                         <ThemedView key={item.title}>
                             <TouchableOpacity style={styles.menuItem} activeOpacity={1} onPress={item.onPress}>
@@ -133,6 +157,12 @@ export default function ActiveProgramHome() {
                     ))}
                 </ThemedView>
             </ScrollView>
+            <ResetProgramModal
+                visible={isResetProgramModalVisible}
+                onClose={() => setIsResetProgramModalVisible(false)}
+                onConfirm={handleResetProgramConfirm}
+            />
+            <EndProgramModal visible={isEndProgramModalVisible} onClose={() => setIsEndProgramModalVisible(false)} onConfirm={handleEndProgramConfirm} />
         </ThemedView>
     );
 }

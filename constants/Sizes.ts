@@ -29,4 +29,5 @@ export const Sizes = {
     iconButtonMD: moderateScale(40),
     iconButtonLG: moderateScale(60),
     fontSizeDefault: moderateScale(14),
+    fontSizeSmall: moderateScale(13),
 };

@@ -21,8 +21,8 @@ export const Colors = {
         iconSelected: '#0f0f0f', // Adjusted for visibility
         highlightContainerText: '#fafafa', // Text on highlighted containers
         white: '#FEFEFE', // White
-        red: '#cc4533', // Error color
-        redTransparent: '#f7e5e3',
+        red: '#D64545', // Error color
+        redTransparent: 'rgba(255, 0, 0, 0.12)',
         blueTransparent: 'rgba(135, 206, 235, 0.2)',
         blueSolid: '#5DADE2',
         warning: '#FFA500', // Optional: Warning color (e.g., for alerts)

@@ -1,13 +1,12 @@
 // components/overlays/CenteredModal.tsx
 
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { StyleSheet, View, ViewStyle, Dimensions, Modal as RNModal } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { BlurView } from 'expo-blur';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
-import { Modal } from '@/components/overlays/Modal'; // Importing the reusable Modal
 
 interface CenteredModalProps {
     visible: boolean;
@@ -21,38 +20,36 @@ export const CenteredModal: React.FC<CenteredModalProps> = ({ visible, onClose, 
     const themeColors = Colors[colorScheme];
 
     return (
-        <Modal visible={visible} onClose={onClose} overlay={false}>
-            {/* Reusing the new Modal */}
-            <View style={styles.container}>
-                <TouchableOpacity style={styles.overlay} onPress={onClose} activeOpacity={1}>
-                    <BlurView intensity={50} style={styles.blur} tint='systemUltraThinMaterial' experimentalBlurMethod='dimezisBlurView' />
-                </TouchableOpacity>
-                <ThemedView style={[styles.modal, { backgroundColor: themeColors.background }, style]}>{children}</ThemedView>
+        <RNModal visible={visible} transparent={true} animationType='fade' onRequestClose={onClose}>
+            <View style={styles.overlay}>
+                <BlurView intensity={50} style={StyleSheet.absoluteFill} tint={'dark'} />
+                <ThemedView style={[styles.modal, { backgroundColor: themeColors.background }, styles.shadow, style]}>{children}</ThemedView>
             </View>
-        </Modal>
+        </RNModal>
     );
 };
 
+const { width, height } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
-    container: {
+    overlay: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-    },
-    overlay: {
-        ...StyleSheet.absoluteFillObject,
-    },
-    blur: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.1)',
     },
     modal: {
-        borderRadius: Spaces.SM,
+        borderRadius: Spaces.MD,
         padding: Spaces.LG,
-        maxWidth: '80%',
-        width: '80%',
-        maxHeight: '60%',
+        width: Math.min(width * 0.9, 400),
+        maxHeight: height * 0.8,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    shadow: {
+        shadowColor: 'rgba(0,0,0,0.2)',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 1,
+        shadowRadius: 4,
+        elevation: 5, // For Android
     },
 });
