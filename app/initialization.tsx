@@ -47,11 +47,6 @@ const Initialization: React.FC = () => {
 
             if (userProgramProgress && userProgramProgress.ProgramId) {
                 await Promise.all([
-                    dispatch(getProgramAsync({ programId: userProgramProgress.ProgramId })),
-                    dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId })),
-                ]);
-
-                await Promise.all([
                     dispatch(getWorkoutQuoteAsync()),
                     dispatch(getRestDayQuoteAsync()),
                     dispatch(getSpotlightWorkoutsAsync()),

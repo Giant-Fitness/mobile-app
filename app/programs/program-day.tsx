@@ -1,6 +1,6 @@
 // app/programs/program-day.tsx
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { StyleSheet, ActivityIndicator, View } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -12,16 +12,12 @@ import { Icon } from '@/components/base/Icon';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
-import { moderateScale, verticalScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { TextButton } from '@/components/buttons/TextButton';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '@/store/rootReducer';
-import { getProgramDayAsync } from '@/store/programs/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { getWeekNumber, getDayOfWeek } from '@/utils/calendar';
+import { useProgramData } from '@/hooks/useProgramData';
 
 type ProgramDayScreenParams = {
     ProgramDay: {
@@ -31,84 +27,54 @@ type ProgramDayScreenParams = {
 };
 
 const ProgramDayScreen = () => {
-    // **1. All Hooks Called Unconditionally at the Top**
-
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
-
     const navigation = useNavigation();
     const route = useRoute<RouteProp<ProgramDayScreenParams, 'ProgramDay'>>();
-    const dispatch = useDispatch<AppDispatch>();
-
     const { dayId, programId } = route.params;
 
-    const navigateToAllWorkouts = (initialFilters = {}) => {
-        navigation.navigate('workouts/all-workouts', { initialFilters });
-    };
+    const { programDay, programDayState, currentWeek, dayOfWeek, isEnrolled, isDayCompleted, handleCompleteDay } = useProgramData(programId, dayId);
 
-    const program = useSelector((state: RootState) => state.programs.programs[programId]);
-    const programDay = useSelector((state: RootState) => state.programs.programDays[programId]?.[dayId]);
-    const programDayState = useSelector((state: RootState) => state.programs.programDaysState[programId]?.[dayId]);
-    const userProgramProgress = useSelector((state: RootState) => state.user.userProgramProgress);
-
-    // **Data Fetching Hook**
-    useEffect(() => {
-        if (!programDay && programDayState !== REQUEST_STATE.PENDING) {
-            dispatch(getProgramDayAsync({ programId, dayId }));
-        }
-    }, [programDay, programDayState, dispatch, programId, dayId]);
-
-    // **Header Options Hook**
-    useEffect(() => {
-        navigation.setOptions({ headerShown: false });
-    }, [navigation]);
-
-    // **Animated Hooks**
     const scrollY = useSharedValue(0);
-
     const scrollHandler = useAnimatedScrollHandler({
         onScroll: (event) => {
             scrollY.value = event.contentOffset.y;
         },
     });
 
-    // **Event Handlers**
-    const handleCompleteDay = () => {
-        console.log('Complete Day button pressed');
+    React.useEffect(() => {
+        navigation.setOptions({ headerShown: false });
+    }, [navigation]);
+
+    const navigateToAllWorkouts = (initialFilters = {}) => {
+        navigation.navigate('workouts/all-workouts', { initialFilters });
     };
 
     const handleAlreadyCompletedDay = () => {
         console.log('Un-finish day button pressed');
     };
 
-    // **Calculate Current Week Based on dayId**
-    const currentDayNumber = parseInt(dayId, 10);
-    const currentWeek = getWeekNumber(currentDayNumber);
-    const dayOfWeek = getDayOfWeek(currentDayNumber);
-    const isEnrolled = userProgramProgress?.ProgramId === programId;
-    const isDayCompleted = userProgramProgress?.CompletedDays.includes(dayId);
+    if (programDayState === REQUEST_STATE.PENDING) {
+        return (
+            <ThemedView style={styles.loadingContainer}>
+                <ActivityIndicator size='large' color={themeColors.text} />
+            </ThemedView>
+        );
+    }
 
-    // **2. Main Return with Conditional Rendering**
+    if (programDayState === REQUEST_STATE.REJECTED) {
+        return (
+            <ThemedView style={styles.errorContainer}>
+                <ThemedText>Error loading the program day.</ThemedText>
+            </ThemedView>
+        );
+    }
+
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
             <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Spaces.XXL} headerInterpolationEnd={Sizes.imageLGHeight} />
             <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
-                {/* **Loading State** */}
-                {programDayState === REQUEST_STATE.PENDING && (
-                    <ThemedView style={styles.loadingContainer}>
-                        <ActivityIndicator size='large' color={themeColors.text} />
-                    </ThemedView>
-                )}
-
-                {/* **Error State** */}
-                {programDayState === REQUEST_STATE.REJECTED && (
-                    <ThemedView style={styles.errorContainer}>
-                        <ThemedText>Error loading the program day.</ThemedText>
-                    </ThemedView>
-                )}
-
-                {/* **Loaded State** */}
-                {programDayState === REQUEST_STATE.FULFILLED && programDay && (
+                {programDay && (
                     <>
                         <TopImageInfoCard
                             image={{ uri: programDay.PhotoUrl }}
@@ -136,30 +102,20 @@ const ProgramDayScreen = () => {
                                         </ThemedView>
                                     ) : (
                                         <ThemedView>
-                                            <ThemedView style={styles.attributeRow}>
-                                                <ThemedView style={styles.attribute}>
-                                                    <Icon name='stopwatch' color={themeColors.text} />
-                                                    <ThemedText type='body' style={styles.attributeText}>
-                                                        {programDay.Time} mins
-                                                    </ThemedText>
+                                            {[
+                                                { icon: 'stopwatch', text: `${programDay.Time} mins` },
+                                                { icon: 'kettlebell', text: programDay.Equipment.join(', ') },
+                                                { icon: 'yoga', text: programDay.MuscleGroups.join(', ') },
+                                            ].map((item, index) => (
+                                                <ThemedView key={index} style={styles.attributeRow}>
+                                                    <ThemedView style={styles.attribute}>
+                                                        <Icon name={item.icon} color={themeColors.text} />
+                                                        <ThemedText type='body' style={styles.attributeText}>
+                                                            {item.text}
+                                                        </ThemedText>
+                                                    </ThemedView>
                                                 </ThemedView>
-                                            </ThemedView>
-                                            <ThemedView style={styles.attributeRow}>
-                                                <ThemedView style={styles.attribute}>
-                                                    <Icon name='kettlebell' color={themeColors.text} />
-                                                    <ThemedText type='body' style={styles.attributeText}>
-                                                        {programDay.Equipment.join(', ')}
-                                                    </ThemedText>
-                                                </ThemedView>
-                                            </ThemedView>
-                                            <ThemedView style={styles.attributeRow}>
-                                                <ThemedView style={styles.attribute}>
-                                                    <Icon name='yoga' color={themeColors.text} />
-                                                    <ThemedText type='body' style={styles.attributeText}>
-                                                        {programDay.MuscleGroups.join(', ')}
-                                                    </ThemedText>
-                                                </ThemedView>
-                                            </ThemedView>
+                                            ))}
                                         </ThemedView>
                                     )}
                                 </ThemedView>
@@ -203,7 +159,7 @@ const ProgramDayScreen = () => {
                                         size={'LG'}
                                     />
                                 )}
-                                {programDay && programDay.RestDay && (
+                                {programDay.RestDay && (
                                     <TextButton
                                         text='Mobility Workouts'
                                         textStyle={[{ color: themeColors.text }]}

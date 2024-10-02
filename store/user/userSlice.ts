@@ -2,7 +2,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { UserState, initialState } from '@/store/user/userState';
-import { getUserProgramProgressAsync, getUserAsync } from '@/store/user/thunks';
+import { getUserProgramProgressAsync, getUserAsync, completeDayAsync } from '@/store/user/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { UserProgramProgress, User } from '@/types';
 
@@ -42,6 +42,20 @@ const userSlice = createSlice({
             .addCase(getUserProgramProgressAsync.rejected, (state, action) => {
                 state.userProgramProgressState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'Failed to fetch user program progress';
+            })
+
+            // Complete Day
+            .addCase(completeDayAsync.pending, (state) => {
+                state.userProgramProgressState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(completeDayAsync.fulfilled, (state, action: PayloadAction<UserProgramProgress>) => {
+                state.userProgramProgressState = REQUEST_STATE.FULFILLED;
+                state.userProgramProgress = action.payload;
+            })
+            .addCase(completeDayAsync.rejected, (state, action) => {
+                state.userProgramProgressState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to complete day';
             });
     },
 });

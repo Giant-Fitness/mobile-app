@@ -4,7 +4,7 @@ import { Workout, WorkoutRecommendations } from '@/types';
 import { sampleWorkouts, sampleSpotlightRecommendations } from '@/store/workouts/mockData';
 import axios from 'axios';
 
-const API_BASE_URL = 'https://5kwqdlbqo5.execute-api.ap-south-1.amazonaws.com/prod';
+const API_BASE_URL = 'https://r5oibllip9.execute-api.ap-south-1.amazonaws.com/prod';
 
 // Utility function to simulate network delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

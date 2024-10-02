@@ -4,7 +4,7 @@ import { UserProgramProgress, User } from '@/types';
 
 // Sample user
 const sampleUser: User = {
-    UserId: '5097e8c0-71a3-438a-bb9c-d190678301be',
+    UserId: '048a2a6c-4c16-417a-9bfd-84ec2c80e3f5',
 };
 
 // Sample user program progress
