@@ -33,7 +33,10 @@ const ProgramDayScreen = () => {
     const route = useRoute<RouteProp<ProgramDayScreenParams, 'ProgramDay'>>();
     const { dayId, programId } = route.params;
 
-    const { programDay, programDayState, currentWeek, dayOfWeek, isEnrolled, isDayCompleted, handleCompleteDay } = useProgramData(programId, dayId);
+    const { programDay, programDayState, currentWeek, dayOfWeek, isEnrolled, isDayCompleted, handleCompleteDay, handleUncompleteDay } = useProgramData(
+        programId,
+        dayId,
+    );
 
     const scrollY = useSharedValue(0);
     const scrollHandler = useAnimatedScrollHandler({
@@ -48,10 +51,6 @@ const ProgramDayScreen = () => {
 
     const navigateToAllWorkouts = (initialFilters = {}) => {
         navigation.navigate('workouts/all-workouts', { initialFilters });
-    };
-
-    const handleAlreadyCompletedDay = () => {
-        console.log('Un-finish day button pressed');
     };
 
     if (programDayState === REQUEST_STATE.PENDING) {
@@ -145,7 +144,7 @@ const ProgramDayScreen = () => {
                                         style={[styles.completeButton, { backgroundColor: themeColors.background }]}
                                         textStyle={[{ color: themeColors.text }]}
                                         iconColor={themeColors.text}
-                                        onPress={handleAlreadyCompletedDay}
+                                        onPress={handleUncompleteDay}
                                         iconName='check-outline'
                                         size={'LG'}
                                     />
@@ -155,7 +154,6 @@ const ProgramDayScreen = () => {
                                         textType='bodyMedium'
                                         style={[styles.completeButton, { backgroundColor: themeColors.buttonPrimary }]}
                                         onPress={handleCompleteDay}
-                                        iconName='check'
                                         size={'LG'}
                                     />
                                 )}

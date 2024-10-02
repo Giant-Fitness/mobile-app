@@ -35,12 +35,12 @@ export const getUserAsync = createAsyncThunk<User, void>('user/getUser', async (
 
 export const completeDayAsync = createAsyncThunk<
     UserProgramProgress,
-    { programId: string; dayId: string },
+    { dayId: string },
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
->('user/completeDay', async ({ programId, dayId }, { getState, rejectWithValue }) => {
+>('user/completeDay', async ({ dayId }, { getState, rejectWithValue }) => {
     const state = getState();
     const userId = state.user.user?.UserId;
     if (!userId) {
@@ -50,5 +50,25 @@ export const completeDayAsync = createAsyncThunk<
         return await UserService.completeDay(userId, dayId);
     } catch (error) {
         return rejectWithValue({ errorMessage: 'Failed to complete day' });
+    }
+});
+
+export const uncompleteDayAsync = createAsyncThunk<
+    UserProgramProgress,
+    { dayId: string },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/uncompleteDay', async ({ dayId }, { getState, rejectWithValue }) => {
+    const state = getState();
+    const userId = state.user.user?.UserId;
+    if (!userId) {
+        return rejectWithValue({ errorMessage: 'User ID not available' });
+    }
+    try {
+        return await UserService.uncompleteDay(userId, dayId);
+    } catch (error) {
+        return rejectWithValue({ errorMessage: 'Failed to uncomplete day' });
     }
 });
