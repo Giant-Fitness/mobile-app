@@ -2,7 +2,15 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { UserState, initialState } from '@/store/user/userState';
-import { getUserProgramProgressAsync, getUserAsync, completeDayAsync, uncompleteDayAsync, endProgramAsync, startProgramAsync, resetProgramAsync } from '@/store/user/thunks';
+import {
+    getUserProgramProgressAsync,
+    getUserAsync,
+    completeDayAsync,
+    uncompleteDayAsync,
+    endProgramAsync,
+    startProgramAsync,
+    resetProgramAsync,
+} from '@/store/user/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { UserProgramProgress, User } from '@/types';
 

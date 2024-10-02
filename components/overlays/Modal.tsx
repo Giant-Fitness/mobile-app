@@ -33,7 +33,6 @@ export const Modal: React.FC<ModalProps & AccessibilityProps> = ({
             <TouchableWithoutFeedback onPress={overlay ? onClose : undefined}>
                 <View style={styles.overlay} />
             </TouchableWithoutFeedback>
-
             <View style={[styles.modalContainer, { backgroundColor: themeColors.modalBackground }, style]}>{children}</View>
         </RNModal>
     );
