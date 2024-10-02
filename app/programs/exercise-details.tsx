@@ -114,7 +114,9 @@ const ExerciseDetailsScreen = () => {
                                 </ThemedText>
                             </ThemedView>
                         </ThemedView>
-                        {isEnrolled && exercise.ORMPercentage && <HighlightedTip iconName='bulb' tipText={'Quickly find your ideal lifting weight using the Calculator'} />}
+                        {isEnrolled && exercise.ORMPercentage && (
+                            <HighlightedTip iconName='bulb' tipText={'Quickly find your ideal lifting weight using the Calculator'} />
+                        )}
                     </ThemedView>
 
                     <ThemedView style={styles.instructionContainer}>

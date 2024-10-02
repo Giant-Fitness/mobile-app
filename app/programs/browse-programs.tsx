@@ -17,6 +17,7 @@ import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProgramCard } from '@/components/programs/ProgramCard';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
+import { useProgramData } from '@/hooks/useProgramData';
 
 export default function BrowseProgramsScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -25,7 +26,7 @@ export default function BrowseProgramsScreen() {
     const navigation = useNavigation();
     const insets = useSafeAreaInsets();
 
-    const userProgramProgress = useSelector((state: RootState) => state.user.userProgramProgress);
+    const { userProgramProgress } = useProgramData();
     const { programs, allProgramsState } = useSelector((state: RootState) => state.programs);
 
     const fetchData = useCallback(async () => {

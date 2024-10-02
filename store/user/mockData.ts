@@ -1,6 +1,11 @@
 // store/user/mockData.ts
 
-import { UserProgramProgress } from '@/types';
+import { UserProgramProgress, User } from '@/types';
+
+// Sample user
+const sampleUser: User = {
+    UserId: '048a2a6c-4c16-417a-9bfd-84ec2c80e3f5',
+};
 
 // Sample user program progress
 const sampleUserProgress: UserProgramProgress = {
@@ -12,4 +17,4 @@ const sampleUserProgress: UserProgramProgress = {
     LastActivityAt: '2024-07-05',
 };
 
-export { sampleUserProgress };
+export { sampleUserProgress, sampleUser };

@@ -1,5 +1,9 @@
 // types/userTypes.ts
 
+export interface User {
+    UserId: string;
+}
+
 export interface UserProgramProgress {
     UserId: string;
     ProgramId: number;

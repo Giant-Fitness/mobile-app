@@ -4,7 +4,7 @@ import { Program, ProgramDay } from '@/types';
 import { sampleProgramDays, mockPrograms } from '@/store/programs/mockData';
 import axios from 'axios';
 
-const API_BASE_URL = 'https://5kwqdlbqo5.execute-api.ap-south-1.amazonaws.com/prod';
+const API_BASE_URL = 'https://r5oibllip9.execute-api.ap-south-1.amazonaws.com/prod';
 
 // Utility function to simulate network delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -58,6 +58,7 @@ const getProgramDaysAll = async (programId: string): Promise<ProgramDay[]> => {
         const parsedBody = JSON.parse(response.data.body);
         return parsedBody.programDays || [];
     } catch (error) {
+        console.log(error);
         console.error(`Error fetching programDays ${programId}:`, error);
         throw error;
     }
