@@ -45,20 +45,28 @@ const completeDay = async (userId: string, dayId: string): Promise<UserProgramPr
             },
         );
 
-        let programProgress;
+        let programProgress, programCompleted;
         if (typeof response.data === 'string') {
             const parsedData = JSON.parse(response.data);
             programProgress = parsedData.body ? JSON.parse(parsedData.body).programProgress : parsedData.programProgress;
+            programCompleted = parsedData.body ? JSON.parse(parsedData.body).programCompleted : parsedData.programCompleted;
         } else if (response.data.body && typeof response.data.body === 'string') {
             programProgress = JSON.parse(response.data.body).programProgress;
+            programCompleted = JSON.parse(response.data.body).programCompleted;
         } else {
             programProgress = response.data.body ? response.data.body.programProgress : response.data.programProgress;
+            programCompleted = response.data.body ? response.data.body.programCompleted : response.data.programCompleted;
         }
 
         if (!programProgress) {
             throw new Error('Program progress not found in response');
         }
-        return programProgress;
+
+        if (!programCompleted) {
+            return programProgress;
+        } else {
+            return {};
+        }
     } catch (error) {
         if (axios.isAxiosError(error)) {
             if (error.code === 'ECONNABORTED') {
