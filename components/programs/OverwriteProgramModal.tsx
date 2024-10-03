@@ -45,9 +45,9 @@ export const OverwriteProgramModal: React.FC<OverwriteProgramModalProps> = ({ vi
                     <TextButton
                         text='Yes, End!'
                         onPress={handleConfirm}
-                        style={[styles.button, { backgroundColor: themeColors.red, borderWidth: 0 }]}
+                        style={[styles.button, { backgroundColor: themeColors.background, borderWidth: 1, borderColor: themeColors.redTransparent }]}
                         textType='bodyXSmall'
-                        textStyle={[styles.buttonTextStyle, { color: themeColors.white }]}
+                        textStyle={[styles.buttonTextStyle, { color: themeColors.red }]}
                     />
                     <PrimaryButton text='No, Go Back.' onPress={onClose} style={styles.button} textType='bodyXSmall' textStyle={styles.buttonTextStyle} />
                 </View>
