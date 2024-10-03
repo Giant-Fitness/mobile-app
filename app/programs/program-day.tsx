@@ -228,6 +228,7 @@ const styles = StyleSheet.create({
     attributeRow: {
         flexDirection: 'row',
         justifyContent: 'flex-start',
+        marginRight: Spaces.MD,
     },
     exercisesContainer: {
         paddingTop: Spaces.LG,
