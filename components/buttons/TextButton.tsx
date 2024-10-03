@@ -52,7 +52,6 @@ export const TextButton: React.FC<TextButtonProps & AccessibilityProps> = ({
         MD: { paddingVertical: Spaces.SM, paddingHorizontal: Spaces.MD },
         LG: { paddingVertical: Spaces.MD, paddingHorizontal: Spaces.LG },
     }[size];
-
     return (
         <TouchableOpacity
             style={[
@@ -102,7 +101,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         borderRadius: Spaces.XL, // Rounded corners
         borderWidth: StyleSheet.hairlineWidth,
-        flex: 1,
     },
     text: {
         fontSize: Sizes.fontSizeDefault,

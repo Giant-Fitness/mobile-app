@@ -11,6 +11,7 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useNavigation } from '@react-navigation/native';
 
 type EndProgramModalProps = {
     visible: boolean;
@@ -21,6 +22,12 @@ type EndProgramModalProps = {
 export const EndProgramModal: React.FC<EndProgramModalProps> = ({ visible, onClose, onConfirm }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const navigation = useNavigation();
+
+    const handleConfirm = () => {
+        onConfirm();
+        navigation.navigate('programs/program-abandon-feedback' as never);
+    };
 
     return (
         <CenteredModal visible={visible} onClose={onClose}>
@@ -37,7 +44,7 @@ export const EndProgramModal: React.FC<EndProgramModalProps> = ({ visible, onClo
                 <View style={styles.buttonContainer}>
                     <TextButton
                         text='Yes, End!'
-                        onPress={onConfirm}
+                        onPress={handleConfirm}
                         style={[styles.button, { backgroundColor: themeColors.red, borderWidth: 0 }]}
                         textType='bodyXSmall'
                         textStyle={[styles.buttonTextStyle, { color: themeColors.white }]}

@@ -21,6 +21,7 @@ export type ThemedTextProps = TextProps & {
         | 'italic'
         | 'buttonSmall'
         | 'titleXLarge'
+        | 'headline'
         | 'bodyXSmall'
         | 'bodyMedium'
         | 'bodySmall';
@@ -58,10 +59,11 @@ const styles = StyleSheet.create({
         lineHeight: moderateScale(32),
         fontFamily: 'InterSemiBold',
     },
-    titleXXLarge: {
-        fontSize: moderateScale(24),
-        lineHeight: moderateScale(36),
-        fontFamily: 'InterMedium',
+    headline: {
+        fontSize: moderateScale(32),
+        lineHeight: moderateScale(48),
+        fontFamily: 'InterExtraBold',
+        textTransform: 'uppercase',
     },
     title: {
         fontSize: moderateScale(16),
