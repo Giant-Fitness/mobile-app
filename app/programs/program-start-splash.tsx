@@ -31,7 +31,7 @@ export default function ProgramStartSplashScreen() {
     const randomTextRef = useRef('');
 
     useEffect(() => {
-        navigation.setOptions({ headerShown: false });
+        navigation.setOptions({ headerShown: false, gestureEnabled: false });
     }, [navigation]);
 
     useFocusEffect(

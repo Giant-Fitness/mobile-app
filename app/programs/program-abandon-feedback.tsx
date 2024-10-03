@@ -37,7 +37,7 @@ export default function ProgramAbandonFeedbackScreen() {
     );
 
     useEffect(() => {
-        navigation.setOptions({ headerShown: false });
+        navigation.setOptions({ headerShown: false, gestureEnabled: false });
     }, [navigation]);
 
     const toggleOption = (id: string) => {
