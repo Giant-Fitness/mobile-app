@@ -1,6 +1,6 @@
 // app/programs/program-overview.tsx
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Dimensions } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -20,6 +20,7 @@ import { TextButton } from '@/components/buttons/TextButton';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { SlideUpActionButton } from '@/components/buttons/SlideUpActionButton';
 import { useProgramData } from '@/hooks/useProgramData';
+import { OverwriteProgramModal } from '@/components/programs/OverwriteProgramModal';
 
 type ProgramOverviewScreenParams = {
     programId: string;
@@ -34,6 +35,8 @@ const ProgramOverviewScreen = () => {
 
     const { activeProgram: program, userProgramProgress, dataLoadedState, startProgram, error } = useProgramData(programId, undefined, { fetchAllDays: false });
 
+    const [isOverwriteProgramModalVisible, setIsOverwriteProgramModalVisible] = useState(false);
+
     const scrollY = useSharedValue(0);
     const scrollHandler = useAnimatedScrollHandler({
         onScroll: (event) => {
@@ -41,16 +44,43 @@ const ProgramOverviewScreen = () => {
         },
     });
 
-    React.useEffect(() => {
+    const { showSplash, handleSplashComplete } = useSplashScreen({
+        dataLoadedState,
+    });
+
+    useEffect(() => {
         navigation.setOptions({ headerShown: false });
     }, [navigation]);
 
     const isOnThisProgram = userProgramProgress?.ProgramId === programId;
     const isOnAProgram = !!userProgramProgress?.ProgramId;
 
-    const { showSplash, handleSplashComplete } = useSplashScreen({
-        dataLoadedState,
-    });
+    const handleStartProgram = () => {
+        startProgram();
+        navigation.navigate('programs/program-start-splash' as never);
+    };
+
+    const handleStartProgramConfirm = () => {
+        startProgram();
+        setIsOverwriteProgramModalVisible(false);
+    };
+
+    const navigateToProgramCalendar = () => {
+        navigation.navigate('programs/program-calendar', { programId });
+    };
+
+    const getLevelIcon = (level: string) => {
+        switch (level.toLowerCase()) {
+            case 'beginner':
+                return 'level-beginner';
+            case 'intermediate':
+                return 'level-intermediate';
+            case 'advanced':
+                return 'level-advanced';
+            default:
+                return 'people';
+        }
+    };
 
     if (showSplash) {
         return <DumbbellSplash onAnimationComplete={handleSplashComplete} isDataLoaded={dataLoadedState === REQUEST_STATE.FULFILLED} />;
@@ -73,23 +103,6 @@ const ProgramOverviewScreen = () => {
     }
 
     const { ProgramName, PhotoUrl, Weeks, Frequency, Goal, Level, DescriptionLong, Equipment, DesignedFor, CalendarOverview } = program;
-
-    const getLevelIcon = (level: string) => {
-        switch (level.toLowerCase()) {
-            case 'beginner':
-                return 'level-beginner';
-            case 'intermediate':
-                return 'level-intermediate';
-            case 'advanced':
-                return 'level-advanced';
-            default:
-                return 'people';
-        }
-    };
-
-    const navigateToProgramCalendar = () => {
-        navigation.navigate('programs/program-calendar', { programId });
-    };
 
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.backgroundTertiary }]}>
@@ -174,7 +187,7 @@ const ProgramOverviewScreen = () => {
                             {isOnAProgram && !isOnThisProgram && (
                                 <TextButton
                                     text='Start Program'
-                                    onPress={startProgram}
+                                    onPress={() => setIsOverwriteProgramModalVisible(true)}
                                     textType='bodyMedium'
                                     size='LG'
                                     style={[styles.calendarButton, { marginTop: Spaces.MD }]}
@@ -186,9 +199,14 @@ const ProgramOverviewScreen = () => {
             </Animated.ScrollView>
             {!isOnAProgram && (
                 <SlideUpActionButton scrollY={scrollY} slideUpThreshold={0}>
-                    <PrimaryButton text='Start Program' textType='bodyMedium' style={styles.startButton} onPress={startProgram} size='LG' />
+                    <PrimaryButton text='Start Program' textType='bodyMedium' style={styles.startButton} onPress={handleStartProgram} size='LG' />
                 </SlideUpActionButton>
             )}
+            <OverwriteProgramModal
+                visible={isOverwriteProgramModalVisible}
+                onClose={() => setIsOverwriteProgramModalVisible(false)}
+                onConfirm={handleStartProgramConfirm}
+            />
         </ThemedView>
     );
 };

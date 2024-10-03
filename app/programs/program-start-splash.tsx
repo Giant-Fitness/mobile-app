@@ -1,4 +1,4 @@
-// app/programs/program-end-splash.tsx
+// app/programs/program-start-splash.tsx
 
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
@@ -11,19 +11,21 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 
 const motivationalTexts = [
-    'Every end is a new beginning',
-    "You've got this, keep going",
-    'Change is growth in disguise',
-    'Your journey is just starting',
-    'Embrace the challenge ahead',
+    'Your journey begins',
+    'Rise to the challenge',
+    'Embrace the grind',
+    'Make it happen',
+    'Push your limits',
+    'Commit to greatness',
+    'Start strong, finish stronger',
+    'Today is day one',
 ];
 
-export default function ProgramEndSplashScreen() {
+export default function ProgramStartSplashScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const navigation = useNavigation();
     const router = useRouter();
-
     const slideAnim = useRef(new Animated.Value(50)).current;
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const randomTextRef = useRef('');
@@ -57,7 +59,7 @@ export default function ProgramEndSplashScreen() {
 
             // Set up navigation timer
             const timer = setTimeout(() => {
-                router.replace('/(tabs)/home');
+                router.replace('/(top-tabs)/programs');
             }, 3000);
 
             // Clean up function
@@ -95,7 +97,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         paddingLeft: Spaces.XL,
-        paddingRight: Spaces.XXL * 2, // Increased right padding
+        paddingRight: Spaces.XXL * 2,
     },
     text: {
         textAlign: 'left',

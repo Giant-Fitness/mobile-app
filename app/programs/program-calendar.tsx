@@ -24,6 +24,7 @@ import { ProgramProgressPillBar } from '@/components/programs/ProgramProgressPil
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { ProgramWeekList } from '@/components/programs/ProgramWeekList';
 import { getProgramAsync, getAllProgramDaysAsync } from '@/store/programs/thunks';
+import { startProgramAsync } from '@/store/user/thunks';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { SlideUpActionButton } from '@/components/buttons/SlideUpActionButton';
 
@@ -171,9 +172,10 @@ const ProgramCalendarScreen = () => {
 
     // Handle the Start Program action
     const handleStartProgram = () => {
-        // Start the program
-        console.log('Program started');
-        // Implement your start program logic here
+        dispatch(startProgramAsync({ programId: programId }));
+        // Fetch all program days when starting a new program
+        dispatch(getAllProgramDaysAsync({ programId: programId }));
+        navigation.navigate('programs/program-start-splash' as never);
     };
 
     // Handle the Reset Program action
