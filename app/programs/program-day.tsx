@@ -1,7 +1,8 @@
 // app/programs/program-day.tsx
 
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, ActivityIndicator, View } from 'react-native';
+import { router } from 'expo-router';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -18,6 +19,7 @@ import { TextButton } from '@/components/buttons/TextButton';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { useProgramData } from '@/hooks/useProgramData';
+import { ProgramDaySkipModal } from '@/components/programs/ProgramDaySkipModal';
 
 type ProgramDayScreenParams = {
     ProgramDay: {
@@ -31,12 +33,11 @@ const ProgramDayScreen = () => {
     const themeColors = Colors[colorScheme];
     const navigation = useNavigation();
     const route = useRoute<RouteProp<ProgramDayScreenParams, 'ProgramDay'>>();
+    const [isProgramDaySkipModalVisible, setIsProgramDaySkipModalVisible] = useState(false);
     const { dayId, programId } = route.params;
 
-    const { programDay, programDayState, currentWeek, dayOfWeek, isEnrolled, isDayCompleted, handleCompleteDay, handleUncompleteDay } = useProgramData(
-        programId,
-        dayId,
-    );
+    const { userProgramProgress, programDay, programDayState, currentWeek, dayOfWeek, isEnrolled, isDayCompleted, handleCompleteDay, handleUncompleteDay } =
+        useProgramData(programId, dayId);
 
     const scrollY = useSharedValue(0);
     const scrollHandler = useAnimatedScrollHandler({
@@ -51,6 +52,21 @@ const ProgramDayScreen = () => {
 
     const navigateToAllWorkouts = (initialFilters = {}) => {
         navigation.navigate('workouts/all-workouts', { initialFilters });
+    };
+
+    const finishDayChecker = () => {
+        if (userProgramProgress.CurrentDay < dayId) {
+            setIsProgramDaySkipModalVisible(true);
+        } else {
+            handleCompleteDay();
+            router.push('/(top-tabs)/programs');
+        }
+    };
+
+    const handleProgramDaySkip = () => {
+        handleCompleteDay();
+        setIsProgramDaySkipModalVisible(false);
+        router.push('/(top-tabs)/programs');
     };
 
     if (programDayState === REQUEST_STATE.PENDING) {
@@ -153,7 +169,7 @@ const ProgramDayScreen = () => {
                                         text='Finish Day'
                                         textType='bodyMedium'
                                         style={[styles.completeButton, { backgroundColor: themeColors.buttonPrimary }]}
-                                        onPress={handleCompleteDay}
+                                        onPress={finishDayChecker}
                                         size={'LG'}
                                     />
                                 )}
@@ -172,6 +188,11 @@ const ProgramDayScreen = () => {
                     </>
                 )}
             </Animated.ScrollView>
+            <ProgramDaySkipModal
+                visible={isProgramDaySkipModalVisible}
+                onClose={() => setIsProgramDaySkipModalVisible(false)}
+                onConfirm={handleProgramDaySkip}
+            />
         </ThemedView>
     );
 };

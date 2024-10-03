@@ -1,4 +1,4 @@
-// components/programs/EndProgramModal.tsx
+// components/programs/ProgramDaySkipModal.tsx
 
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
@@ -11,22 +11,19 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { useNavigation } from '@react-navigation/native';
 
-type EndProgramModalProps = {
+type ProgramDaySkipModalProps = {
     visible: boolean;
     onClose: () => void;
     onConfirm: () => void;
 };
 
-export const EndProgramModal: React.FC<EndProgramModalProps> = ({ visible, onClose, onConfirm }) => {
+export const ProgramDaySkipModal: React.FC<ProgramDaySkipModalProps> = ({ visible, onClose, onConfirm }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
-    const navigation = useNavigation();
 
     const handleConfirm = () => {
         onConfirm();
-        navigation.navigate('programs/program-abandon-feedback' as never);
     };
 
     return (
@@ -36,14 +33,14 @@ export const EndProgramModal: React.FC<EndProgramModalProps> = ({ visible, onClo
                     <Icon name='warning' color={themeColors.red} size={24} />
                 </View>
                 <ThemedText type='title' style={styles.title}>
-                    End Program
+                    Skip Days
                 </ThemedText>
                 <ThemedText type='bodySmall' style={styles.message}>
-                    You're about to end the program early. Are you sure?
+                    Completing this day will also complete all previous days. Are you sure?
                 </ThemedText>
                 <View style={styles.buttonContainer}>
                     <TextButton
-                        text='Yes, End.'
+                        text='Yes, Complete.'
                         onPress={handleConfirm}
                         style={[styles.button, { backgroundColor: themeColors.background, borderWidth: 1, borderColor: themeColors.redTransparent }]}
                         textType='bodyXSmall'
