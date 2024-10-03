@@ -3,7 +3,7 @@
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { UserProgramProgress, User } from '@/types';
 
-export interface ProgramState {
+export interface UserState {
     user: User | null;
     userState: REQUEST_STATE;
     userProgramProgress: UserProgramProgress | null;
@@ -11,7 +11,7 @@ export interface ProgramState {
     error: string | null;
 }
 
-export const initialState: ProgramState = {
+export const initialState: UserState = {
     user: null,
     userState: REQUEST_STATE.IDLE,
     userProgramProgress: null,

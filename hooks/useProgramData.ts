@@ -1,6 +1,6 @@
 // hooks/useProgramData.ts
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/rootReducer';
 import {
@@ -34,6 +34,9 @@ export const useProgramData = (
     const userState = useSelector((state: RootState) => state.user.userState);
     const userProgramProgress = useSelector((state: RootState) => state.user.userProgramProgress);
     const userProgramProgressState = useSelector((state: RootState) => state.user.userProgramProgressState);
+
+    const [isCompletingDay, setIsCompletingDay] = useState(false);
+    const [isUncompletingDay, setIsUncompletingDay] = useState(false);
 
     // Program-specific selectors
     const { programs, programsState, programDays, programDaysState, error: programError } = useSelector((state: RootState) => state.programs);
@@ -216,15 +219,29 @@ export const useProgramData = (
 
     const isDayCompleted = userProgramProgress?.CompletedDays?.includes(specificDayId) || false;
 
-    const handleCompleteDay = () => {
+    const handleCompleteDay = async () => {
         if (specificDayId) {
-            dispatch(completeDayAsync({ dayId: specificDayId }));
+            setIsCompletingDay(true);
+            try {
+                await dispatch(completeDayAsync({ dayId: specificDayId })).unwrap();
+            } catch (error) {
+                console.error('Failed to complete day:', error);
+            } finally {
+                setIsCompletingDay(false);
+            }
         }
     };
 
-    const handleUncompleteDay = () => {
+    const handleUncompleteDay = async () => {
         if (specificDayId) {
-            dispatch(uncompleteDayAsync({ dayId: specificDayId }));
+            setIsUncompletingDay(true);
+            try {
+                await dispatch(uncompleteDayAsync({ dayId: specificDayId })).unwrap();
+            } catch (error) {
+                console.error('Failed to uncomplete day:', error);
+            } finally {
+                setIsUncompletingDay(false);
+            }
         }
     };
 
@@ -263,6 +280,8 @@ export const useProgramData = (
         endProgram,
         startProgram,
         resetProgram,
+        isCompletingDay,
+        isUncompletingDay,
         error: programError || quoteError,
     };
 };

@@ -1,7 +1,7 @@
 // components/buttons/PrimaryButton.tsx
 
 import React from 'react';
-import { TouchableOpacity, StyleSheet, StyleProp, ViewStyle, TextStyle, AccessibilityProps } from 'react-native';
+import { TouchableOpacity, StyleSheet, StyleProp, ViewStyle, TextStyle, AccessibilityProps, ActivityIndicator } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -15,17 +15,18 @@ import { ThemedTextProps } from '@/components/base/ThemedText';
 type PrimaryButtonProps = {
     onPress: () => void;
     text?: string;
-    iconName?: string; // Optional icon to be displayed with text
-    iconPosition?: 'left' | 'right'; // Icon position relative to text
+    iconName?: string;
+    iconPosition?: 'left' | 'right';
     iconSize?: number;
     iconColor?: string;
     style?: StyleProp<ViewStyle>;
     textStyle?: StyleProp<TextStyle>;
     iconStyle?: StyleProp<ViewStyle>;
-    textType?: ThemedTextProps['type']; // For themed text
-    size?: 'SM' | 'MD' | 'LG'; // Button size variants
-    disabled?: boolean; // Disable button
-    accessibilityLabel?: string; // Accessibility label for screen readers
+    textType?: ThemedTextProps['type'];
+    size?: 'SM' | 'MD' | 'LG';
+    disabled?: boolean;
+    accessibilityLabel?: string;
+    loading?: boolean;
 };
 
 export const PrimaryButton: React.FC<PrimaryButtonProps & AccessibilityProps> = ({
@@ -38,15 +39,15 @@ export const PrimaryButton: React.FC<PrimaryButtonProps & AccessibilityProps> = 
     style,
     textStyle,
     iconStyle,
-    textType = 'body', // Default text type
+    textType = 'body',
     size = 'MD',
     disabled = false,
-    accessibilityLabel = text || 'Primary button', // Fallback to text for accessibility label
+    accessibilityLabel = text || 'Primary button',
+    loading = false,
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
-    // Define button dimensions based on size prop
     const buttonPadding = {
         SM: { paddingVertical: Spaces.XS, paddingHorizontal: Spaces.SM, borderRadius: Spaces.XL },
         MD: { paddingVertical: Spaces.SM, paddingHorizontal: Spaces.MD, borderRadius: Spaces.XL },
@@ -58,37 +59,43 @@ export const PrimaryButton: React.FC<PrimaryButtonProps & AccessibilityProps> = 
             style={[
                 styles.button,
                 {
-                    backgroundColor: disabled ? themeColors.buttonDisabled : themeColors.buttonPrimary, // Solid color for primary action
-                    opacity: disabled ? Opacities.disabled : 1,
+                    backgroundColor: disabled || loading ? themeColors.buttonDisabled : themeColors.buttonPrimary,
+                    opacity: disabled || loading ? Opacities.disabled : 1,
                     ...buttonPadding,
                 },
                 style,
             ]}
-            onPress={disabled ? undefined : onPress}
+            onPress={disabled || loading ? undefined : onPress}
             activeOpacity={1}
             accessibilityLabel={accessibilityLabel}
-            disabled={disabled}
+            disabled={disabled || loading}
         >
-            {iconName && iconPosition === 'left' && (
-                <Icon
-                    name={iconName}
-                    size={moderateScale(iconSize)}
-                    color={iconColor || themeColors.buttonPrimaryText}
-                    style={[styles.icon, iconStyle, { marginRight: Spaces.SM }]}
-                />
-            )}
+            {loading ? (
+                <ActivityIndicator size='small' color={themeColors.buttonPrimaryText} />
+            ) : (
+                <>
+                    {iconName && iconPosition === 'left' && (
+                        <Icon
+                            name={iconName}
+                            size={moderateScale(iconSize)}
+                            color={iconColor || themeColors.buttonPrimaryText}
+                            style={[styles.icon, iconStyle, { marginRight: Spaces.SM }]}
+                        />
+                    )}
 
-            <ThemedText type={textType} style={[styles.text, { color: themeColors.buttonPrimaryText }, textStyle]}>
-                {text}
-            </ThemedText>
+                    <ThemedText type={textType} style={[styles.text, { color: themeColors.buttonPrimaryText }, textStyle]}>
+                        {text}
+                    </ThemedText>
 
-            {iconName && iconPosition === 'right' && (
-                <Icon
-                    name={iconName}
-                    size={moderateScale(iconSize)}
-                    color={iconColor || themeColors.buttonPrimaryText}
-                    style={[styles.icon, iconStyle, { marginLeft: Spaces.XS }]}
-                />
+                    {iconName && iconPosition === 'right' && (
+                        <Icon
+                            name={iconName}
+                            size={moderateScale(iconSize)}
+                            color={iconColor || themeColors.buttonPrimaryText}
+                            style={[styles.icon, iconStyle, { marginLeft: Spaces.XS }]}
+                        />
+                    )}
+                </>
             )}
         </TouchableOpacity>
     );

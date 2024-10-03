@@ -1,6 +1,6 @@
 // app/programs/program-day.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, ActivityIndicator, View } from 'react-native';
 import { router } from 'expo-router';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -21,6 +21,7 @@ import { REQUEST_STATE } from '@/constants/requestStates';
 import { useProgramData } from '@/hooks/useProgramData';
 import { ProgramDaySkipModal } from '@/components/programs/ProgramDaySkipModal';
 import { ProgramDayUnfinishModal } from '@/components/programs/ProgramDayUnfinishModal';
+import LottieView from 'lottie-react-native';
 
 type ProgramDayScreenParams = {
     ProgramDay: {
@@ -36,11 +37,24 @@ const ProgramDayScreen = () => {
     const route = useRoute<RouteProp<ProgramDayScreenParams, 'ProgramDay'>>();
     const [isProgramDaySkipModalVisible, setIsProgramDaySkipModalVisible] = useState(false);
     const [isResetDayModalVisible, setIsResetDayModalVisible] = useState(false);
+    const [showConfetti, setShowConfetti] = useState(false);
+    const confettiRef = useRef<LottieView>(null);
 
     const { dayId, programId } = route.params;
 
-    const { userProgramProgress, programDay, programDayState, currentWeek, dayOfWeek, isEnrolled, isDayCompleted, handleCompleteDay, handleUncompleteDay } =
-        useProgramData(programId, dayId);
+    const {
+        userProgramProgress,
+        programDay,
+        programDayState,
+        currentWeek,
+        dayOfWeek,
+        isEnrolled,
+        isDayCompleted,
+        handleCompleteDay,
+        handleUncompleteDay,
+        isCompletingDay,
+        isUncompletingDay,
+    } = useProgramData(programId, dayId);
 
     const scrollY = useSharedValue(0);
     const scrollHandler = useAnimatedScrollHandler({
@@ -57,25 +71,35 @@ const ProgramDayScreen = () => {
         navigation.navigate('workouts/all-workouts', { initialFilters });
     };
 
-    const finishDayChecker = () => {
+    const finishDayChecker = async () => {
         if (userProgramProgress.CurrentDay < dayId) {
             setIsProgramDaySkipModalVisible(true);
         } else {
-            handleCompleteDay();
-            router.push('/(top-tabs)/programs');
+            await handleCompleteDay();
+            setShowConfetti(true);
+            confettiRef.current?.play();
+            setTimeout(() => {
+                setShowConfetti(false);
+                router.push('/(tabs)/home');
+            }, 2200); // Adjust this time as needed
         }
     };
 
-    const handleProgramDaySkip = () => {
-        handleCompleteDay();
+    const handleProgramDaySkip = async () => {
+        await handleCompleteDay();
         setIsProgramDaySkipModalVisible(false);
-        router.push('/(top-tabs)/programs');
+        setShowConfetti(true);
+        confettiRef.current?.play();
+        setTimeout(() => {
+            setShowConfetti(false);
+            router.push('/(tabs)/home');
+        }, 2200); // Adjust this time as needed
     };
 
     const resetDay = () => {
         handleUncompleteDay();
         setIsResetDayModalVisible(false);
-        router.push('/(top-tabs)/programs');
+        router.push('/(tabs)/home');
     };
 
     if (programDayState === REQUEST_STATE.PENDING) {
@@ -172,6 +196,8 @@ const ProgramDayScreen = () => {
                                         onPress={() => setIsResetDayModalVisible(true)}
                                         iconName='check-outline'
                                         size={'LG'}
+                                        disabled={isUncompletingDay}
+                                        loading={isUncompletingDay}
                                     />
                                 ) : (
                                     <PrimaryButton
@@ -180,6 +206,8 @@ const ProgramDayScreen = () => {
                                         style={[styles.completeButton, { backgroundColor: themeColors.buttonPrimary }]}
                                         onPress={finishDayChecker}
                                         size={'LG'}
+                                        disabled={isCompletingDay}
+                                        loading={isCompletingDay}
                                     />
                                 )}
                                 {programDay.RestDay && (
@@ -203,6 +231,17 @@ const ProgramDayScreen = () => {
                 onConfirm={handleProgramDaySkip}
             />
             <ProgramDayUnfinishModal visible={isResetDayModalVisible} onClose={() => setIsResetDayModalVisible(false)} onConfirm={resetDay} />
+            {showConfetti && (
+                <View style={StyleSheet.absoluteFill}>
+                    <LottieView
+                        ref={confettiRef}
+                        source={require('@/assets/splash/confetti2.json')}
+                        autoPlay={false}
+                        loop={false}
+                        style={StyleSheet.absoluteFill}
+                    />
+                </View>
+            )}
         </ThemedView>
     );
 };
