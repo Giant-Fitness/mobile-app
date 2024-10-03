@@ -20,6 +20,7 @@ import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { useProgramData } from '@/hooks/useProgramData';
 import { ProgramDaySkipModal } from '@/components/programs/ProgramDaySkipModal';
+import { ProgramDayUnfinishModal } from '@/components/programs/ProgramDayUnfinishModal';
 
 type ProgramDayScreenParams = {
     ProgramDay: {
@@ -34,6 +35,8 @@ const ProgramDayScreen = () => {
     const navigation = useNavigation();
     const route = useRoute<RouteProp<ProgramDayScreenParams, 'ProgramDay'>>();
     const [isProgramDaySkipModalVisible, setIsProgramDaySkipModalVisible] = useState(false);
+    const [isResetDayModalVisible, setIsResetDayModalVisible] = useState(false);
+
     const { dayId, programId } = route.params;
 
     const { userProgramProgress, programDay, programDayState, currentWeek, dayOfWeek, isEnrolled, isDayCompleted, handleCompleteDay, handleUncompleteDay } =
@@ -66,6 +69,12 @@ const ProgramDayScreen = () => {
     const handleProgramDaySkip = () => {
         handleCompleteDay();
         setIsProgramDaySkipModalVisible(false);
+        router.push('/(top-tabs)/programs');
+    };
+
+    const resetDay = () => {
+        handleUncompleteDay();
+        setIsResetDayModalVisible(false);
         router.push('/(top-tabs)/programs');
     };
 
@@ -160,7 +169,7 @@ const ProgramDayScreen = () => {
                                         style={[styles.completeButton, { backgroundColor: themeColors.background }]}
                                         textStyle={[{ color: themeColors.text }]}
                                         iconColor={themeColors.text}
-                                        onPress={handleUncompleteDay}
+                                        onPress={() => setIsResetDayModalVisible(true)}
                                         iconName='check-outline'
                                         size={'LG'}
                                     />
@@ -193,6 +202,7 @@ const ProgramDayScreen = () => {
                 onClose={() => setIsProgramDaySkipModalVisible(false)}
                 onConfirm={handleProgramDaySkip}
             />
+            <ProgramDayUnfinishModal visible={isResetDayModalVisible} onClose={() => setIsResetDayModalVisible(false)} onConfirm={resetDay} />
         </ThemedView>
     );
 };
