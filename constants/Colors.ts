@@ -10,7 +10,7 @@ export const Colors = {
         backgroundTertiary: '#EDEEEE',
         primary: '#204D24', // Primary color (Green)
         secondary: '#EAEAEA', // Secondary elements
-        accent: '#45A949', // Accent color
+        accent: '#45A949', // Accent color 81F499
         systemBorderColor: 'rgba(0, 0, 0, 0.2)', // Lighter border for subtle dividers
         container: '#f7f7f5', // Container background
         containerHighlight: '#1e221e', // Slightly adjusted to avoid too dark
