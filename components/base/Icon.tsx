@@ -146,8 +146,12 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
             return <AnimatedFeather name='target' {...commonProps} />;
         case 'calendar':
             return <AnimatedIonicons name='calendar' {...commonProps} />;
+        case 'auto-graph':
+            return <AnimatedMaterialIcons name='auto-graph' {...commonProps} />;
         case 'power-sleep':
             return <AnimatedMaterialCommunityIcons name='power-sleep' {...commonProps} />;
+        case 'library':
+            return <AnimatedIonicons name='library-outline' {...commonProps} />;
         default:
             return <AnimatedIonicons name='alert-circle-outline' {...commonProps} />;
     }

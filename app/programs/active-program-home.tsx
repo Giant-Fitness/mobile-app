@@ -20,6 +20,20 @@ import { useProgramData } from '@/hooks/useProgramData';
 import { EndProgramModal } from '@/components/programs/EndProgramModal';
 import { ResetProgramModal } from '@/components/programs/ResetProgramModal';
 
+const MenuItem = ({ icon, text, onPress, color, leftIconColor, backgroundColor }) => (
+    <TouchableOpacity style={styles.menuItem} activeOpacity={1} onPress={onPress}>
+        <View style={styles.menuItemLeft}>
+            <View style={[styles.iconBox, { backgroundColor }]}>
+                <Icon name={icon} size={Sizes.iconSizeMD} color={leftIconColor} />
+            </View>
+            <ThemedText type='overline' style={[styles.menuText, { color }]}>
+                {text}
+            </ThemedText>
+        </View>
+        <Icon name='chevron-forward' size={Sizes.iconSizeSM} color={color} style={styles.menuChevron} />
+    </TouchableOpacity>
+);
+
 export default function ActiveProgramHome() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -27,18 +41,11 @@ export default function ActiveProgramHome() {
     const [isEndProgramModalVisible, setIsEndProgramModalVisible] = useState(false);
     const [isResetProgramModalVisible, setIsResetProgramModalVisible] = useState(false);
 
-    const {
-        userProgramProgress,
-        activeProgram,
-        activeProgramNextDays,
-        dataLoadedState,
-        isLastDay,
-        currentWeek,
-        displayQuote,
-        endProgram,
-        resetProgram,
-        error,
-    } = useProgramData(undefined, undefined, { fetchAllDays: true });
+    const { activeProgram, activeProgramNextDays, dataLoadedState, isLastDay, currentWeek, displayQuote, endProgram, resetProgram, error } = useProgramData(
+        undefined,
+        undefined,
+        { fetchAllDays: true },
+    );
 
     const { showSplash, handleSplashComplete } = useSplashScreen({
         dataLoadedState,
@@ -56,20 +63,8 @@ export default function ActiveProgramHome() {
         );
     }
 
-    const navigateToProgramCalendar = () => {
-        navigation.navigate('programs/program-calendar', {
-            programId: activeProgram.ProgramId,
-        });
-    };
-
-    const navigateToProgramOverview = () => {
-        navigation.navigate('programs/program-overview', {
-            programId: activeProgram.ProgramId,
-        });
-    };
-
-    const navigateToBrowsePrograms = () => {
-        navigation.navigate('programs/browse-programs');
+    const navigateTo = (route, params = {}) => {
+        navigation.navigate(route, params);
     };
 
     const handleEndProgramConfirm = () => {
@@ -82,6 +77,14 @@ export default function ActiveProgramHome() {
         setIsResetProgramModalVisible(false);
     };
 
+    const menuItems = [
+        { icon: 'auto-graph', text: 'View Progress', onPress: () => navigateTo('programs/program-calendar', { programId: activeProgram.ProgramId }) },
+        { icon: 'library', text: 'Browse Library', onPress: () => navigateTo('programs/browse-programs') },
+        { icon: 'list', text: 'Plan Overview', onPress: () => navigateTo('programs/program-overview', { programId: activeProgram.ProgramId }) },
+        { icon: 'warning', text: 'End Program', onPress: () => setIsEndProgramModalVisible(true) },
+        { icon: 'warning', text: 'Reset Program', onPress: () => setIsResetProgramModalVisible(true) },
+    ];
+
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
             <ScrollView
@@ -92,36 +95,36 @@ export default function ActiveProgramHome() {
                 showsVerticalScrollIndicator={false}
             >
                 {isLastDay ? (
-                    <ThemedView style={{ marginHorizontal: Spaces.SM, marginTop: Spaces.XL, marginBottom: Spaces.LG }}>
+                    <View style={styles.tipContainer}>
                         <HighlightedTip iconName='star' tipText='The finish line is here, one last push!' />
-                    </ThemedView>
+                    </View>
                 ) : (
                     displayQuote && (
-                        <ThemedView style={styles.quoteContainer}>
+                        <View style={styles.quoteContainer}>
                             <ThemedText type='italic' style={[styles.quoteText, { color: themeColors.subText }]}>
                                 {displayQuote.QuoteText}
                             </ThemedText>
-                        </ThemedView>
+                        </View>
                     )
                 )}
 
-                <ThemedView style={styles.planHeader}>
+                <View style={styles.planHeader}>
                     <ThemedText type='titleLarge'>{activeProgram?.ProgramName}</ThemedText>
-                </ThemedView>
+                </View>
 
-                <ThemedView style={[styles.weekProgress]}>
+                <View style={styles.weekProgress}>
                     <ThemedText style={[{ color: themeColors.subText }]}>
                         Week {currentWeek} of {activeProgram?.Weeks}
                     </ThemedText>
-                </ThemedView>
+                </View>
 
-                <ThemedView style={[styles.activeCardContainer]}>
+                <View style={styles.activeCardContainer}>
                     <ActiveProgramDayCard />
-                </ThemedView>
+                </View>
 
                 {activeProgramNextDays.length > 0 && (
                     <ThemedView style={[styles.upNextContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
-                        <ThemedText type='title' style={[styles.subHeader, { color: themeColors.text }]}>
+                        <ThemedText type='title' style={styles.subHeader}>
                             Up Next
                         </ThemedText>
                         {activeProgramNextDays.map((day) => (
@@ -130,32 +133,13 @@ export default function ActiveProgramHome() {
                     </ThemedView>
                 )}
 
-                <ThemedView style={[styles.menuContainer]}>
-                    {[
-                        { title: 'Program Calendar', onPress: navigateToProgramCalendar },
-                        { title: 'Program Overview', onPress: navigateToProgramOverview },
-                        { title: 'Browse Programs', onPress: navigateToBrowsePrograms },
-                        { title: 'Reset Program', onPress: () => setIsResetProgramModalVisible(true) },
-                        { title: 'End Program', onPress: () => setIsEndProgramModalVisible(true) },
-                    ].map((item, index) => (
-                        <ThemedView key={item.title}>
-                            <TouchableOpacity style={styles.menuItem} activeOpacity={1} onPress={item.onPress}>
-                                <ThemedText type='body' style={[{ color: themeColors.text }]}>
-                                    {item.title}
-                                </ThemedText>
-                                <Icon name='chevron-forward' size={Sizes.iconSizeSM} color={themeColors.iconDefault} />
-                            </TouchableOpacity>
-                            {index < 4 && (
-                                <View
-                                    style={{
-                                        borderBottomColor: themeColors.systemBorderColor,
-                                        borderBottomWidth: StyleSheet.hairlineWidth,
-                                    }}
-                                />
-                            )}
+                <View style={styles.menuWrapper}>
+                    {menuItems.map((item, index) => (
+                        <ThemedView key={index} style={[styles.menuContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
+                            <MenuItem {...item} color={themeColors.text} leftIconColor={themeColors.tipText} backgroundColor={`${themeColors.tipBackground}`} />
                         </ThemedView>
                     ))}
-                </ThemedView>
+                </View>
             </ScrollView>
             <ResetProgramModal
                 visible={isResetProgramModalVisible}
@@ -175,18 +159,35 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     subHeader: {
-        marginTop: Spaces.MD,
         marginBottom: Spaces.MD,
     },
     upNextContainer: {
-        paddingTop: Spaces.SM,
-        paddingHorizontal: Spaces.LG,
+        paddingVertical: Spaces.MD,
+        paddingHorizontal: Spaces.XL,
     },
     menuItem: {
-        paddingTop: Spaces.LG,
-        paddingBottom: Spaces.LG,
+        paddingVertical: Spaces.LG,
         flexDirection: 'row',
+        alignItems: 'center',
         justifyContent: 'space-between',
+    },
+    menuItemLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    iconBox: {
+        width: Spaces.XXL,
+        height: Spaces.XXL,
+        borderRadius: Spaces.SM,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: Spaces.MD,
+    },
+    menuIcon: {
+        marginRight: Spaces.SM,
+    },
+    menuChevron: {
+        marginLeft: Spaces.SM,
     },
     quoteContainer: {
         paddingTop: Spaces.XL,
@@ -209,8 +210,18 @@ const styles = StyleSheet.create({
         paddingBottom: Spaces.XXL,
     },
     menuContainer: {
-        paddingHorizontal: Spaces.LG,
-        paddingBottom: 0,
-        paddingTop: Spaces.MD,
+        marginHorizontal: Spaces.LG,
+        paddingHorizontal: Spaces.MD,
+        marginBottom: Spaces.MD,
+        borderRadius: Spaces.MD,
+    },
+    tipContainer: {
+        marginHorizontal: Spaces.SM,
+        marginTop: Spaces.XL,
+        marginBottom: Spaces.LG,
+    },
+    menuWrapper: {
+        marginTop: Spaces.XXL,
+        marginBottom: Spaces.XL,
     },
 });

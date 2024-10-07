@@ -88,7 +88,7 @@ export default function BrowseProgramsScreen() {
 
     return (
         <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.background }]}>
-            <AnimatedHeader disableColorChange={true} title='Browse Programs' headerBackground={themeColors.background} />
+            <AnimatedHeader disableColorChange={true} title='Browse' headerBackground={themeColors.background} />
             <FlatList
                 data={Object.values(programs)}
                 renderItem={renderItem}
