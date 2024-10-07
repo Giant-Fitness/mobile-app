@@ -78,7 +78,7 @@ export default function ActiveProgramHome() {
     };
 
     const menuItems = [
-        { icon: 'auto-graph', text: 'View Progress', onPress: () => navigateTo('programs/program-calendar', { programId: activeProgram.ProgramId }) },
+        { icon: 'auto-graph', text: 'View Progress', onPress: () => navigateTo('programs/program-progress', { programId: activeProgram.ProgramId }) },
         { icon: 'library', text: 'Browse Library', onPress: () => navigateTo('programs/browse-programs') },
         { icon: 'list', text: 'Plan Overview', onPress: () => navigateTo('programs/program-overview', { programId: activeProgram.ProgramId }) },
         { icon: 'warning', text: 'End Program', onPress: () => setIsEndProgramModalVisible(true) },

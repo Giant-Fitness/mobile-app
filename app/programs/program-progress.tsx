@@ -1,4 +1,4 @@
-// app/programs/ProgramCalendarScreen.tsx
+// app/programs/ProgramProgressScreen.tsx
 
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, Dimensions } from 'react-native';
@@ -28,11 +28,11 @@ import { startProgramAsync } from '@/store/user/thunks';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { SlideUpActionButton } from '@/components/buttons/SlideUpActionButton';
 
-type ProgramCalendarScreenParams = {
+type ProgramProgressScreenParams = {
     programId: string;
 };
 
-const ProgramCalendarScreen = () => {
+const ProgramProgressScreen = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const dispatch = useDispatch<AppDispatch>();
@@ -40,7 +40,7 @@ const ProgramCalendarScreen = () => {
 
     const navigation = useNavigation();
 
-    const route = useRoute<RouteProp<Record<string, ProgramCalendarScreenParams>, string>>();
+    const route = useRoute<RouteProp<Record<string, ProgramProgressScreenParams>, string>>();
     const { programId } = route.params;
 
     const scrollY = useSharedValue(0);
@@ -201,7 +201,7 @@ const ProgramCalendarScreen = () => {
     };
 
     return (
-        <ThemedView style={[styles.container, { backgroundColor: themeColors.backgroundTertiary }]}>
+        <ThemedView style={[styles.container, { backgroundColor: themeColors.backgroundSecondary }]}>
             <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Spaces.XXL} headerInterpolationEnd={Sizes.imageLGHeight} />
             <Animated.ScrollView
                 contentContainerStyle={[{ flexGrow: 1 }]}
@@ -210,15 +210,7 @@ const ProgramCalendarScreen = () => {
                 onScroll={scrollHandler}
                 scrollEventThrottle={16}
             >
-                <ThemedView
-                    style={[
-                        {
-                            backgroundColor: themeColors.background,
-                        },
-                        !isOnThisProgram && { marginBottom: Sizes.bottomSpaceLarge },
-                        isOnThisProgram && { marginBottom: Spaces.XXL },
-                    ]}
-                >
+                <View style={[!isOnThisProgram && { marginBottom: Sizes.bottomSpaceLarge }, isOnThisProgram && { marginBottom: Spaces.XXL }]}>
                     <TopImageInfoCard
                         image={{ uri: program.PhotoUrl }}
                         title={program.ProgramName}
@@ -230,54 +222,54 @@ const ProgramCalendarScreen = () => {
                             paddingBottom: Spaces.XXS,
                         }}
                         imageStyle={{ height: Sizes.image3XLHeight }}
-                        extraContent={
-                            <View>
-                                {/* Attributes in a Row */}
-                                <ThemedView style={[styles.attributeRow]}>
-                                    {/* Attribute 1: Length */}
-                                    <View style={styles.attributeItem}>
-                                        <Icon name='stopwatch' size={Sizes.fontSizeDefault} color={themeColors.text} />
-                                        <ThemedText type='buttonSmall' style={[styles.attributeText]}>
-                                            {program.Weeks} Weeks
-                                        </ThemedText>
-                                    </View>
+                        // extraContent={
+                        //     <View>
+                        //         {/* Attributes in a Row */}
+                        //         <ThemedView style={[styles.attributeRow]}>
+                        //             {/* Attribute 1: Length */}
+                        //             <View style={styles.attributeItem}>
+                        //                 <Icon name='stopwatch' size={Sizes.fontSizeDefault} color={themeColors.text} />
+                        //                 <ThemedText type='buttonSmall' style={[styles.attributeText]}>
+                        //                     {program.Weeks} Weeks
+                        //                 </ThemedText>
+                        //             </View>
 
-                                    {/* Attribute 2: Frequency */}
-                                    <View style={styles.attributeItem}>
-                                        <Icon name='calendar' size={Sizes.fontSizeDefault} color={themeColors.text} />
-                                        <ThemedText type='buttonSmall' style={[styles.attributeText]}>
-                                            {program.Frequency}
-                                        </ThemedText>
-                                    </View>
+                        //             {/* Attribute 2: Frequency */}
+                        //             <View style={styles.attributeItem}>
+                        //                 <Icon name='calendar' size={Sizes.fontSizeDefault} color={themeColors.text} />
+                        //                 <ThemedText type='buttonSmall' style={[styles.attributeText]}>
+                        //                     {program.Frequency}
+                        //                 </ThemedText>
+                        //             </View>
 
-                                    {/* Attribute 3: Goal */}
-                                    <View style={styles.attributeItem}>
-                                        <Icon name='target' size={Sizes.fontSizeDefault} color={themeColors.text} />
-                                        <ThemedText type='buttonSmall' style={[styles.attributeText]}>
-                                            {program.Goal}
-                                        </ThemedText>
-                                    </View>
+                        //             {/* Attribute 3: Goal */}
+                        //             <View style={styles.attributeItem}>
+                        //                 <Icon name='target' size={Sizes.fontSizeDefault} color={themeColors.text} />
+                        //                 <ThemedText type='buttonSmall' style={[styles.attributeText]}>
+                        //                     {program.Goal}
+                        //                 </ThemedText>
+                        //             </View>
 
-                                    {/* Attribute 4: Level */}
-                                    <View style={styles.attributeItem}>
-                                        <Icon name={getLevelIcon(program.Level)} color={themeColors.text} />
-                                        <ThemedText type='buttonSmall' style={[styles.attributeText]}>
-                                            {program.Level}
-                                        </ThemedText>
-                                    </View>
-                                    {/* Short Description */}
-                                    <ThemedText type='italic' style={[{ paddingBottom: Spaces.SM, paddingTop: Spaces.MD }]}>
-                                        {program.DescriptionShort}
-                                    </ThemedText>
-                                </ThemedView>
-                            </View>
-                        }
+                        //             {/* Attribute 4: Level */}
+                        //             <View style={styles.attributeItem}>
+                        //                 <Icon name={getLevelIcon(program.Level)} color={themeColors.text} />
+                        //                 <ThemedText type='buttonSmall' style={[styles.attributeText]}>
+                        //                     {program.Level}
+                        //                 </ThemedText>
+                        //             </View>
+                        //             {/* Short Description */}
+                        //             <ThemedText type='italic' style={[{ paddingBottom: Spaces.SM, paddingTop: Spaces.MD }]}>
+                        //                 {program.DescriptionShort}
+                        //             </ThemedText>
+                        //         </ThemedView>
+                        //     </View>
+                        // }
                     />
                     {isOnThisProgram && (
                         <ThemedView style={[styles.progress]}>
-                            <ThemedText type='overline' style={[{ color: themeColors.subText, paddingBottom: Spaces.MD }]}>
+                            {/*                            <ThemedText type='overline' style={[{ color: themeColors.subText, paddingBottom: Spaces.MD }]}>
                                 Day {userCurrentDayNumber}/{program?.Days}
-                            </ThemedText>
+                            </ThemedText>*/}
                             <ProgramProgressPillBar
                                 completedParts={Number(userCurrentWeekNumber) - 1}
                                 currentPart={Number(userCurrentWeekNumber)}
@@ -316,14 +308,14 @@ const ProgramCalendarScreen = () => {
                         </ThemedView>
                     </ThemedView>
                     {/* Week-by-Week View */}
-                    <ProgramWeekList
+                    {/*                    <ProgramWeekList
                         currentMonthWeeks={currentMonthWeeks}
                         userCurrentWeekNumber={userCurrentWeekNumber}
                         userCurrentDayNumber={userCurrentDayNumber}
                         navigateToProgramDay={navigateToProgramDay}
                         completedDays={userProgramProgress.CompletedDays || []}
-                    />
-                </ThemedView>
+                    />*/}
+                </View>
             </Animated.ScrollView>
             <View style={styles.buttonContainer}>
                 {!isOnThisProgram && !isOnAProgram && (
@@ -364,7 +356,7 @@ const styles = StyleSheet.create({
         paddingTop: Spaces.LG,
     },
     calendarContainer: {
-        borderRadius: Spaces.SM,
+        marginTop: Spaces.XXL,
     },
     calendar: {
         paddingBottom: Spaces.LG,
@@ -376,8 +368,9 @@ const styles = StyleSheet.create({
         borderWidth: 1,
     },
     progress: {
-        marginHorizontal: Spaces.LG,
-        paddingTop: Spaces.LG,
+        paddingHorizontal: Spaces.LG,
+        paddingTop: Spaces.SM,
+        paddingBottom: Spaces.XL,
     },
     attributeRow: {
         flexDirection: 'row',
@@ -396,4 +389,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ProgramCalendarScreen;
+export default ProgramProgressScreen;
