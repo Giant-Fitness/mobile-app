@@ -62,10 +62,16 @@ export default function TabLayout() {
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Home',
-                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'home-active' : 'home-inactive'} size={25} color={color} />,
+                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'home-active' : 'home-inactive'} size={22} color={color} />,
                 }}
             />
             <Tabs.Screen
+                name='(top-tabs)'
+                options={{
+                    href: null, // This prevents the tab from being rendered
+                }}
+            />
+            {/*<Tabs.Screen
                 name='(top-tabs)'
                 options={{
                     headerStyle: {
@@ -79,8 +85,14 @@ export default function TabLayout() {
                     title: 'Train',
                     tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'exercise-active' : 'exercise-inactive'} size={25} color={color} />,
                 }}
-            />
+            />*/}
             <Tabs.Screen
+                name='nutrition'
+                options={{
+                    href: null, // This prevents the tab from being rendered
+                }}
+            />
+            {/*<Tabs.Screen
                 name='nutrition'
                 options={{
                     headerStyle: {
@@ -90,6 +102,30 @@ export default function TabLayout() {
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Nutrition',
                     tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'nutrition-active' : 'nutrition-inactive'} size={23} color={color} />,
+                }}
+            />*/}
+            <Tabs.Screen
+                name='programs'
+                options={{
+                    headerStyle: {
+                        backgroundColor: themeColors.background,
+                        height: 90,
+                    },
+                    headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
+                    title: 'Plans',
+                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'plan-active' : 'plan-inactive'} size={22} color={color} />,
+                }}
+            />
+            <Tabs.Screen
+                name='on-demand'
+                options={{
+                    headerStyle: {
+                        backgroundColor: themeColors.background,
+                        height: 90,
+                    },
+                    headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
+                    title: 'Solos',
+                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'lightning-active' : 'lightning-inactive'} size={23} color={color} />,
                 }}
             />
             <Tabs.Screen
@@ -101,7 +137,7 @@ export default function TabLayout() {
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Progress',
-                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'progress-active' : 'progress-inactive'} size={23} color={color} />,
+                    tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'progress-active' : 'progress-inactive'} size={21} color={color} />,
                 }}
             />
         </Tabs>

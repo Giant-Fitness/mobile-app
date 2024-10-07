@@ -73,13 +73,13 @@ export default function BrowseProgramsScreen() {
 
     const renderHeader = useMemo(
         () => (
-            <ThemedView style={[styles.infoContainer, { marginTop: Spaces.SM }, userProgramProgress?.ProgramId && { marginTop: insets.top + Spaces.XXL }]}>
+            <ThemedView style={[styles.infoContainer, { marginTop: Spaces.SM }, { marginTop: insets.top + Spaces.XXL }]}>
                 <ThemedText type='bodySmall' style={[styles.infoText, { color: themeColors.subText }]}>
                     Level up your fitness! Follow these structured, multi-week adventures to unlock your full potential
                 </ThemedText>
             </ThemedView>
         ),
-        [userProgramProgress, insets.top, themeColors.subText],
+        [insets.top, themeColors.subText],
     );
 
     if (showSplash) {
@@ -88,7 +88,7 @@ export default function BrowseProgramsScreen() {
 
     return (
         <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.background }]}>
-            {userProgramProgress?.ProgramId && <AnimatedHeader disableColorChange={true} title='Browse Programs' headerBackground={themeColors.background} />}
+            <AnimatedHeader disableColorChange={true} title='Browse Programs' headerBackground={themeColors.background} />
             <FlatList
                 data={Object.values(programs)}
                 renderItem={renderItem}

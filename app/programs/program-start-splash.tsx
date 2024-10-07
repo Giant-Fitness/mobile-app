@@ -59,7 +59,7 @@ export default function ProgramStartSplashScreen() {
 
             // Set up navigation timer
             const timer = setTimeout(() => {
-                router.replace('/(top-tabs)/programs');
+                router.replace('/(tabs)/home');
             }, 3000);
 
             // Clean up function
@@ -80,7 +80,7 @@ export default function ProgramStartSplashScreen() {
                     },
                 ]}
             >
-                <ThemedText type='headline' style={[styles.text, {color: themeColors.white}]}>
+                <ThemedText type='headline' style={[styles.text, { color: themeColors.white }]}>
                     {randomText}
                 </ThemedText>
             </Animated.View>

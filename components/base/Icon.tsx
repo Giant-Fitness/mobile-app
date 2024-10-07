@@ -80,10 +80,18 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
             return <AnimatedFontAwesome name='plate-wheat' {...commonProps} />;
         case 'nutrition-inactive':
             return <AnimatedFontAwesome name='plate-wheat' {...commonProps} />;
+        case 'plan-active':
+            return <AnimatedMaterialCommunityIcons name='clipboard-check' {...commonProps} />;
+        case 'plan-inactive':
+            return <AnimatedMaterialCommunityIcons name='clipboard-check' {...commonProps} />;
         case 'progress-active':
-            return <AnimatedIonicons name='stats-chart' {...commonProps} />;
+            return <AnimatedEntypo name='bar-graph' {...commonProps} />;
         case 'progress-inactive':
-            return <AnimatedIonicons name='stats-chart' {...commonProps} />;
+            return <AnimatedEntypo name='bar-graph' {...commonProps} />;
+        case 'lightning-active':
+            return <AnimatedMaterialCommunityIcons name='lightning-bolt' {...commonProps} />;
+        case 'lightning-inactive':
+            return <AnimatedMaterialCommunityIcons name='lightning-bolt' {...commonProps} />;
         case 'exercise-active':
             return <AnimatedMaterialIcons name='sports-martial-arts' {...commonProps} />;
         case 'exercise-inactive':
