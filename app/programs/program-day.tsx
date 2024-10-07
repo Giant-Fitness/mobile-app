@@ -101,7 +101,9 @@ const ProgramDayScreen = () => {
         setIsResetDayModalVisible(false);
         router.push('/(tabs)/home');
     };
-
+    const handleMenuPress = () => {
+        console.log('Menu Pressed');
+    };
     if (programDayState === REQUEST_STATE.PENDING) {
         return (
             <ThemedView style={styles.loadingContainer}>
@@ -120,7 +122,12 @@ const ProgramDayScreen = () => {
 
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
-            <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Spaces.XXL} headerInterpolationEnd={Sizes.imageLGHeight} />
+            <AnimatedHeader
+                scrollY={scrollY}
+                headerInterpolationStart={Spaces.XXL}
+                headerInterpolationEnd={Sizes.imageLGHeight}
+                onMenuPress={handleMenuPress}
+            />
             <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
                 {programDay && (
                     <>

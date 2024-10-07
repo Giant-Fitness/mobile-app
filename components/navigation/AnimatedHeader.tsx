@@ -1,13 +1,14 @@
 // components/navigation/AnimatedHeader.tsx
 
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import Animated, { useAnimatedStyle, interpolateColor, useDerivedValue } from 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { BackButton } from '@/components/navigation/BackButton';
 import { Spaces } from '@/constants/Spaces';
 import { ThemedText } from '@/components/base/ThemedText';
+import { Icon } from '@/components/base/Icon';
 
 type AnimatedHeaderProps = {
     scrollY: Animated.SharedValue<number>;
@@ -15,9 +16,10 @@ type AnimatedHeaderProps = {
     headerInterpolationStart?: number;
     headerInterpolationEnd?: number;
     disableColorChange?: boolean;
-    title?: string; // Optional title prop
+    title?: string;
     backButtonColor?: string;
     headerBackground?: string;
+    onMenuPress?: () => void;
 };
 
 export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
@@ -26,19 +28,18 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
     headerInterpolationStart = 100,
     headerInterpolationEnd = 170,
     disableColorChange = false,
-    title, // Destructure the title prop
+    title,
     backButtonColor,
     headerBackground = 'transparent',
+    onMenuPress,
 }) => {
-    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
-    const themeColors = Colors[colorScheme]; // Access theme-specific colors
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
 
-    // Determine background color style
     const animatedHeaderStyle = useAnimatedStyle(() => {
         if (disableColorChange) {
             return { backgroundColor: headerBackground || 'transparent' };
         }
-
         const backgroundColor = interpolateColor(
             scrollY.value,
             [headerInterpolationStart, headerInterpolationEnd],
@@ -47,14 +48,11 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
         return { backgroundColor };
     });
 
-    // Determine icon color
     const animatedIconColor = useDerivedValue(() => {
         if (disableColorChange) {
             return backButtonColor || themeColors.text;
         }
-
-        const color = interpolateColor(scrollY.value, [headerInterpolationStart, headerInterpolationEnd], [themeColors.white, themeColors.text]);
-        return color;
+        return interpolateColor(scrollY.value, [headerInterpolationStart, headerInterpolationEnd], [themeColors.white, themeColors.text]);
     });
 
     return (
@@ -64,6 +62,11 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
                 <ThemedText type='link' style={[styles.title, { color: themeColors.text }]}>
                     {title}
                 </ThemedText>
+            )}
+            {onMenuPress && (
+                <TouchableOpacity style={styles.menuButton} onPress={onMenuPress} activeOpacity={1}>
+                    <Icon name='more-horizontal' size={24} color={animatedIconColor} />
+                </TouchableOpacity>
             )}
         </Animated.View>
     );
@@ -78,7 +81,7 @@ const styles = StyleSheet.create({
         height: 100,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center', // Center content
+        justifyContent: 'center',
         paddingHorizontal: Spaces.MD,
         paddingVertical: Spaces.MD,
         zIndex: 10,
@@ -91,6 +94,12 @@ const styles = StyleSheet.create({
     },
     title: {
         top: Spaces.MD,
+    },
+    menuButton: {
+        position: 'absolute',
+        top: Spaces.XXL,
+        right: Spaces.XL,
+        zIndex: 10,
     },
 });
 
