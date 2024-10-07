@@ -93,9 +93,9 @@ export default function WorkoutsScreen() {
     return (
         <ScrollView style={[styles.container, { backgroundColor: themeColors.background }]} showsVerticalScrollIndicator={false}>
             <ThemedView>
-                <ThemedView style={styles.infoContainer}>
-                    <ThemedText type='bodySmall' style={[styles.infoText, { color: themeColors.subText }]}>
-                        {'Jump into quick, goal-crushing sessions anytime! These one-off workouts fit your schedule and mood'}
+                <ThemedView style={[styles.infoContainer, { backgroundColor: themeColors.tipBackground }]}>
+                    <ThemedText type='bodySmall' style={[styles.infoText, { color: themeColors.tipText }]}>
+                        {'Jump into these one-off sessions that fit your schedule and mood!'}
                     </ThemedText>
                 </ThemedView>
                 <ThemedText type='title' style={[styles.header, { color: themeColors.text }]}>
@@ -175,9 +175,11 @@ export default function WorkoutsScreen() {
 
 const styles = StyleSheet.create({
     infoContainer: {
-        paddingTop: Spaces.LG,
-        paddingBottom: 0,
-        marginHorizontal: Spaces.XXXL,
+        marginTop: Spaces.LG,
+        paddingVertical: Spaces.MD,
+        paddingHorizontal: Spaces.MD,
+        borderRadius: Spaces.MD,
+        marginHorizontal: Spaces.XXL,
     },
     infoText: {
         textAlign: 'center',
@@ -216,14 +218,5 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderRadius: Spaces.SM,
         marginHorizontal: Spaces.XXS,
-    },
-    shadowContainer: {
-        shadowColor: 'rgba(0,0,0,0.2)', // Use a more standard shadow color
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 1,
-        shadowRadius: 4,
-        elevation: 5, // For Android
-        borderRadius: Spaces.SM, // Match the child border radius
-        marginRight: Spaces.MD,
     },
 });

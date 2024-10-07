@@ -173,7 +173,7 @@ const ProgramDayScreen = () => {
                             <ThemedView
                                 style={[
                                     styles.exercisesContainer,
-                                    { backgroundColor: themeColors.backgroundTertiary },
+                                    { backgroundColor: themeColors.backgroundSecondary },
                                     [{ paddingBottom: Spaces.XL }],
                                     isEnrolled && [{ paddingBottom: Sizes.bottomSpaceLarge }],
                                 ]}

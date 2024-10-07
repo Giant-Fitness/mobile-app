@@ -73,8 +73,8 @@ export default function BrowseProgramsScreen() {
 
     const renderHeader = useMemo(
         () => (
-            <ThemedView style={[styles.infoContainer, { marginTop: Spaces.SM }, { marginTop: insets.top + Spaces.XXL }]}>
-                <ThemedText type='bodySmall' style={[styles.infoText, { color: themeColors.subText }]}>
+            <ThemedView style={[styles.infoContainer, { backgroundColor: themeColors.tipBackground }, { marginTop: insets.top + Spaces.XXXL }]}>
+                <ThemedText type='bodySmall' style={[styles.infoText, { color: themeColors.tipText }]}>
                     Level up your fitness! Follow these structured, multi-week adventures to unlock your full potential
                 </ThemedText>
             </ThemedView>
@@ -118,9 +118,11 @@ const styles = StyleSheet.create({
         marginHorizontal: Spaces.MD,
     },
     infoContainer: {
-        paddingTop: Spaces.MD,
-        paddingBottom: Spaces.XL,
-        marginHorizontal: Spaces.XXL,
+        paddingVertical: Spaces.MD,
+        paddingHorizontal: Spaces.MD,
+        marginBottom: Spaces.XL,
+        marginHorizontal: Spaces.XL,
+        borderRadius: Spaces.MD,
     },
     infoText: {
         textAlign: 'center',
