@@ -175,11 +175,11 @@ export default function WorkoutsScreen() {
 
 const styles = StyleSheet.create({
     infoContainer: {
-        marginTop: Spaces.LG,
+        marginTop: Spaces.XL,
         paddingVertical: Spaces.MD,
         paddingHorizontal: Spaces.MD,
         borderRadius: Spaces.MD,
-        marginHorizontal: Spaces.XXL,
+        marginHorizontal: Spaces.LG,
     },
     infoText: {
         textAlign: 'center',

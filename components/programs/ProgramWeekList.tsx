@@ -49,7 +49,7 @@ export const ProgramWeekList: React.FC<ProgramWeekListProps> = ({
                     <Collapsible
                         key={`week-${weekNumber}`}
                         title={`Week ${weekNumber}`}
-                        isOpen={isCurrentWeek} // Open current week by default
+                        isOpen={false}
                         activeOpacity={1}
                         titleStyle={[
                             styles.weekHeaderText,

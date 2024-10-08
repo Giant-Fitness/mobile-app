@@ -10,6 +10,7 @@ import { Colors } from '@/constants/Colors';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { Spaces } from '@/constants/Spaces';
+import { Sizes } from '@/constants/Sizes';
 import { AppDispatch, RootState } from '@/store/rootReducer';
 import { getAllProgramsAsync } from '@/store/programs/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
@@ -73,7 +74,7 @@ export default function BrowseProgramsScreen() {
 
     const renderHeader = useMemo(
         () => (
-            <ThemedView style={[styles.infoContainer, { backgroundColor: themeColors.tipBackground }, { marginTop: insets.top + Spaces.XXXL }]}>
+            <ThemedView style={[styles.infoContainer, { backgroundColor: themeColors.tipBackground }, { marginTop: Sizes.headerHeight + Spaces.LG }]}>
                 <ThemedText type='bodySmall' style={[styles.infoText, { color: themeColors.tipText }]}>
                     Follow these structured, multi-week adventures to unlock your full potential!
                 </ThemedText>
@@ -121,8 +122,8 @@ const styles = StyleSheet.create({
         paddingVertical: Spaces.MD,
         paddingHorizontal: Spaces.MD,
         marginBottom: Spaces.XL,
-        marginHorizontal: Spaces.XL,
-        borderRadius: Spaces.MD,
+        marginHorizontal: 0,
+        borderRadius: Spaces.SM,
     },
     infoText: {
         textAlign: 'center',

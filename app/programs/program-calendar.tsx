@@ -1,4 +1,4 @@
-// app/programs/ProgramProgressScreen.tsx
+// app/programs/ActiveProgramProgressScreen.tsx
 
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, Dimensions } from 'react-native';
@@ -27,20 +27,22 @@ import { getProgramAsync, getAllProgramDaysAsync } from '@/store/programs/thunks
 import { startProgramAsync } from '@/store/user/thunks';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { SlideUpActionButton } from '@/components/buttons/SlideUpActionButton';
+import { BottomMenuModal } from '@/components/overlays/BottomMenuModal';
 
-type ProgramProgressScreenParams = {
+type ActiveProgramProgressScreenParams = {
     programId: string;
 };
 
-const ProgramProgressScreen = () => {
+const ActiveProgramProgressScreen = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const dispatch = useDispatch<AppDispatch>();
     const screenWidth = Dimensions.get('window').width;
+    const [isBottomMenuVisible, setIsBottomMenuVisible] = useState(false);
 
     const navigation = useNavigation();
 
-    const route = useRoute<RouteProp<Record<string, ProgramProgressScreenParams>, string>>();
+    const route = useRoute<RouteProp<Record<string, ActiveProgramProgressScreenParams>, string>>();
     const { programId } = route.params;
 
     const scrollY = useSharedValue(0);
@@ -389,4 +391,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ProgramProgressScreen;
+export default ActiveProgramProgressScreen;

@@ -32,6 +32,7 @@ export const Colors = {
         tipIcon: '#408E44', // standard green
         tipText: '#408E44', // standard green
         inputBackground: 'rgba(244, 255, 244, 0.95)',
+        splashBackgroud: '#34BE82',
     },
     dark: {
         text: '#F6F8F6', // Main text color
@@ -63,5 +64,7 @@ export const Colors = {
         tipBackground: 'rgba(39, 158, 44, 0.2)', // Highlighter green with increased opacity
         tipIcon: '#279E2C', // Accent green
         tipText: '#279E2C', // Accent green
+        inputBackground: 'rgba(244, 255, 244, 0.95)',
+        splashBackgroud: '#34BE82',
     },
 };

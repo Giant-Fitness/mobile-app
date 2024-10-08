@@ -113,7 +113,7 @@ const ProgramDayScreen = () => {
             label: 'View Progress',
             icon: 'auto-graph',
             onPress: () => {
-                console.log('View Progress');
+                navigation.navigate('programs/active-program-progress');
             },
         },
         {
@@ -147,7 +147,7 @@ const ProgramDayScreen = () => {
                 scrollY={scrollY}
                 headerInterpolationStart={Spaces.XXL}
                 headerInterpolationEnd={Sizes.imageLGHeight}
-                onMenuPress={handleMenuPress}
+                onMenuPress={isEnrolled ? handleMenuPress : undefined}
             />
             <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
                 {programDay && (

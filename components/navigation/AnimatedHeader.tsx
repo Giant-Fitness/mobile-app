@@ -89,16 +89,16 @@ const styles = StyleSheet.create({
     },
     backButton: {
         position: 'absolute',
-        top: Spaces.XXL,
+        top: Spaces.XXL + Spaces.SM,
         left: Spaces.MD,
         zIndex: 10,
     },
     title: {
-        top: Spaces.MD,
+        top: Spaces.LG,
     },
     menuButton: {
         position: 'absolute',
-        top: Spaces.XXL,
+        top: Spaces.XXL + Spaces.SM,
         right: Spaces.XL,
         zIndex: 10,
     },

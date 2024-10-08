@@ -34,7 +34,10 @@ export const BottomMenuModal: React.FC<BottomMenuModalProps> = ({ isVisible, onC
                 {options.map((option, index) => (
                     <TouchableOpacity
                         key={index}
-                        style={styles.option}
+                        style={[
+                            styles.option,
+                            index !== options.length - 1 && styles.optionBorder, // Apply border only if it's not the last item
+                        ]}
                         onPress={() => {
                             option.onPress();
                             onClose();
@@ -51,7 +54,7 @@ export const BottomMenuModal: React.FC<BottomMenuModalProps> = ({ isVisible, onC
                 ))}
             </ThemedView>
             <ThemedView style={[styles.cancelContainer]}>
-                <TouchableOpacity style={[styles.option, styles.cancelOption]} onPress={onClose} activeOpacity={1}>
+                <TouchableOpacity style={[styles.cancelOption]} onPress={onClose} activeOpacity={1}>
                     <ThemedText type='button' style={[styles.cancelText, { color: themeColors.text }]}>
                         Cancel
                     </ThemedText>
@@ -77,6 +80,8 @@ const styles = StyleSheet.create({
     },
     option: {
         paddingVertical: Spaces.MD,
+    },
+    optionBorder: {
         borderBottomWidth: 1,
         borderBottomColor: 'rgba(0, 0, 0, 0.1)',
     },
@@ -92,7 +97,7 @@ const styles = StyleSheet.create({
         textAlign: 'left',
     },
     cancelOption: {
-        borderBottomWidth: 0,
+        paddingVertical: Spaces.SM,
     },
     cancelText: {
         textAlign: 'center',

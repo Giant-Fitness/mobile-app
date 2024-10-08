@@ -267,6 +267,7 @@ export const useProgramData = (
         activeProgram,
         programDay,
         programDayState,
+        programDays,
         activeProgramNextDays,
         dataLoadedState,
         isLastDay,

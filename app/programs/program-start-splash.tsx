@@ -70,7 +70,7 @@ export default function ProgramStartSplashScreen() {
     const randomText = motivationalTexts[Math.floor(Math.random() * motivationalTexts.length)];
 
     return (
-        <View style={[styles.container, { backgroundColor: themeColors.tipText }]}>
+        <View style={[styles.container, { backgroundColor: themeColors.splashBackgroud }]}>
             <Animated.View
                 style={[
                     styles.textContainer,
