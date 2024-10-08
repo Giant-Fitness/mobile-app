@@ -10,6 +10,7 @@ import { Colors } from '@/constants/Colors';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { Spaces } from '@/constants/Spaces';
+import { Sizes } from '@/constants/Sizes';
 import { AppDispatch, RootState } from '@/store/rootReducer';
 import { getAllProgramsAsync } from '@/store/programs/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
@@ -73,13 +74,13 @@ export default function BrowseProgramsScreen() {
 
     const renderHeader = useMemo(
         () => (
-            <ThemedView style={[styles.infoContainer, { marginTop: Spaces.SM }, userProgramProgress?.ProgramId && { marginTop: insets.top + Spaces.XXL }]}>
-                <ThemedText type='bodySmall' style={[styles.infoText, { color: themeColors.subText }]}>
-                    Level up your fitness! Follow these structured, multi-week adventures to unlock your full potential
+            <ThemedView style={[styles.infoContainer, { backgroundColor: themeColors.tipBackground }, { marginTop: Sizes.headerHeight + Spaces.LG }]}>
+                <ThemedText type='bodySmall' style={[styles.infoText, { color: themeColors.tipText }]}>
+                    Follow these structured, multi-week adventures to unlock your full potential!
                 </ThemedText>
             </ThemedView>
         ),
-        [userProgramProgress, insets.top, themeColors.subText],
+        [insets.top, themeColors.subText],
     );
 
     if (showSplash) {
@@ -88,7 +89,7 @@ export default function BrowseProgramsScreen() {
 
     return (
         <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.background }]}>
-            {userProgramProgress?.ProgramId && <AnimatedHeader disableColorChange={true} title='Browse Programs' headerBackground={themeColors.background} />}
+            <AnimatedHeader disableColorChange={true} title='Browse' headerBackground={themeColors.background} />
             <FlatList
                 data={Object.values(programs)}
                 renderItem={renderItem}
@@ -118,9 +119,11 @@ const styles = StyleSheet.create({
         marginHorizontal: Spaces.MD,
     },
     infoContainer: {
-        paddingTop: Spaces.MD,
-        paddingBottom: Spaces.XL,
-        marginHorizontal: Spaces.XXL,
+        paddingVertical: Spaces.MD,
+        paddingHorizontal: Spaces.MD,
+        marginBottom: Spaces.XL,
+        marginHorizontal: 0,
+        borderRadius: Spaces.SM,
     },
     infoText: {
         textAlign: 'center',

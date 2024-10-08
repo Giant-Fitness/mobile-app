@@ -29,7 +29,7 @@ export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ 
     if (isEnrolled && userProgramProgress) {
         const dayNumber = parseInt(day.DayId);
         const currentDayNumber = parseInt(userProgramProgress.CurrentDay);
-        const isCompleted = userProgramProgress.CompletedDays.includes(day.DayId);
+        const isCompleted = userProgramProgress.CompletedDays?.includes(day.DayId);
 
         if (isCompleted) {
             backgroundColor = themeColors.tipBackground; // Completed

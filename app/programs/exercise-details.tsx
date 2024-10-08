@@ -67,7 +67,7 @@ const ExerciseDetailsScreen = () => {
         setCalculatorVisible(false);
     };
     return (
-        <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
+        <ThemedView style={{ flex: 1, backgroundColor: themeColors.backgroundSecondary }}>
             <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Spaces.XXL} headerInterpolationEnd={Sizes.imageLGHeight} />
             <Animated.ScrollView
                 contentContainerStyle={{ flexGrow: 1 }}
@@ -79,7 +79,7 @@ const ExerciseDetailsScreen = () => {
                 <ThemedView
                     style={[
                         styles.mainContainer,
-                        { backgroundColor: themeColors.backgroundTertiary },
+                        { backgroundColor: themeColors.backgroundSecondary },
                         isEnrolled && exercise.ORMPercentage && [{ paddingBottom: Sizes.bottomSpaceLarge }],
                     ]}
                 >

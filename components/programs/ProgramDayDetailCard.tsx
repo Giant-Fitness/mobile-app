@@ -49,7 +49,7 @@ export const ProgramDayDetailCard: React.FC<ProgramDayDetailCardProps> = ({ day 
                         </ThemedText>
                     </ThemedView>
 
-                    {day.RestDay ? (
+                    {/*                    {day.RestDay ? (
                         // Display content for a rest day
                         <ThemedView style={[{ backgroundColor: 'transparent' }]}>
                             <ThemedView style={styles.attributeRow}>
@@ -64,7 +64,7 @@ export const ProgramDayDetailCard: React.FC<ProgramDayDetailCardProps> = ({ day 
                                 {`${day.Time} mins`}
                             </ThemedText>
                         </ThemedView>
-                    )}
+                    )}*/}
                 </ThemedView>
             }
             containerStyle={styles.container}
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         backgroundColor: 'transparent',
         width: '100%',
-        marginBottom: Spaces.LG,
+        marginBottom: Spaces.MD,
     },
     title: {
         fontSize: moderateScale(14),
@@ -90,8 +90,8 @@ const styles = StyleSheet.create({
         marginTop: Spaces.XS,
     },
     image: {
-        height: Sizes.imageSM,
-        width: Sizes.imageMDWidth,
+        height: Sizes.imageXSHeight,
+        width: Sizes.imageXSWidth,
     },
     imageContainer: {
         borderRadius: Spaces.XXS,

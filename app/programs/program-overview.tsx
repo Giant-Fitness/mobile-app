@@ -105,7 +105,7 @@ const ProgramOverviewScreen = () => {
     const { ProgramName, PhotoUrl, Weeks, Frequency, Goal, Level, DescriptionLong, Equipment, DesignedFor, CalendarOverview } = program;
 
     return (
-        <ThemedView style={[styles.container, { backgroundColor: themeColors.backgroundTertiary }]}>
+        <ThemedView style={[styles.container, { backgroundColor: themeColors.backgroundSecondary }]}>
             <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Spaces.XXL} headerInterpolationEnd={Sizes.imageLGHeight} />
             <Animated.ScrollView
                 contentContainerStyle={{ flexGrow: 1 }}
@@ -114,7 +114,7 @@ const ProgramOverviewScreen = () => {
                 onScroll={scrollHandler}
                 scrollEventThrottle={16}
             >
-                <ThemedView style={{ backgroundColor: themeColors.backgroundTertiary }}>
+                <ThemedView style={{ backgroundColor: themeColors.backgroundSecondary }}>
                     <TopImageInfoCard
                         image={{ uri: PhotoUrl }}
                         title={ProgramName}
@@ -149,7 +149,7 @@ const ProgramOverviewScreen = () => {
                             </ThemedView>
                         }
                     />
-                    <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.backgroundTertiary }]}>
+                    <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
                         <ThemedView style={styles.descriptionContainer}>
                             <ThemedText type='button' style={{ paddingBottom: Spaces.XS }}>
                                 Equipment Required:
@@ -177,13 +177,13 @@ const ProgramOverviewScreen = () => {
                             ))}
                         </ThemedView>
                         <ThemedView style={styles.bottomButtonContainer}>
-                            <TextButton
+                            {/*                            <TextButton
                                 text='Program Calendar'
                                 onPress={navigateToProgramCalendar}
                                 textType='bodyMedium'
                                 size='LG'
                                 style={styles.calendarButton}
-                            />
+                            />*/}
                             {isOnAProgram && !isOnThisProgram && (
                                 <TextButton
                                     text='Start Program'

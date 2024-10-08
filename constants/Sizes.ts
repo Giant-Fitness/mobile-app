@@ -3,7 +3,7 @@
 import { scale, moderateScale, verticalScale } from '@/utils/scaling';
 
 export const Sizes = {
-    imageXSWidth: scale(60), // XSmall image size
+    imageXSWidth: scale(70), // XSmall image size
     imageXSHeight: verticalScale(60), // XSmall image size
     imageSM: scale(90), // Small image size
     imageMDWidth: scale(110), // Medium image size
@@ -30,4 +30,7 @@ export const Sizes = {
     iconButtonLG: moderateScale(60),
     fontSizeDefault: moderateScale(14),
     fontSizeSmall: moderateScale(13),
+    headerHeight: moderateScale(100),
+    footerHeightIOS: moderateScale(90),
+    footerHeightAndroid: moderateScale(70),
 };

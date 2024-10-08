@@ -68,7 +68,7 @@ export default function ProgramEndSplashScreen() {
     const randomText = motivationalTexts[Math.floor(Math.random() * motivationalTexts.length)];
 
     return (
-        <View style={[styles.container, { backgroundColor: themeColors.tipText }]}>
+        <View style={[styles.container, { backgroundColor: themeColors.splashBackgroud }]}>
             <Animated.View
                 style={[
                     styles.textContainer,
@@ -78,7 +78,7 @@ export default function ProgramEndSplashScreen() {
                     },
                 ]}
             >
-                <ThemedText type='headline' style={[styles.text, {color: themeColors.white}]}>
+                <ThemedText type='headline' style={[styles.text, { color: themeColors.white }]}>
                     {randomText}
                 </ThemedText>
             </Animated.View>

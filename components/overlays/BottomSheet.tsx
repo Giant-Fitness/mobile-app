@@ -1,4 +1,4 @@
-// components/layout/BottomDrawer.tsx
+// components/overlays/BottomSheet.tsx
 
 import React from 'react';
 import { Modal, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
@@ -8,14 +8,14 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 
-interface BottomDrawerProps {
+interface BottomSheetProps {
     visible: boolean;
     onClose: () => void;
     children: React.ReactNode;
     style?: ViewStyle;
 }
 
-export const BottomSheet: React.FC<BottomDrawerProps> = ({ visible, onClose, children, style }) => {
+export const BottomSheet: React.FC<BottomSheetProps> = ({ visible, onClose, children, style }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
     const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
