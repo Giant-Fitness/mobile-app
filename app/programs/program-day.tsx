@@ -3,14 +3,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, ActivityIndicator, View } from 'react-native';
 import { router } from 'expo-router';
+import LottieView from 'lottie-react-native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ExerciseCard } from '@/components/programs/ExerciseCard';
 import { Icon } from '@/components/base/Icon';
-import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
 import { Spaces } from '@/constants/Spaces';
@@ -21,7 +22,7 @@ import { REQUEST_STATE } from '@/constants/requestStates';
 import { useProgramData } from '@/hooks/useProgramData';
 import { ProgramDaySkipModal } from '@/components/programs/ProgramDaySkipModal';
 import { ProgramDayUnfinishModal } from '@/components/programs/ProgramDayUnfinishModal';
-import LottieView from 'lottie-react-native';
+import { BottomMenuModal } from '@/components/overlays/BottomMenuModal';
 
 type ProgramDayScreenParams = {
     ProgramDay: {
@@ -39,6 +40,7 @@ const ProgramDayScreen = () => {
     const [isResetDayModalVisible, setIsResetDayModalVisible] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
     const confettiRef = useRef<LottieView>(null);
+    const [isBottomMenuVisible, setIsBottomMenuVisible] = useState(false);
 
     const { dayId, programId } = route.params;
 
@@ -101,9 +103,28 @@ const ProgramDayScreen = () => {
         setIsResetDayModalVisible(false);
         router.push('/(tabs)/home');
     };
+
     const handleMenuPress = () => {
-        console.log('Menu Pressed');
+        setIsBottomMenuVisible(true);
     };
+
+    const menuOptions = [
+        {
+            label: 'View Progress',
+            icon: 'auto-graph',
+            onPress: () => {
+                console.log('View Progress');
+            },
+        },
+        {
+            label: 'View Plan Details',
+            icon: 'preview',
+            onPress: () => {
+                navigation.navigate('programs/program-overview', { programId });
+            },
+        },
+    ];
+
     if (programDayState === REQUEST_STATE.PENDING) {
         return (
             <ThemedView style={styles.loadingContainer}>
@@ -249,6 +270,8 @@ const ProgramDayScreen = () => {
                     />
                 </View>
             )}
+
+            <BottomMenuModal isVisible={isBottomMenuVisible} onClose={() => setIsBottomMenuVisible(false)} options={menuOptions} />
         </ThemedView>
     );
 };

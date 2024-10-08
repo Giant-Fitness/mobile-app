@@ -10,6 +10,8 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Icon } from '@/components/base/Icon';
 import { Platform } from 'react-native';
+import { Spaces } from '@/constants/Spaces';
+import { Sizes } from '@/constants/Sizes';
 
 export default function TabLayout() {
     const navigation = useNavigation<NativeStackNavigationProp<any>>();
@@ -23,15 +25,15 @@ export default function TabLayout() {
                 tabBarStyle: Platform.select({
                     ios: {
                         backgroundColor: themeColors.background,
-                        height: 90, // iOS specific height
-                        paddingTop: 5,
+                        height: Sizes.footerHeightIOS, // iOS specific height
+                        paddingTop: 0,
                         level: 100,
                     },
                     android: {
                         backgroundColor: themeColors.background,
-                        height: 70, // Android specific height
-                        paddingTop: 10,
-                        paddingBottom: 5, // Android specific padding
+                        height: Sizes.footerHeightAndroid, // Android specific height
+                        paddingTop: Spaces.SM,
+                        paddingBottom: Spaces.XS, // Android specific padding
                         level: 100,
                     },
                 }),
@@ -39,15 +41,15 @@ export default function TabLayout() {
                     marginBottom: Platform.OS === 'android' ? 10 : 0, // Adjusts label position for Android
                 },
                 headerTitleContainerStyle: {
-                    paddingLeft: 8, // Add padding on the left
+                    paddingLeft: 0, // Add padding on the left
                 },
                 headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
-                headerTitleAlign: 'left', // Align the title to the left
+                headerTitleAlign: 'center', // Align the title to the left
                 headerShown: true,
                 tabBarShowLabel: true,
-                headerRight: () => (
+                headerLeft: () => (
                     <TouchableOpacity activeOpacity={1} onPress={() => navigation.navigate('settings/settings' as any)}>
-                        <Icon name='person' size={28} color={themeColors.subText} style={{ marginRight: 18 }} />
+                        <Icon name='person' size={28} color={themeColors.subText} style={{ marginLeft: Spaces.LG }} />
                     </TouchableOpacity>
                 ),
             }}
@@ -58,7 +60,7 @@ export default function TabLayout() {
                 options={{
                     headerStyle: {
                         backgroundColor: themeColors.background,
-                        height: 90,
+                        height: Sizes.headerHeight,
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Home',
@@ -75,7 +77,7 @@ export default function TabLayout() {
                 name='(top-tabs)'
                 options={{
                     headerStyle: {
-                        height: 90,
+                        height: Sizes.headerHeight,
                         backgroundColor: themeColors.background,
                         borderBottomWidth: 0, // Remove the border under the navbar
                         shadowOpacity: 0, // Remove the shadow for iOS
@@ -97,7 +99,7 @@ export default function TabLayout() {
                 options={{
                     headerStyle: {
                         backgroundColor: themeColors.background,
-                        height: 90,
+                        height: Sizes.headerHeight,
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Nutrition',
@@ -109,7 +111,7 @@ export default function TabLayout() {
                 options={{
                     headerStyle: {
                         backgroundColor: themeColors.background,
-                        height: 90,
+                        height: Sizes.headerHeight,
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Plans',
@@ -121,7 +123,7 @@ export default function TabLayout() {
                 options={{
                     headerStyle: {
                         backgroundColor: themeColors.background,
-                        height: 90,
+                        height: Sizes.headerHeight,
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Solos',
@@ -133,7 +135,7 @@ export default function TabLayout() {
                 options={{
                     headerStyle: {
                         backgroundColor: themeColors.background,
-                        height: 90,
+                        height: Sizes.headerHeight,
                     },
                     headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
                     title: 'Progress',

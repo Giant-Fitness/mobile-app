@@ -75,7 +75,7 @@ export default function BrowseProgramsScreen() {
         () => (
             <ThemedView style={[styles.infoContainer, { backgroundColor: themeColors.tipBackground }, { marginTop: insets.top + Spaces.XXXL }]}>
                 <ThemedText type='bodySmall' style={[styles.infoText, { color: themeColors.tipText }]}>
-                    Level up your fitness! Follow these structured, multi-week adventures to unlock your full potential
+                    Follow these structured, multi-week adventures to unlock your full potential!
                 </ThemedText>
             </ThemedView>
         ),

@@ -7,6 +7,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { BackButton } from '@/components/navigation/BackButton';
 import { Spaces } from '@/constants/Spaces';
+import { Sizes } from '@/constants/Sizes';
 import { ThemedText } from '@/components/base/ThemedText';
 import { Icon } from '@/components/base/Icon';
 
@@ -78,7 +79,7 @@ const styles = StyleSheet.create({
         top: 0,
         left: 0,
         right: 0,
-        height: 100,
+        height: Sizes.headerHeight,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',

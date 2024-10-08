@@ -30,4 +30,7 @@ export const Sizes = {
     iconButtonLG: moderateScale(60),
     fontSizeDefault: moderateScale(14),
     fontSizeSmall: moderateScale(13),
+    headerHeight: moderateScale(100),
+    footerHeightIOS: moderateScale(90),
+    footerHeightAndroid: moderateScale(70),
 };
