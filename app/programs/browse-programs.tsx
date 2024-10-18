@@ -1,7 +1,7 @@
 // app/programs/browse-programs.tsx
 
 import React, { useEffect, useCallback, useMemo } from 'react';
-import { FlatList, StyleSheet } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
@@ -20,7 +20,6 @@ import { ProgramCard } from '@/components/programs/ProgramCard';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { useProgramData } from '@/hooks/useProgramData';
 
-// Wrap ProgramCard with React.memo
 const MemoizedProgramCard = React.memo(ProgramCard);
 
 export default function BrowseProgramsScreen() {
@@ -30,7 +29,7 @@ export default function BrowseProgramsScreen() {
     const navigation = useNavigation();
     const insets = useSafeAreaInsets();
 
-    const { userProgramProgress } = useProgramData();
+    const { userProgramProgress, userRecommendations } = useProgramData();
     const { programs, allProgramsState } = useSelector((state: RootState) => state.programs);
 
     const fetchData = useCallback(async () => {
@@ -63,25 +62,56 @@ export default function BrowseProgramsScreen() {
         ({ item }: { item: any }) => (
             <MemoizedProgramCard
                 program={item}
-                isActive={item.ProgramId === userProgramProgress?.ProgramId}
+                isActive={false}
                 onPress={() => navigateToProgramOverview(item.ProgramId)}
                 activeProgramUser={userProgramProgress?.ProgramId}
-                recommendedProgram={false}
+                recommendedProgram={item.ProgramId === userRecommendations?.RecommendedProgramID}
             />
         ),
-        [userProgramProgress, navigateToProgramOverview],
+        [userProgramProgress, userRecommendations, navigateToProgramOverview],
     );
 
-    const renderHeader = useMemo(
-        () => (
-            <ThemedView style={[styles.infoContainer, { backgroundColor: themeColors.tipBackground }, { marginTop: Sizes.headerHeight + Spaces.LG }]}>
-                <ThemedText type='bodySmall' style={[styles.infoText, { color: themeColors.tipText }]}>
-                    Follow these structured, multi-week adventures to unlock your full potential!
-                </ThemedText>
-            </ThemedView>
-        ),
-        [insets.top, themeColors.subText],
-    );
+    const renderHeader = useMemo(() => {
+        const activeProgram = userProgramProgress?.ProgramId ? programs[userProgramProgress.ProgramId] : null;
+        const recommendedProgram = !activeProgram && userRecommendations?.RecommendedProgramID ? programs[userRecommendations.RecommendedProgramID] : null;
+
+        return (
+            <View>
+                <ThemedView style={[styles.infoContainer, { backgroundColor: themeColors.tipBackground }, { marginTop: Sizes.headerHeight + Spaces.LG }]}>
+                    <ThemedText type='bodySmall' style={[styles.infoText, { color: themeColors.tipText }]}>
+                        Follow these structured, multi-week adventures to unlock your full potential!
+                    </ThemedText>
+                </ThemedView>
+                {activeProgram && (
+                    <View style={styles.topProgramContainer}>
+                        <MemoizedProgramCard
+                            program={activeProgram}
+                            isActive={true}
+                            onPress={() => navigateToProgramOverview(activeProgram.ProgramId)}
+                            activeProgramUser={userProgramProgress?.ProgramId}
+                            recommendedProgram={false}
+                        />
+                    </View>
+                )}
+                {recommendedProgram && (
+                    <View style={styles.topProgramContainer}>
+                        <MemoizedProgramCard
+                            program={recommendedProgram}
+                            isActive={false}
+                            onPress={() => navigateToProgramOverview(recommendedProgram.ProgramId)}
+                            activeProgramUser={userProgramProgress?.ProgramId}
+                            recommendedProgram={true}
+                        />
+                    </View>
+                )}
+            </View>
+        );
+    }, [insets.top, themeColors.subText, programs, userProgramProgress, userRecommendations, navigateToProgramOverview]);
+
+    const programList = useMemo(() => {
+        const topProgramId = userProgramProgress?.ProgramId || userRecommendations?.RecommendedProgramID;
+        return Object.values(programs).filter((program) => program.ProgramId !== topProgramId);
+    }, [programs, userProgramProgress, userRecommendations]);
 
     if (showSplash) {
         return <DumbbellSplash onAnimationComplete={handleSplashComplete} isDataLoaded={allProgramsState === REQUEST_STATE.FULFILLED} />;
@@ -91,14 +121,14 @@ export default function BrowseProgramsScreen() {
         <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.background }]}>
             <AnimatedHeader disableColorChange={true} title='Browse' headerBackground={themeColors.background} />
             <FlatList
-                data={Object.values(programs)}
+                data={programList}
                 renderItem={renderItem}
                 keyExtractor={keyExtractor}
                 ListHeaderComponent={renderHeader}
                 contentContainerStyle={[
                     styles.contentContainer,
                     { backgroundColor: themeColors.background },
-                    userProgramProgress?.ProgramId && { paddingBottom: Spaces.XXL },
+                    (userProgramProgress?.ProgramId || userRecommendations?.RecommendedProgramID) && { paddingBottom: Spaces.XXL },
                 ]}
                 showsVerticalScrollIndicator={false}
                 maxToRenderPerBatch={10}
@@ -128,4 +158,5 @@ const styles = StyleSheet.create({
     infoText: {
         textAlign: 'center',
     },
+    topProgramContainer: {},
 });
