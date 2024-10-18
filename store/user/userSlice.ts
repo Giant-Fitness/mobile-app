@@ -5,6 +5,7 @@ import { UserState, initialState } from '@/store/user/userState';
 import {
     getUserProgramProgressAsync,
     getUserAsync,
+    getUserRecommendationsAsync,
     completeDayAsync,
     uncompleteDayAsync,
     endProgramAsync,
@@ -12,7 +13,7 @@ import {
     resetProgramAsync,
 } from '@/store/user/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { UserProgramProgress, User } from '@/types';
+import { UserProgramProgress, User, UserRecommendations } from '@/types';
 
 const userSlice = createSlice({
     name: 'user',
@@ -50,6 +51,20 @@ const userSlice = createSlice({
             .addCase(getUserProgramProgressAsync.rejected, (state, action) => {
                 state.userProgramProgressState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'Failed to fetch user program progress';
+            })
+
+            // User Recommendations
+            .addCase(getUserRecommendationsAsync.pending, (state) => {
+                state.userRecommendationsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(getUserRecommendationsAsync.fulfilled, (state, action: PayloadAction<UserRecommendations>) => {
+                state.userRecommendationsState = REQUEST_STATE.FULFILLED;
+                state.userRecommendations = action.payload;
+            })
+            .addCase(getUserRecommendationsAsync.rejected, (state, action) => {
+                state.userRecommendationsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to fetch user recommendationns';
             })
 
             // Complete Day

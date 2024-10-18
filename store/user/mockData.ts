@@ -5,6 +5,11 @@ import { UserProgramProgress, User } from '@/types';
 // Sample user
 const sampleUser: User = {
     UserId: '048a2a6c-4c16-417a-9bfd-84ec2c80e3f5',
+    OnboardingStatus: {
+        biodata: false,
+        fitness: false,
+        nutrition: false,
+    },
 };
 
 // Sample user program progress

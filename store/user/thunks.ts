@@ -2,7 +2,7 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import UserService from '@/store/user/service';
-import { UserProgramProgress, User } from '@/types';
+import { UserProgramProgress, User, UserRecommendations } from '@/types';
 import { RootState } from '@/store/rootReducer';
 import { REQUEST_STATE } from '@/constants/requestStates';
 
@@ -118,4 +118,22 @@ export const resetProgramAsync = createAsyncThunk<UserProgramProgress, void>('us
     } catch (error) {
         return rejectWithValue({ errorMessage: 'Failed to reset program' });
     }
+});
+
+export const getUserRecommendationsAsync = createAsyncThunk<
+    UserRecommendations,
+    string | undefined,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/getUserRecommendations', async (userId: string | undefined, { getState, rejectWithValue }) => {
+    if (!userId) {
+        return rejectWithValue({ errorMessage: 'User ID not available' });
+    }
+    const state = getState();
+    if (state.user.userRecommendations) {
+        return state.user.userRecommendations;
+    }
+    return await UserService.getUserRecommendations(userId);
 });

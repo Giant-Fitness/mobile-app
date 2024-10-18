@@ -6,6 +6,7 @@ import { AppDispatch, RootState } from '@/store/rootReducer';
 import {
     getUserAsync,
     getUserProgramProgressAsync,
+    getUserRecommendationsAsync,
     completeDayAsync,
     uncompleteDayAsync,
     endProgramAsync,
@@ -34,6 +35,8 @@ export const useProgramData = (
     const userState = useSelector((state: RootState) => state.user.userState);
     const userProgramProgress = useSelector((state: RootState) => state.user.userProgramProgress);
     const userProgramProgressState = useSelector((state: RootState) => state.user.userProgramProgressState);
+    const userRecommendations = useSelector((state: RootState) => state.user.userRecommendations);
+    const userRecommendationsState = useSelector((state: RootState) => state.user.userRecommendationsState);
 
     const [isCompletingDay, setIsCompletingDay] = useState(false);
     const [isUncompletingDay, setIsUncompletingDay] = useState(false);
@@ -107,7 +110,10 @@ export const useProgramData = (
         if (user && user.UserId && userProgramProgressState === REQUEST_STATE.IDLE) {
             dispatch(getUserProgramProgressAsync(user.UserId));
         }
-    }, [dispatch, user, userProgramProgressState]);
+        if (user && user.UserId && userRecommendationsState === REQUEST_STATE.IDLE) {
+            dispatch(getUserRecommendationsAsync(user.UserId));
+        }
+    }, [dispatch, user, userProgramProgressState, userRecommendationsState]);
 
     useEffect(() => {
         const programId = specificProgramId || userProgramProgress?.ProgramId;
@@ -139,7 +145,11 @@ export const useProgramData = (
     // Compute overall data loaded state
     const dataLoadedState = useMemo(() => {
         // Basic checks for user and program progress
-        if (userState !== REQUEST_STATE.FULFILLED || userProgramProgressState !== REQUEST_STATE.FULFILLED) {
+        if (
+            userState !== REQUEST_STATE.FULFILLED ||
+            userProgramProgressState !== REQUEST_STATE.FULFILLED ||
+            userRecommendationsState !== REQUEST_STATE.FULFILLED
+        ) {
             return REQUEST_STATE.PENDING;
         }
 
@@ -264,6 +274,7 @@ export const useProgramData = (
     return {
         user,
         userProgramProgress,
+        userRecommendations,
         activeProgram,
         programDay,
         programDayState,

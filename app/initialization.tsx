@@ -10,14 +10,22 @@ import { Redirect } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
 import { getProgramAsync, getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/thunks';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
-import { getUserAsync, getUserProgramProgressAsync } from '@/store/user/thunks';
+import { getUserAsync, getUserProgramProgressAsync, getUserRecommendationsAsync } from '@/store/user/thunks';
 import { getMultipleWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 
 const Initialization: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const navigation = useNavigation();
-    const { user, userState, userProgramProgress, userProgramProgressState, error: userError } = useSelector((state: RootState) => state.user);
+    const {
+        user,
+        userState,
+        userRecommendations,
+        userRecommendationsState,
+        userProgramProgress,
+        userProgramProgressState,
+        error: userError,
+    } = useSelector((state: RootState) => state.user);
     const { error: programError } = useSelector((state: RootState) => state.programs);
     const { spotlightWorkouts, spotlightWorkoutsState, error: workoutError } = useSelector((state: RootState) => state.workouts);
     const [dataLoaded, setDataLoaded] = useState(REQUEST_STATE.PENDING);
@@ -47,6 +55,7 @@ const Initialization: React.FC = () => {
 
             if (userProgramProgress && userProgramProgress.ProgramId) {
                 await Promise.all([
+                    dispatch(getUserRecommendationsAsync(user.UserId)),
                     dispatch(getWorkoutQuoteAsync()),
                     dispatch(getRestDayQuoteAsync()),
                     dispatch(getSpotlightWorkoutsAsync()),
@@ -55,6 +64,7 @@ const Initialization: React.FC = () => {
                 ]);
             } else {
                 await Promise.all([
+                    dispatch(getUserRecommendationsAsync(user.UserId)),
                     dispatch(getWorkoutQuoteAsync()),
                     dispatch(getRestDayQuoteAsync()),
                     dispatch(getSpotlightWorkoutsAsync()),

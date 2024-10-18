@@ -1,6 +1,6 @@
 // store/user/service.ts
 
-import { UserProgramProgress, User } from '@/types';
+import { UserProgramProgress, User, UserRecommendations } from '@/types';
 import { sampleUserProgress, sampleUser } from '@/store/user/mockData';
 import axios from 'axios';
 
@@ -29,6 +29,18 @@ const getUserProgramProgress = async (userId: string): Promise<UserProgramProgre
         return parsedBody.programProgress;
     } catch (error) {
         console.error(`Error fetching programprogress for user ${userId}:`, error);
+        throw error;
+    }
+};
+
+const getUserRecommendations = async (userId: string): Promise<UserRecommendations> => {
+    console.log('service: getUserRecommendations');
+    try {
+        const response = await axios.get(`${API_BASE_URL}/recommendations/personalized/${userId}`);
+        const parsedBody = JSON.parse(response.data.body);
+        return parsedBody.userRecommendations;
+    } catch (error) {
+        console.error(`Error fetching recommendations for user ${userId}:`, error);
         throw error;
     }
 };
@@ -246,4 +258,5 @@ export default {
     endProgram,
     startProgram,
     resetProgram,
+    getUserRecommendations,
 };
