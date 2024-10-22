@@ -14,6 +14,7 @@ type IconButtonProps = {
     iconName: string;
     iconSize?: number; // Default size will be applied if not provided
     iconColor?: string; // Default color if not provided
+    disabled?: boolean;
     size?: 'SM' | 'MD' | 'LG'; // Variants for button size
     style?: StyleProp<ViewStyle>;
     accessibilityLabel?: string; // Accessibility label for screen readers
@@ -26,6 +27,7 @@ export const IconButton: React.FC<IconButtonProps & AccessibilityProps> = ({
     iconColor,
     size = 'MD', // Default size
     style,
+    disabled = false,
     accessibilityLabel = 'Icon button', // Default accessibility label
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -54,6 +56,7 @@ export const IconButton: React.FC<IconButtonProps & AccessibilityProps> = ({
             onPress={onPress}
             accessibilityLabel={accessibilityLabel}
             activeOpacity={1}
+            disabled={disabled}
         >
             <Icon name={iconName} size={moderateScale(iconSize)} color={iconColor || themeColors.iconDefault} />
         </TouchableOpacity>

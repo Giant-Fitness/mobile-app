@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     },
     menuButton: {
         position: 'absolute',
-        top: Spaces.XXL + Spaces.SM,
+        top: Spaces.XXXL + Spaces.XXL,
         right: Spaces.XL,
         zIndex: 10,
     },

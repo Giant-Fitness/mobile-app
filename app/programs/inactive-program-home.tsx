@@ -100,7 +100,7 @@ export default function InactiveProgramHome() {
             title: 'Find Your Perfect Plan',
             iconSize: Sizes.iconSizeSM,
             text: 'Let us recommend a plan tailored to your goals',
-            onPress: () => console.log('plan wizard'),
+            onPress: () => navigateTo('programs/program-recommender-wizard'),
         });
     }
 
@@ -130,9 +130,9 @@ export default function InactiveProgramHome() {
                         titleType='titleLarge'
                         gradientColors={['transparent', 'transparent']}
                     />
-                    <ThemedText type='titleLarge' style={[styles.motivationalQuote, { color: themeColors.tipText }]}>
+                    {/*                    <ThemedText type='titleLarge' style={[styles.motivationalQuote, { color: themeColors.tipText }]}>
                         Join the Hustle!
-                    </ThemedText>
+                    </ThemedText>*/}
                 </View>
             )}
 
