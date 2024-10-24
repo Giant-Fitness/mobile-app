@@ -151,11 +151,13 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
         case 'power-sleep':
             return <AnimatedMaterialCommunityIcons name='power-sleep' {...commonProps} />;
         case 'library':
-            return <AnimatedIonicons name='library-outline' {...commonProps} />;
+            return <AnimatedMaterialIcons name='local-library' {...commonProps} />;
         case 'more-horizontal':
             return <AnimatedFeather name='more-horizontal' {...commonProps} />;
         case 'preview':
             return <AnimatedMaterialCommunityIcons name='view-dashboard-outline' {...commonProps} />;
+        case 'magic-wand':
+            return <AnimatedFontAwesome name='wand-magic-sparkles' {...commonProps} />;
         default:
             return <AnimatedIonicons name='alert-circle-outline' {...commonProps} />;
     }

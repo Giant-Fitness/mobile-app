@@ -38,7 +38,8 @@ const LoginPage = () => {
 
 const styles = StyleSheet.create({
     titleContainer: {
-        flexDirection: 'row',
+        flex: 1,
+        justifyContent: 'center',
         alignItems: 'center',
         gap: 8,
     },

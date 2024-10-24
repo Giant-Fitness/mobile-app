@@ -3,8 +3,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { UserState, initialState } from '@/store/user/userState';
 import {
-    getUserProgramProgressAsync,
     getUserAsync,
+    getUserFitnessProfileAsync,
+    updateUserFitnessProfileAsync,
+    getUserRecommendationsAsync,
+    getUserProgramProgressAsync,
     completeDayAsync,
     uncompleteDayAsync,
     endProgramAsync,
@@ -12,7 +15,7 @@ import {
     resetProgramAsync,
 } from '@/store/user/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { UserProgramProgress, User } from '@/types';
+import { UserProgramProgress, User, UserRecommendations } from '@/types';
 
 const userSlice = createSlice({
     name: 'user',
@@ -38,6 +41,42 @@ const userSlice = createSlice({
                 state.error = action.error.message || 'Failed to fetch user';
             })
 
+            // Get User Fitness Profile
+            .addCase(getUserFitnessProfileAsync.pending, (state) => {
+                state.userFitnessProfileState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(getUserFitnessProfileAsync.fulfilled, (state, action) => {
+                state.userFitnessProfileState = REQUEST_STATE.FULFILLED;
+                state.userFitnessProfile = action.payload.userFitnessProfile;
+            })
+            .addCase(getUserFitnessProfileAsync.rejected, (state, action) => {
+                state.userFitnessProfileState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to get user fitness profile';
+            })
+
+            // Update User Fitness Profile
+            .addCase(updateUserFitnessProfileAsync.pending, (state) => {
+                state.userState = REQUEST_STATE.PENDING;
+                state.userRecommendationsState = REQUEST_STATE.PENDING;
+                state.userFitnessProfileState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(updateUserFitnessProfileAsync.fulfilled, (state, action) => {
+                state.userState = REQUEST_STATE.FULFILLED;
+                state.userRecommendationsState = REQUEST_STATE.FULFILLED;
+                state.userFitnessProfileState = REQUEST_STATE.PENDING;
+                state.user = action.payload.user;
+                state.userFitnessProfile = action.payload.userFitnessProfile;
+                state.userRecommendations = action.payload.userRecommendations;
+            })
+            .addCase(updateUserFitnessProfileAsync.rejected, (state, action) => {
+                state.userState = REQUEST_STATE.REJECTED;
+                state.userRecommendationsState = REQUEST_STATE.REJECTED;
+                state.userFitnessProfileState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to update user fitness profile';
+            })
+
             // User Program Progress
             .addCase(getUserProgramProgressAsync.pending, (state) => {
                 state.userProgramProgressState = REQUEST_STATE.PENDING;
@@ -50,6 +89,19 @@ const userSlice = createSlice({
             .addCase(getUserProgramProgressAsync.rejected, (state, action) => {
                 state.userProgramProgressState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'Failed to fetch user program progress';
+            })
+            // User Recommendations
+            .addCase(getUserRecommendationsAsync.pending, (state) => {
+                state.userRecommendationsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(getUserRecommendationsAsync.fulfilled, (state, action: PayloadAction<UserRecommendations>) => {
+                state.userRecommendationsState = REQUEST_STATE.FULFILLED;
+                state.userRecommendations = action.payload;
+            })
+            .addCase(getUserRecommendationsAsync.rejected, (state, action) => {
+                state.userRecommendationsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to fetch user recommendationns';
             })
 
             // Complete Day

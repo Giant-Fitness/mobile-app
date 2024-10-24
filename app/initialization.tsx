@@ -10,14 +10,24 @@ import { Redirect } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
 import { getProgramAsync, getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/thunks';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
-import { getUserAsync, getUserProgramProgressAsync } from '@/store/user/thunks';
+import { getUserAsync, getUserFitnessProfileAsync, getUserProgramProgressAsync, getUserRecommendationsAsync } from '@/store/user/thunks';
 import { getMultipleWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 
 const Initialization: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const navigation = useNavigation();
-    const { user, userState, userProgramProgress, userProgramProgressState, error: userError } = useSelector((state: RootState) => state.user);
+    const {
+        user,
+        userState,
+        userFitnessProfile,
+        userFitnessProfileState,
+        userRecommendations,
+        userRecommendationsState,
+        userProgramProgress,
+        userProgramProgressState,
+        error: userError,
+    } = useSelector((state: RootState) => state.user);
     const { error: programError } = useSelector((state: RootState) => state.programs);
     const { spotlightWorkouts, spotlightWorkoutsState, error: workoutError } = useSelector((state: RootState) => state.workouts);
     const [dataLoaded, setDataLoaded] = useState(REQUEST_STATE.PENDING);
@@ -40,26 +50,22 @@ const Initialization: React.FC = () => {
                 throw new Error('User data not available');
             }
 
-            await dispatch(getUserProgramProgressAsync(user.UserId));
-            while (userProgramProgressState !== REQUEST_STATE.FULFILLED) {
-                await new Promise((resolve) => setTimeout(resolve, 50));
-            }
+            await Promise.all([
+                dispatch(getUserFitnessProfileAsync()),
+                dispatch(getUserProgramProgressAsync()),
+                dispatch(getUserRecommendationsAsync()),
+                dispatch(getWorkoutQuoteAsync()),
+                dispatch(getRestDayQuoteAsync()),
+                dispatch(getSpotlightWorkoutsAsync()),
+            ]);
 
             if (userProgramProgress && userProgramProgress.ProgramId) {
                 await Promise.all([
-                    dispatch(getWorkoutQuoteAsync()),
-                    dispatch(getRestDayQuoteAsync()),
-                    dispatch(getSpotlightWorkoutsAsync()),
                     dispatch(getProgramAsync({ programId: userProgramProgress.ProgramId })),
                     dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId })),
                 ]);
             } else {
-                await Promise.all([
-                    dispatch(getWorkoutQuoteAsync()),
-                    dispatch(getRestDayQuoteAsync()),
-                    dispatch(getSpotlightWorkoutsAsync()),
-                    dispatch(getAllProgramsAsync()),
-                ]);
+                await Promise.all([dispatch(getAllProgramsAsync())]);
             }
 
             setDataLoaded(REQUEST_STATE.FULFILLED);
@@ -67,7 +73,7 @@ const Initialization: React.FC = () => {
         } catch (error) {
             return REQUEST_STATE.REJECTED;
         }
-    }, [dispatch, user, userProgramProgress]);
+    }, [dispatch, user]);
 
     useEffect(() => {
         navigation.setOptions({ headerShown: false });

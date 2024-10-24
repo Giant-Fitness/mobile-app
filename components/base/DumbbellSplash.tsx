@@ -71,7 +71,7 @@ export const DumbbellSplash: React.FC<SplashScreenProps> = ({ onAnimationComplet
                     },
                 ]}
             >
-                <LottieView ref={animation} source={require('@/assets/splash/dumbbell2.json')} style={styles.lottie} autoPlay={false} loop={true} />
+                <LottieView ref={animation} source={require('@/assets/animations/dumbbell.json')} style={styles.lottie} autoPlay={false} loop={true} />
             </Animated.View>
         </View>
     );

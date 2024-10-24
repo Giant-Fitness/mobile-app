@@ -1,6 +1,6 @@
 // store/user/service.ts
 
-import { UserProgramProgress, User } from '@/types';
+import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile } from '@/types';
 import { sampleUserProgress, sampleUser } from '@/store/user/mockData';
 import axios from 'axios';
 
@@ -17,8 +17,110 @@ const simulateNetworkDelay = async () => {
 
 const getUser = async (): Promise<User> => {
     console.log('service: getUser');
-    await simulateNetworkDelay();
-    return sampleUser;
+    try {
+        const userId = 'd91c85f4-c493-4d1c-b6bd-d493a3485bba';
+        const response = await axios.get(`${API_BASE_URL}/users/${userId}`);
+        const parsedBody = JSON.parse(response.data.body);
+        return parsedBody.user;
+    } catch (error) {
+        console.error(`Error fetching user ${userId}:`, error);
+        throw error;
+    }
+};
+
+const getUserFitnessProfile = async (userId: string): Promise<UserFitnessProfile> => {
+    console.log('service: getUserFitnessProfile');
+    try {
+        const response = await axios.get(`${API_BASE_URL}/users/${userId}/fitnessprofile`, {
+            timeout: 10000,
+            timeoutErrorMessage: 'Request timed out after 10 seconds',
+        });
+
+        let result;
+        if (typeof response.data === 'string') {
+            const parsedData = JSON.parse(response.data);
+            result = parsedData.body ? JSON.parse(parsedData.body) : parsedData;
+        } else if (response.data.body && typeof response.data.body === 'string') {
+            result = JSON.parse(response.data.body);
+        } else {
+            result = response.data.body || response.data;
+        }
+
+        if (!result.userFitnessProfile) {
+            throw new Error('Invalid response format');
+        }
+
+        return result.userFitnessProfile;
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            if (error.code === 'ECONNABORTED') {
+                console.error('Request timed out:', error.message);
+            } else {
+                console.error('Axios error:', error.message);
+                console.error('Response:', error.response ? JSON.stringify(error.response.data, null, 2) : 'No response');
+            }
+        } else {
+            console.error('Unknown error:', error);
+        }
+        throw error;
+    }
+};
+
+const updateUserFitnessProfile = async (
+    userId: string,
+    userFitnessProfile: UserFitnessProfile,
+): Promise<{ user: User; recommendations: UserRecommendations }> => {
+    console.log('service: updateUserFitnessProfile');
+    try {
+        const response = await axios.put(`${API_BASE_URL}/users/${userId}/fitnessprofile`, userFitnessProfile, {
+            timeout: 10000,
+            timeoutErrorMessage: 'Request timed out after 10 seconds',
+        });
+
+        let result;
+        if (typeof response.data === 'string') {
+            const parsedData = JSON.parse(response.data);
+            result = parsedData.body ? JSON.parse(parsedData.body) : parsedData;
+        } else if (response.data.body && typeof response.data.body === 'string') {
+            result = JSON.parse(response.data.body);
+        } else {
+            result = response.data.body || response.data;
+        }
+
+        if (!result.user || !result.userRecommendations || !result.userFitnessProfile) {
+            throw new Error('Invalid response format');
+        }
+
+        return {
+            user: result.user,
+            userRecommendations: result.userRecommendations,
+            userFitnessProfile: result.userFitnessProfile,
+        };
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            if (error.code === 'ECONNABORTED') {
+                console.error('Request timed out:', error.message);
+            } else {
+                console.error('Axios error:', error.message);
+                console.error('Response:', error.response ? JSON.stringify(error.response.data, null, 2) : 'No response');
+            }
+        } else {
+            console.error('Unknown error:', error);
+        }
+        throw error;
+    }
+};
+
+const getUserRecommendations = async (userId: string): Promise<UserRecommendations> => {
+    console.log('service: getUserRecommendations');
+    try {
+        const response = await axios.get(`${API_BASE_URL}/recommendations/personalized/${userId}`);
+        const parsedBody = JSON.parse(response.data.body);
+        return parsedBody.userRecommendations;
+    } catch (error) {
+        console.error(`Error fetching recommendations for user ${userId}:`, error);
+        throw error;
+    }
 };
 
 const getUserProgramProgress = async (userId: string): Promise<UserProgramProgress> => {
@@ -239,8 +341,11 @@ const resetProgram = async (userId: string): Promise<UserProgramProgress> => {
 };
 
 export default {
-    getUserProgramProgress,
     getUser,
+    getUserFitnessProfile,
+    updateUserFitnessProfile,
+    getUserRecommendations,
+    getUserProgramProgress,
     completeDay,
     uncompleteDay,
     endProgram,

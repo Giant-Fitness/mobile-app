@@ -263,7 +263,7 @@ const ProgramDayScreen = () => {
                 <View style={StyleSheet.absoluteFill}>
                     <LottieView
                         ref={confettiRef}
-                        source={require('@/assets/splash/confetti2.json')}
+                        source={require('@/assets/animations/confetti.json')}
                         autoPlay={false}
                         loop={false}
                         style={StyleSheet.absoluteFill}
