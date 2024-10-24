@@ -2,28 +2,9 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import UserService from '@/store/user/service';
-import { UserProgramProgress, User, UserRecommendations } from '@/types';
+import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile } from '@/types';
 import { RootState } from '@/store/rootReducer';
 import { REQUEST_STATE } from '@/constants/requestStates';
-
-export const getUserProgramProgressAsync = createAsyncThunk<
-    UserProgramProgress,
-    string | undefined,
-    {
-        state: RootState;
-        rejectValue: { errorMessage: string };
-    }
->('user/getUserProgramProgress', async (userId: string | undefined, { getState, rejectWithValue }) => {
-    if (!userId) {
-        return rejectWithValue({ errorMessage: 'User ID not available' });
-    }
-
-    const state = getState();
-    if (state.user.userProgramProgress) {
-        return state.user.userProgramProgress;
-    }
-    return await UserService.getUserProgramProgress(userId);
-});
 
 export const getUserAsync = createAsyncThunk<User, void>('user/getUser', async (_, { getState, rejectWithValue }) => {
     const state = getState();
@@ -31,6 +12,124 @@ export const getUserAsync = createAsyncThunk<User, void>('user/getUser', async (
         return state.user.user;
     }
     return await UserService.getUser();
+});
+
+export const getUserFitnessProfileAsync = createAsyncThunk<
+    UserFitnessProfile,
+    void,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/getUserFitnessProfile', async (_, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        // Check if user ID exists
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Return cached fitness profile if available
+        if (state.user.userFitnessProfile) {
+            return state.user.userFitnessProfile;
+        }
+
+        // Fetch and return fitness profile
+        const profile = await UserService.getUserFitnessProfile(userId);
+        return profile;
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch fitness profile',
+        });
+    }
+});
+
+export const updateUserFitnessProfileAsync = createAsyncThunk<
+    { user: User; recommendations: UserRecommendations },
+    { fitnesProfile: UserFitnessProfile },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/updateFitnessProfile', async ({ fitnesProfile }, { getState, rejectWithValue }) => {
+    const state = getState();
+    const userId = state.user.user?.UserId;
+
+    if (!userId) {
+        return rejectWithValue({ errorMessage: 'User ID not available' });
+    }
+
+    try {
+        return await UserService.updateUserFitnessProfile(userId, fitnesProfile);
+    } catch (error) {
+        return rejectWithValue({ errorMessage: 'Failed to update fitness profile' });
+    }
+});
+
+export const getUserRecommendationsAsync = createAsyncThunk<
+    UserRecommendations,
+    void,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/getUserRecommendations', async (_, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        // Check if user ID exists
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Return cached recommendations if available
+        if (state.user.userRecommendations) {
+            return state.user.userRecommendations;
+        }
+
+        // Fetch and return recommendations
+        const userRecommendations = await UserService.getUserRecommendations(userId);
+        return userRecommendations;
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch user recommendations',
+        });
+    }
+});
+
+export const getUserProgramProgressAsync = createAsyncThunk<
+    UserProgramProgress,
+    void,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/getUserProgramProgress', async (_, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        // Check if user ID exists
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Return cached progress if available
+        if (state.user.userProgramProgress) {
+            return state.user.userProgramProgress;
+        }
+
+        // Fetch and return progress
+        const userProgramProgress = await UserService.getUserProgramProgress(userId);
+        return userProgramProgress;
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch program progress',
+        });
+    }
 });
 
 export const completeDayAsync = createAsyncThunk<
@@ -118,22 +217,4 @@ export const resetProgramAsync = createAsyncThunk<UserProgramProgress, void>('us
     } catch (error) {
         return rejectWithValue({ errorMessage: 'Failed to reset program' });
     }
-});
-
-export const getUserRecommendationsAsync = createAsyncThunk<
-    UserRecommendations,
-    string | undefined,
-    {
-        state: RootState;
-        rejectValue: { errorMessage: string };
-    }
->('user/getUserRecommendations', async (userId: string | undefined, { getState, rejectWithValue }) => {
-    if (!userId) {
-        return rejectWithValue({ errorMessage: 'User ID not available' });
-    }
-    const state = getState();
-    if (state.user.userRecommendations) {
-        return state.user.userRecommendations;
-    }
-    return await UserService.getUserRecommendations(userId);
 });

@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { router } from 'expo-router';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 
 import { ThemedView } from '@/components/base/ThemedView';
@@ -32,6 +33,7 @@ const ProgramRecommenderWizardScreen = () => {
 
     const handleComplete = (data) => {
         console.log('Wizard completed with data:', data);
+        router.replace('/(tabs)/programs');
         // Process the completed form data
         // e.g., send to API, update user profile, etc.
     };

@@ -1,11 +1,13 @@
 // store/user/userState.ts
 
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { UserProgramProgress, User, UserRecommendations } from '@/types';
+import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile } from '@/types';
 
 export interface UserState {
     user: User | null;
     userState: REQUEST_STATE;
+    userFitnessProfile: UserFitnessProfile | null;
+    userFitnessProfileState: REQUEST_STATE;
     userRecommendations: UserRecommendations | null;
     userRecommendationsState: REQUEST_STATE;
     userProgramProgress: UserProgramProgress | null;
@@ -16,6 +18,8 @@ export interface UserState {
 export const initialState: UserState = {
     user: null,
     userState: REQUEST_STATE.IDLE,
+    userFitnessProfile: null,
+    userFitnessProfileState: REQUEST_STATE.IDLE,
     userRecommendations: null,
     userRecommendationsState: REQUEST_STATE.IDLE,
     userProgramProgress: null,

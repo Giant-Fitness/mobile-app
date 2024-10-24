@@ -24,3 +24,11 @@ export interface UserRecommendations {
     UserId: string;
     RecommendedProgramID: string;
 }
+
+export interface UserFitnessProfile {
+    UserId: string;
+    GymExperienceLevel: string;
+    AccessToEquipment: string;
+    DaysPerWeekDesired: string;
+    PrimaryFitnessGoal: string;
+}

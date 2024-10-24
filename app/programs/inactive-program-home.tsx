@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { ScrollView, StyleSheet, View, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+// import { router } from 'expo-router';
 import { useSelector, useDispatch } from 'react-redux';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';

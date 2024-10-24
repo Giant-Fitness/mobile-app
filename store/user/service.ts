@@ -1,6 +1,6 @@
 // store/user/service.ts
 
-import { UserProgramProgress, User, UserRecommendations } from '@/types';
+import { UserProgramProgress, User, UserRecommendations, UserFitnnessProfile } from '@/types';
 import { sampleUserProgress, sampleUser } from '@/store/user/mockData';
 import axios from 'axios';
 
@@ -29,6 +29,85 @@ const getUserProgramProgress = async (userId: string): Promise<UserProgramProgre
         return parsedBody.programProgress;
     } catch (error) {
         console.error(`Error fetching programprogress for user ${userId}:`, error);
+        throw error;
+    }
+};
+
+const getUserFitnessProfile = async (userId: string): Promise<UserFitnnessProfile> => {
+    console.log('service: getUserFitnessProfile');
+    try {
+        const response = await axios.get(`${API_BASE_URL}/users/${userId}/fitnessprofile`, {
+            timeout: 10000,
+            timeoutErrorMessage: 'Request timed out after 10 seconds',
+        });
+
+        let result;
+        if (typeof response.data === 'string') {
+            const parsedData = JSON.parse(response.data);
+            result = parsedData.body ? JSON.parse(parsedData.body) : parsedData;
+        } else if (response.data.body && typeof response.data.body === 'string') {
+            result = JSON.parse(response.data.body);
+        } else {
+            result = response.data.body || response.data;
+        }
+
+        if (!result.userFitnessProfile) {
+            throw new Error('Invalid response format');
+        }
+
+        return result.userFitnessProfile;
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            if (error.code === 'ECONNABORTED') {
+                console.error('Request timed out:', error.message);
+            } else {
+                console.error('Axios error:', error.message);
+                console.error('Response:', error.response ? JSON.stringify(error.response.data, null, 2) : 'No response');
+            }
+        } else {
+            console.error('Unknown error:', error);
+        }
+        throw error;
+    }
+};
+
+const updateUserFitnessProfile = async (userId: string, fitnesProfile: any): Promise<{ user: User; recommendations: UserRecommendations }> => {
+    console.log('service: updateUserFitnessProfile');
+    try {
+        const response = await axios.put(`${API_BASE_URL}/users/${userId}/fitnessprofile`, preferences, {
+            timeout: 10000,
+            timeoutErrorMessage: 'Request timed out after 10 seconds',
+        });
+
+        let result;
+        if (typeof response.data === 'string') {
+            const parsedData = JSON.parse(response.data);
+            result = parsedData.body ? JSON.parse(parsedData.body) : parsedData;
+        } else if (response.data.body && typeof response.data.body === 'string') {
+            result = JSON.parse(response.data.body);
+        } else {
+            result = response.data.body || response.data;
+        }
+
+        if (!result.user || !result.recommendations) {
+            throw new Error('Invalid response format');
+        }
+
+        return {
+            user: result.user,
+            recommendations: result.recommendations,
+        };
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            if (error.code === 'ECONNABORTED') {
+                console.error('Request timed out:', error.message);
+            } else {
+                console.error('Axios error:', error.message);
+                console.error('Response:', error.response ? JSON.stringify(error.response.data, null, 2) : 'No response');
+            }
+        } else {
+            console.error('Unknown error:', error);
+        }
         throw error;
     }
 };
@@ -251,12 +330,14 @@ const resetProgram = async (userId: string): Promise<UserProgramProgress> => {
 };
 
 export default {
-    getUserProgramProgress,
     getUser,
+    getUserFitnessProfile,
+    updateUserFitnessProfile,
+    getUserRecommendations,
+    getUserProgramProgress,
     completeDay,
     uncompleteDay,
     endProgram,
     startProgram,
     resetProgram,
-    getUserRecommendations,
 };
