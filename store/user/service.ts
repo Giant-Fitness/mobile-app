@@ -1,6 +1,6 @@
 // store/user/service.ts
 
-import { UserProgramProgress, User, UserRecommendations, UserFitnnessProfile } from '@/types';
+import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile } from '@/types';
 import { sampleUserProgress, sampleUser } from '@/store/user/mockData';
 import axios from 'axios';
 
@@ -17,23 +17,18 @@ const simulateNetworkDelay = async () => {
 
 const getUser = async (): Promise<User> => {
     console.log('service: getUser');
-    await simulateNetworkDelay();
-    return sampleUser;
-};
-
-const getUserProgramProgress = async (userId: string): Promise<UserProgramProgress> => {
-    console.log('service: getUserProgramProgress');
     try {
-        const response = await axios.get(`${API_BASE_URL}/users/${userId}/programprogress`);
+        const userId = 'd91c85f4-c493-4d1c-b6bd-d493a3485bba';
+        const response = await axios.get(`${API_BASE_URL}/users/${userId}`);
         const parsedBody = JSON.parse(response.data.body);
-        return parsedBody.programProgress;
+        return parsedBody.user;
     } catch (error) {
-        console.error(`Error fetching programprogress for user ${userId}:`, error);
+        console.error(`Error fetching user ${userId}:`, error);
         throw error;
     }
 };
 
-const getUserFitnessProfile = async (userId: string): Promise<UserFitnnessProfile> => {
+const getUserFitnessProfile = async (userId: string): Promise<UserFitnessProfile> => {
     console.log('service: getUserFitnessProfile');
     try {
         const response = await axios.get(`${API_BASE_URL}/users/${userId}/fitnessprofile`, {
@@ -71,10 +66,13 @@ const getUserFitnessProfile = async (userId: string): Promise<UserFitnnessProfil
     }
 };
 
-const updateUserFitnessProfile = async (userId: string, fitnesProfile: any): Promise<{ user: User; recommendations: UserRecommendations }> => {
+const updateUserFitnessProfile = async (
+    userId: string,
+    userFitnessProfile: UserFitnessProfile,
+): Promise<{ user: User; recommendations: UserRecommendations }> => {
     console.log('service: updateUserFitnessProfile');
     try {
-        const response = await axios.put(`${API_BASE_URL}/users/${userId}/fitnessprofile`, preferences, {
+        const response = await axios.put(`${API_BASE_URL}/users/${userId}/fitnessprofile`, userFitnessProfile, {
             timeout: 10000,
             timeoutErrorMessage: 'Request timed out after 10 seconds',
         });
@@ -89,13 +87,14 @@ const updateUserFitnessProfile = async (userId: string, fitnesProfile: any): Pro
             result = response.data.body || response.data;
         }
 
-        if (!result.user || !result.recommendations) {
+        if (!result.user || !result.userRecommendations || !result.userFitnessProfile) {
             throw new Error('Invalid response format');
         }
 
         return {
             user: result.user,
-            recommendations: result.recommendations,
+            userRecommendations: result.userRecommendations,
+            userFitnessProfile: result.userFitnessProfile,
         };
     } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -120,6 +119,18 @@ const getUserRecommendations = async (userId: string): Promise<UserRecommendatio
         return parsedBody.userRecommendations;
     } catch (error) {
         console.error(`Error fetching recommendations for user ${userId}:`, error);
+        throw error;
+    }
+};
+
+const getUserProgramProgress = async (userId: string): Promise<UserProgramProgress> => {
+    console.log('service: getUserProgramProgress');
+    try {
+        const response = await axios.get(`${API_BASE_URL}/users/${userId}/programprogress`);
+        const parsedBody = JSON.parse(response.data.body);
+        return parsedBody.programProgress;
+    } catch (error) {
+        console.error(`Error fetching programprogress for user ${userId}:`, error);
         throw error;
     }
 };

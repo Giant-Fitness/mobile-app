@@ -7,7 +7,7 @@ import { SelectionGroup } from '@/components/buttons/SelectionButton';
 import { Spaces } from '@/constants/Spaces';
 
 export const WorkoutGoalsForm = forwardRef(({ formData, onSubmit, onValidityChange }, ref) => {
-    const [goal, setGoal] = useState(formData.goal || '');
+    const [PrimaryFitnessGoal, setPrimaryFitnessGoal] = useState(formData.PrimaryFitnessGoal || '');
 
     const goalOptions = [
         { key: 'lose-weight', text: 'Lose Weight' },
@@ -17,13 +17,13 @@ export const WorkoutGoalsForm = forwardRef(({ formData, onSubmit, onValidityChan
     ];
 
     useEffect(() => {
-        onValidityChange(!!goal);
-    }, [goal, onValidityChange]);
+        onValidityChange(!!PrimaryFitnessGoal);
+    }, [PrimaryFitnessGoal, onValidityChange]);
 
     useImperativeHandle(ref, () => ({
         submitForm: () => {
-            if (goal) {
-                onSubmit({ goal });
+            if (PrimaryFitnessGoal) {
+                onSubmit({ PrimaryFitnessGoal });
             }
         },
     }));
@@ -33,13 +33,13 @@ export const WorkoutGoalsForm = forwardRef(({ formData, onSubmit, onValidityChan
             <ThemedText type='bodyMedium' style={styles.question}>
                 What is your primary fitness goal?
             </ThemedText>
-            <SelectionGroup options={goalOptions} selectedKeys={[goal]} onSelect={(key) => setGoal(key)} multiSelect={false} />
+            <SelectionGroup options={goalOptions} selectedKeys={[PrimaryFitnessGoal]} onSelect={(key) => setPrimaryFitnessGoal(key)} multiSelect={false} />
         </View>
     );
 });
 
 export const ExperienceForm = forwardRef(({ formData, onSubmit, onValidityChange }, ref) => {
-    const [experience, setExperience] = useState(formData.experience || '');
+    const [GymExperienceLevel, setGymExperienceLevel] = useState(formData.GymExperienceLevel || '');
 
     const experienceOptions = [
         { key: 'beginner', text: 'Beginner', subText: 'New to working out or less than 1 year of experience' },
@@ -48,13 +48,13 @@ export const ExperienceForm = forwardRef(({ formData, onSubmit, onValidityChange
     ];
 
     useEffect(() => {
-        onValidityChange(!!experience);
-    }, [experience, onValidityChange]);
+        onValidityChange(!!GymExperienceLevel);
+    }, [GymExperienceLevel, onValidityChange]);
 
     useImperativeHandle(ref, () => ({
         submitForm: () => {
-            if (experience) {
-                onSubmit({ experience });
+            if (GymExperienceLevel) {
+                onSubmit({ GymExperienceLevel });
             }
         },
     }));
@@ -64,13 +64,18 @@ export const ExperienceForm = forwardRef(({ formData, onSubmit, onValidityChange
             <ThemedText type='bodyMedium' style={styles.question}>
                 What is your current experience level with working out?
             </ThemedText>
-            <SelectionGroup options={experienceOptions} selectedKeys={[experience]} onSelect={(key) => setExperience(key)} multiSelect={false} />
+            <SelectionGroup
+                options={experienceOptions}
+                selectedKeys={[GymExperienceLevel]}
+                onSelect={(key) => setGymExperienceLevel(key)}
+                multiSelect={false}
+            />
         </View>
     );
 });
 
 export const ScheduleForm = forwardRef(({ formData, onSubmit, onValidityChange }, ref) => {
-    const [schedule, setSchedule] = useState(formData.schedule || '');
+    const [DaysPerWeekDesired, setDaysPerWeekDesired] = useState(formData.DaysPerWeekDesired || '');
 
     const scheduleOptions = [
         { key: 'twothree', text: '2–3 days a week' },
@@ -79,13 +84,13 @@ export const ScheduleForm = forwardRef(({ formData, onSubmit, onValidityChange }
     ];
 
     useEffect(() => {
-        onValidityChange(!!schedule);
-    }, [schedule, onValidityChange]);
+        onValidityChange(!!DaysPerWeekDesired);
+    }, [DaysPerWeekDesired, onValidityChange]);
 
     useImperativeHandle(ref, () => ({
         submitForm: () => {
-            if (schedule) {
-                onSubmit({ schedule });
+            if (DaysPerWeekDesired) {
+                onSubmit({ DaysPerWeekDesired });
             }
         },
     }));
@@ -95,13 +100,13 @@ export const ScheduleForm = forwardRef(({ formData, onSubmit, onValidityChange }
             <ThemedText type='bodyMedium' style={styles.question}>
                 How many days per week can you commit to training?
             </ThemedText>
-            <SelectionGroup options={scheduleOptions} selectedKeys={[schedule]} onSelect={(key) => setSchedule(key)} multiSelect={false} />
+            <SelectionGroup options={scheduleOptions} selectedKeys={[DaysPerWeekDesired]} onSelect={(key) => setDaysPerWeekDesired(key)} multiSelect={false} />
         </View>
     );
 });
 
 export const EquipmentForm = forwardRef(({ formData, onSubmit, onValidityChange }, ref) => {
-    const [equipment, setEquipment] = useState(formData.equipment || '');
+    const [AccessToEquipment, setAccessToEquipment] = useState(formData.AccessToEquipment || '');
 
     const equipmentOptions = [
         { key: 'none', text: 'No Equipment', subText: 'Bodyweight workouts you can do anywhere' },
@@ -110,13 +115,13 @@ export const EquipmentForm = forwardRef(({ formData, onSubmit, onValidityChange 
     ];
 
     useEffect(() => {
-        onValidityChange(!!equipment);
-    }, [equipment, onValidityChange]);
+        onValidityChange(!!AccessToEquipment);
+    }, [AccessToEquipment, onValidityChange]);
 
     useImperativeHandle(ref, () => ({
         submitForm: () => {
-            if (equipment) {
-                onSubmit({ equipment });
+            if (AccessToEquipment) {
+                onSubmit({ AccessToEquipment });
             }
         },
     }));
@@ -126,7 +131,7 @@ export const EquipmentForm = forwardRef(({ formData, onSubmit, onValidityChange 
             <ThemedText type='bodyMedium' style={styles.question}>
                 What equipment do you have available for your workouts?
             </ThemedText>
-            <SelectionGroup options={equipmentOptions} selectedKeys={[equipment]} onSelect={(key) => setEquipment(key)} multiSelect={false} />
+            <SelectionGroup options={equipmentOptions} selectedKeys={[AccessToEquipment]} onSelect={(key) => setAccessToEquipment(key)} multiSelect={false} />
         </View>
     );
 });

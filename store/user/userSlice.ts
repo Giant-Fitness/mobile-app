@@ -68,7 +68,7 @@ const userSlice = createSlice({
                 state.userFitnessProfileState = REQUEST_STATE.PENDING;
                 state.user = action.payload.user;
                 state.userFitnessProfile = action.payload.userFitnessProfile;
-                state.userRecommendations = action.payload.recommendations;
+                state.userRecommendations = action.payload.userRecommendations;
             })
             .addCase(updateUserFitnessProfileAsync.rejected, (state, action) => {
                 state.userState = REQUEST_STATE.REJECTED;

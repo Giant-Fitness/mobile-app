@@ -1,9 +1,10 @@
 // app/programs/program-recommender-wizard.tsx
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { router } from 'expo-router';
+import { useDispatch, useSelector } from 'react-redux';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 
 import { ThemedView } from '@/components/base/ThemedView';
@@ -14,11 +15,19 @@ import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { SignupWizard } from '@/components/onboarding/SignupWizard';
 import { WorkoutGoalsForm, ExperienceForm, EquipmentForm, ScheduleForm } from '@/components/onboarding/fitness/FitnessWizardForms';
 import { ProgramRecommenderIntro } from '@/components/onboarding/fitness/ProgramRecommenderIntro';
+import { updateUserFitnessProfileAsync } from '@/store/user/thunks';
+import { AutoDismissSuccessModal } from '@/components/overlays/AutoDismissSuccessModal';
+import { AppDispatch, RootState } from '@/store/rootReducer';
 
 const ProgramRecommenderWizardScreen = () => {
+    const dispatch = useDispatch<AppDispatch>();
     const navigation = useNavigation();
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+
+    const userState = useSelector((state: RootState) => state.user.userState);
+    const error = useSelector((state: RootState) => state.user.error);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     useEffect(() => {
         navigation.setOptions({ headerShown: false });
@@ -31,11 +40,22 @@ const ProgramRecommenderWizardScreen = () => {
         },
     });
 
-    const handleComplete = (data) => {
-        console.log('Wizard completed with data:', data);
+    const handleComplete = async (data: any) => {
+        try {
+            const result = await dispatch(updateUserFitnessProfileAsync({ userFitnessProfile: data })).unwrap();
+
+            if (result.user && result.userRecommendations && result.userFitnessProfile) {
+                setShowSuccessModal(true);
+            }
+        } catch (error) {
+            console.error('Failed to update fitness profile:', error);
+            // Handle error case
+        }
+    };
+
+    const handleSuccessModalDismiss = () => {
+        setShowSuccessModal(false);
         router.replace('/(tabs)/programs');
-        // Process the completed form data
-        // e.g., send to API, update user profile, etc.
     };
 
     const wizardSteps = [
@@ -47,7 +67,14 @@ const ProgramRecommenderWizardScreen = () => {
 
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.backgroundSecondary }]}>
-            <SignupWizard steps={wizardSteps} onComplete={handleComplete} IntroScreen={ProgramRecommenderIntro} />
+            <SignupWizard steps={wizardSteps} onComplete={handleComplete} IntroScreen={ProgramRecommenderIntro} submitText='Get Plan' />
+            <AutoDismissSuccessModal
+                visible={showSuccessModal}
+                onDismiss={handleSuccessModalDismiss}
+                title='Perfect Match!'
+                message="We've found your ideal program based on your preferences."
+                duration={2000}
+            />
         </ThemedView>
     );
 };

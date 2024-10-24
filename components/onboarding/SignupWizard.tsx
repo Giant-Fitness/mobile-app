@@ -21,9 +21,10 @@ interface SignupWizardProps {
     steps: WizardStep[];
     onComplete: (data: any) => void;
     IntroScreen?: React.ComponentType<{ onStart: () => void }>;
+    submitText: string;
 }
 
-export const SignupWizard: React.FC<SignupWizardProps> = ({ steps, onComplete, IntroScreen }) => {
+export const SignupWizard: React.FC<SignupWizardProps> = ({ steps, onComplete, IntroScreen, submitText = 'Submit' }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const [showIntroScreen, setShowIntroScreen] = useState(true);
@@ -39,7 +40,6 @@ export const SignupWizard: React.FC<SignupWizardProps> = ({ steps, onComplete, I
         if (currentStep < steps.length - 1) {
             setCurrentStep(currentStep + 1);
         } else {
-            console.log('Collected data:', updatedFormData);
             onComplete(updatedFormData);
         }
     };
@@ -92,7 +92,7 @@ export const SignupWizard: React.FC<SignupWizardProps> = ({ steps, onComplete, I
                         <TextButton
                             iconName='chevron-forward'
                             onPress={() => formRef.current?.submitForm()}
-                            text='Get Plan'
+                            text={submitText}
                             iconPosition='right'
                             style={[styles.submitButton, { backgroundColor: themeColors.buttonPrimary }, !isCurrentStepValid && styles.disabledButton]}
                             size='MD'

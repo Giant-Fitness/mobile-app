@@ -47,13 +47,13 @@ export const getUserFitnessProfileAsync = createAsyncThunk<
 });
 
 export const updateUserFitnessProfileAsync = createAsyncThunk<
-    { user: User; recommendations: UserRecommendations },
-    { fitnesProfile: UserFitnessProfile },
+    { user: User; userRecommendations: UserRecommendations; userFitnessProfile: UserFitnessProfile },
+    { userFitnessProfile: UserFitnessProfile },
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
->('user/updateFitnessProfile', async ({ fitnesProfile }, { getState, rejectWithValue }) => {
+>('user/updateFitnessProfile', async ({ userFitnessProfile }, { getState, rejectWithValue }) => {
     const state = getState();
     const userId = state.user.user?.UserId;
 
@@ -62,7 +62,7 @@ export const updateUserFitnessProfileAsync = createAsyncThunk<
     }
 
     try {
-        return await UserService.updateUserFitnessProfile(userId, fitnesProfile);
+        return await UserService.updateUserFitnessProfile(userId, userFitnessProfile);
     } catch (error) {
         return rejectWithValue({ errorMessage: 'Failed to update fitness profile' });
     }
