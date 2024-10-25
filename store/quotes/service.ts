@@ -14,13 +14,13 @@ const simulateNetworkDelay = async () => {
 
 const getWorkoutQuote = async (): Promise<Quote> => {
     console.log('service: getWorkoutQuote');
-    await simulateNetworkDelay();
+    // await simulateNetworkDelay();
     return mockWorkoutQuote;
 };
 
 const getRestDayQuote = async (): Promise<Quote> => {
     console.log('service: getRestDayQuote');
-    await simulateNetworkDelay();
+    // await simulateNetworkDelay();
     return mockRestDayQuote;
 };
 

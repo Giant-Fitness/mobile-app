@@ -1,7 +1,6 @@
 // store/user/service.ts
 
 import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile } from '@/types';
-import { sampleUserProgress, sampleUser } from '@/store/user/mockData';
 import axios from 'axios';
 
 const API_BASE_URL = 'https://r5oibllip9.execute-api.ap-south-1.amazonaws.com/prod';
@@ -9,16 +8,10 @@ const API_BASE_URL = 'https://r5oibllip9.execute-api.ap-south-1.amazonaws.com/pr
 // Utility function to simulate network delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Simulate a random delay between 200ms and 1000ms
-const simulateNetworkDelay = async () => {
-    const randomDelay = Math.floor(Math.random() * (1000 - 200 + 1) + 200);
-    await delay(randomDelay);
-};
-
 const getUser = async (): Promise<User> => {
     console.log('service: getUser');
+    const userId = 'd91c85f4-c493-4d1c-b6bd-d493a3485bba';
     try {
-        const userId = 'd91c85f4-c493-4d1c-b6bd-d493a3485bba';
         const response = await axios.get(`${API_BASE_URL}/users/${userId}`);
         const parsedBody = JSON.parse(response.data.body);
         return parsedBody.user;
@@ -69,7 +62,7 @@ const getUserFitnessProfile = async (userId: string): Promise<UserFitnessProfile
 const updateUserFitnessProfile = async (
     userId: string,
     userFitnessProfile: UserFitnessProfile,
-): Promise<{ user: User; recommendations: UserRecommendations }> => {
+): Promise<{ user: User; userRecommendations: UserRecommendations; userFitnessProfile: UserFitnessProfile }> => {
     console.log('service: updateUserFitnessProfile');
     try {
         const response = await axios.put(`${API_BASE_URL}/users/${userId}/fitnessprofile`, userFitnessProfile, {

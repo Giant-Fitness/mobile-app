@@ -1,7 +1,7 @@
 // app/programs/program-abandon-feedback.tsx
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';

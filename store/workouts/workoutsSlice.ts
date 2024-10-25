@@ -1,7 +1,7 @@
 // store/workouts/workoutsSlice.ts
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { WorkoutState, initialState } from '@/store/workouts/workoutsState';
+import { initialState } from '@/store/workouts/workoutsState';
 import { getAllWorkoutsAsync, getMultipleWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { Workout, WorkoutRecommendations } from '@/types';

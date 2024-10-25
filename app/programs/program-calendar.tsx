@@ -8,7 +8,7 @@ import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '@/store/rootReducer';
+import { AppDispatch, RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { ProgramMonthView } from '@/components/programs/ProgramMonthView';
 import { Spaces } from '@/constants/Spaces';

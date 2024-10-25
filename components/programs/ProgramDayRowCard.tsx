@@ -3,13 +3,10 @@
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
-import { ThemedView } from '@/components/base/ThemedView';
-import { Icon } from '@/components/base/Icon';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { ProgramDay } from '@/types';
-import { moderateScale } from '@/utils/scaling';
 
 interface ProgramDayRowCardProps {
     day: ProgramDay;
@@ -48,7 +45,6 @@ export const ProgramDayRowCard: React.FC<ProgramDayRowCardProps> = ({ day, onPre
                 <ThemedText
                     type='buttonSmall'
                     style={[
-                        styles.dayIdText,
                         isCompleted && [{ color: themeColors.subText, textDecorationLine: 'line-through' }],
                         isCurrentDay && { color: themeColors.background },
                     ]}

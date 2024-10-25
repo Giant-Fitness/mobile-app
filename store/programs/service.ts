@@ -66,7 +66,6 @@ const getProgramDaysAll = async (programId: string): Promise<ProgramDay[]> => {
 
 const getProgramDaysFiltered = async (programId: string, dayIds: string[]): Promise<ProgramDay[]> => {
     console.log('service: getProgramDaysFiltered');
-    return filteredDays.sort((a, b) => parseInt(a.DayId) - parseInt(b.DayId));
     try {
         const dayIdsString = dayIds.join(',');
         const response = await axios.get(`${API_BASE_URL}/programs/${programId}/days/batch`, {

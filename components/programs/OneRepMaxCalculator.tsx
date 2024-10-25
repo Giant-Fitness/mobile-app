@@ -11,7 +11,6 @@ import { Icon } from '@/components/base/Icon';
 import { scale, moderateScale } from '@/utils/scaling';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { TextButton } from '@/components/buttons/TextButton';
-import { HighlightedTip } from '@/components/alerts/HighlightedTip';
 
 let MathView;
 if (Platform.OS === 'ios') {
@@ -200,7 +199,7 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
                             </ThemedView>
                             <ThemedText type='bodySmall' style={styles.methodologyText}>
                                 We use the Epley Formula to estimate your one-rep-max (1RM) and calculate how much weight you should lift based on the intensity
-                                of today's workout.
+                                of today&apos;s workout.
                             </ThemedText>
                             <ThemedView
                                 style={[styles.formulaContainer, { backgroundColor: themeColors.container, borderColor: themeColors.systemBorderColor }]}

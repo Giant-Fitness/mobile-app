@@ -3,8 +3,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import UserService from '@/store/user/service';
 import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile } from '@/types';
-import { RootState } from '@/store/rootReducer';
-import { REQUEST_STATE } from '@/constants/requestStates';
+import { RootState } from '@/store/store';
 
 export const getUserAsync = createAsyncThunk<User, void>('user/getUser', async (_, { getState, rejectWithValue }) => {
     const state = getState();

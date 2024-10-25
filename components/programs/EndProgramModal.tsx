@@ -39,7 +39,7 @@ export const EndProgramModal: React.FC<EndProgramModalProps> = ({ visible, onClo
                     End Program
                 </ThemedText>
                 <ThemedText type='bodySmall' style={styles.message}>
-                    You're about to finish the program early. Are you sure you want to continue?
+                    You&apos;re about to finish the program early. Are you sure you want to continue?
                 </ThemedText>
                 <View style={styles.buttonContainer}>
                     <TextButton

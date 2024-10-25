@@ -1,7 +1,6 @@
 // store/workouts/service.ts
 
 import { Workout, WorkoutRecommendations } from '@/types';
-import { sampleWorkouts, sampleSpotlightRecommendations } from '@/store/workouts/mockData';
 import axios from 'axios';
 
 const API_BASE_URL = 'https://r5oibllip9.execute-api.ap-south-1.amazonaws.com/prod';

@@ -1,7 +1,7 @@
 // components/overlays/FiltersDrawer.tsx
 
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { BottomSheet } from '@/components/overlays/BottomSheet';
 import { FilterChip } from '@/components/base/FilterChip';
 import { ThemedText } from '@/components/base/ThemedText';

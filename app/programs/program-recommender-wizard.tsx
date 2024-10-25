@@ -4,20 +4,18 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { router } from 'expo-router';
-import { useDispatch, useSelector } from 'react-redux';
-import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
+import { useDispatch } from 'react-redux';
 
 import { ThemedView } from '@/components/base/ThemedView';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { SignupWizard } from '@/components/onboarding/SignupWizard';
 import { WorkoutGoalsForm, ExperienceForm, EquipmentForm, ScheduleForm } from '@/components/onboarding/fitness/FitnessWizardForms';
 import { ProgramRecommenderIntro } from '@/components/onboarding/fitness/ProgramRecommenderIntro';
 import { updateUserFitnessProfileAsync } from '@/store/user/thunks';
 import { AutoDismissSuccessModal } from '@/components/overlays/AutoDismissSuccessModal';
-import { AppDispatch, RootState } from '@/store/rootReducer';
+import { AppDispatch } from '@/store/store';
 
 const ProgramRecommenderWizardScreen = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -25,20 +23,11 @@ const ProgramRecommenderWizardScreen = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
-    const userState = useSelector((state: RootState) => state.user.userState);
-    const error = useSelector((state: RootState) => state.user.error);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     useEffect(() => {
         navigation.setOptions({ headerShown: false });
     }, [navigation]);
-
-    const scrollY = useSharedValue(0);
-    const scrollHandler = useAnimatedScrollHandler({
-        onScroll: (event) => {
-            scrollY.value = event.contentOffset.y;
-        },
-    });
 
     const handleComplete = async (data: any) => {
         try {

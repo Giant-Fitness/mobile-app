@@ -5,7 +5,7 @@ import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { View, Button, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { RouteProp } from '@react-navigation/native';
 import { Exercise } from '@/types';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
@@ -14,15 +14,11 @@ import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { TextButton } from '@/components/buttons/TextButton';
-import { IconButton } from '@/components/buttons/IconButton';
-import { moderateScale, verticalScale } from '@/utils/scaling';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThumbnailVideoPlayer } from '@/components/media/ThumbnailVideoPlayer';
 import { BulletedList } from '@/components/layout/BulletedList';
 import { Icon } from '@/components/base/Icon';
-import { HighlightedTip } from '@/components/alerts/HighlightedTip';
 import { OneRepMaxCalculator } from '@/components/programs/OneRepMaxCalculator';
-import { SlideUpActionButton } from '@/components/buttons/SlideUpActionButton';
 
 type ExerciseDetailsScreenParams = {
     Exercise: {
@@ -125,7 +121,7 @@ const ExerciseDetailsScreen = () => {
                                     onPress={openCalculator}
                                     size={'LG'}
                                 />
-{/*                                <PrimaryButton
+                                {/*                                <PrimaryButton
                                     text='Log Exercise'
                                     textType='buttonSmall'
                                     style={[styles.logButton, { marginLeft: Spaces.XS }]}
@@ -146,23 +142,6 @@ const ExerciseDetailsScreen = () => {
                 </ThemedView>
             </Animated.ScrollView>
             <OneRepMaxCalculator visible={isCalculatorVisible} onClose={closeCalculator} ormPercentage={exercise.ORMPercentage} />
-            {/*
-            {isEnrolled && exercise.ORMPercentage && (
-                <SlideUpActionButton scrollY={scrollY} slideUpThreshold={0}>
-                    <View style={styles.buttonContainer}>
-                        {/*                        <PrimaryButton text='Log' textType='bodyMedium' style={[styles.logButton]} onPress={handleLogExercise} size={'LG'} />
-                        <IconButton
-                            iconName='calculator'
-                            onPress={openCalculator}
-                            iconSize={Spaces.LG + Spaces.XS}
-                            iconColor={themeColors.text}
-                            style={styles.calculatorButton}
-                            size={'LG'}
-                        />
-                        <PrimaryButton text='Calculator' textType='bodyMedium' style={[{ width: '100%' }]} onPress={openCalculator} size={'LG'} />
-                    </View>
-                </SlideUpActionButton>
-            )}*/}
         </ThemedView>
     );
 };

@@ -4,14 +4,12 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { Collapsible } from '@/components/layout/Collapsible';
-import { ThemedText } from '@/components/base/ThemedText';
 import { ProgramDay } from '@/types';
 import { ProgramDayRowCard } from '@/components/programs/ProgramDayRowCard';
 import { getWeekNumber } from '@/utils/calendar';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
-import { moderateScale } from '@/utils/scaling';
 
 interface ProgramWeekListProps {
     currentMonthWeeks: ProgramDay[][];

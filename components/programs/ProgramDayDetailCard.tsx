@@ -8,7 +8,6 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { LeftImageInfoCard } from '@/components/media/LeftImageInfoCard';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useNavigation } from '@react-navigation/native';
-import { Icon } from '@/components/base/Icon';
 import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';

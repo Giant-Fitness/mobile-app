@@ -13,7 +13,7 @@ export interface UserOnboardingStatus {
 
 export interface UserProgramProgress {
     UserId: string;
-    ProgramId: number;
+    ProgramId: string;
     CurrentDay: number;
     CompletedDays: string[];
     StartAt: string;

@@ -3,7 +3,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import WorkoutService from '@/store/workouts/service';
 import { Workout, WorkoutRecommendations } from '@/types';
-import { RootState } from '@/store/rootReducer';
+import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 
 export const getAllWorkoutsAsync = createAsyncThunk<Workout[], void>('workouts/getAllWorkouts', async (_, { getState, rejectWithValue }) => {

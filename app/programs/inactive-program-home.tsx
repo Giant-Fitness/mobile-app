@@ -1,7 +1,7 @@
 // app/programs/inactive-program-home.tsx
 
 import React, { useState, useEffect } from 'react';
-import { ScrollView, StyleSheet, View, TouchableOpacity, Image } from 'react-native';
+import { ScrollView, StyleSheet, View, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 // import { router } from 'expo-router';
 import { useSelector, useDispatch } from 'react-redux';
@@ -16,21 +16,20 @@ import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { getUserRecommendationsAsync } from '@/store/user/thunks';
 import { getProgramAsync } from '@/store/programs/thunks';
-import { AppDispatch, RootState } from '@/store/rootReducer';
+import { AppDispatch, RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { RecommendedProgramCard } from '@/components/programs/RecommendedProgramCard';
 import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
-import { moderateScale } from '@/utils/scaling';
 import motivationalImage from '@/assets/images/pilates-bro.svg';
 
-const MenuItem = ({ icon, title, text, onPress, titleColor, textColor, chevronColor, leftIconColor, backgroundColor, iconSize }) => (
+const MenuItem = ({ icon, title, text, onPress, titleColor, textColor, leftIconColor, backgroundColor, iconSize }) => (
     <TouchableOpacity style={styles.menuItem} activeOpacity={1} onPress={onPress}>
         <View style={styles.menuItemLeft}>
             <View style={[styles.iconBox, { backgroundColor }]}>
                 <Icon name={icon} size={iconSize} color={leftIconColor} />
             </View>
             <View style={styles.menuTextContainer}>
-                <ThemedText type='buttonSmall' style={[styles.menuTitle, { color: titleColor }]}>
+                <ThemedText type='buttonSmall' style={[{ color: titleColor }]}>
                     {title}
                 </ThemedText>
                 <ThemedText type='bodySmall' style={[styles.menuText, { color: textColor }]}>
@@ -48,16 +47,16 @@ export default function InactiveProgramHome() {
     const dispatch = useDispatch<AppDispatch>();
 
     const [dataLoaded, setDataLoaded] = useState(REQUEST_STATE.PENDING);
-    const { user, userRecommendations, userRecommendationsState, error: userError } = useSelector((state: RootState) => state.user);
-    const { programs, programDays, programsState, programDaysState } = useSelector((state: RootState) => state.programs);
+    const { user, userRecommendations, userRecommendationsState } = useSelector((state: RootState) => state.user);
+    const { programs } = useSelector((state: RootState) => state.programs);
 
-    const isOnboardingComplete = user.OnboardingStatus?.fitness === true;
+    const isOnboardingComplete = user?.OnboardingStatus?.fitness === true;
 
     useEffect(() => {
         const fetchData = async () => {
             if (isOnboardingComplete) {
                 if (userRecommendationsState !== REQUEST_STATE.FULFILLED) {
-                    await dispatch(getUserRecommendationsAsync(user.UserId));
+                    await dispatch(getUserRecommendationsAsync());
                 }
 
                 if (userRecommendations && userRecommendations.RecommendedProgramID) {
@@ -69,7 +68,7 @@ export default function InactiveProgramHome() {
         };
 
         fetchData();
-    }, [dispatch, user.UserId, userRecommendationsState, isOnboardingComplete]);
+    }, [dispatch, user?.UserId, userRecommendationsState, isOnboardingComplete]);
 
     const { showSplash, handleSplashComplete } = useSplashScreen({
         dataLoadedState: dataLoaded,
@@ -137,7 +136,7 @@ export default function InactiveProgramHome() {
                 </View>
             )}
 
-            <View style={styles.menuWrapper}>
+            <View>
                 {menuItems.map((item, index) => (
                     <ThemedView key={index} style={[styles.menuContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
                         <MenuItem
@@ -203,7 +202,6 @@ const styles = StyleSheet.create({
     },
     motivationalContainer: {
         marginBottom: Spaces.LG,
-        alignItems: 'left',
     },
     motivationalImage: {
         width: '100%',

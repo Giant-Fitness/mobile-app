@@ -1,7 +1,7 @@
 // store/user/userSlice.ts
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { UserState, initialState } from '@/store/user/userState';
+import { initialState } from '@/store/user/userState';
 import {
     getUserAsync,
     getUserFitnessProfileAsync,
@@ -15,7 +15,7 @@ import {
     resetProgramAsync,
 } from '@/store/user/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { UserProgramProgress, User, UserRecommendations } from '@/types';
+import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile } from '@/types';
 
 const userSlice = createSlice({
     name: 'user',

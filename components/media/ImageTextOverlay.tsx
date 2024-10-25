@@ -8,13 +8,12 @@ import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Image } from 'expo-image';
-import { scale, moderateScale, verticalScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 
 type ImageTextOverlayProps = {
     image: any;
-    title: string;
+    title?: string;
     subtitle?: string;
     titleStyle?: StyleProp<TextStyle>;
     subtitleStyle?: StyleProp<TextStyle>;

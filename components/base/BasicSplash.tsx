@@ -7,10 +7,6 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 
-interface SplashScreenProps {
-    onLoadingComplete: () => void;
-}
-
 export const BasicSplash: React.FC = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];

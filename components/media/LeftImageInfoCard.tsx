@@ -8,7 +8,6 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { scale, moderateScale, verticalScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 

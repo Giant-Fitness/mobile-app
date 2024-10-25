@@ -1,6 +1,6 @@
 // app/programs/active-program-home.tsx
 
-import React, { useState } from 'react';
+import React from 'react';
 import { ScrollView, StyleSheet, View, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ThemedText } from '@/components/base/ThemedText';

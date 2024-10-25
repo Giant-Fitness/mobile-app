@@ -7,7 +7,6 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 
@@ -20,16 +19,7 @@ interface CollapsibleProps extends PropsWithChildren {
     iconStyle?: ViewStyle;
 }
 
-export function Collapsible({
-    children,
-    title,
-    titleStyle,
-    headingStyle,
-    isOpen: isOpenProp = false,
-    activeOpacity = 0.8,
-    iconColor,
-    iconStyle,
-}: CollapsibleProps) {
+export function Collapsible({ children, title, titleStyle, headingStyle, isOpen: isOpenProp = false, activeOpacity = 0.8, iconStyle }: CollapsibleProps) {
     const [isOpen, setIsOpen] = useState(isOpenProp);
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];

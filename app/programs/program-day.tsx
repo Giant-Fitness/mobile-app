@@ -1,6 +1,6 @@
 // app/programs/program-day.tsx
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { StyleSheet, ActivityIndicator, View } from 'react-native';
 import { router } from 'expo-router';
 import LottieView from 'lottie-react-native';
