@@ -11,8 +11,12 @@ import { Icon } from '@/components/base/Icon';
 import { scale, moderateScale } from '@/utils/scaling';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { TextButton } from '@/components/buttons/TextButton';
-import MathView from 'react-native-math-view';
 import { HighlightedTip } from '@/components/alerts/HighlightedTip';
+
+let MathView;
+if (Platform.OS === 'ios') {
+    MathView = require('react-native-math-view').default;
+}
 
 interface OneRepMaxCalculatorProps {
     visible: boolean;
@@ -58,6 +62,17 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
         const calculatedOneRM = (w * (1 + r / 30) * ormPercentage) / 100;
         setOneRM(Math.round(calculatedOneRM));
         setIsResultVisible(true);
+    };
+
+    const renderFormula = () => {
+        if (Platform.OS === 'ios' && MathView) {
+            return <MathView math={'1RM = Weight \\times (1 + \\frac{Reps}{30})'} />;
+        }
+        return (
+            <ThemedText type='bodyMedium' style={styles.formulaText}>
+                1RM = Weight × (1 + Reps ÷ 30)
+            </ThemedText>
+        );
     };
 
     return (
@@ -190,7 +205,7 @@ export const OneRepMaxCalculator: React.FC<OneRepMaxCalculatorProps> = ({ visibl
                             <ThemedView
                                 style={[styles.formulaContainer, { backgroundColor: themeColors.container, borderColor: themeColors.systemBorderColor }]}
                             >
-                                <MathView math={'1RM = Weight \\times (1 + \\frac{Reps}{30})'} />
+                                {renderFormula()}
                             </ThemedView>
                         </ThemedView>
                     </KeyboardAwareScrollView>
@@ -310,5 +325,13 @@ const styles = StyleSheet.create({
     instructions: {
         marginHorizontal: Spaces.SM,
         marginBottom: Spaces.MD,
+    },
+    formulaText: {
+        textAlign: 'center',
+        fontFamily: Platform.select({
+            ios: 'Courier',
+            android: 'monospace',
+        }),
+        fontSize: moderateScale(13),
     },
 });

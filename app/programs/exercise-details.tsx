@@ -13,6 +13,7 @@ import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
+import { TextButton } from '@/components/buttons/TextButton';
 import { IconButton } from '@/components/buttons/IconButton';
 import { moderateScale, verticalScale } from '@/utils/scaling';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -115,7 +116,23 @@ const ExerciseDetailsScreen = () => {
                             </ThemedView>
                         </ThemedView>
                         {isEnrolled && exercise.ORMPercentage && (
-                            <HighlightedTip iconName='bulb' tipText={'Quickly find your ideal lifting weight using the Calculator'} />
+                            // <HighlightedTip iconName='bulb' tipText={'Quickly find your ideal lifting weight using the Calculator'} />
+                            <View style={styles.buttonContainer}>
+                                <TextButton
+                                    text='Weight Calculator'
+                                    textType='buttonSmall'
+                                    style={[styles.calculatorButton]}
+                                    onPress={openCalculator}
+                                    size={'LG'}
+                                />
+{/*                                <PrimaryButton
+                                    text='Log Exercise'
+                                    textType='buttonSmall'
+                                    style={[styles.logButton, { marginLeft: Spaces.XS }]}
+                                    onPress={handleLogExercise}
+                                    size={'LG'}
+                                />*/}
+                            </View>
                         )}
                     </ThemedView>
 
@@ -129,7 +146,7 @@ const ExerciseDetailsScreen = () => {
                 </ThemedView>
             </Animated.ScrollView>
             <OneRepMaxCalculator visible={isCalculatorVisible} onClose={closeCalculator} ormPercentage={exercise.ORMPercentage} />
-
+            {/*
             {isEnrolled && exercise.ORMPercentage && (
                 <SlideUpActionButton scrollY={scrollY} slideUpThreshold={0}>
                     <View style={styles.buttonContainer}>
@@ -141,11 +158,11 @@ const ExerciseDetailsScreen = () => {
                             iconColor={themeColors.text}
                             style={styles.calculatorButton}
                             size={'LG'}
-                        />*/}
+                        />
                         <PrimaryButton text='Calculator' textType='bodyMedium' style={[{ width: '100%' }]} onPress={openCalculator} size={'LG'} />
                     </View>
                 </SlideUpActionButton>
-            )}
+            )}*/}
         </ThemedView>
     );
 };
@@ -165,13 +182,17 @@ const styles = StyleSheet.create({
     buttonContainer: {
         flexDirection: 'row',
         alignItems: 'center',
+        marginHorizontal: Spaces.MD,
     },
     logButton: {
-        width: '80%',
-        flexDirection: 'row',
-        marginRight: Spaces.SM,
+        width: '50%',
+        borderRadius: Spaces.SM,
     },
-    calculatorButton: {},
+    calculatorButton: {
+        width: '50%',
+        borderRadius: Spaces.SM,
+        paddingHorizontal: 0,
+    },
     tipContainer: {
         flexDirection: 'row',
         alignItems: 'center',
