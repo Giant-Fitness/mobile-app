@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TouchableOpacity, Dimensions } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
-import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import { router } from 'expo-router';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { REQUEST_STATE } from '@/constants/requestStates';
@@ -24,6 +25,7 @@ import { BottomMenuModal } from '@/components/overlays/BottomMenuModal';
 import { useProgramData } from '@/hooks/useProgramData';
 import { EndProgramModal } from '@/components/programs/EndProgramModal';
 import { ResetProgramModal } from '@/components/programs/ResetProgramModal';
+import { AutoDismissSuccessModal } from '@/components/overlays/AutoDismissSuccessModal';
 
 const ActiveProgramProgressScreen = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -34,6 +36,7 @@ const ActiveProgramProgressScreen = () => {
     const [monthDataLoaded, setMonthDataLoaded] = useState(REQUEST_STATE.IDLE);
     const [isEndProgramModalVisible, setIsEndProgramModalVisible] = useState(false);
     const [isResetProgramModalVisible, setIsResetProgramModalVisible] = useState(false);
+    const [showResetSuccess, setShowResetSuccess] = useState(false);
 
     const { activeProgram, programDays, userProgramProgress, dataLoadedState, error, currentWeek, resetProgram, endProgram } = useProgramData(
         undefined,
@@ -121,6 +124,12 @@ const ActiveProgramProgressScreen = () => {
     const handleResetProgramConfirm = () => {
         resetProgram();
         setIsResetProgramModalVisible(false);
+        setShowResetSuccess(true);
+    };
+
+    const handleResetSuccessDismiss = () => {
+        setShowResetSuccess(false);
+        router.push('/(tabs)/programs');
     };
 
     const menuOptions = [
@@ -128,7 +137,7 @@ const ActiveProgramProgressScreen = () => {
             label: 'View Plan Details',
             icon: 'preview',
             onPress: () => {
-                navigation.navigate('programs/program-overview', { programId });
+                navigation.navigate('programs/program-overview', { programId: activeProgram.ProgramId });
             },
         },
         {
@@ -230,6 +239,14 @@ const ActiveProgramProgressScreen = () => {
                 visible={isResetProgramModalVisible}
                 onClose={() => setIsResetProgramModalVisible(false)}
                 onConfirm={handleResetProgramConfirm}
+            />
+            <AutoDismissSuccessModal
+                visible={showResetSuccess}
+                onDismiss={handleResetSuccessDismiss}
+                title='Program Reset'
+                showTitle={true}
+                showMessage={false}
+                duration={1300}
             />
             <EndProgramModal visible={isEndProgramModalVisible} onClose={() => setIsEndProgramModalVisible(false)} onConfirm={handleEndProgramConfirm} />
         </ThemedView>

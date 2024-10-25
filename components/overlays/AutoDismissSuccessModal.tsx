@@ -2,7 +2,7 @@
 
 import React, { useEffect, useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Modal } from '@/components/overlays/Modal';
+import { CenteredModal } from '@/components/overlays/CenteredModal';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
 import LottieView from 'lottie-react-native';
@@ -51,7 +51,7 @@ export const AutoDismissSuccessModal: React.FC<AutoDismissSuccessModalProps> = (
     }, [visible, duration, handleDismiss]);
 
     return (
-        <Modal visible={visible} onClose={onDismiss} overlay={false} style={styles.modal} accessibilityLabel='Success notification'>
+        <CenteredModal visible={visible} onClose={onDismiss} overlay={false} style={styles.modal} accessibilityLabel='Success notification'>
             <ThemedView style={styles.container}>
                 <ThemedView style={styles.animationContainer}>
                     <LottieView source={require('@/assets/animations/check.json')} autoPlay loop={false} style={styles.animation} />
@@ -65,24 +65,20 @@ export const AutoDismissSuccessModal: React.FC<AutoDismissSuccessModalProps> = (
 
                 {showMessage && <ThemedText style={[styles.message, { color: themeColors.textSecondary }]}>{message}</ThemedText>}
             </ThemedView>
-        </Modal>
+        </CenteredModal>
     );
 };
 
 const styles = StyleSheet.create({
     modal: {
         position: 'absolute',
-        top: '25%', // Center vertically near the top half
-        left: Spaces.LG,
-        right: Spaces.LG,
         margin: 0,
         alignItems: 'center',
+        borderRadius: Spaces.SM,
     },
     container: {
         alignItems: 'center',
         width: '100%',
-        padding: Spaces.LG,
-        borderRadius: Spaces.SM,
     },
     animationContainer: {
         alignItems: 'center',
