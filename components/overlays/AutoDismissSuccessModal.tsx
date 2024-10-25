@@ -24,9 +24,10 @@ export const AutoDismissSuccessModal: React.FC<AutoDismissSuccessModalProps> = (
     visible,
     onDismiss,
     title = 'Success!',
-    message,
+    message = 'Success!',
     duration = 800,
     showTitle = true,
+    showMessage = true,
 }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme];
@@ -62,7 +63,7 @@ export const AutoDismissSuccessModal: React.FC<AutoDismissSuccessModalProps> = (
                     </ThemedText>
                 )}
 
-                <ThemedText style={[styles.message, { color: themeColors.textSecondary }]}>{message}</ThemedText>
+                {showMessage && <ThemedText style={[styles.message, { color: themeColors.textSecondary }]}>{message}</ThemedText>}
             </ThemedView>
         </Modal>
     );

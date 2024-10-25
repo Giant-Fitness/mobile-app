@@ -23,6 +23,7 @@ import { useProgramData } from '@/hooks/useProgramData';
 import { ProgramDaySkipModal } from '@/components/programs/ProgramDaySkipModal';
 import { ProgramDayUnfinishModal } from '@/components/programs/ProgramDayUnfinishModal';
 import { BottomMenuModal } from '@/components/overlays/BottomMenuModal';
+import { AutoDismissSuccessModal } from '@/components/overlays/AutoDismissSuccessModal';
 
 type ProgramDayScreenParams = {
     ProgramDay: {
@@ -41,6 +42,7 @@ const ProgramDayScreen = () => {
     const [showConfetti, setShowConfetti] = useState(false);
     const confettiRef = useRef<LottieView>(null);
     const [isBottomMenuVisible, setIsBottomMenuVisible] = useState(false);
+    const [showResetSuccess, setShowResetSuccess] = useState(false);
 
     const { dayId, programId } = route.params;
 
@@ -101,6 +103,11 @@ const ProgramDayScreen = () => {
     const resetDay = () => {
         handleUncompleteDay();
         setIsResetDayModalVisible(false);
+        setShowResetSuccess(true);
+    };
+
+    const handleResetModalDismiss = () => {
+        setShowResetSuccess(false);
         router.push('/(tabs)/home');
     };
 
@@ -253,6 +260,14 @@ const ProgramDayScreen = () => {
                     </>
                 )}
             </Animated.ScrollView>
+            <AutoDismissSuccessModal
+                visible={showResetSuccess}
+                onDismiss={handleResetModalDismiss}
+                title='Day Reset'
+                showTitle={true}
+                showMessage={false}
+                duration={1300}
+            />
             <ProgramDaySkipModal
                 visible={isProgramDaySkipModalVisible}
                 onClose={() => setIsProgramDaySkipModalVisible(false)}
