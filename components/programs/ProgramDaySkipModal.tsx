@@ -36,17 +36,17 @@ export const ProgramDaySkipModal: React.FC<ProgramDaySkipModalProps> = ({ visibl
                     Skip Days
                 </ThemedText>
                 <ThemedText type='bodySmall' style={styles.message}>
-                    Completing this day will also complete all previous days. Are you sure?
+                    Completing this day will mark all previous days as complete. Are you sure you want to proceed?
                 </ThemedText>
                 <View style={styles.buttonContainer}>
                     <TextButton
-                        text='Yes, Complete.'
+                        text='Yes, Complete'
                         onPress={handleConfirm}
                         style={[styles.button, { backgroundColor: themeColors.background, borderWidth: 1, borderColor: themeColors.redTransparent }]}
                         textType='bodyXSmall'
                         textStyle={[styles.buttonTextStyle, { color: themeColors.red }]}
                     />
-                    <PrimaryButton text='No, Go Back!' onPress={onClose} style={styles.button} textType='bodyXSmall' textStyle={styles.buttonTextStyle} />
+                    <PrimaryButton text='No, Go Back' onPress={onClose} style={styles.button} textType='bodyXSmall' textStyle={styles.buttonTextStyle} />
                 </View>
             </View>
         </CenteredModal>

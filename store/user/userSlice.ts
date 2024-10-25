@@ -83,8 +83,8 @@ const userSlice = createSlice({
                 state.error = null;
             })
             .addCase(getUserProgramProgressAsync.fulfilled, (state, action: PayloadAction<UserProgramProgress>) => {
-                state.userProgramProgressState = REQUEST_STATE.FULFILLED;
                 state.userProgramProgress = action.payload;
+                state.userProgramProgressState = REQUEST_STATE.FULFILLED;
             })
             .addCase(getUserProgramProgressAsync.rejected, (state, action) => {
                 state.userProgramProgressState = REQUEST_STATE.REJECTED;

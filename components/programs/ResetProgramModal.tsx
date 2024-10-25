@@ -32,17 +32,17 @@ export const ResetProgramModal: React.FC<ResetProgramModalProps> = ({ visible, o
                     Reset Program
                 </ThemedText>
                 <ThemedText type='bodySmall' style={styles.message}>
-                    You're about to reset your progress and lose any ongoing streaks. Are you sure?
+                    You're about to reset your progress and lose any active streaks. Are you sure you want to proceed?
                 </ThemedText>
                 <View style={styles.buttonContainer}>
                     <TextButton
-                        text='Yes, Reset.'
+                        text='Yes, Reset'
                         onPress={onConfirm}
                         style={[styles.button, { backgroundColor: themeColors.background, borderWidth: 1, borderColor: themeColors.redTransparent }]}
                         textType='bodyXSmall'
                         textStyle={[styles.buttonTextStyle, { color: themeColors.red }]}
                     />
-                    <PrimaryButton text='No, Go Back!' onPress={onClose} style={styles.button} textType='bodyXSmall' textStyle={styles.buttonTextStyle} />
+                    <PrimaryButton text='No, Go Back' onPress={onClose} style={styles.button} textType='bodyXSmall' textStyle={styles.buttonTextStyle} />
                 </View>
             </View>
         </CenteredModal>

@@ -57,16 +57,8 @@ const Initialization: React.FC = () => {
                 dispatch(getWorkoutQuoteAsync()),
                 dispatch(getRestDayQuoteAsync()),
                 dispatch(getSpotlightWorkoutsAsync()),
+                dispatch(getAllProgramsAsync()),
             ]);
-
-            if (userProgramProgress && userProgramProgress.ProgramId) {
-                await Promise.all([
-                    dispatch(getProgramAsync({ programId: userProgramProgress.ProgramId })),
-                    dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId })),
-                ]);
-            } else {
-                await Promise.all([dispatch(getAllProgramsAsync())]);
-            }
 
             setDataLoaded(REQUEST_STATE.FULFILLED);
             return REQUEST_STATE.FULFILLED;
@@ -91,6 +83,12 @@ const Initialization: React.FC = () => {
             dispatch(getMultipleWorkoutsAsync({ workoutIds: spotlightWorkouts.WorkoutIds }));
         }
     }, [spotlightWorkouts, dispatch]);
+
+    useEffect(() => {
+        if (userProgramProgressState === REQUEST_STATE.FULFILLED && userProgramProgress.ProgramId) {
+            dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId }));
+        }
+    }, [userProgramProgress, dispatch]);
 
     const { showSplash, handleSplashComplete } = useSplashScreen({
         dataLoadedState: dataLoaded,
