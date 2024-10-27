@@ -5,6 +5,7 @@ import programsReducer from '@/store/programs/programsSlice';
 import quotesReducer from '@/store/quotes/quotesSlice';
 import userReducer from '@/store/user/userSlice';
 import workoutsReducer from '@/store/workouts/workoutsSlice';
+import feedbackReducer from '@/store/feedback/feedbackSlice';
 
 export const store = configureStore({
     reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
         quotes: quotesReducer,
         user: userReducer,
         workouts: workoutsReducer,
+        feedback: feedbackReducer,
     },
     devTools: true,
 });

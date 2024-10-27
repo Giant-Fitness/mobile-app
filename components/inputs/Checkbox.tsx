@@ -23,7 +23,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({ label, checked, onToggle, st
     return (
         <TouchableOpacity style={[styles.container, style]} onPress={onToggle} activeOpacity={0.7}>
             <View style={[styles.checkbox, { borderColor: themeColors.text }, checked && { backgroundColor: themeColors.text }]}>
-                {checked && <Icon name='check' size={Sizes.iconSizeSM} color={themeColors.background} />}
+                {checked && <Icon name='check-square' size={Sizes.iconSizeSM} color={themeColors.background} />}
             </View>
             <ThemedText style={styles.label}>{label}</ThemedText>
         </TouchableOpacity>
