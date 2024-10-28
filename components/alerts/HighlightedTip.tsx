@@ -1,13 +1,12 @@
 // components/alerts/HighlightedTip.tsx
 
 import React from 'react';
-import { StyleSheet, View, Platform, ViewStyle } from 'react-native';
+import { StyleSheet, ViewStyle } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
 import { Icon } from '@/components/base/Icon';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 

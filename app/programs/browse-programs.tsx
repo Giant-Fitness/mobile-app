@@ -11,7 +11,7 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
-import { AppDispatch, RootState } from '@/store/rootReducer';
+import { AppDispatch, RootState } from '@/store/store';
 import { getAllProgramsAsync } from '@/store/programs/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';

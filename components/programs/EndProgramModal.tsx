@@ -17,16 +17,17 @@ type EndProgramModalProps = {
     visible: boolean;
     onClose: () => void;
     onConfirm: () => void;
+    programId: string;
 };
 
-export const EndProgramModal: React.FC<EndProgramModalProps> = ({ visible, onClose, onConfirm }) => {
+export const EndProgramModal: React.FC<EndProgramModalProps> = ({ visible, onClose, onConfirm, programId }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const navigation = useNavigation();
 
     const handleConfirm = () => {
         onConfirm();
-        navigation.navigate('programs/program-abandon-feedback' as never);
+        navigation.navigate('programs/program-abandon-feedback' as never, { programId });
     };
 
     return (
@@ -39,7 +40,7 @@ export const EndProgramModal: React.FC<EndProgramModalProps> = ({ visible, onClo
                     End Program
                 </ThemedText>
                 <ThemedText type='bodySmall' style={styles.message}>
-                    You're about to finish the program early. Are you sure you want to continue?
+                    You&apos;re about to finish the program early. Are you sure you want to continue?
                 </ThemedText>
                 <View style={styles.buttonContainer}>
                     <TextButton

@@ -19,7 +19,7 @@ export interface Workout {
     Archived: boolean;
 }
 
-interface WorkoutRecommendations {
+export interface WorkoutRecommendations {
     RecommendationType: string; // "Spotlight", "Endurance", "Mobility", "Strength"
     WorkoutIds: string[];
 }

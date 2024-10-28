@@ -71,8 +71,8 @@ const styles = StyleSheet.create({
         fontFamily: 'InterSemiBold',
     },
     subtitle: {
-        fontSize: moderateScale(18),
-        lineHeight: moderateScale(27),
+        fontSize: moderateScale(16),
+        lineHeight: moderateScale(24),
         fontFamily: 'InterRegular',
     },
     caption: {

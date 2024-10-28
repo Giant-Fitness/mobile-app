@@ -59,8 +59,8 @@ export const PrimaryButton: React.FC<PrimaryButtonProps & AccessibilityProps> = 
             style={[
                 styles.button,
                 {
-                    backgroundColor: disabled || loading ? themeColors.buttonDisabled : themeColors.buttonPrimary,
-                    opacity: disabled || loading ? Opacities.disabled : 1,
+                    backgroundColor: disabled || loading ? themeColors.buttonPrimary : themeColors.buttonPrimary,
+                    opacity: disabled || loading ? 0.7 : 1,
                     ...buttonPadding,
                 },
                 style,

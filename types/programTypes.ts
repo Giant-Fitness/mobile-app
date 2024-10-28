@@ -52,7 +52,7 @@ export interface Exercise {
 }
 
 export interface ProgramDay {
-    ProgramId: number;
+    ProgramId: string;
     DayId: string;
     DayTitle: string;
     RestDay: boolean;

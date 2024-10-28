@@ -4,11 +4,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { SafeAreaView, Text, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
-import { AppDispatch, RootState } from '@/store/rootReducer';
+import { AppDispatch, RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { Redirect } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
-import { getProgramAsync, getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/thunks';
+import { getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/thunks';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
 import { getUserAsync, getUserFitnessProfileAsync, getUserProgramProgressAsync, getUserRecommendationsAsync } from '@/store/user/thunks';
 import { getMultipleWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
@@ -17,17 +17,7 @@ import { useSplashScreen } from '@/hooks/useSplashScreen';
 const Initialization: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const navigation = useNavigation();
-    const {
-        user,
-        userState,
-        userFitnessProfile,
-        userFitnessProfileState,
-        userRecommendations,
-        userRecommendationsState,
-        userProgramProgress,
-        userProgramProgressState,
-        error: userError,
-    } = useSelector((state: RootState) => state.user);
+    const { user, userState, userProgramProgress, userProgramProgressState, error: userError } = useSelector((state: RootState) => state.user);
     const { error: programError } = useSelector((state: RootState) => state.programs);
     const { spotlightWorkouts, spotlightWorkoutsState, error: workoutError } = useSelector((state: RootState) => state.workouts);
     const [dataLoaded, setDataLoaded] = useState(REQUEST_STATE.PENDING);
@@ -85,7 +75,7 @@ const Initialization: React.FC = () => {
     }, [spotlightWorkouts, dispatch]);
 
     useEffect(() => {
-        if (userProgramProgressState === REQUEST_STATE.FULFILLED && userProgramProgress.ProgramId) {
+        if (userProgramProgressState === REQUEST_STATE.FULFILLED && userProgramProgress?.ProgramId) {
             dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId }));
         }
     }, [userProgramProgress, dispatch]);

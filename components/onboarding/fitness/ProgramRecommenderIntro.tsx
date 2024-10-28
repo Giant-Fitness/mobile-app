@@ -6,7 +6,6 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { TextButton } from '@/components/buttons/TextButton';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
 import motivationalImage from '@/assets/images/stretching.svg';
@@ -32,7 +31,7 @@ export const ProgramRecommenderIntro: React.FC<ProgramRecommenderIntroProps> = (
                     Find the Best Plan for Your Fitness Journey
                 </ThemedText>
                 <ThemedText type='body' style={styles.description}>
-                    Answer a few simple questions, and we'll match you with a workout plan that fits your goals and lifestyle.
+                    Answer a few simple questions, and we&apos;ll match you with a workout plan that fits your goals and lifestyle.
                 </ThemedText>
 
                 <ThemedText type='body' style={styles.description}>

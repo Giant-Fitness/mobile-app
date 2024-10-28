@@ -4,7 +4,6 @@ import React from 'react';
 import { Modal as RNModal, View, StyleSheet, StyleProp, ViewStyle, TouchableWithoutFeedback, AccessibilityProps } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Opacities } from '@/constants/Opacities';
 

@@ -1,14 +1,10 @@
 // components/buttons/SlideUpActionButton.tsx
 
 import React from 'react';
-import { StyleSheet, Dimensions } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, useDerivedValue, interpolate, Extrapolate, withTiming, runOnJS } from 'react-native-reanimated';
+import { StyleSheet } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, useDerivedValue, withTiming } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
-
-const { width } = Dimensions.get('window');
 
 type SlideUpActionButtonProps = {
     children: React.ReactNode;
@@ -17,9 +13,6 @@ type SlideUpActionButtonProps = {
 };
 
 export const SlideUpActionButton: React.FC<SlideUpActionButtonProps> = ({ children, scrollY, slideUpThreshold = 100 }) => {
-    const colorScheme = useColorScheme() as 'light' | 'dark';
-    const themeColors = Colors[colorScheme];
-
     const hasAppeared = useSharedValue(false);
 
     const derivedTranslateY = useDerivedValue(() => {

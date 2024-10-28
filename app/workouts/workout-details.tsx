@@ -17,7 +17,7 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
-import { AppDispatch, RootState } from '@/store/rootReducer';
+import { AppDispatch, RootState } from '@/store/store';
 import { getWorkoutAsync } from '@/store/workouts/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { useSplashScreen } from '@/hooks/useSplashScreen';

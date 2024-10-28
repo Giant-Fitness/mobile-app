@@ -13,7 +13,7 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store/rootReducer';
+import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { getWeekNumber, getDayOfWeek } from '@/utils/calendar';
 
@@ -25,9 +25,9 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
 
     const navigation = useNavigation();
 
-    const { userProgramProgress, userProgramProgressState, error: userError } = useSelector((state: RootState) => state.user);
+    const { userProgramProgress } = useSelector((state: RootState) => state.user);
 
-    const { programDays, programDaysState, error: programError } = useSelector((state: RootState) => state.programs);
+    const { programDays, programDaysState } = useSelector((state: RootState) => state.programs);
 
     const programId = userProgramProgress?.ProgramId;
     const dayId = userProgramProgress?.CurrentDay;

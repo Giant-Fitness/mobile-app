@@ -4,10 +4,7 @@ import React from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { ThemedText } from '@/components/base/ThemedText';
-import { ThemedView } from '@/components/base/ThemedView';
 import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
-import { Icon } from '@/components/base/Icon';
 import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
@@ -22,8 +19,6 @@ export const RecommendedProgramCard: React.FC<RecommendedProgramCardProps> = ({ 
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
-    const cardBackgroundColor = themeColors.containerHighlight;
-    const textColor = themeColors.background;
     const shadowColor = 'rgba(0,0,0,0.2)';
     return (
         <TouchableOpacity onPress={onPress} style={[styles.shadowContainer, { shadowColor: shadowColor }]} activeOpacity={1}>

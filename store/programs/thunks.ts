@@ -3,7 +3,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import ProgramService from '@/store/programs/service';
 import { Program, ProgramDay } from '@/types';
-import { RootState } from '@/store/rootReducer';
+import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 
 export const getAllProgramsAsync = createAsyncThunk<Program[], void>('programs/getAllPrograms', async (_, { getState, rejectWithValue }) => {

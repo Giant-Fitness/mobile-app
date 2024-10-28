@@ -1,7 +1,7 @@
 // components/onboarding/fitness/FitnessWizardForms.tsx
 
 import React, { useState, forwardRef, useImperativeHandle, useEffect } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { SelectionGroup } from '@/components/buttons/SelectionButton';
 import { Spaces } from '@/constants/Spaces';
@@ -37,6 +37,7 @@ export const WorkoutGoalsForm = forwardRef(({ formData, onSubmit, onValidityChan
         </View>
     );
 });
+WorkoutGoalsForm.displayName = 'WorkoutGoalsForm';
 
 export const ExperienceForm = forwardRef(({ formData, onSubmit, onValidityChange }, ref) => {
     const [GymExperienceLevel, setGymExperienceLevel] = useState(formData.GymExperienceLevel || '');
@@ -73,6 +74,7 @@ export const ExperienceForm = forwardRef(({ formData, onSubmit, onValidityChange
         </View>
     );
 });
+ExperienceForm.displayName = 'ExperienceForm';
 
 export const ScheduleForm = forwardRef(({ formData, onSubmit, onValidityChange }, ref) => {
     const [DaysPerWeekDesired, setDaysPerWeekDesired] = useState(formData.DaysPerWeekDesired || '');
@@ -104,6 +106,7 @@ export const ScheduleForm = forwardRef(({ formData, onSubmit, onValidityChange }
         </View>
     );
 });
+ScheduleForm.displayName = 'ScheduleForm';
 
 export const EquipmentForm = forwardRef(({ formData, onSubmit, onValidityChange }, ref) => {
     const [AccessToEquipment, setAccessToEquipment] = useState(formData.AccessToEquipment || '');
@@ -135,6 +138,7 @@ export const EquipmentForm = forwardRef(({ formData, onSubmit, onValidityChange 
         </View>
     );
 });
+EquipmentForm.displayName = 'EquipmentForm';
 
 const styles = StyleSheet.create({
     formContainer: {

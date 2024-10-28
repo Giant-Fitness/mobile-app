@@ -1,7 +1,7 @@
 // components/programs/ProgramDayOverviewCard.tsx
 
 import React from 'react';
-import { StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ProgramDay } from '@/types';

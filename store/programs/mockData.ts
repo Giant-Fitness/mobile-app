@@ -24,7 +24,7 @@ const sampleExercises: Exercise[] = [
         Sets: 2,
         RepsUpper: 6,
         RepsLower: 4,
-        Rest: '90s',
+        Rest: 90,
         ORMPercentage: 90,
     },
     {
@@ -47,7 +47,7 @@ const sampleExercises: Exercise[] = [
         Sets: 2,
         RepsUpper: 6,
         RepsLower: 4,
-        Rest: '90s',
+        Rest: 90,
         ORMPercentage: 90,
     },
     {
@@ -70,7 +70,7 @@ const sampleExercises: Exercise[] = [
         Sets: 2,
         RepsUpper: 6,
         RepsLower: 4,
-        Rest: '90s',
+        Rest: 90,
         ORMPercentage: 90,
     },
 ];

@@ -7,7 +7,6 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { moderateScale } from '@/utils/scaling';
 import { Sizes } from '@/constants/Sizes';
-import { Opacities } from '@/constants/Opacities';
 
 type IconButtonProps = {
     onPress: () => void;

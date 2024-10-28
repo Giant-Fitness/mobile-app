@@ -1,7 +1,7 @@
 // store/programs/programsSlice.ts
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ProgramState, initialState } from '@/store/programs/programsState';
+import { initialState } from '@/store/programs/programsState';
 import { getAllProgramsAsync, getProgramAsync, getProgramDayAsync, getAllProgramDaysAsync, getMultipleProgramDaysAsync } from '@/store/programs/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { Program, ProgramDay } from '@/types';

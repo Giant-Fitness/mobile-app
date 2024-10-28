@@ -248,7 +248,12 @@ const ActiveProgramProgressScreen = () => {
                 showMessage={false}
                 duration={1300}
             />
-            <EndProgramModal visible={isEndProgramModalVisible} onClose={() => setIsEndProgramModalVisible(false)} onConfirm={handleEndProgramConfirm} />
+            <EndProgramModal
+                programId={activeProgram?.ProgramId || ''}
+                visible={isEndProgramModalVisible}
+                onClose={() => setIsEndProgramModalVisible(false)}
+                onConfirm={handleEndProgramConfirm}
+            />
         </ThemedView>
     );
 };

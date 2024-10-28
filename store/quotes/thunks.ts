@@ -3,7 +3,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import QuoteService from './service';
 import { Quote } from '@/types';
-import { RootState } from '@/store/rootReducer';
+import { RootState } from '@/store/store';
 
 export const getWorkoutQuoteAsync = createAsyncThunk<Quote, void>('quotes/getWorkoutQuote', async (_, { getState }) => {
     const state = getState() as RootState;

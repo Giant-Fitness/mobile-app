@@ -1,6 +1,6 @@
 // app/workouts/all-workouts.tsx
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FlatList, StyleSheet, ListRenderItemInfo } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -16,7 +16,7 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { useSharedValue } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
-import { AppDispatch, RootState } from '@/store/rootReducer';
+import { AppDispatch, RootState } from '@/store/store';
 import { getAllWorkoutsAsync } from '@/store/workouts/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
@@ -110,15 +110,6 @@ export default function AllWorkoutsScreen() {
     const renderItem = useCallback(({ item }: ListRenderItemInfo<Workout>) => <MemoizedWorkoutDetailedCard workout={item} />, [themeColors.card]);
 
     const keyExtractor = (item: Workout) => item.WorkoutId;
-
-    const getItemLayout = useCallback(
-        (data: Workout[] | null | undefined, index: number) => ({
-            length: Sizes.workoutCardHeight + Spaces.MD, // Adjust this value based on your card's height + margin
-            offset: (Sizes.workoutCardHeight + Spaces.MD) * index,
-            index,
-        }),
-        [],
-    );
 
     const { showSplash, handleSplashComplete } = useSplashScreen({
         dataLoadedState: allWorkoutsState,

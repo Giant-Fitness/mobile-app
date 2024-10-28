@@ -4,7 +4,6 @@ import React, { useRef, useState } from 'react';
 import { StyleSheet, TouchableOpacity, Image, View, Animated, Modal, ActivityIndicator } from 'react-native';
 import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle } from '@/components/media/FullScreenVideoPlayer';
 import { Spaces } from '@/constants/Spaces';
-import { moderateScale } from '@/utils/scaling';
 import { Icon } from '@/components/base/Icon';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';

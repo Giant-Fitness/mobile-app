@@ -1,6 +1,6 @@
 // app/programs/program-day.tsx
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { StyleSheet, ActivityIndicator, View } from 'react-native';
 import { router } from 'expo-router';
 import LottieView from 'lottie-react-native';
@@ -48,6 +48,7 @@ const ProgramDayScreen = () => {
 
     const {
         userProgramProgress,
+        activeProgram,
         programDay,
         programDayState,
         currentWeek,
@@ -79,25 +80,31 @@ const ProgramDayScreen = () => {
         if (userProgramProgress.CurrentDay < dayId) {
             setIsProgramDaySkipModalVisible(true);
         } else {
+            completeDay();
+        }
+    };
+
+    const completeDay = async () => {
+        var programId = userProgramProgress?.ProgramId;
+        if (activeProgram && activeProgram.Days.toString() === dayId.toString()) {
+            await handleCompleteDay();
+            navigation.navigate('programs/program-complete', {
+                programId: programId,
+            });
+        } else {
             await handleCompleteDay();
             setShowConfetti(true);
             confettiRef.current?.play();
             setTimeout(() => {
                 setShowConfetti(false);
                 router.push('/(tabs)/home');
-            }, 2200); // Adjust this time as needed
+            }, 2200);
         }
     };
 
     const handleProgramDaySkip = async () => {
-        await handleCompleteDay();
         setIsProgramDaySkipModalVisible(false);
-        setShowConfetti(true);
-        confettiRef.current?.play();
-        setTimeout(() => {
-            setShowConfetti(false);
-            router.push('/(tabs)/home');
-        }, 2200); // Adjust this time as needed
+        completeDay();
     };
 
     const resetDay = () => {

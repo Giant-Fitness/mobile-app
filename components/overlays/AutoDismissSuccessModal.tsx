@@ -15,9 +15,10 @@ interface AutoDismissSuccessModalProps {
     visible: boolean;
     onDismiss: () => void;
     title?: string;
-    message: string;
+    message?: string;
     duration?: number; // Duration in milliseconds
     showTitle?: boolean;
+    showMessage?: boolean;
 }
 
 export const AutoDismissSuccessModal: React.FC<AutoDismissSuccessModalProps> = ({

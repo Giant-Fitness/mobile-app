@@ -13,7 +13,6 @@ import { Icon } from '@/components/base/Icon';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { TextButton } from '@/components/buttons/TextButton';
-import { HighlightedTip } from '@/components/alerts/HighlightedTip';
 
 type ExerciseCardProps = {
     exercise: Exercise;
