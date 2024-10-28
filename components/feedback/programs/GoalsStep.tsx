@@ -1,4 +1,4 @@
-// components/feedback/programs/DifficultyStep.tsx
+// components/feedback/programs/GoalsStep.tsx
 
 import React from 'react';
 import { StyleSheet } from 'react-native';
@@ -7,25 +7,23 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { RadioGroup } from '@/components/inputs/RadioGroup';
 import { Spaces } from '@/constants/Spaces';
 import { FeedbackStep } from '@/components/feedback/FeedbackForm';
+import { ProgramCompleteData } from '@/types/feedbackTypes';
 
-export const DifficultyStep: FeedbackStep<any> = ({ data, onChange }) => {
+export const GoalsStep: FeedbackStep<ProgramCompleteData> = ({ data, onChange }) => {
     const options = [
-        { id: '1', label: 'Too Easy' },
-        { id: '2', label: 'Slightly Easy' },
-        { id: '3', label: 'Just Right' },
-        { id: '4', label: 'Slightly Hard' },
-        { id: '5', label: 'Too Hard' },
+        { id: 'true', label: 'Yes, I achieved my goals' },
+        { id: 'false', label: 'No, I did not achieve my goals' },
     ];
 
     return (
         <ThemedView>
             <ThemedText type='subtitle' style={styles.stepTitle}>
-                How would you rate the difficulty of the workouts?
+                Did you achieve your fitness goals with this program?
             </ThemedText>
             <RadioGroup
                 options={options}
-                selected={data.DifficultyRating?.toString()}
-                onSelect={(value) => onChange({ DifficultyRating: parseInt(value) })}
+                selected={data.AchievedGoals.toString()}
+                onSelect={(value) => onChange({ AchievedGoals: value === 'true' })}
                 style={styles.radioGroup}
             />
         </ThemedView>

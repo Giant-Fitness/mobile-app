@@ -65,7 +65,7 @@ export default function ProgramCompleteScreen() {
     }, [navigation, mainMessageOpacity, journeyMessageOpacity, fabOpacity]);
 
     const handleContinue = () => {
-        navigation.navigate('programs/program-complete-feedback', { programId });
+        navigation.navigate('programs/program-complete-feedback' as never, { programId });
     };
 
     return (

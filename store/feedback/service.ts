@@ -1,11 +1,10 @@
 // store/user/service.ts
 
-import { ProgramAbandonData } from '@/types';
 import axios from 'axios';
 
 const API_BASE_URL = 'https://r5oibllip9.execute-api.ap-south-1.amazonaws.com/prod';
 
-const sendProgramFeedback = async (userId: string, programId: string, feedback: ProgramAbandonData, feedbackType: string): Promise<void> => {
+const sendProgramFeedback = async (userId: string, programId: string, feedback: any, feedbackType: string): Promise<void> => {
     console.log('service: sendProgramFeedback');
     try {
         const payload = {
@@ -16,6 +15,10 @@ const sendProgramFeedback = async (userId: string, programId: string, feedback: 
             DifficultyRating: feedback.DifficultyRating,
             Improvements: feedback.Improvements,
             AdditionalFeedback: feedback.additionalFeedback,
+            WouldRecommend: feedback.WouldRecommend,
+            AchievedGoals: feedback.AchievedGoals,
+            OverallRating: feedback.OverallRating,
+            FavoriteAspects: feedback.FavoriteAspects,
             FeedbackType: feedbackType,
         };
         await axios.post(`${API_BASE_URL}/feedback/programs`, payload, {

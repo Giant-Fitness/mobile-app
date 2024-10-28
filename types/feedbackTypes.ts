@@ -7,3 +7,12 @@ export interface ProgramAbandonData {
     Improvements: string[];
     additionalFeedback?: string;
 }
+
+export interface ProgramCompleteData {
+    OverallRating: number;
+    DifficultyRating: number;
+    AchievedGoals: boolean;
+    WouldRecommend: boolean;
+    FavoriteAspects: string[];
+    additionalFeedback?: string;
+}

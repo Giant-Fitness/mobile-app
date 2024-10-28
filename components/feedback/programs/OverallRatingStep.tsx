@@ -1,33 +1,21 @@
-// components/feedback/programs/DifficultyStep.tsx
-
+// components/feedback/programs/OverallRatingStep.tsx
 import React from 'react';
+
 import { StyleSheet } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
-import { RadioGroup } from '@/components/inputs/RadioGroup';
+import { StarRating } from '@/components/inputs/StarRating';
 import { Spaces } from '@/constants/Spaces';
 import { FeedbackStep } from '@/components/feedback/FeedbackForm';
+import { ProgramCompleteData } from '@/types/feedbackTypes';
 
-export const DifficultyStep: FeedbackStep<any> = ({ data, onChange }) => {
-    const options = [
-        { id: '1', label: 'Too Easy' },
-        { id: '2', label: 'Slightly Easy' },
-        { id: '3', label: 'Just Right' },
-        { id: '4', label: 'Slightly Hard' },
-        { id: '5', label: 'Too Hard' },
-    ];
-
+export const OverallRatingStep: FeedbackStep<ProgramCompleteData> = ({ data, onChange }) => {
     return (
         <ThemedView>
             <ThemedText type='subtitle' style={styles.stepTitle}>
-                How would you rate the difficulty of the workouts?
+                How would you rate your overall experience?
             </ThemedText>
-            <RadioGroup
-                options={options}
-                selected={data.DifficultyRating?.toString()}
-                onSelect={(value) => onChange({ DifficultyRating: parseInt(value) })}
-                style={styles.radioGroup}
-            />
+            <StarRating rating={data.OverallRating} onRatingChange={(rating) => onChange({ OverallRating: rating })} style={styles.rating} />
         </ThemedView>
     );
 };
@@ -51,5 +39,8 @@ const styles = StyleSheet.create({
     textAreaInput: {
         height: Spaces.XXXL,
         marginTop: Spaces.LG,
+    },
+    rating: {
+        marginVertical: Spaces.MD,
     },
 });
