@@ -1,19 +1,69 @@
 // store/user/service.ts
 
 import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile } from '@/types';
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
+import { authService } from '@/utils/auth';
 
 const API_BASE_URL = 'https://r5oibllip9.execute-api.ap-south-1.amazonaws.com/prod';
 
 // Utility function to simulate network delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Create axios instance with interceptors
+const createAuthenticatedAxios = (): AxiosInstance => {
+    const instance = axios.create({
+        baseURL: API_BASE_URL,
+        timeout: 10000,
+        timeoutErrorMessage: 'Request timed out after 10 seconds',
+    });
+
+    // Add auth token to requests
+    instance.interceptors.request.use(async (config) => {
+        const token = await authService.getAccessToken();
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    });
+
+    return instance;
+};
+
+const api = createAuthenticatedAxios();
+
+// Helper to handle API response parsing
+const parseResponse = (response: any) => {
+    if (typeof response.data === 'string') {
+        const parsedData = JSON.parse(response.data);
+        return parsedData.body ? JSON.parse(parsedData.body) : parsedData;
+    } else if (response.data.body && typeof response.data.body === 'string') {
+        return JSON.parse(response.data.body);
+    }
+    return response.data.body || response.data;
+};
+
+// Error handling helper
+const handleAxiosError = (error: any) => {
+    if (axios.isAxiosError(error)) {
+        if (error.code === 'ECONNABORTED') {
+            console.error('Request timed out:', error.message);
+        } else {
+            console.error('Axios error:', error.message);
+            console.error('Response:', error.response ? JSON.stringify(error.response.data, null, 2) : 'No response');
+        }
+    } else {
+        console.error('Unknown error:', error);
+    }
+};
+
 const getUser = async (): Promise<User> => {
     console.log('service: getUser');
-    const userId = 'd91c85f4-c493-4d1c-b6bd-d493a3485bba';
+    const userId = await authService.getUserId();
+    // const userId = 'c1e39dca-a0e1-702b-1b39-1dcc09779731'
+
     try {
-        const response = await axios.get(`${API_BASE_URL}/users/${userId}`);
-        const parsedBody = JSON.parse(response.data.body);
+        const response = await api.get(`/users/${userId}`);
+        const parsedBody = parseResponse(response);
         return parsedBody.user;
     } catch (error) {
         console.error(`Error fetching user ${userId}:`, error);
@@ -24,20 +74,11 @@ const getUser = async (): Promise<User> => {
 const getUserFitnessProfile = async (userId: string): Promise<UserFitnessProfile> => {
     console.log('service: getUserFitnessProfile');
     try {
-        const response = await axios.get(`${API_BASE_URL}/users/${userId}/fitnessprofile`, {
-            timeout: 10000,
-            timeoutErrorMessage: 'Request timed out after 10 seconds',
-        });
+        // const userId = await authService.getUserId();
+        if (!userId) throw new Error('No user ID found');
 
-        let result;
-        if (typeof response.data === 'string') {
-            const parsedData = JSON.parse(response.data);
-            result = parsedData.body ? JSON.parse(parsedData.body) : parsedData;
-        } else if (response.data.body && typeof response.data.body === 'string') {
-            result = JSON.parse(response.data.body);
-        } else {
-            result = response.data.body || response.data;
-        }
+        const response = await api.get(`/users/${userId}/fitnessprofile`);
+        const result = parseResponse(response);
 
         if (!result.userFitnessProfile) {
             throw new Error('Invalid response format');
@@ -45,16 +86,7 @@ const getUserFitnessProfile = async (userId: string): Promise<UserFitnessProfile
 
         return result.userFitnessProfile;
     } catch (error) {
-        if (axios.isAxiosError(error)) {
-            if (error.code === 'ECONNABORTED') {
-                console.error('Request timed out:', error.message);
-            } else {
-                console.error('Axios error:', error.message);
-                console.error('Response:', error.response ? JSON.stringify(error.response.data, null, 2) : 'No response');
-            }
-        } else {
-            console.error('Unknown error:', error);
-        }
+        handleAxiosError(error);
         throw error;
     }
 };

@@ -40,7 +40,7 @@ export const LeftImageInfoCard: React.FC<LeftImageInfoCardProps> = ({
     titleStyle,
     subtitleStyle,
     gradientColors = ['transparent', 'rgba(0,0,0,0.4)'],
-    placeholder = '@/assets/images/adaptive-icon.png',
+    placeholder = '@/assets/images/logo.png',
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
     const themeColors = Colors[colorScheme]; // Access theme-specific colors

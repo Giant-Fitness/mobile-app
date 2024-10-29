@@ -42,7 +42,7 @@ export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
     subtitleStyle,
     titleType = 'title',
     subtitleType = 'body',
-    placeholder = '@/assets/images/adaptive-icon.png',
+    placeholder = '@/assets/images/logo.png',
     titleFirst = false,
     onPress,
 }) => {
