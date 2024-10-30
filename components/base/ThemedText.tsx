@@ -22,6 +22,7 @@ export type ThemedTextProps = TextProps & {
         | 'buttonSmall'
         | 'titleXLarge'
         | 'headline'
+        | 'headlineSmall'
         | 'bodyXSmall'
         | 'bodyMedium'
         | 'bodySmall';
@@ -58,6 +59,11 @@ const styles = StyleSheet.create({
         fontSize: moderateScale(21),
         lineHeight: moderateScale(32),
         fontFamily: 'InterSemiBold',
+    },
+    headlineSmall: {
+        fontSize: moderateScale(24),
+        lineHeight: moderateScale(36),
+        fontFamily: 'InterExtraBold',
     },
     headline: {
         fontSize: moderateScale(32),

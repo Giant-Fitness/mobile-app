@@ -1,109 +1,33 @@
 // app/index.tsx
 
-import React from 'react';
-import { StyleSheet, Pressable, SafeAreaView } from 'react-native';
-import { Amplify } from 'aws-amplify';
-import { Authenticator } from '@aws-amplify/ui-react-native';
-import { ThemeProvider } from '@aws-amplify/ui-react-native';
-import { Link, Redirect } from 'expo-router';
-import { Hub } from 'aws-amplify/utils';
+import { Redirect } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { getCurrentUser } from 'aws-amplify/auth';
+import WelcomeScreens from '@/components/onboarding/WelcomeScreens';
 
-import outputs from '../amplify_outputs.json';
-import { useAuthTheme } from '@/components/auth/AuthTheme';
-import { CustomHeader } from '@/components/auth/AuthComponents';
-import { ThemedText } from '@/components/base/ThemedText';
-import { Spaces } from '@/constants/Spaces';
-import { authService } from '@/utils/auth';
+export default function Index() {
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
-Amplify.configure({
-    Auth: {
-        Cognito: {
-            userPoolId: outputs.auth.Cognito.userPoolId,
-            userPoolClientId: outputs.auth.Cognito.userPoolClientId,
-            identityPoolId: outputs.auth.Cognito.identityPoolId,
-        },
-    },
-});
-
-const BYPASS_AUTH = false;
-
-const LoginPage = () => {
-    const authTheme = useAuthTheme();
-
-    React.useEffect(() => {
-        // Listen for auth events
-        const listener = Hub.listen('auth', async ({ payload }) => {
-            switch (payload.event) {
-                case 'signedIn':
-                    try {
-                        await authService.storeAuthData();
-                    } catch (error) {
-                        console.error('Error storing auth data:', error);
-                    }
-                    break;
-
-                // Handle sign out to clear data
-                case 'signedOut':
-                    try {
-                        await authService.clearAuthData();
-                    } catch (error) {
-                        console.error('Error clearing auth data:', error);
-                    }
-                    break;
-            }
-        });
-
-        return () => listener();
-    }, []);
-
-    // Add initial auth check
-    React.useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                await authService.storeAuthData();
-            } catch (error) {
-                console.log('No initial auth data to store:', error);
-            }
-        };
-
+    useEffect(() => {
         checkAuth();
     }, []);
 
-    if (BYPASS_AUTH) {
-        return (
-            <SafeAreaView style={styles.container}>
-                <Link href={'/initialization'} replace asChild>
-                    <Pressable style={styles.button}>
-                        <ThemedText type='button'>Login</ThemedText>
-                    </Pressable>
-                </Link>
-            </SafeAreaView>
-        );
+    async function checkAuth() {
+        try {
+            await getCurrentUser();
+            setIsAuthenticated(true);
+        } catch {
+            setIsAuthenticated(false);
+        }
     }
 
-    return (
-        <ThemeProvider theme={authTheme}>
-            <Authenticator.Provider>
-                <Authenticator Header={CustomHeader} loginMechanisms={['email']} signUpAttributes={['email']}>
-                    <Redirect href='/initialization' />
-                </Authenticator>
-            </Authenticator.Provider>
-        </ThemeProvider>
-    );
-};
+    if (isAuthenticated === null) {
+        return null;
+    }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: Spaces.MD,
-    },
-    button: {
-        paddingVertical: Spaces.SM,
-        paddingHorizontal: Spaces.LG,
-        borderRadius: 5,
-    },
-});
+    if (isAuthenticated) {
+        return <Redirect href='/initialization' />;
+    }
 
-export default LoginPage;
+    return <WelcomeScreens />;
+}
