@@ -36,7 +36,7 @@ export const ImageTextOverlay: React.FC<ImageTextOverlayProps> = ({
     containerStyle,
     textContainerStyle,
     gradientColors = ['transparent', 'rgba(0,0,0,0.8)'],
-    placeholder = '@/assets/images/adaptive-icon.png',
+    placeholder = '@/assets/images/logo.png',
 }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme ?? 'light'];

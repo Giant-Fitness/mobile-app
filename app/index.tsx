@@ -1,58 +1,109 @@
 // app/index.tsx
 
 import React from 'react';
-import { StyleSheet, Pressable, Text, SafeAreaView } from 'react-native';
+import { StyleSheet, Pressable, SafeAreaView } from 'react-native';
 import { Amplify } from 'aws-amplify';
-import { Authenticator, withAuthenticator } from '@aws-amplify/ui-react-native';
-import outputs from '../amplify_outputs.json';
+import { Authenticator } from '@aws-amplify/ui-react-native';
+import { ThemeProvider } from '@aws-amplify/ui-react-native';
 import { Link, Redirect } from 'expo-router';
-import { ThemedView } from '@/components/base/ThemedView';
+import { Hub } from 'aws-amplify/utils';
 
-Amplify.configure(outputs);
+import outputs from '../amplify_outputs.json';
+import { useAuthTheme } from '@/components/auth/AuthTheme';
+import { CustomHeader } from '@/components/auth/AuthComponents';
+import { ThemedText } from '@/components/base/ThemedText';
+import { Spaces } from '@/constants/Spaces';
+import { authService } from '@/utils/auth';
 
-// Set the flag to bypass authentication
-const BYPASS_AUTH = true; // Change this to false to enable authentication. You'll have to restart the expo server
+Amplify.configure({
+    Auth: {
+        Cognito: {
+            userPoolId: outputs.auth.Cognito.userPoolId,
+            userPoolClientId: outputs.auth.Cognito.userPoolClientId,
+            identityPoolId: outputs.auth.Cognito.identityPoolId,
+        },
+    },
+});
+
+const BYPASS_AUTH = false;
 
 const LoginPage = () => {
+    const authTheme = useAuthTheme();
+
+    React.useEffect(() => {
+        // Listen for auth events
+        const listener = Hub.listen('auth', async ({ payload }) => {
+            switch (payload.event) {
+                case 'signedIn':
+                    try {
+                        await authService.storeAuthData();
+                    } catch (error) {
+                        console.error('Error storing auth data:', error);
+                    }
+                    break;
+
+                // Handle sign out to clear data
+                case 'signedOut':
+                    try {
+                        await authService.clearAuthData();
+                    } catch (error) {
+                        console.error('Error clearing auth data:', error);
+                    }
+                    break;
+            }
+        });
+
+        return () => listener();
+    }, []);
+
+    // Add initial auth check
+    React.useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                await authService.storeAuthData();
+            } catch (error) {
+                console.log('No initial auth data to store:', error);
+            }
+        };
+
+        checkAuth();
+    }, []);
+
     if (BYPASS_AUTH) {
         return (
-            <SafeAreaView style={styles.titleContainer}>
+            <SafeAreaView style={styles.container}>
                 <Link href={'/initialization'} replace asChild>
                     <Pressable style={styles.button}>
-                        <Text style={styles.buttonText}>Login</Text>
+                        <ThemedText type='button'>Login</ThemedText>
                     </Pressable>
                 </Link>
             </SafeAreaView>
         );
     }
 
-    // Otherwise, render the authenticator provider
     return (
-        <Authenticator.Provider>
-            <Authenticator>
-                <Redirect href='/initialization' />
-            </Authenticator>
-        </Authenticator.Provider>
+        <ThemeProvider theme={authTheme}>
+            <Authenticator.Provider>
+                <Authenticator Header={CustomHeader} loginMechanisms={['email']} signUpAttributes={['email']}>
+                    <Redirect href='/initialization' />
+                </Authenticator>
+            </Authenticator.Provider>
+        </ThemeProvider>
     );
 };
 
 const styles = StyleSheet.create({
-    titleContainer: {
+    container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        gap: 8,
+        gap: Spaces.MD,
     },
     button: {
-        paddingVertical: 10,
-        paddingHorizontal: 20,
+        paddingVertical: Spaces.SM,
+        paddingHorizontal: Spaces.LG,
         borderRadius: 5,
-    },
-    buttonText: {
-        fontSize: 16,
-        fontWeight: 'bold',
     },
 });
 
-// Conditionally export with or without the withAuthenticator HOC
-export default BYPASS_AUTH ? LoginPage : withAuthenticator(LoginPage);
+export default LoginPage;
