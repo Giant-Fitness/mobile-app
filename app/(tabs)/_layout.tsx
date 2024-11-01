@@ -12,6 +12,7 @@ import { Icon } from '@/components/base/Icon';
 import { Platform } from 'react-native';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
+import { moderateScale } from '@/utils/scaling'; // Use the customized moderateScale
 
 export default function TabLayout() {
     const navigation = useNavigation<NativeStackNavigationProp<any>>();
@@ -62,7 +63,7 @@ export default function TabLayout() {
                         backgroundColor: themeColors.background,
                         height: Sizes.headerHeight,
                     },
-                    headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
+                    headerTitleStyle: { color: themeColors.text, fontFamily: 'InterSemiBold', fontSize: moderateScale(18) },
                     title: 'Home',
                     tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'home-active' : 'home-inactive'} size={22} color={color} />,
                 }}
@@ -113,7 +114,7 @@ export default function TabLayout() {
                         backgroundColor: themeColors.background,
                         height: Sizes.headerHeight,
                     },
-                    headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
+                    headerTitleStyle: { color: themeColors.text, fontFamily: 'InterSemiBold', fontSize: moderateScale(18) },
                     title: 'Plans',
                     tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'plan-active' : 'plan-inactive'} size={22} color={color} />,
                 }}
@@ -125,7 +126,7 @@ export default function TabLayout() {
                         backgroundColor: themeColors.background,
                         height: Sizes.headerHeight,
                     },
-                    headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
+                    headerTitleStyle: { color: themeColors.text, fontFamily: 'InterSemiBold', fontSize: moderateScale(18) },
                     title: 'Solos',
                     tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'lightning-active' : 'lightning-inactive'} size={23} color={color} />,
                 }}
@@ -137,7 +138,7 @@ export default function TabLayout() {
                         backgroundColor: themeColors.background,
                         height: Sizes.headerHeight,
                     },
-                    headerTitleStyle: { color: themeColors.text, fontFamily: 'InterMedium' },
+                    headerTitleStyle: { color: themeColors.text, fontFamily: 'InterSemiBold', fontSize: moderateScale(18) },
                     title: 'Progress',
                     tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'progress-active' : 'progress-inactive'} size={21} color={color} />,
                 }}

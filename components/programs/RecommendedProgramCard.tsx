@@ -9,6 +9,8 @@ import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { Program } from '@/types';
+import { Icon } from '@/components/base/Icon';
+import { ThemedText } from '@/components/base/ThemedText';
 
 type RecommendedProgramCardProps = {
     program: Program;
@@ -35,13 +37,12 @@ export const RecommendedProgramCard: React.FC<RecommendedProgramCardProps> = ({ 
                         titleStyle={{ marginRight: Spaces.LG, lineHeight: moderateScale(20), marginBottom: 0 }}
                         subtitleStyle={{ marginTop: 0 }}
                     />
-                    {/*                    <View style={[styles.recommendedOverlay, { backgroundColor: 'rgba(255,255,255,0.9)' }]}>
-                        <Icon name='star' size={Sizes.fontSizeDefault} color={'rgba(0,0,0,0.95)'} />
-                        <ThemedText type='buttonSmall' style={[styles.activeText, { marginLeft: Spaces.XS }]}>
+                    {/* <View style={[styles.recommendedOverlay, { backgroundColor: 'rgba(255,255,255,0.9)' }]}>
+                        <Icon name='star' size={Sizes.fontSizeDefault} color={'rgba(0,0,0,0.7)'} />
+                        <ThemedText type='buttonSmall' style={[{color: 'rgba(0,0,0,0.7)'}, { marginLeft: Spaces.XS }]}>
                             Recommended
                         </ThemedText>
-                    </View>
-*/}
+                    </View> */}
                 </View>
             </View>
         </TouchableOpacity>

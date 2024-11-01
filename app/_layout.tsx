@@ -58,6 +58,13 @@ export default function RootLayout() {
                             headerShown: false,
                         }}
                     />
+                    <Stack.Screen
+                        name='login'
+                        options={{
+                            // Hide the header for this route
+                            headerShown: false,
+                        }}
+                    />
                     <Stack.Screen name='(tabs)' options={{ headerShown: false, gestureEnabled: false }} />
                 </Stack>
             </ThemeProvider>
