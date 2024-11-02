@@ -20,7 +20,7 @@ import { AppDispatch, RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { RecommendedProgramCard } from '@/components/programs/RecommendedProgramCard';
 import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
-import motivationalImage from '@/assets/images/pilates-bro.svg';
+import motivationalImage from '@/assets/images/trainer-alt.svg';
 
 const MenuItem = ({ icon, title, text, onPress, titleColor, textColor, leftIconColor, backgroundColor, iconSize }) => (
     <TouchableOpacity style={styles.menuItem} activeOpacity={1} onPress={onPress}>
@@ -114,7 +114,7 @@ export default function InactiveProgramHome() {
         >
             {isOnboardingComplete && recommendedProgram ? (
                 <View style={styles.recommendedProgramContainer}>
-                    <ThemedText type='title' style={[styles.recommendedHeader, { color: themeColors.text }]}>
+                    <ThemedText type='titleLarge' style={[styles.recommendedHeader, { color: themeColors.text }]}>
                         {'Your Journey Starts Here'}
                     </ThemedText>
                     <RecommendedProgramCard

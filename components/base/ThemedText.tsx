@@ -22,10 +22,11 @@ export type ThemedTextProps = TextProps & {
         | 'buttonSmall'
         | 'titleXLarge'
         | 'headline'
-        | 'headlineSmall'
+        | 'headlineLarge'
         | 'bodyXSmall'
         | 'bodyMedium'
-        | 'bodySmall';
+        | 'bodySmall'
+        | 'greeting';
 };
 
 // Styles for different text types using specific Inter fonts with adjusted scaling
@@ -53,43 +54,43 @@ const styles = StyleSheet.create({
     titleLarge: {
         fontSize: moderateScale(18),
         lineHeight: moderateScale(27),
-        fontFamily: 'InterSemiBold',
+        fontFamily: 'NunitoBold',
     },
     titleXLarge: {
         fontSize: moderateScale(21),
         lineHeight: moderateScale(32),
-        fontFamily: 'InterSemiBold',
-    },
-    headlineSmall: {
-        fontSize: moderateScale(24),
-        lineHeight: moderateScale(36),
-        fontFamily: 'InterExtraBold',
+        fontFamily: 'NunitoBold',
     },
     headline: {
+        fontSize: moderateScale(24),
+        lineHeight: moderateScale(36),
+        fontFamily: 'MontserratAlternatesBold',
+    },
+    headlineLarge: {
         fontSize: moderateScale(32),
         lineHeight: moderateScale(48),
-        fontFamily: 'InterExtraBold',
+        fontFamily: 'MontserratBold',
         textTransform: 'uppercase',
     },
     title: {
         fontSize: moderateScale(16),
         lineHeight: moderateScale(24),
-        fontFamily: 'InterSemiBold',
+        fontFamily: 'NunitoBold',
     },
     subtitle: {
         fontSize: moderateScale(16),
         lineHeight: moderateScale(24),
-        fontFamily: 'InterRegular',
+        fontFamily: 'NunitoMedium',
     },
     caption: {
         fontSize: moderateScale(12),
         lineHeight: moderateScale(18),
-        fontFamily: 'InterMedium',
+        fontFamily: 'NunitoMedium',
     },
     link: {
         fontSize: moderateScale(16),
         lineHeight: moderateScale(24),
-        fontFamily: 'InterMedium',
+        fontFamily: 'NunitoMedium',
     },
     button: {
         fontSize: moderateScale(14),
@@ -116,6 +117,11 @@ const styles = StyleSheet.create({
         fontSize: moderateScale(13),
         lineHeight: moderateScale(18),
         fontFamily: 'InterItalic',
+    },
+    greeting: {
+        fontSize: moderateScale(24),
+        lineHeight: moderateScale(30),
+        fontFamily: 'ComfortaaBold',
     },
 });
 

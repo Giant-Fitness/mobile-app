@@ -98,14 +98,14 @@ export default function WorkoutsScreen() {
                         {'Jump into these one-off sessions that fit your schedule and mood!'}
                     </ThemedText>
                 </ThemedView>
-                <ThemedText type='title' style={[styles.header, { color: themeColors.text }]}>
+                <ThemedText type='titleLarge' style={[styles.header, { color: themeColors.text }]}>
                     {'Spotlight'}
                 </ThemedText>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.mainScrollView}>
                     {spotlightWorkouts && renderWorkoutCards(spotlightWorkouts.WorkoutIds)}
                 </ScrollView>
                 <ThemedView style={styles.menuContainer}>
-                    <ThemedText type='title' style={[styles.header, { color: themeColors.text, paddingBottom: Spaces.MD }]}>
+                    <ThemedText type='titleLarge' style={[styles.header, { color: themeColors.text, paddingBottom: Spaces.MD }]}>
                         {'Browse'}
                     </ThemedText>
                     <ThemedView>

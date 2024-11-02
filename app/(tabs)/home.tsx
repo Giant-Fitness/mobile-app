@@ -1,40 +1,222 @@
 // app/(tabs)/home.tsx
 
 import React from 'react';
-import { Image, StyleSheet } from 'react-native';
-
-import ParallaxScrollView from '@/components/layout/ParallaxScrollView';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
+import { ActiveProgramDayCompressedCard } from '@/components/programs/ActiveProgramDayCompressedCard';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/Colors';
+import { Spaces } from '@/constants/Spaces';
+import { useProgramData } from '@/hooks/useProgramData';
+import { ActionTile } from '@/components/home/ActionTile';
+import { LargeActionTile } from '@/components/home/LargeActionTile';
+import { FactOfTheDay } from '@/components/home/FactOfTheDay';
+import { useNavigation } from '@react-navigation/native';
+import { darkenColor } from '@/utils/colorUtils';
 
 export default function HomeScreen() {
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
+    const navigation = useNavigation();
+
+    const { user, userProgramProgress } = useProgramData();
+
+    const isFitnessOnboardingComplete = user?.OnboardingStatus?.fitness === true;
+
+    const actionTiles = [
+        {
+            title: 'Track Weight',
+            image: require('@/assets/images/weight.png'),
+            onPress: () => console.log('LogWeight'),
+            backgroundColor: themeColors.purpleTransparent,
+            textColor: darkenColor(themeColors.purpleSolid, 0.3),
+        },
+        {
+            title: 'Body Measurements',
+            image: require('@/assets/images/measure.png'),
+            onPress: () => console.log('LogMeasurements'),
+            backgroundColor: themeColors.blueTransparent,
+            textColor: darkenColor(themeColors.blueSolid, 0.3),
+        },
+        // {
+        //     title: 'Capture Progress',
+        //     image: require('@/assets/images/camera.png'),
+        //     onPress: () => console.log('ProgressPhotos'),
+        //     backgroundColor: themeColors.tangerineTransparent,
+        //     textColor: darkenColor(themeColors.tangerineSolid, 0.3),
+        // },
+        {
+            title: 'Why LMC?',
+            image: require('@/assets/images/skipping-rope.png'),
+            onPress: () => console.log('Article'),
+            backgroundColor: themeColors.maroonTransparent,
+            textColor: darkenColor(themeColors.maroonSolid, 0.3),
+        },
+    ];
+
+    const renderForYouSection = (reorderTiles = false) => {
+        let tiles = [...actionTiles];
+
+        if (reorderTiles) {
+            // Find the app info tile index
+            const appInfoIndex = tiles.findIndex((tile) => tile.title === 'Is LMC for you?');
+            if (appInfoIndex !== -1) {
+                // Remove and store the app info tile
+                const [appInfoTile] = tiles.splice(appInfoIndex, 1);
+                // Add it to the beginning
+                tiles.unshift(appInfoTile);
+            }
+        }
+
+        return (
+            <>
+                <View style={styles.header}>
+                    <ThemedText type='titleLarge'>For You</ThemedText>
+                </View>
+
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.actionTilesContainer}>
+                    {tiles.map((tile, index) => (
+                        <ActionTile
+                            key={index}
+                            image={tile.image}
+                            title={tile.title}
+                            onPress={tile.onPress}
+                            backgroundColor={tile.backgroundColor}
+                            textColor={tile.textColor}
+                        />
+                    ))}
+                </ScrollView>
+            </>
+        );
+    };
+
+    const renderContent = () => {
+        const greeting = user?.FirstName ? `Hi, ${user.FirstName}!` : 'Hi!';
+
+        if (!isFitnessOnboardingComplete) {
+            // State 3: Not completed onboarding
+            return (
+                <>
+                    <View style={styles.greeting}>
+                        <ThemedText type='greeting'>{greeting}</ThemedText>
+                    </View>
+
+                    <LargeActionTile
+                        title='Get Started'
+                        description='Let us recommend a training plan tailored to your goals'
+                        onPress={() => navigation.navigate('programs/program-recommender-wizard')}
+                        backgroundColor={themeColors.containerHighlight}
+                        image={require('@/assets/images/nutrition.png')}
+                        textColor={themeColors.highlightContainerText}
+                    />
+
+                    {renderForYouSection(true)}
+
+                    <FactOfTheDay />
+                </>
+            );
+        }
+
+        if (!userProgramProgress?.ProgramId) {
+            // State 2: Completed onboarding but no active program
+            return (
+                <>
+                    <View style={styles.greeting}>
+                        <ThemedText type='greeting'>{greeting}</ThemedText>
+                    </View>
+
+                    <LargeActionTile
+                        title='Start Training'
+                        description='Our structured training plans turn your goals into achievements'
+                        onPress={() => navigation.navigate('programs/browse-programs')}
+                        backgroundColor={themeColors.containerHighlight}
+                        image={require('@/assets/images/logo.png')}
+                        textColor={themeColors.highlightContainerText}
+                    />
+
+                    {renderForYouSection()}
+
+                    <FactOfTheDay />
+                </>
+            );
+        }
+
+        // State 1: Active program
+        return (
+            <>
+                <View style={styles.greeting}>
+                    <ThemedText type='greeting'>{greeting}</ThemedText>
+                </View>
+
+                <View style={styles.header}>
+                    <ThemedText type='titleLarge'>Today's Workout</ThemedText>
+                </View>
+
+                <View style={styles.workoutDayCard}>
+                    <ActiveProgramDayCompressedCard />
+                </View>
+
+                <View
+                    style={[
+                        styles.divider,
+                        {
+                            borderBottomColor: themeColors.systemBorderColor,
+                            borderBottomWidth: StyleSheet.hairlineWidth,
+                            marginBottom: Spaces.LG,
+                        },
+                    ]}
+                />
+
+                {renderForYouSection()}
+
+                <FactOfTheDay />
+            </>
+        );
+    };
+
     return (
-        <ParallaxScrollView
-            headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-            headerImage={<Image source={require('@/assets/images/logo.png')} style={styles.reactLogo} />}
-        >
-            <ThemedView style={styles.titleContainer}>
-                <ThemedText type='titleLarge'>Welcome!</ThemedText>
-            </ThemedView>
-        </ParallaxScrollView>
+        <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
+            <ScrollView
+                style={styles.scrollContainer}
+                contentContainerStyle={{
+                    justifyContent: 'flex-start',
+                }}
+                showsVerticalScrollIndicator={false}
+            >
+                {renderContent()}
+            </ScrollView>
+        </ThemedView>
     );
 }
 
 const styles = StyleSheet.create({
-    titleContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
+    container: {
+        flex: 1,
     },
-    stepContainer: {
-        gap: 8,
-        marginBottom: 8,
+    scrollContainer: {
+        width: '100%',
     },
-    reactLogo: {
-        height: 178,
-        width: 290,
-        bottom: 0,
-        left: 0,
-        position: 'absolute',
+
+    greeting: {
+        marginTop: Spaces.LG,
+        paddingHorizontal: Spaces.LG,
+        marginBottom: Spaces.LG,
+    },
+    header: {
+        paddingHorizontal: Spaces.LG,
+        marginBottom: Spaces.SM,
+    },
+    workoutDayCard: {
+        paddingHorizontal: Spaces.LG,
+        paddingBottom: Spaces.XL,
+    },
+    divider: {
+        width: '90%',
+        alignSelf: 'center',
+    },
+    actionTilesContainer: {
+        paddingHorizontal: Spaces.LG,
+        paddingVertical: Spaces.XS,
     },
 });

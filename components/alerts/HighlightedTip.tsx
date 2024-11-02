@@ -11,7 +11,7 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 
 type HighlightedTipProps = {
-    iconName: string;
+    iconName?: string;
     tipText: string;
     disableIcon?: boolean;
     textType?: string;

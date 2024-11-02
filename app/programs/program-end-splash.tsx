@@ -78,7 +78,7 @@ export default function ProgramEndSplashScreen() {
                     },
                 ]}
             >
-                <ThemedText type='headline' style={[styles.text, { color: themeColors.white }]}>
+                <ThemedText type='headlineLarge' style={[styles.text, { color: themeColors.white }]}>
                     {randomText}
                 </ThemedText>
             </Animated.View>

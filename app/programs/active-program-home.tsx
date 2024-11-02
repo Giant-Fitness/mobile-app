@@ -9,6 +9,7 @@ import { ActiveProgramDayCard } from '@/components/programs/ActiveProgramDayCard
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ProgramDayDetailCard } from '@/components/programs/ProgramDayDetailCard';
+import { TrainingQuote } from '@/components/quotes/TrainingQuote';
 import { Icon } from '@/components/base/Icon';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
@@ -77,19 +78,7 @@ export default function ActiveProgramHome() {
                 }}
                 showsVerticalScrollIndicator={false}
             >
-                {isLastDay ? (
-                    <View style={styles.tipContainer}>
-                        <HighlightedTip iconName='star' tipText='The finish line is here, one last push!' />
-                    </View>
-                ) : (
-                    displayQuote && (
-                        <View style={styles.quoteContainer}>
-                            <ThemedText type='italic' style={[styles.quoteText, { color: themeColors.subText }]}>
-                                {displayQuote.QuoteText}
-                            </ThemedText>
-                        </View>
-                    )
-                )}
+                <TrainingQuote quote={displayQuote} isLastDay={isLastDay} />
 
                 <View style={styles.planHeader}>
                     <ThemedText type='titleLarge'>{activeProgram?.ProgramName}</ThemedText>
@@ -172,15 +161,6 @@ const styles = StyleSheet.create({
     menuChevron: {
         marginLeft: Spaces.SM,
     },
-    quoteContainer: {
-        paddingTop: Spaces.XL,
-        paddingBottom: Spaces.MD,
-        marginHorizontal: Spaces.XXL,
-    },
-    quoteText: {
-        textAlign: 'center',
-        paddingBottom: Spaces.SM,
-    },
     planHeader: {
         paddingHorizontal: Spaces.LG,
     },
@@ -197,11 +177,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: Spaces.MD,
         marginBottom: Spaces.MD,
         borderRadius: Spaces.MD,
-    },
-    tipContainer: {
-        marginHorizontal: Spaces.SM,
-        marginTop: Spaces.XL,
-        marginBottom: Spaces.LG,
     },
     menuWrapper: {
         marginTop: Spaces.XXL,
