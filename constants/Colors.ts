@@ -25,6 +25,16 @@ export const Colors = {
         redTransparent: 'rgba(255, 0, 0, 0.12)',
         blueTransparent: 'rgba(135, 206, 235, 0.2)',
         blueSolid: '#5DADE2',
+        purpleTransparent: '#F3E8FF',
+        purpleSolid: '#7B3EE8',
+        tangerineTransparent: '#FFF3E0',
+        tangerineSolid: '#F57C00',
+        tealTransparent: '#ECFDF5',
+        tealSolid: '#059669',
+        maroonTransparent: '#FBEAEA', // A soft, light maroon for a background
+        maroonSolid: '#8B1E3F', // A deep maroon for a solid accent
+        mintTransparent: 'rgba(74, 222, 128, 0.12)',
+        mintSolid: '#059669',
         warning: '#FFA500', // Optional: Warning color (e.g., for alerts)
         info: '#1E90FF', // Optional: Info color (e.g., for badges)
         transparent: 'rgba(255, 255, 255, 0)',
@@ -58,6 +68,16 @@ export const Colors = {
         redTransparent: 'rgba(204, 69, 51, 0.5)',
         blueTransparent: 'rgba(135, 206, 235, 0.2)',
         blueSolid: '#5DADE2',
+        purpleTransparent: '#F3E8FF',
+        purpleSolid: '#7B3EE8',
+        tangerineTransparent: '#FFF3E0',
+        tangerineSolid: '#F57C00',
+        tealTransparent: '#ECFDF5',
+        tealSolid: '#059669',
+        mintTransparent: 'rgba(52, 211, 153, 0.15)',
+        mintSolid: '#059669',
+        maroonTransparent: '#FBEAEA', // A soft, light maroon for a background
+        maroonSolid: '#8B1E3F', // A deep maroon for a solid accent
         warning: '#FF8C00', // Optional: Warning color (darker orange)
         info: '#4682B4', // Optional: Info color (muted blue)
         transparent: 'rgba(0, 0, 0, 0)',

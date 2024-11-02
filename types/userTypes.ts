@@ -3,6 +3,7 @@
 export interface User {
     UserId: string;
     OnboardingStatus: UserOnboardingStatus;
+    FirstName: string;
 }
 
 export interface UserOnboardingStatus {

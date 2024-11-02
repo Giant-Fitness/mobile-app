@@ -133,7 +133,7 @@ const ExerciseDetailsScreen = () => {
                     </ThemedView>
 
                     <ThemedView style={styles.instructionContainer}>
-                        <ThemedText type='link' style={{ color: themeColors.text, paddingBottom: Spaces.MD }}>
+                        <ThemedText type='subtitle' style={{ color: themeColors.text, paddingBottom: Spaces.MD }}>
                             Instructions
                         </ThemedText>
                         {/* Render Instructions as a Bulleted List */}

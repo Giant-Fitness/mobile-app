@@ -63,7 +63,7 @@ export default function TabLayout() {
                         backgroundColor: themeColors.background,
                         height: Sizes.headerHeight,
                     },
-                    headerTitleStyle: { color: themeColors.text, fontFamily: 'InterSemiBold', fontSize: moderateScale(18) },
+                    headerTitleStyle: { color: themeColors.text, fontSize: moderateScale(16) },
                     title: 'Home',
                     tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'home-active' : 'home-inactive'} size={22} color={color} />,
                 }}
@@ -114,7 +114,7 @@ export default function TabLayout() {
                         backgroundColor: themeColors.background,
                         height: Sizes.headerHeight,
                     },
-                    headerTitleStyle: { color: themeColors.text, fontFamily: 'InterSemiBold', fontSize: moderateScale(18) },
+                    headerTitleStyle: { color: themeColors.text, fontSize: moderateScale(16) },
                     title: 'Plans',
                     tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'plan-active' : 'plan-inactive'} size={22} color={color} />,
                 }}
@@ -126,7 +126,7 @@ export default function TabLayout() {
                         backgroundColor: themeColors.background,
                         height: Sizes.headerHeight,
                     },
-                    headerTitleStyle: { color: themeColors.text, fontFamily: 'InterSemiBold', fontSize: moderateScale(18) },
+                    headerTitleStyle: { color: themeColors.text, fontSize: moderateScale(16) },
                     title: 'Solos',
                     tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'lightning-active' : 'lightning-inactive'} size={23} color={color} />,
                 }}
@@ -138,7 +138,7 @@ export default function TabLayout() {
                         backgroundColor: themeColors.background,
                         height: Sizes.headerHeight,
                     },
-                    headerTitleStyle: { color: themeColors.text, fontFamily: 'InterSemiBold', fontSize: moderateScale(18) },
+                    headerTitleStyle: { color: themeColors.text, fontSize: moderateScale(16) },
                     title: 'Progress',
                     tabBarIcon: ({ color, focused, size }) => <Icon name={focused ? 'progress-active' : 'progress-inactive'} size={21} color={color} />,
                 }}
