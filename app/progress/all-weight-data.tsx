@@ -1,8 +1,8 @@
 // app/progress/all-weight-data.tsx
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -16,12 +16,20 @@ import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { useSharedValue } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { MeasurementCalendar } from '@/components/progress/MeasurementCalendar';
+import { AppDispatch } from '@/store/store';
+import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
+import { logWeightMeasurementAsync, updateWeightMeasurementAsync, deleteWeightMeasurementAsync } from '@/store/user/thunks';
 
 export default function AllWeightDataScreen() {
     const navigation = useNavigation();
+    const dispatch = useDispatch<AppDispatch>();
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const scrollY = useSharedValue(0);
+
+    const [isWeightSheetVisible, setIsWeightSheetVisible] = useState(false);
+    const [selectedMeasurement, setSelectedMeasurement] = useState<UserWeightMeasurement | null>(null);
+    const [isAddingWeight, setIsAddingWeight] = useState(false);
 
     const { userWeightMeasurements } = useSelector((state: RootState) => state.user);
 
@@ -29,16 +37,72 @@ export default function AllWeightDataScreen() {
         navigation.setOptions({ headerShown: false });
     }, [navigation]);
 
-    // Handle tile press
-    const handleTilePress = (measurement: UserWeightMeasurement) => {
-        console.log('Tile clicked:', measurement);
-    };
-
     // Calculate weight change between measurements
     const getWeightChange = (currentWeight: number, previousWeight: number | null) => {
         if (previousWeight === null) return null;
         const change = currentWeight - previousWeight;
         return change !== 0 ? change.toFixed(1) : null;
+    };
+
+    const handleAddWeight = () => {
+        setSelectedMeasurement(null);
+        setIsAddingWeight(true);
+        setIsWeightSheetVisible(true);
+    };
+
+    const handleWeightAdd = async (weight: number, date: Date) => {
+        try {
+            await dispatch(
+                logWeightMeasurementAsync({
+                    weight: weight,
+                    measurementTimestamp: date.toISOString(),
+                }),
+            ).unwrap();
+            setIsWeightSheetVisible(false);
+            setIsAddingWeight(false);
+        } catch (error) {
+            console.error('Failed to log weight:', error);
+        }
+    };
+
+    const handleWeightUpdate = async (weight: number, date: Date) => {
+        if (!selectedMeasurement) return;
+
+        try {
+            await dispatch(
+                updateWeightMeasurementAsync({
+                    timestamp: selectedMeasurement.MeasurementTimestamp,
+                    weight: weight,
+                }),
+            ).unwrap();
+            setIsWeightSheetVisible(false);
+            setSelectedMeasurement(null);
+        } catch (error) {
+            console.error('Failed to update weight:', error);
+        }
+    };
+
+    const handleWeightDelete = async (timestamp: string) => {
+        try {
+            await dispatch(deleteWeightMeasurementAsync({ timestamp })).unwrap();
+            setIsWeightSheetVisible(false);
+            setSelectedMeasurement(null);
+        } catch (error) {
+            console.error('Failed to delete weight:', error);
+        }
+    };
+
+    const handleSheetClose = () => {
+        setIsWeightSheetVisible(false);
+        setSelectedMeasurement(null);
+        setIsAddingWeight(false);
+    };
+
+    // Update tile press handler
+    const handleTilePress = (measurement: UserWeightMeasurement) => {
+        setSelectedMeasurement(measurement);
+        setIsAddingWeight(false);
+        setIsWeightSheetVisible(true);
     };
 
     // Render tile for the measurement list
@@ -97,7 +161,14 @@ export default function AllWeightDataScreen() {
 
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
-            <AnimatedHeader scrollY={scrollY} disableColorChange={true} headerBackground={themeColors.background} title='Weight History' />
+            <AnimatedHeader
+                scrollY={scrollY}
+                disableColorChange={true}
+                headerBackground={themeColors.background}
+                title='Weight History'
+                menuIcon='plus'
+                onMenuPress={handleAddWeight}
+            />
 
             <View style={styles.content}>
                 <MeasurementCalendar
@@ -106,12 +177,27 @@ export default function AllWeightDataScreen() {
                         const measurement = userWeightMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date);
                         if (measurement) {
                             handleTilePress(measurement);
+                        } else {
+                            // If no measurement exists for this date, open add sheet
+                            setSelectedMeasurement(null);
+                            setIsAddingWeight(true);
+                            setIsWeightSheetVisible(true);
                         }
                     }}
                     renderTile={renderListItem}
                     measurementUnit='kg'
                 />
             </View>
+
+            <WeightLoggingSheet
+                visible={isWeightSheetVisible}
+                onClose={handleSheetClose}
+                onSubmit={isAddingWeight ? handleWeightAdd : handleWeightUpdate}
+                onDelete={handleWeightDelete}
+                initialWeight={selectedMeasurement?.Weight}
+                initialDate={selectedMeasurement ? new Date(selectedMeasurement.MeasurementTimestamp) : undefined}
+                isEditing={!!selectedMeasurement}
+            />
         </ThemedView>
     );
 }

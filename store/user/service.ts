@@ -396,7 +396,8 @@ const logWeightMeasurement = async (userId: string, weight: number, measurementT
 const updateWeightMeasurement = async (userId: string, timestamp: string, weight: number): Promise<UserWeightMeasurement> => {
     console.log('service: updateWeightMeasurement');
     try {
-        const response = await api.put(`/users/${userId}/weight-measurements/${timestamp}`, { weight });
+        const query = `/users/${userId}/weight-measurements/${timestamp}`;
+        const response = await api.put(query, { weight });
         const result = parseResponse(response);
         return result.measurement;
     } catch (error) {

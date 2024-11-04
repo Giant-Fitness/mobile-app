@@ -174,7 +174,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                 {/* Header */}
                 <ThemedView style={[styles.header, { borderBottomColor: themeColors.systemBorderColor }]}>
                     <TouchableOpacity onPress={handleClose} style={styles.headerButton} disabled={isSubmitting || isDeleting}>
-                        <Icon name='close' size={22} color={themeColors.text} />
+                        <Icon name='close' size={20} color={themeColors.text} />
                     </TouchableOpacity>
 
                     <ThemedText type='title'>{isEditing ? 'Edit Weight' : 'Log Weight'}</ThemedText>
@@ -183,9 +183,9 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                         {isEditing && onDelete && (
                             <TouchableOpacity onPress={handleDelete} style={styles.deleteButton} disabled={isSubmitting || isDeleting}>
                                 {isDeleting ? (
-                                    <ActivityIndicator size='small' color={themeColors.red} />
+                                    <ActivityIndicator size='small' color={themeColors.subText} />
                                 ) : (
-                                    <Icon name='trash' color={isSubmitting ? themeColors.subText : themeColors.red} size={22} />
+                                    <Icon name='trash' color={isSubmitting ? themeColors.subText : themeColors.subText} size={18} />
                                 )}
                             </TouchableOpacity>
                         )}
@@ -193,7 +193,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                             {isSubmitting ? (
                                 <ActivityIndicator size='small' color={themeColors.text} />
                             ) : (
-                                <Icon name='check' color={isSubmitting || isDeleting ? themeColors.text : themeColors.text} size={22} />
+                                <Icon name='check' color={isSubmitting || isDeleting ? themeColors.text : themeColors.text} size={20} />
                             )}
                         </TouchableOpacity>
                     </View>
@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
     },
     deleteButton: {
-        marginRight: Spaces.MD,
+        marginRight: Spaces.SM + Spaces.XS,
     },
     dateSelector: {
         flexDirection: 'row',

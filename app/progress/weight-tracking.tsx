@@ -18,6 +18,8 @@ import { TimeRange, TIME_RANGES, aggregateData, calculateMovingAverage, getTimeW
 import { UserWeightMeasurement } from '@/types';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { Icon } from '@/components/base/Icon';
+import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
+import { updateWeightMeasurementAsync, deleteWeightMeasurementAsync, logWeightMeasurementAsync } from '@/store/user/thunks';
 
 const RangeSelector = ({ selectedRange, onRangeChange, style }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -63,14 +65,82 @@ export default function WeightTrackingScreen() {
     const themeColors = Colors[colorScheme];
 
     const { userWeightMeasurements } = useSelector((state: RootState) => state.user);
+    const [isWeightSheetVisible, setIsWeightSheetVisible] = useState(false);
+    const [isAddingWeight, setIsAddingWeight] = useState(false);
+    const [selectedMeasurement, setSelectedMeasurement] = useState<UserWeightMeasurement | null>(null);
+    const dispatch = useDispatch<AppDispatch>();
 
     useEffect(() => {
         navigation.setOptions({ headerShown: false });
     }, [navigation]);
 
+    // Add handlers for weight modifications
+    const handleWeightUpdate = async (weight: number, date: Date) => {
+        if (!selectedMeasurement) return;
+
+        try {
+            await dispatch(
+                updateWeightMeasurementAsync({
+                    timestamp: selectedMeasurement.MeasurementTimestamp,
+                    weight: weight,
+                }),
+            ).unwrap();
+            setIsWeightSheetVisible(false);
+            setSelectedMeasurement(null);
+        } catch (error) {
+            console.error('Failed to update weight:', error);
+        }
+    };
+
+    // Add the handleWeightAdd function
+    const handleWeightAdd = async (weight: number, date: Date) => {
+        try {
+            await dispatch(
+                logWeightMeasurementAsync({
+                    weight: weight,
+                    measurementTimestamp: date.toISOString(),
+                }),
+            ).unwrap();
+            setIsWeightSheetVisible(false);
+            setIsAddingWeight(false);
+        } catch (error) {
+            console.error('Failed to log weight:', error);
+        }
+    };
+
+    const handleWeightDelete = async (timestamp: string) => {
+        try {
+            await dispatch(deleteWeightMeasurementAsync({ timestamp })).unwrap();
+            setIsWeightSheetVisible(false);
+            setSelectedMeasurement(null);
+        } catch (error) {
+            console.error('Failed to delete weight:', error);
+        }
+    };
+
+    // Update the handleTilePress function
+    const handleTilePress = (measurement: UserWeightMeasurement) => {
+        setSelectedMeasurement(measurement);
+        setIsWeightSheetVisible(true);
+    };
+
+    // Update the handleDataPointPress function
     const handleDataPointPress = (measurement: UserWeightMeasurement) => {
-        console.log('Navigate to measurement:', measurement);
-        // navigation.navigate('BodyMeasurementLog', { date: measurement.MeasurementTimestamp });
+        setSelectedMeasurement(measurement);
+        setIsWeightSheetVisible(true);
+    };
+
+    const handleAddWeight = () => {
+        setSelectedMeasurement(null); // Ensure we're not in edit mode
+        setIsAddingWeight(true);
+        setIsWeightSheetVisible(true);
+    };
+
+    // Add this close handler
+    const handleSheetClose = () => {
+        setIsWeightSheetVisible(false);
+        setSelectedMeasurement(null);
+        setIsAddingWeight(false);
     };
 
     const {
@@ -228,10 +298,6 @@ export default function WeightTrackingScreen() {
         </ThemedText>
     );
 
-    const handleTilePress = (measurement: UserWeightMeasurement) => {
-        console.log('Navigate to measurement:', measurement);
-    };
-
     const renderDataItem = ({ item, section, index }) => {
         const date = new Date(item.MeasurementTimestamp);
         const dayOfWeek = date.toLocaleDateString('default', { weekday: 'long' });
@@ -277,7 +343,14 @@ export default function WeightTrackingScreen() {
 
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
-            <AnimatedHeader scrollY={scrollY} disableColorChange={true} headerBackground={themeColors.background} title='Weight Tracking' />
+            <AnimatedHeader
+                scrollY={scrollY}
+                disableColorChange={true}
+                headerBackground={themeColors.background}
+                title='Weight Tracking'
+                menuIcon='plus'
+                onMenuPress={handleAddWeight}
+            />
 
             <SectionList
                 sections={groupedData}
@@ -296,6 +369,16 @@ export default function WeightTrackingScreen() {
                 onScroll={(event) => {
                     scrollY.value = event.nativeEvent.contentOffset.y;
                 }}
+            />
+
+            <WeightLoggingSheet
+                visible={isWeightSheetVisible}
+                onClose={handleSheetClose}
+                onSubmit={isAddingWeight ? handleWeightAdd : handleWeightUpdate}
+                onDelete={handleWeightDelete}
+                initialWeight={selectedMeasurement?.Weight}
+                initialDate={selectedMeasurement ? new Date(selectedMeasurement.MeasurementTimestamp) : undefined}
+                isEditing={!!selectedMeasurement}
             />
         </ThemedView>
     );

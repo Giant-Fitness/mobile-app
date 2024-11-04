@@ -68,7 +68,7 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
             )}
             {onMenuPress && (
                 <TouchableOpacity style={styles.menuButton} onPress={onMenuPress} activeOpacity={1}>
-                    <Icon name={menuIcon} size={24} color={animatedIconColor} />
+                    <Icon name={menuIcon} size={22} color={animatedIconColor} />
                 </TouchableOpacity>
             )}
         </Animated.View>
@@ -100,8 +100,8 @@ const styles = StyleSheet.create({
     },
     menuButton: {
         position: 'absolute',
-        top: Spaces.XXL + Spaces.SM,
-        right: Spaces.XL,
+        top: Spaces.XXL + Spaces.SM + Spaces.XS + Spaces.XXS,
+        right: Spaces.LG,
         zIndex: 10,
     },
 });
