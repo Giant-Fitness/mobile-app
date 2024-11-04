@@ -1,0 +1,106 @@
+// components/progress/MeasurementCalendar.tsx
+
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { ThemedView } from '@/components/base/ThemedView';
+import { ThemedText } from '@/components/base/ThemedText';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/Colors';
+import { Spaces } from '@/constants/Spaces';
+import { Icon } from '@/components/base/Icon';
+import { CalendarMonth } from '@/components/progress/CalendarMonth';
+import { MeasurementList } from '@/components/progress/MeasurementList';
+
+interface CalendarData {
+    timestamp: string;
+    value: number;
+    additionalData?: any;
+}
+
+interface MeasurementCalendarProps {
+    data: CalendarData[];
+    onDayPress?: (date: string) => void;
+    renderTile: (item: CalendarData) => React.ReactNode;
+    measurementUnit?: string;
+}
+
+export const MeasurementCalendar: React.FC<MeasurementCalendarProps> = ({ data, onDayPress, renderTile, measurementUnit }) => {
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
+
+    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [displayedMonth, setDisplayedMonth] = useState<Date>(new Date());
+
+    // Create a map of dates with measurements for quick lookup
+    const measurementDates = new Map(data.map((item) => [new Date(item.timestamp).toDateString(), item]));
+
+    useEffect(() => {
+        // Find the most recent measurement date
+        if (data.length > 0) {
+            const mostRecentDate = new Date(Math.max(...data.map((item) => new Date(item.timestamp).getTime())));
+            setDisplayedMonth(mostRecentDate);
+        }
+    }, [data]);
+
+    const handlePrevMonth = () => {
+        setDisplayedMonth(new Date(displayedMonth.getFullYear(), displayedMonth.getMonth() - 1, 1));
+    };
+
+    const handleNextMonth = () => {
+        setDisplayedMonth(new Date(displayedMonth.getFullYear(), displayedMonth.getMonth() + 1, 1));
+    };
+
+    // Get measurements for the currently displayed month
+    const currentMonthMeasurements = data.filter((item) => {
+        const date = new Date(item.timestamp);
+        return date.getMonth() === displayedMonth.getMonth() && date.getFullYear() === displayedMonth.getFullYear();
+    });
+
+    return (
+        <ThemedView style={styles.container}>
+            <View style={styles.header}>
+                <TouchableOpacity onPress={handlePrevMonth}>
+                    <Icon name='chevron-back' color={themeColors.text} />
+                </TouchableOpacity>
+                <ThemedText type='titleMedium'>
+                    {displayedMonth.toLocaleString('default', {
+                        month: 'long',
+                        year: 'numeric',
+                    })}
+                </ThemedText>
+                <TouchableOpacity onPress={handleNextMonth}>
+                    <Icon name='chevron-forward' color={themeColors.text} />
+                </TouchableOpacity>
+            </View>
+
+            <CalendarMonth date={displayedMonth} measurementDates={measurementDates} onDayPress={onDayPress} />
+
+            {/* <ThemedText type="overline" style={styles.listHeader}>
+                {currentMonthMeasurements.length} Measurements
+            </ThemedText>
+
+            <MeasurementList
+                data={currentMonthMeasurements}
+                renderTile={renderTile}
+            /> */}
+        </ThemedView>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: Spaces.LG,
+        paddingVertical: Spaces.MD,
+    },
+    listHeader: {
+        marginTop: Spaces.XL,
+        marginBottom: Spaces.MD,
+        marginLeft: Spaces.LG,
+    },
+});

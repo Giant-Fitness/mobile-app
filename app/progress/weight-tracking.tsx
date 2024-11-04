@@ -1,5 +1,7 @@
+// app/progress/weight-tracking.tsx
+
 import React, { useState, useMemo, useEffect } from 'react';
-import { StyleSheet, View, ScrollView } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, SectionList } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -15,8 +17,9 @@ import { AppDispatch, RootState } from '@/store/store';
 import { TimeRange, TIME_RANGES, aggregateData, calculateMovingAverage, getTimeWindow, getTimeRangeLabel } from '@/utils/weight';
 import { UserWeightMeasurement } from '@/types';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
+import { Icon } from '@/components/base/Icon';
 
-const RangeSelector = ({ selectedRange, onRangeChange, style }: { selectedRange: TimeRange; onRangeChange: (range: TimeRange) => void; style?: any }) => {
+const RangeSelector = ({ selectedRange, onRangeChange, style }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
@@ -43,6 +46,12 @@ const RangeSelector = ({ selectedRange, onRangeChange, style }: { selectedRange:
             ))}
         </View>
     );
+};
+
+const getWeightChange = (currentWeight: number, previousWeight: number | null) => {
+    if (previousWeight === null) return null;
+    const change = currentWeight - previousWeight;
+    return change !== 0 ? change.toFixed(1) : null;
 };
 
 export default function WeightTrackingScreen() {
@@ -95,26 +104,22 @@ export default function WeightTrackingScreen() {
             };
         }
 
-        // Get time window and aggregated data
         const timeWindow = getTimeWindow(selectedTimeRange);
         const aggregated = aggregateData(userWeightMeasurements, selectedTimeRange);
 
-        // Calculate statistics for selected time range
         const weights = aggregated.map((d) => d.weight);
         const avg = weights.reduce((a, b) => a + b) / weights.length;
         const change = aggregated[aggregated.length - 1].weight - aggregated[0].weight;
         const percent = (change / aggregated[0].weight) * 100;
 
-        // Calculate all-time statistics - Create a new array before sorting
         const allData = [...userWeightMeasurements].sort((a, b) => new Date(a.MeasurementTimestamp).getTime() - new Date(b.MeasurementTimestamp).getTime());
         const allTimeChange = allData[allData.length - 1].Weight - allData[0].Weight;
         const allTimePercent = (allTimeChange / allData[0].Weight) * 100;
 
-        // Calculate Y-axis range with padding
         const minWeight = Math.min(...weights);
         const maxWeight = Math.max(...weights);
         const range = maxWeight - minWeight;
-        const padding = Math.max(range * 0.1, 1); // At least 1kg padding
+        const padding = Math.max(range * 0.1, 1);
 
         return {
             aggregatedData: aggregated,
@@ -135,85 +140,163 @@ export default function WeightTrackingScreen() {
         };
     }, [userWeightMeasurements, selectedTimeRange]);
 
+    const groupedData = useMemo(() => {
+        if (!userWeightMeasurements.length) return [];
+
+        const now = new Date();
+        const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        const filteredMeasurements = userWeightMeasurements.filter((measurement) => {
+            const date = new Date(measurement.MeasurementTimestamp);
+            return date >= twoMonthsAgo && date <= now;
+        });
+
+        filteredMeasurements.sort((a, b) => new Date(b.MeasurementTimestamp) - new Date(a.MeasurementTimestamp));
+
+        const groups: { title: string; data: UserWeightMeasurement[] }[] = [];
+        filteredMeasurements.forEach((measurement) => {
+            const date = new Date(measurement.MeasurementTimestamp);
+            const monthYear = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            const existingGroup = groups.find((group) => group.title === monthYear);
+            if (existingGroup) {
+                existingGroup.data.push(measurement);
+            } else {
+                groups.push({ title: monthYear, data: [measurement] });
+            }
+        });
+
+        return groups;
+    }, [userWeightMeasurements]);
+
+    const renderListHeader = () => (
+        <View>
+            <View style={styles.header}>
+                <View style={styles.legendContainer}>
+                    <View style={styles.legendItem}>
+                        <View style={[styles.legendDot, { borderColor: themeColors.purpleSolid }]} />
+                        <ThemedText type='bodyXSmall'>Weight</ThemedText>
+                    </View>
+                    <View style={[styles.legendItem, { marginLeft: Spaces.MD }]}>
+                        <View style={[styles.legendLine, { backgroundColor: lightenColor(themeColors.purpleSolid, 0.6) }]} />
+                        <ThemedText type='bodyXSmall'>Trend Line</ThemedText>
+                    </View>
+                </View>
+            </View>
+
+            <View style={styles.insightsContainer}>
+                <View style={styles.insightItem}>
+                    <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
+                        Average
+                    </ThemedText>
+                    <ThemedText type='titleXLarge'>{averageWeight.toFixed(1)} kg</ThemedText>
+                </View>
+                <View style={[styles.insightItem, { marginLeft: Spaces.XXXL }]}>
+                    <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
+                        Change
+                    </ThemedText>
+                    <ThemedText type='titleXLarge' style={{ color: weightChange > 0 ? themeColors.maroonSolid : darkenColor(themeColors.accent, 0.3) }}>
+                        {weightChange > 0 ? '+' : ''}
+                        {weightChange.toFixed(1)} kg
+                    </ThemedText>
+                </View>
+            </View>
+
+            <View style={styles.chartContainer}>
+                <WeightChart
+                    data={aggregatedData}
+                    timeRange={selectedTimeRange}
+                    yAxisRange={yAxisRange}
+                    movingAverages={movingAverages}
+                    effectiveTimeRange={effectiveTimeRange}
+                    onDataPointPress={handleDataPointPress}
+                />
+            </View>
+
+            <RangeSelector selectedRange={selectedTimeRange} onRangeChange={setSelectedTimeRange} style={styles.rangeSelector} />
+
+            <TouchableOpacity style={styles.dataButton} onPress={() => navigation.navigate('progress/all-weight-data')} activeOpacity={0.9}>
+                <ThemedText type='titleXLarge'>Data</ThemedText>
+                <Icon name='chevron-forward' style={styles.dataChevron} color={themeColors.text} />
+            </TouchableOpacity>
+        </View>
+    );
+
+    const renderDataSectionHeader = ({ section }) => (
+        <ThemedText type='title' style={styles.sectionHeader}>
+            {section.title}
+        </ThemedText>
+    );
+
+    const handleTilePress = (measurement: UserWeightMeasurement) => {
+        console.log('Navigate to measurement:', measurement);
+    };
+
+    const renderDataItem = ({ item, section, index }) => {
+        const date = new Date(item.MeasurementTimestamp);
+        const dayOfWeek = date.toLocaleDateString('default', { weekday: 'long' });
+        const month = date.toLocaleDateString('default', { month: 'short' });
+        const day = date.getDate();
+
+        const previousWeight = index < section.data.length - 1 ? section.data[index + 1].Weight : null;
+        const weightChange = getWeightChange(item.Weight, previousWeight);
+
+        return (
+            <TouchableOpacity
+                style={[styles.tile, { backgroundColor: lightenColor(themeColors.purpleTransparent, 0.5) }]}
+                onPress={() => handleTilePress(item)}
+                activeOpacity={0.8}
+            >
+                <View style={styles.tileLeft}>
+                    <ThemedText type='caption'>
+                        {dayOfWeek}, {`${month} ${day}`}
+                    </ThemedText>
+                    <ThemedText type='titleMedium' style={styles.weightText}>
+                        {item.Weight.toFixed(1)} kg
+                    </ThemedText>
+                </View>
+                {weightChange && (
+                    <View style={styles.tileRight}>
+                        <ThemedText
+                            type='bodySmall'
+                            style={[
+                                styles.changeText,
+                                {
+                                    color: parseFloat(weightChange) > 0 ? themeColors.maroonSolid : darkenColor(themeColors.accent, 0.3),
+                                },
+                            ]}
+                        >
+                            {weightChange > 0 ? '+' : ''}
+                            {weightChange} kg
+                        </ThemedText>
+                    </View>
+                )}
+            </TouchableOpacity>
+        );
+    };
+
     return (
-        <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
+        <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
             <AnimatedHeader scrollY={scrollY} disableColorChange={true} headerBackground={themeColors.background} title='Weight Tracking' />
 
-            <ScrollView style={[styles.container, { backgroundColor: themeColors.background }]} showsVerticalScrollIndicator={false}>
-                <View style={styles.header}>
-                    <View style={styles.legendContainer}>
-                        <View style={styles.legendItem}>
-                            <View style={[styles.legendDot, { borderColor: themeColors.purpleSolid }]} />
-                            <ThemedText type='bodyXSmall'>Weight</ThemedText>
-                        </View>
-                        <View style={[styles.legendItem, { marginLeft: Spaces.MD }]}>
-                            <View style={[styles.legendLine, { backgroundColor: lightenColor(themeColors.purpleSolid, 0.6) }]} />
-                            <ThemedText type='bodyXSmall'>Trend Line</ThemedText>
-                        </View>
-                    </View>
-                </View>
-
-                <View style={styles.insightsContainer}>
-                    <View style={styles.insightItem}>
-                        <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
-                            Average
-                        </ThemedText>
-                        <ThemedText type='titleXLarge'>{averageWeight.toFixed(1)} kg</ThemedText>
-                    </View>
-                    <View style={[styles.insightItem, { marginLeft: Spaces.XXXL }]}>
-                        <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
-                            Change
-                        </ThemedText>
-                        <ThemedText type='titleXLarge' style={{ color: weightChange >= 0 ? themeColors.maroonSolid : darkenColor(themeColors.accent, 0.3) }}>
-                            {weightChange > 0 ? '+' : ''}
-                            {weightChange.toFixed(1)} kg
-                        </ThemedText>
-                    </View>
-                </View>
-
-                <View style={styles.chartContainer}>
-                    <WeightChart
-                        data={aggregatedData}
-                        timeRange={selectedTimeRange}
-                        yAxisRange={yAxisRange}
-                        movingAverages={movingAverages}
-                        effectiveTimeRange={effectiveTimeRange}
-                        onDataPointPress={handleDataPointPress}
-                    />
-                </View>
-
-                <RangeSelector selectedRange={selectedTimeRange} onRangeChange={setSelectedTimeRange} style={styles.rangeSelector} />
-
-                {/* <ThemedText type='titleLarge' style={{ marginTop: Spaces.MD, marginBottom: Spaces.SM, paddingLeft: Spaces.LG }}>
-                    Insights
-                </ThemedText>
-                <View style={[styles.analyticsContainer, { backgroundColor: themeColors.purpleTransparent }]}>
-                    <View style={styles.analyticsGrid}>
-                        <View style={styles.analyticsItem}>
-                            <ThemedView style={styles.weightChangeContainer}>
-                                <ThemedText
-                                    type='titleXLarge'
-                                    style={[
-                                        styles.weightChangeText,
-                                        {
-                                            color: allTimeChange >= 0 ? themeColors.maroonSolid : darkenColor(themeColors.accent, 0.3),
-                                        },
-                                    ]}
-                                >
-                                    {allTimeChange > 0 ? '+' : ''}
-                                    {allTimeChange.toFixed(1)}
-                                </ThemedText>
-                                <ThemedText type='overline' style={styles.kgText}>
-                                    kg
-                                </ThemedText>
-                            </ThemedView>
-                            <ThemedText type='overline' style={styles.totalChangeLabel}>
-                                Total Change
-                            </ThemedText>
-                        </View>
-                    </View>
-                </View> */}
-            </ScrollView>
+            <SectionList
+                sections={groupedData}
+                keyExtractor={(item) => item.MeasurementTimestamp}
+                renderSectionHeader={renderDataSectionHeader}
+                renderItem={renderDataItem}
+                ListHeaderComponent={renderListHeader}
+                ListEmptyComponent={() => (
+                    <ThemedText type='bodyMedium' style={styles.emptyText}>
+                        No data available.
+                    </ThemedText>
+                )}
+                stickySectionHeadersEnabled={false}
+                contentContainerStyle={styles.listContent}
+                showsVerticalScrollIndicator={false}
+                onScroll={(event) => {
+                    scrollY.value = event.nativeEvent.contentOffset.y;
+                }}
+            />
         </ThemedView>
     );
 }
@@ -221,7 +304,7 @@ export default function WeightTrackingScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingTop: Spaces.XL,
+        paddingTop: Spaces.SM,
     },
     header: {
         padding: Spaces.LG,
@@ -232,7 +315,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'flex-start',
-        marginBottom: Spaces.MD,
     },
     legendItem: {
         flexDirection: 'row',
@@ -272,35 +354,50 @@ const styles = StyleSheet.create({
     rangeText: {
         fontSize: 12,
     },
-    analyticsContainer: {
-        marginHorizontal: Spaces.LG,
-        paddingHorizontal: Spaces.LG,
-        paddingVertical: Spaces.LG,
-        borderRadius: Spaces.MD, // Create pill shape for the container
+    listContent: {
+        paddingBottom: Spaces.XL,
     },
-    analyticsGrid: {
-        flexDirection: 'column',
-        justifyContent: 'space-around',
+    sectionHeader: {
+        marginTop: Spaces.MD,
+        marginLeft: Spaces.MD,
     },
-    analyticsItem: {
+    tile: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: Spaces.MD,
+        paddingHorizontal: Spaces.MD,
+        marginVertical: Spaces.XS,
+        marginHorizontal: Spaces.MD,
+        borderRadius: Spaces.SM,
+    },
+    tileLeft: {
+        flex: 1,
+    },
+    tileRight: {
+        marginLeft: Spaces.MD,
+    },
+    weightText: {
+        marginTop: Spaces.XS,
+        fontWeight: '600',
+    },
+    changeText: {
+        fontWeight: '500',
+    },
+    dataButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between', // Align weight change to the right
-    },
-    weightChangeContainer: {
-        borderRadius: Spaces.SM,
-        paddingHorizontal: Spaces.MD,
         paddingVertical: Spaces.SM,
-        alignItems: 'center',
+        paddingRight: Spaces.MD,
+        marginTop: Spaces.XL,
+        marginHorizontal: Spaces.MD,
     },
-    weightChangeText: {
-        fontSize: 24, // Increase size for visibility
+    dataChevron: {
+        marginLeft: Spaces.XS,
     },
-    kgText: {
-        fontSize: 12,
+    emptyText: {
         textAlign: 'center',
-    },
-    totalChangeLabel: {
-        marginLeft: Spaces.SM, // Align Total Change label next to the weight change
+        marginTop: Spaces.SM,
+        color: Colors.light.subText,
     },
 });
