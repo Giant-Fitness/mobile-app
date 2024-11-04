@@ -1,7 +1,8 @@
 // app/(tabs)/home.tsx
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import { useDispatch } from 'react-redux';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ActiveProgramDayCompressedCard } from '@/components/programs/ActiveProgramDayCompressedCard';
@@ -14,21 +15,54 @@ import { LargeActionTile } from '@/components/home/LargeActionTile';
 import { FactOfTheDay } from '@/components/home/FactOfTheDay';
 import { useNavigation } from '@react-navigation/native';
 import { darkenColor } from '@/utils/colorUtils';
+import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
+import { logWeightMeasurementAsync, getWeightMeasurementsAsync } from '@/store/user/thunks';
+import { AppDispatch } from '@/store/store';
 
 export default function HomeScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const navigation = useNavigation();
+    const dispatch = useDispatch<AppDispatch>();
+
+    const [isWeightSheetVisible, setIsWeightSheetVisible] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const { user, userProgramProgress } = useProgramData();
 
     const isFitnessOnboardingComplete = user?.OnboardingStatus?.fitness === true;
 
+    const handleLogWeight = async (weight: number, date: Date) => {
+        setIsLoading(true);
+        try {
+            await dispatch(
+                logWeightMeasurementAsync({
+                    weight: weight,
+                    measurementTimestamp: date.toISOString(),
+                }),
+            ).unwrap();
+
+            // Refresh measurements after logging
+            await dispatch(getWeightMeasurementsAsync()).unwrap();
+            setIsWeightSheetVisible(false);
+        } catch (error) {
+            console.error('Failed to log weight:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleWeightTilePress = () => {
+        // Pre-fetch measurements when opening the sheet
+        // dispatch(getWeightMeasurementsAsync());
+        setIsWeightSheetVisible(true);
+    };
+
     const actionTiles = [
         {
             title: 'Track Weight',
             image: require('@/assets/images/weight.png'),
-            onPress: () => console.log('LogWeight'),
+            onPress: handleWeightTilePress,
             backgroundColor: themeColors.purpleTransparent,
             textColor: darkenColor(themeColors.purpleSolid, 0.3),
         },
@@ -186,6 +220,13 @@ export default function HomeScreen() {
             >
                 {renderContent()}
             </ScrollView>
+
+            <WeightLoggingSheet
+                visible={isWeightSheetVisible}
+                onClose={() => setIsWeightSheetVisible(false)}
+                onSubmit={handleLogWeight}
+                isLoading={isLoading}
+            />
         </ThemedView>
     );
 }

@@ -19,6 +19,13 @@ import { Spaces } from '@/constants/Spaces';
 export default function ProgressScreen() {
     const dispatch = useDispatch<AppDispatch>();
     const navigation = useNavigation();
+    const scrollY = useSharedValue(0);
+
+    const scrollHandler = useAnimatedScrollHandler({
+        onScroll: (event) => {
+            scrollY.value = event.contentOffset.y;
+        },
+    });
 
     const { userWeightMeasurements, userWeightMeasurementsState, error } = useSelector((state: RootState) => state.user);
 
@@ -32,7 +39,6 @@ export default function ProgressScreen() {
         if (userWeightMeasurementsState !== REQUEST_STATE.FULFILLED) {
             return REQUEST_STATE.PENDING;
         }
-
         return REQUEST_STATE.FULFILLED;
     }, [userWeightMeasurementsState]);
 
@@ -41,15 +47,8 @@ export default function ProgressScreen() {
     });
 
     if (showSplash) {
-        return <DumbbellSplash />;
+        return <DumbbellSplash onAnimationComplete={handleSplashComplete} />;
     }
-
-    const scrollY = useSharedValue(0);
-    const scrollHandler = useAnimatedScrollHandler({
-        onScroll: (event) => {
-            scrollY.value = event.contentOffset.y;
-        },
-    });
 
     return (
         <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
