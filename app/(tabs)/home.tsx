@@ -157,7 +157,7 @@ export default function HomeScreen() {
                     <ActiveProgramDayCompressedCard />
                 </View>
 
-                <View
+                {/* <View
                     style={[
                         styles.divider,
                         {
@@ -166,7 +166,7 @@ export default function HomeScreen() {
                             marginBottom: Spaces.LG,
                         },
                     ]}
-                />
+                /> */}
 
                 {renderForYouSection()}
 

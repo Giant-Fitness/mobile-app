@@ -1,35 +1,79 @@
 // app/(tabs)/progress.tsx
 
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet } from 'react-native';
-import React from 'react';
-import ParallaxScrollView from '@/components/layout/ParallaxScrollView';
+import React, { useEffect, useMemo } from 'react';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
+import { getWeightMeasurementsAsync } from '@/store/user/thunks';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/store/store';
+import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
+import { useNavigation } from '@react-navigation/native';
+import { DumbbellSplash } from '@/components/base/DumbbellSplash';
+import { REQUEST_STATE } from '@/constants/requestStates';
+import { useSplashScreen } from '@/hooks/useSplashScreen';
+import { WeightOverviewChartCard } from '@/components/progress/WeightOverviewChartCard';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
 
 export default function ProgressScreen() {
+    const dispatch = useDispatch<AppDispatch>();
+    const { userWeightMeasurements, userWeightMeasurementsState, error } = useSelector((state: RootState) => state.user);
+
+    useEffect(() => {
+        if (userWeightMeasurementsState === REQUEST_STATE.IDLE) {
+            dispatch(getWeightMeasurementsAsync());
+        }
+    }, [dispatch, userWeightMeasurementsState]);
+
+    const dataLoadedState = useMemo(() => {
+        if (userWeightMeasurementsState !== REQUEST_STATE.FULFILLED) {
+            return REQUEST_STATE.PENDING;
+        }
+
+        return REQUEST_STATE.FULFILLED;
+    }, [userWeightMeasurementsState]);
+
+    const { showSplash, handleSplashComplete } = useSplashScreen({
+        dataLoadedState: dataLoadedState,
+    });
+
+    if (showSplash) {
+        return <DumbbellSplash />;
+    }
+
+    const scrollY = useSharedValue(0);
+    const scrollHandler = useAnimatedScrollHandler({
+        onScroll: (event) => {
+            scrollY.value = event.contentOffset.y;
+        },
+    });
+
     return (
-        <ParallaxScrollView
-            headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-            headerImage={<Ionicons size={310} name='code-slash' style={styles.headerImage} />}
-        >
-            <ThemedView style={styles.titleContainer}>
-                <ThemedText type='title'>Explore</ThemedText>
+        <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
+            <ThemedView style={styles.cardContainer}>
+                <WeightOverviewChartCard
+                    values={userWeightMeasurements}
+                    isLoading={userWeightMeasurementsState === REQUEST_STATE.PENDING}
+                    onPress={() => console.log('chart pressed')}
+                    style={{
+                        width: '100%',
+                        marginTop: Spaces.LG,
+                        chartContainer: {
+                            height: Sizes.imageSM,
+                        },
+                    }}
+                />
             </ThemedView>
-            <ThemedText>This app includes example code to help you get started.</ThemedText>
-        </ParallaxScrollView>
+        </Animated.ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
-    headerImage: {
-        color: '#808080',
-        bottom: -90,
-        left: -35,
-        position: 'absolute',
-    },
-    titleContainer: {
+    cardContainer: {
         flexDirection: 'row',
-        gap: 8,
+        width: '100%',
+        justifyContent: 'space-between',
+        paddingHorizontal: Spaces.LG,
     },
 });

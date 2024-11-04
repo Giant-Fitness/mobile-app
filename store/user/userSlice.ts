@@ -13,9 +13,13 @@ import {
     endProgramAsync,
     startProgramAsync,
     resetProgramAsync,
+    getWeightMeasurementsAsync,
+    logWeightMeasurementAsync,
+    updateWeightMeasurementAsync,
+    deleteWeightMeasurementAsync,
 } from '@/store/user/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile } from '@/types';
+import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, UserWeightMeasurement } from '@/types';
 
 const userSlice = createSlice({
     name: 'user',
@@ -46,7 +50,7 @@ const userSlice = createSlice({
                 state.userFitnessProfileState = REQUEST_STATE.PENDING;
                 state.error = null;
             })
-            .addCase(getUserFitnessProfileAsync.fulfilled, (state, action) => {
+            .addCase(getUserFitnessProfileAsync.fulfilled, (state, action: PayloadAction<UserFitnessProfile>) => {
                 state.userFitnessProfileState = REQUEST_STATE.FULFILLED;
                 state.userFitnessProfile = action.payload.userFitnessProfile;
             })
@@ -172,6 +176,61 @@ const userSlice = createSlice({
             .addCase(resetProgramAsync.rejected, (state, action) => {
                 state.userProgramProgressState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'Failed to end program';
+            })
+            // Get Weight Measurements
+            .addCase(getWeightMeasurementsAsync.pending, (state) => {
+                state.userWeightMeasurementsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(getWeightMeasurementsAsync.fulfilled, (state, action: PayloadAction<UserWeightMeasurement[]>) => {
+                state.userWeightMeasurementsState = REQUEST_STATE.FULFILLED;
+                state.userWeightMeasurements = action.payload;
+            })
+            .addCase(getWeightMeasurementsAsync.rejected, (state, action) => {
+                state.userWeightMeasurementsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to fetch weight measurements';
+            })
+
+            // Log New Weight Measurement
+            .addCase(logWeightMeasurementAsync.pending, (state) => {
+                state.userWeightMeasurementsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(logWeightMeasurementAsync.fulfilled, (state, action: PayloadAction<UserWeightMeasurement[]>) => {
+                state.userWeightMeasurementsState = REQUEST_STATE.FULFILLED;
+                state.userWeightMeasurements = action.payload;
+            })
+            .addCase(logWeightMeasurementAsync.rejected, (state, action) => {
+                state.userWeightMeasurementsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to log weight measurement';
+            })
+
+            // Update Weight Measurement
+            .addCase(updateWeightMeasurementAsync.pending, (state) => {
+                state.userWeightMeasurementsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(updateWeightMeasurementAsync.fulfilled, (state, action: PayloadAction<UserWeightMeasurement[]>) => {
+                state.userWeightMeasurementsState = REQUEST_STATE.FULFILLED;
+                state.userWeightMeasurements = action.payload;
+            })
+            .addCase(updateWeightMeasurementAsync.rejected, (state, action) => {
+                state.userWeightMeasurementsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to update weight measurement';
+            })
+
+            // Delete Weight Measurement
+            .addCase(deleteWeightMeasurementAsync.pending, (state) => {
+                state.userWeightMeasurementsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(deleteWeightMeasurementAsync.fulfilled, (state, action: PayloadAction<UserWeightMeasurement[]>) => {
+                state.userWeightMeasurementsState = REQUEST_STATE.FULFILLED;
+                state.userWeightMeasurements = action.payload;
+            })
+            .addCase(deleteWeightMeasurementAsync.rejected, (state, action) => {
+                state.userWeightMeasurementsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to delete weight measurement';
             });
     },
 });

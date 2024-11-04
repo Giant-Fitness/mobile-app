@@ -2,7 +2,7 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import UserService from '@/store/user/service';
-import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile } from '@/types';
+import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, UserWeightMeasurement } from '@/types';
 import { RootState } from '@/store/store';
 
 export const getUserAsync = createAsyncThunk<User, void>('user/getUser', async (_, { getState, rejectWithValue }) => {
@@ -215,5 +215,128 @@ export const resetProgramAsync = createAsyncThunk<UserProgramProgress, void>('us
         return UserService.resetProgram(userId);
     } catch (error) {
         return rejectWithValue({ errorMessage: 'Failed to reset program' });
+    }
+});
+
+// Get all weight measurements
+export const getWeightMeasurementsAsync = createAsyncThunk<
+    UserWeightMeasurement[],
+    void,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/getWeightMeasurements', async (_, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Return cached measurements if available
+        if (state.user.userWeightMeasurements.length > 0 && state.user.userWeightMeasurementsState === REQUEST_STATE.FULFILLED) {
+            return state.user.userWeightMeasurements;
+        }
+
+        const measurements = await UserService.getWeightMeasurements(userId);
+        return measurements;
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch weight measurements',
+        });
+    }
+});
+
+// Helper function to refresh weight measurements
+const refreshWeightMeasurements = async (userId: string) => {
+    return await UserService.getWeightMeasurements(userId);
+};
+
+// Log new weight measurement
+export const logWeightMeasurementAsync = createAsyncThunk<
+    UserWeightMeasurement[],
+    { weight: number; measurementTimestamp?: string },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/logWeightMeasurement', async ({ weight, measurementTimestamp }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Log the new measurement
+        await UserService.logWeightMeasurement(userId, weight, measurementTimestamp);
+
+        // Refresh and return all measurements
+        return await refreshWeightMeasurements(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to log weight measurement',
+        });
+    }
+});
+
+// Update weight measurement
+export const updateWeightMeasurementAsync = createAsyncThunk<
+    UserWeightMeasurement[],
+    { timestamp: string; weight: number },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/updateWeightMeasurement', async ({ timestamp, weight }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Update the measurement
+        await UserService.updateWeightMeasurement(userId, timestamp, weight);
+
+        // Refresh and return all measurements
+        return await refreshWeightMeasurements(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to update weight measurement',
+        });
+    }
+});
+
+// Delete weight measurement
+export const deleteWeightMeasurementAsync = createAsyncThunk<
+    UserWeightMeasurement[],
+    { timestamp: string },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/deleteWeightMeasurement', async ({ timestamp }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Delete the measurement
+        await UserService.deleteWeightMeasurement(userId, timestamp);
+
+        // Refresh and return all measurements
+        return await refreshWeightMeasurements(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to delete weight measurement',
+        });
     }
 });
