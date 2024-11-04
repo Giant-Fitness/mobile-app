@@ -1,3 +1,5 @@
+// components/progress/WeightOverviewChartCard.tsx
+
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -9,6 +11,7 @@ import { Path, Svg, Circle } from 'react-native-svg';
 import { format } from 'date-fns';
 import Animated, { useAnimatedStyle, withRepeat, withTiming, withSequence, useSharedValue } from 'react-native-reanimated';
 import { ThemedText } from '../base/ThemedText';
+import { darkenColor, lightenColor } from '@/utils/colorUtils';
 
 type WeightOverviewChartCardProps = {
     values: UserWeightMeasurement[];
@@ -140,7 +143,11 @@ export const WeightOverviewChartCard: React.FC<WeightOverviewChartCardProps> = (
     }
 
     return (
-        <TouchableOpacity style={[styles.card, { backgroundColor: themeColors.purpleTransparent }, style]} onPress={onPress} activeOpacity={0.9}>
+        <TouchableOpacity
+            style={[styles.card, { backgroundColor: lightenColor(themeColors.purpleTransparent, 0.5) }, style]}
+            onPress={onPress}
+            activeOpacity={0.9}
+        >
             <View style={styles.textContainer}>
                 <ThemedText type='title' style={[styles.title]}>
                     Weight Trend
@@ -151,22 +158,31 @@ export const WeightOverviewChartCard: React.FC<WeightOverviewChartCardProps> = (
             </View>
             <View style={[styles.chartContainer, style.chartContainer]}>
                 {processedData && (
-                    <Svg width='100%' height='100%' viewBox='0 0 100 40' preserveAspectRatio='xMidYMid meet'>
-                        <Path d={processedData} stroke={themeColors.purpleSolid} strokeWidth={0.8} fill='none' />
+                    <Svg width='100%' height='100%' viewBox='0 0 100 38' preserveAspectRatio='xMidYMid meet'>
+                        <Path d={processedData} stroke={themeColors.purpleSolid} strokeWidth={0.9} fill='none' />
                         {points.map((point, index) => (
                             <Circle
                                 key={index}
                                 cx={point.x}
                                 cy={point.y}
                                 stroke={themeColors.purpleSolid}
-                                strokeWidth='0.8'
-                                r='1'
+                                strokeWidth='0.9'
+                                r='1.5'
                                 fill={themeColors.purpleTransparent}
                             />
                         ))}
                     </Svg>
                 )}
             </View>
+            <View
+                style={[
+                    styles.divider,
+                    {
+                        borderBottomColor: themeColors.systemBorderColor,
+                        borderBottomWidth: StyleSheet.hairlineWidth,
+                    },
+                ]}
+            />
             <View style={styles.footerContainer}>
                 <ThemedText type='overline' style={[styles.value, { color: themeColors.subText }]}>
                     {averageWeight.toFixed(1)} kg (average)
@@ -211,5 +227,10 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         backgroundColor: '#F5F5F5',
+    },
+    divider: {
+        marginBottom: Spaces.MD,
+        width: '100%',
+        alignSelf: 'center',
     },
 });

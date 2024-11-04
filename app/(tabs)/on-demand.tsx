@@ -13,7 +13,7 @@ import { WorkoutOverviewCard } from '@/components/workouts/WorkoutOverviewCard';
 import { Icon } from '@/components/base/Icon';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
-import { AppDispatch, RootState } from '@/store/rootReducer';
+import { AppDispatch, RootState } from '@/store/store';
 import { getSpotlightWorkoutsAsync, getMultipleWorkoutsAsync } from '@/store/workouts/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';

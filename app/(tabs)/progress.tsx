@@ -18,6 +18,8 @@ import { Spaces } from '@/constants/Spaces';
 
 export default function ProgressScreen() {
     const dispatch = useDispatch<AppDispatch>();
+    const navigation = useNavigation();
+
     const { userWeightMeasurements, userWeightMeasurementsState, error } = useSelector((state: RootState) => state.user);
 
     useEffect(() => {
@@ -55,7 +57,7 @@ export default function ProgressScreen() {
                 <WeightOverviewChartCard
                     values={userWeightMeasurements}
                     isLoading={userWeightMeasurementsState === REQUEST_STATE.PENDING}
-                    onPress={() => console.log('chart pressed')}
+                    onPress={() => navigation.navigate('progress/weight-tracking')}
                     style={{
                         width: '100%',
                         marginTop: Spaces.LG,

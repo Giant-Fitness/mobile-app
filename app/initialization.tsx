@@ -17,7 +17,7 @@ import {
     getUserRecommendationsAsync,
     getWeightMeasurementsAsync,
 } from '@/store/user/thunks';
-import { getMultipleWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
+import { getAllWorkoutsAsync, getMultipleWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 
 const Initialization: React.FC = () => {
@@ -84,7 +84,8 @@ const Initialization: React.FC = () => {
 
     useEffect(() => {
         if (spotlightWorkoutsState === REQUEST_STATE.FULFILLED && spotlightWorkouts) {
-            dispatch(getMultipleWorkoutsAsync({ workoutIds: spotlightWorkouts.WorkoutIds }));
+            // dispatch(getMultipleWorkoutsAsync({ workoutIds: spotlightWorkouts.WorkoutIds }));
+            dispatch(getAllWorkoutsAsync());
         }
     }, [spotlightWorkouts, dispatch]);
 
