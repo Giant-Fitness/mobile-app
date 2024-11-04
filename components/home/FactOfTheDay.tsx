@@ -91,6 +91,7 @@ export const FactOfTheDay = ({}: FactOfTheDayProps) => {
                             {
                                 color: darkenColor(themeColors.tealSolid, 0.3),
                                 lineHeight: 21,
+                                fontSize: 13,
                             },
                         ]}
                     >
@@ -116,7 +117,7 @@ export const FactOfTheDay = ({}: FactOfTheDayProps) => {
 const styles = StyleSheet.create({
     container: {
         marginHorizontal: Spaces.LG,
-        marginTop: Spaces.XXL,
+        marginTop: Spaces.XL,
         marginBottom: Spaces.XL,
         borderRadius: Spaces.MD,
         overflow: 'hidden',

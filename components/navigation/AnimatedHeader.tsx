@@ -20,6 +20,7 @@ type AnimatedHeaderProps = {
     title?: string;
     backButtonColor?: string;
     headerBackground?: string;
+    menuIcon?: string;
     onMenuPress?: () => void;
 };
 
@@ -32,6 +33,7 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
     title,
     backButtonColor,
     headerBackground = 'transparent',
+    menuIcon = 'more-horizontal',
     onMenuPress,
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -60,13 +62,13 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
         <Animated.View style={[styles.headerContainer, animatedHeaderStyle]}>
             <BackButton style={styles.backButton} animatedColor={animatedIconColor} onBackPress={onBackPress} />
             {title && (
-                <ThemedText type='link' style={[styles.title, { color: themeColors.text }]}>
+                <ThemedText type='title' style={[styles.title, { color: themeColors.text }]}>
                     {title}
                 </ThemedText>
             )}
             {onMenuPress && (
                 <TouchableOpacity style={styles.menuButton} onPress={onMenuPress} activeOpacity={1}>
-                    <Icon name='more-horizontal' size={24} color={animatedIconColor} />
+                    <Icon name={menuIcon} size={22} color={animatedIconColor} />
                 </TouchableOpacity>
             )}
         </Animated.View>
@@ -98,8 +100,8 @@ const styles = StyleSheet.create({
     },
     menuButton: {
         position: 'absolute',
-        top: Spaces.XXL + Spaces.SM,
-        right: Spaces.XL,
+        top: Spaces.XXL + Spaces.SM + Spaces.XS + Spaces.XXS,
+        right: Spaces.LG,
         zIndex: 10,
     },
 });

@@ -33,3 +33,9 @@ export interface UserFitnessProfile {
     DaysPerWeekDesired: string;
     PrimaryFitnessGoal: string;
 }
+
+export interface UserWeightMeasurement {
+    UserId: string;
+    MeasurementTimestamp: string;
+    Weight: number;
+}

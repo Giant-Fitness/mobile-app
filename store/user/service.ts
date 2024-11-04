@@ -1,6 +1,6 @@
 // store/user/service.ts
 
-import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile } from '@/types';
+import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, UserWeightMeasurement } from '@/types';
 import axios, { AxiosInstance } from 'axios';
 import { authService } from '@/utils/auth';
 
@@ -365,6 +365,57 @@ const resetProgram = async (userId: string): Promise<UserProgramProgress> => {
     }
 };
 
+const getWeightMeasurements = async (userId: string): Promise<UserWeightMeasurement[]> => {
+    console.log('service: getWeightMeasurements');
+    try {
+        const response = await api.get(`/users/${userId}/weight-measurements`);
+        const result = parseResponse(response);
+        return result.measurements || [];
+    } catch (error) {
+        handleAxiosError(error);
+        throw error;
+    }
+};
+
+const logWeightMeasurement = async (userId: string, weight: number, measurementTimestamp?: string): Promise<UserWeightMeasurement> => {
+    console.log('service: logWeightMeasurement');
+    try {
+        const payload = {
+            weight,
+            ...(measurementTimestamp && { measurementTimestamp }),
+        };
+        const response = await api.post(`/users/${userId}/weight-measurements`, payload);
+        const result = parseResponse(response);
+        return result.measurements;
+    } catch (error) {
+        handleAxiosError(error);
+        throw error;
+    }
+};
+
+const updateWeightMeasurement = async (userId: string, timestamp: string, weight: number): Promise<UserWeightMeasurement> => {
+    console.log('service: updateWeightMeasurement');
+    try {
+        const query = `/users/${userId}/weight-measurements/${timestamp}`;
+        const response = await api.put(query, { weight });
+        const result = parseResponse(response);
+        return result.measurement;
+    } catch (error) {
+        handleAxiosError(error);
+        throw error;
+    }
+};
+
+const deleteWeightMeasurement = async (userId: string, timestamp: string): Promise<void> => {
+    console.log('service: deleteWeightMeasurement');
+    try {
+        await api.delete(`/users/${userId}/weight-measurements/${timestamp}`);
+    } catch (error) {
+        handleAxiosError(error);
+        throw error;
+    }
+};
+
 export default {
     getUser,
     getUserFitnessProfile,
@@ -376,4 +427,8 @@ export default {
     endProgram,
     startProgram,
     resetProgram,
+    getWeightMeasurements,
+    logWeightMeasurement,
+    updateWeightMeasurement,
+    deleteWeightMeasurement,
 };
