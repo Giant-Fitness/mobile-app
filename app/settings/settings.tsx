@@ -6,9 +6,12 @@ import { useNavigation } from '@react-navigation/native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { signOut } from 'aws-amplify/auth';
 import { authService } from '@/utils/auth';
+import { resetStore } from '@/store/actions';
+import { useDispatch } from 'react-redux';
 
 const SettingsScreen = () => {
     const navigation = useNavigation();
+    const dispatch = useDispatch();
     const BYPASS_AUTH = false; // toggle this to false to enable real authentication handling
 
     const handleSignOut = async () => {
@@ -23,8 +26,13 @@ const SettingsScreen = () => {
             try {
                 // Clear stored auth data
                 await authService.clearAuthData();
+
                 // Sign out from Amplify
                 await signOut();
+
+                // Reset the entire Redux store to initial state
+                dispatch(resetStore());
+
                 // Navigate to login
                 navigation.reset({
                     index: 0,
