@@ -1,18 +1,35 @@
 // app/settings/settings.tsx
 
-import React from 'react';
-import { StyleSheet, View, Button, Alert } from 'react-native';
+import React, { useEffect } from 'react';
+import { StyleSheet, View, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { signOut } from 'aws-amplify/auth';
 import { authService } from '@/utils/auth';
 import { resetStore } from '@/store/actions';
 import { useDispatch } from 'react-redux';
+import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
+import { Colors } from '@/constants/Colors';
+import { useSharedValue } from 'react-native-reanimated';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Sizes } from '@/constants/Sizes';
+import { PrimaryButton } from '@/components/buttons/PrimaryButton';
+import { TextButton } from '@/components/buttons/TextButton';
 
 const SettingsScreen = () => {
     const navigation = useNavigation();
     const dispatch = useDispatch();
     const BYPASS_AUTH = false; // toggle this to false to enable real authentication handling
+
+    const scrollY = useSharedValue(0);
+
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
+
+    useEffect(() => {
+        navigation.setOptions({ headerShown: false });
+    }, [navigation]);
 
     const handleSignOut = async () => {
         if (BYPASS_AUTH) {
@@ -22,7 +39,6 @@ const SettingsScreen = () => {
                 routes: [{ name: 'index' }],
             });
         } else {
-            // Handle sign out using Amplify
             try {
                 // Clear stored auth data
                 await authService.clearAuthData();
@@ -46,12 +62,35 @@ const SettingsScreen = () => {
     };
 
     return (
-        <ThemedView>
-            <Button title='Sign Out' onPress={handleSignOut} />
+        <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
+            <AnimatedHeader scrollY={scrollY} disableColorChange={true} headerBackground={themeColors.background} title='Settings' />
+            <ThemedView style={[styles.content]}>
+                <TextButton
+                    iconStyle={{ marginTop: Spaces.XXS }}
+                    iconName='exit'
+                    size='LG'
+                    style={[styles.signOutButton]}
+                    text='Sign Out'
+                    onPress={handleSignOut}
+                />
+            </ThemedView>
         </ThemedView>
     );
 };
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        paddingTop: Sizes.headerHeight,
+    },
+    content: {
+        marginTop: Spaces.XL,
+    },
+    signOutButton: {
+        width: '80%',
+        alignSelf: 'center',
+        borderRadius: Spaces.SM,
+    },
+});
 
 export default SettingsScreen;
