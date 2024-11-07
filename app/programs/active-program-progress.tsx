@@ -142,7 +142,7 @@ const ActiveProgramProgressScreen = () => {
         },
         {
             label: 'Reset Progress',
-            icon: 'warning',
+            icon: 'repeat',
             onPress: () => {
                 setIsResetProgramModalVisible(true);
             },

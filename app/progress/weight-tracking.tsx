@@ -16,7 +16,6 @@ import { WeightChart } from '@/components/progress/WeightChart';
 import { AppDispatch, RootState } from '@/store/store';
 import {
     TimeRange,
-    TIME_RANGES,
     aggregateData,
     calculateMovingAverage,
     getTimeWindow,
