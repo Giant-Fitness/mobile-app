@@ -7,7 +7,7 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { Image } from 'expo-image';
+import { Image, ImageContentFit } from 'expo-image';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 
@@ -15,6 +15,7 @@ type ImageTextOverlayProps = {
     image: any;
     title?: string;
     subtitle?: string;
+    imageContentFit?: ImageContentFit;
     titleStyle?: StyleProp<TextStyle>;
     subtitleStyle?: StyleProp<TextStyle>;
     containerStyle?: StyleProp<ViewStyle>;
@@ -31,6 +32,7 @@ export const ImageTextOverlay: React.FC<ImageTextOverlayProps> = ({
     subtitle,
     titleStyle,
     subtitleStyle,
+    imageContentFit = 'cover',
     titleType = 'titleLarge', // Default to 'titleLarge' if not provided
     subtitleType = 'subtitle', // Default to 'subtitle' if not provided
     containerStyle,
@@ -44,7 +46,7 @@ export const ImageTextOverlay: React.FC<ImageTextOverlayProps> = ({
     return (
         <ThemedView style={[containerStyle]}>
             <ThemedView style={styles.imageWrapper}>
-                <Image source={image} style={styles.image} contentFit='cover' cachePolicy='memory-disk' placeholder={placeholder} />
+                <Image source={image} style={styles.image} contentFit={imageContentFit} cachePolicy='memory-disk' placeholder={placeholder} />
                 <LinearGradient colors={gradientColors} style={styles.gradientOverlay} />
                 <ThemedView style={[styles.textContainer, textContainerStyle]}>
                     <ThemedText type={titleType} style={[styles.title, titleStyle, { color: themeColors.white }]}>

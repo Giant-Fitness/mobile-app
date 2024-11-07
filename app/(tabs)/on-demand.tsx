@@ -1,7 +1,7 @@
 // app/(tabs)/on-demand.tsx
 
 import React, { useEffect, useMemo } from 'react';
-import { Dimensions, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,9 +10,7 @@ import { ThemedView } from '@/components/base/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { WorkoutOverviewCard } from '@/components/workouts/WorkoutOverviewCard';
-import { Icon } from '@/components/base/Icon';
 import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
 import { AppDispatch, RootState } from '@/store/store';
 import { getSpotlightWorkoutsAsync, getMultipleWorkoutsAsync } from '@/store/workouts/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
@@ -165,9 +163,9 @@ export default function WorkoutsScreen() {
                                 textColor={category.textColor}
                                 style={{ marginRight: 0 }}
                                 width={tileWidth}
-                                height={120}
-                                imageSize={60}
-                                fontSize={15}
+                                height={110}
+                                imageSize={40}
+                                fontSize={14}
                             />
                         </View>
                     ))}

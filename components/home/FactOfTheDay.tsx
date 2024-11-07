@@ -140,6 +140,6 @@ const styles = StyleSheet.create({
         position: 'absolute',
         right: -Spaces.XL - Spaces.SM, // Adjust this value to shift more or less
         width: 200, // Adjust size as needed
-        height: '80%',
+        height: '60%',
     },
 });

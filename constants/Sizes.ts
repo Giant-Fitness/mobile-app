@@ -10,6 +10,7 @@ export const Sizes = {
     imageMDHeight: verticalScale(110), // Medium image size
     imageLGHeight: verticalScale(160), // Large image size
     imageXLHeight: verticalScale(220), // XL image size
+    imageXLWidth: verticalScale(200), // XL image size
     imageXXLWidth: scale(220), // XXL image size
     imageXXLHeight: verticalScale(250), // XLarge image size
     image3XLHeight: verticalScale(320), // XLarge image size

@@ -18,7 +18,7 @@ import { AppDispatch, RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { RecommendedProgramCard } from '@/components/programs/RecommendedProgramCard';
 import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
-import { darkenColor } from '@/utils/colorUtils';
+import { darkenColor, lightenColor } from '@/utils/colorUtils';
 
 const MenuItem = ({ title, description, onPress, backgroundColor, textColor, image, isGrid = false }) => {
     if (isGrid) {
@@ -50,7 +50,7 @@ const MenuItem = ({ title, description, onPress, backgroundColor, textColor, ima
                     style={[
                         styles.menuBackgroundImage,
                         {
-                            opacity: 0.15,
+                            opacity: 0.12,
                             tintColor: textColor,
                         },
                     ]}
@@ -110,8 +110,8 @@ export default function InactiveProgramHome() {
             description: 'Let us recommend a plan tailored to your goals',
             image: require('@/assets/images/wand.png'),
             onPress: () => navigateTo('programs/program-recommender-wizard'),
-            backgroundColor: darkenColor(themeColors.tangerineTransparent, 0),
-            textColor: darkenColor(themeColors.tangerineSolid, 0.4),
+            backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.7),
+            textColor: darkenColor(themeColors.tangerineSolid, 0),
             show: !isOnboardingComplete,
         },
         {
@@ -119,8 +119,8 @@ export default function InactiveProgramHome() {
             description: 'Our structured training plans turn your goals into achievements',
             image: require('@/assets/images/clipboard.png'),
             onPress: () => navigateTo('programs/browse-programs'),
-            backgroundColor: themeColors.tangerineTransparent,
-            textColor: darkenColor(themeColors.tangerineSolid, 0.3),
+            backgroundColor: lightenColor(themeColors.maroonTransparent, 0.3),
+            textColor: darkenColor(themeColors.maroonSolid, 0),
             show: true,
         },
     ].filter((item) => item.show);
@@ -146,14 +146,14 @@ export default function InactiveProgramHome() {
                     <ImageTextOverlay
                         image={require('@/assets/images/trainer-2.png')}
                         containerStyle={styles.imageOverlayContainer}
-                        titleType='titleLarge'
                         gradientColors={['transparent', 'transparent']}
+                        imageContentFit={'contain'}
                     />
                 </View>
             )}
 
-            <View style={menuItems.length > 1 ? styles.gridContainer : styles.menuContainer}>
-                {menuItems.length > 1
+            <View style={menuItems.length > 2 ? styles.gridContainer : styles.menuContainer}>
+                {menuItems.length > 2
                     ? // Grid layout for multiple items
                       menuItems.map((item, index) => {
                           const screenWidth = Dimensions.get('window').width;
@@ -200,14 +200,14 @@ const styles = StyleSheet.create({
     },
     menuDescription: {
         lineHeight: 21,
-        fontSize: 14,
+        fontSize: 13,
         maxWidth: '90%',
     },
     menuBackgroundImage: {
         position: 'absolute',
         right: -Spaces.XL - Spaces.SM,
         width: 200,
-        height: '80%',
+        height: '60%',
     },
     recommendedProgramContainer: {
         marginHorizontal: Spaces.LG,
@@ -217,7 +217,8 @@ const styles = StyleSheet.create({
         marginBottom: Spaces.MD,
     },
     motivationalContainer: {
-        marginBottom: Spaces.LG,
+        marginBottom: 0,
+        marginTop: -Spaces.MD,
     },
     imageOverlayContainer: {
         height: Sizes.imageXXLHeight,
@@ -225,6 +226,7 @@ const styles = StyleSheet.create({
     },
     menuContainer: {
         marginTop: Spaces.MD,
+        paddingBottom: Spaces.LG,
     },
     gridContainer: {
         flexDirection: 'row',
