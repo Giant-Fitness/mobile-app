@@ -14,6 +14,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
+import { darkenColor } from '@/utils/colorUtils';
 
 const WhyLMCScreen = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -31,142 +32,158 @@ const WhyLMCScreen = () => {
         navigation.setOptions({ headerShown: false });
     }, [navigation]);
 
-    // Custom GIF renderer component to handle GIF display within TopImageInfoCard
-    const GifRenderer = () => (
-        <Image
-            source={require('@/assets/gifs/team.gif')}
-            style={styles.gifStyle}
-            resizeMode="cover"
-        />
-    );
-
     const features = [
         {
-            title: 'Holistic Wellness Approach',
-            icon: 'favorite',
+            title: 'Balanced Fitness Approach',
+            icon: 'star',
+            iconSize: 12,
+            image: require('@/assets/images/gymnastics-rings.png'),
             points: [
-                'Comprehensive fitness programs designed by experts',
-                'Personalized nutrition guidance with Indian diet focus',
-                'Mental wellness support and stress management',
+                'Programs that cover strength, cardio, flexibility, and more',
+                'Nutrition advice to fit your unique goals',
+                'Support to keep your motivation and energy high',
             ],
+            backgroundColor: themeColors.purpleTransparent,
+            textColor: darkenColor(themeColors.purpleSolid, 0.3),
         },
         {
-            title: 'Community-Driven Platform',
-            icon: 'groups',
-            points: [
-                'Connect with like-minded individuals',
-                'Regular in-person events and meetups',
-                'Share progress and celebrate victories together',
-            ],
-        },
-        {
-            title: 'Expert Guidance & Support',
-            icon: 'school',
-            points: [
-                'Learn from certified fitness professionals',
-                'Get personalized feedback on your journey',
-                'Access to nutrition experts and coaches',
-            ],
-        },
-        {
-            title: 'Smart Progress Tracking',
+            title: 'Smart Tracking for Real Progress',
             icon: 'trending-up',
+            iconSize: 13,
+            image: require('@/assets/images/line-chart.png'),
             points: [
-                'Intelligent workout recommendations',
-                'Body measurement and progress photos',
-                'Adaptive nutrition tracking',
+                'Personalized workout suggestions based on your progress',
+                'Record every milestone with photos and data',
+                'Flexible nutrition tracking to keep you on course',
             ],
+            backgroundColor: themeColors.blueTransparent,
+            textColor: darkenColor(themeColors.blueSolid, 0.3),
         },
         {
-            title: 'Your Voice Matters',
+            title: 'Made with You, for You',
             icon: 'campaign',
+            iconSize: 18,
+            image: require('@/assets/images/megaphone.png'),
             points: [
-                'Public product roadmap',
-                'Community-driven feature development',
-                'Regular feedback sessions and surveys',
+                "See what's coming next with our public roadmap",
+                'Community-driven features shaped by you',
+                'Share feedback through surveys and open sessions',
             ],
-        }
+            backgroundColor: themeColors.maroonTransparent,
+            textColor: darkenColor(themeColors.maroonSolid, 0.3),
+        },
+        // {
+        //     title: 'Together We Go Further (Coming Soon)',
+        //     icon: 'groups',
+        //     points: [
+        //         'Connect with like-minded individuals',
+        //         'Regular in-person events and meetups',
+        //         'Share progress and celebrate victories together',
+        //     ],
+        // },
+        // {
+        //     title: 'Expert Guidance & Support',
+        //     icon: 'school',
+        //     points: [
+        //         'Learn from certified fitness professionals',
+        //         'Get personalized feedback on your journey',
+        //         'Access to nutrition experts and coaches',
+        //     ],
+        // },
     ];
 
     const renderFeatureSection = (feature: typeof features[0], index: number) => (
-        <ThemedView 
-            key={index}
-            style={[
-                styles.featureContainer,
-                { backgroundColor: themeColors.backgroundSecondary }
-            ]}
-        >
-            <View style={styles.featureHeader}>
-                <Icon name={feature.icon} size={24} color={themeColors.text} />
-                <ThemedText type="titleMedium" style={styles.featureTitle}>
-                    {feature.title}
-                </ThemedText>
-            </View>
-            {feature.points.map((point, idx) => (
-                <View key={idx} style={styles.pointContainer}>
-                    <Icon name="check-circle" size={16} color={themeColors.buttonPrimary} />
-                    <ThemedText type="body" style={styles.pointText}>
-                        {point}
-                    </ThemedText>
+        <ThemedView key={index} style={[styles.featureContainer, { backgroundColor: feature.backgroundColor }]}>
+            <View style={styles.contentWrapper}>
+                <View style={styles.content}>
+                    <View style={styles.featureHeader}>
+                        <Icon style={{ marginTop: Spaces.XS }} name={feature.icon} size={feature.iconSize} color={feature.textColor} />
+                        <ThemedText type='title' style={[styles.featureTitle, { color: feature.textColor }]}>
+                            {feature.title}
+                        </ThemedText>
+                    </View>
+                    {feature.points.map((point, idx) => (
+                        <View key={idx} style={styles.pointContainer}>
+                            <Icon style={{ marginTop: Spaces.XS }} name='check-outline' size={12} color={feature.textColor} />
+                            <ThemedText type='overline' style={[styles.pointText, { color: feature.textColor }]}>
+                                {point}
+                            </ThemedText>
+                        </View>
+                    ))}
                 </View>
-            ))}
+                <Image
+                    source={feature.image}
+                    style={[
+                        styles.backgroundImage,
+                        {
+                            opacity: colorScheme === 'light' ? 0.1 : 0.15,
+                            tintColor: feature.textColor,
+                        },
+                    ]}
+                    resizeMode='contain'
+                />
+            </View>
         </ThemedView>
     );
 
     return (
-        <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
-            <AnimatedHeader
-                scrollY={scrollY}
-                headerInterpolationStart={Spaces.XXL}
-                headerInterpolationEnd={Sizes.imageLGHeight}
-            />
-            <Animated.ScrollView
-                onScroll={scrollHandler}
-                scrollEventThrottle={16}
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ flexGrow: 1 }}
-            >
+        <ThemedView style={{ paddingTop: Spaces.XXL, flex: 1, backgroundColor: themeColors.background }}>
+            <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Spaces.SM} headerInterpolationEnd={Spaces.MD} />
+            <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
                 <TopImageInfoCard
-                    CustomImageComponent={GifRenderer}
-                    title="Why Choose Lean Machine?"
-                    subtitle="Your All-in-One Wellness Partner"
-                    titleType="titleLarge"
-                    subtitleType="link"
-                    subtitleStyle={{ 
+                    image={require('@/assets/images/team.svg')}
+                    title='The LMC Difference'
+                    subtitle='Fitness, Simplified and Supercharged'
+                    titleType='titleLarge'
+                    subtitleType='link'
+                    subtitleStyle={{
                         marginBottom: Spaces.SM,
                         color: themeColors.subText,
-                        marginTop: 0
+                        marginTop: 0,
                     }}
                     titleStyle={{ marginBottom: 0 }}
-                    containerStyle={{ elevation: 5, marginBottom: 0 }}
                     contentContainerStyle={{
                         backgroundColor: themeColors.background,
                         paddingHorizontal: Spaces.LG,
+                        paddingBottom: 0,
                     }}
+                    useImageContainer={true}
                     imageStyle={{ height: Sizes.imageXXLHeight }}
                     titleFirst={true}
-                    extraContent={
-                        <ThemedView style={styles.visionContainer}>
-                            <ThemedText type="body" style={styles.visionText}>
-                                We're building more than just another fitness app - we're creating a supportive community where everyone can achieve their wellness goals together. With expert guidance, personalized support, and a focus on holistic health, we're here to help you become the best version of yourself.
-                            </ThemedText>
-                        </ThemedView>
-                    }
                 />
-                
-                <ThemedView style={styles.featuresContainer}>
-                    {features.map((feature, index) => renderFeatureSection(feature, index))}
+
+                <ThemedView style={styles.descriptionContainer}>
+                    <ThemedView>
+                        <View>
+                            <View>
+                                <ThemedText type='link' style={[styles.descriptionText]}>
+                                    Starting a fitness journey can be daunting – there's a lot of "What do I do?" and "How do I stay on track?" That's why we
+                                    created LMC: to simplify the steps and give you everything you need to succeed without overthinking.
+                                </ThemedText>
+                                <ThemedText
+                                    type='link'
+                                    style={[
+                                        styles.descriptionText,
+                                        {
+                                            marginTop: Spaces.MD,
+                                        },
+                                    ]}
+                                >
+                                    LMC isn't just about fitness; it's about creating something together. Your feedback and ideas shape LMC, helping us make it
+                                    the best fit for you and the whole community.
+                                </ThemedText>
+                            </View>
+                        </View>
+                    </ThemedView>
                 </ThemedView>
+
+                <ThemedView style={styles.featuresContainer}>{features.map((feature, index) => renderFeatureSection(feature, index))}</ThemedView>
             </Animated.ScrollView>
         </ThemedView>
     );
 };
 
 const styles = StyleSheet.create({
-    gifStyle: {
-        width: '100%',
-        height: Sizes.imageXXLHeight,
-    },
     visionContainer: {
         paddingVertical: Spaces.MD,
         paddingHorizontal: Spaces.SM,
@@ -177,18 +194,29 @@ const styles = StyleSheet.create({
     },
     featuresContainer: {
         padding: Spaces.MD,
-        gap: Spaces.MD,
+        paddingBottom: Spaces.XL,
+        gap: Spaces.LG,
     },
     featureContainer: {
-        padding: Spaces.LG,
         borderRadius: Spaces.MD,
-        gap: Spaces.MD,
+        overflow: 'hidden',
+    },
+    contentWrapper: {
+        position: 'relative',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    content: {
+        padding: Spaces.LG,
+        flex: 1,
+        zIndex: 1,
     },
     featureHeader: {
         flexDirection: 'row',
-        alignItems: 'center',
-        gap: Spaces.MD,
-        marginBottom: Spaces.SM,
+        alignItems: 'flex-start',
+        gap: Spaces.SM,
+        marginBottom: Spaces.MD,
     },
     featureTitle: {
         flex: 1,
@@ -198,10 +226,26 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         gap: Spaces.SM,
         paddingLeft: Spaces.SM,
+        marginBottom: Spaces.SM,
     },
     pointText: {
         flex: 1,
         lineHeight: 20,
+        fontSize: 14,
+    },
+    backgroundImage: {
+        position: 'absolute',
+        right: -Spaces.XL - Spaces.SM,
+        width: 200,
+        height: '80%',
+    },
+    descriptionContainer: {
+        paddingHorizontal: Spaces.LG,
+        paddingTop: Spaces.MD,
+        paddingBottom: Spaces.XL,
+    },
+    descriptionText: {
+        lineHeight: 21,
     },
 });
 

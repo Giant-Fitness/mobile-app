@@ -1,7 +1,5 @@
 // components/media/TopImageInfoCard.tsx
 
-// components/media/TopImageInfoCard.tsx
-
 import React from 'react';
 import { StyleSheet, StyleProp, ViewStyle, TextStyle, ImageSourcePropType, ImageStyle, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -17,8 +15,8 @@ type TopImageInfoCardProps = {
     image: ImageSourcePropType;
     title: string;
     subtitle?: string;
-    titleType?: ThemedTextProps['type']; // Use ThemedTextProps for titleType
-    subtitleType?: ThemedTextProps['type']; // Use ThemedTextProps for subtitleType
+    titleType?: ThemedTextProps['type'];
+    subtitleType?: ThemedTextProps['type'];
     extraContent?: React.ReactNode;
     containerStyle?: StyleProp<ViewStyle>;
     imageStyle?: StyleProp<ImageStyle>;
@@ -28,6 +26,7 @@ type TopImageInfoCardProps = {
     placeholder?: any;
     titleFirst?: boolean;
     onPress?: () => void;
+    useImageContainer?: boolean; // New prop for optional image container
 };
 
 export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
@@ -45,14 +44,26 @@ export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
     placeholder = '@/assets/images/logo.png',
     titleFirst = false,
     onPress,
+    useImageContainer = false, // Default to false for backward compatibility
 }) => {
-    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
-    const themeColors = Colors[colorScheme]; // Access theme-specific colors
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
+
+    const renderImage = () => {
+        if (useImageContainer) {
+            return (
+                <ThemedView style={styles.imageContainer}>
+                    <Image source={image} style={[styles.image, imageStyle]} placeholder={placeholder} contentFit='contain' />
+                </ThemedView>
+            );
+        }
+        return <Image source={image} style={[styles.image, imageStyle]} placeholder={placeholder} />;
+    };
+
     return (
         <TouchableOpacity onPress={onPress} style={[styles.container, containerStyle]} activeOpacity={1}>
-            <Image source={image} style={[styles.image, imageStyle]} placeholder={placeholder} />
+            {renderImage()}
             <ThemedView style={[styles.contentContainer, { backgroundColor: themeColors.containerHighlight }, contentContainerStyle]}>
-                {/* Conditionally render title and subtitle based on the 'titleFirst' prop */}
                 {titleFirst ? (
                     <>
                         <ThemedText type={titleType} style={[styles.title, titleStyle]}>
@@ -86,6 +97,10 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: 'transparent',
         overflow: 'hidden',
+    },
+    imageContainer: {
+        width: '100%',
+        backgroundColor: 'transparent',
     },
     image: {
         width: '100%',
