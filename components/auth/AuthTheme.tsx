@@ -154,7 +154,7 @@ export const useAuthTheme = (): Theme => {
                     backgroundColor: themeColors.containerHighlight,
                 },
                 containerDefault: {
-                    backgroundColor: themeColors.containerHighlight,
+                    backgroundColor: themeColors.background,
                     borderWidth: StyleSheet.hairlineWidth,
                     borderColor: themeColors.systemBorderColor,
                 },
@@ -192,11 +192,12 @@ export const useAuthTheme = (): Theme => {
                     paddingVertical: Spaces.SM + Spaces.XS,
                     paddingHorizontal: Spaces.LG,
                     fontSize: 14,
-                    color: themeColors.subTextSecondary,
+                    color: themeColors.text,
                 },
                 fieldContainer: {
                     backgroundColor: themeColors.background,
-                    borderWidth: StyleSheet.hairlineWidth,
+                    borderWidth: 0,
+                    borderBottomWidth: StyleSheet.hairlineWidth,
                     borderColor: themeColors.systemBorderColor,
                     borderRadius: Spaces.SM,
                 },

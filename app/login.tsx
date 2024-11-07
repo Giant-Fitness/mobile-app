@@ -74,6 +74,9 @@ const LoginPage = () => {
                             ForgotPassword: ({ fields, ...props }) => (
                                 <Authenticator.ForgotPassword {...props} fields={fields.map((field) => ({ ...field, labelHidden: true }))} />
                             ),
+                            ConfirmResetPassword: ({ fields, ...props }) => (
+                                <Authenticator.ConfirmResetPassword {...props} fields={fields.map((field) => ({ ...field, labelHidden: true }))} />
+                            ),
                         }}
                         loginMechanisms={['email']}
                         signUpAttributes={['email']}
