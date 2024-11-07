@@ -66,13 +66,13 @@ export default function HomeScreen() {
             backgroundColor: themeColors.purpleTransparent,
             textColor: darkenColor(themeColors.purpleSolid, 0.3),
         },
-        {
-            title: 'Body Measurements',
-            image: require('@/assets/images/measure.png'),
-            onPress: () => console.log('LogMeasurements'),
-            backgroundColor: themeColors.blueTransparent,
-            textColor: darkenColor(themeColors.blueSolid, 0.3),
-        },
+        // {
+        //     title: 'Body Measurements',
+        //     image: require('@/assets/images/measure.png'),
+        //     onPress: () => console.log('LogMeasurements'),
+        //     backgroundColor: themeColors.blueTransparent,
+        //     textColor: darkenColor(themeColors.blueSolid, 0.3),
+        // },
         // {
         //     title: 'Capture Progress',
         //     image: require('@/assets/images/camera.png'),
