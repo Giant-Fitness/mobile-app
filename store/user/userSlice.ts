@@ -4,6 +4,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { initialState } from '@/store/user/userState';
 import {
     getUserAsync,
+    updateUserAsync,
     getUserFitnessProfileAsync,
     updateUserFitnessProfileAsync,
     getUserRecommendationsAsync,
@@ -43,6 +44,19 @@ const userSlice = createSlice({
             .addCase(getUserAsync.rejected, (state, action) => {
                 state.userState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'Failed to fetch user';
+            })
+
+            .addCase(updateUserAsync.pending, (state) => {
+                state.userState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(updateUserAsync.fulfilled, (state, action: PayloadAction<User>) => {
+                state.userState = REQUEST_STATE.FULFILLED;
+                state.user = action.payload;
+            })
+            .addCase(updateUserAsync.rejected, (state, action) => {
+                state.userState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to update user';
             })
 
             // Get User Fitness Profile

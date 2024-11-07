@@ -168,6 +168,14 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
             return <AnimatedFontAwesome name='arrow-trend-up' {...commonProps} />;
         case 'campaign':
             return <AnimatedMaterialIcons name='campaign' {...commonProps} />;
+        case 'email':
+            return <AnimatedMaterialCommunityIcons name='email-outline' {...commonProps} />;
+        case 'lock':
+            return <AnimatedMaterialCommunityIcons name='lock-outline' {...commonProps} />;
+        case 'eye':
+            return <AnimatedIonicons name='eye-outline' {...commonProps} />;
+        case 'eye-off':
+            return <AnimatedIonicons name='eye-off-outline' {...commonProps} />;
         default:
             return <AnimatedIonicons name='alert-circle-outline' {...commonProps} />;
     }

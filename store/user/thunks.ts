@@ -14,6 +14,25 @@ export const getUserAsync = createAsyncThunk<User, void>('user/getUser', async (
     return await UserService.getUser();
 });
 
+export const updateUserAsync = createAsyncThunk<
+    User,
+    Partial<User>,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/updateUser', async (updates, { getState, rejectWithValue }) => {
+    try {
+        // Update the user
+        const updatedUser = await UserService.updateUser(updates);
+        return updatedUser;
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to update user',
+        });
+    }
+});
+
 export const getUserFitnessProfileAsync = createAsyncThunk<
     UserFitnessProfile,
     void,
