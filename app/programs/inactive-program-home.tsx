@@ -1,15 +1,13 @@
 // app/programs/inactive-program-home.tsx
 
 import React, { useState, useEffect } from 'react';
-import { ScrollView, StyleSheet, View, TouchableOpacity } from 'react-native';
+import { ScrollView, StyleSheet, View, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-// import { router } from 'expo-router';
 import { useSelector, useDispatch } from 'react-redux';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { Icon } from '@/components/base/Icon';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
@@ -20,25 +18,48 @@ import { AppDispatch, RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { RecommendedProgramCard } from '@/components/programs/RecommendedProgramCard';
 import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
-import motivationalImage from '@/assets/images/trainer-alt.svg';
+import { darkenColor } from '@/utils/colorUtils';
 
-const MenuItem = ({ icon, title, text, onPress, titleColor, textColor, leftIconColor, backgroundColor, iconSize }) => (
-    <TouchableOpacity style={styles.menuItem} activeOpacity={1} onPress={onPress}>
-        <View style={styles.menuItemLeft}>
-            <View style={[styles.iconBox, { backgroundColor }]}>
-                <Icon name={icon} size={iconSize} color={leftIconColor} />
+const MenuItem = ({ title, description, onPress, backgroundColor, textColor, image, isGrid = false }) => {
+    if (isGrid) {
+        return (
+            <TouchableOpacity onPress={onPress} style={[styles.gridMenuItem, { backgroundColor }]} activeOpacity={0.7}>
+                <View style={styles.gridContentWrapper}>
+                    <Image source={image} style={[styles.gridImage, { tintColor: textColor }]} resizeMode='contain' />
+                    <ThemedText type='overline' style={[styles.gridTitle, { color: textColor }]} numberOfLines={2}>
+                        {title}
+                    </ThemedText>
+                </View>
+            </TouchableOpacity>
+        );
+    }
+
+    return (
+        <TouchableOpacity onPress={onPress} style={[styles.menuItem, { backgroundColor }]} activeOpacity={0.7}>
+            <View style={styles.menuContentWrapper}>
+                <View style={styles.menuContent}>
+                    <ThemedText type='title' style={[styles.menuTitle, { color: textColor }]}>
+                        {title}
+                    </ThemedText>
+                    <ThemedText type='overline' style={[styles.menuDescription, { color: textColor }]}>
+                        {description}
+                    </ThemedText>
+                </View>
+                <Image
+                    source={image}
+                    style={[
+                        styles.menuBackgroundImage,
+                        {
+                            opacity: 0.15,
+                            tintColor: textColor,
+                        },
+                    ]}
+                    resizeMode='contain'
+                />
             </View>
-            <View style={styles.menuTextContainer}>
-                <ThemedText type='buttonSmall' style={[{ color: titleColor }]}>
-                    {title}
-                </ThemedText>
-                <ThemedText type='bodySmall' style={[styles.menuText, { color: textColor }]}>
-                    {text}
-                </ThemedText>
-            </View>
-        </View>
-    </TouchableOpacity>
-);
+        </TouchableOpacity>
+    );
+};
 
 export default function InactiveProgramHome() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -63,7 +84,6 @@ export default function InactiveProgramHome() {
                     await dispatch(getProgramAsync({ programId: userRecommendations.RecommendedProgramID }));
                 }
             }
-
             setDataLoaded(REQUEST_STATE.FULFILLED);
         };
 
@@ -86,30 +106,29 @@ export default function InactiveProgramHome() {
 
     const menuItems = [
         {
-            icon: 'library',
-            title: 'Browse Library',
-            iconSize: Sizes.iconSizeMD,
-            text: 'Our structured training plans turn your goals into achievements',
-            onPress: () => navigateTo('programs/browse-programs'),
-        },
-    ];
-
-    if (!isOnboardingComplete) {
-        menuItems.unshift({
-            icon: 'magic-wand',
             title: 'Find Your Perfect Plan',
-            iconSize: Sizes.iconSizeSM,
-            text: 'Let us recommend a plan tailored to your goals',
+            description: 'Let us recommend a plan tailored to your goals',
+            image: require('@/assets/images/wand.png'),
             onPress: () => navigateTo('programs/program-recommender-wizard'),
-        });
-    }
+            backgroundColor: darkenColor(themeColors.tangerineTransparent, 0),
+            textColor: darkenColor(themeColors.tangerineSolid, 0.4),
+            show: !isOnboardingComplete,
+        },
+        {
+            title: 'Browse Library',
+            description: 'Our structured training plans turn your goals into achievements',
+            image: require('@/assets/images/clipboard.png'),
+            onPress: () => navigateTo('programs/browse-programs'),
+            backgroundColor: themeColors.tangerineTransparent,
+            textColor: darkenColor(themeColors.tangerineSolid, 0.3),
+            show: true,
+        },
+    ].filter((item) => item.show);
 
     return (
         <ScrollView
             style={[styles.container, { backgroundColor: themeColors.background }]}
-            contentContainerStyle={{
-                justifyContent: 'flex-start',
-            }}
+            contentContainerStyle={{ justifyContent: 'flex-start' }}
             showsVerticalScrollIndicator={false}
         >
             {isOnboardingComplete && recommendedProgram ? (
@@ -125,29 +144,31 @@ export default function InactiveProgramHome() {
             ) : (
                 <View style={styles.motivationalContainer}>
                     <ImageTextOverlay
-                        image={motivationalImage}
+                        image={require('@/assets/images/trainer-2.png')}
                         containerStyle={styles.imageOverlayContainer}
                         titleType='titleLarge'
                         gradientColors={['transparent', 'transparent']}
                     />
-                    {/*                    <ThemedText type='titleLarge' style={[styles.motivationalQuote, { color: themeColors.tipText }]}>
-                        Join the Hustle!
-                    </ThemedText>*/}
                 </View>
             )}
 
-            <View>
-                {menuItems.map((item, index) => (
-                    <ThemedView key={index} style={[styles.menuContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
-                        <MenuItem
-                            {...item}
-                            titleColor={themeColors.text}
-                            textColor={themeColors.subText}
-                            leftIconColor={themeColors.tipText}
-                            backgroundColor={`${themeColors.tipBackground}`}
-                        />
-                    </ThemedView>
-                ))}
+            <View style={menuItems.length > 1 ? styles.gridContainer : styles.menuContainer}>
+                {menuItems.length > 1
+                    ? // Grid layout for multiple items
+                      menuItems.map((item, index) => {
+                          const screenWidth = Dimensions.get('window').width;
+                          const padding = Spaces.LG * 2;
+                          const gap = Spaces.MD;
+                          const tileWidth = (screenWidth - 1.01 * padding - gap) / 2;
+
+                          return (
+                              <View key={index} style={[{ width: tileWidth }, index % 2 === 0 ? { marginRight: gap / 2 } : { marginLeft: gap / 2 }]}>
+                                  <MenuItem {...item} isGrid={true} />
+                              </View>
+                          );
+                      })
+                    : // Full-width layout for single item
+                      menuItems.map((item, index) => <MenuItem key={index} {...item} isGrid={false} />)}
             </View>
         </ScrollView>
     );
@@ -158,43 +179,38 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     menuItem: {
-        paddingVertical: Spaces.MD,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    menuItemLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    menuIcon: {
-        marginRight: Spaces.SM,
-    },
-    menuContainer: {
-        marginHorizontal: Spaces.MD,
-        paddingHorizontal: Spaces.MD,
-        marginBottom: Spaces.LG,
         borderRadius: Spaces.MD,
+        overflow: 'hidden',
+        marginBottom: Spaces.LG,
+        marginHorizontal: Spaces.LG,
     },
-    iconBox: {
-        width: Spaces.XXXL,
-        height: Spaces.XXXL,
-        borderRadius: Spaces.SM,
-        justifyContent: 'center',
+    menuContentWrapper: {
+        position: 'relative',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        marginRight: Spaces.MD,
+    },
+    menuContent: {
+        padding: Spaces.LG,
+        flex: 1,
+        zIndex: 1,
+    },
+    menuTitle: {
+        marginBottom: Spaces.XS,
+    },
+    menuDescription: {
+        lineHeight: 21,
+        fontSize: 14,
+        maxWidth: '90%',
+    },
+    menuBackgroundImage: {
+        position: 'absolute',
+        right: -Spaces.XL - Spaces.SM,
+        width: 200,
+        height: '80%',
     },
     recommendedProgramContainer: {
         marginHorizontal: Spaces.LG,
-    },
-    menuTextContainer: {
-        alignItems: 'flex-start',
-        flex: 1,
-        marginRight: 0,
-    },
-    menuText: {
-        flexShrink: 1,
-        lineHeight: Spaces.MD,
     },
     recommendedHeader: {
         marginTop: Spaces.XL,
@@ -203,17 +219,37 @@ const styles = StyleSheet.create({
     motivationalContainer: {
         marginBottom: Spaces.LG,
     },
-    motivationalImage: {
-        width: '100%',
-        height: Sizes.imageLGHeight,
-    },
-    motivationalQuote: {
-        marginTop: Spaces.MD,
-        marginLeft: Spaces.XL,
-        textAlign: 'left',
-    },
     imageOverlayContainer: {
-        height: Sizes.imageXLHeight,
+        height: Sizes.imageXXLHeight,
         width: '100%',
+    },
+    menuContainer: {
+        marginTop: Spaces.MD,
+    },
+    gridContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        paddingTop: Spaces.XL,
+        paddingHorizontal: Spaces.LG,
+        paddingBottom: Spaces.XL,
+    },
+    gridMenuItem: {
+        borderRadius: Spaces.MD,
+        padding: Spaces.SM + Spaces.XS,
+        height: 120,
+        justifyContent: 'space-between',
+    },
+    gridContentWrapper: {
+        flex: 1,
+        justifyContent: 'space-between',
+    },
+    gridImage: {
+        width: 42,
+        height: 42,
+        marginBottom: Spaces.XXS,
+    },
+    gridTitle: {
+        fontSize: 15,
+        lineHeight: 18,
     },
 });
