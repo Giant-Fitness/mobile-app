@@ -16,6 +16,7 @@ import { WeightOverviewChartCard } from '@/components/progress/WeightOverviewCha
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
+import { BodyMeasurementsComingSoonCard } from '@/components/progress/BodyMeasurementsComingSoonCard';
 
 export default function ProgressScreen() {
     const dispatch = useDispatch<AppDispatch>();
@@ -102,6 +103,17 @@ export default function ProgressScreen() {
                             },
                         }}
                     />
+
+                    <BodyMeasurementsComingSoonCard
+                        style={{
+                            width: '100%',
+                            marginBottom: Spaces.LG,
+                            marginTop: Spaces.XL,
+                            chartContainer: {
+                                height: Sizes.imageSM,
+                            },
+                        }}
+                    />
                 </ThemedView>
             </Animated.ScrollView>
 
@@ -117,7 +129,6 @@ export default function ProgressScreen() {
 
 const styles = StyleSheet.create({
     cardContainer: {
-        flexDirection: 'row',
         width: '100%',
         justifyContent: 'space-between',
         paddingHorizontal: Spaces.LG,

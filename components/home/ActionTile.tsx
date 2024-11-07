@@ -1,7 +1,7 @@
 // components/home/ActionTile.tsx
 
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View, Image, ImageSourcePropType } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, Image, ImageSourcePropType, ViewStyle } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
@@ -13,9 +13,24 @@ interface ActionTileProps {
     backgroundColor: string;
     textColor: string;
     imageSize?: number;
+    width?: number;
+    height?: number;
+    style?: ViewStyle;
+    fontSize?: number;
 }
 
-export const ActionTile = ({ image, title, onPress, backgroundColor, textColor, imageSize = 50 }: ActionTileProps) => {
+export const ActionTile = ({
+    image,
+    title,
+    onPress,
+    backgroundColor,
+    textColor,
+    imageSize = 50,
+    width = 120,
+    height = 130,
+    style,
+    fontSize = 13,
+}: ActionTileProps) => {
     return (
         <TouchableOpacity
             onPress={onPress}
@@ -23,7 +38,10 @@ export const ActionTile = ({ image, title, onPress, backgroundColor, textColor, 
                 styles.container,
                 {
                     backgroundColor,
+                    width,
+                    height,
                 },
+                style,
             ]}
             activeOpacity={0.7}
         >
@@ -42,7 +60,7 @@ export const ActionTile = ({ image, title, onPress, backgroundColor, textColor, 
                 />
             </View>
             <View style={styles.textContainer}>
-                <ThemedText type={'overline'} style={[styles.text, { color: textColor }]} numberOfLines={2}>
+                <ThemedText type={'overline'} style={[styles.text, { color: textColor, fontSize: fontSize }]} numberOfLines={2}>
                     {title}
                 </ThemedText>
             </View>
@@ -52,8 +70,6 @@ export const ActionTile = ({ image, title, onPress, backgroundColor, textColor, 
 
 const styles = StyleSheet.create({
     container: {
-        width: 120,
-        height: 130,
         borderRadius: Spaces.MD,
         padding: Spaces.SM + Spaces.XS,
         marginRight: Spaces.MD,
@@ -70,7 +86,6 @@ const styles = StyleSheet.create({
         flexShrink: 1,
     },
     text: {
-        fontSize: 13,
         lineHeight: 18,
     },
 });

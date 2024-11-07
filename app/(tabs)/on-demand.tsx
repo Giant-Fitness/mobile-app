@@ -1,7 +1,7 @@
 // app/(tabs)/on-demand.tsx
 
 import React, { useEffect, useMemo } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,14 +10,14 @@ import { ThemedView } from '@/components/base/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { WorkoutOverviewCard } from '@/components/workouts/WorkoutOverviewCard';
-import { Icon } from '@/components/base/Icon';
 import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
 import { AppDispatch, RootState } from '@/store/store';
 import { getSpotlightWorkoutsAsync, getMultipleWorkoutsAsync } from '@/store/workouts/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
+import { ActionTile } from '@/components/home/ActionTile';
+import { darkenColor } from '@/utils/colorUtils';
 
 type RootStackParamList = {
     'workouts/all-workouts': { initialFilters: object };
@@ -90,6 +90,43 @@ export default function WorkoutsScreen() {
         );
     }
 
+    const screenWidth = Dimensions.get('window').width;
+    const padding = Spaces.LG * 2; // Left and right padding
+    const gap = Spaces.MD; // Gap between tiles
+    const numberOfColumns = 2;
+    const tileWidth = (screenWidth - 1.01 * padding - gap) / numberOfColumns;
+
+    const workoutCategories = [
+        {
+            title: 'Mobility',
+            image: require('@/assets/images/stretching.png'),
+            onPress: () => navigateToAllWorkouts({ focus: ['Mobility'] }),
+            backgroundColor: themeColors.maroonTransparent,
+            textColor: darkenColor(themeColors.maroonSolid, 0.3),
+        },
+        {
+            title: 'Strength',
+            image: require('@/assets/images/dumbbell.png'),
+            onPress: () => navigateToAllWorkouts({ focus: ['Strength'] }),
+            backgroundColor: themeColors.purpleTransparent,
+            textColor: darkenColor(themeColors.purpleSolid, 0.3),
+        },
+        {
+            title: 'Endurance',
+            image: require('@/assets/images/stationary-bicycle.png'),
+            onPress: () => navigateToAllWorkouts({ focus: ['Endurance'] }),
+            backgroundColor: themeColors.blueTransparent,
+            textColor: darkenColor(themeColors.blueSolid, 0.3),
+        },
+        {
+            title: 'All Workouts',
+            image: require('@/assets/images/video-folder.png'),
+            onPress: () => navigateToAllWorkouts(),
+            backgroundColor: themeColors.tangerineTransparent,
+            textColor: darkenColor(themeColors.tangerineSolid, 0.3),
+        },
+    ];
+
     return (
         <ScrollView style={[styles.container, { backgroundColor: themeColors.background }]} showsVerticalScrollIndicator={false}>
             <ThemedView>
@@ -101,79 +138,47 @@ export default function WorkoutsScreen() {
                 <ThemedText type='titleLarge' style={[styles.header, { color: themeColors.text }]}>
                     {'Spotlight'}
                 </ThemedText>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.mainScrollView}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.spotlightContainer}>
                     {spotlightWorkouts && renderWorkoutCards(spotlightWorkouts.WorkoutIds)}
                 </ScrollView>
-                <ThemedView style={styles.menuContainer}>
-                    <ThemedText type='titleLarge' style={[styles.header, { color: themeColors.text, paddingBottom: Spaces.MD }]}>
-                        {'Browse'}
-                    </ThemedText>
-                    <ThemedView>
-                        <TouchableOpacity onPress={() => navigateToAllWorkouts({ focus: ['Mobility'] })} style={styles.menuItem} activeOpacity={1}>
-                            <ThemedText type='overline' style={[{ color: themeColors.text }]}>
-                                {'Mobility Workouts'}
-                            </ThemedText>
-                            <Icon name='chevron-forward' size={Sizes.iconSizeSM} color={themeColors.iconDefault} />
-                        </TouchableOpacity>
-                    </ThemedView>
-                    <View
-                        style={[
-                            styles.divider,
-                            {
-                                borderBottomColor: themeColors.systemBorderColor,
-                                borderBottomWidth: StyleSheet.hairlineWidth,
-                            },
-                        ]}
-                    />
-                    <ThemedView>
-                        <TouchableOpacity onPress={() => navigateToAllWorkouts({ focus: ['Strength'] })} style={styles.menuItem} activeOpacity={1}>
-                            <ThemedText type='overline' style={[{ color: themeColors.text }]}>
-                                {'Strength Workouts'}
-                            </ThemedText>
-                            <Icon name='chevron-forward' size={Sizes.iconSizeSM} color={themeColors.iconDefault} />
-                        </TouchableOpacity>
-                    </ThemedView>
-                    <View
-                        style={[
-                            styles.divider,
-                            {
-                                borderBottomColor: themeColors.systemBorderColor,
-                                borderBottomWidth: StyleSheet.hairlineWidth,
-                            },
-                        ]}
-                    />
-                    <ThemedView>
-                        <TouchableOpacity onPress={() => navigateToAllWorkouts({ focus: ['Endurance'] })} style={styles.menuItem} activeOpacity={1}>
-                            <ThemedText type='overline' style={[{ color: themeColors.text }]}>
-                                {'Endurance Workouts'}
-                            </ThemedText>
-                            <Icon name='chevron-forward' size={Sizes.iconSizeSM} color={themeColors.iconDefault} />
-                        </TouchableOpacity>
-                    </ThemedView>
-                    <View
-                        style={[
-                            styles.divider,
-                            {
-                                borderBottomColor: themeColors.systemBorderColor,
-                                borderBottomWidth: StyleSheet.hairlineWidth,
-                            },
-                        ]}
-                    />
-                    <ThemedView>
-                        <TouchableOpacity onPress={() => navigateToAllWorkouts()} style={styles.menuItem} activeOpacity={1}>
-                            <ThemedText type='overline' style={[{ color: themeColors.text }]}>
-                                {'All Workouts'}
-                            </ThemedText>
-                            <Icon name='chevron-forward' size={Sizes.iconSizeSM} color={themeColors.iconDefault} />
-                        </TouchableOpacity>
-                    </ThemedView>
-                </ThemedView>
+                <ThemedText type='titleLarge' style={[styles.header, { color: themeColors.text, paddingBottom: Spaces.SM }]}>
+                    {'Browse'}
+                </ThemedText>
+
+                <View style={styles.categoryGrid}>
+                    {workoutCategories.map((category, index) => (
+                        <View
+                            key={index}
+                            style={[
+                                styles.categoryTile,
+                                index % 2 === 0 ? { marginRight: gap / 2 } : { marginLeft: gap / 2 },
+                                index < 2 ? { marginBottom: gap } : {},
+                            ]}
+                        >
+                            <ActionTile
+                                image={category.image}
+                                title={category.title}
+                                onPress={category.onPress}
+                                backgroundColor={category.backgroundColor}
+                                textColor={category.textColor}
+                                style={{ marginRight: 0 }}
+                                width={tileWidth}
+                                height={110}
+                                imageSize={40}
+                                fontSize={14}
+                            />
+                        </View>
+                    ))}
+                </View>
             </ThemedView>
         </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
     infoContainer: {
         marginTop: Spaces.XL,
         paddingVertical: Spaces.MD,
@@ -184,39 +189,24 @@ const styles = StyleSheet.create({
     infoText: {
         textAlign: 'center',
     },
-    container: {
-        flex: 1,
-    },
-    menuContainer: {
-        paddingBottom: Spaces.XL,
-    },
-    menuItem: {
-        paddingHorizontal: Spaces.LG,
-        paddingVertical: Spaces.LG,
-        flexDirection: 'row',
-        justifyContent: 'space-between', // This will push the icon to the right
-        alignItems: 'center', // This will vertically center the text and icon
-    },
-    mainScrollView: {
-        marginLeft: Spaces.LG,
-        paddingRight: Spaces.XL,
-        paddingBottom: Spaces.XXL,
-        paddingTop: Spaces.MD,
-    },
     header: {
         paddingTop: Spaces.LG,
-        paddingLeft: Spaces.LG,
+        paddingHorizontal: Spaces.LG,
+        marginBottom: Spaces.SM,
     },
-    divider: {
-        width: '90%',
-        alignSelf: 'center',
+    spotlightContainer: {
+        marginLeft: Spaces.LG,
+        paddingRight: Spaces.XL,
+        paddingBottom: Spaces.XL,
+        paddingTop: Spaces.MD,
     },
-    seeAllButton: {
-        width: Sizes.imageXXLWidth,
-        height: Sizes.imageXXLHeight,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: Spaces.SM,
-        marginHorizontal: Spaces.XXS,
+    categoryGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        paddingHorizontal: Spaces.LG,
+        paddingBottom: Spaces.XL,
+    },
+    categoryTile: {
+        marginBottom: Spaces.MD,
     },
 });
