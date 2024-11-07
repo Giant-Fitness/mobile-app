@@ -2,7 +2,7 @@
     "expo": {
         "name": "LMC",
         "slug": "lmc-app",
-        "version": "1.0.0",
+        "version": "0.0.1",
         "orientation": "portrait",
         "icon": "./assets/images/icon.png",
         "scheme": "myapp",
@@ -15,7 +15,7 @@
         "ios": {
             "supportsTablet": true,
             "userInterfaceStyle": "automatic",
-            "bundleIdentifier": "com.kusharora339.GiantFitness"
+            "bundleIdentifier": "com.GiantFitness.LMC"
         },
         "android": {
             "adaptiveIcon": {
@@ -23,7 +23,7 @@
                 "backgroundColor": "#ffffff"
             },
             "userInterfaceStyle": "automatic",
-            "package": "com.kusharora339.GiantFitness"
+            "package": "com.GiantFitness.LMC"
         },
         "web": {
             "bundler": "metro",
@@ -40,7 +40,7 @@
             }
         },
         "owner": "hustleclub",
-        "runtimeVersion": "1.0.0",
+        "runtimeVersion": "0.0.1",
         "updates": {
             "url": "https://u.expo.dev/8f1030a1-b4d2-4668-9c53-b1e7cfbabf24"
         }
