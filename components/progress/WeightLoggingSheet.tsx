@@ -193,7 +193,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                             {isSubmitting ? (
                                 <ActivityIndicator size='small' color={themeColors.text} />
                             ) : (
-                                <Icon name='check' color={isSubmitting || isDeleting ? themeColors.text : themeColors.text} size={20} />
+                                <Icon name='check' color={isSubmitting || isDeleting ? themeColors.subText : themeColors.text} size={24} />
                             )}
                         </TouchableOpacity>
                     </View>

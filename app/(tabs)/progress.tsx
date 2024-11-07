@@ -1,10 +1,10 @@
 // app/(tabs)/progress.tsx
 
 import { StyleSheet } from 'react-native';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { getWeightMeasurementsAsync } from '@/store/user/thunks';
+import { getWeightMeasurementsAsync, logWeightMeasurementAsync } from '@/store/user/thunks';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
@@ -13,6 +13,7 @@ import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { WeightOverviewChartCard } from '@/components/progress/WeightOverviewChartCard';
+import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 
@@ -20,6 +21,10 @@ export default function ProgressScreen() {
     const dispatch = useDispatch<AppDispatch>();
     const navigation = useNavigation();
     const scrollY = useSharedValue(0);
+
+    // Add state for weight logging sheet
+    const [isWeightSheetVisible, setIsWeightSheetVisible] = useState(false);
+    const [isLoggingWeight, setIsLoggingWeight] = useState(false);
 
     const scrollHandler = useAnimatedScrollHandler({
         onScroll: (event) => {
@@ -46,27 +51,67 @@ export default function ProgressScreen() {
         dataLoadedState: dataLoadedState,
     });
 
+    // Handle weight logging
+    const handleLogWeight = async (weight: number, date: Date) => {
+        setIsLoggingWeight(true);
+        try {
+            await dispatch(
+                logWeightMeasurementAsync({
+                    weight: weight,
+                    measurementTimestamp: date.toISOString(),
+                }),
+            ).unwrap();
+
+            // Refresh measurements after logging
+            await dispatch(getWeightMeasurementsAsync()).unwrap();
+            setIsWeightSheetVisible(false);
+        } catch (error) {
+            console.error('Failed to log weight:', error);
+        } finally {
+            setIsLoggingWeight(false);
+        }
+    };
+
+    const handleChartPress = () => {
+        // Navigate to detailed view only if we have enough data points
+        if (userWeightMeasurements?.length >= 2) {
+            navigation.navigate('progress/weight-tracking');
+        } else {
+            setIsWeightSheetVisible(true);
+        }
+    };
+
     if (showSplash) {
         return <DumbbellSplash onAnimationComplete={handleSplashComplete} />;
     }
 
     return (
-        <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
-            <ThemedView style={styles.cardContainer}>
-                <WeightOverviewChartCard
-                    values={userWeightMeasurements}
-                    isLoading={userWeightMeasurementsState === REQUEST_STATE.PENDING}
-                    onPress={() => navigation.navigate('progress/weight-tracking')}
-                    style={{
-                        width: '100%',
-                        marginTop: Spaces.LG,
-                        chartContainer: {
-                            height: Sizes.imageSM,
-                        },
-                    }}
-                />
-            </ThemedView>
-        </Animated.ScrollView>
+        <>
+            <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
+                <ThemedView style={styles.cardContainer}>
+                    <WeightOverviewChartCard
+                        values={userWeightMeasurements}
+                        isLoading={userWeightMeasurementsState === REQUEST_STATE.PENDING}
+                        onPress={handleChartPress}
+                        onLogWeight={() => setIsWeightSheetVisible(true)}
+                        style={{
+                            width: '100%',
+                            marginTop: Spaces.LG,
+                            chartContainer: {
+                                height: Sizes.imageSM,
+                            },
+                        }}
+                    />
+                </ThemedView>
+            </Animated.ScrollView>
+
+            <WeightLoggingSheet
+                visible={isWeightSheetVisible}
+                onClose={() => setIsWeightSheetVisible(false)}
+                onSubmit={handleLogWeight}
+                isLoading={isLoggingWeight}
+            />
+        </>
     );
 }
 

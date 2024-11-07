@@ -1,13 +1,13 @@
 // components/progress/WeightOverviewChartCard.tsx
 
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Icon } from '@/components/base/Icon';
 import { UserWeightMeasurement } from '@/types';
 import { Spaces } from '@/constants/Spaces';
-import { Path, Svg, Circle } from 'react-native-svg';
+import { Path, Svg, Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { format } from 'date-fns';
 import Animated, { useAnimatedStyle, withRepeat, withTiming, withSequence, useSharedValue } from 'react-native-reanimated';
 import { ThemedText } from '../base/ThemedText';
@@ -16,9 +16,105 @@ import { darkenColor, lightenColor } from '@/utils/colorUtils';
 type WeightOverviewChartCardProps = {
     values: UserWeightMeasurement[];
     onPress: () => void;
+    onLogWeight: () => void;
     isLoading?: boolean;
-    style?: any; // Allow container styling to be passed
+    style?: any;
 };
+
+const EmptyStateChart = ({ color }: { color: string }) => (
+    <Svg width='100%' height='100%' viewBox='0 0 100 38' preserveAspectRatio='xMidYMid meet'>
+        <Defs>
+            <LinearGradient id='emptyGradient' x1='0' y1='0' x2='0' y2='1'>
+                <Stop offset='0' stopColor={color} stopOpacity='0.2' />
+                <Stop offset='1' stopColor={color} stopOpacity='0.05' />
+            </LinearGradient>
+        </Defs>
+        <Path d='M 0 30 C 25 30, 25 15, 50 15 C 75 15, 75 30, 100 30' stroke={color} strokeWidth='0.9' strokeDasharray='2,2' fill='none' opacity='0.5' />
+        <Path d='M 0 30 C 25 30, 25 15, 50 15 C 75 15, 75 30, 100 30 L 100 38 L 0 38 Z' fill='url(#emptyGradient)' />
+    </Svg>
+);
+
+const SingleDataPointState = ({ measurement, onPress, themeColors }: { measurement: UserWeightMeasurement; onPress: () => void; themeColors: any }) => {
+    const measurementDate = new Date(measurement.MeasurementTimestamp);
+    const today = new Date();
+    const isToday = measurementDate.toDateString() === today.toDateString();
+    const formattedDate = format(measurementDate, 'MMM d, yyyy');
+
+    // Create the content without the touchable wrapper
+    const content = (
+        <View style={styles.singleDataContainer}>
+            <View style={styles.singleDataContent}>
+                <View style={styles.firstMeasurementContainer}>
+                    <ThemedText type='bodyMedium' style={styles.firstMeasurementLabel}>
+                        {isToday ? "Today's Measurement" : 'First Measurement'}
+                    </ThemedText>
+                    <ThemedText type='titleLarge' style={[styles.weightValue, { color: themeColors.purpleSolid }]}>
+                        {measurement.Weight.toFixed(1)} kg
+                    </ThemedText>
+                    <ThemedText type='bodySmall' style={[styles.dateText, { color: themeColors.subText }]}>
+                        {formattedDate}
+                    </ThemedText>
+                </View>
+
+                {isToday ? (
+                    <View style={[styles.messageContainer]}>
+                        <ThemedText type='bodySmall' style={[styles.helperText, { color: themeColors.subText }]}>
+                            Great start! Come back tomorrow to log your next measurement and start tracking your progress.
+                        </ThemedText>
+                    </View>
+                ) : (
+                    <>
+                        <TouchableOpacity style={[styles.addNextButton, { backgroundColor: themeColors.purpleSolid }]} onPress={onPress} activeOpacity={0.8}>
+                            <Icon name='plus' size={18} color={themeColors.white} style={styles.addIcon} />
+                            <ThemedText type='button' style={[styles.buttonText, { color: themeColors.white }]}>
+                                Add Next Measurement
+                            </ThemedText>
+                        </TouchableOpacity>
+
+                        <ThemedText type='bodySmall' style={[styles.helperText, { color: themeColors.subText }]}>
+                            Add another measurement to start tracking your progress
+                        </ThemedText>
+                    </>
+                )}
+            </View>
+        </View>
+    );
+
+    // For today's measurement, return content without TouchableOpacity
+    if (isToday) {
+        return content;
+    }
+
+    // For past measurements, wrap in TouchableOpacity
+    return (
+        <TouchableOpacity style={styles.contentWrapper} onPress={onPress} activeOpacity={0.8}>
+            {content}
+        </TouchableOpacity>
+    );
+};
+
+const EmptyState = ({ onPress, themeColors }: { onPress: () => void; themeColors: any }) => (
+    <View style={styles.emptyStateContainer}>
+        <View style={styles.emptyStateContent}>
+            <View style={[styles.iconContainer]} />
+            <ThemedText type='title' style={styles.emptyStateTitle}>
+                Track Your Weight Journey
+            </ThemedText>
+            <ThemedText type='bodySmall' style={[styles.emptyStateDescription, { color: themeColors.subText }]}>
+                Track your weight regularly to see your journey take shape with charts that keep you motivated and informed.
+            </ThemedText>
+            <TouchableOpacity style={[styles.addButton, { backgroundColor: themeColors.purpleSolid }]} onPress={onPress} activeOpacity={0.8}>
+                <Icon name='plus' size={18} color={themeColors.white} style={styles.addIcon} />
+                <ThemedText type='button' style={[styles.buttonText, { color: themeColors.white }]}>
+                    Add First Measurement
+                </ThemedText>
+            </TouchableOpacity>
+        </View>
+        <View style={styles.chartContainer}>
+            <EmptyStateChart color={themeColors.purpleSolid} />
+        </View>
+    </View>
+);
 
 const ShimmerEffect = ({ style }: { style: any }) => {
     const translateX = useSharedValue(-100);
@@ -38,17 +134,32 @@ const ShimmerEffect = ({ style }: { style: any }) => {
     );
 };
 
-type Point = {
-    x: number;
-    y: number;
-    weight: number;
-};
+const PADDING_VERTICAL = 4;
 
-const PADDING_VERTICAL = 4; // Padding for top and bottom of chart
-
-export const WeightOverviewChartCard: React.FC<WeightOverviewChartCardProps> = ({ values, onPress, isLoading = false, style = {} }) => {
+export const WeightOverviewChartCard: React.FC<WeightOverviewChartCardProps> = ({ values, onPress, onLogWeight, isLoading = false, style = {} }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+
+    const handlePress = () => {
+        // Check if we have a measurement from today
+        if (values?.length === 1) {
+            const measurementDate = new Date(values[0].MeasurementTimestamp);
+            const today = new Date();
+            const isToday = measurementDate.toDateString() === today.toDateString();
+
+            // If it's today's measurement, don't do anything
+            if (isToday) {
+                return;
+            }
+        }
+
+        // Regular logic for other cases
+        if (!values?.length || values.length < 2) {
+            onLogWeight();
+        } else {
+            onPress();
+        }
+    };
 
     const { processedData, dateRange, averageWeight, points } = useMemo(() => {
         if (!values?.length) {
@@ -125,7 +236,7 @@ export const WeightOverviewChartCard: React.FC<WeightOverviewChartCardProps> = (
 
     if (isLoading) {
         return (
-            <TouchableOpacity style={[styles.card, { backgroundColor: themeColors.backgroundSecondary }, style]} onPress={onPress} activeOpacity={0.9}>
+            <TouchableOpacity style={[styles.card, { backgroundColor: themeColors.backgroundSecondary }, style]} onPress={handlePress} activeOpacity={0.9}>
                 <View style={styles.textContainer}>
                     <ShimmerEffect style={{ height: 20 }} />
                     <View style={{ height: 8 }} />
@@ -142,10 +253,31 @@ export const WeightOverviewChartCard: React.FC<WeightOverviewChartCardProps> = (
         );
     }
 
+    if (!values?.length) {
+        return (
+            <TouchableOpacity
+                style={[styles.card, { backgroundColor: lightenColor(themeColors.purpleTransparent, 0.5) }, style]}
+                onPress={handlePress}
+                activeOpacity={0.9}
+            >
+                <EmptyState onPress={handlePress} themeColors={themeColors} />
+            </TouchableOpacity>
+        );
+    }
+
+    if (values.length === 1) {
+        return (
+            <View style={[styles.card, { backgroundColor: lightenColor(themeColors.purpleTransparent, 0.5) }, style]}>
+                <SingleDataPointState measurement={values[0]} onPress={handlePress} themeColors={themeColors} />
+            </View>
+        );
+    }
+
+    // Regular chart view for 2+ measurements
     return (
         <TouchableOpacity
             style={[styles.card, { backgroundColor: lightenColor(themeColors.purpleTransparent, 0.5) }, style]}
-            onPress={onPress}
+            onPress={handlePress}
             activeOpacity={0.9}
         >
             <View style={styles.textContainer}>
@@ -232,5 +364,106 @@ const styles = StyleSheet.create({
         marginBottom: Spaces.MD,
         width: '100%',
         alignSelf: 'center',
+    },
+    emptyStateContainer: {
+        width: '100%',
+        alignItems: 'center',
+        paddingVertical: Spaces.SM,
+    },
+    emptyStateContent: {
+        alignItems: 'center',
+        paddingHorizontal: Spaces.MD,
+    },
+    iconContainer: {
+        width: Spaces.LG,
+        height: Spaces.LG,
+        borderRadius: Spaces.LG,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    emptyStateTitle: {
+        marginBottom: Spaces.SM,
+        textAlign: 'center',
+    },
+    emptyStateDescription: {
+        textAlign: 'center',
+        marginBottom: Spaces.MD,
+        paddingHorizontal: 0,
+    },
+    addButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: Spaces.MD,
+        paddingVertical: Spaces.SM,
+        borderRadius: 20,
+        marginBottom: Spaces.SM,
+        marginTop: Spaces.SM,
+    },
+    addIcon: {
+        marginRight: Spaces.XXS,
+    },
+    buttonText: {
+        fontWeight: '600',
+    },
+    singleDataContainer: {
+        width: '100%',
+        alignItems: 'center',
+        paddingVertical: Spaces.SM,
+    },
+    singleDataContent: {
+        width: '100%',
+        alignItems: 'center',
+        paddingHorizontal: Spaces.SM,
+    },
+    firstMeasurementContainer: {
+        alignItems: 'center',
+        marginBottom: Spaces.MD,
+    },
+    firstMeasurementLabel: {
+        marginBottom: Spaces.XXS,
+    },
+    weightValue: {
+        fontSize: 28,
+        fontWeight: '600',
+        paddingTop: Spaces.MD,
+        marginBottom: Spaces.XXS,
+    },
+    dateText: {
+        marginBottom: Spaces.SM,
+    },
+    dividerContainer: {
+        alignItems: 'center',
+        marginBottom: Spaces.MD,
+    },
+    verticalDivider: {
+        width: 1,
+        height: 24,
+        marginBottom: Spaces.XXS,
+    },
+    dividerDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+    },
+    addNextButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: Spaces.MD,
+        paddingVertical: Spaces.SM,
+        borderRadius: 20,
+        marginBottom: Spaces.SM,
+    },
+    helperText: {
+        textAlign: 'center',
+        marginTop: Spaces.XXS,
+    },
+    messageContainer: {
+        borderRadius: Spaces.SM,
+        paddingHorizontal: Spaces.MD,
+        paddingBottom: Spaces.MD,
+        width: '100%',
+    },
+    contentWrapper: {
+        width: '100%',
     },
 });
