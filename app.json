@@ -1,7 +1,7 @@
 {
     "expo": {
         "name": "LMC",
-        "slug": "GiantFitness",
+        "slug": "lmc-app",
         "version": "1.0.0",
         "orientation": "portrait",
         "icon": "./assets/images/icon.png",
@@ -33,6 +33,16 @@
         "plugins": ["expo-router"],
         "experiments": {
             "typedRoutes": true
+        },
+        "extra": {
+            "eas": {
+                "projectId": "8f1030a1-b4d2-4668-9c53-b1e7cfbabf24"
+            }
+        },
+        "owner": "hustleclub",
+        "runtimeVersion": "1.0.0",
+        "updates": {
+            "url": "https://u.expo.dev/8f1030a1-b4d2-4668-9c53-b1e7cfbabf24"
         }
     }
 }
