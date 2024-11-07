@@ -83,7 +83,7 @@ export default function HomeScreen() {
         {
             title: 'Why LMC?',
             image: require('@/assets/images/skipping-rope.png'),
-            onPress: () => console.log('Article'),
+            onPress: () => navigation.navigate('blog/why-lmc'),
             backgroundColor: themeColors.maroonTransparent,
             textColor: darkenColor(themeColors.maroonSolid, 0.3),
         },
