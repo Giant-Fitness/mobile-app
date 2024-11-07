@@ -14,41 +14,21 @@ import { useSharedValue } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { WeightChart } from '@/components/progress/WeightChart';
 import { AppDispatch, RootState } from '@/store/store';
-import { TimeRange, TIME_RANGES, aggregateData, calculateMovingAverage, getTimeWindow, getTimeRangeLabel } from '@/utils/weight';
+import {
+    TimeRange,
+    TIME_RANGES,
+    aggregateData,
+    calculateMovingAverage,
+    getTimeWindow,
+    getTimeRangeLabel,
+    getAvailableTimeRanges,
+    getInitialTimeRange,
+} from '@/utils/weight';
 import { UserWeightMeasurement } from '@/types';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { Icon } from '@/components/base/Icon';
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
 import { updateWeightMeasurementAsync, deleteWeightMeasurementAsync, logWeightMeasurementAsync } from '@/store/user/thunks';
-
-const RangeSelector = ({ selectedRange, onRangeChange, style }) => {
-    const colorScheme = useColorScheme() as 'light' | 'dark';
-    const themeColors = Colors[colorScheme];
-
-    return (
-        <View style={[styles.rangeSelector, style]}>
-            {Object.keys(TIME_RANGES).map((range) => (
-                <ThemedView
-                    key={range}
-                    style={[
-                        styles.rangePill,
-                        {
-                            backgroundColor: range === selectedRange ? themeColors.containerHighlight : themeColors.background,
-                        },
-                    ]}
-                    onTouchEnd={() => onRangeChange(range as TimeRange)}
-                >
-                    <ThemedText
-                        type='body'
-                        style={[styles.rangeText, { color: range === selectedRange ? themeColors.highlightContainerText : themeColors.subText }]}
-                    >
-                        {range}
-                    </ThemedText>
-                </ThemedView>
-            ))}
-        </View>
-    );
-};
 
 const getWeightChange = (currentWeight: number, previousWeight: number | null) => {
     if (previousWeight === null) return null;
@@ -58,6 +38,7 @@ const getWeightChange = (currentWeight: number, previousWeight: number | null) =
 
 export default function WeightTrackingScreen() {
     const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRange>('1W');
+    const [availableRanges, setAvailableRanges] = useState<ReturnType<typeof getAvailableTimeRanges>>([]);
     const navigation = useNavigation();
     const scrollY = useSharedValue(0);
 
@@ -73,6 +54,14 @@ export default function WeightTrackingScreen() {
     useEffect(() => {
         navigation.setOptions({ headerShown: false });
     }, [navigation]);
+
+    useEffect(() => {
+        if (userWeightMeasurements.length) {
+            const ranges = getAvailableTimeRanges(userWeightMeasurements);
+            setAvailableRanges(ranges);
+            setSelectedTimeRange(getInitialTimeRange(userWeightMeasurements));
+        }
+    }, [userWeightMeasurements]);
 
     // Add handlers for weight modifications
     const handleWeightUpdate = async (weight: number, date: Date) => {
@@ -276,14 +265,14 @@ export default function WeightTrackingScreen() {
                 <WeightChart
                     data={aggregatedData}
                     timeRange={selectedTimeRange}
+                    availableRanges={availableRanges}
+                    onRangeChange={setSelectedTimeRange}
                     yAxisRange={yAxisRange}
                     movingAverages={movingAverages}
                     effectiveTimeRange={effectiveTimeRange}
                     onDataPointPress={handleDataPointPress}
                 />
             </View>
-
-            <RangeSelector selectedRange={selectedTimeRange} onRangeChange={setSelectedTimeRange} style={styles.rangeSelector} />
 
             <TouchableOpacity style={styles.dataButton} onPress={() => navigation.navigate('progress/all-weight-data')} activeOpacity={0.9}>
                 <ThemedText type='titleXLarge'>Data</ThemedText>
@@ -422,21 +411,6 @@ const styles = StyleSheet.create({
     },
     insightItem: {},
     chartContainer: {},
-    rangeSelector: {
-        flexDirection: 'row',
-        padding: Spaces.MD,
-        justifyContent: 'space-between',
-    },
-    rangePill: {
-        paddingHorizontal: Spaces.SM,
-        paddingVertical: Spaces.XS,
-        borderRadius: Spaces.MD,
-        minWidth: 48,
-        alignItems: 'center',
-    },
-    rangeText: {
-        fontSize: 12,
-    },
     listContent: {
         paddingBottom: Spaces.XL,
     },

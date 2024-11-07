@@ -1,4 +1,19 @@
-import { startOfWeek, startOfMonth, subDays, subMonths, subYears, endOfWeek, endOfMonth, isSameDay, lastDayOfWeek, lastDayOfMonth, format } from 'date-fns';
+// utils/weight.ts
+
+import {
+    startOfWeek,
+    startOfMonth,
+    subDays,
+    subMonths,
+    subYears,
+    endOfWeek,
+    endOfMonth,
+    isSameDay,
+    lastDayOfWeek,
+    lastDayOfMonth,
+    format,
+    isWithinInterval,
+} from 'date-fns';
 import { UserWeightMeasurement } from '@/types';
 
 export type TimeRange = '1W' | '1M' | '3M' | '6M' | '1Y' | 'All';
@@ -10,12 +25,86 @@ export const TIME_RANGES = {
     '6M': { days: 180, label: '6 Months' },
     '1Y': { days: 365, label: '1 Year' },
     All: { days: Infinity, label: 'All Time' },
-};
-
+} as const;
 export type AggregatedData = {
     timestamp: Date;
     weight: number;
     originalData: UserWeightMeasurement;
+};
+
+export interface TimeRangeOption {
+    range: TimeRange;
+    label: string;
+    disabled: boolean;
+}
+
+export const getAvailableTimeRanges = (data: UserWeightMeasurement[]): TimeRangeOption[] => {
+    if (!data || data.length < 1) {
+        return Object.entries(TIME_RANGES).map(([range, { label }]) => ({
+            range: range as TimeRange,
+            label,
+            disabled: true,
+        }));
+    }
+
+    const now = new Date();
+    const sortedData = [...data].sort((a, b) => new Date(a.MeasurementTimestamp).getTime() - new Date(b.MeasurementTimestamp).getTime());
+    const firstDate = new Date(sortedData[0].MeasurementTimestamp);
+    const totalDays = Math.ceil((now.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    return Object.entries(TIME_RANGES).map(([range, { label, days }]) => {
+        const timeRange = range as TimeRange;
+        const { start, end } = getTimeWindow(timeRange, now);
+
+        // Count data points in this range
+        const dataPointsInRange = sortedData.filter((measurement) => {
+            const date = new Date(measurement.MeasurementTimestamp);
+            return date >= start && date <= end;
+        }).length;
+
+        // Determine if range should be disabled based on data requirements
+        let disabled = false;
+
+        if (timeRange === '1W' || timeRange === '1M') {
+            // For short ranges, enable if we have at least one point
+            disabled = dataPointsInRange < 1;
+        } else if (timeRange === 'All') {
+            // For All time, enable if we have at least two points total
+            disabled = data.length < 2;
+        } else {
+            // For other ranges (3M, 6M, 1Y)
+            // 1. Check if we have enough historical data
+            const hasEnoughHistory = totalDays >= days * 0.5; // At least half the range period
+            // 2. Check if we have enough data points
+            const hasEnoughPoints = dataPointsInRange >= 2;
+
+            disabled = !hasEnoughHistory || !hasEnoughPoints;
+        }
+
+        return {
+            range: timeRange,
+            label,
+            disabled,
+        };
+    });
+};
+
+export const getInitialTimeRange = (data: UserWeightMeasurement[]): TimeRange => {
+    if (!data || data.length < 1) return '1W';
+
+    const availableRanges = getAvailableTimeRanges(data);
+
+    // Find the first enabled range in order of preference: 1W, 1M, 3M, 6M, 1Y, All
+    const preferredOrder: TimeRange[] = ['1W', '1M', '3M', '6M', '1Y', 'All'];
+
+    for (const range of preferredOrder) {
+        const rangeOption = availableRanges.find((r) => r.range === range);
+        if (rangeOption && !rangeOption.disabled) {
+            return range;
+        }
+    }
+
+    return 'All'; // Fallback to 'All' if no other ranges are available
 };
 
 export const getTimeRangeLabel = (firstDate: Date, lastDate: Date): string => {

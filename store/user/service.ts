@@ -377,12 +377,12 @@ const getWeightMeasurements = async (userId: string): Promise<UserWeightMeasurem
     }
 };
 
-const logWeightMeasurement = async (userId: string, weight: number, measurementTimestamp?: string): Promise<UserWeightMeasurement> => {
+const logWeightMeasurement = async (userId: string, weight: number, measurementTimestamp: string): Promise<UserWeightMeasurement> => {
     console.log('service: logWeightMeasurement');
     try {
         const payload = {
             weight,
-            ...(measurementTimestamp && { measurementTimestamp }),
+            MeasurementTimestamp: measurementTimestamp,
         };
         const response = await api.post(`/users/${userId}/weight-measurements`, payload);
         const result = parseResponse(response);
