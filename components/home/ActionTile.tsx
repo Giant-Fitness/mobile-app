@@ -13,9 +13,11 @@ interface ActionTileProps {
     backgroundColor: string;
     textColor: string;
     imageSize?: number;
+    width?: number;
+    height?: number;
 }
 
-export const ActionTile = ({ image, title, onPress, backgroundColor, textColor, imageSize = 50 }: ActionTileProps) => {
+export const ActionTile = ({ image, title, onPress, backgroundColor, textColor, imageSize = 50, width = 120, height = 130 }: ActionTileProps) => {
     return (
         <TouchableOpacity
             onPress={onPress}
@@ -23,6 +25,8 @@ export const ActionTile = ({ image, title, onPress, backgroundColor, textColor, 
                 styles.container,
                 {
                     backgroundColor,
+                    width,
+                    height,
                 },
             ]}
             activeOpacity={0.7}
@@ -52,8 +56,6 @@ export const ActionTile = ({ image, title, onPress, backgroundColor, textColor, 
 
 const styles = StyleSheet.create({
     container: {
-        width: 120,
-        height: 130,
         borderRadius: Spaces.MD,
         padding: Spaces.SM + Spaces.XS,
         marginRight: Spaces.MD,

@@ -1,7 +1,7 @@
 // app/(tabs)/home.tsx
 
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -91,6 +91,11 @@ export default function HomeScreen() {
 
     const renderForYouSection = (reorderTiles = false) => {
         let tiles = [...actionTiles];
+        const screenWidth = Dimensions.get('window').width;
+        const padding = Spaces.LG * 2; // Left and right padding
+        const gap = Spaces.MD; // Gap between tiles
+        const numberOfTiles = tiles.length;
+        const tileWidth = (screenWidth - padding - gap * (numberOfTiles - 1)) / numberOfTiles;
 
         if (reorderTiles) {
             // Find the app info tile index
@@ -109,7 +114,8 @@ export default function HomeScreen() {
                     <ThemedText type='titleLarge'>For You</ThemedText>
                 </View>
 
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.actionTilesContainer}>
+                <View style={styles.actionTilesContainer}>
+                    {/* <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.actionTilesScrollContainer}> */}
                     {tiles.map((tile, index) => (
                         <ActionTile
                             key={index}
@@ -118,9 +124,11 @@ export default function HomeScreen() {
                             onPress={tile.onPress}
                             backgroundColor={tile.backgroundColor}
                             textColor={tile.textColor}
+                            width={tileWidth}
                         />
                     ))}
-                </ScrollView>
+                    {/* </ScrollView> */}
+                </View>
             </>
         );
     };
@@ -257,6 +265,11 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     },
     actionTilesContainer: {
+        paddingHorizontal: Spaces.LG,
+        paddingVertical: Spaces.XS,
+        flexDirection: 'row',
+    },
+    actionTilesScrollContainer: {
         paddingHorizontal: Spaces.LG,
         paddingVertical: Spaces.XS,
     },

@@ -117,7 +117,7 @@ export const FactOfTheDay = ({}: FactOfTheDayProps) => {
 const styles = StyleSheet.create({
     container: {
         marginHorizontal: Spaces.LG,
-        marginTop: Spaces.XL,
+        marginTop: Spaces.LG,
         marginBottom: Spaces.XL,
         borderRadius: Spaces.MD,
         overflow: 'hidden',
