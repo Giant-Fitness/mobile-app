@@ -17,7 +17,7 @@ import { REQUEST_STATE } from '@/constants/requestStates';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { ActionTile } from '@/components/home/ActionTile';
-import { darkenColor } from '@/utils/colorUtils';
+import { darkenColor, lightenColor } from '@/utils/colorUtils';
 
 type RootStackParamList = {
     'workouts/all-workouts': { initialFilters: object };
@@ -122,7 +122,7 @@ export default function WorkoutsScreen() {
             title: 'All Workouts',
             image: require('@/assets/images/video-folder.png'),
             onPress: () => navigateToAllWorkouts(),
-            backgroundColor: themeColors.tangerineTransparent,
+            backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.6),
             textColor: darkenColor(themeColors.tangerineSolid, 0.3),
         },
     ];
