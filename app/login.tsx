@@ -62,8 +62,18 @@ const LoginPage = () => {
             <ThemeProvider theme={authTheme}>
                 <Authenticator.Provider>
                     <Authenticator
+                        Container={(props) => (
+                            // reuse default `Container` and apply custom background
+                            <Authenticator.Container {...props} style={{ backgroundColor: themeColors.background }} />
+                        )}
                         components={{
                             SignIn: CustomSignIn,
+                            SignUp: ({ fields, ...props }) => (
+                                <Authenticator.SignUp {...props} fields={fields.map((field) => ({ ...field, labelHidden: true }))} />
+                            ),
+                            ForgotPassword: ({ fields, ...props }) => (
+                                <Authenticator.ForgotPassword {...props} fields={fields.map((field) => ({ ...field, labelHidden: true }))} />
+                            ),
                         }}
                         loginMechanisms={['email']}
                         signUpAttributes={['email']}
