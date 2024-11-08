@@ -1,19 +1,23 @@
 // app/login.tsx
 
-import React from 'react';
-import { StyleSheet, Pressable, SafeAreaView } from 'react-native';
-import { Amplify } from 'aws-amplify';
+import React, { useEffect } from 'react';
+import { Dimensions, Pressable, StyleSheet, View } from 'react-native';
 import { Authenticator } from '@aws-amplify/ui-react-native';
 import { ThemeProvider } from '@aws-amplify/ui-react-native';
-import { Link, Redirect } from 'expo-router';
 import { Hub } from 'aws-amplify/utils';
-
-import outputs from '../amplify_outputs.json';
-import { useAuthTheme } from '@/components/auth/AuthTheme';
-import { CustomHeader } from '@/components/auth/AuthComponents';
-import { ThemedText } from '@/components/base/ThemedText';
-import { Spaces } from '@/constants/Spaces';
 import { authService } from '@/utils/auth';
+import { useAuthTheme } from '@/components/auth/AuthTheme';
+import { CustomHeader, CustomSignIn } from '@/components/auth/AuthComponents';
+import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Amplify } from 'aws-amplify';
+import outputs from '../amplify_outputs.json';
+import { Spaces } from '@/constants/Spaces';
+import { PrimaryButton } from '@/components/buttons/PrimaryButton';
+import { ThemedText } from '@/components/base/ThemedText';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('screen');
+const { height: SCREEN_HEIGHT } = Dimensions.get('screen');
 
 Amplify.configure({
     Auth: {
@@ -25,13 +29,13 @@ Amplify.configure({
     },
 });
 
-const BYPASS_AUTH = false;
-
 const LoginPage = () => {
     const authTheme = useAuthTheme();
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
 
-    React.useEffect(() => {
-        // Listen for auth events
+    useEffect(() => {
+        // Listen for auth events to store or clear data
         const listener = Hub.listen('auth', async ({ payload }) => {
             switch (payload.event) {
                 case 'signedIn':
@@ -41,8 +45,6 @@ const LoginPage = () => {
                         console.error('Error storing auth data:', error);
                     }
                     break;
-
-                // Handle sign out to clear data
                 case 'signedOut':
                     try {
                         await authService.clearAuthData();
@@ -50,59 +52,90 @@ const LoginPage = () => {
                         console.error('Error clearing auth data:', error);
                     }
                     break;
+                default:
+                    break;
             }
         });
 
         return () => listener();
     }, []);
 
-    // Add initial auth check
-    React.useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                await authService.storeAuthData();
-            } catch (error) {
-                console.log('No initial auth data to store:', error);
-            }
-        };
-
-        checkAuth();
-    }, []);
-
-    if (BYPASS_AUTH) {
-        return (
-            <SafeAreaView style={styles.container}>
-                <Link href={'/initialization'} replace asChild>
-                    <Pressable style={styles.button}>
-                        <ThemedText type='button'>Login</ThemedText>
-                    </Pressable>
-                </Link>
-            </SafeAreaView>
-        );
-    }
-
     return (
-        <ThemeProvider theme={authTheme}>
-            <Authenticator.Provider>
-                <Authenticator Header={CustomHeader} loginMechanisms={['email']} signUpAttributes={['email']}>
-                    <Redirect href='/initialization' />
-                </Authenticator>
-            </Authenticator.Provider>
-        </ThemeProvider>
+        <View style={[styles.fullScreen, { backgroundColor: themeColors.background }]}>
+            <ThemeProvider theme={authTheme}>
+                <Authenticator.Provider>
+                    <Authenticator
+                        Container={(props) => (
+                            // reuse default `Container` and apply custom background
+                            <Authenticator.Container {...props} style={{ backgroundColor: themeColors.background }} />
+                        )}
+                        components={{
+                            SignIn: CustomSignIn,
+                            SignUp: ({ fields, toSignIn, ...props }) => (
+                                <View style={{ flex: 1, width: '100%' }}>
+                                    <CustomHeader containerStyle={{ marginLeft: Spaces.MD, paddingBottom: Spaces.LG }} />
+                                    <View>
+                                        <Authenticator.SignUp
+                                            {...props}
+                                            fields={fields.map((field) => ({
+                                                ...field,
+                                                labelHidden: true,
+                                                placeholder: field.name === 'confirm_password' ? 'Confirm password' : field.placeholder,
+                                            }))}
+                                            Header={() => null}
+                                            hideSignIn={true}
+                                            // Customize the footer to replace the default Sign Up button
+                                            // Customize the footer to replace the default Sign Up button and add "Sign In" link
+                                            Footer={() => (
+                                                <View>
+                                                    <View style={styles.signUpContainer}>
+                                                        <ThemedText style={styles.signUpText}>Already have an account?</ThemedText>
+                                                        <Pressable onPress={toSignIn}>
+                                                            <ThemedText style={[styles.signUpLink, { color: themeColors.accent }]}>Sign In</ThemedText>
+                                                        </Pressable>
+                                                    </View>
+                                                </View>
+                                            )}
+                                        />
+                                    </View>
+                                </View>
+                            ),
+                            ForgotPassword: ({ fields, ...props }) => (
+                                <Authenticator.ForgotPassword {...props} fields={fields.map((field) => ({ ...field, labelHidden: true }))} />
+                            ),
+                            ConfirmResetPassword: ({ fields, ...props }) => (
+                                <Authenticator.ConfirmResetPassword {...props} fields={fields.map((field) => ({ ...field, labelHidden: true }))} />
+                            ),
+                            ConfirmSignUp: ({ fields, ...props }) => (
+                                <Authenticator.ConfirmSignUp {...props} fields={fields.map((field) => ({ ...field, labelHidden: true }))} />
+                            ),
+                        }}
+                        loginMechanisms={['email']}
+                        signUpAttributes={['email']}
+                    ></Authenticator>
+                </Authenticator.Provider>
+            </ThemeProvider>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
+    fullScreen: {
+        width: SCREEN_WIDTH,
+        height: SCREEN_HEIGHT,
+    },
+    signUpContainer: {
+        flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        gap: Spaces.MD,
+        marginTop: Spaces.MD,
+        gap: Spaces.XS,
     },
-    button: {
-        paddingVertical: Spaces.SM,
-        paddingHorizontal: Spaces.LG,
-        borderRadius: 5,
+    signUpText: {
+        // Customize as needed, such as color or font size
+    },
+    signUpLink: {
+        fontWeight: '500',
     },
 });
 

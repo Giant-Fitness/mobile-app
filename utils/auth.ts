@@ -82,6 +82,21 @@ export const authService = {
         const userInfoStr = await SecureStore.getItemAsync(STORAGE_KEYS.USER_INFO);
         return userInfoStr ? JSON.parse(userInfoStr) : null;
     },
+
+    checkSession: async () => {
+        try {
+            const session = await fetchAuthSession();
+            return {
+                isAuthenticated: !!session.tokens,
+                session,
+            };
+        } catch (error) {
+            return {
+                isAuthenticated: false,
+                session: null,
+            };
+        }
+    },
 };
 
 const STORAGE_KEYS = {

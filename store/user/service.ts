@@ -71,6 +71,27 @@ const getUser = async (): Promise<User> => {
     }
 };
 
+const updateUser = async (updates: Partial<User>): Promise<User> => {
+    console.log('service: updateUser');
+    try {
+        const userId = await authService.getUserId();
+        if (!userId) throw new Error('No user ID found');
+
+        const response = await api.put(`/users/${userId}`, updates);
+        const result = parseResponse(response);
+
+        if (!result.user) {
+            console.log(result);
+            throw new Error('Invalid response format');
+        }
+
+        return result.user;
+    } catch (error) {
+        handleAxiosError(error);
+        throw error;
+    }
+};
+
 const getUserFitnessProfile = async (userId: string): Promise<UserFitnessProfile> => {
     console.log('service: getUserFitnessProfile');
     try {
@@ -418,6 +439,7 @@ const deleteWeightMeasurement = async (userId: string, timestamp: string): Promi
 
 export default {
     getUser,
+    updateUser,
     getUserFitnessProfile,
     updateUserFitnessProfile,
     getUserRecommendations,
