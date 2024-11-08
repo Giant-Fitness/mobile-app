@@ -13,8 +13,8 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Amplify } from 'aws-amplify';
 import outputs from '../amplify_outputs.json';
 import { Spaces } from '@/constants/Spaces';
-import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { ThemedText } from '@/components/base/ThemedText';
+import { router } from 'expo-router';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('screen');
 const { height: SCREEN_HEIGHT } = Dimensions.get('screen');
@@ -41,6 +41,7 @@ const LoginPage = () => {
                 case 'signedIn':
                     try {
                         await authService.storeAuthData();
+                        router.replace('/');
                     } catch (error) {
                         console.error('Error storing auth data:', error);
                     }

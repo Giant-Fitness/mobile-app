@@ -63,8 +63,8 @@ const WelcomeScreens: React.FC = () => {
             id: 3,
             title: 'Smarter Tracking for Stronger Progress',
             description: [
-                'Track workouts, log body measurements, and upload photos to capture every step. Share your journey with friends for motivation',
-                'Receive recommended lift weights based on your progress, helping you push safely and effectively',
+                'Track your workouts, log measurements, and capture photos to see your progress unfold',
+                'Get tailored lift recommendations to keep pushing safely, and share milestones with friends for extra motivation',
             ],
             image: require('@/assets/images/progress.png'),
         },

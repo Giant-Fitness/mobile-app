@@ -1,7 +1,7 @@
 // blog/why-lmc.tsx
 
 import React from 'react';
-import { StyleSheet, ScrollView, View, Image } from 'react-native';
+import { StyleSheet, View, Image, Text } from 'react-native';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 
@@ -133,7 +133,7 @@ const WhyLMCScreen = () => {
                 <TopImageInfoCard
                     image={require('@/assets/images/team.svg')}
                     title='The LMC Difference'
-                    subtitle='Fitness, Simplified and Supercharged'
+                    subtitle='Fitness – Simplified and Supercharged'
                     titleType='titleLarge'
                     subtitleType='link'
                     subtitleStyle={{
@@ -157,20 +157,21 @@ const WhyLMCScreen = () => {
                         <View>
                             <View>
                                 <ThemedText type='link' style={[styles.descriptionText]}>
-                                    Starting a fitness journey can be daunting – there's a lot of "What do I do?" and "How do I stay on track?" That's why we
-                                    created LMC: to simplify the steps and give you everything you need to succeed without overthinking.
+                                    We know starting a fitness journey can be overwhelming – there's a lot of{' '}
+                                    <Text style={styles.italicText}>"What do I do?"</Text> and <Text style={styles.italicText}>"How do I stay on track?"</Text>
+                                    {'\n'}That’s why we created LMC: to guide you every step of the way and give you everything you need to succeed.
                                 </ThemedText>
                                 <ThemedText
                                     type='link'
                                     style={[
                                         styles.descriptionText,
                                         {
-                                            marginTop: Spaces.MD,
+                                            marginTop: Spaces.MD + Spaces.XS,
                                         },
                                     ]}
                                 >
-                                    LMC isn't just about fitness; it's about creating something together. Your feedback and ideas shape LMC, helping us make it
-                                    the best fit for you and the whole community.
+                                    But LMC isn't just another fitness app; it’s a community-first platform where your feedback counts, your favorite trainers
+                                    inspire, and your friends keep you accountable, just as with your gym crew.
                                 </ThemedText>
                             </View>
                         </View>
@@ -184,6 +185,13 @@ const WhyLMCScreen = () => {
 };
 
 const styles = StyleSheet.create({
+    italicText: {
+        fontStyle: 'italic',
+        fontWeight: '700',
+    },
+    descriptionText: {
+        lineHeight: 21,
+    },
     visionContainer: {
         paddingVertical: Spaces.MD,
         paddingHorizontal: Spaces.SM,
@@ -193,7 +201,8 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     featuresContainer: {
-        padding: Spaces.MD,
+        paddingHorizontal: Spaces.MD,
+        paddingTop: Spaces.SM,
         paddingBottom: Spaces.XL,
         gap: Spaces.LG,
     },

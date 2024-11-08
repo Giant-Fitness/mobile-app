@@ -1,6 +1,6 @@
 // app/index.tsx
 
-import { Redirect } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import WelcomeScreens from '@/components/onboarding/WelcomeScreens';
 import { authService } from '@/utils/auth';
@@ -15,25 +15,21 @@ export default function Index() {
 
     const { user } = useSelector((state: RootState) => state.user);
 
+    // Effect for initial auth check and user data fetch
     useEffect(() => {
         const checkAuthAndFetchUserData = async () => {
             try {
-                // Check if the user is authenticated by looking at the session
                 const { isAuthenticated: sessionAuthenticated } = await authService.checkSession();
                 setIsAuthenticated(sessionAuthenticated);
 
                 if (sessionAuthenticated) {
-                    // Fetch user data from the backend
                     const resultAction = await dispatch(getUserAsync());
                     if (getUserAsync.fulfilled.match(resultAction)) {
                         const userData = resultAction.payload;
-                        // If user data is null, redirect to WelcomeScreens
                         if (!userData) {
                             setIsAuthenticated(false);
                             return;
                         }
-
-                        // Check if the user has a FirstName
                         setUserHasName(!!userData.FirstName);
                     } else {
                         setIsAuthenticated(false);
@@ -47,27 +43,36 @@ export default function Index() {
         checkAuthAndFetchUserData();
     }, [dispatch]);
 
-    // Render the appropriate screen based on the state
+    // Separate effect for handling navigation based on auth state
+    useEffect(() => {
+        if (isAuthenticated === null || userHasName === null) {
+            return; // Still loading
+        }
 
-    // If not authenticated, show welcome screens
+        if (isAuthenticated === false) {
+            return; // WelcomeScreens will be rendered
+        }
+
+        if (isAuthenticated && userHasName === false) {
+            router.replace('/onboarding/name-collection');
+            return;
+        }
+
+        if (isAuthenticated && userHasName) {
+            router.replace('/initialization');
+            return;
+        }
+    }, [isAuthenticated, userHasName]);
+
+    // Render logic
     if (isAuthenticated === false) {
         return <WelcomeScreens />;
     }
 
-    // If still checking, show a loading state
     if (isAuthenticated === null || userHasName === null) {
         return null; // Or a loading indicator
     }
 
-    // If authenticated but user has no FirstName, go to name-collection
-    if (isAuthenticated && userHasName === false) {
-        return <Redirect href='/onboarding/name-collection' />;
-    }
-
-    // If authenticated and user has a FirstName, go to initialization
-    if (isAuthenticated && userHasName) {
-        return <Redirect href='/initialization' />;
-    }
-
+    // Return null as navigation will be handled by the effect
     return null;
 }

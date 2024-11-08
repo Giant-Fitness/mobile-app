@@ -20,7 +20,7 @@ import { RecommendedProgramCard } from '@/components/programs/RecommendedProgram
 import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 
-const MenuItem = ({ title, description, onPress, backgroundColor, textColor, image, isGrid = false }) => {
+const MenuItem = ({ title, description, onPress, backgroundColor, textColor, image, isGrid = false, descriptionColor }) => {
     if (isGrid) {
         return (
             <TouchableOpacity onPress={onPress} style={[styles.gridMenuItem, { backgroundColor }]} activeOpacity={0.7}>
@@ -41,7 +41,7 @@ const MenuItem = ({ title, description, onPress, backgroundColor, textColor, ima
                     <ThemedText type='title' style={[styles.menuTitle, { color: textColor }]}>
                         {title}
                     </ThemedText>
-                    <ThemedText type='overline' style={[styles.menuDescription, { color: textColor }]}>
+                    <ThemedText type='overline' style={[styles.menuDescription, { color: descriptionColor }]}>
                         {description}
                     </ThemedText>
                 </View>
@@ -112,6 +112,7 @@ export default function InactiveProgramHome() {
             onPress: () => navigateTo('programs/program-recommender-wizard'),
             backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.7),
             textColor: darkenColor(themeColors.tangerineSolid, 0),
+            descriptionColor: darkenColor(themeColors.subText, 0.2),
             show: !isOnboardingComplete,
         },
         {
@@ -121,6 +122,7 @@ export default function InactiveProgramHome() {
             onPress: () => navigateTo('programs/browse-programs'),
             backgroundColor: lightenColor(themeColors.maroonTransparent, 0.3),
             textColor: darkenColor(themeColors.maroonSolid, 0),
+            descriptionColor: darkenColor(themeColors.subText, 0.2),
             show: true,
         },
     ].filter((item) => item.show);

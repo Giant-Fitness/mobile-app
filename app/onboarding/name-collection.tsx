@@ -22,6 +22,7 @@ const NameCollectionScreen = () => {
     const [error, setError] = useState('');
     const dispatch = useDispatch<AppDispatch>();
     const { user } = useSelector((state: RootState) => state.user);
+
     useEffect(() => {
         navigation.setOptions({ headerShown: false });
     }, [navigation]);

@@ -89,7 +89,7 @@ export const FactOfTheDay = ({}: FactOfTheDayProps) => {
                         style={[
                             styles.text,
                             {
-                                color: darkenColor(themeColors.tealSolid, 0.3),
+                                color: darkenColor(themeColors.subText, 0.1),
                                 lineHeight: 21,
                                 fontSize: 13,
                             },
