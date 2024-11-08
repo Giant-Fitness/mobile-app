@@ -1,7 +1,7 @@
 // components/auth/AuthComponents.tsx
 
 import React, { useEffect, useState } from 'react';
-import { View, Image, StyleSheet, Pressable, TextInput } from 'react-native';
+import { View, Image, StyleSheet, Pressable, TextInput, ImageStyle, TextStyle, ViewStyle } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
@@ -13,21 +13,28 @@ import { signIn } from '@aws-amplify/auth';
 import { router } from 'expo-router';
 import { authService } from '@/utils/auth';
 
-export const CustomHeader = () => {
+type CustomHeaderProps = {
+    containerStyle?: ViewStyle;
+    logoStyle?: ImageStyle;
+    textContainerStyle?: ViewStyle;
+    textStyle?: TextStyle;
+};
+
+export const CustomHeader: React.FC<CustomHeaderProps> = ({ containerStyle, logoStyle, textContainerStyle, textStyle }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
     return (
-        <View style={styles.headerContainer}>
-            <Image source={require('@/assets/images/logo.png')} style={styles.logo} resizeMode='contain' />
-            <View style={styles.textContainer}>
-                <ThemedText type='headline' style={[styles.headerText, { color: themeColors.text }]}>
+        <View style={[styles.headerContainer, containerStyle]}>
+            <Image source={require('@/assets/images/logo.png')} style={[styles.logo, logoStyle]} resizeMode='contain' />
+            <View style={[styles.textContainer, textContainerStyle]}>
+                <ThemedText type='headline' style={[styles.headerText, { color: themeColors.text }, textStyle]}>
                     Gain Muscle
                 </ThemedText>
-                <ThemedText type='headline' style={[styles.headerText, { color: themeColors.text }]}>
+                <ThemedText type='headline' style={[styles.headerText, { color: themeColors.text }, textStyle]}>
                     Lose Weight
                 </ThemedText>
-                <ThemedText type='headline' style={[styles.headerText, { color: themeColors.text }]}>
+                <ThemedText type='headline' style={[styles.headerText, { color: themeColors.text }, textStyle]}>
                     Maintain Results
                 </ThemedText>
             </View>
@@ -94,7 +101,7 @@ export const CustomSignIn = (props: any) => {
                 />
                 {field.name === 'password' && (
                     <Pressable onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-                        <Icon name={showPassword ? 'eye-off' : 'eye'} size={20} color={themeColors.subText} />
+                        <Icon name={showPassword ? 'eye' : 'eye-off'} size={16} color={themeColors.subText} />
                     </Pressable>
                 )}
             </View>

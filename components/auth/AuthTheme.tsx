@@ -215,9 +215,9 @@ export const useAuthTheme = (): Theme => {
             },
             passwordField: {
                 container: {
-                    width: '95%', // Match button width
+                    width: '95%',
                     marginBottom: Spaces.MD,
-                    alignSelf: 'center', // Center the container
+                    alignSelf: 'center',
                 },
                 field: {
                     flex: 1,
@@ -233,6 +233,7 @@ export const useAuthTheme = (): Theme => {
                     borderRadius: Spaces.SM,
                     flexDirection: 'row',
                     alignItems: 'center',
+                    width: '100%',
                 },
                 error: {
                     borderColor: themeColors.red,

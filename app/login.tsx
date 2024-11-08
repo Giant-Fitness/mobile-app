@@ -1,17 +1,20 @@
 // app/login.tsx
 
 import React, { useEffect } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { Dimensions, Pressable, StyleSheet, View } from 'react-native';
 import { Authenticator } from '@aws-amplify/ui-react-native';
 import { ThemeProvider } from '@aws-amplify/ui-react-native';
 import { Hub } from 'aws-amplify/utils';
 import { authService } from '@/utils/auth';
 import { useAuthTheme } from '@/components/auth/AuthTheme';
-import { CustomSignIn } from '@/components/auth/AuthComponents';
+import { CustomHeader, CustomSignIn } from '@/components/auth/AuthComponents';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Amplify } from 'aws-amplify';
 import outputs from '../amplify_outputs.json';
+import { Spaces } from '@/constants/Spaces';
+import { PrimaryButton } from '@/components/buttons/PrimaryButton';
+import { ThemedText } from '@/components/base/ThemedText';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('screen');
 const { height: SCREEN_HEIGHT } = Dimensions.get('screen');
@@ -68,14 +71,43 @@ const LoginPage = () => {
                         )}
                         components={{
                             SignIn: CustomSignIn,
-                            SignUp: ({ fields, ...props }) => (
-                                <Authenticator.SignUp {...props} fields={fields.map((field) => ({ ...field, labelHidden: true }))} />
+                            SignUp: ({ fields, toSignIn, ...props }) => (
+                                <View style={{ flex: 1, width: '100%' }}>
+                                    <CustomHeader containerStyle={{ marginLeft: Spaces.MD, paddingBottom: Spaces.LG }} />
+                                    <View>
+                                        <Authenticator.SignUp
+                                            {...props}
+                                            fields={fields.map((field) => ({
+                                                ...field,
+                                                labelHidden: true,
+                                                placeholder: field.name === 'confirm_password' ? 'Confirm password' : field.placeholder,
+                                            }))}
+                                            Header={() => null}
+                                            hideSignIn={true}
+                                            // Customize the footer to replace the default Sign Up button
+                                            // Customize the footer to replace the default Sign Up button and add "Sign In" link
+                                            Footer={() => (
+                                                <View>
+                                                    <View style={styles.signUpContainer}>
+                                                        <ThemedText style={styles.signUpText}>Already have an account?</ThemedText>
+                                                        <Pressable onPress={toSignIn}>
+                                                            <ThemedText style={[styles.signUpLink, { color: themeColors.accent }]}>Sign In</ThemedText>
+                                                        </Pressable>
+                                                    </View>
+                                                </View>
+                                            )}
+                                        />
+                                    </View>
+                                </View>
                             ),
                             ForgotPassword: ({ fields, ...props }) => (
                                 <Authenticator.ForgotPassword {...props} fields={fields.map((field) => ({ ...field, labelHidden: true }))} />
                             ),
                             ConfirmResetPassword: ({ fields, ...props }) => (
                                 <Authenticator.ConfirmResetPassword {...props} fields={fields.map((field) => ({ ...field, labelHidden: true }))} />
+                            ),
+                            ConfirmSignUp: ({ fields, ...props }) => (
+                                <Authenticator.ConfirmSignUp {...props} fields={fields.map((field) => ({ ...field, labelHidden: true }))} />
                             ),
                         }}
                         loginMechanisms={['email']}
@@ -91,6 +123,19 @@ const styles = StyleSheet.create({
     fullScreen: {
         width: SCREEN_WIDTH,
         height: SCREEN_HEIGHT,
+    },
+    signUpContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: Spaces.MD,
+        gap: Spaces.XS,
+    },
+    signUpText: {
+        // Customize as needed, such as color or font size
+    },
+    signUpLink: {
+        fontWeight: '500',
     },
 });
 
