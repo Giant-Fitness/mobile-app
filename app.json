@@ -13,9 +13,19 @@
             "backgroundColor": "#ffffff"
         },
         "ios": {
-            "supportsTablet": true,
+            "supportsTablet": false,
             "userInterfaceStyle": "automatic",
-            "bundleIdentifier": "com.GiantFitness.LMC"
+            "bundleIdentifier": "com.GiantFitness.LMC",
+            "minimimVersionIOS": "15.1",
+            "infoPlist": {
+                "UIRequiresFullScreen": true,
+                "UIStatusBarStyle": "auto",
+                "NSCameraUsageDescription": "This app needs access to the camera to scan QR codes.",
+                "NSPhotoLibraryUsageDescription": "This app needs access to photos for profile pictures.",
+                "NSUserNotificationsUsageDescription": "We'll send you notifications about your workouts and updates.",
+                "UIRequiredDeviceCapabilities": ["armv7", "telephony"],
+                "UISupportedInterfaceOrientations": ["UIInterfaceOrientationPortrait"]
+            }
         },
         "android": {
             "adaptiveIcon": {
@@ -23,12 +33,9 @@
                 "backgroundColor": "#ffffff"
             },
             "userInterfaceStyle": "automatic",
-            "package": "com.GiantFitness.LMC"
-        },
-        "web": {
-            "bundler": "metro",
-            "output": "static",
-            "favicon": "./assets/images/icon.png"
+            "package": "com.GiantFitness.LMC",
+            "minSdkVersion": 24,
+            "permissions": ["NOTIFICATIONS", "RECEIVE_BOOT_COMPLETED", "VIBRATE", "CAMERA", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
         },
         "plugins": ["expo-router"],
         "experiments": {
