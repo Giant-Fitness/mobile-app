@@ -1,6 +1,6 @@
 // app/programs/exercise-details.tsx
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
@@ -45,8 +45,24 @@ const ExerciseDetailsScreen = () => {
         },
     });
 
-    React.useEffect(() => {
-        navigation.setOptions({ headerShown: false });
+    useEffect(() => {
+        // Hide header immediately on mount
+        const hideHeader = () => {
+            navigation.setOptions({
+                headerShown: false,
+                // Add any other header options you want to override
+            });
+        };
+
+        // Run immediately and after a small delay to ensure it takes effect
+        hideHeader();
+        const timer = setTimeout(hideHeader, 0);
+
+        return () => {
+            clearTimeout(timer);
+            // Optionally restore header on unmount if needed
+            navigation.setOptions({ headerShown: true });
+        };
     }, [navigation]);
 
     const handleLogExercise = () => {

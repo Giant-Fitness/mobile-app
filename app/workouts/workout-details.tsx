@@ -54,10 +54,30 @@ export default function WorkoutDetailScreen() {
     const [reachedMilestones, setReachedMilestones] = useState(new Set());
 
     useEffect(() => {
-        navigation.setOptions({ headerShown: false });
+        // Set up navigation options immediately
+        const setNavOptions = () => {
+            navigation.setOptions({
+                headerShown: false,
+            });
+        };
+
+        // Run immediately and after a small delay
+        setNavOptions();
+        const navTimer = setTimeout(setNavOptions, 0);
+
+        // Only fetch if workout isn't already loaded
         if (workoutState !== REQUEST_STATE.FULFILLED) {
             dispatch(getWorkoutAsync({ workoutId }));
         }
+
+        // Cleanup
+        return () => {
+            clearTimeout(navTimer);
+            // Optional: restore header on unmount
+            navigation.setOptions({
+                headerShown: true,
+            });
+        };
     }, [navigation, dispatch, workoutId, workoutState]);
 
     const { showSplash, handleSplashComplete } = useSplashScreen({

@@ -27,7 +27,25 @@ export default function ProgramCompleteFeedbackScreen() {
     const { user } = useSelector((state: RootState) => state.user);
 
     useEffect(() => {
-        navigation.setOptions({ headerShown: false, gestureEnabled: false });
+        const setNavOptions = () => {
+            navigation.setOptions({
+                headerShown: false,
+                gestureEnabled: false,
+            });
+        };
+
+        // Run immediately and after a small delay
+        setNavOptions();
+        const timer = setTimeout(setNavOptions, 0);
+
+        return () => {
+            clearTimeout(timer);
+            // Optional: restore default settings on unmount
+            navigation.setOptions({
+                headerShown: true,
+                gestureEnabled: true,
+            });
+        };
     }, [navigation]);
 
     const initialData: ProgramCompleteData = {

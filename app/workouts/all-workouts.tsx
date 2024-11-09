@@ -55,10 +55,29 @@ export default function AllWorkoutsScreen() {
     }, [dispatch, workouts]);
 
     useEffect(() => {
-        navigation.setOptions({ headerShown: false });
-        fetchData();
-    }, [navigation, fetchData]);
+        // Set up navigation options immediately
+        const setNavOptions = () => {
+            navigation.setOptions({
+                headerShown: false,
+            });
+        };
 
+        // Run immediately and after a small delay
+        setNavOptions();
+        const navTimer = setTimeout(setNavOptions, 0);
+
+        // Fetch data after navigation options are set
+        fetchData();
+
+        // Cleanup
+        return () => {
+            clearTimeout(navTimer);
+            // Optional: restore header on unmount
+            navigation.setOptions({
+                headerShown: true,
+            });
+        };
+    }, [navigation, fetchData]);
     useEffect(() => {
         if (allWorkoutsState === REQUEST_STATE.FULFILLED) {
             filterAndSortWorkouts(filters, sortOption);

@@ -26,7 +26,23 @@ const ProgramRecommenderWizardScreen = () => {
     const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     useEffect(() => {
-        navigation.setOptions({ headerShown: false });
+        // Hide header immediately on mount
+        const hideHeader = () => {
+            navigation.setOptions({
+                headerShown: false,
+                // Add any other header options you want to override
+            });
+        };
+
+        // Run immediately and after a small delay to ensure it takes effect
+        hideHeader();
+        const timer = setTimeout(hideHeader, 0);
+
+        return () => {
+            clearTimeout(timer);
+            // Optionally restore header on unmount if needed
+            navigation.setOptions({ headerShown: true });
+        };
     }, [navigation]);
 
     const handleComplete = async (data: any) => {

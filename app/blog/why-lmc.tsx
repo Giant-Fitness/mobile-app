@@ -1,9 +1,10 @@
 // blog/why-lmc.tsx
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, View, Image, Text, Platform } from 'react-native';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
+import { router } from 'expo-router';
 
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -28,8 +29,24 @@ const WhyLMCScreen = () => {
         },
     });
 
-    React.useEffect(() => {
-        navigation.setOptions({ headerShown: false });
+    useEffect(() => {
+        // Hide header immediately on mount
+        const hideHeader = () => {
+            navigation.setOptions({
+                headerShown: false,
+                // Add any other header options you want to override
+            });
+        };
+
+        // Run immediately and after a small delay to ensure it takes effect
+        hideHeader();
+        const timer = setTimeout(hideHeader, 0);
+
+        return () => {
+            clearTimeout(timer);
+            // Optionally restore header on unmount if needed
+            navigation.setOptions({ headerShown: true });
+        };
     }, [navigation]);
 
     const features = [

@@ -51,7 +51,23 @@ export default function WeightTrackingScreen() {
     const dispatch = useDispatch<AppDispatch>();
 
     useEffect(() => {
-        navigation.setOptions({ headerShown: false });
+        const setNavOptions = () => {
+            navigation.setOptions({
+                headerShown: false,
+            });
+        };
+
+        // Run immediately and after a small delay
+        setNavOptions();
+        const timer = setTimeout(setNavOptions, 0);
+
+        return () => {
+            clearTimeout(timer);
+            // Optional: restore default settings on unmount
+            navigation.setOptions({
+                headerShown: true,
+            });
+        };
     }, [navigation]);
 
     useEffect(() => {

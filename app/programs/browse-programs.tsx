@@ -43,8 +43,23 @@ export default function BrowseProgramsScreen() {
     });
 
     useEffect(() => {
-        navigation.setOptions({ headerShown: false });
+        // Hide header immediately
+        const hideHeader = () => {
+            navigation.setOptions({ headerShown: false });
+        };
+
+        // Run immediately and after a small delay
+        hideHeader();
+        const timer = setTimeout(hideHeader, 0);
+
+        // Fetch data
         fetchData();
+
+        return () => {
+            clearTimeout(timer);
+            // Optional: restore header on unmount
+            navigation.setOptions({ headerShown: true });
+        };
     }, [navigation, fetchData]);
 
     const navigateToProgramOverview = useCallback(

@@ -34,7 +34,23 @@ export default function AllWeightDataScreen() {
     const { userWeightMeasurements } = useSelector((state: RootState) => state.user);
 
     useEffect(() => {
-        navigation.setOptions({ headerShown: false });
+        const setNavOptions = () => {
+            navigation.setOptions({
+                headerShown: false,
+            });
+        };
+
+        // Run immediately and after a small delay
+        setNavOptions();
+        const timer = setTimeout(setNavOptions, 0);
+
+        return () => {
+            clearTimeout(timer);
+            // Optional: restore default settings on unmount
+            navigation.setOptions({
+                headerShown: true,
+            });
+        };
     }, [navigation]);
 
     // Calculate weight change between measurements

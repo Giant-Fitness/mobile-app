@@ -28,7 +28,17 @@ export default function ProgramCompleteScreen() {
     const lottieRef = useRef<LottieView>(null);
 
     useEffect(() => {
-        navigation.setOptions({ headerShown: false, gestureEnabled: false });
+        // Separate nav options setup to run immediately
+        const setNavOptions = () => {
+            navigation.setOptions({
+                headerShown: false,
+                gestureEnabled: false,
+            });
+        };
+
+        // Run nav options setup immediately and after small delay
+        setNavOptions();
+        const navTimer = setTimeout(setNavOptions, 0);
 
         // Start the animation sequence
         const animationSequence = async () => {
@@ -43,7 +53,7 @@ export default function ProgramCompleteScreen() {
             lottieRef.current?.play();
 
             // Journey message fade in after delay
-            setTimeout(() => {
+            const journeyTimer = setTimeout(() => {
                 Animated.timing(journeyMessageOpacity, {
                     toValue: 1,
                     duration: 1000,
@@ -52,16 +62,34 @@ export default function ProgramCompleteScreen() {
             }, 2000);
 
             // Show FAB after all animations
-            setTimeout(() => {
+            const fabTimer = setTimeout(() => {
                 Animated.timing(fabOpacity, {
                     toValue: 1,
                     duration: 500,
                     useNativeDriver: true,
                 }).start();
             }, 3500);
+
+            return { journeyTimer, fabTimer };
         };
 
-        animationSequence();
+        // Start animation sequence
+        const timers = animationSequence();
+
+        // Cleanup function
+        return () => {
+            clearTimeout(navTimer);
+            // Clean up animation timers
+            timers.then(({ journeyTimer, fabTimer }) => {
+                clearTimeout(journeyTimer);
+                clearTimeout(fabTimer);
+            });
+            // Optional: restore navigation settings
+            navigation.setOptions({
+                headerShown: true,
+                gestureEnabled: true,
+            });
+        };
     }, [navigation, mainMessageOpacity, journeyMessageOpacity, fabOpacity]);
 
     const handleContinue = () => {
