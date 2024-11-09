@@ -50,7 +50,7 @@ export default function BrowseProgramsScreen() {
 
         // Run immediately and after a small delay
         hideHeader();
-        const timer = setTimeout(hideHeader, 0);
+        const timer = setTimeout(hideHeader, 1);
 
         // Fetch data
         fetchData();

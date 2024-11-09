@@ -63,7 +63,7 @@ export default function WorkoutDetailScreen() {
 
         // Run immediately and after a small delay
         setNavOptions();
-        const navTimer = setTimeout(setNavOptions, 0);
+        const navTimer = setTimeout(setNavOptions, 1);
 
         // Only fetch if workout isn't already loaded
         if (workoutState !== REQUEST_STATE.FULFILLED) {

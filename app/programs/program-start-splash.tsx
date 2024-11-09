@@ -40,7 +40,7 @@ export default function ProgramStartSplashScreen() {
 
         // Run immediately and after a small delay
         setNavOptions();
-        const timer = setTimeout(setNavOptions, 0);
+        const timer = setTimeout(setNavOptions, 1);
 
         return () => {
             clearTimeout(timer);

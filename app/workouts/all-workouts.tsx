@@ -64,7 +64,7 @@ export default function AllWorkoutsScreen() {
 
         // Run immediately and after a small delay
         setNavOptions();
-        const navTimer = setTimeout(setNavOptions, 0);
+        const navTimer = setTimeout(setNavOptions, 1);
 
         // Fetch data after navigation options are set
         fetchData();
