@@ -169,7 +169,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
     };
 
     return (
-        <BottomSheet visible={visible} onClose={handleClose}>
+        <BottomSheet visible={visible} onClose={handleClose} style={Platform.OS === 'ios' ? { height: '60%' } : undefined}>
             <View style={styles.container}>
                 {/* Header */}
                 <ThemedView style={[styles.header, { borderBottomColor: themeColors.systemBorderColor }]}>

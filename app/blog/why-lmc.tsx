@@ -1,7 +1,7 @@
 // blog/why-lmc.tsx
 
 import React from 'react';
-import { StyleSheet, View, Image, Text } from 'react-native';
+import { StyleSheet, View, Image, Text, Platform } from 'react-native';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 
@@ -186,8 +186,17 @@ const WhyLMCScreen = () => {
 
 const styles = StyleSheet.create({
     italicText: {
-        fontStyle: 'italic',
-        fontWeight: '700',
+        ...Platform.select({
+            ios: {
+                fontFamily: 'System',
+                fontStyle: 'italic',
+                fontWeight: '500',
+            },
+            android: {
+                fontStyle: 'italic',
+                fontWeight: '700',
+            },
+        }),
     },
     descriptionText: {
         lineHeight: 21,
@@ -252,9 +261,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: Spaces.LG,
         paddingTop: Spaces.MD,
         paddingBottom: Spaces.XL,
-    },
-    descriptionText: {
-        lineHeight: 21,
     },
 });
 
