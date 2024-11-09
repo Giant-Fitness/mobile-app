@@ -22,6 +22,7 @@ type AnimatedHeaderProps = {
     headerBackground?: string;
     menuIcon?: string;
     onMenuPress?: () => void;
+    disableBackButtonAnimation?: boolean; // New prop
 };
 
 export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
@@ -34,6 +35,7 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
     backButtonColor,
     headerBackground = 'transparent',
     menuIcon = 'more-horizontal',
+    disableBackButtonAnimation = false,
     onMenuPress,
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -52,7 +54,7 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
     });
 
     const animatedIconColor = useDerivedValue(() => {
-        if (disableColorChange) {
+        if (disableColorChange || disableBackButtonAnimation) {
             return backButtonColor || themeColors.text;
         }
         return interpolateColor(scrollY.value, [headerInterpolationStart, headerInterpolationEnd], [themeColors.white, themeColors.text]);

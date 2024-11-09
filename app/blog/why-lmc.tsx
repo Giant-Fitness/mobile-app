@@ -145,7 +145,12 @@ const WhyLMCScreen = () => {
 
     return (
         <ThemedView style={{ paddingTop: Spaces.XXL, flex: 1, backgroundColor: themeColors.background }}>
-            <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Spaces.SM} headerInterpolationEnd={Spaces.MD} />
+            <AnimatedHeader
+                disableBackButtonAnimation={true}
+                scrollY={scrollY}
+                headerInterpolationStart={Sizes.headerHeight}
+                headerInterpolationEnd={Sizes.headerHeight + Spaces.XXXL}
+            />
             <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
                 <TopImageInfoCard
                     image={require('@/assets/images/team.svg')}
@@ -165,7 +170,7 @@ const WhyLMCScreen = () => {
                         paddingBottom: 0,
                     }}
                     useImageContainer={true}
-                    imageStyle={{ height: Sizes.imageXXLHeight }}
+                    imageStyle={{ height: Sizes.imageXLHeight }}
                     titleFirst={true}
                 />
 
