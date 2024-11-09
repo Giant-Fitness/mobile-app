@@ -167,9 +167,10 @@ const styles = StyleSheet.create({
     },
     input: {
         width: '100%',
-        paddingVertical: Spaces.SM + Spaces.XS,
+        paddingVertical: Spaces.MD,
         paddingHorizontal: Spaces.SM,
         borderRadius: Spaces.SM,
+        marginBottom: 1,
         fontSize: 14,
     },
     forgotPasswordContainer: {
