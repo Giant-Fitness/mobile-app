@@ -153,16 +153,27 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
         hideCalendarView();
     };
 
-    const generateCalendarDays = (date: Date): Date[] => {
+    const generateCalendarDays = (date: Date): Date[][] => {
         const start = startOfWeek(startOfMonth(date));
         const end = endOfWeek(endOfMonth(date));
 
-        const days: Date[] = [];
+        const days: Date[][] = [];
+        let currentWeek: Date[] = [];
         let day = start;
 
         while (day <= end) {
-            days.push(day);
+            currentWeek.push(day);
+
+            if (currentWeek.length === 7) {
+                days.push(currentWeek);
+                currentWeek = [];
+            }
+
             day = addDays(day, 1);
+        }
+
+        if (currentWeek.length > 0) {
+            days.push(currentWeek);
         }
 
         return days;
@@ -269,52 +280,56 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                         </View>
 
                         <View style={styles.calendarGrid}>
-                            {generateCalendarDays(displayMonth).map((date, index) => {
-                                const isCurrentMonth = isSameMonth(date, displayMonth);
-                                const isToday = isSameDay(date, new Date());
-                                const isSelected = isSameDay(date, selectedDate);
-                                const isFutureDate = date > new Date();
-                                const isDisabled = isFutureDate || !isCurrentMonth;
+                            {generateCalendarDays(displayMonth).map((week, weekIndex) => (
+                                <View key={`week-${weekIndex}`} style={styles.calendarWeek}>
+                                    {week.map((date, dayIndex) => {
+                                        const isCurrentMonth = isSameMonth(date, displayMonth);
+                                        const isToday = isSameDay(date, new Date());
+                                        const isSelected = isSameDay(date, selectedDate);
+                                        const isFutureDate = date > new Date();
+                                        const isDisabled = isFutureDate || !isCurrentMonth;
 
-                                return (
-                                    <TouchableOpacity
-                                        key={index}
-                                        style={[
-                                            styles.calendarDay,
-                                            isToday &&
-                                                !isSelected && {
-                                                    borderWidth: StyleSheet.hairlineWidth,
-                                                    borderColor: themeColors.text,
-                                                },
-                                            isSelected && {
-                                                backgroundColor: themeColors.text,
-                                            },
-                                        ]}
-                                        onPress={() => handleDateSelect(date)}
-                                        disabled={isSubmitting || isDeleting || isDisabled}
-                                    >
-                                        <ThemedText
-                                            type='bodySmall'
-                                            style={[
-                                                styles.dayText,
-                                                isSelected && {
-                                                    color: themeColors.background,
-                                                },
-                                                isDisabled && {
-                                                    color: themeColors.subText,
-                                                    opacity: 0.5,
-                                                },
-                                                isToday &&
-                                                    !isSelected && {
-                                                        color: themeColors.text,
+                                        return (
+                                            <TouchableOpacity
+                                                key={`day-${dayIndex}`}
+                                                style={[
+                                                    styles.calendarDay,
+                                                    isToday &&
+                                                        !isSelected && {
+                                                            borderWidth: StyleSheet.hairlineWidth,
+                                                            borderColor: themeColors.text,
+                                                        },
+                                                    isSelected && {
+                                                        backgroundColor: themeColors.text,
                                                     },
-                                            ]}
-                                        >
-                                            {format(date, 'd')}
-                                        </ThemedText>
-                                    </TouchableOpacity>
-                                );
-                            })}
+                                                ]}
+                                                onPress={() => handleDateSelect(date)}
+                                                disabled={isSubmitting || isDeleting || isDisabled}
+                                            >
+                                                <ThemedText
+                                                    type='bodySmall'
+                                                    style={[
+                                                        styles.dayText,
+                                                        isSelected && {
+                                                            color: themeColors.background,
+                                                        },
+                                                        isDisabled && {
+                                                            color: themeColors.subText,
+                                                            opacity: 0.5,
+                                                        },
+                                                        isToday &&
+                                                            !isSelected && {
+                                                                color: themeColors.text,
+                                                            },
+                                                    ]}
+                                                >
+                                                    {format(date, 'd')}
+                                                </ThemedText>
+                                            </TouchableOpacity>
+                                        );
+                                    })}
+                                </View>
+                            ))}
                         </View>
 
                         <View style={styles.calendarFooter}>
@@ -375,9 +390,6 @@ const styles = StyleSheet.create({
         marginLeft: Spaces.SM,
         paddingHorizontal: Spaces.LG,
     },
-    calendar: {
-        // Calendar styles
-    },
     inputContainer: {
         marginTop: Spaces.SM,
         paddingBottom: Spaces.MD,
@@ -420,20 +432,25 @@ const styles = StyleSheet.create({
         marginLeft: Spaces.SM,
     },
     calendarGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-around',
+        flexDirection: 'column',
         paddingVertical: Spaces.MD,
+    },
+    calendarWeek: {
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        width: '100%',
+        marginBottom: 2,
     },
     dayText: {
         textAlign: 'center',
     },
-    today: {
-        borderWidth: 1,
-    },
-    selectedDay: {},
-    outsideMonth: {
-        opacity: 0.4,
+    calendarDay: {
+        width: 40,
+        height: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginHorizontal: 4,
+        borderRadius: 20,
     },
     calendarFooter: {
         flexDirection: 'row',
@@ -444,13 +461,5 @@ const styles = StyleSheet.create({
     calendarButton: {
         flex: 1,
         borderWidth: 0,
-    },
-    calendarDay: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginVertical: 2,
-        borderRadius: 20,
     },
 });
