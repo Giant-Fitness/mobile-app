@@ -117,6 +117,7 @@ export default function RootLayout() {
                         options={{
                             // Hide the header for this route
                             headerShown: false,
+                            animation: 'none',
                         }}
                     />
                     <Stack.Screen
@@ -132,6 +133,7 @@ export default function RootLayout() {
                         options={{
                             // Hide the header for this route
                             headerShown: false,
+                            animation: 'none',
                         }}
                     />
                 </Stack>
