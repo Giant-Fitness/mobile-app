@@ -30,17 +30,9 @@ const Initialization: React.FC = () => {
     const [lastAction, setLastAction] = useState<string>('Starting Initialization');
     const dispatch = useDispatch<AppDispatch>();
     const navigation = useNavigation();
-    const {
-        user,
-        userState,
-        userProgramProgress,
-        userProgramProgressState,
-        userWeightMeasurements,
-    } = useSelector((state: RootState) => state.user);
+    const { user, userState, userProgramProgress, userProgramProgressState, userWeightMeasurements } = useSelector((state: RootState) => state.user);
     const { error: programError } = useSelector((state: RootState) => state.programs);
-    const { spotlightWorkouts, spotlightWorkoutsState, error: workoutError } = useSelector(
-        (state: RootState) => state.workouts
-    );
+    const { spotlightWorkouts, spotlightWorkoutsState, error: workoutError } = useSelector((state: RootState) => state.workouts);
     const [dataLoaded, setDataLoaded] = useState(REQUEST_STATE.PENDING);
     const [error, setError] = useState<ErrorState | null>(null);
 
@@ -73,7 +65,7 @@ const Initialization: React.FC = () => {
             setLastAction(`User Data Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
             setError({
                 source: 'User Data',
-                message: error instanceof Error ? error.message : 'Failed to fetch user data'
+                message: error instanceof Error ? error.message : 'Failed to fetch user data',
             });
             return REQUEST_STATE.REJECTED;
         }
@@ -105,7 +97,7 @@ const Initialization: React.FC = () => {
             setLastAction(`Additional Data Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
             setError({
                 source: 'Additional Data',
-                message: error instanceof Error ? error.message : 'Failed to fetch additional data'
+                message: error instanceof Error ? error.message : 'Failed to fetch additional data',
             });
             return REQUEST_STATE.REJECTED;
         }
@@ -121,7 +113,7 @@ const Initialization: React.FC = () => {
             } catch (error) {
                 setError({
                     source: 'Initialization',
-                    message: error instanceof Error ? error.message : 'Failed to initialize app'
+                    message: error instanceof Error ? error.message : 'Failed to initialize app',
                 });
             }
         };
@@ -151,12 +143,8 @@ const Initialization: React.FC = () => {
     if (error || programError || workoutError) {
         return (
             <SafeAreaView style={styles.container}>
-                <Text style={styles.errorSource}>
-                    Error in: {error?.source || (programError ? 'Programs' : 'Workouts')}
-                </Text>
-                <Text style={styles.errorText}>
-                    {error?.message || programError || workoutError || 'An unexpected error occurred.'}
-                </Text>
+                <Text style={styles.errorSource}>Error in: {error?.source || (programError ? 'Programs' : 'Workouts')}</Text>
+                <Text style={styles.errorText}>{error?.message || programError || workoutError || 'An unexpected error occurred.'}</Text>
             </SafeAreaView>
         );
     }
@@ -167,7 +155,7 @@ const Initialization: React.FC = () => {
         { label: 'Error', value: error || 'None' },
         { label: 'User', value: user?.UserId || 'None' },
         { label: 'Program Progress', value: userProgramProgress?.ProgramId || 'None' },
-        { label: 'Spotlight Workouts', value: spotlightWorkouts ? 'Loaded' : 'None' }
+        { label: 'Spotlight Workouts', value: spotlightWorkouts ? 'Loaded' : 'None' },
     ];
 
     const baseScreen = (
@@ -176,12 +164,8 @@ const Initialization: React.FC = () => {
                 <DumbbellSplash isDataLoaded={false} />
             ) : error || programError || workoutError ? (
                 <SafeAreaView style={styles.container}>
-                    <Text style={styles.errorSource}>
-                        Error in: {error?.source || (programError ? 'Programs' : 'Workouts')}
-                    </Text>
-                    <Text style={styles.errorText}>
-                        {error?.message || programError || workoutError || 'An unexpected error occurred.'}
-                    </Text>
+                    <Text style={styles.errorSource}>Error in: {error?.source || (programError ? 'Programs' : 'Workouts')}</Text>
+                    <Text style={styles.errorText}>{error?.message || programError || workoutError || 'An unexpected error occurred.'}</Text>
                 </SafeAreaView>
             ) : (
                 <Redirect href='/(tabs)/home' />

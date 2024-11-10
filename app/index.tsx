@@ -2,7 +2,7 @@
 
 import { Redirect, router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import WelcomeScreens from '@/components/onboarding/WelcomeScreens';
 import { authService } from '@/utils/auth';
 import { useDispatch, useSelector } from 'react-redux';
@@ -13,21 +13,43 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { DebugOverlay } from '@/components/debug/DebugOverlay';
 import * as SecureStore from 'expo-secure-store';
+import { fetchAuthSession } from 'aws-amplify/auth';
+import { configureAmplify } from '@/config/amplify';
 
 export default function Index() {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
     const [userHasName, setUserHasName] = useState<boolean | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [lastAction, setLastAction] = useState<string>('Initial Load');
+    const [isInitializing, setIsInitializing] = useState(true);
     const dispatch = useDispatch<AppDispatch>();
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const [debugInfo, setDebugInfo] = useState<any>({
+        amplifyConfigured: false,
         checkCount: 0,
         lastCheck: new Date().toISOString(),
-        authChecks: []
+        authChecks: [],
     });
+
     const { user, userState } = useSelector((state: RootState) => state.user);
+
+    // Initialize Amplify first
+    useEffect(() => {
+        const initializeAmplify = async () => {
+            try {
+                setLastAction('Configuring Amplify');
+                const configured = configureAmplify();
+                setDebugInfo((prev) => ({
+                    ...prev,
+                    amplifyConfigured: configured,
+                }));
+            } catch (error) {
+                setError(`Amplify Config Error: ${error.message}`);
+            }
+        };
+        initializeAmplify();
+    }, []);
 
     const checkSecureStore = async () => {
         try {
@@ -46,18 +68,18 @@ export default function Index() {
                 userInfo: userInfo ? JSON.parse(userInfo) : null,
             };
 
-            setDebugInfo(prev => ({
+            setDebugInfo((prev) => ({
                 ...prev,
                 checkCount: prev.checkCount + 1,
                 lastCheck: new Date().toISOString(),
-                authChecks: [...prev.authChecks.slice(-4), newCheck] // Keep last 5 checks
+                authChecks: [...prev.authChecks.slice(-4), newCheck], // Keep last 5 checks
             }));
 
             return newCheck;
         } catch (e) {
-            setDebugInfo(prev => ({
+            setDebugInfo((prev) => ({
                 ...prev,
-                error: e.message
+                error: e.message,
             }));
             return null;
         }
@@ -67,37 +89,52 @@ export default function Index() {
         const checkAuthAndFetchUserData = async () => {
             try {
                 setLastAction('Checking Session');
-                const storeState = await checkSecureStore();
-                
-                const { isAuthenticated: sessionAuthenticated, session } = await authService.checkSession();
-                setLastAction(`Auth: ${sessionAuthenticated}`);
-                setIsAuthenticated(sessionAuthenticated);
+                setIsInitializing(true);
 
-                if (sessionAuthenticated) {
-                    setLastAction('Fetching User');
-                    const resultAction = await dispatch(getUserAsync());
-                    
-                    if (getUserAsync.fulfilled.match(resultAction)) {
-                        const userData = resultAction.payload;
-                        if (!userData) {
-                            setLastAction('No User - Clearing');
+                // Check secure store first
+                const storeState = await checkSecureStore();
+
+                // Only proceed with auth check if we have stored tokens
+                if (storeState?.hasAccessToken && storeState?.hasIdToken) {
+                    const { isAuthenticated: sessionAuthenticated } = await authService.checkSession();
+                    setLastAction(`Auth Check: ${sessionAuthenticated}`);
+                    setIsAuthenticated(sessionAuthenticated);
+
+                    if (sessionAuthenticated) {
+                        setLastAction('Fetching User');
+                        const resultAction = await dispatch(getUserAsync());
+
+                        if (getUserAsync.fulfilled.match(resultAction)) {
+                            const userData = resultAction.payload;
+                            if (!userData) {
+                                setLastAction('No User - Clearing');
+                                await authService.clearAuthData();
+                                setIsAuthenticated(false);
+                            } else {
+                                setLastAction(`Has Name: ${!!userData.FirstName}`);
+                                setUserHasName(!!userData.FirstName);
+                            }
+                        } else {
+                            setLastAction('User Fetch Failed');
                             await authService.clearAuthData();
                             setIsAuthenticated(false);
-                            return;
                         }
-                        setLastAction(`Has Name: ${!!userData.FirstName}`);
-                        setUserHasName(!!userData.FirstName);
                     } else {
-                        setLastAction('User Fetch Failed');
+                        setLastAction('Session Invalid - Clearing');
                         await authService.clearAuthData();
                         setIsAuthenticated(false);
                     }
+                } else {
+                    setLastAction('No Stored Tokens');
+                    setIsAuthenticated(false);
                 }
             } catch (error) {
                 setLastAction(`Error: ${error.message}`);
                 await authService.clearAuthData();
                 setError(`Fatal Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
                 setIsAuthenticated(false);
+            } finally {
+                setIsInitializing(false);
             }
         };
 
@@ -106,6 +143,8 @@ export default function Index() {
 
     // Handle navigation after render
     useEffect(() => {
+        if (isInitializing) return;
+
         const navigate = async () => {
             try {
                 if (isAuthenticated && userHasName === false) {
@@ -122,16 +161,26 @@ export default function Index() {
         };
 
         navigate();
-    }, [isAuthenticated, userHasName]);
+    }, [isAuthenticated, userHasName, isInitializing]);
 
     const debugItems = [
         { label: 'Action', value: lastAction },
+        { label: 'Initializing', value: isInitializing },
         { label: 'Auth', value: isAuthenticated },
         { label: 'Name', value: userHasName },
         { label: 'State', value: userState },
         { label: 'Check History', value: debugInfo.authChecks },
-        { label: 'Error', value: error || 'None' }
+        { label: 'Error', value: error || 'None' },
     ];
+
+    if (isInitializing) {
+        return (
+            <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+                <ActivityIndicator size='large' color={themeColors.accent} />
+                <DebugOverlay items={debugItems} />
+            </View>
+        );
+    }
 
     return (
         <>
@@ -165,5 +214,5 @@ const styles = StyleSheet.create({
         fontSize: 14,
         marginBottom: 5,
         textAlign: 'center',
-    }
+    },
 });

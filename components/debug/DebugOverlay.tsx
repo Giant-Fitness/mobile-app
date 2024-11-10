@@ -17,32 +17,20 @@ export const DebugOverlay: React.FC<DebugOverlayProps> = ({ items }) => {
 
     return (
         <>
-            <TouchableOpacity 
-                style={styles.debugTrigger} 
-                onPress={() => setIsVisible(!isVisible)}
-            >
+            <TouchableOpacity style={styles.debugTrigger} onPress={() => setIsVisible(!isVisible)}>
                 <View style={styles.debugDot} />
             </TouchableOpacity>
-            
+
             {isVisible && (
-                <ScrollView 
-                    style={styles.debugContainer}
-                    contentContainerStyle={styles.debugContent}
-                >
-                    <TouchableOpacity 
-                        style={styles.closeButton} 
-                        onPress={() => setIsVisible(false)}
-                    >
+                <ScrollView style={styles.debugContainer} contentContainerStyle={styles.debugContent}>
+                    <TouchableOpacity style={styles.closeButton} onPress={() => setIsVisible(false)}>
                         <ThemedText style={styles.closeText}>Close Debug</ThemedText>
                     </TouchableOpacity>
                     {items.map((item, index) => (
                         <View key={index} style={styles.debugRow}>
                             <ThemedText style={styles.debugLabel}>{item.label}:</ThemedText>
                             <ThemedText style={styles.debugValue}>
-                                {typeof item.value === 'object' 
-                                    ? JSON.stringify(item.value, null, 2)
-                                    : String(item.value)
-                                }
+                                {typeof item.value === 'object' ? JSON.stringify(item.value, null, 2) : String(item.value)}
                             </ThemedText>
                         </View>
                     ))}

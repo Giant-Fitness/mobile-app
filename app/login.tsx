@@ -10,24 +10,12 @@ import { useAuthTheme } from '@/components/auth/AuthTheme';
 import { CustomHeader, CustomSignIn } from '@/components/auth/AuthComponents';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Amplify } from 'aws-amplify';
-import outputs from '../amplify_outputs.json';
 import { Spaces } from '@/constants/Spaces';
 import { ThemedText } from '@/components/base/ThemedText';
 import { router } from 'expo-router';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('screen');
 const { height: SCREEN_HEIGHT } = Dimensions.get('screen');
-
-Amplify.configure({
-    Auth: {
-        Cognito: {
-            userPoolId: outputs.auth.Cognito.userPoolId,
-            userPoolClientId: outputs.auth.Cognito.userPoolClientId,
-            identityPoolId: outputs.auth.Cognito.identityPoolId,
-        },
-    },
-});
 
 const LoginPage = () => {
     const authTheme = useAuthTheme();
