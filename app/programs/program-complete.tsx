@@ -38,7 +38,7 @@ export default function ProgramCompleteScreen() {
 
         // Run nav options setup immediately and after small delay
         setNavOptions();
-        const navTimer = setTimeout(setNavOptions, 1);
+        const navTimer = setTimeout(setNavOptions, 0);
 
         // Start the animation sequence
         const animationSequence = async () => {

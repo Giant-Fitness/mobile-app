@@ -62,6 +62,7 @@ export const CustomSignIn = (props: any) => {
             await authService.storeAuthData();
             router.replace('/');
         } catch (err) {
+            console.log(err);
             setError('Failed to sign in. Please check your credentials.');
         } finally {
             setLoading(false); // Reset loading to false after sign-in attempt

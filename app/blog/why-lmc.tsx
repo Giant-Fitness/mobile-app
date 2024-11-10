@@ -40,7 +40,7 @@ const WhyLMCScreen = () => {
 
         // Run immediately and after a small delay to ensure it takes effect
         hideHeader();
-        const timer = setTimeout(hideHeader, 1);
+        const timer = setTimeout(hideHeader, 0);
 
         return () => {
             clearTimeout(timer);

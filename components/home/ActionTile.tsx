@@ -5,6 +5,7 @@ import { StyleSheet, TouchableOpacity, View, Image, ImageSourcePropType, ViewSty
 import { ThemedText } from '@/components/base/ThemedText';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
+import { Icon } from '@/components/base/Icon';
 
 interface ActionTileProps {
     image: ImageSourcePropType;
@@ -17,6 +18,7 @@ interface ActionTileProps {
     height?: number;
     style?: ViewStyle;
     fontSize?: number;
+    showChevron?: boolean;
 }
 
 export const ActionTile = ({
@@ -30,6 +32,7 @@ export const ActionTile = ({
     height = 130,
     style,
     fontSize = 13,
+    showChevron = false,
 }: ActionTileProps) => {
     return (
         <TouchableOpacity
@@ -59,10 +62,13 @@ export const ActionTile = ({
                     resizeMode='contain'
                 />
             </View>
-            <View style={styles.textContainer}>
-                <ThemedText type={'overline'} style={[styles.text, { color: textColor, fontSize: fontSize }]} numberOfLines={2}>
-                    {title}
-                </ThemedText>
+            <View style={styles.textWrapper}>
+                <View style={styles.textContainer}>
+                    <ThemedText type={'overline'} style={[styles.text, { color: textColor, fontSize: fontSize }]} numberOfLines={2}>
+                        {title}
+                    </ThemedText>
+                    {showChevron && <Icon name='chevron-forward' size={fontSize} color={textColor} style={styles.chevron} />}
+                </View>
             </View>
         </TouchableOpacity>
     );
@@ -83,9 +89,17 @@ const styles = StyleSheet.create({
         height: 40,
     },
     textContainer: {
-        flexShrink: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: Spaces.XXS,
     },
     text: {
         lineHeight: 18,
+    },
+    textWrapper: {
+        flexShrink: 1,
+    },
+    chevron: {
+        marginLeft: Spaces.XXS,
     },
 });

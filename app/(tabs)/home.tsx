@@ -125,6 +125,8 @@ export default function HomeScreen() {
                             backgroundColor={tile.backgroundColor}
                             textColor={tile.textColor}
                             width={tileWidth}
+                            style={{ borderWidth: StyleSheet.hairlineWidth, borderColor: tile.textColor }}
+                            showChevron={true}
                         />
                     ))}
                     {/* </ScrollView> */}

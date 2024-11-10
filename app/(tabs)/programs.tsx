@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
-import ActiveProgramHome from '@/app/programs/active-program-home';
-import InactiveProgramHome from '@/app/programs/inactive-program-home';
+import ActiveProgramHome from '@/components/programs/active-program-home';
+import InactiveProgramHome from '@/components/programs/inactive-program-home';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { useProgramData } from '@/hooks/useProgramData';
