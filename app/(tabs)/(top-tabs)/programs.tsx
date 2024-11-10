@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
-import ActiveProgramHome from '@/app/programs/active-program-home';
+import ActiveProgramHome from '@/components/programs/active-program-home';
 import BrowseProgramsScreen from '@/app/programs/browse-programs';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { REQUEST_STATE } from '@/constants/requestStates';

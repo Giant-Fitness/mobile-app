@@ -35,10 +35,6 @@ const Initialization: React.FC = () => {
     const { spotlightWorkouts, spotlightWorkoutsState, error: workoutError } = useSelector((state: RootState) => state.workouts);
     const [dataLoaded, setDataLoaded] = useState(REQUEST_STATE.PENDING);
 
-    useEffect(() => {
-        navigation.setOptions({ headerShown: false });
-    }, [navigation]);
-
     const fetchUserData = useCallback(async () => {
         try {
             await dispatch(getUserAsync());
