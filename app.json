@@ -51,7 +51,10 @@
         "owner": "hustleclub",
         "runtimeVersion": "0.0.1",
         "updates": {
-            "url": "https://u.expo.dev/8f1030a1-b4d2-4668-9c53-b1e7cfbabf24"
+            "url": "https://u.expo.dev/8f1030a1-b4d2-4668-9c53-b1e7cfbabf24",
+            "enabled": true,
+            "fallbackToCacheTimeout": 0,
+            "checkAutomatically": "ON_LOAD"
         }
     }
 }
