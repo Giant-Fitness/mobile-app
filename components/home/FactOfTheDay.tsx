@@ -62,11 +62,29 @@ const facts = [
     'Flexibility training helps increase blood flow to muscles and can reduce injury risk.',
 ];
 
+// Generate a random fact once per day using the current date as seed
+const getFactOfTheDay = () => {
+    const today = new Date();
+    const dateString = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+
+    // Simple hash function for the date string
+    let hash = 0;
+    for (let i = 0; i < dateString.length; i++) {
+        hash = (hash << 5) - hash + dateString.charCodeAt(i);
+        hash = hash & hash; // Convert to 32-bit integer
+    }
+
+    // Use the hash to get a consistent fact for the day
+    const index = Math.abs(hash) % facts.length;
+    return facts[index];
+};
+
+// Memoize the fact so it stays consistent during the session
+const todaysFact = getFactOfTheDay();
+
 export const FactOfTheDay = ({}: FactOfTheDayProps) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
-
-    const randomFact = facts[Math.floor(Math.random() * facts.length)];
 
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.tealTransparent }]}>
@@ -95,7 +113,7 @@ export const FactOfTheDay = ({}: FactOfTheDayProps) => {
                             },
                         ]}
                     >
-                        {randomFact}
+                        {todaysFact}
                     </ThemedText>
                 </View>
                 <Image
@@ -131,15 +149,15 @@ const styles = StyleSheet.create({
     content: {
         padding: Spaces.LG,
         flex: 1,
-        zIndex: 1, // Ensure text stays above the image
+        zIndex: 1,
     },
     text: {
-        maxWidth: '90%', // Ensure text doesn't overlap with image
+        maxWidth: '90%',
     },
     backgroundImage: {
         position: 'absolute',
-        right: -Spaces.XL - Spaces.SM, // Adjust this value to shift more or less
-        width: 200, // Adjust size as needed
+        right: -Spaces.XL - Spaces.SM,
+        width: 200,
         height: '60%',
     },
 });

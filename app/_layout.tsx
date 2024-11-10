@@ -127,6 +127,13 @@ export default function RootLayout() {
                         }}
                     />
                     <Stack.Screen name='(tabs)' options={{ headerShown: false, gestureEnabled: false }} />
+                    <Stack.Screen
+                        name='initialization'
+                        options={{
+                            // Hide the header for this route
+                            headerShown: false,
+                        }}
+                    />
                 </Stack>
             </ThemeProvider>
         </Provider>

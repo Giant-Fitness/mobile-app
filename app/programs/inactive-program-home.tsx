@@ -35,7 +35,11 @@ const MenuItem = ({ title, description, onPress, backgroundColor, textColor, ima
     }
 
     return (
-        <TouchableOpacity onPress={onPress} style={[styles.menuItem, { backgroundColor }]} activeOpacity={0.7}>
+        <TouchableOpacity
+            onPress={onPress}
+            style={[styles.menuItem, { backgroundColor, borderColor: textColor, borderWidth: StyleSheet.hairlineWidth }]}
+            activeOpacity={0.7}
+        >
             <View style={styles.menuContentWrapper}>
                 <View style={styles.menuContent}>
                     <ThemedText type='title' style={[styles.menuTitle, { color: textColor }]}>
