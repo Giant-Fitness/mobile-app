@@ -16,7 +16,7 @@
             "supportsTablet": false,
             "userInterfaceStyle": "automatic",
             "bundleIdentifier": "com.GiantFitness.LMC",
-            "minimumVersionIOS": "15.1",
+            "buildNumber": "1",
             "infoPlist": {
                 "UIRequiresFullScreen": true,
                 "UIStatusBarStyle": "auto",
@@ -36,6 +36,7 @@
             },
             "userInterfaceStyle": "automatic",
             "package": "com.GiantFitness.LMC",
+            "versionCode": 1,
             "minSdkVersion": 24,
             "permissions": ["NOTIFICATIONS", "RECEIVE_BOOT_COMPLETED", "VIBRATE", "CAMERA", "READ_MEDIA_IMAGES"]
         },
@@ -49,7 +50,9 @@
             }
         },
         "owner": "hustleclub",
-        "runtimeVersion": "0.0.1",
+        "runtimeVersion": {
+            "policy": "appVersion"
+        },
         "updates": {
             "url": "https://u.expo.dev/8f1030a1-b4d2-4668-9c53-b1e7cfbabf24",
             "enabled": true,

@@ -1,27 +1,79 @@
 {
-    "cli": {
-        "version": ">= 12.6.2",
-        "appVersionSource": "remote"
+  "cli": {
+    "version": ">= 12.6.2",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "channel": "development",
+      "env": {
+        "APP_ENV": "development"
+      },
+      "ios": {
+        "resourceClass": "medium"
+      },
+      "android": {
+        "resourceClass": "medium",
+        "buildType": "apk"
+      }
     },
-    "build": {
-        "development": {
-            "developmentClient": true,
-            "distribution": "internal",
-            "channel": "development",
-            "resourceClass": "medium"
-        },
-        "preview": {
-            "distribution": "internal",
-            "channel": "preview",
-            "resourceClass": "medium"
-        },
-        "production": {
-            "autoIncrement": true,
-            "channel": "production",
-            "resourceClass": "medium"
-        }
+    "feature": {
+      "distribution": "internal",
+      "channel": "feature",
+      "env": {
+        "APP_ENV": "feature"
+      },
+      "ios": {
+        "resourceClass": "medium"
+      },
+      "android": {
+        "resourceClass": "medium",
+        "buildType": "apk"
+      }
     },
-    "submit": {
-        "production": {}
+    "staging": {
+      "distribution": "internal",
+      "channel": "staging",
+      "env": {
+        "APP_ENV": "staging"
+      },
+      "ios": {
+        "resourceClass": "medium"
+      },
+      "android": {
+        "resourceClass": "medium",
+        "buildType": "apk"
+      }
+    },
+    "release": {
+      "distribution": "store",
+      "channel": "release",
+      "env": {
+        "APP_ENV": "release"
+      },
+      "ios": {
+        "resourceClass": "medium"
+      },
+      "android": {
+        "resourceClass": "medium",
+        "buildType": "app-bundle"
+      }
+    },
+    "production": {
+      "channel": "production",
+      "distribution": "store",
+      "env": {
+        "APP_ENV": "production"
+      },
+      "ios": {
+        "resourceClass": "medium"
+      },
+      "android": {
+        "resourceClass": "medium",
+        "buildType": "app-bundle"
+      }
     }
+  }
 }
