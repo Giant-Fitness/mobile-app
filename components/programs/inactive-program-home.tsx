@@ -1,24 +1,20 @@
 // app/programs/inactive-program-home.tsx
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { ScrollView, StyleSheet, View, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useSelector, useDispatch } from 'react-redux';
 import { ThemedText } from '@/components/base/ThemedText';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
-import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
-import { getUserRecommendationsAsync } from '@/store/user/thunks';
-import { getProgramAsync } from '@/store/programs/thunks';
-import { AppDispatch, RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { RecommendedProgramCard } from '@/components/programs/RecommendedProgramCard';
 import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { Icon } from '@/components/base/Icon';
+import { useInactiveProgramData } from '@/hooks/useInactiveProgramData';
 
 const MenuItem = ({ title, description, onPress, backgroundColor, textColor, image, isGrid = false, descriptionColor }) => {
     if (isGrid) {
@@ -72,40 +68,13 @@ export default function InactiveProgramHome() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const navigation = useNavigation();
-    const dispatch = useDispatch<AppDispatch>();
 
-    const [dataLoaded, setDataLoaded] = useState(REQUEST_STATE.PENDING);
-    const { user, userRecommendations, userRecommendationsState } = useSelector((state: RootState) => state.user);
-    const { programs } = useSelector((state: RootState) => state.programs);
+    const { isOnboardingComplete, recommendedProgram, dataLoadedState } = useInactiveProgramData();
 
-    const isOnboardingComplete = user?.OnboardingStatus?.fitness === true;
-
-    useEffect(() => {
-        const fetchData = async () => {
-            if (isOnboardingComplete) {
-                if (userRecommendationsState !== REQUEST_STATE.FULFILLED) {
-                    await dispatch(getUserRecommendationsAsync());
-                }
-
-                if (userRecommendations && userRecommendations.RecommendedProgramID) {
-                    await dispatch(getProgramAsync({ programId: userRecommendations.RecommendedProgramID }));
-                }
-            }
-            setDataLoaded(REQUEST_STATE.FULFILLED);
-        };
-
-        fetchData();
-    }, [dispatch, user?.UserId, userRecommendationsState, isOnboardingComplete]);
-
-    const { showSplash, handleSplashComplete } = useSplashScreen({
-        dataLoadedState: dataLoaded,
-    });
-
-    if (showSplash) {
-        return <DumbbellSplash onAnimationComplete={handleSplashComplete} isDataLoaded={false} />;
+    // Only show splash during initial app load
+    if (dataLoadedState === REQUEST_STATE.PENDING) {
+        return <DumbbellSplash isDataLoaded={false} />;
     }
-
-    const recommendedProgram = isOnboardingComplete && userRecommendations?.RecommendedProgramID ? programs[userRecommendations.RecommendedProgramID] : null;
 
     const navigateTo = (route, params = {}) => {
         navigation.navigate(route, params);
