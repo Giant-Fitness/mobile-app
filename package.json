@@ -32,6 +32,7 @@
         "expo-blur": "^13.0.2",
         "expo-camera": "~15.0.16",
         "expo-constants": "~16.0.2",
+        "expo-dev-client": "~4.0.29",
         "expo-device": "~6.0.2",
         "expo-font": "^12.0.9",
         "expo-health": "^0.0.0",
