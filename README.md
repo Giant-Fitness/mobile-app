@@ -22,6 +22,74 @@ feature/* → develop → staging → release → main
 -   `develop`: Main development branch where features are merged.
 -   `feature/*`: Individual feature branches (e.g., `feature/user-auth`).
 
+## 🌿 Branch Naming Conventions
+
+We follow a simple, descriptive branch naming convention:
+```
+type/short-description
+```
+
+### Branch Types
+
+- `feature/` - New features
+- `fix/` - Bug fixes
+- `ui/` - Visual changes and UI improvements
+- `hotfix/` - Urgent production fixes
+- `refactor/` - Code improvements without feature changes
+- `setup/` - Configuration and setup changes
+
+### Examples
+
+```bash
+# Features
+feature/workout-history
+feature/apple-signin
+feature/custom-exercises
+
+# Bug Fixes
+fix/workout-save-crash
+fix/ios-notifications
+fix/profile-image
+
+# UI Changes
+ui/workout-card-redesign
+ui/dark-mode
+ui/loading-states
+
+# Hotfixes
+hotfix/auth-crash
+hotfix/data-loss
+
+# Refactoring
+refactor/api-cleanup
+refactor/workout-logic
+
+# Setup
+setup/amplify-config
+setup/notifications
+```
+
+### Guidelines
+
+1. Use kebab-case for descriptions (hyphens between words)
+2. Keep names short but descriptive
+3. Include platform if platform-specific (ios/android)
+4. Add version numbers if needed (v2, v3)
+
+❌ Don't:
+```bash
+feature/f1                  # Too vague
+fix/bug                     # Not descriptive
+feature/my_new_feature     # Wrong format
+```
+
+✅ Do:
+```bash
+feature/auth-flow          # Clear and concise
+fix/android-workout-crash  # Platform-specific
+ui/profile-redesign-v2     # Versioned change
+```
+
 ## 🚀 Development Workflow
 
 ### 1. Starting a New Feature
