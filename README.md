@@ -25,18 +25,19 @@ feature/* → develop → staging → release → main
 ## 🌿 Branch Naming Conventions
 
 We follow a simple, descriptive branch naming convention:
+
 ```
 type/short-description
 ```
 
 ### Branch Types
 
-- `feature/` - New features
-- `fix/` - Bug fixes
-- `ui/` - Visual changes and UI improvements
-- `hotfix/` - Urgent production fixes
-- `refactor/` - Code improvements without feature changes
-- `setup/` - Configuration and setup changes
+-   `feature/` - New features
+-   `fix/` - Bug fixes
+-   `ui/` - Visual changes and UI improvements
+-   `hotfix/` - Urgent production fixes
+-   `refactor/` - Code improvements without feature changes
+-   `setup/` - Configuration and setup changes
 
 ### Examples
 
@@ -77,6 +78,7 @@ setup/notifications
 4. Add version numbers if needed (v2, v3)
 
 ❌ Don't:
+
 ```bash
 feature/f1                  # Too vague
 fix/bug                     # Not descriptive
@@ -84,6 +86,7 @@ feature/my_new_feature     # Wrong format
 ```
 
 ✅ Do:
+
 ```bash
 feature/auth-flow          # Clear and concise
 fix/android-workout-crash  # Platform-specific

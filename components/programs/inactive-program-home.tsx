@@ -5,7 +5,6 @@ import { ScrollView, StyleSheet, View, TouchableOpacity, Dimensions, Image } fro
 import { useNavigation } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
 import { ThemedText } from '@/components/base/ThemedText';
-import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
@@ -19,6 +18,7 @@ import { REQUEST_STATE } from '@/constants/requestStates';
 import { RecommendedProgramCard } from '@/components/programs/RecommendedProgramCard';
 import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
+import { Icon } from '@/components/base/Icon';
 
 const MenuItem = ({ title, description, onPress, backgroundColor, textColor, image, isGrid = false, descriptionColor }) => {
     if (isGrid) {
@@ -42,9 +42,12 @@ const MenuItem = ({ title, description, onPress, backgroundColor, textColor, ima
         >
             <View style={styles.menuContentWrapper}>
                 <View style={styles.menuContent}>
-                    <ThemedText type='title' style={[styles.menuTitle, { color: textColor }]}>
-                        {title}
-                    </ThemedText>
+                    <View style={styles.titleContainer}>
+                        <ThemedText type='title' style={[styles.menuTitle, { color: textColor }]}>
+                            {title}
+                        </ThemedText>
+                        <Icon name='chevron-forward' color={textColor} size={18} style={styles.chevron} />
+                    </View>
                     <ThemedText type='overline' style={[styles.menuDescription, { color: descriptionColor }]}>
                         {description}
                     </ThemedText>
@@ -201,9 +204,6 @@ const styles = StyleSheet.create({
         flex: 1,
         zIndex: 1,
     },
-    menuTitle: {
-        marginBottom: Spaces.XS,
-    },
     menuDescription: {
         lineHeight: 21,
         fontSize: 13,
@@ -259,5 +259,17 @@ const styles = StyleSheet.create({
     gridTitle: {
         fontSize: 15,
         lineHeight: 18,
+    },
+    titleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        marginBottom: Spaces.XS,
+    },
+    menuTitle: {
+        marginBottom: 0,
+    },
+    chevron: {
+        marginLeft: Spaces.XS,
     },
 });
