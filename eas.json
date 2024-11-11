@@ -1,84 +1,83 @@
 {
     "cli": {
-      "version": ">= 12.6.2",
-      "appVersionSource": "remote"
+        "version": ">= 12.6.2",
+        "appVersionSource": "remote"
     },
     "build": {
-      "development": {
-        "developmentClient": false,
-        "distribution": "internal",
-        "channel": "development",
-        "env": {
-          "APP_ENV": "development"
+        "development": {
+            "developmentClient": false,
+            "distribution": "internal",
+            "channel": "development",
+            "env": {
+                "APP_ENV": "development"
+            },
+            "ios": {
+                "resourceClass": "medium"
+            },
+            "android": {
+                "resourceClass": "medium",
+                "buildType": "apk"
+            }
         },
-        "ios": {
-          "resourceClass": "medium"
+        "feature": {
+            "distribution": "internal",
+            "channel": "feature",
+            "autoIncrement": true,
+            "env": {
+                "APP_ENV": "feature"
+            },
+            "ios": {
+                "resourceClass": "medium"
+            },
+            "android": {
+                "resourceClass": "medium",
+                "buildType": "apk"
+            }
         },
-        "android": {
-          "resourceClass": "medium",
-          "buildType": "apk"
+        "staging": {
+            "distribution": "internal",
+            "channel": "staging",
+            "autoIncrement": true,
+            "env": {
+                "APP_ENV": "staging"
+            },
+            "ios": {
+                "resourceClass": "medium"
+            },
+            "android": {
+                "resourceClass": "medium",
+                "buildType": "apk"
+            }
+        },
+        "release": {
+            "distribution": "store",
+            "channel": "release",
+            "autoIncrement": true,
+            "env": {
+                "APP_ENV": "release"
+            },
+            "ios": {
+                "resourceClass": "medium"
+            },
+            "android": {
+                "resourceClass": "medium",
+                "buildType": "app-bundle"
+            }
+        },
+        "production": {
+            "channel": "production",
+            "distribution": "store",
+            "autoIncrement": true,
+            "env": {
+                "APP_ENV": "production"
+            },
+            "ios": {
+                "resourceClass": "medium"
+            },
+            "android": {
+                "resourceClass": "medium",
+                "buildType": "app-bundle"
+            }
         }
-      },
-      "feature": {
-        "distribution": "internal",
-        "channel": "feature",
-        "autoIncrement": true,
-        "env": {
-          "APP_ENV": "feature"
-        },
-        "ios": {
-          "resourceClass": "medium"
-        },
-        "android": {
-          "resourceClass": "medium",
-          "buildType": "apk"
-        }
-      },
-      "staging": {
-        "distribution": "internal",
-        "channel": "staging",
-        "autoIncrement": true,
-        "env": {
-          "APP_ENV": "staging"
-        },
-        "ios": {
-          "resourceClass": "medium"
-        },
-        "android": {
-          "resourceClass": "medium",
-          "buildType": "apk"
-        }
-      },
-      "release": {
-        "distribution": "store",
-        "channel": "release",
-        "autoIncrement": true,
-        "env": {
-          "APP_ENV": "release"
-        },
-        "ios": {
-          "resourceClass": "medium"
-        },
-        "android": {
-          "resourceClass": "medium",
-          "buildType": "app-bundle"
-        }
-      },
-      "production": {
-        "channel": "production",
-        "distribution": "store",
-        "autoIncrement": true,
-        "env": {
-          "APP_ENV": "production"
-        },
-        "ios": {
-          "resourceClass": "medium"
-        },
-        "android": {
-          "resourceClass": "medium",
-          "buildType": "app-bundle"
-        }
-      }
     }
-  }
-  
+}
