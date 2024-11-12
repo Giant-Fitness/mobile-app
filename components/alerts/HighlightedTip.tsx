@@ -16,16 +16,27 @@ type HighlightedTipProps = {
     disableIcon?: boolean;
     textType?: string;
     containerStyle?: ViewStyle;
+    textColor?: string;
 };
 
-export const HighlightedTip: React.FC<HighlightedTipProps> = ({ iconName, tipText, disableIcon = false, textType = 'bodySmall', containerStyle }) => {
+export const HighlightedTip: React.FC<HighlightedTipProps> = ({
+    iconName,
+    tipText,
+    disableIcon = false,
+    textType = 'bodySmall',
+    containerStyle,
+    textColor,
+}) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
+    const textColorStyle = textColor ? { color: textColor } : { color: themeColors.tipText };
+    const iconColorStyle = textColor || themeColors.tipIcon;
+
     return (
         <ThemedView style={[styles.tipContainer, styles.shadow, { backgroundColor: themeColors.tipBackground }, containerStyle]}>
-            {!disableIcon && <Icon name={iconName} size={Sizes.iconSizeSM} color={themeColors.tipIcon} style={styles.tipIcon} />}
-            <ThemedText type={textType} style={[styles.tipText, { color: themeColors.tipText }]}>
+            {!disableIcon && <Icon name={iconName} size={Sizes.iconSizeSM} color={iconColorStyle} style={styles.tipIcon} />}
+            <ThemedText type={textType} style={[styles.tipText, textColorStyle]}>
                 {tipText}
             </ThemedText>
         </ThemedView>

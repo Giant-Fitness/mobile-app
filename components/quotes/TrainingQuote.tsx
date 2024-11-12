@@ -23,7 +23,12 @@ export const TrainingQuote: React.FC<TrainingQuoteProps> = ({ quote, isLastDay }
         <>
             {isLastDay ? (
                 <View style={styles.tipContainer}>
-                    <HighlightedTip iconName='star' tipText='The finish line is here, one last push!' />
+                    <HighlightedTip
+                        containerStyle={{ backgroundColor: themeColors.tealTransparent }}
+                        textColor={darkenColor(themeColors.tealSolid, 0.3)}
+                        iconName='star'
+                        tipText='The finish line is here, one last push!'
+                    />
                 </View>
             ) : (
                 <View style={[styles.quoteContainer, { backgroundColor: themeColors.tealTransparent }]}>
