@@ -17,7 +17,30 @@ import { getProgramAsync, getAllProgramDaysAsync, getProgramDayAsync, getMultipl
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
 import { selectWorkoutQuote, selectWorkoutQuoteState, selectRestDayQuote, selectRestDayQuoteState, selectQuoteError } from '@/store/quotes/selectors';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { getWeekNumber, getNextDayIds, getDayOfWeek } from '@/utils/calendar';
+import { getWeekNumber, getNextDayIds, getDayOfWeek, groupWeeksIntoMonths, groupProgramDaysIntoWeeks } from '@/utils/calendar';
+
+interface PreloadedData {
+    months: any[][][];
+    currentMonthIndex: number;
+}
+
+let preloadedProgressData: { [key: string]: PreloadedData } = {};
+
+export const preloadProgramProgressData = async (dispatch: AppDispatch, programId: string) => {
+    // Start loading program days
+    await dispatch(getAllProgramDaysAsync({ programId })).unwrap();
+
+    // Pre-calculate months data
+    const programDaysResult = await dispatch(getAllProgramDaysAsync({ programId })).unwrap();
+    const programDaysArray = Object.values(programDaysResult);
+    const groupedWeeks = groupProgramDaysIntoWeeks(programDaysArray);
+    const groupedMonths = groupWeeksIntoMonths(groupedWeeks);
+
+    preloadedProgressData[programId] = {
+        months: groupedMonths,
+        currentMonthIndex: 0, // Will be updated when actually viewing the progress screen
+    };
+};
 
 interface UseProgramDataOptions {
     fetchAllDays?: boolean;
@@ -38,6 +61,8 @@ export const useProgramData = (
     const userRecommendations = useSelector((state: RootState) => state.user.userRecommendations);
     const userRecommendationsState = useSelector((state: RootState) => state.user.userRecommendationsState);
 
+    const [months, setMonths] = useState<any[][][]>([]);
+    const [currentMonthIndex, setCurrentMonthIndex] = useState(0);
     const [isCompletingDay, setIsCompletingDay] = useState(false);
     const [isUncompletingDay, setIsUncompletingDay] = useState(false);
 
@@ -141,6 +166,50 @@ export const useProgramData = (
             dispatch(getRestDayQuoteAsync());
         }
     }, [dispatch, workoutQuoteState, restDayQuoteState]);
+
+    const programCalendarData = useMemo(() => {
+        const programId = activeProgram?.ProgramId;
+        if (!programId || !programDays[programId]) {
+            return {
+                months: [],
+                initialMonthIndex: 0,
+                currentWeek: 1,
+            };
+        }
+
+        const programDaysArray = Object.values(programDays[programId]);
+        if (!programDaysArray.length) {
+            return {
+                months: [],
+                initialMonthIndex: 0,
+                currentWeek: 1,
+            };
+        }
+
+        const groupedWeeks = groupProgramDaysIntoWeeks(programDaysArray);
+
+        const groupedMonths = groupWeeksIntoMonths(groupedWeeks);
+
+        // Calculate initial month index
+        let initialMonthIndex = 0;
+        if (userProgramProgress?.CurrentDay) {
+            initialMonthIndex = Math.floor((parseInt(userProgramProgress.CurrentDay) - 1) / 28);
+            initialMonthIndex = Math.min(initialMonthIndex, groupedMonths.length - 1);
+        }
+
+        return {
+            months: groupedMonths,
+            initialMonthIndex,
+            currentWeek: userProgramProgress?.CurrentDay ? getWeekNumber(parseInt(userProgramProgress.CurrentDay)) : 1,
+        };
+    }, [activeProgram, programDays, userProgramProgress]);
+
+    // Wait for data to be loaded before setting month index
+    useEffect(() => {
+        if (programCalendarData.months.length > 0) {
+            setCurrentMonthIndex(programCalendarData.initialMonthIndex);
+        }
+    }, [programCalendarData]);
 
     // Compute overall data loaded state
     const dataLoadedState = useMemo(() => {
@@ -282,7 +351,6 @@ export const useProgramData = (
         activeProgramNextDays,
         dataLoadedState,
         isLastDay,
-        currentWeek,
         dayOfWeek,
         displayQuote,
         isEnrolled,
@@ -294,6 +362,10 @@ export const useProgramData = (
         resetProgram,
         isCompletingDay,
         isUncompletingDay,
+        months: programCalendarData.months,
+        currentMonthIndex,
+        setCurrentMonthIndex,
+        currentWeek: programCalendarData.currentWeek,
         error: programError || quoteError,
     };
 };

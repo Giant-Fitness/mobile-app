@@ -24,6 +24,7 @@ import { ProgramDaySkipModal } from '@/components/programs/ProgramDaySkipModal';
 import { ProgramDayUnfinishModal } from '@/components/programs/ProgramDayUnfinishModal';
 import { BottomMenuModal } from '@/components/overlays/BottomMenuModal';
 import { AutoDismissSuccessModal } from '@/components/overlays/AutoDismissSuccessModal';
+import { getDayOfWeek, getWeekNumber } from '@/utils/calendar';
 
 type ProgramDayScreenParams = {
     ProgramDay: {
@@ -185,7 +186,7 @@ const ProgramDayScreen = () => {
                         <TopImageInfoCard
                             image={{ uri: programDay.PhotoUrl }}
                             title={`${programDay.DayTitle}`}
-                            subtitle={`Week ${currentWeek} Day ${dayOfWeek}`}
+                            subtitle={`Week ${getWeekNumber(parseInt(dayId))} Day ${getDayOfWeek(parseInt(dayId))}`}
                             titleType='titleLarge'
                             subtitleType='link'
                             subtitleStyle={{ marginBottom: Spaces.SM, color: themeColors.subText, marginTop: 0 }}
