@@ -63,7 +63,7 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
     const day = currentDay;
 
     return (
-        <View style={styles.shadowContainer}>
+        <View style={[styles.shadowContainer, { backgroundColor: themeColors.background }]}>
             <TouchableOpacity onPress={navigateToProgramDay} style={styles.cardContainer} activeOpacity={1}>
                 <ImageTextOverlay
                     image={{ uri: day.PhotoUrl }}
@@ -83,7 +83,7 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
 
 const styles = StyleSheet.create({
     shadowContainer: {
-        shadowColor: 'rgba(0,80,0,0.25)', // Use a more standard shadow color
+        shadowColor: 'rgba(0,80,0,0.3)',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 1,
         shadowRadius: 4,
