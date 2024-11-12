@@ -1,7 +1,7 @@
 // app/programs/active-program-home.tsx
 
 import React from 'react';
-import { ScrollView, StyleSheet, View, TouchableOpacity } from 'react-native';
+import { ScrollView, StyleSheet, View, Image, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -10,39 +10,22 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ProgramDayDetailCard } from '@/components/programs/ProgramDayDetailCard';
 import { TrainingQuote } from '@/components/quotes/TrainingQuote';
-import { Icon } from '@/components/base/Icon';
 import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { HighlightedTip } from '@/components/alerts/HighlightedTip';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { useProgramData } from '@/hooks/useProgramData';
-
-const MenuItem = ({ icon, text, onPress, color, chevronColor, leftIconColor, backgroundColor }) => (
-    <TouchableOpacity style={styles.menuItem} activeOpacity={1} onPress={onPress}>
-        <View style={styles.menuItemLeft}>
-            <View style={[styles.iconBox, { backgroundColor }]}>
-                <Icon name={icon} size={Sizes.iconSizeMD} color={leftIconColor} />
-            </View>
-            <ThemedText type='overline' style={[styles.menuText, { color }]}>
-                {text}
-            </ThemedText>
-        </View>
-        <Icon name='chevron-forward' size={Sizes.iconSizeSM} color={chevronColor} style={styles.menuChevron} />
-    </TouchableOpacity>
-);
+import { darkenColor, lightenColor } from '@/utils/colorUtils';
+import { Icon } from '@/components/base/Icon';
 
 export default function ActiveProgramHome() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const navigation = useNavigation();
 
-    const { activeProgram, activeProgramNextDays, dataLoadedState, isLastDay, currentWeek, displayQuote, endProgram, resetProgram, error } = useProgramData(
-        undefined,
-        undefined,
-        { fetchAllDays: true },
-    );
+    const { activeProgram, activeProgramNextDays, dataLoadedState, isLastDay, currentWeek, displayQuote, error } = useProgramData(undefined, undefined, {
+        fetchAllDays: true,
+    });
 
     const { showSplash, handleSplashComplete } = useSplashScreen({
         dataLoadedState,
@@ -65,8 +48,24 @@ export default function ActiveProgramHome() {
     };
 
     const menuItems = [
-        { icon: 'auto-graph', text: 'View Progress', onPress: () => navigateTo('programs/active-program-progress') },
-        { icon: 'library', text: 'Browse Library', onPress: () => navigateTo('programs/browse-programs') },
+        {
+            title: 'View Progress',
+            description: 'Track your journey and celebrate your achievements',
+            image: require('@/assets/images/line-chart.png'),
+            onPress: () => navigateTo('programs/active-program-progress'),
+            backgroundColor: lightenColor(themeColors.tealTransparent, 0.3),
+            textColor: darkenColor(themeColors.tealSolid, 0),
+            descriptionColor: darkenColor(themeColors.subText, 0.2),
+        },
+        {
+            title: 'Browse Library',
+            description: 'Explore our collection of structured training plans',
+            image: require('@/assets/images/clipboard.png'),
+            onPress: () => navigateTo('programs/browse-programs'),
+            backgroundColor: lightenColor(themeColors.purpleTransparent, 0.3),
+            textColor: darkenColor(themeColors.purpleSolid, 0),
+            descriptionColor: darkenColor(themeColors.subText, 0.2),
+        },
     ];
 
     return (
@@ -107,15 +106,44 @@ export default function ActiveProgramHome() {
 
                 <View style={styles.menuWrapper}>
                     {menuItems.map((item, index) => (
-                        <ThemedView key={index} style={[styles.menuContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
-                            <MenuItem
-                                {...item}
-                                color={themeColors.text}
-                                chevronColor={themeColors.iconDefault}
-                                leftIconColor={themeColors.tipText}
-                                backgroundColor={`${themeColors.tipBackground}`}
-                            />
-                        </ThemedView>
+                        <TouchableOpacity
+                            key={index}
+                            onPress={item.onPress}
+                            style={[
+                                styles.menuItem,
+                                {
+                                    backgroundColor: item.backgroundColor,
+                                    borderColor: item.textColor,
+                                    borderWidth: StyleSheet.hairlineWidth,
+                                },
+                            ]}
+                            activeOpacity={0.7}
+                        >
+                            <View style={styles.menuContentWrapper}>
+                                <View style={styles.menuContent}>
+                                    <View style={styles.titleContainer}>
+                                        <ThemedText type='title' style={[styles.menuTitle, { color: item.textColor }]}>
+                                            {item.title}
+                                        </ThemedText>
+                                        <Icon name='chevron-forward' color={item.textColor} size={18} style={styles.chevron} />
+                                    </View>
+                                    <ThemedText type='overline' style={[styles.menuDescription, { color: item.descriptionColor }]}>
+                                        {item.description}
+                                    </ThemedText>
+                                </View>
+                                <Image
+                                    source={item.image}
+                                    style={[
+                                        styles.menuBackgroundImage,
+                                        {
+                                            opacity: 0.12,
+                                            tintColor: item.textColor,
+                                        },
+                                    ]}
+                                    resizeMode='contain'
+                                />
+                            </View>
+                        </TouchableOpacity>
                     ))}
                 </View>
             </ScrollView>
@@ -137,30 +165,6 @@ const styles = StyleSheet.create({
         paddingVertical: Spaces.MD,
         paddingHorizontal: Spaces.XL,
     },
-    menuItem: {
-        paddingVertical: Spaces.LG,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    menuItemLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    iconBox: {
-        width: Spaces.XXL,
-        height: Spaces.XXL,
-        borderRadius: Spaces.SM,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: Spaces.MD,
-    },
-    menuIcon: {
-        marginRight: Spaces.SM,
-    },
-    menuChevron: {
-        marginLeft: Spaces.SM,
-    },
     planHeader: {
         paddingHorizontal: Spaces.LG,
     },
@@ -172,14 +176,48 @@ const styles = StyleSheet.create({
         paddingHorizontal: Spaces.LG,
         paddingBottom: Spaces.XXL,
     },
-    menuContainer: {
-        marginHorizontal: Spaces.LG,
-        paddingHorizontal: Spaces.MD,
-        marginBottom: Spaces.MD,
-        borderRadius: Spaces.MD,
-    },
     menuWrapper: {
         marginTop: Spaces.XXL,
         marginBottom: Spaces.XL,
+    },
+    menuItem: {
+        borderRadius: Spaces.MD,
+        overflow: 'hidden',
+        marginBottom: Spaces.LG,
+        marginHorizontal: Spaces.LG,
+    },
+    menuContentWrapper: {
+        position: 'relative',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    menuContent: {
+        padding: Spaces.LG,
+        flex: 1,
+        zIndex: 1,
+    },
+    menuDescription: {
+        lineHeight: 21,
+        fontSize: 13,
+        maxWidth: '90%',
+    },
+    menuBackgroundImage: {
+        position: 'absolute',
+        right: -Spaces.XL - Spaces.SM,
+        width: 200,
+        height: '60%',
+    },
+    titleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        marginBottom: Spaces.XS,
+    },
+    menuTitle: {
+        marginBottom: 0,
+    },
+    chevron: {
+        marginLeft: Spaces.XS,
     },
 });
