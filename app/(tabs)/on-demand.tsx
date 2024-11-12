@@ -161,11 +161,12 @@ export default function WorkoutsScreen() {
                                 onPress={category.onPress}
                                 backgroundColor={category.backgroundColor}
                                 textColor={category.textColor}
-                                style={{ marginRight: 0 }}
+                                style={{ marginRight: 0, borderWidth: StyleSheet.hairlineWidth, borderColor: category.textColor }}
                                 width={tileWidth}
                                 height={110}
                                 imageSize={40}
                                 fontSize={14}
+                                showChevron={true}
                             />
                         </View>
                     ))}
