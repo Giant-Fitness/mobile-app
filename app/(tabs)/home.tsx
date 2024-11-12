@@ -138,32 +138,31 @@ export default function HomeScreen() {
     const renderContent = () => {
         const greeting = user?.FirstName ? `Hi, ${user.FirstName}!` : 'Hi!';
 
-        if (!isFitnessOnboardingComplete) {
-            // State 3: Not completed onboarding
+        // State 1: Has active program (highest priority)
+        if (userProgramProgress?.ProgramId) {
             return (
                 <>
                     <View style={styles.greeting}>
                         <ThemedText type='greeting'>{greeting}</ThemedText>
                     </View>
 
-                    <LargeActionTile
-                        title='Get Started'
-                        description='Let us recommend a training plan tailored to your goals'
-                        onPress={() => navigation.navigate('programs/program-recommender-wizard')}
-                        backgroundColor={themeColors.containerHighlight}
-                        image={require('@/assets/images/nutrition.png')}
-                        textColor={themeColors.highlightContainerText}
-                    />
+                    <View style={styles.header}>
+                        <ThemedText type='titleLarge'>Today's Workout</ThemedText>
+                    </View>
 
-                    {renderForYouSection(true)}
+                    <View style={styles.workoutDayCard}>
+                        <ActiveProgramDayCompressedCard />
+                    </View>
+
+                    {renderForYouSection()}
 
                     <FactOfTheDay />
                 </>
             );
         }
 
-        if (!userProgramProgress?.ProgramId) {
-            // State 2: Completed onboarding but no active program
+        // State 2: No active program but completed onboarding
+        if (isFitnessOnboardingComplete) {
             return (
                 <>
                     <View style={styles.greeting}>
@@ -186,33 +185,23 @@ export default function HomeScreen() {
             );
         }
 
-        // State 1: Active program
+        // State 3: No active program and no onboarding (lowest priority)
         return (
             <>
                 <View style={styles.greeting}>
                     <ThemedText type='greeting'>{greeting}</ThemedText>
                 </View>
 
-                <View style={styles.header}>
-                    <ThemedText type='titleLarge'>Today's Workout</ThemedText>
-                </View>
+                <LargeActionTile
+                    title='Get Started'
+                    description='Let us recommend a training plan tailored to your goals'
+                    onPress={() => navigation.navigate('programs/program-recommender-wizard')}
+                    backgroundColor={themeColors.containerHighlight}
+                    image={require('@/assets/images/nutrition.png')}
+                    textColor={themeColors.highlightContainerText}
+                />
 
-                <View style={styles.workoutDayCard}>
-                    <ActiveProgramDayCompressedCard />
-                </View>
-
-                {/* <View
-                    style={[
-                        styles.divider,
-                        {
-                            borderBottomColor: themeColors.systemBorderColor,
-                            borderBottomWidth: StyleSheet.hairlineWidth,
-                            marginBottom: Spaces.LG,
-                        },
-                    ]}
-                /> */}
-
-                {renderForYouSection()}
+                {renderForYouSection(true)}
 
                 <FactOfTheDay />
             </>
