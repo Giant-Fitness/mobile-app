@@ -26,7 +26,6 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
     const navigation = useNavigation();
 
     const { userProgramProgress } = useSelector((state: RootState) => state.user);
-
     const { programDays, programDaysState } = useSelector((state: RootState) => state.programs);
 
     const programId = userProgramProgress?.ProgramId;
@@ -36,7 +35,6 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
     const currentDayState = programId && dayId ? programDaysState[programId]?.[dayId] : REQUEST_STATE.IDLE;
 
     if (currentDayState === REQUEST_STATE.PENDING || !currentDay) {
-        // Render a loading indicator
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size='large' color={themeColors.text} />
@@ -45,7 +43,6 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
     }
 
     if (currentDayState === REQUEST_STATE.REJECTED || !currentDay) {
-        // Render an error message or placeholder
         return (
             <ThemedView style={styles.errorContainer}>
                 <ThemedText>Error loading the current day.</ThemedText>
@@ -63,13 +60,12 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
     };
 
     const day = currentDay;
-    // **Calculate Current Week Based on dayId**
     const currentDayNumber = parseInt(dayId, 10);
     const currentWeek = getWeekNumber(currentDayNumber);
     const dayOfWeek = getDayOfWeek(currentDayNumber);
 
     return (
-        <View style={styles.shadowContainer}>
+        <View style={[styles.shadowContainer, { backgroundColor: themeColors.background }]}>
             <TopImageInfoCard
                 image={{ uri: day.PhotoUrl }}
                 title={day.DayTitle}
@@ -77,13 +73,11 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
                 onPress={navigateToProgramDay}
                 extraContent={
                     day.RestDay ? (
-                        // Display content specific to a rest day
                         <ThemedView style={[styles.attributeRow, { marginLeft: 0, marginTop: -Spaces.XXS }]}>
                             <Icon name='power-sleep' size={moderateScale(18)} color={themeColors.highlightContainerText} />
                             <Icon name='chevron-forward' size={moderateScale(16)} color={themeColors.highlightContainerText} style={styles.chevronIcon} />
                         </ThemedView>
                     ) : (
-                        // Display content specific to a workout day
                         <ThemedView style={styles.attributeRow}>
                             <Icon name='stopwatch' size={moderateScale(14)} color={themeColors.highlightContainerText} />
                             <ThemedText type='body' style={[styles.attributeText, { color: themeColors.highlightContainerText, paddingRight: Spaces.MD }]}>
@@ -108,12 +102,14 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
 
 const styles = StyleSheet.create({
     shadowContainer: {
+        borderRadius: Spaces.SM,
+        // iOS shadow
         shadowColor: 'rgba(0,80,0,0.4)',
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 1,
         shadowRadius: 4,
-        elevation: 5, // For Android
-        borderRadius: Spaces.SM, // Match the child border radius
+        // Android shadow
+        elevation: 5,
     },
     attributeRow: {
         flexDirection: 'row',
