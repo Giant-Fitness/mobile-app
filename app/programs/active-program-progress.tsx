@@ -38,16 +38,8 @@ const ActiveProgramProgressScreen = () => {
     const [isResetProgramModalVisible, setIsResetProgramModalVisible] = useState(false);
     const [showResetSuccess, setShowResetSuccess] = useState(false);
 
-    const { activeProgram, programDays, userProgramProgress, dataLoadedState, error, currentWeek, resetProgram, endProgram } = useProgramData(
-        undefined,
-        undefined,
-        {
-            fetchAllDays: true,
-        },
-    );
-
-    const [months, setMonths] = useState<any[][][]>([]);
-    const [currentMonthIndex, setCurrentMonthIndex] = useState(0);
+    const { activeProgram, userProgramProgress, programDays, months, currentMonthIndex, currentWeek, setCurrentMonthIndex, resetProgram, endProgram, error } =
+        useProgramData(undefined, undefined, { fetchAllDays: true });
 
     const scrollY = useSharedValue(0);
     const scrollHandler = useAnimatedScrollHandler({
@@ -55,6 +47,14 @@ const ActiveProgramProgressScreen = () => {
             scrollY.value = event.contentOffset.y;
         },
     });
+
+    if (!activeProgram || !months.length) {
+        return (
+            <ThemedView style={styles.errorContainer}>
+                <ThemedText>Loading program data...</ThemedText>
+            </ThemedView>
+        );
+    }
 
     useEffect(() => {
         // Hide header immediately on mount
@@ -77,30 +77,10 @@ const ActiveProgramProgressScreen = () => {
     }, [navigation]);
 
     useEffect(() => {
-        if (activeProgram && userProgramProgress) {
-            const programDaysArray = Object.values(programDays[activeProgram.ProgramId]);
-
-            const groupedWeeks = groupProgramDaysIntoWeeks(programDaysArray);
-            const groupedMonths = groupWeeksIntoMonths(groupedWeeks);
-            setMonths(groupedMonths);
-
-            let initialIndex = 0;
-            if (userProgramProgress.CurrentDay) {
-                initialIndex = Math.floor((parseInt(userProgramProgress.CurrentDay) - 1) / 28);
-                initialIndex = Math.min(initialIndex, groupedMonths.length - 1);
-            }
-            setCurrentMonthIndex(initialIndex);
+        if (months.length > 0) {
             setMonthDataLoaded(REQUEST_STATE.FULFILLED);
         }
-    }, [activeProgram, userProgramProgress, dataLoadedState]);
-
-    const { showSplash, handleSplashComplete } = useSplashScreen({
-        monthDataLoaded,
-    });
-
-    if (showSplash) {
-        return <DumbbellSplash onAnimationComplete={handleSplashComplete} isDataLoaded={monthDataLoaded === REQUEST_STATE.FULFILLED} />;
-    }
+    }, [months]);
 
     if (error) {
         return (
