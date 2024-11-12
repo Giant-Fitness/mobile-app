@@ -8,6 +8,7 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { Spaces } from '@/constants/Spaces';
 import { HighlightedTip } from '@/components/alerts/HighlightedTip';
 import { Quote } from '@/types';
+import { darkenColor } from '@/utils/colorUtils';
 
 type TrainingQuoteProps = {
     quote: Quote;
@@ -25,8 +26,8 @@ export const TrainingQuote: React.FC<TrainingQuoteProps> = ({ quote, isLastDay }
                     <HighlightedTip iconName='star' tipText='The finish line is here, one last push!' />
                 </View>
             ) : (
-                <View style={[styles.quoteContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
-                    <ThemedText type='italic' style={[styles.quoteText, { color: themeColors.tipText }]}>
+                <View style={[styles.quoteContainer, { backgroundColor: themeColors.tealTransparent }]}>
+                    <ThemedText type='bodySmall' style={[styles.quoteText, { color: darkenColor(themeColors.tealSolid, 0.3) }]}>
                         {quote.QuoteText}
                     </ThemedText>
                 </View>
@@ -37,14 +38,16 @@ export const TrainingQuote: React.FC<TrainingQuoteProps> = ({ quote, isLastDay }
 
 const styles = StyleSheet.create({
     quoteContainer: {
-        paddingTop: Spaces.XL,
+        marginTop: Spaces.LG,
+        paddingTop: Spaces.MD,
         paddingBottom: Spaces.MD,
         paddingHorizontal: Spaces.XL,
+        marginHorizontal: Spaces.LG,
+        borderRadius: Spaces.MD,
         marginBottom: Spaces.LG,
     },
     quoteText: {
         textAlign: 'center',
-        paddingBottom: Spaces.SM,
     },
     tipContainer: {
         marginHorizontal: Spaces.SM,

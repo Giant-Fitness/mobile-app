@@ -1,7 +1,7 @@
 // app/programs/browse-programs.tsx
 
 import React, { useEffect, useCallback, useMemo } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet, View, Image } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
@@ -19,8 +19,59 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProgramCard } from '@/components/programs/ProgramCard';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { useProgramData } from '@/hooks/useProgramData';
+import { darkenColor } from '@/utils/colorUtils';
 
 const MemoizedProgramCard = React.memo(ProgramCard);
+
+const ProgramInfo = () => {
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
+
+    return (
+        <ThemedView style={[styles.infoContainer, { backgroundColor: themeColors.tealTransparent }]}>
+            <View style={styles.contentWrapper}>
+                <View style={styles.content}>
+                    <ThemedText
+                        type='title'
+                        style={[
+                            styles.infoTitle,
+                            {
+                                color: darkenColor(themeColors.tealSolid, 0.3),
+                                marginBottom: Spaces.XS,
+                            },
+                        ]}
+                    >
+                        Training Plans
+                    </ThemedText>
+                    <ThemedText
+                        type='overline'
+                        style={[
+                            styles.infoText,
+                            {
+                                color: darkenColor(themeColors.subText, 0.1),
+                                lineHeight: 21,
+                                fontSize: 13,
+                            },
+                        ]}
+                    >
+                        Follow these structured, multi-week adventures to unlock your full potential!
+                    </ThemedText>
+                </View>
+                <Image
+                    source={require('@/assets/images/dumbbell.png')}
+                    style={[
+                        styles.backgroundImage,
+                        {
+                            opacity: colorScheme === 'light' ? 0.1 : 0.15,
+                            tintColor: themeColors.tealSolid,
+                        },
+                    ]}
+                    resizeMode='contain'
+                />
+            </View>
+        </ThemedView>
+    );
+};
 
 export default function BrowseProgramsScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -92,11 +143,9 @@ export default function BrowseProgramsScreen() {
 
         return (
             <View>
-                <ThemedView style={[styles.infoContainer, { backgroundColor: themeColors.tipBackground }, { marginTop: Sizes.headerHeight + Spaces.LG }]}>
-                    <ThemedText type='bodySmall' style={[styles.infoText, { color: themeColors.tipText }]}>
-                        Follow these structured, multi-week adventures to unlock your full potential!
-                    </ThemedText>
-                </ThemedView>
+                <View style={{ marginTop: Sizes.headerHeight + Spaces.LG }}>
+                    <ProgramInfo />
+                </View>
                 {activeProgram && (
                     <View style={styles.topProgramContainer}>
                         <MemoizedProgramCard
@@ -163,15 +212,34 @@ const styles = StyleSheet.create({
         paddingBottom: Spaces.MD,
         marginHorizontal: Spaces.MD,
     },
+    topProgramContainer: {},
     infoContainer: {
-        paddingVertical: Spaces.MD,
-        paddingHorizontal: Spaces.MD,
+        marginHorizontal: Spaces.XS,
         marginBottom: Spaces.XL,
-        marginHorizontal: 0,
-        borderRadius: Spaces.SM,
+        borderRadius: Spaces.MD,
+        overflow: 'hidden',
+    },
+    contentWrapper: {
+        position: 'relative',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    content: {
+        padding: Spaces.LG,
+        flex: 1,
+        zIndex: 1,
+    },
+    infoTitle: {
+        maxWidth: '90%',
     },
     infoText: {
-        textAlign: 'center',
+        maxWidth: '90%',
     },
-    topProgramContainer: {},
+    backgroundImage: {
+        position: 'absolute',
+        right: -Spaces.XL - Spaces.SM,
+        width: 200,
+        height: '60%',
+    },
 });

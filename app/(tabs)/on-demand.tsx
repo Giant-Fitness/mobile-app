@@ -130,9 +130,9 @@ export default function WorkoutsScreen() {
     return (
         <ScrollView style={[styles.container, { backgroundColor: themeColors.background }]} showsVerticalScrollIndicator={false}>
             <ThemedView>
-                <ThemedView style={[styles.infoContainer, { backgroundColor: themeColors.tipBackground }]}>
-                    <ThemedText type='bodySmall' style={[styles.infoText, { color: themeColors.tipText }]}>
-                        {'Jump into these one-off sessions that fit your schedule and mood!'}
+                <ThemedView style={[styles.infoContainer, { backgroundColor: themeColors.tealTransparent }]}>
+                    <ThemedText type='bodySmall' style={[styles.infoText, { color: darkenColor(themeColors.tealSolid, 0.3) }]}>
+                        {'Solos are one-off sessions that fit your schedule and mood!'}
                     </ThemedText>
                 </ThemedView>
                 <ThemedText type='titleLarge' style={[styles.header, { color: themeColors.text }]}>
