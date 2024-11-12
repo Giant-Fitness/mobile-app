@@ -1,13 +1,15 @@
 // components/workouts/WorkoutOverviewCard.tsx
 
 import React from 'react';
-import { StyleSheet, ImageSourcePropType, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
 import { moderateScale } from '@/utils/scaling';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { Workout } from '@/types';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/Colors';
 
 type WorkoutOverviewCardProps = {
     workout: Workout;
@@ -15,6 +17,8 @@ type WorkoutOverviewCardProps = {
 
 export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ workout }) => {
     const navigation = useNavigation();
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
 
     const navigateToWorkoutDetails = () => {
         navigation.navigate('workouts/workout-details', {
@@ -23,40 +27,59 @@ export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ workou
     };
 
     return (
-        <View style={styles.shadowContainer}>
-            <TouchableOpacity onPress={navigateToWorkoutDetails} style={styles.cardContainer} activeOpacity={1}>
-                <ImageTextOverlay
-                    image={workout.PhotoUrl}
-                    title={workout.WorkoutName}
-                    subtitle={`${workout.Time} mins, ${workout.Level}`}
-                    gradientColors={['transparent', 'rgba(0,0,0,0.65)']}
-                    containerStyle={{ height: '100%' }}
-                    textContainerStyle={{ bottom: Spaces.LG }}
-                    subtitleType='bodySmall'
-                    titleType='title'
-                    titleStyle={{ marginRight: Spaces.LG, lineHeight: moderateScale(20) }}
-                    subtitleStyle={{ marginTop: Spaces.XS }}
-                />
-            </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={navigateToWorkoutDetails} activeOpacity={1}>
+            {/* Outer container with background color for shadow */}
+            <View style={[styles.shadowContainer, { backgroundColor: themeColors.background }]}>
+                <View style={styles.cardContainer}>
+                    <ImageTextOverlay
+                        image={workout.PhotoUrl}
+                        title={workout.WorkoutName}
+                        subtitle={`${workout.Time} mins, ${workout.Level}`}
+                        gradientColors={['transparent', 'rgba(0,0,0,0.65)']}
+                        containerStyle={styles.imageContainer}
+                        textContainerStyle={styles.textContainer}
+                        subtitleType='bodySmall'
+                        titleType='title'
+                        titleStyle={styles.titleStyle}
+                        subtitleStyle={styles.subtitleStyle}
+                    />
+                </View>
+            </View>
+        </TouchableOpacity>
     );
 };
 
 const styles = StyleSheet.create({
     shadowContainer: {
-        shadowColor: 'rgba(0,80,0,0.25)', // Use a more standard shadow color
+        borderRadius: Spaces.SM,
+        marginRight: Spaces.MD,
+        // iOS shadow
+        shadowColor: 'rgba(0,80,0,0.25)',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 1,
         shadowRadius: 4,
-        elevation: 5, // For Android
-        borderRadius: Spaces.SM, // Match the child border radius
-        marginRight: Spaces.MD,
+        // Android shadow
+        elevation: 5,
     },
     cardContainer: {
         width: Sizes.imageXXLWidth,
         height: Sizes.imageXXLHeight,
         overflow: 'hidden',
         borderRadius: Spaces.SM,
-        // Remove shadow properties from here
+    },
+    imageContainer: {
+        height: '100%',
+    },
+    textContainer: {
+        bottom: Spaces.LG,
+    },
+    titleStyle: {
+        marginRight: Spaces.LG,
+        lineHeight: moderateScale(20),
+    },
+    subtitleStyle: {
+        marginTop: Spaces.XS,
     },
 });
+
+export default WorkoutOverviewCard;
