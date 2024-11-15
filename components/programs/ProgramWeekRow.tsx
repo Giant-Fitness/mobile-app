@@ -1,7 +1,7 @@
 // components/programs/ProgramWeekRow.tsx
 
 import React from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { ProgramDay, UserProgramProgress } from '@/types';
 import { ProgramDayOverviewCard } from '@/components/programs/ProgramDayOverviewCard';
 import { Spaces } from '@/constants/Spaces';
@@ -24,7 +24,7 @@ export const ProgramWeekRow: React.FC<ProgramWeekRowProps> = ({ week, onDayPress
                             key={day.DayId}
                             day={day}
                             onPress={() => onDayPress(day.DayId)}
-                            userProgramProgress={userProgramProgress}
+                            userProgramProgress={userProgramProgress ?? undefined}
                             isEnrolled={isEnrolled}
                         />
                     );

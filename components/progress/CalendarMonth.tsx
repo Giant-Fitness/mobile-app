@@ -6,7 +6,7 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
-import { lightenColor } from '@/utils/colorUtils';
+import { darkenColor, lightenColor } from '@/utils/colorUtils';
 
 interface CalendarMonthProps {
     date: Date;
@@ -17,6 +17,12 @@ interface CalendarMonthProps {
 export const CalendarMonth: React.FC<CalendarMonthProps> = ({ date, measurementDates, onDayPress }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const isFutureDate = (dateToCheck: Date) => {
+        return dateToCheck > today;
+    };
 
     const getDaysInMonth = (year: number, month: number) => {
         return new Date(year, month + 1, 0).getDate();
@@ -37,15 +43,18 @@ export const CalendarMonth: React.FC<CalendarMonthProps> = ({ date, measurementD
         }
 
         // Add the days of the month
+        // Add the days of the month
         for (let i = 1; i <= daysInMonth; i++) {
-            const currentDate = new Date(date.getFullYear(), date.getMonth(), i).toDateString();
-
+            const dayDate = new Date(date.getFullYear(), date.getMonth(), i);
+            const currentDate = dayDate.toDateString();
             const hasMeasurement = measurementDates.has(currentDate);
+            const isFuture = isFutureDate(dayDate);
 
             days.push(
                 <TouchableOpacity
                     key={i}
-                    onPress={() => onDayPress?.(currentDate)}
+                    onPress={() => !isFuture && onDayPress?.(dayDate.toDateString())}
+                    disabled={isFuture}
                     style={[
                         styles.dayCell,
                         hasMeasurement && {
@@ -55,10 +64,13 @@ export const CalendarMonth: React.FC<CalendarMonthProps> = ({ date, measurementD
                             borderColor: lightenColor(themeColors.purpleSolid, 0.8),
                             borderWidth: 1,
                         },
+                        isFuture && {
+                            backgroundColor: darkenColor(themeColors.background, 0.015),
+                        },
                     ]}
                     activeOpacity={0.8}
                 >
-                    <ThemedText>{i}</ThemedText>
+                    <ThemedText style={isFuture ? { color: lightenColor(themeColors.subText, 0.5) } : undefined}>{i}</ThemedText>
                 </TouchableOpacity>,
             );
         }

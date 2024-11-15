@@ -3,11 +3,9 @@
 import React from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
-import { Icon } from '@/components/base/Icon';
 import { Spaces } from '@/constants/Spaces';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { lightenColor } from '@/utils/colorUtils';
 import { Path, Svg, Defs, LinearGradient, Stop } from 'react-native-svg';
 
 interface BodyMeasurementsComingSoonCardProps {

@@ -10,7 +10,7 @@ import { Spaces } from '@/constants/Spaces';
 import { AggregatedData, TimeRange, TimeRangeOption } from '@/utils/weight';
 import { UserWeightMeasurement } from '@/types';
 import { ThemedText } from '@/components/base/ThemedText';
-import { darkenColor, lightenColor } from '@/utils/colorUtils';
+import { lightenColor } from '@/utils/colorUtils';
 import { ThemedView } from '@/components/base/ThemedView';
 
 const CHART_PADDING = {
@@ -48,13 +48,28 @@ type WeightChartProps = {
     style?: any;
 };
 
-const RangeSelector = ({ selectedRange, onRangeChange, availableRanges, style }) => {
+type TimeRangeOptionType = {
+    range: TimeRange;
+    disabled?: boolean; // Add this line if 'disabled' is not already defined
+};
+
+const RangeSelector = ({
+    selectedRange,
+    onRangeChange,
+    availableRanges,
+    style,
+}: {
+    selectedRange: TimeRange;
+    onRangeChange: (range: TimeRange) => void;
+    availableRanges: TimeRangeOption[];
+    style?: any;
+}) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
     return (
         <View style={[styles.rangeSelector, style]}>
-            {availableRanges.map(({ range, label, disabled }) => (
+            {availableRanges.map(({ range, disabled }: TimeRangeOptionType) => (
                 <ThemedView
                     key={range}
                     style={[
@@ -83,7 +98,17 @@ const RangeSelector = ({ selectedRange, onRangeChange, availableRanges, style })
     );
 };
 
-const EmptyStateChart = ({ themeColors, width, height, padding }) => (
+const EmptyStateChart = ({
+    themeColors,
+    width,
+    height,
+    padding,
+}: {
+    themeColors: any; // Replace 'any' with the actual type if known
+    width: number;
+    height: number;
+    padding: { top: number; right: number; bottom: number; left: number };
+}) => (
     <Svg width={width} height={height} preserveAspectRatio='xMidYMid meet'>
         <Defs>
             <LinearGradient id='emptyGradient' x1='0' y1='0' x2='0' y2='1'>

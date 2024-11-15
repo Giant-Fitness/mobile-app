@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
 import { moderateScale } from '@/utils/scaling';
 import { Sizes } from '@/constants/Sizes';
@@ -10,19 +9,22 @@ import { Spaces } from '@/constants/Spaces';
 import { Workout } from '@/types';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import { router } from 'expo-router';
 
 type WorkoutOverviewCardProps = {
     workout: Workout;
 };
 
 export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ workout }) => {
-    const navigation = useNavigation();
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
     const navigateToWorkoutDetails = () => {
-        navigation.navigate('workouts/workout-details', {
-            workoutId: workout.WorkoutId,
+        router.push({
+            pathname: '/(app)/workouts/workout-details',
+            params: {
+                workoutId: workout.WorkoutId,
+            },
         });
     };
 

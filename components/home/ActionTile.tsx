@@ -4,7 +4,6 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, View, Image, ImageSourcePropType, ViewStyle } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
 import { Icon } from '@/components/base/Icon';
 
 interface ActionTileProps {

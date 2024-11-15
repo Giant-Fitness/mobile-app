@@ -2,14 +2,14 @@
 
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View, Image, ImageSourcePropType, ViewStyle } from 'react-native';
-import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedText, ThemedTextProps } from '@/components/base/ThemedText';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 
 interface LargeActionTileProps {
     title: string;
-    titleSize?: string;
-    bodySize?: string;
+    titleSize?: ThemedTextProps['type'];
+    bodySize?: ThemedTextProps['type'];
     description: string;
     onPress: () => void;
     backgroundColor: string;

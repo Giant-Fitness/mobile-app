@@ -127,7 +127,7 @@ export const CustomSignIn = (props: any) => {
                 <PrimaryButton text='Sign In' onPress={handleSignIn} size='LG' disabled={!isValid || loading} loading={loading} />
 
                 <View style={styles.signUpContainer}>
-                    <ThemedText style={styles.signUpText}>Don't have an account?</ThemedText>
+                    <ThemedText style={styles.signUpText}>Don&apos;t have an account?</ThemedText>
                     <Pressable onPress={toSignUp}>
                         <ThemedText style={[styles.signUpLink, { color: themeColors.accent }]}>Sign Up</ThemedText>
                     </Pressable>

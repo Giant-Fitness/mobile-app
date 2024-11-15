@@ -9,12 +9,13 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
+import { ThemedTextProps } from '@/components/base/ThemedText';
 
 type HighlightedTipProps = {
     iconName?: string;
     tipText: string;
     disableIcon?: boolean;
-    textType?: string;
+    textType?: ThemedTextProps['type'];
     containerStyle?: ViewStyle;
     textColor?: string;
 };
@@ -35,7 +36,7 @@ export const HighlightedTip: React.FC<HighlightedTipProps> = ({
 
     return (
         <ThemedView style={[styles.tipContainer, styles.shadow, { backgroundColor: themeColors.tipBackground }, containerStyle]}>
-            {!disableIcon && <Icon name={iconName} size={Sizes.iconSizeSM} color={iconColorStyle} style={styles.tipIcon} />}
+            {!disableIcon && <Icon name={iconName || 'default'} size={Sizes.iconSizeSM} color={iconColorStyle} style={styles.tipIcon} />}
             <ThemedText type={textType} style={[styles.tipText, textColorStyle]}>
                 {tipText}
             </ThemedText>

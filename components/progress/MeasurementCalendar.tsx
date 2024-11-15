@@ -9,12 +9,13 @@ import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { Icon } from '@/components/base/Icon';
 import { CalendarMonth } from '@/components/progress/CalendarMonth';
-import { MeasurementList } from '@/components/progress/MeasurementList';
+import { lightenColor } from '@/utils/colorUtils';
 
 interface CalendarData {
     timestamp: string;
     value: number;
-    additionalData?: any;
+    originalData: any;
+    previousData?: any;
 }
 
 interface MeasurementCalendarProps {
@@ -24,11 +25,10 @@ interface MeasurementCalendarProps {
     measurementUnit?: string;
 }
 
-export const MeasurementCalendar: React.FC<MeasurementCalendarProps> = ({ data, onDayPress, renderTile, measurementUnit }) => {
+export const MeasurementCalendar: React.FC<MeasurementCalendarProps> = ({ data, onDayPress }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
-    const [selectedDate, setSelectedDate] = useState(new Date());
     const [displayedMonth, setDisplayedMonth] = useState<Date>(new Date());
 
     // Create a map of dates with measurements for quick lookup
@@ -50,11 +50,12 @@ export const MeasurementCalendar: React.FC<MeasurementCalendarProps> = ({ data, 
         setDisplayedMonth(new Date(displayedMonth.getFullYear(), displayedMonth.getMonth() + 1, 1));
     };
 
-    // Get measurements for the currently displayed month
-    const currentMonthMeasurements = data.filter((item) => {
-        const date = new Date(item.timestamp);
-        return date.getMonth() === displayedMonth.getMonth() && date.getFullYear() === displayedMonth.getFullYear();
-    });
+    const isNextMonthInFuture = () => {
+        const nextMonth = new Date(displayedMonth.getFullYear(), displayedMonth.getMonth() + 1, 1);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return nextMonth > today;
+    };
 
     return (
         <ThemedView style={styles.container}>
@@ -62,27 +63,18 @@ export const MeasurementCalendar: React.FC<MeasurementCalendarProps> = ({ data, 
                 <TouchableOpacity onPress={handlePrevMonth}>
                     <Icon name='chevron-back' color={themeColors.text} />
                 </TouchableOpacity>
-                <ThemedText type='titleMedium'>
+                <ThemedText type='body'>
                     {displayedMonth.toLocaleString('default', {
                         month: 'long',
                         year: 'numeric',
                     })}
                 </ThemedText>
-                <TouchableOpacity onPress={handleNextMonth}>
-                    <Icon name='chevron-forward' color={themeColors.text} />
+                <TouchableOpacity onPress={handleNextMonth} disabled={isNextMonthInFuture()}>
+                    <Icon name='chevron-forward' color={isNextMonthInFuture() ? lightenColor(themeColors.subText, 1) : themeColors.text} />
                 </TouchableOpacity>
             </View>
 
             <CalendarMonth date={displayedMonth} measurementDates={measurementDates} onDayPress={onDayPress} />
-
-            {/* <ThemedText type="overline" style={styles.listHeader}>
-                {currentMonthMeasurements.length} Measurements
-            </ThemedText>
-
-            <MeasurementList
-                data={currentMonthMeasurements}
-                renderTile={renderTile}
-            /> */}
         </ThemedView>
     );
 };

@@ -7,7 +7,6 @@ import PropTypes from 'prop-types';
 
 interface FullScreenVideoPlayerProps {
     source: { uri: string };
-    startInFullscreen?: boolean;
     onPlaybackStatusUpdate?: (status: AVPlaybackStatus) => void;
     onDismiss?: () => void;
 }
@@ -17,10 +16,9 @@ export interface FullScreenVideoPlayerHandle {
 }
 
 export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, FullScreenVideoPlayerProps>(
-    ({ source, startInFullscreen = false, onPlaybackStatusUpdate, onDismiss }, ref) => {
+    ({ source, onPlaybackStatusUpdate, onDismiss }, ref) => {
         const video = useRef<Video>(null);
         const [isVideoVisible, setIsVideoVisible] = useState(false);
-        const [isVideoLoaded, setIsVideoLoaded] = useState(false);
         const [isFullscreenPresented, setIsFullscreenPresented] = useState(false);
         const fadeAnim = useRef(new Animated.Value(0)).current;
         const dismissTimer = useRef<NodeJS.Timeout | null>(null);
@@ -72,11 +70,11 @@ export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, Ful
         };
 
         const handleVideoLoad = async () => {
-            setIsVideoLoaded(true);
             if (video.current) {
                 try {
                     await video.current.playAsync();
                 } catch (error) {
+                    console.log(error);
                     Alert.alert('Error', 'An error occurred while playing the video.');
                 }
             }
@@ -101,7 +99,6 @@ export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, Ful
                 }
                 setIsFullscreenPresented(false);
                 setIsVideoVisible(false);
-                setIsVideoLoaded(false);
                 fadeAnim.setValue(0);
                 if (onDismiss) {
                     onDismiss();
@@ -151,7 +148,6 @@ FullScreenVideoPlayer.propTypes = {
     source: PropTypes.shape({
         uri: PropTypes.string.isRequired,
     }).isRequired,
-    startInFullscreen: PropTypes.bool,
     onPlaybackStatusUpdate: PropTypes.func,
     onDismiss: PropTypes.func,
 };

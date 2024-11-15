@@ -1,18 +1,18 @@
 // components/workouts/WorkoutDetailedCard.tsx
 
 import React from 'react';
-import { StyleSheet, ImageSourcePropType } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
-import { useNavigation } from '@react-navigation/native';
 import { LeftImageInfoCard } from '@/components/media/LeftImageInfoCard';
 import { Icon } from '@/components/base/Icon';
-import { scale, moderateScale } from '@/utils/scaling';
+import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { Workout } from '@/types';
+import { router } from 'expo-router';
 
 type WorkoutDetailedCardProps = {
     workout: Workout;
@@ -22,11 +22,12 @@ export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ workou
     const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
     const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
-    const navigation = useNavigation();
-
     const navigateToWorkoutDetails = () => {
-        navigation.navigate('workouts/workout-details', {
-            workoutId: workout.WorkoutId,
+        router.push({
+            pathname: '/(app)/workouts/workout-details',
+            params: {
+                workoutId: workout.WorkoutId,
+            },
         });
     };
 
@@ -34,7 +35,7 @@ export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ workou
 
     return (
         <LeftImageInfoCard
-            image={workout.PhotoUrl}
+            image={{ uri: workout.PhotoUrl }}
             title={workout.WorkoutName}
             titleStyle={{ fontSize: moderateScale(14) }}
             containerStyle={{ paddingBottom: Spaces.LG }}

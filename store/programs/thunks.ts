@@ -6,7 +6,7 @@ import { Program, ProgramDay } from '@/types';
 import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 
-export const getAllProgramsAsync = createAsyncThunk<Program[], void>('programs/getAllPrograms', async (_, { getState, rejectWithValue }) => {
+export const getAllProgramsAsync = createAsyncThunk<Program[], void>('programs/getAllPrograms', async (_, { getState }) => {
     const state = getState() as RootState;
     // If programs are already loaded, return them
     if (state.programs.allProgramsState === REQUEST_STATE.FULFILLED) {
@@ -51,6 +51,7 @@ export const getAllProgramDaysAsync = createAsyncThunk<ProgramDay[], { programId
             }
             return programDays;
         } catch (error) {
+            console.log(error);
             return rejectWithValue('Error fetching program days.');
         }
     },
@@ -96,6 +97,7 @@ export const getMultipleProgramDaysAsync = createAsyncThunk<ProgramDay[], { prog
             }
             return [...existingDays, ...fetchedDays];
         } catch (error) {
+            console.log(error);
             return rejectWithValue('Error fetching program days.');
         }
     },

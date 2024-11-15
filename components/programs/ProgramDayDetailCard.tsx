@@ -7,12 +7,12 @@ import { StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { LeftImageInfoCard } from '@/components/media/LeftImageInfoCard';
 import { ThemedView } from '@/components/base/ThemedView';
-import { useNavigation } from '@react-navigation/native';
 import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { ProgramDay } from '@/types';
 import { getWeekNumber, getDayOfWeek } from '@/utils/calendar';
+import { router } from 'expo-router';
 
 type ProgramDayDetailCardProps = {
     day: ProgramDay;
@@ -21,12 +21,14 @@ type ProgramDayDetailCardProps = {
 export const ProgramDayDetailCard: React.FC<ProgramDayDetailCardProps> = ({ day }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
-    const navigation = useNavigation();
 
     const navigateToProgramDay = () => {
-        navigation.navigate('programs/program-day', {
-            programId: day.ProgramId,
-            dayId: day.DayId,
+        router.replace({
+            pathname: '/(app)/programs/program-day',
+            params: {
+                programId: day.ProgramId,
+                dayId: day.DayId,
+            },
         });
     };
 

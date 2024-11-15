@@ -1,4 +1,5 @@
 // components/feedback/FeedbackForm.tsx
+
 import React, { useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -20,7 +21,6 @@ export type FeedbackStep<T> = React.ComponentType<{
 
 export type FeedbackFormResult<T> = {
     data: T;
-    lastCompletedStep: number;
 };
 
 type FeedbackFormProps<T> = {
@@ -45,7 +45,6 @@ export default function FeedbackForm<T>({ steps, onSubmit, onSkip, initialData, 
         try {
             await onSkip({
                 data: feedbackData,
-                lastCompletedStep: currentStep - 1,
             });
         } finally {
             setIsSkipping(false);
@@ -59,7 +58,6 @@ export default function FeedbackForm<T>({ steps, onSubmit, onSkip, initialData, 
         try {
             await onSubmit({
                 data: feedbackData,
-                lastCompletedStep: steps.length,
             });
         } finally {
             setIsSubmitting(false);

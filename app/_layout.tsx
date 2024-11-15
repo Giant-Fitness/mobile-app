@@ -111,29 +111,23 @@ export default function RootLayout() {
     return (
         <Provider store={store}>
             <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                <Stack>
+                <Stack
+                    screenOptions={{
+                        headerShown: false,
+                        gestureEnabled: false,
+                        navigationBarHidden: true,
+                        animation: 'slide_from_right',
+                        presentation: 'card',
+                    }}
+                >
+                    <Stack.Screen name='(app)' options={{ headerShown: false, gestureEnabled: false }} />
+                    <Stack.Screen name='(auth)' options={{ headerShown: false, gestureEnabled: false }} />
                     <Stack.Screen
                         name='index'
                         options={{
-                            // Hide the header for this route
                             headerShown: false,
                             animation: 'none',
-                        }}
-                    />
-                    <Stack.Screen
-                        name='login'
-                        options={{
-                            // Hide the header for this route
-                            headerShown: false,
-                        }}
-                    />
-                    <Stack.Screen name='(tabs)' options={{ headerShown: false, gestureEnabled: false }} />
-                    <Stack.Screen
-                        name='initialization'
-                        options={{
-                            // Hide the header for this route
-                            headerShown: false,
-                            animation: 'none',
+                            gestureEnabled: false,
                         }}
                     />
                 </Stack>

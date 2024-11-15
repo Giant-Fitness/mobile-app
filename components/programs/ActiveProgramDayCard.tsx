@@ -11,19 +11,17 @@ import { Icon } from '@/components/base/Icon';
 import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
-import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { getWeekNumber, getDayOfWeek } from '@/utils/calendar';
+import { router } from 'expo-router';
 
 type ActiveProgramDayCardProps = {};
 
 export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
-
-    const navigation = useNavigation();
 
     const { userProgramProgress } = useSelector((state: RootState) => state.user);
     const { programDays, programDaysState } = useSelector((state: RootState) => state.programs);
@@ -52,15 +50,18 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
 
     const navigateToProgramDay = () => {
         if (programId && dayId) {
-            navigation.navigate('programs/program-day', {
-                programId: programId,
-                dayId: dayId,
+            router.push({
+                pathname: '/(app)/programs/program-day',
+                params: {
+                    programId,
+                    dayId,
+                },
             });
         }
     };
 
     const day = currentDay;
-    const currentDayNumber = parseInt(dayId, 10);
+    const currentDayNumber = parseInt(String(dayId ?? '0'), 10);
     const currentWeek = getWeekNumber(currentDayNumber);
     const dayOfWeek = getDayOfWeek(currentDayNumber);
 

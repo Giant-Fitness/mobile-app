@@ -26,7 +26,7 @@ interface SelectionButtonProps {
 }
 
 export const SelectionButton: React.FC<SelectionButtonProps> = ({ option, isSelected, onSelect, containerStyle, textStyle, subTextStyle, iconStyle }) => {
-    const colorScheme = useColorScheme();
+    const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
     const buttonStyle = [
@@ -38,7 +38,7 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({ option, isSele
         containerStyle,
     ];
 
-    const textColor = isSelected ? themeColors.buttonPrimaryText : themeColors.texrt;
+    const textColor = isSelected ? themeColors.buttonPrimaryText : themeColors.text;
 
     return (
         <TouchableOpacity style={buttonStyle} onPress={() => onSelect(option.key)} activeOpacity={0.9}>

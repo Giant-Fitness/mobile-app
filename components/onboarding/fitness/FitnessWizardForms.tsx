@@ -6,7 +6,39 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { SelectionGroup } from '@/components/buttons/SelectionButton';
 import { Spaces } from '@/constants/Spaces';
 
-export const WorkoutGoalsForm = forwardRef(({ formData, onSubmit, onValidityChange }, ref) => {
+interface WorkoutGoalsFormProps {
+    formData: {
+        PrimaryFitnessGoal?: string;
+    };
+    onSubmit: (data: { PrimaryFitnessGoal: string }) => void;
+    onValidityChange: (isValid: boolean) => void;
+}
+
+interface ExperienceFormProps {
+    formData: {
+        GymExperienceLevel?: string;
+    };
+    onSubmit: (data: { GymExperienceLevel: string }) => void;
+    onValidityChange: (isValid: boolean) => void;
+}
+
+interface ScheduleFormProps {
+    formData: {
+        DaysPerWeekDesired?: string;
+    };
+    onSubmit: (data: { DaysPerWeekDesired: string }) => void;
+    onValidityChange: (isValid: boolean) => void;
+}
+
+interface EquipmentFormProps {
+    formData: {
+        AccessToEquipment?: string;
+    };
+    onSubmit: (data: { AccessToEquipment: string }) => void;
+    onValidityChange: (isValid: boolean) => void;
+}
+
+export const WorkoutGoalsForm = forwardRef<unknown, WorkoutGoalsFormProps>(({ formData, onSubmit, onValidityChange }, ref) => {
     const [PrimaryFitnessGoal, setPrimaryFitnessGoal] = useState(formData.PrimaryFitnessGoal || '');
 
     const goalOptions = [
@@ -39,7 +71,7 @@ export const WorkoutGoalsForm = forwardRef(({ formData, onSubmit, onValidityChan
 });
 WorkoutGoalsForm.displayName = 'WorkoutGoalsForm';
 
-export const ExperienceForm = forwardRef(({ formData, onSubmit, onValidityChange }, ref) => {
+export const ExperienceForm = forwardRef<unknown, ExperienceFormProps>(({ formData, onSubmit, onValidityChange }, ref) => {
     const [GymExperienceLevel, setGymExperienceLevel] = useState(formData.GymExperienceLevel || '');
 
     const experienceOptions = [
@@ -76,7 +108,7 @@ export const ExperienceForm = forwardRef(({ formData, onSubmit, onValidityChange
 });
 ExperienceForm.displayName = 'ExperienceForm';
 
-export const ScheduleForm = forwardRef(({ formData, onSubmit, onValidityChange }, ref) => {
+export const ScheduleForm = forwardRef<unknown, ScheduleFormProps>(({ formData, onSubmit, onValidityChange }, ref) => {
     const [DaysPerWeekDesired, setDaysPerWeekDesired] = useState(formData.DaysPerWeekDesired || '');
 
     const scheduleOptions = [
@@ -108,7 +140,7 @@ export const ScheduleForm = forwardRef(({ formData, onSubmit, onValidityChange }
 });
 ScheduleForm.displayName = 'ScheduleForm';
 
-export const EquipmentForm = forwardRef(({ formData, onSubmit, onValidityChange }, ref) => {
+export const EquipmentForm = forwardRef<unknown, EquipmentFormProps>(({ formData, onSubmit, onValidityChange }, ref) => {
     const [AccessToEquipment, setAccessToEquipment] = useState(formData.AccessToEquipment || '');
 
     const equipmentOptions = [

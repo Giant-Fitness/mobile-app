@@ -12,7 +12,7 @@ import { scale, moderateScale } from '@/utils/scaling';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { TextButton } from '@/components/buttons/TextButton';
 
-let MathView;
+let MathView: React.ComponentType<any> | undefined;
 if (Platform.OS === 'ios') {
     MathView = require('react-native-math-view').default;
 }

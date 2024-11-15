@@ -5,17 +5,31 @@ import globals from 'globals';
 import reactRecommended from 'eslint-plugin-react/configs/recommended.js';
 
 export default [
-    reactRecommended,
     {
-        files: ['**/*.{js,jsx,mjs,cjs,ts,tsx}'],
+        // Apply recommended React rules
+        ...reactRecommended,
+        plugins: {
+            react,
+        },
+        settings: {
+            react: {
+                version: 'detect',
+            },
+        },
+    },
+    {
+        // TypeScript configuration
+        files: ['**/*.{ts,tsx}'],
         languageOptions: {
-            ecmaVersion: 'latest',
-            sourceType: 'module',
             parser: typescriptParser,
             parserOptions: {
+                ecmaVersion: 'latest',
+                sourceType: 'module',
                 ecmaFeatures: {
                     jsx: true,
                 },
+                project: './tsconfig.json', // Add this to enable type-aware rules
+                tsconfigRootDir: './',
             },
             globals: {
                 ...globals.browser,
@@ -25,19 +39,33 @@ export default [
             '@typescript-eslint': typescriptEslint,
         },
         rules: {
-            // Disable react/prop-types for TypeScript files
             'react/prop-types': 'off',
-            // Add other rules as needed
+            '@typescript-eslint/no-unused-vars': 'warn',
+            '@typescript-eslint/explicit-function-return-type': 'off',
+            '@typescript-eslint/explicit-module-boundary-types': 'off',
+            '@typescript-eslint/no-explicit-any': 'off',
+            // Add other TypeScript rules as needed
         },
     },
     {
-        ignores: ['.expo/*', 'android/*', 'ios/*'],
-    },
-    {
-        settings: {
-            react: {
-                version: 'detect',
+        // JavaScript configuration
+        files: ['**/*.{js,jsx,mjs,cjs}'],
+        languageOptions: {
+            ecmaVersion: 'latest',
+            sourceType: 'module',
+            parser: typescriptParser, // Added here too for consistency
+            parserOptions: {
+                ecmaFeatures: {
+                    jsx: true,
+                },
+            },
+            globals: {
+                ...globals.browser,
             },
         },
+    },
+    {
+        // Ignore patterns
+        ignores: ['.expo/*', 'android/*', 'ios/*', 'node_modules/*', 'dist/*', 'build/*'],
     },
 ];

@@ -1,7 +1,7 @@
 // components/media/ThumbnailVideoPlayer.tsx
 
 import React, { useRef, useState } from 'react';
-import { StyleSheet, TouchableOpacity, Image, View, Animated, Modal, ActivityIndicator } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, Animated, Modal } from 'react-native';
 import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle } from '@/components/media/FullScreenVideoPlayer';
 import { Spaces } from '@/constants/Spaces';
 import { Icon } from '@/components/base/Icon';

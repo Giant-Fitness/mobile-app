@@ -4,7 +4,7 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
-import { ProgramDay } from '@/types';
+import { ProgramDay, UserProgramProgress } from '@/types';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { Colors } from '@/constants/Colors';
@@ -28,7 +28,7 @@ export const ProgramDayOverviewCard: React.FC<ProgramDayOverviewCardProps> = ({ 
     let displayRest = false;
     if (isEnrolled && userProgramProgress) {
         const dayNumber = parseInt(day.DayId);
-        const currentDayNumber = parseInt(userProgramProgress.CurrentDay);
+        const currentDayNumber = userProgramProgress.CurrentDay;
         const isCompleted = userProgramProgress.CompletedDays?.includes(day.DayId);
 
         if (isCompleted) {

@@ -1,19 +1,6 @@
 // utils/weight.ts
 
-import {
-    startOfWeek,
-    startOfMonth,
-    subDays,
-    subMonths,
-    subYears,
-    endOfWeek,
-    endOfMonth,
-    isSameDay,
-    lastDayOfWeek,
-    lastDayOfMonth,
-    format,
-    isWithinInterval,
-} from 'date-fns';
+import { startOfWeek, startOfMonth, subDays, subMonths, subYears, isSameDay, lastDayOfWeek, lastDayOfMonth, format } from 'date-fns';
 import { UserWeightMeasurement } from '@/types';
 
 export type TimeRange = '1W' | '1M' | '3M' | '6M' | '1Y' | 'All';

@@ -31,7 +31,7 @@ export const ProgramWeekList: React.FC<ProgramWeekListProps> = ({
 
     return (
         <ThemedView style={styles.weekByWeekContainer}>
-            {currentMonthWeeks.map((week, weekIndex) => {
+            {currentMonthWeeks.map((week) => {
                 // Filter out null days (placeholders)
                 const daysInWeek = week.filter((day) => day !== null) as ProgramDay[];
 
