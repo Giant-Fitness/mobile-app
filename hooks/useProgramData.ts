@@ -13,7 +13,7 @@ import {
     startProgramAsync,
     resetProgramAsync,
 } from '@/store/user/thunks';
-import { getProgramAsync, getAllProgramDaysAsync, getProgramDayAsync, getMultipleProgramDaysAsync } from '@/store/programs/thunks';
+import { getProgramAsync, getAllProgramDaysAsync, getProgramDayAsync } from '@/store/programs/thunks';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
 import { selectWorkoutQuote, selectWorkoutQuoteState, selectRestDayQuote, selectRestDayQuoteState, selectQuoteError } from '@/store/quotes/selectors';
 import { REQUEST_STATE } from '@/constants/requestStates';
@@ -67,7 +67,6 @@ export const useProgramData = (
     const userRecommendations = useSelector((state: RootState) => state.user.userRecommendations);
     const userRecommendationsState = useSelector((state: RootState) => state.user.userRecommendationsState);
 
-    const [months, setMonths] = useState<any[][][]>([]);
     const [currentMonthIndex, setCurrentMonthIndex] = useState(0);
     const [isCompletingDay, setIsCompletingDay] = useState(false);
     const [isUncompletingDay, setIsUncompletingDay] = useState(false);
@@ -300,8 +299,6 @@ export const useProgramData = (
 
     // Additional computed values
     const currentDayNumber = specificDayId ? parseInt(specificDayId, 10) : parseInt(userProgramProgress?.CurrentDay || '0', 10);
-
-    const currentWeek = userProgramProgress?.CurrentDay ? getWeekNumber(currentDayNumber) : null;
 
     const dayOfWeek = userProgramProgress?.CurrentDay ? getDayOfWeek(currentDayNumber) : null;
 

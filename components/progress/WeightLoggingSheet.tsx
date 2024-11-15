@@ -31,7 +31,6 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
     initialWeight,
     initialDate,
     isEditing = false,
-    isLoading = false,
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -110,6 +109,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
             await onSubmit(weightNum, selectedDate);
             handleClose();
         } catch (err) {
+            console.log(err);
             setError('Failed to save weight measurement');
         } finally {
             setIsSubmitting(false);
@@ -124,6 +124,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
             await onDelete(initialDate.toISOString());
             handleClose();
         } catch (err) {
+            console.log(err);
             setError('Failed to delete measurement');
         } finally {
             setIsDeleting(false);
@@ -224,7 +225,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                             onPress={() => !isEditing && showCalendarView()}
                             disabled={isEditing || isSubmitting || isDeleting}
                         >
-                            <ThemedText type='buttonMedium' style={{ opacity: isEditing ? 0.5 : 1 }}>
+                            <ThemedText type='body' style={{ opacity: isEditing ? 0.5 : 1 }}>
                                 {format(selectedDate, 'dd/MM/yyyy')}
                             </ThemedText>
                             {!isEditing && (
@@ -268,7 +269,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                 ) : (
                     <View style={styles.calendarContainer}>
                         <View style={styles.calendarHeader}>
-                            <ThemedText type='buttonMedium'>{format(displayMonth, 'MMMM yyyy')}</ThemedText>
+                            <ThemedText type='body'>{format(displayMonth, 'MMMM yyyy')}</ThemedText>
                             <View style={styles.calendarNav}>
                                 <TouchableOpacity onPress={handlePrevMonth} style={styles.navigationButton} disabled={isSubmitting || isDeleting}>
                                     <Icon name='chevron-back' color={themeColors.text} />

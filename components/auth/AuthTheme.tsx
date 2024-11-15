@@ -10,40 +10,6 @@ export const useAuthTheme = (): Theme => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
-    const sharedFieldStyles = {
-        container: {
-            width: '100%',
-            marginBottom: Spaces.MD,
-            paddingHorizontal: Spaces.MD, // Add horizontal padding to container
-        },
-        field: {
-            width: '100%',
-            paddingVertical: Spaces.SM + Spaces.XS,
-            paddingHorizontal: Spaces.LG,
-            fontSize: 14,
-            color: themeColors.subTextSecondary,
-        },
-        fieldContainer: {
-            backgroundColor: themeColors.background,
-            borderWidth: StyleSheet.hairlineWidth,
-            borderColor: themeColors.systemBorderColor,
-            borderRadius: Spaces.SM,
-            flexDirection: 'row', // Ensure icon and text are in a row
-            alignItems: 'center', // Center items vertically
-        },
-        error: {
-            borderColor: themeColors.red,
-        },
-        disabled: {
-            opacity: 0.5,
-        },
-        label: {
-            color: themeColors.subText,
-            fontSize: 14,
-            marginBottom: Spaces.XS,
-        },
-    };
-
     return {
         tokens: {
             colors: {

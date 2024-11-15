@@ -9,19 +9,17 @@ import { ThemedView } from '@/components/base/ThemedView';
 import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
-import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { ImageTextOverlay } from '../media/ImageTextOverlay';
+import { router } from 'expo-router';
 
 type ActiveProgramDayCompressedCardProps = {};
 
 export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressedCardProps> = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
-
-    const navigation = useNavigation();
 
     const { userProgramProgress } = useSelector((state: RootState) => state.user);
 
@@ -50,12 +48,14 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
             </ThemedView>
         );
     }
-
     const navigateToProgramDay = () => {
         if (programId && dayId) {
-            navigation.navigate('programs/program-day', {
-                programId: programId,
-                dayId: dayId,
+            router.push({
+                pathname: '/(app)/programs/program-day',
+                params: {
+                    programId,
+                    dayId,
+                },
             });
         }
     };

@@ -28,7 +28,9 @@ export const authService = {
                         username: session.tokens.idToken.payload['cognito:username'],
                     };
                     await SecureStore.setItemAsync(STORAGE_KEYS.USER_INFO, JSON.stringify(userInfo));
-                    await SecureStore.setItemAsync(STORAGE_KEYS.USER_ID, userInfo.sub);
+                    if (userInfo.sub) {
+                        await SecureStore.setItemAsync(STORAGE_KEYS.USER_ID, userInfo.sub);
+                    }
                 }
             }
 
@@ -38,10 +40,10 @@ export const authService = {
             };
         } catch (error) {
             console.error('Error in storeAuthData:', {
-                name: error.name,
-                message: error.message,
-                code: error.code,
-                stack: error.stack,
+                name: (error as Error).name,
+                message: (error as Error).message,
+                code: (error as any).code, // 'code' might not be part of the standard Error type
+                stack: (error as Error).stack,
             });
             throw error;
         }
@@ -91,6 +93,7 @@ export const authService = {
                 session,
             };
         } catch (error) {
+            console.log(error);
             return {
                 isAuthenticated: false,
                 session: null,

@@ -2,7 +2,6 @@
 
 import React, { useState, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { IconButton } from '@/components/buttons/IconButton';
 import { TextButton } from '@/components/buttons/TextButton';
@@ -11,6 +10,7 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import { router } from 'expo-router';
 
 interface WizardStep {
     title: string;
@@ -31,16 +31,24 @@ export const SignupWizard: React.FC<SignupWizardProps> = ({ steps, onComplete, I
     const [currentStep, setCurrentStep] = useState(0);
     const [formData, setFormData] = useState({});
     const [isCurrentStepValid, setIsCurrentStepValid] = useState(false);
-    const navigation = useNavigation();
+    const [isLoading, setIsLoading] = useState(false);
     const formRef = useRef();
 
-    const handleNext = (stepData: any) => {
+    const handleNext = async (stepData: any) => {
         const updatedFormData = { ...formData, ...stepData };
         setFormData(updatedFormData);
+
         if (currentStep < steps.length - 1) {
             setCurrentStep(currentStep + 1);
         } else {
-            onComplete(updatedFormData);
+            setIsLoading(true);
+            try {
+                await onComplete(updatedFormData);
+            } catch (error) {
+                console.error('Error completing signup:', error);
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
 
@@ -59,7 +67,7 @@ export const SignupWizard: React.FC<SignupWizardProps> = ({ steps, onComplete, I
     };
 
     const handleExit = () => {
-        navigation.goBack();
+        router.back();
     };
 
     if (showIntroScreen && IntroScreen) {
@@ -99,7 +107,8 @@ export const SignupWizard: React.FC<SignupWizardProps> = ({ steps, onComplete, I
                             textStyle={{ color: themeColors.buttonPrimaryText }}
                             iconSize={Spaces.MD}
                             iconColor={themeColors.buttonPrimaryText}
-                            disabled={!isCurrentStepValid}
+                            disabled={!isCurrentStepValid || isLoading}
+                            loading={isLoading}
                         />
                     </View>
                 )}

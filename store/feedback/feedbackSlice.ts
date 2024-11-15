@@ -1,6 +1,6 @@
 // store/feedback/feedbackSlice.ts
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 import { initialState } from '@/store/feedback/feedbackState';
 import { sendProgramAbandonFeedbackAsync } from '@/store/feedback/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
@@ -20,7 +20,7 @@ const feedbackSlice = createSlice({
                 state.submitProgramFeedbackStatus = REQUEST_STATE.PENDING;
                 state.error = null;
             })
-            .addCase(sendProgramAbandonFeedbackAsync.fulfilled, (state, action) => {
+            .addCase(sendProgramAbandonFeedbackAsync.fulfilled, (state) => {
                 state.submitProgramFeedbackStatus = REQUEST_STATE.FULFILLED;
             })
             .addCase(sendProgramAbandonFeedbackAsync.rejected, (state, action) => {

@@ -11,7 +11,7 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { useNavigation } from '@react-navigation/native';
+import { router } from 'expo-router';
 
 type OverwriteProgramModalProps = {
     visible: boolean;
@@ -22,11 +22,10 @@ type OverwriteProgramModalProps = {
 export const OverwriteProgramModal: React.FC<OverwriteProgramModalProps> = ({ visible, onClose, onConfirm }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
-    const navigation = useNavigation();
 
     const handleConfirm = () => {
         onConfirm();
-        navigation.navigate('programs/program-start-splash' as never);
+        router.replace('/(app)/programs/program-start-splash');
     };
 
     return (

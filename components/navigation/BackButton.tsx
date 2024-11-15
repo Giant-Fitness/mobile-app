@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { TouchableOpacity, StyleSheet, ViewStyle, AccessibilityProps } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import { Icon } from '@/components/base/Icon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -11,6 +10,7 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { Opacities } from '@/constants/Opacities';
 import Animated, { useAnimatedProps } from 'react-native-reanimated';
+import { router } from 'expo-router';
 
 type BackButtonProps = {
     style?: ViewStyle;
@@ -29,7 +29,6 @@ export const BackButton: React.FC<BackButtonProps & AccessibilityProps> = ({
     onBackPress,
     accessibilityLabel = 'Go back', // Default accessibility label
 }) => {
-    const navigation = useNavigation();
     const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
     const themeColors = Colors[colorScheme]; // Access theme-specific colors
     const defaultIconColor = staticColor || themeColors.iconSelected; // Use static color if provided
@@ -45,7 +44,7 @@ export const BackButton: React.FC<BackButtonProps & AccessibilityProps> = ({
     return (
         <TouchableOpacity
             style={[styles.button, style]}
-            onPress={onBackPress || (() => navigation.goBack())}
+            onPress={onBackPress || (() => router.back())}
             accessibilityLabel={accessibilityLabel}
             activeOpacity={Opacities.buttonActiveOpacity}
         >

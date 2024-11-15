@@ -5,11 +5,11 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 
 interface SplashScreenProps {
-    onAnimationComplete: () => void;
+    onAnimationComplete?: () => void;
     isDataLoaded: boolean;
 }
 
-export const DumbbellSplash: React.FC<SplashScreenProps> = ({ onAnimationComplete, isDataLoaded }) => {
+export const DumbbellSplash: React.FC<SplashScreenProps> = ({ onAnimationComplete = () => {}, isDataLoaded }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const animation = useRef<LottieView | null>(null);

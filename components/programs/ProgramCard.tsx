@@ -68,15 +68,13 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({ program, isActive, act
                         />
                         {isActive && (
                             <View style={[styles.activeOverlay, { backgroundColor: 'rgba(255,255,255,0.95)' }]}>
-                                <ThemedText type='buttonSmall' style={styles.activeText}>
-                                    Active Program
-                                </ThemedText>
+                                <ThemedText type='buttonSmall'>Active Program</ThemedText>
                             </View>
                         )}
                         {!activeProgramUser && recommendedProgram && (
                             <View style={[styles.recommendedOverlay, { backgroundColor: 'rgba(255,255,255,0.9)' }]}>
                                 <Icon name='star' size={Sizes.fontSizeDefault} color={'rgba(0,0,0,0.95)'} />
-                                <ThemedText type='buttonSmall' style={[styles.activeText, { marginLeft: Spaces.XS }]}>
+                                <ThemedText type='buttonSmall' style={[{ marginLeft: Spaces.XS }]}>
                                     Recommended
                                 </ThemedText>
                             </View>

@@ -4,8 +4,6 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { Exercise } from '@/types';
@@ -13,26 +11,24 @@ import { Icon } from '@/components/base/Icon';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { TextButton } from '@/components/buttons/TextButton';
+import { router } from 'expo-router';
 
 type ExerciseCardProps = {
     exercise: Exercise;
     isEnrolled: boolean;
 };
 
-type RootStackParamList = {
-    'programs/exercise-details': Exercise; // Define the expected parameter type
-};
-
 export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isEnrolled = false }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme as 'light' | 'dark'];
 
-    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-
     const navigateToExerciseDetail = () => {
-        navigation.navigate('programs/exercise-details', {
-            exercise: exercise,
-            isEnrolled: isEnrolled,
+        router.push({
+            pathname: '/(app)/programs/exercise-details',
+            params: {
+                exercise: JSON.stringify(exercise),
+                isEnrolled: isEnrolled.toString(),
+            },
         });
     };
 

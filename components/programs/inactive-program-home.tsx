@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { ScrollView, StyleSheet, View, TouchableOpacity, Dimensions, Image } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
@@ -15,8 +14,20 @@ import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { Icon } from '@/components/base/Icon';
 import { useInactiveProgramData } from '@/hooks/useInactiveProgramData';
+import { router } from 'expo-router';
 
-const MenuItem = ({ title, description, onPress, backgroundColor, textColor, image, isGrid = false, descriptionColor }) => {
+interface MenuItemProps {
+    title: string;
+    description: string;
+    onPress: () => void;
+    backgroundColor: string;
+    textColor: string;
+    image: any;
+    isGrid?: boolean;
+    descriptionColor: string;
+}
+
+const MenuItem: React.FC<MenuItemProps> = ({ title, description, onPress, backgroundColor, textColor, image, isGrid = false, descriptionColor }) => {
     if (isGrid) {
         return (
             <TouchableOpacity onPress={onPress} style={[styles.gridMenuItem, { backgroundColor }]} activeOpacity={0.7}>
@@ -67,7 +78,6 @@ const MenuItem = ({ title, description, onPress, backgroundColor, textColor, ima
 export default function InactiveProgramHome() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
-    const navigation = useNavigation();
 
     const { isOnboardingComplete, recommendedProgram, dataLoadedState } = useInactiveProgramData();
 
@@ -76,8 +86,8 @@ export default function InactiveProgramHome() {
         return <DumbbellSplash isDataLoaded={false} />;
     }
 
-    const navigateTo = (route, params = {}) => {
-        navigation.navigate(route, params);
+    const navigateTo = (route: 'programs/program-recommender-wizard' | 'programs/browse-programs' | 'programs/program-overview', params = {}) => {
+        router.push({ pathname: `/(app)/${route}` as const, params });
     };
 
     const menuItems = [

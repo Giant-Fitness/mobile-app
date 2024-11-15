@@ -1,19 +1,9 @@
 // store/programs/service.ts
 
 import { Program, ProgramDay } from '@/types';
-import { sampleProgramDays, mockPrograms } from '@/store/programs/mockData';
 import axios from 'axios';
 
 const API_BASE_URL = 'https://r5oibllip9.execute-api.ap-south-1.amazonaws.com/prod';
-
-// Utility function to simulate network delay
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-// Simulate a random delay between 200ms and 1000ms
-const simulateNetworkDelay = async () => {
-    const randomDelay = Math.floor(Math.random() * (1000 - 200 + 1) + 200);
-    await delay(randomDelay);
-};
 
 const getAllPrograms = async (): Promise<Program[]> => {
     console.log('service: getAllPrograms');

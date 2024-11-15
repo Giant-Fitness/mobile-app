@@ -5,7 +5,6 @@ import { Modal as RNModal, View, StyleSheet, StyleProp, ViewStyle, TouchableWith
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
-import { Opacities } from '@/constants/Opacities';
 
 type ModalProps = {
     visible: boolean;
@@ -32,7 +31,7 @@ export const Modal: React.FC<ModalProps & AccessibilityProps> = ({
             <TouchableWithoutFeedback onPress={overlay ? onClose : undefined}>
                 <View style={styles.overlay} />
             </TouchableWithoutFeedback>
-            <View style={[styles.modalContainer, { backgroundColor: themeColors.modalBackground }, style]}>{children}</View>
+            <View style={[styles.modalContainer, { backgroundColor: themeColors.background }, style]}>{children}</View>
         </RNModal>
     );
 };
@@ -47,7 +46,7 @@ const styles = StyleSheet.create({
         marginVertical: Spaces.XL,
         borderRadius: Spaces.MD,
         padding: Spaces.MD,
-        shadowOpacity: Opacities.modalShadowOpacity,
+        shadowOpacity: 0.8,
         shadowRadius: Spaces.SM,
         elevation: 5, // Shadow for Android
     },

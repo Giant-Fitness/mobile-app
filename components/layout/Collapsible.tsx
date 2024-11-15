@@ -2,7 +2,7 @@
 
 import React, { PropsWithChildren, useState } from 'react';
 import { Icon } from '@/components/base/Icon';
-import { StyleSheet, TouchableOpacity, TextStyle, ViewStyle } from 'react-native';
+import { StyleSheet, TouchableOpacity, TextStyle, ViewStyle, StyleProp } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { Colors } from '@/constants/Colors';
@@ -12,11 +12,11 @@ import { Sizes } from '@/constants/Sizes';
 
 interface CollapsibleProps extends PropsWithChildren {
     title: string;
-    titleStyle?: TextStyle;
-    headingStyle?: ViewStyle;
+    titleStyle?: StyleProp<TextStyle>;
+    headingStyle?: StyleProp<ViewStyle>;
     isOpen?: boolean;
     activeOpacity?: number;
-    iconStyle?: ViewStyle;
+    iconStyle?: StyleProp<TextStyle>;
 }
 
 export function Collapsible({ children, title, titleStyle, headingStyle, isOpen: isOpenProp = false, activeOpacity = 0.8, iconStyle }: CollapsibleProps) {

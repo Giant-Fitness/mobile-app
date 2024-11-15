@@ -66,7 +66,7 @@ const userSlice = createSlice({
             })
             .addCase(getUserFitnessProfileAsync.fulfilled, (state, action: PayloadAction<UserFitnessProfile>) => {
                 state.userFitnessProfileState = REQUEST_STATE.FULFILLED;
-                state.userFitnessProfile = action.payload.userFitnessProfile;
+                state.userFitnessProfile = action.payload;
             })
             .addCase(getUserFitnessProfileAsync.rejected, (state, action) => {
                 state.userFitnessProfileState = REQUEST_STATE.REJECTED;

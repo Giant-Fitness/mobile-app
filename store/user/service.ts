@@ -6,9 +6,6 @@ import { authService } from '@/utils/auth';
 
 const API_BASE_URL = 'https://r5oibllip9.execute-api.ap-south-1.amazonaws.com/prod';
 
-// Utility function to simulate network delay
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 // Create axios instance with interceptors
 const createAuthenticatedAxios = (): AxiosInstance => {
     const instance = axios.create({
@@ -182,11 +179,11 @@ const getUserProgramProgress = async (userId: string): Promise<UserProgramProgre
 };
 
 const completeDay = async (userId: string, dayId: string): Promise<UserProgramProgress> => {
-    console.log('service: completeDay');
+    const day = parseInt(dayId);
     try {
         const response = await axios.put(
             `${API_BASE_URL}/users/${userId}/programprogress/complete-day`,
-            { dayId },
+            { dayId: day },
             {
                 timeout: 10000, // 10 seconds timeout
                 timeoutErrorMessage: 'Request timed out after 10 seconds',

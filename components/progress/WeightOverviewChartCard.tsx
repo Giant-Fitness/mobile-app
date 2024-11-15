@@ -11,7 +11,7 @@ import { Path, Svg, Circle, Defs, LinearGradient, Stop } from 'react-native-svg'
 import { format } from 'date-fns';
 import Animated, { useAnimatedStyle, withRepeat, withTiming, withSequence, useSharedValue } from 'react-native-reanimated';
 import { ThemedText } from '../base/ThemedText';
-import { darkenColor, lightenColor } from '@/utils/colorUtils';
+import { lightenColor } from '@/utils/colorUtils';
 
 type WeightOverviewChartCardProps = {
     values: UserWeightMeasurement[];

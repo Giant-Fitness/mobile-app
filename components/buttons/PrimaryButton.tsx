@@ -9,7 +9,6 @@ import { Icon } from '@/components/base/Icon';
 import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
-import { Opacities } from '@/constants/Opacities';
 import { ThemedTextProps } from '@/components/base/ThemedText';
 
 type PrimaryButtonProps = {

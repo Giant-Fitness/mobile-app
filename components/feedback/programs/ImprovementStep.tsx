@@ -5,7 +5,6 @@ import { StyleSheet } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
 import { Checkbox } from '@/components/inputs/Checkbox';
-import { TextInput } from '@/components/inputs/TextInput';
 import { Spaces } from '@/constants/Spaces';
 import { FeedbackStep } from '@/components/feedback/FeedbackForm';
 import { ProgramAbandonData } from '@/types/feedbackTypes';
@@ -42,13 +41,6 @@ export const ImprovementsStep: FeedbackStep<ProgramAbandonData> = ({ data, onCha
                     style={styles.checkbox}
                 />
             ))}
-            {/* <TextInput
-                placeholder="Any additional feedback?"
-                value={data.additionalFeedback}
-                onChangeText={(text) => onChange({ additionalFeedback: text })}
-                style={StyleSheet.flatten([styles.textInput, styles.textAreaInput])}
-                multiline
-            /> */}
         </ThemedView>
     );
 };
@@ -65,12 +57,5 @@ const styles = StyleSheet.create({
     },
     checkbox: {
         marginVertical: Spaces.SM,
-    },
-    textInput: {
-        marginTop: Spaces.SM,
-    },
-    textAreaInput: {
-        height: Spaces.XXXL,
-        marginTop: Spaces.LG,
     },
 });

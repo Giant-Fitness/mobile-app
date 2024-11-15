@@ -1,11 +1,11 @@
 // app/index.tsx
 
-import { Redirect, router } from 'expo-router';
+import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import WelcomeScreens from '@/components/onboarding/WelcomeScreens';
 import { authService } from '@/utils/auth';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '@/store/store';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '@/store/store';
 import { getUserAsync } from '@/store/user/thunks';
 import { configureAmplify } from '@/config/amplify';
 
@@ -13,7 +13,6 @@ export default function Index() {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
     const [userHasName, setUserHasName] = useState<boolean | null>(null);
     const dispatch = useDispatch<AppDispatch>();
-    const { user } = useSelector((state: RootState) => state.user);
 
     // Initialize Amplify first
     useEffect(() => {
@@ -41,6 +40,7 @@ export default function Index() {
                     }
                 }
             } catch (error) {
+                console.log(error);
                 setIsAuthenticated(false);
             }
         };
@@ -57,11 +57,11 @@ export default function Index() {
             return; // WelcomeScreens will be rendered
         }
         if (isAuthenticated && userHasName === false) {
-            router.replace('/onboarding/name-collection');
+            router.replace('/(app)/onboarding/name-collection');
             return;
         }
         if (isAuthenticated && userHasName) {
-            router.replace('/initialization');
+            router.replace('/(app)/initialization');
             return;
         }
     }, [isAuthenticated, userHasName]);

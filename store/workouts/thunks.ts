@@ -6,7 +6,7 @@ import { Workout, WorkoutRecommendations } from '@/types';
 import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 
-export const getAllWorkoutsAsync = createAsyncThunk<Workout[], void>('workouts/getAllWorkouts', async (_, { getState, rejectWithValue }) => {
+export const getAllWorkoutsAsync = createAsyncThunk<Workout[], void>('workouts/getAllWorkouts', async (_, { getState }) => {
     const state = getState() as RootState;
     // If workouts are already loaded, return them
     if (state.workouts.allWorkoutsState === REQUEST_STATE.FULFILLED) {
@@ -58,14 +58,11 @@ export const getMultipleWorkoutsAsync = createAsyncThunk<Workout[], { workoutIds
     },
 );
 
-export const getSpotlightWorkoutsAsync = createAsyncThunk<WorkoutRecommendations, void>(
-    'workouts/getSpotlightWorkouts',
-    async (_, { getState, rejectWithValue }) => {
-        const state = getState() as RootState;
-        // If workouts are already loaded, return them
-        if (state.workouts.spotlightWorkoutsState === REQUEST_STATE.FULFILLED) {
-            return Object.values(state.workouts.spotlightWorkouts);
-        }
-        return await WorkoutService.getSpotlightWorkouts();
-    },
-);
+export const getSpotlightWorkoutsAsync = createAsyncThunk<WorkoutRecommendations, void>('workouts/getSpotlightWorkouts', async (_, { getState }) => {
+    const state = getState() as RootState;
+    // If workouts are already loaded, return them
+    if (state.workouts.spotlightWorkoutsState === REQUEST_STATE.FULFILLED) {
+        return Object.values(state.workouts.spotlightWorkouts);
+    }
+    return await WorkoutService.getSpotlightWorkouts();
+});

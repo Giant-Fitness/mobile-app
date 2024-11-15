@@ -1,7 +1,7 @@
 // components/overlays/AutoDismissSuccessModal.tsx
 
 import React, { useEffect, useCallback } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { CenteredModal } from '@/components/overlays/CenteredModal';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -30,7 +30,7 @@ export const AutoDismissSuccessModal: React.FC<AutoDismissSuccessModalProps> = (
     showTitle = true,
     showMessage = true,
 }) => {
-    const colorScheme = useColorScheme();
+    const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
     const handleDismiss = useCallback(() => {
@@ -52,7 +52,7 @@ export const AutoDismissSuccessModal: React.FC<AutoDismissSuccessModalProps> = (
     }, [visible, duration, handleDismiss]);
 
     return (
-        <CenteredModal visible={visible} onClose={onDismiss} overlay={false} style={styles.modal} accessibilityLabel='Success notification'>
+        <CenteredModal visible={visible} onClose={onDismiss} style={styles.modal}>
             <ThemedView style={styles.container}>
                 <ThemedView style={styles.animationContainer}>
                     <LottieView source={require('@/assets/animations/check.json')} autoPlay loop={false} style={styles.animation} />
@@ -64,7 +64,7 @@ export const AutoDismissSuccessModal: React.FC<AutoDismissSuccessModalProps> = (
                     </ThemedText>
                 )}
 
-                {showMessage && <ThemedText style={[styles.message, { color: themeColors.textSecondary }]}>{message}</ThemedText>}
+                {showMessage && <ThemedText style={[styles.message, { color: themeColors.subText }]}>{message}</ThemedText>}
             </ThemedView>
         </CenteredModal>
     );

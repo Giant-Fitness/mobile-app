@@ -1,7 +1,7 @@
 // components/overlays/BottomSheet.tsx
 
 import React from 'react';
-import { Modal, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { Modal, StyleProp, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { BlurView } from 'expo-blur';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -12,7 +12,7 @@ interface BottomSheetProps {
     visible: boolean;
     onClose: () => void;
     children: React.ReactNode;
-    style?: ViewStyle;
+    style?: StyleProp<ViewStyle>;
 }
 
 export const BottomSheet: React.FC<BottomSheetProps> = ({ visible, onClose, children, style }) => {

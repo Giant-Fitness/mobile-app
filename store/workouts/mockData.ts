@@ -1,6 +1,6 @@
 // store/workouts/mockData.ts
 
-import { Workouts, WorkoutRecommendations } from '@/types';
+import { WorkoutRecommendations, Workout } from '@/types';
 
 const sampleSpotlightRecommendations: WorkoutRecommendations = {
     RecommendationType: 'Spotlight',

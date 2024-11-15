@@ -35,7 +35,6 @@ const WelcomeScreens: React.FC = () => {
     const themeColors = Colors[colorScheme];
     const scrollX = useSharedValue(0);
     const buttonOpacity = useSharedValue(0);
-    const [currentIndex, setCurrentIndex] = React.useState(0);
 
     const welcomeItems: WelcomeItem[] = [
         {
@@ -78,7 +77,6 @@ const WelcomeScreens: React.FC = () => {
 
     const updateIndex = React.useCallback(
         (index: number) => {
-            setCurrentIndex(index);
             if (index === welcomeItems.length - 1) {
                 buttonOpacity.value = withTiming(1, animationConfig);
             } else {
@@ -97,7 +95,7 @@ const WelcomeScreens: React.FC = () => {
     });
 
     const handleNavigateToLogin = () => {
-        router.push('/login');
+        router.push('/(auth)/login');
     };
 
     const buttonAnimatedStyle = useAnimatedStyle(() => ({

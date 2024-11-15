@@ -7,14 +7,6 @@ import userReducer from '@/store/user/userSlice';
 import workoutsReducer from '@/store/workouts/workoutsSlice';
 import feedbackReducer from '@/store/feedback/feedbackSlice';
 import { resetStore } from '@/store/actions';
-// Create a reducer enhancer that handles resetting the entire store
-const resettableReducer = (reducer: typeof rootReducer) => (state: any, action: any) => {
-    if (action.type === resetStore().type) {
-        // Reset to initial state
-        return reducer(undefined, action);
-    }
-    return reducer(state, action);
-};
 
 const combinedReducer = combineReducers({
     programs: programsReducer,

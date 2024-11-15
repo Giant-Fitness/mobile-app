@@ -3,7 +3,7 @@
 import React from 'react';
 import { StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedText, ThemedTextProps } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
@@ -21,8 +21,8 @@ type ImageTextOverlayProps = {
     containerStyle?: StyleProp<ViewStyle>;
     textContainerStyle?: StyleProp<ViewStyle>;
     gradientColors?: string[];
-    titleType?: string; // Optional type for title
-    subtitleType?: string; // Optional type for subtitle
+    titleType?: ThemedTextProps['type'];
+    subtitleType?: ThemedTextProps['type'];
     placeholder?: any; // Placeholder image while loading
 };
 
@@ -40,8 +40,8 @@ export const ImageTextOverlay: React.FC<ImageTextOverlayProps> = ({
     gradientColors = ['transparent', 'rgba(0,0,0,0.8)'],
     placeholder = '@/assets/images/logo.png',
 }) => {
-    const colorScheme = useColorScheme();
-    const themeColors = Colors[colorScheme ?? 'light'];
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
 
     return (
         <ThemedView style={[containerStyle]}>

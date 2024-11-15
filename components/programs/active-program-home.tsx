@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { ScrollView, StyleSheet, View, Image, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ActiveProgramDayCard } from '@/components/programs/ActiveProgramDayCard';
@@ -18,11 +17,11 @@ import { useProgramData } from '@/hooks/useProgramData';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { Icon } from '@/components/base/Icon';
 import { WorkoutCompletedSection } from './WorkoutCompletedSection';
+import { router } from 'expo-router';
 
 export default function ActiveProgramHome() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
-    const navigation = useNavigation();
 
     const {
         userProgramProgress,
@@ -54,9 +53,8 @@ export default function ActiveProgramHome() {
             </ThemedView>
         );
     }
-
-    const navigateTo = (route, params = {}) => {
-        navigation.navigate(route, params);
+    const navigateTo = (route: 'programs/active-program-progress' | 'programs/browse-programs', params = {}) => {
+        router.push({ pathname: `/(app)/${route}` as const, params });
     };
 
     const menuItems = [
@@ -89,16 +87,16 @@ export default function ActiveProgramHome() {
                 }}
                 showsVerticalScrollIndicator={false}
             >
-                <TrainingQuote quote={displayQuote} isLastDay={isLastDay} />
+                {displayQuote && <TrainingQuote quote={displayQuote} isLastDay={isLastDay} />}
 
                 {hasCompletedWorkoutToday ? (
                     <>
-                        <WorkoutCompletedSection onBrowseSolos={() => navigation.navigate('workouts/all-workouts')} />
+                        <WorkoutCompletedSection onBrowseSolos={() => router.push('/(app)/workouts/all-workouts')} />
                         <ThemedView style={[styles.upNextContainer, { backgroundColor: themeColors.backgroundSecondary, marginTop: Spaces.MD }]}>
                             <ThemedText type='title' style={styles.subHeader}>
-                                Tomorrow's Workout
+                                Tomorrow&apos;s Workout
                             </ThemedText>
-                            <ProgramDayDetailCard key={userProgramProgress?.CurrentDay} day={activeProgramCurrentDay} style={[]} />
+                            {activeProgramCurrentDay && <ProgramDayDetailCard key={userProgramProgress?.CurrentDay} day={activeProgramCurrentDay} />}
                         </ThemedView>
                     </>
                 ) : (

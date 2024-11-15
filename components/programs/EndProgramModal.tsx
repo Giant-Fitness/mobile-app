@@ -11,7 +11,7 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { useNavigation } from '@react-navigation/native';
+import { router } from 'expo-router';
 
 type EndProgramModalProps = {
     visible: boolean;
@@ -23,11 +23,17 @@ type EndProgramModalProps = {
 export const EndProgramModal: React.FC<EndProgramModalProps> = ({ visible, onClose, onConfirm, programId }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
-    const navigation = useNavigation();
 
     const handleConfirm = () => {
         onConfirm();
-        navigation.navigate('programs/program-abandon-feedback' as never, { programId });
+        try {
+            router.push({
+                pathname: '/(app)/programs/program-abandon-feedback',
+                params: { programId },
+            });
+        } catch (error) {
+            console.error('Navigation error:', error);
+        }
     };
 
     return (

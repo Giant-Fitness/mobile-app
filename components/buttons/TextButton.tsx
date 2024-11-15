@@ -59,9 +59,9 @@ export const TextButton: React.FC<TextButtonProps & AccessibilityProps> = ({
             style={[
                 styles.button,
                 {
-                    backgroundColor: disabled || loading ? themeColors.buttonDisabled : themeColors.background,
+                    backgroundColor: disabled || loading ? themeColors.background : themeColors.background,
                     borderColor: themeColors.text,
-                    opacity: disabled || loading ? Opacities.disabled : 1,
+                    opacity: disabled || loading ? 0.5 : 1,
                     ...buttonPadding,
                 },
                 style,

@@ -6,7 +6,7 @@ import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, Use
 import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 
-export const getUserAsync = createAsyncThunk<User, void>('user/getUser', async (_, { getState, rejectWithValue }) => {
+export const getUserAsync = createAsyncThunk<User, void>('user/getUser', async (_, { getState }) => {
     const state = getState();
     if (state.user.user) {
         return state.user.user;
@@ -21,7 +21,7 @@ export const updateUserAsync = createAsyncThunk<
         state: RootState;
         rejectValue: { errorMessage: string };
     }
->('user/updateUser', async (updates, { getState, rejectWithValue }) => {
+>('user/updateUser', async (updates, { rejectWithValue }) => {
     try {
         // Update the user
         const updatedUser = await UserService.updateUser(updates);
@@ -83,6 +83,7 @@ export const updateUserFitnessProfileAsync = createAsyncThunk<
     try {
         return await UserService.updateUserFitnessProfile(userId, userFitnessProfile);
     } catch (error) {
+        console.log(error);
         return rejectWithValue({ errorMessage: 'Failed to update fitness profile' });
     }
 });
@@ -167,6 +168,7 @@ export const completeDayAsync = createAsyncThunk<
     try {
         return await UserService.completeDay(userId, dayId);
     } catch (error) {
+        console.log(error);
         return rejectWithValue({ errorMessage: 'Failed to complete day' });
     }
 });
@@ -187,6 +189,7 @@ export const uncompleteDayAsync = createAsyncThunk<
     try {
         return await UserService.uncompleteDay(userId, dayId);
     } catch (error) {
+        console.log(error);
         return rejectWithValue({ errorMessage: 'Failed to uncomplete day' });
     }
 });
@@ -201,6 +204,7 @@ export const endProgramAsync = createAsyncThunk<UserProgramProgress, void>('user
         await UserService.endProgram(userId);
         return {};
     } catch (error) {
+        console.log(error);
         return rejectWithValue({ errorMessage: 'Failed to end program' });
     }
 });
@@ -221,6 +225,7 @@ export const startProgramAsync = createAsyncThunk<
     try {
         return await UserService.startProgram(userId, programId);
     } catch (error) {
+        console.log(error);
         return rejectWithValue({ errorMessage: 'Failed to start program' });
     }
 });
@@ -234,6 +239,7 @@ export const resetProgramAsync = createAsyncThunk<UserProgramProgress, void>('us
     try {
         return UserService.resetProgram(userId);
     } catch (error) {
+        console.log(error);
         return rejectWithValue({ errorMessage: 'Failed to reset program' });
     }
 });
