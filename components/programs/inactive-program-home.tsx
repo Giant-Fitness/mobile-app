@@ -82,22 +82,26 @@ export default function InactiveProgramHome() {
 
     const menuItems = [
         {
-            title: 'Find Your Perfect Plan',
-            description: 'Let us recommend a plan tailored to your goals',
-            image: require('@/assets/images/wand.png'),
-            onPress: () => navigateTo('programs/program-recommender-wizard'),
-            backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.7),
-            textColor: darkenColor(themeColors.tangerineSolid, 0),
+            title: !isOnboardingComplete ? 'Find Your Perfect Plan' : 'Browse Library',
+            description: !isOnboardingComplete
+                ? 'Let us recommend a plan tailored to your goals'
+                : 'Our structured training plans turn your goals into achievements',
+            image: !isOnboardingComplete ? require('@/assets/images/wand.png') : require('@/assets/images/clipboard.png'),
+            onPress: () => navigateTo(!isOnboardingComplete ? 'programs/program-recommender-wizard' : 'programs/browse-programs'),
+            backgroundColor: !isOnboardingComplete ? lightenColor(themeColors.tangerineTransparent, 0.7) : lightenColor(themeColors.maroonTransparent, 0.3),
+            textColor: !isOnboardingComplete ? darkenColor(themeColors.tangerineSolid, 0) : darkenColor(themeColors.maroonSolid, 0),
             descriptionColor: darkenColor(themeColors.subText, 0.2),
-            show: !isOnboardingComplete,
+            show: true,
         },
         {
-            title: 'Browse Library',
-            description: 'Our structured training plans turn your goals into achievements',
-            image: require('@/assets/images/clipboard.png'),
-            onPress: () => navigateTo('programs/browse-programs'),
-            backgroundColor: lightenColor(themeColors.maroonTransparent, 0.3),
-            textColor: darkenColor(themeColors.maroonSolid, 0),
+            title: !isOnboardingComplete ? 'Browse Library' : 'Update Your Preferences',
+            description: !isOnboardingComplete
+                ? 'Our structured training plans turn your goals into achievements'
+                : 'Retake our quiz to get an updated training plan recommendation',
+            image: !isOnboardingComplete ? require('@/assets/images/clipboard.png') : require('@/assets/images/wand.png'),
+            onPress: () => navigateTo(!isOnboardingComplete ? 'programs/browse-programs' : 'programs/program-recommender-wizard'),
+            backgroundColor: !isOnboardingComplete ? lightenColor(themeColors.maroonTransparent, 0.3) : lightenColor(themeColors.tangerineTransparent, 0.7),
+            textColor: !isOnboardingComplete ? darkenColor(themeColors.maroonSolid, 0) : darkenColor(themeColors.tangerineSolid, 0),
             descriptionColor: darkenColor(themeColors.subText, 0.2),
             show: true,
         },
