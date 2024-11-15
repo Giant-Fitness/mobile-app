@@ -18,6 +18,8 @@ import { darkenColor } from '@/utils/colorUtils';
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
 import { logWeightMeasurementAsync, getWeightMeasurementsAsync } from '@/store/user/thunks';
 import { AppDispatch } from '@/store/store';
+import { PrimaryButton } from '@/components/buttons/PrimaryButton';
+import { WorkoutCompletedSection } from '@/components/programs/WorkoutCompletedSection';
 
 export default function HomeScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -28,7 +30,7 @@ export default function HomeScreen() {
     const [isWeightSheetVisible, setIsWeightSheetVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    const { user, userProgramProgress } = useProgramData();
+    const { user, userProgramProgress, hasCompletedWorkoutToday } = useProgramData();
 
     const isFitnessOnboardingComplete = user?.OnboardingStatus?.fitness === true;
 
@@ -146,16 +148,20 @@ export default function HomeScreen() {
                         <ThemedText type='greeting'>{greeting}</ThemedText>
                     </View>
 
-                    <View style={styles.header}>
-                        <ThemedText type='titleLarge'>Today's Workout</ThemedText>
-                    </View>
-
-                    <View style={styles.workoutDayCard}>
-                        <ActiveProgramDayCompressedCard />
-                    </View>
+                    {hasCompletedWorkoutToday ? (
+                        <WorkoutCompletedSection onBrowseSolos={() => navigation.navigate('workouts/all-workouts')} />
+                    ) : (
+                        <>
+                            <View style={styles.header}>
+                                <ThemedText type='titleLarge'>Today's Workout</ThemedText>
+                            </View>
+                            <View style={styles.workoutDayCard}>
+                                <ActiveProgramDayCompressedCard />
+                            </View>
+                        </>
+                    )}
 
                     {renderForYouSection()}
-
                     <FactOfTheDay />
                 </>
             );

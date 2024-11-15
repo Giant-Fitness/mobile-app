@@ -17,13 +17,25 @@ import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { useProgramData } from '@/hooks/useProgramData';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { Icon } from '@/components/base/Icon';
+import { WorkoutCompletedSection } from './WorkoutCompletedSection';
 
 export default function ActiveProgramHome() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const navigation = useNavigation();
 
-    const { activeProgram, activeProgramNextDays, dataLoadedState, isLastDay, currentWeek, displayQuote, error } = useProgramData(undefined, undefined, {
+    const {
+        userProgramProgress,
+        activeProgram,
+        activeProgramNextDays,
+        activeProgramCurrentDay,
+        dataLoadedState,
+        isLastDay,
+        currentWeek,
+        displayQuote,
+        hasCompletedWorkoutToday,
+        error,
+    } = useProgramData(undefined, undefined, {
         fetchAllDays: true,
     });
 
@@ -79,29 +91,41 @@ export default function ActiveProgramHome() {
             >
                 <TrainingQuote quote={displayQuote} isLastDay={isLastDay} />
 
-                <View style={styles.planHeader}>
-                    <ThemedText type='titleLarge'>{activeProgram?.ProgramName}</ThemedText>
-                </View>
+                {hasCompletedWorkoutToday ? (
+                    <>
+                        <WorkoutCompletedSection onBrowseSolos={() => navigation.navigate('workouts/all-workouts')} />
+                        <ThemedView style={[styles.upNextContainer, { backgroundColor: themeColors.backgroundSecondary, marginTop: Spaces.MD }]}>
+                            <ThemedText type='title' style={styles.subHeader}>
+                                Tomorrow's Workout
+                            </ThemedText>
+                            <ProgramDayDetailCard key={userProgramProgress?.CurrentDay} day={activeProgramCurrentDay} style={[]} />
+                        </ThemedView>
+                    </>
+                ) : (
+                    <>
+                        <View style={styles.planHeader}>
+                            <ThemedText type='titleLarge'>{activeProgram?.ProgramName}</ThemedText>
+                        </View>
+                        <View style={styles.weekProgress}>
+                            <ThemedText style={[{ color: themeColors.subText }]}>
+                                Week {currentWeek} of {activeProgram?.Weeks}
+                            </ThemedText>
+                        </View>
+                        <View style={styles.activeCardContainer}>
+                            <ActiveProgramDayCard />
+                        </View>
 
-                <View style={styles.weekProgress}>
-                    <ThemedText style={[{ color: themeColors.subText }]}>
-                        Week {currentWeek} of {activeProgram?.Weeks}
-                    </ThemedText>
-                </View>
-
-                <View style={styles.activeCardContainer}>
-                    <ActiveProgramDayCard />
-                </View>
-
-                {activeProgramNextDays.length > 0 && (
-                    <ThemedView style={[styles.upNextContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
-                        <ThemedText type='title' style={styles.subHeader}>
-                            Up Next
-                        </ThemedText>
-                        {activeProgramNextDays.map((day) => (
-                            <ProgramDayDetailCard key={day.DayId} day={day} />
-                        ))}
-                    </ThemedView>
+                        {activeProgramNextDays.length > 0 && (
+                            <ThemedView style={[styles.upNextContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
+                                <ThemedText type='title' style={styles.subHeader}>
+                                    Up Next
+                                </ThemedText>
+                                {activeProgramNextDays.map((day) => (
+                                    <ProgramDayDetailCard key={day.DayId} day={day} />
+                                ))}
+                            </ThemedView>
+                        )}
+                    </>
                 )}
 
                 <View style={styles.menuWrapper}>
@@ -164,6 +188,7 @@ const styles = StyleSheet.create({
     upNextContainer: {
         paddingVertical: Spaces.MD,
         paddingHorizontal: Spaces.XL,
+        marginBottom: Spaces.XXL,
     },
     planHeader: {
         paddingHorizontal: Spaces.LG,
@@ -177,7 +202,6 @@ const styles = StyleSheet.create({
         paddingBottom: Spaces.XXL,
     },
     menuWrapper: {
-        marginTop: Spaces.XXL,
         marginBottom: Spaces.XL,
     },
     menuItem: {

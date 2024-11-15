@@ -42,6 +42,12 @@ export const preloadProgramProgressData = async (dispatch: AppDispatch, programI
     };
 };
 
+const isToday = (dateString: string) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
+};
+
 interface UseProgramDataOptions {
     fetchAllDays?: boolean;
 }
@@ -123,6 +129,15 @@ export const useProgramData = (
         }
         return [];
     }, [specificProgramId, userProgramProgress, activeProgramNextDayIds, programDays]);
+
+    const activeProgramCurrentDay = useMemo(() => {
+        const programId = userProgramProgress?.ProgramId;
+        const dayId = userProgramProgress?.CurrentDay;
+        if (programId && dayId) {
+            return programDays[programId]?.[dayId];
+        }
+        return null;
+    }, [userProgramProgress, programDays]);
 
     // Effects for data fetching
     useEffect(() => {
@@ -340,6 +355,19 @@ export const useProgramData = (
         dispatch(resetProgramAsync());
     };
 
+    const hasCompletedWorkoutToday = useMemo(() => {
+        // If there's no program progress or LastActivityAt, return false
+        if (!userProgramProgress?.LastActivityAt) return false;
+
+        // If this is day 1, then treat it like no workouts today
+        if (userProgramProgress.CurrentDay === 1) {
+            return false;
+        }
+
+        // Otherwise, check if they've completed a workout today
+        return isToday(userProgramProgress.LastActivityAt);
+    }, [userProgramProgress, userProgramProgress?.LastActivityAt, userProgramProgress?.CurrentDay]);
+
     return {
         user,
         userProgramProgress,
@@ -349,6 +377,7 @@ export const useProgramData = (
         programDayState,
         programDays,
         activeProgramNextDays,
+        activeProgramCurrentDay,
         dataLoadedState,
         isLastDay,
         dayOfWeek,
@@ -365,6 +394,7 @@ export const useProgramData = (
         months: programCalendarData.months,
         currentMonthIndex,
         setCurrentMonthIndex,
+        hasCompletedWorkoutToday,
         currentWeek: programCalendarData.currentWeek,
         error: programError || quoteError,
     };

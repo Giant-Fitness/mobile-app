@@ -11,16 +11,13 @@ import { Colors } from '@/constants/Colors';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { ProgramMonthView } from '@/components/programs/ProgramMonthView';
 import { Spaces } from '@/constants/Spaces';
-import { groupProgramDaysIntoWeeks, groupWeeksIntoMonths, getWeekNumber, getDayOfWeek } from '@/utils/calendar';
 import { Icon } from '@/components/base/Icon';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { Sizes } from '@/constants/Sizes';
 import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
 import { ProgramProgressPillBar } from '@/components/programs/ProgramProgressPillBar';
-import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { ProgramWeekList } from '@/components/programs/ProgramWeekList';
-import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { BottomMenuModal } from '@/components/overlays/BottomMenuModal';
 import { useProgramData } from '@/hooks/useProgramData';
 import { EndProgramModal } from '@/components/programs/EndProgramModal';
@@ -28,50 +25,34 @@ import { ResetProgramModal } from '@/components/programs/ResetProgramModal';
 import { AutoDismissSuccessModal } from '@/components/overlays/AutoDismissSuccessModal';
 
 const ActiveProgramProgressScreen = () => {
+    // 1. Hooks Section - All hooks must be called before any conditionals
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const screenWidth = Dimensions.get('window').width;
-    const [isBottomMenuVisible, setIsBottomMenuVisible] = useState(false);
     const navigation = useNavigation();
+    const scrollY = useSharedValue(0);
+
+    // State hooks
+    const [isBottomMenuVisible, setIsBottomMenuVisible] = useState(false);
     const [monthDataLoaded, setMonthDataLoaded] = useState(REQUEST_STATE.IDLE);
     const [isEndProgramModalVisible, setIsEndProgramModalVisible] = useState(false);
     const [isResetProgramModalVisible, setIsResetProgramModalVisible] = useState(false);
     const [showResetSuccess, setShowResetSuccess] = useState(false);
 
-    const { activeProgram, userProgramProgress, programDays, months, currentMonthIndex, currentWeek, setCurrentMonthIndex, resetProgram, endProgram, error } =
+    const { activeProgram, userProgramProgress, months, currentMonthIndex, currentWeek, setCurrentMonthIndex, resetProgram, endProgram, error } =
         useProgramData(undefined, undefined, { fetchAllDays: true });
 
-    const scrollY = useSharedValue(0);
-    const scrollHandler = useAnimatedScrollHandler({
-        onScroll: (event) => {
-            scrollY.value = event.contentOffset.y;
-        },
-    });
-
-    if (!activeProgram || !months.length) {
-        return (
-            <ThemedView style={styles.errorContainer}>
-                <ThemedText>Loading program data...</ThemedText>
-            </ThemedView>
-        );
-    }
-
+    // Effect hooks
     useEffect(() => {
-        // Hide header immediately on mount
         const hideHeader = () => {
             navigation.setOptions({
                 headerShown: false,
-                // Add any other header options you want to override
             });
         };
-
-        // Run immediately and after a small delay to ensure it takes effect
         hideHeader();
         const timer = setTimeout(hideHeader, 0);
-
         return () => {
             clearTimeout(timer);
-            // Optionally restore header on unmount if needed
             navigation.setOptions({ headerShown: true });
         };
     }, [navigation]);
@@ -82,24 +63,22 @@ const ActiveProgramProgressScreen = () => {
         }
     }, [months]);
 
-    if (error) {
-        return (
-            <ThemedView style={styles.errorContainer}>
-                <ThemedText>Error loading the program: {error}</ThemedText>
-            </ThemedView>
-        );
-    }
+    // Handlers and other functions
+    const scrollHandler = useAnimatedScrollHandler({
+        onScroll: (event) => {
+            scrollY.value = event.contentOffset.y;
+        },
+    });
 
     const navigateToProgramDay = (dayId: string) => {
         if (dayId) {
             navigation.navigate('programs/program-day', {
-                programId: activeProgram.ProgramId,
+                programId: activeProgram?.ProgramId,
                 dayId: dayId,
             });
         }
     };
 
-    const totalMonths = months.length;
     const handlePrevMonth = () => {
         if (currentMonthIndex > 0) {
             setCurrentMonthIndex(currentMonthIndex - 1);
@@ -107,7 +86,7 @@ const ActiveProgramProgressScreen = () => {
     };
 
     const handleNextMonth = () => {
-        if (currentMonthIndex < totalMonths - 1) {
+        if (currentMonthIndex < months.length - 1) {
             setCurrentMonthIndex(currentMonthIndex + 1);
         }
     };
@@ -128,12 +107,16 @@ const ActiveProgramProgressScreen = () => {
         router.push('/(tabs)/programs');
     };
 
+    const handleMenuPress = () => {
+        setIsBottomMenuVisible(true);
+    };
+
     const menuOptions = [
         {
             label: 'View Plan Details',
             icon: 'preview',
             onPress: () => {
-                navigation.navigate('programs/program-overview', { programId: activeProgram.ProgramId });
+                navigation.navigate('programs/program-overview', { programId: activeProgram?.ProgramId });
             },
         },
         {
@@ -152,10 +135,29 @@ const ActiveProgramProgressScreen = () => {
         },
     ];
 
-    const handleMenuPress = () => {
-        setIsBottomMenuVisible(true);
-    };
+    const totalMonths = months.length;
 
+    // Render loading/error states
+    if (!activeProgram || !months.length) {
+        if (!userProgramProgress?.UserId) {
+            return <View></View>;
+        }
+        return (
+            <ThemedView style={styles.errorContainer}>
+                <ThemedText>Loading program data...</ThemedText>
+            </ThemedView>
+        );
+    }
+
+    if (error) {
+        return (
+            <ThemedView style={styles.errorContainer}>
+                <ThemedText>Error loading the program: {error}</ThemedText>
+            </ThemedView>
+        );
+    }
+
+    // Main render
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.backgroundSecondary }]}>
             <AnimatedHeader
@@ -230,6 +232,7 @@ const ActiveProgramProgressScreen = () => {
                     />
                 </View>
             </Animated.ScrollView>
+
             <BottomMenuModal isVisible={isBottomMenuVisible} onClose={() => setIsBottomMenuVisible(false)} options={menuOptions} />
             <ResetProgramModal
                 visible={isResetProgramModalVisible}
@@ -245,7 +248,7 @@ const ActiveProgramProgressScreen = () => {
                 duration={1300}
             />
             <EndProgramModal
-                programId={activeProgram?.ProgramId || ''}
+                programId={activeProgram?.ProgramId}
                 visible={isEndProgramModalVisible}
                 onClose={() => setIsEndProgramModalVisible(false)}
                 onConfirm={handleEndProgramConfirm}

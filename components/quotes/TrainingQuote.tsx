@@ -43,13 +43,13 @@ export const TrainingQuote: React.FC<TrainingQuoteProps> = ({ quote, isLastDay }
 
 const styles = StyleSheet.create({
     quoteContainer: {
-        marginTop: Spaces.LG,
+        marginTop: Spaces.MD,
         paddingTop: Spaces.MD,
         paddingBottom: Spaces.MD,
         paddingHorizontal: Spaces.XL,
         marginHorizontal: Spaces.LG,
         borderRadius: Spaces.MD,
-        marginBottom: Spaces.LG,
+        marginBottom: Spaces.MD,
     },
     quoteText: {
         textAlign: 'center',
