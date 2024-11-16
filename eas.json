@@ -5,6 +5,7 @@
     },
     "build": {
         "development": {
+            "autoIncrement": true,
             "developmentClient": false,
             "distribution": "internal",
             "channel": "development",
