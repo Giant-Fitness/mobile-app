@@ -13,7 +13,8 @@
                 "APP_ENV": "development"
             },
             "ios": {
-                "resourceClass": "medium"
+                "resourceClass": "medium",
+                "buildConfiguration": "Release"
             },
             "android": {
                 "resourceClass": "medium",
@@ -28,7 +29,8 @@
                 "APP_ENV": "feature"
             },
             "ios": {
-                "resourceClass": "medium"
+                "resourceClass": "medium",
+                "buildConfiguration": "Release"
             },
             "android": {
                 "resourceClass": "medium",
@@ -43,7 +45,8 @@
                 "APP_ENV": "staging"
             },
             "ios": {
-                "resourceClass": "medium"
+                "resourceClass": "medium",
+                "buildConfiguration": "Release"
             },
             "android": {
                 "resourceClass": "medium",
@@ -58,7 +61,8 @@
                 "APP_ENV": "release"
             },
             "ios": {
-                "resourceClass": "medium"
+                "resourceClass": "medium",
+                "buildConfiguration": "Release"
             },
             "android": {
                 "resourceClass": "medium",
@@ -73,7 +77,8 @@
                 "APP_ENV": "production"
             },
             "ios": {
-                "resourceClass": "medium"
+                "resourceClass": "medium",
+                "buildConfiguration": "Release"
             },
             "android": {
                 "resourceClass": "medium",
