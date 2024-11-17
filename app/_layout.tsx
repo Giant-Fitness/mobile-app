@@ -116,11 +116,11 @@ export default function RootLayout() {
                         headerShown: false,
                         gestureEnabled: false,
                         navigationBarHidden: true,
-                        animation: 'slide_from_right',
+                        animation: 'default',
                         presentation: 'card',
                     }}
                 >
-                    <Stack.Screen name='(app)' options={{ headerShown: false, gestureEnabled: false }} />
+                    <Stack.Screen name='(app)' options={{ headerShown: false, gestureEnabled: false, animation: 'fade' }} />
                     <Stack.Screen name='(auth)' options={{ headerShown: false, gestureEnabled: false }} />
                     <Stack.Screen
                         name='index'

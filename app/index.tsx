@@ -8,6 +8,7 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/store/store';
 import { getUserAsync } from '@/store/user/thunks';
 import { configureAmplify } from '@/config/amplify';
+import { BasicSplash } from '@/components/base/BasicSplash';
 
 export default function Index() {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -72,9 +73,9 @@ export default function Index() {
     }
 
     if (isAuthenticated === null || userHasName === null) {
-        return null; // Loading state
+        return <BasicSplash showLoadingText={false} />;
     }
 
     // Return null as navigation will be handled by the effect
-    return null;
+    return <BasicSplash showLoadingText={false} />;
 }

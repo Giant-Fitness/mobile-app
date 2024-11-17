@@ -9,7 +9,7 @@ export default function AppLayout() {
         <Stack
             screenOptions={{
                 headerShown: false,
-                animation: 'slide_from_right',
+                animation: 'default',
                 gestureEnabled: true,
             }}
         >
@@ -17,7 +17,7 @@ export default function AppLayout() {
                 name='(tabs)'
                 options={{
                     headerShown: false,
-                    animation: 'none',
+                    animation: 'fade',
                     gestureEnabled: false,
                 }}
             />
@@ -32,13 +32,14 @@ export default function AppLayout() {
                 options={{
                     gestureEnabled: false,
                     animation: 'none',
+                    presentation: 'transparentModal',
                 }}
             />
             <Stack.Screen
                 name='programs'
                 options={{
                     gestureEnabled: true,
-                    animation: 'none',
+                    animation: 'default',
                 }}
             />
         </Stack>

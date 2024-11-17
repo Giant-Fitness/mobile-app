@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { SafeAreaView, Text, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { AppDispatch, RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { router } from 'expo-router';
@@ -18,6 +17,7 @@ import {
 } from '@/store/user/thunks';
 import { getAllWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
+import { BasicSplash } from '@/components/base/BasicSplash';
 
 const Initialization: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -98,7 +98,7 @@ const Initialization: React.FC = () => {
     }, [dataLoaded, showSplash, userError, programError, workoutError]);
 
     if (showSplash) {
-        return <DumbbellSplash isDataLoaded={false} />;
+        return <BasicSplash isDataLoaded={dataLoaded === REQUEST_STATE.FULFILLED} showLoadingText={false} />;
     }
 
     if (userError || programError || workoutError) {
