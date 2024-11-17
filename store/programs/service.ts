@@ -1,73 +1,60 @@
 // store/programs/service.ts
 
 import { Program, ProgramDay } from '@/types';
-import axios from 'axios';
-
-const API_BASE_URL = 'https://r5oibllip9.execute-api.ap-south-1.amazonaws.com/prod';
+import { authApiClient } from '@/utils/api/apiConfig';
+import { handleApiError } from '@/utils/api/errorUtils';
 
 const getAllPrograms = async (): Promise<Program[]> => {
     console.log('service: getAllPrograms');
     try {
-        const response = await axios.get(`${API_BASE_URL}/programs`);
-        const parsedBody = JSON.parse(response.data.body);
-        return parsedBody.programs || [];
+        const { data } = await authApiClient.get('/programs');
+        return data.programs || [];
     } catch (error) {
-        console.error('Error fetching all programs:', error);
-        throw error;
+        throw handleApiError(error, 'GetAllPrograms');
     }
 };
 
 const getProgram = async (programId: string): Promise<Program | undefined> => {
     console.log('service: getProgram');
     try {
-        const response = await axios.get(`${API_BASE_URL}/programs/${programId}`);
-        const parsedBody = JSON.parse(response.data.body);
-        return parsedBody.program;
+        const { data } = await authApiClient.get(`/programs/${programId}`);
+        return data.program;
     } catch (error) {
-        console.error(`Error fetching program ${programId}:`, error);
-        throw error;
+        throw handleApiError(error, 'GetProgram');
     }
 };
 
 const getProgramDay = async (programId: string, dayId: string): Promise<ProgramDay | undefined> => {
     console.log('service: getProgramDay');
     try {
-        const response = await axios.get(`${API_BASE_URL}/programs/${programId}/days/${dayId}`);
-        const parsedBody = JSON.parse(response.data.body);
-        return parsedBody.programDay;
+        const { data } = await authApiClient.get(`/programs/${programId}/days/${dayId}`);
+        return data.programDay;
     } catch (error) {
-        console.error(`Error fetching programDay ${programId} ${dayId}:`, error);
-        throw error;
+        throw handleApiError(error, 'GetProgramDay');
     }
 };
 
 const getProgramDaysAll = async (programId: string): Promise<ProgramDay[]> => {
     console.log('service: getProgramDaysAll');
     try {
-        const response = await axios.get(`${API_BASE_URL}/programs/${programId}/days`);
-        const parsedBody = JSON.parse(response.data.body);
-        return parsedBody.programDays || [];
+        const { data } = await authApiClient.get(`/programs/${programId}/days`);
+        return data.programDays || [];
     } catch (error) {
-        console.log(error);
-        console.error(`Error fetching programDays ${programId}:`, error);
-        throw error;
+        throw handleApiError(error, 'GetProgramDaysAll');
     }
 };
 
 const getProgramDaysFiltered = async (programId: string, dayIds: string[]): Promise<ProgramDay[]> => {
     console.log('service: getProgramDaysFiltered');
     try {
-        const dayIdsString = dayIds.join(',');
-        const response = await axios.get(`${API_BASE_URL}/programs/${programId}/days/batch`, {
+        const { data } = await authApiClient.get(`/programs/${programId}/days/batch`, {
             params: {
-                dayIds: dayIdsString,
+                dayIds: dayIds.join(','),
             },
         });
-        const parsedBody = JSON.parse(response.data.body);
-        return parsedBody.programDays || [];
+        return data.programDays || [];
     } catch (error) {
-        console.error('Error fetching multiple program days:', error);
-        throw error;
+        throw handleApiError(error, 'GetProgramDaysFiltered');
     }
 };
 

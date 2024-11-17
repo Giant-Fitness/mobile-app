@@ -116,7 +116,7 @@ export const useProgramData = (
 
     const activeProgramNextDayIds = useMemo(() => {
         if (!specificDayId && userProgramProgress?.CurrentDay && activeProgram?.Days) {
-            return getNextDayIds(userProgramProgress.CurrentDay, activeProgram.Days, 3);
+            return getNextDayIds(userProgramProgress.CurrentDay.toString(), activeProgram.Days, 3);
         }
         return null;
     }, [specificDayId, userProgramProgress, activeProgram]);
@@ -298,7 +298,7 @@ export const useProgramData = (
     ]);
 
     // Additional computed values
-    const currentDayNumber = specificDayId ? parseInt(specificDayId, 10) : parseInt(userProgramProgress?.CurrentDay || '0', 10);
+    const currentDayNumber = specificDayId ? parseInt(specificDayId, 10) : userProgramProgress?.CurrentDay;
 
     const dayOfWeek = userProgramProgress?.CurrentDay ? getDayOfWeek(currentDayNumber) : null;
 
@@ -308,7 +308,7 @@ export const useProgramData = (
 
     const isEnrolled = !!userProgramProgress?.ProgramId && userProgramProgress.ProgramId === specificProgramId;
 
-    const isDayCompleted = userProgramProgress?.CompletedDays?.includes(specificDayId) || false;
+    const isDayCompleted = userProgramProgress?.CompletedDays?.includes(parseInt(specificDayId)) || false;
 
     const handleCompleteDay = async () => {
         if (specificDayId) {
