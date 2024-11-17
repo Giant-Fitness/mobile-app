@@ -27,7 +27,7 @@ export const EndProgramModal: React.FC<EndProgramModalProps> = ({ visible, onClo
     const handleConfirm = () => {
         onConfirm();
         try {
-            router.push({
+            router.replace({
                 pathname: '/(app)/programs/program-abandon-feedback',
                 params: { programId },
             });

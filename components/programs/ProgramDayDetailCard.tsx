@@ -23,7 +23,7 @@ export const ProgramDayDetailCard: React.FC<ProgramDayDetailCardProps> = ({ day 
     const themeColors = Colors[colorScheme];
 
     const navigateToProgramDay = () => {
-        router.replace({
+        router.push({
             pathname: '/(app)/programs/program-day',
             params: {
                 programId: day.ProgramId,
