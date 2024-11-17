@@ -1,10 +1,6 @@
 // utils/api/apiConfig.ts
 
-import axios, { 
-    AxiosError, 
-    AxiosInstance, 
-    AxiosResponse 
-} from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import { handleApiError } from './errorUtils';
 import { authService } from '@/utils/auth';
 
@@ -68,10 +64,7 @@ const addRetryInterceptor = (client: AxiosInstance) => {
             config.retryCount = config.retryCount ?? 0;
 
             const shouldRetry = (error: AxiosError): boolean => {
-                return (
-                    !error.response ||
-                    (error.response.status >= 500 && error.response.status <= 599)
-                );
+                return !error.response || (error.response.status >= 500 && error.response.status <= 599);
             };
 
             if (config.retryCount < API_CONFIG.RETRY_ATTEMPTS && shouldRetry(error)) {
@@ -80,20 +73,16 @@ const addRetryInterceptor = (client: AxiosInstance) => {
                 const delay = config.retryCount * API_CONFIG.RETRY_DELAY;
                 await new Promise((resolve) => setTimeout(resolve, delay));
 
-                console.log(
-                    `Retrying request (${config.retryCount}/${API_CONFIG.RETRY_ATTEMPTS})`
-                );
+                console.log(`Retrying request (${config.retryCount}/${API_CONFIG.RETRY_ATTEMPTS})`);
                 return client(config);
             }
 
             if (config.retryCount >= API_CONFIG.RETRY_ATTEMPTS) {
-                return Promise.reject(
-                    new RetryError(error, API_CONFIG.RETRY_ATTEMPTS)
-                );
+                return Promise.reject(new RetryError(error, API_CONFIG.RETRY_ATTEMPTS));
             }
 
             return Promise.reject(error);
-        }
+        },
     );
 };
 

@@ -2,17 +2,62 @@
 
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import 'react-native-reanimated';
 import React from 'react';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Provider } from 'react-redux';
+import { Provider, useDispatch } from 'react-redux';
 import { store } from '@/store/store';
+import { AppState } from 'react-native';
+import { resetStore } from '@/store/actions';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+function AppStateHandler() {
+    const dispatch = useDispatch();
+    const appStateRef = useRef(AppState.currentState);
+    const lastActiveTimestamp = useRef(Date.now());
+
+    useEffect(() => {
+        const INACTIVITY_TIMEOUT = 45 * 60 * 1000; // 45 minutes
+
+        // console.log('Setting up app state listener. Timeout:', INACTIVITY_TIMEOUT / 1000, 'seconds');
+
+        const subscription = AppState.addEventListener('change', (nextAppState) => {
+            // console.log('App state changed:', {
+            //     from: appStateRef.current,
+            //     to: nextAppState,
+            // });
+
+            if (appStateRef.current.match(/inactive|background/) && nextAppState === 'active') {
+                const timeAway = Date.now() - lastActiveTimestamp.current;
+                // console.log('Time away:', Math.round(timeAway / 1000), 'seconds');
+
+                if (timeAway > INACTIVITY_TIMEOUT) {
+                    // console.log('Timeout exceeded, clearing store and refreshing app...');
+                    dispatch(resetStore());
+                    router.replace('/');
+                } else {
+                    // console.log('Within timeout, continuing normally');
+                }
+            }
+
+            if (nextAppState.match(/inactive|background/)) {
+                lastActiveTimestamp.current = Date.now();
+                // console.log('App backgrounded at:', new Date().toLocaleTimeString());
+            }
+
+            appStateRef.current = nextAppState;
+        });
+
+        return () => subscription.remove();
+    }, [dispatch]);
+
+    return null;
+}
 
 export default function RootLayout() {
     const colorScheme = useColorScheme();
@@ -111,6 +156,7 @@ export default function RootLayout() {
     return (
         <Provider store={store}>
             <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                <AppStateHandler />
                 <Stack
                     screenOptions={{
                         headerShown: false,

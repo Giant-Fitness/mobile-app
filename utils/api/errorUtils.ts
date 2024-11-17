@@ -3,12 +3,7 @@
 import axios from 'axios';
 
 export class ApiError extends Error {
-    constructor(
-        message: string,
-        public statusCode?: number,
-        public code?: string,
-        public originalError?: any
-    ) {
+    constructor(message: string, public statusCode?: number, public code?: string, public originalError?: any) {
         super(message);
         this.name = 'ApiError';
     }
@@ -40,64 +35,29 @@ export const handleApiError = (error: unknown, context?: string): never => {
         let apiError: ApiError;
 
         if (error.code === 'ECONNABORTED') {
-            apiError = new ApiError(
-                `${prefix}Request timed out after ${error.config?.timeout}ms`,
-                statusCode,
-                ErrorCode.TIMEOUT,
-                error
-            );
+            apiError = new ApiError(`${prefix}Request timed out after ${error.config?.timeout}ms`, statusCode, ErrorCode.TIMEOUT, error);
         } else if (!error.response) {
-            apiError = new ApiError(
-                `${prefix}Network error occurred`,
-                undefined,
-                ErrorCode.NETWORK,
-                error
-            );
+            apiError = new ApiError(`${prefix}Network error occurred`, undefined, ErrorCode.NETWORK, error);
         } else {
             switch (statusCode) {
                 case 401:
                 case 403:
-                    apiError = new ApiError(
-                        `${prefix}Authentication failed`,
-                        statusCode,
-                        ErrorCode.AUTH,
-                        error
-                    );
+                    apiError = new ApiError(`${prefix}Authentication failed`, statusCode, ErrorCode.AUTH, error);
                     break;
                 case 404:
-                    apiError = new ApiError(
-                        `${prefix}Resource not found`,
-                        statusCode,
-                        ErrorCode.NOT_FOUND,
-                        error
-                    );
+                    apiError = new ApiError(`${prefix}Resource not found`, statusCode, ErrorCode.NOT_FOUND, error);
                     break;
                 case 422:
-                    apiError = new ApiError(
-                        `${prefix}Validation error`,
-                        statusCode,
-                        ErrorCode.VALIDATION,
-                        error
-                    );
+                    apiError = new ApiError(`${prefix}Validation error`, statusCode, ErrorCode.VALIDATION, error);
                     break;
                 case 500:
                 case 502:
                 case 503:
                 case 504:
-                    apiError = new ApiError(
-                        `${prefix}Server error occurred`,
-                        statusCode,
-                        ErrorCode.SERVER,
-                        error
-                    );
+                    apiError = new ApiError(`${prefix}Server error occurred`, statusCode, ErrorCode.SERVER, error);
                     break;
                 default:
-                    apiError = new ApiError(
-                        `${prefix}Request failed`,
-                        statusCode,
-                        ErrorCode.UNKNOWN,
-                        error
-                    );
+                    apiError = new ApiError(`${prefix}Request failed`, statusCode, ErrorCode.UNKNOWN, error);
             }
         }
 
@@ -112,13 +72,8 @@ export const handleApiError = (error: unknown, context?: string): never => {
     }
 
     // Handle non-Axios errors
-    const apiError = new ApiError(
-        `${prefix}An unexpected error occurred`,
-        undefined,
-        ErrorCode.UNKNOWN,
-        error
-    );
-    
+    const apiError = new ApiError(`${prefix}An unexpected error occurred`, undefined, ErrorCode.UNKNOWN, error);
+
     console.error(apiError.message, { error });
     throw apiError;
 };
