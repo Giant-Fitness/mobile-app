@@ -1,60 +1,50 @@
 // store/workouts/service.ts
 
 import { Workout, WorkoutRecommendations } from '@/types';
-import axios from 'axios';
-
-const API_BASE_URL = 'https://r5oibllip9.execute-api.ap-south-1.amazonaws.com/prod';
+import { authApiClient } from '@/utils/api/apiConfig';
+import { handleApiError } from '@/utils/api/errorUtils';
 
 const getAllWorkouts = async (): Promise<Workout[]> => {
     console.log('service: getAllWorkouts');
     try {
-        const response = await axios.get(`${API_BASE_URL}/workouts`);
-        const parsedBody = JSON.parse(response.data.body);
-        return parsedBody.workouts || [];
+        const { data } = await authApiClient.get('/workouts');
+        return data.workouts || [];
     } catch (error) {
-        console.error('Error fetching all workouts:', error);
-        throw error;
+        throw handleApiError(error, 'GetAllWorkouts');
     }
 };
 
 const getWorkout = async (workoutId: string): Promise<Workout | undefined> => {
     console.log('service: getWorkout');
     try {
-        const response = await axios.get(`${API_BASE_URL}/workouts/${workoutId}`);
-        const parsedBody = JSON.parse(response.data.body);
-        return parsedBody.workout;
+        const { data } = await authApiClient.get(`/workouts/${workoutId}`);
+        return data.workout;
     } catch (error) {
-        console.error(`Error fetching workout ${workoutId}:`, error);
-        throw error;
+        throw handleApiError(error, 'GetWorkout');
     }
 };
 
 const getWorkouts = async (workoutIds: string[]): Promise<Workout[]> => {
     console.log('service: getWorkouts');
     try {
-        const workoutIdsString = workoutIds.join(',');
-        const response = await axios.get(`${API_BASE_URL}/workouts/batch`, {
+        const { data } = await authApiClient.get('/workouts/batch', {
             params: {
-                workoutIds: workoutIdsString,
+                workoutIds: workoutIds.join(','),
             },
         });
-        const parsedBody = JSON.parse(response.data.body);
-        return parsedBody.workouts || [];
+        return data.workouts || [];
     } catch (error) {
-        console.error('Error fetching multiple workouts:', error);
-        throw error;
+        throw handleApiError(error, 'GetWorkouts');
     }
 };
 
 const getSpotlightWorkouts = async (): Promise<WorkoutRecommendations> => {
     console.log('service: getSpotlightWorkouts');
     try {
-        const response = await axios.get(`${API_BASE_URL}/recommendations/workouts/spotlight`);
-        const parsedBody = JSON.parse(response.data.body);
-        return parsedBody;
+        const { data } = await authApiClient.get('/recommendations/workouts/spotlight');
+        return data;
     } catch (error) {
-        console.error('Error fetching spotlight workouts:', error);
-        throw error;
+        throw handleApiError(error, 'GetSpotlightWorkouts');
     }
 };
 

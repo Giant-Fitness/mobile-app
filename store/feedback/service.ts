@@ -1,46 +1,46 @@
-// store/user/service.ts
+// store/feedback/service.ts
 
-import axios from 'axios';
+import { authApiClient } from '@/utils/api/apiConfig';
+import { handleApiError } from '@/utils/api/errorUtils';
 
-const API_BASE_URL = 'https://r5oibllip9.execute-api.ap-south-1.amazonaws.com/prod';
+// Define proper types for feedback payload
+interface ProgramFeedback {
+    TerminationReason?: string;
+    reasonDetails?: string;
+    DifficultyRating?: number;
+    Improvements?: string[];
+    additionalFeedback?: string;
+    WouldRecommend?: boolean;
+    AchievedGoals?: boolean;
+    OverallRating: number;
+    FavoriteAspects?: string[];
+}
 
-const sendProgramFeedback = async (userId: string, programId: string, feedback: any, feedbackType: string): Promise<void> => {
+interface ProgramFeedbackPayload extends ProgramFeedback {
+    UserId: string;
+    ProgramId: string;
+    FeedbackType: string;
+}
+
+const sendProgramFeedback = async (userId: string, programId: string, feedback: ProgramFeedback, feedbackType: string): Promise<void> => {
     console.log('service: sendProgramFeedback');
     try {
-        const payload = {
+        const payload: ProgramFeedbackPayload = {
             UserId: userId,
             ProgramId: programId,
-            TerminationReason: feedback.TerminationReason,
-            ReasonDetails: feedback.reasonDetails,
-            DifficultyRating: feedback.DifficultyRating,
-            Improvements: feedback.Improvements,
-            AdditionalFeedback: feedback.additionalFeedback,
-            WouldRecommend: feedback.WouldRecommend,
-            AchievedGoals: feedback.AchievedGoals,
-            OverallRating: feedback.OverallRating,
-            FavoriteAspects: feedback.FavoriteAspects,
             FeedbackType: feedbackType,
+            ...feedback,
         };
-        await axios.post(`${API_BASE_URL}/feedback/programs`, payload, {
-            timeout: 10000, // 10 seconds timeout
-            timeoutErrorMessage: 'Request timed out after 10 seconds',
-        });
-        return;
+
+        await authApiClient.post('/feedback/programs', payload);
     } catch (error) {
-        if (axios.isAxiosError(error)) {
-            if (error.code === 'ECONNABORTED') {
-                console.error('Request timed out:', error.message);
-            } else {
-                console.error('Axios error:', error.message);
-                console.error('Response:', error.response ? JSON.stringify(error.response.data, null, 2) : 'No response');
-            }
-        } else {
-            console.error('Unknown error:', error);
-        }
-        throw error;
+        throw handleApiError(error, 'SendProgramFeedback');
     }
 };
 
 export default {
     sendProgramFeedback,
 };
+
+// Re-export types for use in components
+export type { ProgramFeedback, ProgramFeedbackPayload };
