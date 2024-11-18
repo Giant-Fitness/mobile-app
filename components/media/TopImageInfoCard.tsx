@@ -1,7 +1,7 @@
 // components/media/TopImageInfoCard.tsx
 
-import React from 'react';
-import { StyleSheet, StyleProp, ViewStyle, TextStyle, ImageSourcePropType, ImageStyle, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, StyleProp, ViewStyle, TextStyle, ImageSourcePropType, ImageStyle, TouchableOpacity, View } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -10,8 +10,12 @@ import { Image } from 'expo-image';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { ThemedTextProps } from '@/components/base/ThemedText';
+import { LinearGradient } from 'expo-linear-gradient';
+import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
 
-type TopImageInfoCardProps = {
+const ShimmerPlaceholder = ShimmerPlaceHolder as unknown as React.ComponentType<any>;
+
+interface TopImageInfoCardProps {
     image: ImageSourcePropType;
     title: string;
     subtitle?: string;
@@ -23,13 +27,12 @@ type TopImageInfoCardProps = {
     contentContainerStyle?: StyleProp<ViewStyle>;
     titleStyle?: StyleProp<TextStyle>;
     subtitleStyle?: StyleProp<TextStyle>;
-    placeholder?: any;
     titleFirst?: boolean;
     onPress?: () => void;
-    useImageContainer?: boolean; // New prop for optional image container
-};
+    useImageContainer?: boolean;
+}
 
-export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
+export const TopImageInfoCard = ({
     image,
     title,
     subtitle,
@@ -41,27 +44,79 @@ export const TopImageInfoCard: React.FC<TopImageInfoCardProps> = ({
     subtitleStyle,
     titleType = 'title',
     subtitleType = 'body',
-    placeholder = '@/assets/images/logo.png',
     titleFirst = false,
     onPress,
-    useImageContainer = false, // Default to false for backward compatibility
-}) => {
+    useImageContainer = false,
+}: TopImageInfoCardProps) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const [isLoading, setIsLoading] = useState(true);
+    const [initialLoad, setInitialLoad] = useState(true);
+
+    useEffect(() => {
+        const checkCache = async () => {
+            try {
+                if (typeof image === 'string') {
+                    const isCached = await Image.getCachePathAsync(image);
+                    if (isCached) {
+                        setIsLoading(false);
+                        setInitialLoad(false);
+                    }
+                } else if (image && typeof image === 'object' && 'uri' in image && image.uri) {
+                    const isCached = await Image.getCachePathAsync(image.uri);
+                    if (isCached) {
+                        setIsLoading(false);
+                        setInitialLoad(false);
+                    }
+                }
+            } catch (error) {
+                console.log('Cache check error:', error);
+            }
+        };
+
+        checkCache();
+    }, [image]);
 
     const renderImage = () => {
+        const imageComponent = (
+            <View style={[styles.imageWrapper, imageStyle]}>
+                <Image
+                    source={image}
+                    style={[styles.image, { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }, imageStyle]}
+                    contentFit='cover'
+                    transition={300}
+                    onLoadStart={() => {
+                        if (initialLoad) {
+                            setIsLoading(true);
+                        }
+                    }}
+                    onLoad={() => {
+                        setIsLoading(false);
+                        setInitialLoad(false);
+                    }}
+                    contentPosition='center'
+                    cachePolicy='memory-disk'
+                />
+                {initialLoad && (
+                    <ShimmerPlaceholder
+                        LinearGradient={LinearGradient}
+                        style={[styles.shimmer, imageStyle]}
+                        visible={!isLoading}
+                        shimmerColors={colorScheme === 'dark' ? ['#1A1A1A', '#2A2A2A', '#1A1A1A'] : ['#D0D0D0', '#E0E0E0', '#D0D0D0']}
+                    />
+                )}
+            </View>
+        );
+
         if (useImageContainer) {
-            return (
-                <ThemedView style={styles.imageContainer}>
-                    <Image source={image} style={[styles.image, imageStyle]} placeholder={placeholder} contentFit='contain' />
-                </ThemedView>
-            );
+            return <ThemedView style={styles.imageContainer}>{imageComponent}</ThemedView>;
         }
-        return <Image source={image} style={[styles.image, imageStyle]} placeholder={placeholder} />;
+
+        return imageComponent;
     };
 
     return (
-        <TouchableOpacity onPress={onPress} style={[styles.container, containerStyle]} activeOpacity={1}>
+        <TouchableOpacity onPress={onPress} style={[styles.container, containerStyle]} activeOpacity={onPress ? 0.7 : 1}>
             {renderImage()}
             <ThemedView style={[styles.contentContainer, { backgroundColor: themeColors.containerHighlight }, contentContainerStyle]}>
                 {titleFirst ? (
@@ -97,12 +152,25 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: 'transparent',
         overflow: 'hidden',
+        position: 'relative',
     },
     imageContainer: {
         width: '100%',
         backgroundColor: 'transparent',
+        position: 'relative',
+    },
+    imageWrapper: {
+        position: 'relative',
+        width: '100%',
+        height: Sizes.imageLGHeight,
     },
     image: {
+        width: '100%',
+        height: Sizes.imageLGHeight,
+        borderTopRightRadius: Spaces.SM,
+        borderTopLeftRadius: Spaces.SM,
+    },
+    shimmer: {
         width: '100%',
         height: Sizes.imageLGHeight,
         borderTopRightRadius: Spaces.SM,

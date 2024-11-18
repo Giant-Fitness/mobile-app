@@ -337,7 +337,8 @@ const styles = StyleSheet.create({
     tipContainer: {
         flexDirection: 'row',
         alignItems: 'flex-start',
-        paddingHorizontal: Spaces.SM,
+        paddingLeft: Spaces.SM,
+        paddingRight: Spaces.LG,
         backgroundColor: 'transparent',
     },
     loadingContainer: {

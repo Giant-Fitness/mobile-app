@@ -1,9 +1,9 @@
 // components/programs/ActiveProgramDayCompressedCard.tsx
 
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import React from 'react';
-import { StyleSheet, View, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { moderateScale } from '@/utils/scaling';
@@ -14,6 +14,11 @@ import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { ImageTextOverlay } from '../media/ImageTextOverlay';
 import { router } from 'expo-router';
+import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
+import { LinearGradient } from 'expo-linear-gradient';
+
+// Cast ShimmerPlaceHolder to the correct type
+const ShimmerPlaceholder = ShimmerPlaceHolder as unknown as React.ComponentType<any>;
 
 type ActiveProgramDayCompressedCardProps = {};
 
@@ -22,7 +27,6 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
     const themeColors = Colors[colorScheme];
 
     const { userProgramProgress } = useSelector((state: RootState) => state.user);
-
     const { programDays, programDaysState } = useSelector((state: RootState) => state.programs);
 
     const programId = userProgramProgress?.ProgramId;
@@ -31,11 +35,25 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
     const currentDay = programId && dayId ? programDays[programId]?.[dayId] : null;
     const currentDayState = programId && dayId ? programDaysState[programId]?.[dayId] : REQUEST_STATE.IDLE;
 
+    // Loading and error states are handled below
     if (currentDayState === REQUEST_STATE.PENDING || !currentDay) {
-        // Render a loading indicator
+        // Render shimmer effect
         return (
-            <View style={styles.cardContainer}>
-                <ActivityIndicator size='large' color={themeColors.text} />
+            <View style={[styles.shadowContainer, { backgroundColor: themeColors.background }]}>
+                <ShimmerPlaceholder
+                    LinearGradient={LinearGradient}
+                    style={styles.shimmerContainer}
+                    shimmerColors={colorScheme === 'dark' ? ['#1A1A1A', '#2A2A2A', '#1A1A1A'] : ['#D0D0D0', '#E0E0E0', '#D0D0D0']}
+                    autoRun={true}
+                >
+                    <View style={styles.shimmerContent}>
+                        <View style={styles.shimmerImage} />
+                        <View style={styles.shimmerTextContainer}>
+                            <View style={styles.shimmerTitle} />
+                            <View style={styles.shimmerSubtitle} />
+                        </View>
+                    </View>
+                </ShimmerPlaceholder>
             </View>
         );
     }
@@ -43,11 +61,12 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
     if (currentDayState === REQUEST_STATE.REJECTED || !currentDay) {
         // Render an error message or placeholder
         return (
-            <ThemedView style={styles.cardContainer}>
+            <ThemedView style={[styles.cardContainer, { backgroundColor: themeColors.background }]}>
                 <ThemedText>Error loading the current day.</ThemedText>
             </ThemedView>
         );
     }
+
     const navigateToProgramDay = () => {
         if (programId && dayId) {
             router.push({
@@ -95,5 +114,37 @@ const styles = StyleSheet.create({
         height: Sizes.imageLGHeight,
         overflow: 'hidden',
         borderRadius: Spaces.SM,
+    },
+    shimmerContainer: {
+        width: '100%',
+        height: Sizes.imageLGHeight,
+        borderRadius: Spaces.SM,
+        overflow: 'hidden',
+    },
+    shimmerContent: {
+        flex: 1,
+        padding: Spaces.MD,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    shimmerImage: {
+        width: '100%',
+        height: '70%',
+        borderRadius: Spaces.SM,
+        marginBottom: Spaces.SM,
+    },
+    shimmerTextContainer: {
+        width: '80%',
+    },
+    shimmerTitle: {
+        width: '60%',
+        height: 20,
+        borderRadius: 4,
+        marginBottom: Spaces.XXS,
+    },
+    shimmerSubtitle: {
+        width: '40%',
+        height: 14,
+        borderRadius: 4,
     },
 });

@@ -120,7 +120,7 @@ const WhyLMCScreen = () => {
     );
 
     return (
-        <ThemedView style={{ paddingTop: Spaces.XXL, flex: 1, backgroundColor: themeColors.background }}>
+        <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
             <AnimatedHeader
                 disableBackButtonAnimation={true}
                 scrollY={scrollY}
@@ -146,7 +146,7 @@ const WhyLMCScreen = () => {
                         paddingBottom: 0,
                     }}
                     useImageContainer={true}
-                    imageStyle={{ height: Sizes.imageXLHeight }}
+                    imageStyle={{ height: Sizes.image3XLHeight }}
                     titleFirst={true}
                 />
 

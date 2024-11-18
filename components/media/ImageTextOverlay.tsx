@@ -1,6 +1,6 @@
 // components/media/ImageTextOverlay.tsx
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ThemedText, ThemedTextProps } from '@/components/base/ThemedText';
@@ -10,6 +10,9 @@ import { Colors } from '@/constants/Colors';
 import { Image, ImageContentFit } from 'expo-image';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
+import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
+
+const ShimmerPlaceholderComponent = ShimmerPlaceHolder as unknown as React.ComponentType<any>;
 
 type ImageTextOverlayProps = {
     image: any;
@@ -23,7 +26,6 @@ type ImageTextOverlayProps = {
     gradientColors?: string[];
     titleType?: ThemedTextProps['type'];
     subtitleType?: ThemedTextProps['type'];
-    placeholder?: any; // Placeholder image while loading
 };
 
 export const ImageTextOverlay: React.FC<ImageTextOverlayProps> = ({
@@ -38,15 +40,62 @@ export const ImageTextOverlay: React.FC<ImageTextOverlayProps> = ({
     containerStyle,
     textContainerStyle,
     gradientColors = ['transparent', 'rgba(0,0,0,0.8)'],
-    placeholder = '@/assets/images/logo.png',
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const [isLoading, setIsLoading] = useState(true);
+    const [initialLoad, setInitialLoad] = useState(true);
 
-    return (
-        <ThemedView style={[containerStyle]}>
+    useEffect(() => {
+        const checkCache = async () => {
+            try {
+                if (typeof image === 'string') {
+                    const isCached = await Image.getCachePathAsync(image);
+                    if (isCached) {
+                        setIsLoading(false);
+                        setInitialLoad(false);
+                    }
+                } else if (image && typeof image === 'object' && 'uri' in image && image.uri) {
+                    const isCached = await Image.getCachePathAsync(image.uri);
+                    if (isCached) {
+                        setIsLoading(false);
+                        setInitialLoad(false);
+                    }
+                }
+            } catch (error) {
+                console.log('Cache check error:', error);
+            }
+        };
+
+        checkCache();
+    }, [image]);
+
+    const renderImage = () => {
+        return (
             <ThemedView style={styles.imageWrapper}>
-                <Image source={image} style={styles.image} contentFit={imageContentFit} cachePolicy='memory-disk' placeholder={placeholder} />
+                <Image
+                    source={image}
+                    style={styles.image}
+                    contentFit={imageContentFit}
+                    cachePolicy='memory-disk'
+                    onLoadStart={() => {
+                        if (initialLoad) {
+                            setIsLoading(true);
+                        }
+                    }}
+                    onLoad={() => {
+                        setIsLoading(false);
+                        setInitialLoad(false);
+                    }}
+                />
+                {initialLoad && (
+                    <ShimmerPlaceholderComponent
+                        LinearGradient={LinearGradient}
+                        style={styles.shimmer}
+                        visible={!isLoading}
+                        shimmerColors={colorScheme === 'dark' ? ['#1A1A1A', '#2A2A2A', '#1A1A1A'] : ['#D0D0D0', '#E0E0E0', '#D0D0D0']}
+                    />
+                )}
                 <LinearGradient colors={gradientColors} style={styles.gradientOverlay} />
                 <ThemedView style={[styles.textContainer, textContainerStyle]}>
                     <ThemedText type={titleType} style={[styles.title, titleStyle, { color: themeColors.white }]}>
@@ -59,16 +108,30 @@ export const ImageTextOverlay: React.FC<ImageTextOverlayProps> = ({
                     )}
                 </ThemedView>
             </ThemedView>
-        </ThemedView>
-    );
+        );
+    };
+
+    return <ThemedView style={[styles.container, containerStyle]}>{renderImage()}</ThemedView>;
 };
 
 const styles = StyleSheet.create({
+    container: {
+        backgroundColor: 'transparent',
+        overflow: 'hidden',
+        position: 'relative',
+    },
     imageWrapper: {
         flex: 1,
         overflow: 'hidden',
+        width: '100%',
+        height: Sizes.imageLGHeight, // Ensure you have this size defined
     },
     image: {
+        width: '100%',
+        height: '100%',
+    },
+    shimmer: {
+        position: 'absolute',
         width: '100%',
         height: '100%',
     },

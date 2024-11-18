@@ -8,7 +8,11 @@ import { Icon } from '@/components/base/Icon';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
-import SkeletonPlaceholder from 'expo-skeleton-placeholder';
+import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
+import { LinearGradient } from 'expo-linear-gradient';
+
+// Cast ShimmerPlaceHolder to the correct type for TypeScript compatibility
+const ShimmerPlaceholder = ShimmerPlaceHolder as unknown as React.ComponentType<any>;
 
 type ThumbnailVideoPlayerProps = {
     videoUrl: string;
@@ -72,22 +76,22 @@ export const ThumbnailVideoPlayer: React.FC<ThumbnailVideoPlayerProps> = ({ vide
     return (
         <View style={styles.container}>
             <TouchableOpacity onPress={handlePlayPress} activeOpacity={0.9}>
-                {/* Image */}
+                {/* Thumbnail Image */}
                 <Animated.Image
                     source={{ uri: thumbnailUrl }}
                     style={[styles.thumbnail, { opacity: imageOpacity }]}
                     onLoadEnd={handleImageLoadEnd}
                     onError={handleImageError}
                 />
-                {/* Skeleton Placeholder Overlay */}
+
+                {/* Shimmer Placeholder Overlay */}
                 {isLoading && (
-                    <View style={styles.skeletonContainer}>
-                        <SkeletonPlaceholder highlightColor='#e1e9ee' backgroundColor='#f2f8fc'>
-                            <SkeletonPlaceholder.Item width='100%' height='100%' borderRadius={Spaces.XXS} />
-                        </SkeletonPlaceholder>
-                        {/* Optional: Add an ActivityIndicator for debugging */}
-                        {/* <ActivityIndicator size="small" color="#0000ff" style={styles.activityIndicator} /> */}
-                    </View>
+                    <ShimmerPlaceholder
+                        LinearGradient={LinearGradient}
+                        style={styles.shimmer}
+                        shimmerColors={colorScheme === 'dark' ? ['#1A1A1A', '#2A2A2A', '#1A1A1A'] : ['#D0D0D0', '#E0E0E0', '#D0D0D0']}
+                        autoRun={true}
+                    />
                 )}
 
                 {/* Play Button */}
@@ -96,7 +100,7 @@ export const ThumbnailVideoPlayer: React.FC<ThumbnailVideoPlayerProps> = ({ vide
                 </View>
             </TouchableOpacity>
 
-            {/* Modal for fade overlay */}
+            {/* Modal for Full Screen Video */}
             <Modal
                 visible={isModalVisible}
                 transparent={true}
@@ -112,14 +116,13 @@ export const ThumbnailVideoPlayer: React.FC<ThumbnailVideoPlayerProps> = ({ vide
                     ]}
                     pointerEvents='none' // Prevents the overlay from blocking touch events
                 />
+                <FullScreenVideoPlayer
+                    ref={videoPlayerRef}
+                    source={{ uri: videoUrl }}
+                    onPlaybackStatusUpdate={onPlaybackStatusUpdate}
+                    onDismiss={handleDismiss} // Pass the dismiss handler
+                />
             </Modal>
-
-            <FullScreenVideoPlayer
-                ref={videoPlayerRef}
-                source={{ uri: videoUrl }}
-                onPlaybackStatusUpdate={onPlaybackStatusUpdate}
-                onDismiss={handleDismiss} // Pass the dismiss handler
-            />
         </View>
     );
 };
@@ -136,16 +139,13 @@ const styles = StyleSheet.create({
         height: '100%',
         borderRadius: Spaces.XXS,
     },
-    skeletonContainer: {
+    shimmer: {
         position: 'absolute',
         top: 0,
         left: 0,
         width: '100%',
         height: '100%',
         borderRadius: Spaces.XXS,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'transparent', // Ensure background doesn't block the skeleton
     },
     playButtonContainer: {
         position: 'absolute',
@@ -163,14 +163,5 @@ const styles = StyleSheet.create({
     fadeOverlay: {
         ...StyleSheet.absoluteFillObject, // Fills the entire screen
         backgroundColor: 'black',
-    },
-    activityIndicator: {
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: [
-            { translateX: -10 }, // Half of ActivityIndicator width
-            { translateY: -10 }, // Half of ActivityIndicator height
-        ],
     },
 });
