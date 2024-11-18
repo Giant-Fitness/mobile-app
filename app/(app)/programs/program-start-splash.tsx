@@ -54,7 +54,7 @@ export default function ProgramStartSplashScreen() {
 
             // Set up navigation timer
             const timer = setTimeout(() => {
-                router.replace('/(app)/(tabs)/home');
+                router.replace('/(app)/(tabs)/programs');
             }, 3000);
 
             // Clean up function

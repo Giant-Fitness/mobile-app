@@ -25,6 +25,7 @@ export interface Program {
     Equipment: string[];
     Frequency: string;
     DesignedFor: string;
+    WhyChooseThisProgram: string;
 }
 
 export interface MuscleGroups {

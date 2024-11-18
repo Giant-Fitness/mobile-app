@@ -93,6 +93,12 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({ program, isActive, act
                                 </ThemedText>
                             </View>
                             <View style={styles.attributeItem}>
+                                <Icon name='calendar' size={Sizes.fontSizeDefault} color={textColor} />
+                                <ThemedText type='buttonSmall' style={[styles.attributeText, { color: textColor }]}>
+                                    {program.Frequency}
+                                </ThemedText>
+                            </View>
+                            <View style={styles.attributeItem}>
                                 <Icon name={getLevelIcon(program.Level)} color={textColor} />
                                 <ThemedText type='buttonSmall' style={[styles.attributeText, { color: textColor }]}>
                                     {program.Level}

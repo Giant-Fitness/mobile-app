@@ -89,7 +89,7 @@ const ProgramOverviewScreen = () => {
         );
     }
 
-    const { ProgramName, PhotoUrl, Weeks, Frequency, Goal, Level, DescriptionLong, Equipment, DesignedFor, CalendarOverview } = program;
+    const { ProgramName, PhotoUrl, Weeks, Frequency, Goal, Level, DescriptionLong, Equipment, DesignedFor, CalendarOverview, WhyChooseThisProgram } = program;
 
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.backgroundSecondary }]}>
@@ -130,7 +130,7 @@ const ProgramOverviewScreen = () => {
                                         </View>
                                     ))}
                                 </ThemedView>
-                                <ThemedText type='bodySmall' style={{ paddingBottom: Spaces.LG, paddingTop: Spaces.MD }}>
+                                <ThemedText type='body' style={{ paddingBottom: Spaces.LG, paddingTop: Spaces.MD, fontSize: 13 }}>
                                     {DescriptionLong}
                                 </ThemedText>
                             </ThemedView>
@@ -145,15 +145,25 @@ const ProgramOverviewScreen = () => {
                                 {Equipment.join(', ')}
                             </ThemedText>
 
+                            <View style={[styles.divider, { borderBottomColor: themeColors.systemBorderColor }]} />
+
                             <ThemedText type='button' style={{ paddingBottom: Spaces.XS }}>
                                 Designed For:
                             </ThemedText>
-                            <ThemedText type='body' style={{ marginBottom: Spaces.XL }}>
+                            <ThemedText type='body' style={{ marginBottom: Spaces.LG }}>
                                 {DesignedFor}
                             </ThemedText>
 
                             <View style={[styles.divider, { borderBottomColor: themeColors.systemBorderColor }]} />
 
+                            <ThemedText type='button' style={{ paddingBottom: Spaces.XS }}>
+                                Why Choose this Program:
+                            </ThemedText>
+                            <ThemedText type='body' style={{ marginBottom: Spaces.SM }}>
+                                {WhyChooseThisProgram}
+                            </ThemedText>
+                        </ThemedView>
+                        <ThemedView style={styles.descriptionContainer}>
                             {CalendarOverview.map((item, index) => (
                                 <ThemedView key={index} style={{ marginTop: Spaces.MD }}>
                                     <ThemedText type='button' style={{ paddingBottom: Spaces.XS }}>
