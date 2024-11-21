@@ -18,6 +18,7 @@ import {
 import { getAllWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { BasicSplash } from '@/components/base/BasicSplash';
+import { ThemedText } from '@/components/base/ThemedText';
 
 const Initialization: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -104,7 +105,7 @@ const Initialization: React.FC = () => {
     if (userError || programError || workoutError) {
         return (
             <SafeAreaView style={styles.container}>
-                <Text style={styles.errorText}>Error: {userError || programError || workoutError || 'An unexpected error occurred.'}</Text>
+                <ThemedText style={styles.errorText}>Error: {userError || programError || workoutError || 'An unexpected error occurred.'}</ThemedText>
             </SafeAreaView>
         );
     }

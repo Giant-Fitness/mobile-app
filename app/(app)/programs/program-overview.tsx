@@ -130,7 +130,7 @@ const ProgramOverviewScreen = () => {
                                         </View>
                                     ))}
                                 </ThemedView>
-                                <ThemedText type='body' style={{ paddingBottom: Spaces.LG, paddingTop: Spaces.MD, fontSize: 13 }}>
+                                <ThemedText type='body' style={{ paddingBottom: Spaces.LG, paddingTop: Spaces.MD }}>
                                     {DescriptionLong}
                                 </ThemedText>
                             </ThemedView>

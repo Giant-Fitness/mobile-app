@@ -131,6 +131,7 @@ export function ThemedText({ style, lightColor, darkColor, type = 'body', ...res
 
     return (
         <Text
+            allowFontScaling={false}
             style={[
                 styles.body, // Default style
                 styles[type] || {}, // Apply type-specific styles if any

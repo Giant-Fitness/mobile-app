@@ -156,9 +156,16 @@ const WhyLMCScreen = () => {
                             <View>
                                 <ThemedText type='link' style={[styles.descriptionText]}>
                                     We know starting a fitness journey can be overwhelming – there&apos;s a lot of
-                                    <Text style={styles.italicText}>&quot;What do I do?&quot;</Text> and
-                                    <Text style={styles.italicText}>&quot;How do I stay on track?&quot;</Text>
-                                    {'\n'}That&apos;s why we created LMC: to guide you every step of the way and give you everything you need to succeed.
+                                    <ThemedText type='link' style={[styles.descriptionText, styles.italicText]}>
+                                        {' '}
+                                        &quot;What do I do?&quot;
+                                    </ThemedText>{' '}
+                                    and
+                                    <ThemedText type='link' style={[styles.descriptionText, styles.italicText]}>
+                                        {' '}
+                                        &quot;How do I stay on track?&quot;
+                                    </ThemedText>
+                                    {'\n\n'}That&apos;s why we created LMC: to guide you every step of the way and give you everything you need to succeed.
                                 </ThemedText>
                                 <ThemedText
                                     type='link'

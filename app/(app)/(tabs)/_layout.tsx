@@ -18,6 +18,8 @@ export default function TabLayout() {
     return (
         <Tabs
             screenOptions={{
+                headerTitleAllowFontScaling: false,
+                tabBarAllowFontScaling: false,
                 tabBarActiveTintColor: themeColors.iconSelected,
                 tabBarStyle: Platform.select({
                     ios: {
@@ -35,8 +37,14 @@ export default function TabLayout() {
                     },
                 }),
                 lazy: true, // This helps with performance
+                tabBarItemStyle: {
+                    paddingVertical: Spaces.SM, // Add some vertical padding
+                    flexDirection: 'column', // Ensure vertical stacking
+                    alignItems: 'center',
+                    justifyContent: 'flex-start', // Start from top instead of space-between
+                },
                 tabBarLabelStyle: {
-                    marginBottom: Platform.OS === 'android' ? 10 : 0,
+                    marginTop: Spaces.XS,
                 },
                 headerTitleContainerStyle: {
                     paddingLeft: 0,

@@ -184,7 +184,7 @@ export default function WorkoutDetailScreen() {
                 <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.backgroundTertiary }]}>
                     {/* Description Container */}
                     <ThemedView style={[styles.descriptionContainer, { backgroundColor: themeColors.background }]}>
-                        <ThemedText type='link' style={{ color: themeColors.text, paddingBottom: Spaces.MD }}>
+                        <ThemedText type='button' style={{ color: themeColors.text, paddingBottom: Spaces.MD }}>
                             What to Expect
                         </ThemedText>
                         <ThemedText type='body' style={[{ color: themeColors.text }]}>
