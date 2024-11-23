@@ -1,8 +1,9 @@
 // app/(app)/programs/program-day.tsx
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, ActivityIndicator, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useDispatch } from 'react-redux';
 import LottieView from 'lottie-react-native';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -24,10 +25,13 @@ import { ProgramDayUnfinishModal } from '@/components/programs/ProgramDayUnfinis
 import { BottomMenuModal } from '@/components/overlays/BottomMenuModal';
 import { AutoDismissSuccessModal } from '@/components/overlays/AutoDismissSuccessModal';
 import { getDayOfWeek, getWeekNumber } from '@/utils/calendar';
+import { fetchExercisesRecentHistoryAsync } from '@/store/exerciseProgress/thunks';
+import { AppDispatch } from '@/store/store';
 
 const ProgramDayScreen = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const dispatch = useDispatch<AppDispatch>();
     const [isProgramDaySkipModalVisible, setIsProgramDaySkipModalVisible] = useState(false);
     const [isResetDayModalVisible, setIsResetDayModalVisible] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
@@ -49,6 +53,16 @@ const ProgramDayScreen = () => {
         isCompletingDay,
         isUncompletingDay,
     } = useProgramData(programId, dayId);
+
+    // Load exercise histories when program day loads
+    useEffect(() => {
+        if (programDay?.Exercises && !programDay.RestDay) {
+            // Extract exercise IDs from the program day
+            const exerciseIds = programDay.Exercises.map((exercise) => exercise.ExerciseId);
+            // Fetch recent history for these exercises
+            dispatch(fetchExercisesRecentHistoryAsync(exerciseIds));
+        }
+    }, [programDay?.Exercises, programDay?.RestDay]);
 
     const scrollY = useSharedValue(0);
     const scrollHandler = useAnimatedScrollHandler({

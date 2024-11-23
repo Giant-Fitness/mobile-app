@@ -37,6 +37,7 @@ export interface Exercise {
     ExerciseId: string;
     ExerciseName: string;
     Category: string;
+    Type: string;
     MuscleGroups: MuscleGroups;
     InstructionsDetailed: string[];
     QuickTip: string;
