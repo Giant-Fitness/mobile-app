@@ -28,6 +28,7 @@ import { AVPlaybackStatus } from 'expo-av';
 export default function WorkoutDetailScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const [isVideoLoading, setIsVideoLoading] = useState(false);
 
     const dispatch = useDispatch<AppDispatch>();
     const { workoutId } = useLocalSearchParams() as { workoutId: string };
@@ -68,6 +69,7 @@ export default function WorkoutDetailScreen() {
 
     // Function to start the video playback
     const handleStartWorkout = () => {
+        setIsVideoLoading(true);
         if (videoPlayerRef.current) {
             videoPlayerRef.current.startPlayback();
             // Reset milestones when starting the workout
@@ -79,6 +81,9 @@ export default function WorkoutDetailScreen() {
     // Function to handle playback status updates from the video player
     const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
         if (status.isLoaded) {
+            if (!status.isBuffering) {
+                setIsVideoLoading(false);
+            }
             const duration = status.durationMillis;
             const currentPosition = status.positionMillis;
 
@@ -111,7 +116,9 @@ export default function WorkoutDetailScreen() {
         }
     };
 
-    const handleDismiss = () => {};
+    const handleDismiss = () => {
+        setIsVideoLoading(false);
+    };
 
     // Scroll Handler for Animated Header
     const scrollHandler = useAnimatedScrollHandler({
@@ -200,7 +207,15 @@ export default function WorkoutDetailScreen() {
                 onDismiss={handleDismiss} // Pass the dismiss handler
             />
             <SlideUpActionButton scrollY={scrollY} slideUpThreshold={Spaces.MD}>
-                <PrimaryButton text='Start Workout' textType='bodyMedium' style={styles.startButton} onPress={handleStartWorkout} size='LG' />
+                <PrimaryButton
+                    text='Start Workout'
+                    textType='bodyMedium'
+                    style={styles.startButton}
+                    onPress={handleStartWorkout}
+                    size='LG'
+                    loading={isVideoLoading}
+                    disabled={isVideoLoading}
+                />
             </SlideUpActionButton>
         </ThemedView>
     );
