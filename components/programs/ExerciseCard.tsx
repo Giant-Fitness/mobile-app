@@ -29,11 +29,18 @@ type ExerciseCardProps = {
     isEnrolled: boolean;
     showLoggingButton?: boolean;
     onLogPress?: () => void;
+    exerciseNumber?: number;
 };
 
 const defaultLogPress = () => {};
 
-export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isEnrolled = false, showLoggingButton = false, onLogPress = defaultLogPress }) => {
+export const ExerciseCard: React.FC<ExerciseCardProps> = ({
+    exercise,
+    isEnrolled = false,
+    showLoggingButton = false,
+    onLogPress = defaultLogPress,
+    exerciseNumber,
+}) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme as 'light' | 'dark'];
 
@@ -160,9 +167,16 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isEnrolled
             ]}
         >
             <ThemedView style={[styles.titleContainer, { backgroundColor: themeColors.background }]}>
-                <ThemedText type='titleLarge' style={[{ color: themeColors.text }]}>
-                    {exercise.ExerciseName}
-                </ThemedText>
+                <View style={styles.titleRow}>
+                    {exerciseNumber && (
+                        <ThemedText type='titleLarge' style={[{ color: lightenColor(themeColors.text, 0.7) }]}>
+                            #{exerciseNumber}{' '}
+                        </ThemedText>
+                    )}
+                    <ThemedText type='titleLarge' style={[{ color: themeColors.text }]}>
+                        {exercise.ExerciseName}
+                    </ThemedText>
+                </View>
             </ThemedView>
             <ThemedView style={styles.infoContainer}>
                 <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.tipBackground }]}>
@@ -218,6 +232,10 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isEnrolled
 };
 
 const styles = StyleSheet.create({
+    titleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
     card: {
         borderRadius: Spaces.SM,
         marginBottom: Spaces.MD,

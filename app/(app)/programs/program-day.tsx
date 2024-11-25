@@ -250,13 +250,14 @@ const ProgramDayScreen = () => {
                                 ]}
                             >
                                 {programDay.Exercises &&
-                                    programDay.Exercises.map((exercise) => (
+                                    programDay.Exercises.map((exercise, index) => (
                                         <ExerciseCard
                                             key={exercise.ExerciseId}
                                             exercise={exercise}
                                             isEnrolled={isEnrolled}
                                             showLoggingButton={exercise.Type === 'strength'}
                                             onLogPress={() => handleExerciseLogPress(exercise)}
+                                            exerciseNumber={index + 1}
                                         />
                                     ))}
                             </ThemedView>
