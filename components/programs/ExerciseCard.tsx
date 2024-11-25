@@ -1,7 +1,8 @@
 // components/programs/ExerciseCard.tsx
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, View, Platform } from 'react-native';
+import Svg, { Circle } from 'react-native-svg';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { Spaces } from '@/constants/Spaces';
@@ -12,7 +13,16 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { TextButton } from '@/components/buttons/TextButton';
 import { router } from 'expo-router';
-import { lightenColor } from '@/utils/colorUtils';
+import { darkenColor, lightenColor } from '@/utils/colorUtils';
+import { RootState } from '@/store/store';
+import { useSelector } from 'react-redux';
+import { format } from 'date-fns';
+import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
+
+type LogButtonState = {
+    type: 'empty' | 'partial' | 'complete';
+    progress?: number; // 0-1 for partial
+};
 
 type ExerciseCardProps = {
     exercise: Exercise;
@@ -27,6 +37,33 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isEnrolled
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme as 'light' | 'dark'];
 
+    const { recentLogs, liftHistory } = useSelector((state: RootState) => state.exerciseProgress);
+
+    // Calculate log button state based on today's progress
+    const logButtonState = useMemo<LogButtonState>(() => {
+        const today = format(new Date(), 'yyyy-MM-dd');
+        const exerciseLogId = `${exercise.ExerciseId}#${today}`;
+
+        // Get today's log from either source
+        const todaysLog = recentLogs[exerciseLogId] || (isLongTermTrackedLift(exercise.ExerciseId) ? liftHistory[exercise.ExerciseId]?.[exerciseLogId] : null);
+
+        if (!todaysLog) {
+            return { type: 'empty' };
+        }
+
+        const loggedSets = todaysLog.Sets.length;
+        const requiredSets = exercise.Sets;
+
+        if (loggedSets >= requiredSets) {
+            return { type: 'complete' };
+        }
+
+        return {
+            type: 'partial',
+            progress: loggedSets / requiredSets,
+        };
+    }, [exercise.ExerciseId, exercise.Sets, recentLogs, liftHistory]);
+
     const navigateToExerciseDetail = () => {
         router.push({
             pathname: '/(app)/programs/exercise-details',
@@ -35,6 +72,80 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isEnrolled
                 isEnrolled: isEnrolled.toString(),
             },
         });
+    };
+
+    const renderLogButton = () => {
+        if (!showLoggingButton) return null;
+
+        let buttonContent;
+        switch (logButtonState.type) {
+            case 'complete':
+                buttonContent = (
+                    <>
+                        <Icon name='check' size={16} color={themeColors.buttonPrimaryText} style={styles.buttonIcon} />
+                        <ThemedText type='bodyMedium' style={{ color: themeColors.buttonPrimaryText, fontSize: 16 }}>
+                            Logged
+                        </ThemedText>
+                    </>
+                );
+                break;
+
+            case 'partial':
+                const progress = logButtonState.progress || 0;
+                const size = 16;
+                const strokeWidth = 2;
+                const radius = (size - strokeWidth) / 2;
+                const circumference = radius * 2 * Math.PI;
+                const strokeDashoffset = circumference - progress * circumference;
+
+                buttonContent = (
+                    <>
+                        <View style={styles.progressRing}>
+                            <Svg width={size} height={size}>
+                                {/* Background circle */}
+                                <Circle
+                                    cx={size / 2}
+                                    cy={size / 2}
+                                    r={radius}
+                                    stroke={lightenColor(themeColors.buttonPrimary, 0.3)}
+                                    strokeWidth={strokeWidth}
+                                    fill='none'
+                                />
+                                {/* Progress circle */}
+                                <Circle
+                                    cx={size / 2}
+                                    cy={size / 2}
+                                    r={radius}
+                                    stroke={themeColors.buttonPrimaryText}
+                                    strokeWidth={strokeWidth}
+                                    fill='none'
+                                    strokeDasharray={`${circumference} ${circumference}`}
+                                    strokeDashoffset={strokeDashoffset}
+                                    transform={`rotate(-90 ${size / 2} ${size / 2})`}
+                                    strokeLinecap='butt'
+                                />
+                            </Svg>
+                        </View>
+                        <ThemedText type='bodyMedium' style={{ color: themeColors.buttonPrimaryText, fontSize: 16 }}>
+                            Log
+                        </ThemedText>
+                    </>
+                );
+                break;
+
+            default:
+                buttonContent = (
+                    <ThemedText type='bodyMedium' style={{ color: themeColors.buttonPrimaryText, fontSize: 16 }}>
+                        Log
+                    </ThemedText>
+                );
+        }
+
+        return (
+            <TextButton onPress={onLogPress} style={[styles.logButton, { backgroundColor: lightenColor(themeColors.buttonPrimary, 0.1) }]}>
+                {buttonContent}
+            </TextButton>
+        );
     };
 
     return (
@@ -100,15 +211,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isEnrolled
                         },
                     ]}
                 />
-                {isEnrolled && showLoggingButton && (
-                    <TextButton
-                        text='Log'
-                        onPress={onLogPress}
-                        textType='bodyMedium'
-                        textStyle={[{ color: themeColors.buttonPrimaryText }]}
-                        style={[{ flex: 1, backgroundColor: lightenColor(themeColors.buttonPrimary, 0.1), borderRadius: Spaces.SM, marginLeft: Spaces.LG }]}
-                    />
-                )}
+                {isEnrolled && showLoggingButton && renderLogButton()}
             </View>
         </ThemedView>
     );
@@ -175,5 +278,20 @@ const styles = StyleSheet.create({
         borderRadius: Spaces.SM,
         marginHorizontal: Spaces.XS,
         alignItems: 'center',
+    },
+    logButton: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: Spaces.SM,
+        marginLeft: Spaces.LG,
+    },
+    buttonIcon: {
+        marginRight: Spaces.XS,
+    },
+    progressRing: {
+        marginRight: Spaces.MD,
+        marginTop: 1,
     },
 });
