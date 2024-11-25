@@ -9,7 +9,8 @@ import {
     deleteExerciseLogAsync,
     fetchExercisesRecentHistoryAsync,
 } from '@/store/exerciseProgress/thunks';
-import { generateExerciseLogId } from '@/store/exerciseProgress/utils';
+import { generateExerciseLogId, isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
+import { ExerciseLog } from '@/types/exerciseProgressTypes';
 
 const exerciseProgressSlice = createSlice({
     name: 'exerciseProgress',
@@ -23,28 +24,33 @@ const exerciseProgressSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // Initialize Tracked Lifts History
+            // Initialize Tracked Lifts History (no changes needed here as it only deals with tracked lifts)
             .addCase(initializeTrackedLiftsHistoryAsync.pending, (state) => {
                 state.liftHistoryState = REQUEST_STATE.PENDING;
                 state.error = null;
             })
             .addCase(initializeTrackedLiftsHistoryAsync.fulfilled, (state, action) => {
                 state.liftHistoryState = REQUEST_STATE.FULFILLED;
-                state.liftHistory = action.payload.liftHistory;
+                // Convert arrays to objects keyed by exerciseLogId
+                const normalizedHistory = Object.fromEntries(
+                    Object.entries(action.payload.liftHistory).map(([exerciseId, logs]) => [
+                        exerciseId,
+                        Object.fromEntries((logs as ExerciseLog[]).map((log) => [log.ExerciseLogId, log])),
+                    ]),
+                );
+                state.liftHistory = normalizedHistory;
             })
             .addCase(initializeTrackedLiftsHistoryAsync.rejected, (state, action) => {
                 state.liftHistoryState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'Failed to initialize tracked lifts history';
             })
-
-            // Fetch Recent History for Specific Exercises
+            // Fetch Recent History (will only contain non-tracked lifts now)
             .addCase(fetchExercisesRecentHistoryAsync.pending, (state) => {
                 state.recentLogsState = REQUEST_STATE.PENDING;
                 state.error = null;
             })
             .addCase(fetchExercisesRecentHistoryAsync.fulfilled, (state, action) => {
                 state.recentLogsState = REQUEST_STATE.FULFILLED;
-                // Merge new recent logs with existing ones
                 state.recentLogs = {
                     ...state.recentLogs,
                     ...action.payload.recentLogs,
@@ -58,32 +64,31 @@ const exerciseProgressSlice = createSlice({
             // Save Exercise Progress
             .addCase(saveExerciseProgressAsync.fulfilled, (state, action) => {
                 const exerciseLogId = generateExerciseLogId(action.payload.exerciseId, action.payload.date);
+                const isTrackedLift = isLongTermTrackedLift(action.payload.exerciseId);
 
-                if (action.payload.isTrackedLift) {
-                    // Update lift history for tracked lifts
+                if (isTrackedLift) {
                     if (!state.liftHistory[action.payload.exerciseId]) {
                         state.liftHistory[action.payload.exerciseId] = {};
                     }
                     state.liftHistory[action.payload.exerciseId][exerciseLogId] = action.payload.log;
+                } else {
+                    state.recentLogs[exerciseLogId] = action.payload.log;
                 }
-
-                // Update recent logs for all exercises
-                state.recentLogs[exerciseLogId] = action.payload.log;
-            })
-            .addCase(saveExerciseProgressAsync.rejected, (state, action) => {
-                state.error = action.error.message || 'Failed to save exercise progress';
             })
 
             // Delete Exercise Log
             .addCase(deleteExerciseLogAsync.fulfilled, (state, action) => {
                 const exerciseLogId = generateExerciseLogId(action.payload.exerciseId, action.payload.date);
+                const isTrackedLift = isLongTermTrackedLift(action.payload.exerciseId);
 
-                // Remove from recent logs
-                delete state.recentLogs[exerciseLogId];
-
-                // Remove from lift history if it's a tracked lift
-                if (action.payload.isTrackedLift && state.liftHistory[action.payload.exerciseId]) {
-                    delete state.liftHistory[action.payload.exerciseId][exerciseLogId];
+                if (isTrackedLift) {
+                    // Delete from lift history only
+                    if (state.liftHistory[action.payload.exerciseId]) {
+                        delete state.liftHistory[action.payload.exerciseId][exerciseLogId];
+                    }
+                } else {
+                    // Delete from recent logs only
+                    delete state.recentLogs[exerciseLogId];
                 }
             })
             .addCase(deleteExerciseLogAsync.rejected, (state, action) => {

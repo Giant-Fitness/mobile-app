@@ -24,9 +24,12 @@ import { ProgramDaySkipModal } from '@/components/programs/ProgramDaySkipModal';
 import { ProgramDayUnfinishModal } from '@/components/programs/ProgramDayUnfinishModal';
 import { BottomMenuModal } from '@/components/overlays/BottomMenuModal';
 import { AutoDismissSuccessModal } from '@/components/overlays/AutoDismissSuccessModal';
+import { ExerciseLoggingSheet } from '@/components/exercise/ExerciseLoggingSheet';
 import { getDayOfWeek, getWeekNumber } from '@/utils/calendar';
 import { fetchExercisesRecentHistoryAsync } from '@/store/exerciseProgress/thunks';
 import { AppDispatch } from '@/store/store';
+import { Exercise } from '@/types';
+import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
 
 const ProgramDayScreen = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -38,6 +41,8 @@ const ProgramDayScreen = () => {
     const confettiRef = useRef<LottieView>(null);
     const [isBottomMenuVisible, setIsBottomMenuVisible] = useState(false);
     const [showResetSuccess, setShowResetSuccess] = useState(false);
+    const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+    const [isLoggingSheetVisible, setIsLoggingSheetVisible] = useState(false);
 
     const { programId, dayId } = useLocalSearchParams<{ programId: string; dayId: string }>();
 
@@ -57,10 +62,18 @@ const ProgramDayScreen = () => {
     // Load exercise histories when program day loads
     useEffect(() => {
         if (programDay?.Exercises && !programDay.RestDay) {
-            // Extract exercise IDs from the program day
-            const exerciseIds = programDay.Exercises.map((exercise) => exercise.ExerciseId);
-            // Fetch recent history for these exercises
-            dispatch(fetchExercisesRecentHistoryAsync(exerciseIds));
+            // Filter exercises to only include non-tracked strength exercises
+            const exerciseIds = programDay.Exercises.filter(
+                (exercise) =>
+                    // Only include if:
+                    !isLongTermTrackedLift(exercise.ExerciseId) && // Not a tracked lift
+                    exercise.Type === 'strength', // Is a strength exercise
+            ).map((exercise) => exercise.ExerciseId);
+
+            // Only fetch if we have any exercises that match our criteria
+            if (exerciseIds.length > 0) {
+                dispatch(fetchExercisesRecentHistoryAsync(exerciseIds));
+            }
         }
     }, [programDay?.Exercises, programDay?.RestDay]);
 
@@ -145,6 +158,16 @@ const ProgramDayScreen = () => {
         },
     ];
 
+    const handleExerciseLogPress = (exercise: Exercise) => {
+        setSelectedExercise(exercise);
+        setIsLoggingSheetVisible(true);
+    };
+
+    const handleLoggingSheetClose = () => {
+        setIsLoggingSheetVisible(false);
+        setSelectedExercise(null);
+    };
+
     if (programDayState === REQUEST_STATE.PENDING) {
         return (
             <ThemedView style={styles.loadingContainer}>
@@ -228,7 +251,13 @@ const ProgramDayScreen = () => {
                             >
                                 {programDay.Exercises &&
                                     programDay.Exercises.map((exercise) => (
-                                        <ExerciseCard key={exercise.ExerciseId} exercise={exercise} isEnrolled={isEnrolled} />
+                                        <ExerciseCard
+                                            key={exercise.ExerciseId}
+                                            exercise={exercise}
+                                            isEnrolled={isEnrolled}
+                                            showLoggingButton={exercise.Type === 'strength'}
+                                            onLogPress={() => handleExerciseLogPress(exercise)}
+                                        />
                                     ))}
                             </ThemedView>
                         )}
@@ -298,7 +327,7 @@ const ProgramDayScreen = () => {
                     />
                 </View>
             )}
-
+            {selectedExercise && <ExerciseLoggingSheet visible={isLoggingSheetVisible} onClose={handleLoggingSheetClose} exercise={selectedExercise} />}
             <BottomMenuModal isVisible={isBottomMenuVisible} onClose={() => setIsBottomMenuVisible(false)} options={menuOptions} />
         </ThemedView>
     );

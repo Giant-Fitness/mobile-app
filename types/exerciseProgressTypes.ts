@@ -1,16 +1,18 @@
 // types/exerciseProgressTypes.ts
 
 export interface ExerciseSet {
-    weight: number;
-    reps: number;
-    timestamp: string; // HH:mm:ss
-    notes?: string;
-    setNumber?: number;
+    Weight: number;
+    Reps: number;
+    Timestamp: string; // HH:mm:ss
+    Notes?: string;
+    SetNumber?: number;
 }
 
 export interface ExerciseLog {
-    exerciseId: string;
-    sets: ExerciseSet[];
-    createdAt: string;
-    updatedAt: string;
+    ExerciseLogId: string;
+    ExerciseId: string;
+    Sets: ExerciseSet[];
+    CreatedAt: string;
+    UpdatedAt: string;
+    Date: string;
 }

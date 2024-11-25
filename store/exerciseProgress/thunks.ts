@@ -27,7 +27,6 @@ export const initializeTrackedLiftsHistoryAsync = createAsyncThunk('exerciseProg
             }),
             {},
         );
-
         return { liftHistory };
     } catch (error) {
         return rejectWithValue({
@@ -45,14 +44,12 @@ export const fetchExercisesRecentHistoryAsync = createAsyncThunk(
             const userId = state.user.user?.UserId;
             if (!userId) return rejectWithValue({ errorMessage: 'User ID not available' });
 
-            // Filter out tracked lifts as we already have their history
+            // Only fetch non-tracked lifts
             const exercisesToFetch = exerciseIds.filter((id) => !isLongTermTrackedLift(id));
 
-            // Get recent history (last 10 logs) for each exercise
             const recentHistoryPromises = exercisesToFetch.map((exerciseId) => ExerciseProgressService.getExerciseHistory(userId, exerciseId, { limit: 10 }));
             const recentHistories = await Promise.all(recentHistoryPromises);
 
-            // Create mapping of exercise IDs to their recent histories
             const recentLogs = exercisesToFetch.reduce(
                 (acc, exerciseId, index) => ({
                     ...acc,

@@ -13,16 +13,23 @@ interface BottomSheetProps {
     onClose: () => void;
     children: React.ReactNode;
     style?: StyleProp<ViewStyle>;
+    disableBackdropPress?: boolean;
 }
 
-export const BottomSheet: React.FC<BottomSheetProps> = ({ visible, onClose, children, style }) => {
-    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
-    const themeColors = Colors[colorScheme]; // Access theme-specific colors
+export const BottomSheet: React.FC<BottomSheetProps> = ({ visible, onClose, children, style, disableBackdropPress = false }) => {
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
+
+    const handleBackdropPress = () => {
+        if (!disableBackdropPress) {
+            onClose();
+        }
+    };
 
     return (
         <Modal animationType='fade' transparent={true} visible={visible} onRequestClose={onClose}>
             <View style={styles.container}>
-                <TouchableOpacity style={styles.overlay} onPress={onClose} activeOpacity={1}>
+                <TouchableOpacity style={styles.overlay} onPress={handleBackdropPress} activeOpacity={1}>
                     <BlurView intensity={50} style={styles.blur} tint='systemUltraThinMaterial' experimentalBlurMethod='dimezisBlurView' />
                 </TouchableOpacity>
                 <ThemedView style={[styles.drawer, { backgroundColor: themeColors.background }, style]}>{children}</ThemedView>

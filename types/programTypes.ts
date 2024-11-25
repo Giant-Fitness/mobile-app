@@ -46,6 +46,7 @@ export interface Exercise {
     CreatedAt: string;
     UpdatedAt: string;
     Archived: boolean;
+    LoggingInstructions: string;
     Sets: number;
     RepsUpper: number;
     RepsLower: number;

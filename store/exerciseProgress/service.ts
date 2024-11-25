@@ -29,7 +29,7 @@ const getExerciseHistory = async (
         }).toString();
 
         const { data } = await authApiClient.get(`/users/${userId}/exercise-progress/${exerciseId}${queryString ? `?${queryString}` : ''}`);
-        return data.logs;
+        return data.history;
     } catch (error) {
         throw handleApiError(error, 'GetExerciseHistory');
     }

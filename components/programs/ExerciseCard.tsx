@@ -16,9 +16,13 @@ import { router } from 'expo-router';
 type ExerciseCardProps = {
     exercise: Exercise;
     isEnrolled: boolean;
+    showLoggingButton?: boolean;
+    onLogPress?: () => void;
 };
 
-export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isEnrolled = false }) => {
+const defaultLogPress = () => {};
+
+export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isEnrolled = false, showLoggingButton = false, onLogPress = defaultLogPress }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme as 'light' | 'dark'];
 
@@ -86,15 +90,15 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isEnrolled
                         },
                     ]}
                 />
-                {/*                {isEnrolled && (
+                {isEnrolled && showLoggingButton && (
                     <TextButton
                         text='Log'
-                        onPress={() => console.log(`Logging exercise: ${exercise.ExerciseName}`)}
+                        onPress={onLogPress}
                         textType='bodyMedium'
                         textStyle={[{ color: themeColors.buttonPrimaryText }]}
                         style={[{ flex: 1, backgroundColor: themeColors.buttonPrimary, borderRadius: Spaces.SM, marginLeft: Spaces.LG }]}
                     />
-                )}*/}
+                )}
             </View>
         </ThemedView>
     );
