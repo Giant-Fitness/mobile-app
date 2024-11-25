@@ -19,12 +19,14 @@ import { getAllWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { BasicSplash } from '@/components/base/BasicSplash';
 import { ThemedText } from '@/components/base/ThemedText';
+import { initializeTrackedLiftsHistoryAsync } from '@/store/exerciseProgress/thunks';
 
 const Initialization: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const { user, userState, userProgramProgress, userProgramProgressState, error: userError } = useSelector((state: RootState) => state.user);
     const { error: programError } = useSelector((state: RootState) => state.programs);
     const { spotlightWorkouts, spotlightWorkoutsState, error: workoutError } = useSelector((state: RootState) => state.workouts);
+    const { error: exerciseError } = useSelector((state: RootState) => state.exerciseProgress);
     const [dataLoaded, setDataLoaded] = useState<keyof typeof REQUEST_STATE>(REQUEST_STATE.PENDING);
 
     const fetchUserData = useCallback(async () => {
@@ -55,6 +57,7 @@ const Initialization: React.FC = () => {
                 dispatch(getSpotlightWorkoutsAsync()),
                 dispatch(getAllProgramsAsync()),
                 dispatch(getWeightMeasurementsAsync()),
+                dispatch(initializeTrackedLiftsHistoryAsync()),
             ]);
 
             setDataLoaded(REQUEST_STATE.FULFILLED);
@@ -93,7 +96,7 @@ const Initialization: React.FC = () => {
     });
 
     useEffect(() => {
-        if (dataLoaded === REQUEST_STATE.FULFILLED && !showSplash && !userError && !programError && !workoutError) {
+        if (dataLoaded === REQUEST_STATE.FULFILLED && !showSplash && !userError && !programError && !workoutError && !exerciseError) {
             router.replace('/(app)/(tabs)/home');
         }
     }, [dataLoaded, showSplash, userError, programError, workoutError]);
@@ -102,7 +105,7 @@ const Initialization: React.FC = () => {
         return <BasicSplash isDataLoaded={dataLoaded === REQUEST_STATE.FULFILLED} showLoadingText={false} />;
     }
 
-    if (userError || programError || workoutError) {
+    if (userError || programError || workoutError || exerciseError) {
         return (
             <SafeAreaView style={styles.container}>
                 <ThemedText style={styles.errorText}>Error: {userError || programError || workoutError || 'An unexpected error occurred.'}</ThemedText>

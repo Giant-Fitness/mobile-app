@@ -6,6 +6,7 @@ import quotesReducer from '@/store/quotes/quotesSlice';
 import userReducer from '@/store/user/userSlice';
 import workoutsReducer from '@/store/workouts/workoutsSlice';
 import feedbackReducer from '@/store/feedback/feedbackSlice';
+import exerciseProgressReducer from '@/store/exerciseProgress/exerciseProgressSlice';
 import { resetStore } from '@/store/actions';
 
 const combinedReducer = combineReducers({
@@ -14,6 +15,7 @@ const combinedReducer = combineReducers({
     user: userReducer,
     workouts: workoutsReducer,
     feedback: feedbackReducer,
+    exerciseProgress: exerciseProgressReducer,
 });
 
 // Create root reducer with reset functionality

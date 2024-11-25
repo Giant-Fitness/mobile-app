@@ -1,8 +1,9 @@
 // app/(app)/programs/program-day.tsx
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, ActivityIndicator, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useDispatch } from 'react-redux';
 import LottieView from 'lottie-react-native';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -23,17 +24,25 @@ import { ProgramDaySkipModal } from '@/components/programs/ProgramDaySkipModal';
 import { ProgramDayUnfinishModal } from '@/components/programs/ProgramDayUnfinishModal';
 import { BottomMenuModal } from '@/components/overlays/BottomMenuModal';
 import { AutoDismissSuccessModal } from '@/components/overlays/AutoDismissSuccessModal';
+import { ExerciseLoggingSheet } from '@/components/exercise/ExerciseLoggingSheet';
 import { getDayOfWeek, getWeekNumber } from '@/utils/calendar';
+import { fetchExercisesRecentHistoryAsync } from '@/store/exerciseProgress/thunks';
+import { AppDispatch } from '@/store/store';
+import { Exercise } from '@/types';
+import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
 
 const ProgramDayScreen = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const dispatch = useDispatch<AppDispatch>();
     const [isProgramDaySkipModalVisible, setIsProgramDaySkipModalVisible] = useState(false);
     const [isResetDayModalVisible, setIsResetDayModalVisible] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
     const confettiRef = useRef<LottieView>(null);
     const [isBottomMenuVisible, setIsBottomMenuVisible] = useState(false);
     const [showResetSuccess, setShowResetSuccess] = useState(false);
+    const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+    const [isLoggingSheetVisible, setIsLoggingSheetVisible] = useState(false);
 
     const { programId, dayId } = useLocalSearchParams<{ programId: string; dayId: string }>();
 
@@ -49,6 +58,24 @@ const ProgramDayScreen = () => {
         isCompletingDay,
         isUncompletingDay,
     } = useProgramData(programId, dayId);
+
+    // Load exercise histories when program day loads
+    useEffect(() => {
+        if (programDay?.Exercises && !programDay.RestDay) {
+            // Filter exercises to only include non-tracked strength exercises
+            const exerciseIds = programDay.Exercises.filter(
+                (exercise) =>
+                    // Only include if:
+                    !isLongTermTrackedLift(exercise.ExerciseId) && // Not a tracked lift
+                    exercise.Type === 'strength', // Is a strength exercise
+            ).map((exercise) => exercise.ExerciseId);
+
+            // Only fetch if we have any exercises that match our criteria
+            if (exerciseIds.length > 0) {
+                dispatch(fetchExercisesRecentHistoryAsync(exerciseIds));
+            }
+        }
+    }, [programDay?.Exercises, programDay?.RestDay]);
 
     const scrollY = useSharedValue(0);
     const scrollHandler = useAnimatedScrollHandler({
@@ -130,6 +157,16 @@ const ProgramDayScreen = () => {
             },
         },
     ];
+
+    const handleExerciseLogPress = (exercise: Exercise) => {
+        setSelectedExercise(exercise);
+        setIsLoggingSheetVisible(true);
+    };
+
+    const handleLoggingSheetClose = () => {
+        setIsLoggingSheetVisible(false);
+        setSelectedExercise(null);
+    };
 
     if (programDayState === REQUEST_STATE.PENDING) {
         return (
@@ -214,7 +251,13 @@ const ProgramDayScreen = () => {
                             >
                                 {programDay.Exercises &&
                                     programDay.Exercises.map((exercise) => (
-                                        <ExerciseCard key={exercise.ExerciseId} exercise={exercise} isEnrolled={isEnrolled} />
+                                        <ExerciseCard
+                                            key={exercise.ExerciseId}
+                                            exercise={exercise}
+                                            isEnrolled={isEnrolled}
+                                            showLoggingButton={exercise.Type === 'strength'}
+                                            onLogPress={() => handleExerciseLogPress(exercise)}
+                                        />
                                     ))}
                             </ThemedView>
                         )}
@@ -284,7 +327,7 @@ const ProgramDayScreen = () => {
                     />
                 </View>
             )}
-
+            {selectedExercise && <ExerciseLoggingSheet visible={isLoggingSheetVisible} onClose={handleLoggingSheetClose} exercise={selectedExercise} />}
             <BottomMenuModal isVisible={isBottomMenuVisible} onClose={() => setIsBottomMenuVisible(false)} options={menuOptions} />
         </ThemedView>
     );

@@ -37,6 +37,7 @@ export interface Exercise {
     ExerciseId: string;
     ExerciseName: string;
     Category: string;
+    Type: string;
     MuscleGroups: MuscleGroups;
     InstructionsDetailed: string[];
     QuickTip: string;
@@ -45,6 +46,7 @@ export interface Exercise {
     CreatedAt: string;
     UpdatedAt: string;
     Archived: boolean;
+    LoggingInstructions: string;
     Sets: number;
     RepsUpper: number;
     RepsLower: number;
