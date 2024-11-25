@@ -1,7 +1,7 @@
 // components/programs/ExerciseCard.tsx
 
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Platform } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { Spaces } from '@/constants/Spaces';
@@ -12,6 +12,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { TextButton } from '@/components/buttons/TextButton';
 import { router } from 'expo-router';
+import { lightenColor } from '@/utils/colorUtils';
 
 type ExerciseCardProps = {
     exercise: Exercise;
@@ -37,7 +38,16 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isEnrolled
     };
 
     return (
-        <ThemedView style={[styles.card, { backgroundColor: themeColors.background }]}>
+        <ThemedView
+            style={[
+                styles.card,
+                {
+                    backgroundColor: themeColors.background,
+                    borderColor: themeColors.systemBorderColor,
+                },
+                Platform.OS === 'ios' ? styles.shadowIOS : styles.shadowAndroid,
+            ]}
+        >
             <ThemedView style={[styles.titleContainer, { backgroundColor: themeColors.background }]}>
                 <ThemedText type='titleLarge' style={[{ color: themeColors.text }]}>
                     {exercise.ExerciseName}
@@ -96,7 +106,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isEnrolled
                         onPress={onLogPress}
                         textType='bodyMedium'
                         textStyle={[{ color: themeColors.buttonPrimaryText }]}
-                        style={[{ flex: 1, backgroundColor: themeColors.buttonPrimary, borderRadius: Spaces.SM, marginLeft: Spaces.LG }]}
+                        style={[{ flex: 1, backgroundColor: lightenColor(themeColors.buttonPrimary, 0.1), borderRadius: Spaces.SM, marginLeft: Spaces.LG }]}
                     />
                 )}
             </View>
@@ -110,6 +120,19 @@ const styles = StyleSheet.create({
         marginBottom: Spaces.MD,
         position: 'relative',
         paddingBottom: Spaces.LG,
+        borderWidth: StyleSheet.hairlineWidth,
+    },
+    shadowIOS: {
+        shadowColor: '#777',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    },
+    shadowAndroid: {
+        elevation: 5,
     },
     titleContainer: {
         paddingHorizontal: Spaces.LG,
