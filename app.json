@@ -41,7 +41,7 @@
             "minSdkVersion": 24,
             "permissions": ["NOTIFICATIONS", "RECEIVE_BOOT_COMPLETED", "VIBRATE", "CAMERA", "READ_MEDIA_IMAGES"]
         },
-        "plugins": ["expo-router", "expo-notifications", "expo-camera"],
+        "plugins": ["expo-router", "expo-notifications", "expo-camera", "expo-font", "expo-secure-store"],
         "experiments": {
             "typedRoutes": true
         },
