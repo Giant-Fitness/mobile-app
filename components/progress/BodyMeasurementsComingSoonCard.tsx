@@ -7,6 +7,7 @@ import { Spaces } from '@/constants/Spaces';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Path, Svg, Defs, LinearGradient, Stop } from 'react-native-svg';
+import { lightenColor } from '@/utils/colorUtils';
 
 interface BodyMeasurementsComingSoonCardProps {
     onPress?: () => void;
@@ -31,7 +32,11 @@ export const BodyMeasurementsComingSoonCard: React.FC<BodyMeasurementsComingSoon
     const themeColors = Colors[colorScheme];
 
     return (
-        <TouchableOpacity style={[styles.card, { backgroundColor: themeColors.blueTransparent }, style]} onPress={onPress} activeOpacity={1}>
+        <TouchableOpacity
+            style={[styles.card, { backgroundColor: themeColors.blueTransparent, borderColor: lightenColor(themeColors.blueSolid, 0.8) }, style]}
+            onPress={onPress}
+            activeOpacity={1}
+        >
             <View style={styles.emptyStateContainer}>
                 <View style={styles.emptyStateContent}>
                     <View style={styles.iconContainer} />
@@ -61,6 +66,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: Spaces.MD,
         alignItems: 'flex-start',
         width: '100%',
+        borderWidth: 1,
     },
     emptyStateContainer: {
         width: '100%',

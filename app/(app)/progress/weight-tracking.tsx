@@ -118,6 +118,10 @@ export default function WeightTrackingScreen() {
         setIsAddingWeight(false);
     };
 
+    const getExistingData = (date: Date) => {
+        return userWeightMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
+    };
+
     const { aggregatedData, effectiveTimeRange, weightChange, averageWeight, yAxisRange, movingAverages } = useMemo(() => {
         if (!userWeightMeasurements.length) {
             return {
@@ -340,6 +344,7 @@ export default function WeightTrackingScreen() {
                 initialWeight={selectedMeasurement?.Weight}
                 initialDate={selectedMeasurement ? new Date(selectedMeasurement.MeasurementTimestamp) : undefined}
                 isEditing={!!selectedMeasurement}
+                getExistingData={getExistingData}
             />
         </ThemedView>
     );

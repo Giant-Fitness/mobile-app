@@ -52,6 +52,10 @@ export default function AllWeightDataScreen() {
         setIsWeightSheetVisible(true);
     };
 
+    const getExistingData = (date: Date) => {
+        return userWeightMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
+    };
+
     const handleWeightAdd = async (weight: number, date: Date) => {
         try {
             await dispatch(
@@ -199,6 +203,7 @@ export default function AllWeightDataScreen() {
                 initialWeight={selectedMeasurement?.Weight}
                 initialDate={isAddingWeight ? selectedCalendarDate : selectedMeasurement ? new Date(selectedMeasurement.MeasurementTimestamp) : undefined}
                 isEditing={!!selectedMeasurement}
+                getExistingData={getExistingData}
             />
         </ThemedView>
     );

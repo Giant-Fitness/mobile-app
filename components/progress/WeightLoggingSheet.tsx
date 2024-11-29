@@ -11,6 +11,8 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Icon } from '@/components/base/Icon';
 import { TextButton } from '@/components/buttons/TextButton';
 import { addDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameDay, isSameMonth, format } from 'date-fns';
+import { lightenColor } from '@/utils/colorUtils';
+import { UserWeightMeasurement } from '@/types';
 
 interface WeightLoggingSheetProps {
     visible: boolean;
@@ -21,6 +23,7 @@ interface WeightLoggingSheetProps {
     initialDate?: Date;
     isEditing?: boolean;
     isLoading?: boolean;
+    getExistingData?: (date: Date) => UserWeightMeasurement | undefined;
 }
 
 export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
@@ -31,6 +34,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
     initialWeight,
     initialDate,
     isEditing = false,
+    getExistingData,
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -42,6 +46,8 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
     const [error, setError] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isEditingMode, setIsEditingMode] = useState(isEditing);
+    const [originalWeight, setOriginalWeight] = useState<number | undefined>(undefined);
 
     const weightInputRef = useRef<TextInput>(null);
 
@@ -58,25 +64,28 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
 
     useEffect(() => {
         if (visible) {
-            if (initialWeight) {
-                setWeight(initialWeight.toString());
+            const today = new Date();
+            const existingData = getExistingData?.(initialDate || today);
+
+            if (existingData) {
+                setWeight(existingData.Weight.toString());
+                setOriginalWeight(existingData.Weight);
+                setSelectedDate(new Date(existingData.MeasurementTimestamp));
+                setIsEditingMode(true);
             } else {
-                setWeight('');
+                setOriginalWeight(undefined);
+                setWeight(initialWeight?.toString() || '');
+                setSelectedDate(initialDate || today);
+                setIsEditingMode(false);
             }
-            if (initialDate) {
-                setSelectedDate(initialDate);
-                setDisplayMonth(initialDate);
-            } else {
-                setSelectedDate(new Date());
-                setDisplayMonth(new Date());
-            }
+            setDisplayMonth(initialDate || today);
             setError('');
             setShowCalendar(false);
             setTimeout(() => {
                 weightInputRef.current?.focus();
             }, 100);
         }
-    }, [visible, initialWeight, initialDate]);
+    }, [visible, initialWeight, initialDate, getExistingData]);
 
     const handleClose = () => {
         onClose();
@@ -143,7 +152,17 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
     };
 
     const handleDateSelect = (date: Date) => {
-        setSelectedDate(date);
+        const existingData = getExistingData?.(date);
+        if (existingData) {
+            setWeight(existingData.Weight.toString());
+            setOriginalWeight(existingData.Weight);
+            setSelectedDate(new Date(existingData.MeasurementTimestamp));
+            setIsEditingMode(true);
+        } else {
+            setOriginalWeight(undefined);
+            setSelectedDate(date);
+            setIsEditingMode(false);
+        }
         hideCalendarView();
     };
 
@@ -189,10 +208,10 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                         <Icon name='close' size={20} color={themeColors.text} />
                     </TouchableOpacity>
 
-                    <ThemedText type='title'>{isEditing ? 'Edit Weight' : 'Log Weight'}</ThemedText>
+                    <ThemedText type='title'>{isEditingMode ? 'Edit Weight' : 'Log Weight'}</ThemedText>
 
                     <View style={styles.headerRight}>
-                        {isEditing && onDelete && (
+                        {isEditingMode && onDelete && (
                             <TouchableOpacity onPress={handleDelete} style={styles.deleteButton} disabled={isSubmitting || isDeleting}>
                                 {isDeleting ? (
                                     <ActivityIndicator size='small' color={themeColors.subText} />
@@ -201,11 +220,32 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                                 )}
                             </TouchableOpacity>
                         )}
-                        <TouchableOpacity onPress={handleSubmit} disabled={isSubmitting || isDeleting}>
+                        <TouchableOpacity
+                            onPress={handleSubmit}
+                            disabled={
+                                isSubmitting ||
+                                isDeleting ||
+                                isNaN(parseFloat(weight)) ||
+                                parseFloat(weight) === 0 ||
+                                (isEditingMode && originalWeight === parseFloat(weight))
+                            }
+                        >
                             {isSubmitting ? (
                                 <ActivityIndicator size='small' color={themeColors.text} />
                             ) : (
-                                <Icon name='check' color={isSubmitting || isDeleting ? themeColors.subText : themeColors.text} size={24} />
+                                <Icon
+                                    name='check'
+                                    size={24}
+                                    color={
+                                        !isSubmitting &&
+                                        !isDeleting &&
+                                        !isNaN(parseFloat(weight)) &&
+                                        parseFloat(weight) !== 0 &&
+                                        (!isEditingMode || originalWeight !== parseFloat(weight))
+                                            ? themeColors.text
+                                            : lightenColor(themeColors.subText, 0.8)
+                                    }
+                                />
                             )}
                         </TouchableOpacity>
                     </View>
