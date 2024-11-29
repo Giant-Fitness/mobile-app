@@ -52,6 +52,10 @@ export default function AllWeightDataScreen() {
         setIsWeightSheetVisible(true);
     };
 
+    const getExistingData = (date: Date) => {
+        return userWeightMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
+    };
+
     const handleWeightAdd = async (weight: number, date: Date) => {
         try {
             await dispatch(
@@ -60,7 +64,6 @@ export default function AllWeightDataScreen() {
                     measurementTimestamp: date.toISOString(),
                 }),
             ).unwrap();
-            setIsWeightSheetVisible(false);
             setIsAddingWeight(false);
         } catch (error) {
             console.error('Failed to log weight:', error);
@@ -77,7 +80,6 @@ export default function AllWeightDataScreen() {
                     weight: weight,
                 }),
             ).unwrap();
-            setIsWeightSheetVisible(false);
             setSelectedMeasurement(null);
         } catch (error) {
             console.error('Failed to update weight:', error);
@@ -199,6 +201,7 @@ export default function AllWeightDataScreen() {
                 initialWeight={selectedMeasurement?.Weight}
                 initialDate={isAddingWeight ? selectedCalendarDate : selectedMeasurement ? new Date(selectedMeasurement.MeasurementTimestamp) : undefined}
                 isEditing={!!selectedMeasurement}
+                getExistingData={getExistingData}
             />
         </ThemedView>
     );

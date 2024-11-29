@@ -1,6 +1,6 @@
 // components/progress/WeightChart.tsx
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Dimensions, TouchableWithoutFeedback, TouchableOpacity } from 'react-native';
 import { Path, Svg, Circle, Line, Text as SvgText, G, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { format } from 'date-fns';
@@ -15,7 +15,7 @@ import { ThemedView } from '@/components/base/ThemedView';
 
 const CHART_PADDING = {
     top: 48,
-    right: 35,
+    right: 36,
     bottom: 10,
     left: 5,
 };
@@ -189,6 +189,13 @@ export const WeightChart: React.FC<WeightChartProps> = ({
     const plotWidth = chartWidth - CHART_PADDING.left - CHART_PADDING.right;
     const plotHeight = chartHeight - CHART_PADDING.top - CHART_PADDING.bottom;
 
+    useEffect(() => {
+        if (data.length > 0) {
+            const lastPoint = points[points.length - 1];
+            setSelectedPoint(lastPoint);
+        }
+    }, [data]);
+
     // Generate grid lines
     const gridLines = React.useMemo(() => {
         const range = yAxisRange.max - yAxisRange.min;
@@ -325,22 +332,12 @@ export const WeightChart: React.FC<WeightChartProps> = ({
                 />
 
                 {/* Tooltip content */}
-                <SvgText x={tooltipX + TOOLTIP_WIDTH / 2 - 12} y={tooltipY + TOOLTIP_PADDING + 12} fill={themeColors.subText} fontSize={12} textAnchor='middle'>
+                <SvgText x={tooltipX + TOOLTIP_WIDTH / 2} y={tooltipY + TOOLTIP_PADDING + 12} fill={themeColors.subText} fontSize={12} textAnchor='middle'>
                     {format(selectedPoint.timestamp, 'MMM d, yyyy')}
                 </SvgText>
-                <SvgText x={tooltipX + TOOLTIP_WIDTH / 2 - 32} y={tooltipY + TOOLTIP_PADDING + 32} fill={themeColors.text} fontSize={14} textAnchor='middle'>
+                <SvgText x={tooltipX + TOOLTIP_WIDTH / 2} y={tooltipY + TOOLTIP_PADDING + 32} fill={themeColors.text} fontSize={14} textAnchor='middle'>
                     {selectedPoint.weight.toFixed(1)} kg
                 </SvgText>
-
-                {/* Manual Chevron */}
-                {/* <Path
-                    d={`M ${tooltipX + TOOLTIP_WIDTH - 15} ${tooltipY + TOOLTIP_PADDING + 20} 
-                       L ${tooltipX + TOOLTIP_WIDTH - 10} ${tooltipY + TOOLTIP_PADDING + 25} 
-                       L ${tooltipX + TOOLTIP_WIDTH - 15} ${tooltipY + TOOLTIP_PADDING + 30}`}
-                    stroke={themeColors.text}
-                    strokeWidth={1}
-                    fill="none"
-                /> */}
             </G>
         );
     };
@@ -393,14 +390,23 @@ export const WeightChart: React.FC<WeightChartProps> = ({
                         {/* Data points */}
                         {points.map((point, index) => (
                             <G key={index}>
+                                <Circle cx={point.x} cy={point.y} r={10} fill={themeColors.purpleSolid} opacity={0.05} />
                                 <Circle
                                     cx={point.x}
                                     cy={point.y}
-                                    r={10}
+                                    r={25}
                                     fill='transparent'
                                     onPress={() => setSelectedPoint(selectedPoint?.x === point.x ? null : point)}
                                 />
-                                <Circle cx={point.x} cy={point.y} r={3} stroke={themeColors.purpleSolid} strokeWidth={1.5} fill={themeColors.background} />
+
+                                <Circle
+                                    cx={point.x}
+                                    cy={point.y}
+                                    r={3}
+                                    stroke={themeColors.purpleSolid}
+                                    strokeWidth={1.5}
+                                    fill={themeColors.purpleTransparent}
+                                />
                             </G>
                         ))}
 

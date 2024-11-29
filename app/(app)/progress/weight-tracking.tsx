@@ -60,7 +60,6 @@ export default function WeightTrackingScreen() {
                     weight: weight,
                 }),
             ).unwrap();
-            setIsWeightSheetVisible(false);
             setSelectedMeasurement(null);
         } catch (error) {
             console.error('Failed to update weight:', error);
@@ -76,7 +75,6 @@ export default function WeightTrackingScreen() {
                     measurementTimestamp: date.toISOString(),
                 }),
             ).unwrap();
-            setIsWeightSheetVisible(false);
             setIsAddingWeight(false);
         } catch (error) {
             console.error('Failed to log weight:', error);
@@ -116,6 +114,10 @@ export default function WeightTrackingScreen() {
         setIsWeightSheetVisible(false);
         setSelectedMeasurement(null);
         setIsAddingWeight(false);
+    };
+
+    const getExistingData = (date: Date) => {
+        return userWeightMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
     };
 
     const { aggregatedData, effectiveTimeRange, weightChange, averageWeight, yAxisRange, movingAverages } = useMemo(() => {
@@ -340,6 +342,7 @@ export default function WeightTrackingScreen() {
                 initialWeight={selectedMeasurement?.Weight}
                 initialDate={selectedMeasurement ? new Date(selectedMeasurement.MeasurementTimestamp) : undefined}
                 isEditing={!!selectedMeasurement}
+                getExistingData={getExistingData}
             />
         </ThemedView>
     );

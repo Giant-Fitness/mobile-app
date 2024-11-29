@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ActiveProgramDayCompressedCard } from '@/components/programs/ActiveProgramDayCompressedCard';
@@ -16,7 +16,7 @@ import { FactOfTheDay } from '@/components/home/FactOfTheDay';
 import { darkenColor } from '@/utils/colorUtils';
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
 import { logWeightMeasurementAsync, getWeightMeasurementsAsync } from '@/store/user/thunks';
-import { AppDispatch } from '@/store/store';
+import { AppDispatch, RootState } from '@/store/store';
 import { WorkoutCompletedSection } from '@/components/programs/WorkoutCompletedSection';
 import { router } from 'expo-router';
 
@@ -29,6 +29,7 @@ export default function HomeScreen() {
     const [isLoading, setIsLoading] = useState(false);
 
     const { user, userProgramProgress, hasCompletedWorkoutToday } = useProgramData();
+    const { userWeightMeasurements } = useSelector((state: RootState) => state.user);
 
     const isFitnessOnboardingComplete = user?.OnboardingStatus?.fitness === true;
 
@@ -44,7 +45,6 @@ export default function HomeScreen() {
 
             // Refresh measurements after logging
             await dispatch(getWeightMeasurementsAsync()).unwrap();
-            setIsWeightSheetVisible(false);
         } catch (error) {
             console.error('Failed to log weight:', error);
         } finally {
@@ -56,6 +56,10 @@ export default function HomeScreen() {
         // Pre-fetch measurements when opening the sheet
         // dispatch(getWeightMeasurementsAsync());
         setIsWeightSheetVisible(true);
+    };
+
+    const getExistingData = (date: Date) => {
+        return userWeightMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
     };
 
     const actionTiles = [
@@ -229,6 +233,7 @@ export default function HomeScreen() {
                 onClose={() => setIsWeightSheetVisible(false)}
                 onSubmit={handleLogWeight}
                 isLoading={isLoading}
+                getExistingData={getExistingData}
             />
         </ThemedView>
     );

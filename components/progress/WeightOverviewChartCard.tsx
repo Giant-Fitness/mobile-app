@@ -256,7 +256,11 @@ export const WeightOverviewChartCard: React.FC<WeightOverviewChartCardProps> = (
     if (!values?.length) {
         return (
             <TouchableOpacity
-                style={[styles.card, { backgroundColor: lightenColor(themeColors.purpleTransparent, 0.5) }, style]}
+                style={[
+                    styles.card,
+                    { backgroundColor: lightenColor(themeColors.purpleTransparent, 0.3), borderColor: lightenColor(themeColors.purpleSolid, 0.9) },
+                    style,
+                ]}
                 onPress={handlePress}
                 activeOpacity={0.9}
             >
@@ -267,7 +271,13 @@ export const WeightOverviewChartCard: React.FC<WeightOverviewChartCardProps> = (
 
     if (values.length === 1) {
         return (
-            <View style={[styles.card, { backgroundColor: lightenColor(themeColors.purpleTransparent, 0.5) }, style]}>
+            <View
+                style={[
+                    styles.card,
+                    { backgroundColor: lightenColor(themeColors.purpleTransparent, 0.3), borderColor: lightenColor(themeColors.purpleSolid, 0.9) },
+                    style,
+                ]}
+            >
                 <SingleDataPointState measurement={values[0]} onPress={handlePress} themeColors={themeColors} />
             </View>
         );
@@ -276,7 +286,11 @@ export const WeightOverviewChartCard: React.FC<WeightOverviewChartCardProps> = (
     // Regular chart view for 2+ measurements
     return (
         <TouchableOpacity
-            style={[styles.card, { backgroundColor: lightenColor(themeColors.purpleTransparent, 0.5) }, style]}
+            style={[
+                styles.card,
+                { backgroundColor: lightenColor(themeColors.purpleTransparent, 0.3), borderColor: lightenColor(themeColors.purpleSolid, 0.9) },
+                style,
+            ]}
             onPress={handlePress}
             activeOpacity={0.9}
         >
@@ -331,6 +345,7 @@ const styles = StyleSheet.create({
         padding: Spaces.MD,
         alignItems: 'flex-start',
         width: '100%',
+        borderWidth: 1,
     },
     chartContainer: {
         width: '100%',
