@@ -27,6 +27,7 @@ type TextButtonProps = {
     disabled?: boolean;
     accessibilityLabel?: string;
     loading?: boolean;
+    children?: React.ReactNode;
 };
 
 export const TextButton: React.FC<TextButtonProps & AccessibilityProps> = ({
@@ -44,6 +45,7 @@ export const TextButton: React.FC<TextButtonProps & AccessibilityProps> = ({
     disabled = false,
     accessibilityLabel = text || 'Text button',
     loading = false,
+    children,
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -73,6 +75,8 @@ export const TextButton: React.FC<TextButtonProps & AccessibilityProps> = ({
         >
             {loading ? (
                 <ActivityIndicator size='small' color={themeColors.text} />
+            ) : children ? (
+                children
             ) : (
                 <>
                     {iconName && iconPosition === 'left' && (
