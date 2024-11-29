@@ -45,7 +45,6 @@ export default function HomeScreen() {
 
             // Refresh measurements after logging
             await dispatch(getWeightMeasurementsAsync()).unwrap();
-            setIsWeightSheetVisible(false);
         } catch (error) {
             console.error('Failed to log weight:', error);
         } finally {

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, TextInput, View, TouchableOpacity, Platform, ActivityIndicator, Keyboard } from 'react-native';
+import LottieView from 'lottie-react-native';
 import { BottomSheet } from '@/components/overlays/BottomSheet';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -13,6 +14,7 @@ import { TextButton } from '@/components/buttons/TextButton';
 import { addDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameDay, isSameMonth, format } from 'date-fns';
 import { lightenColor } from '@/utils/colorUtils';
 import { UserWeightMeasurement } from '@/types';
+import { Sizes } from '@/constants/Sizes';
 
 interface WeightLoggingSheetProps {
     visible: boolean;
@@ -48,22 +50,16 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
     const [isDeleting, setIsDeleting] = useState(false);
     const [isEditingMode, setIsEditingMode] = useState(isEditing);
     const [originalWeight, setOriginalWeight] = useState<number | undefined>(undefined);
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
     const weightInputRef = useRef<TextInput>(null);
 
-    const resetSheet = () => {
-        setWeight('');
-        setSelectedDate(new Date());
-        setDisplayMonth(new Date());
-        setShowCalendar(false);
-        setError('');
-        setIsSubmitting(false);
-        setIsDeleting(false);
-        Keyboard.dismiss();
-    };
-
     useEffect(() => {
         if (visible) {
+            // Clear success state when opening
+            setIsSuccess(false);
+
             const today = new Date();
             const existingData = getExistingData?.(initialDate || today);
 
@@ -79,17 +75,28 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                 setIsEditingMode(false);
             }
             setDisplayMonth(initialDate || today);
-            setError('');
-            setShowCalendar(false);
+
             setTimeout(() => {
                 weightInputRef.current?.focus();
-            }, 100);
+            }, 300);
         }
     }, [visible, initialWeight, initialDate, getExistingData]);
 
     const handleClose = () => {
+        if (isSuccess) {
+            return;
+        }
+
+        Keyboard.dismiss();
         onClose();
-        resetSheet();
+        setWeight('');
+        setSelectedDate(new Date());
+        setDisplayMonth(new Date());
+        setShowCalendar(false);
+        setError('');
+        setIsSubmitting(false);
+        setIsDeleting(false);
+        setIsSuccess(false);
     };
 
     const showCalendarView = () => {
@@ -113,16 +120,38 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
         }
         setError('');
 
-        setIsSubmitting(true);
         try {
+            setIsSubmitting(true);
             await onSubmit(weightNum, selectedDate);
-            handleClose();
+
+            // Set states separately to ensure update
+            setSuccessMessage(isEditingMode ? 'Weight updated' : 'Weight logged');
+            setIsSuccess(true);
+            // Wait for animation then close
+            await new Promise<void>((resolve) => setTimeout(resolve, 1600));
+            onClose();
         } catch (err) {
             console.log(err);
             setError('Failed to save weight measurement');
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    // Modify your render logic
+    const renderSuccessAnimation = () => {
+        if (!isSuccess) return null;
+
+        return (
+            <View style={styles.successContainer}>
+                <View style={styles.animationContainer}>
+                    <LottieView source={require('@/assets/animations/check.json')} autoPlay loop={false} style={styles.animation} />
+                </View>
+                <ThemedText type='title' style={styles.successMessage}>
+                    {successMessage}
+                </ThemedText>
+            </View>
+        );
     };
 
     const handleDelete = async () => {
@@ -152,17 +181,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
     };
 
     const handleDateSelect = (date: Date) => {
-        const existingData = getExistingData?.(date);
-        if (existingData) {
-            setWeight(existingData.Weight.toString());
-            setOriginalWeight(existingData.Weight);
-            setSelectedDate(new Date(existingData.MeasurementTimestamp));
-            setIsEditingMode(true);
-        } else {
-            setOriginalWeight(undefined);
-            setSelectedDate(date);
-            setIsEditingMode(false);
-        }
+        setSelectedDate(date);
         hideCalendarView();
     };
 
@@ -202,194 +221,198 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
     return (
         <BottomSheet visible={visible} onClose={handleClose} style={Platform.OS === 'ios' ? { height: '62%' } : undefined}>
             <View style={styles.container}>
-                {/* Header */}
-                <ThemedView style={[styles.header, { borderBottomColor: themeColors.systemBorderColor }]}>
-                    <TouchableOpacity onPress={handleClose} style={styles.headerButton} disabled={isSubmitting || isDeleting}>
-                        <Icon name='close' size={20} color={themeColors.text} />
-                    </TouchableOpacity>
-
-                    <ThemedText type='title'>{isEditingMode ? 'Edit Weight' : 'Log Weight'}</ThemedText>
-
-                    <View style={styles.headerRight}>
-                        {isEditingMode && onDelete && (
-                            <TouchableOpacity onPress={handleDelete} style={styles.deleteButton} disabled={isSubmitting || isDeleting}>
-                                {isDeleting ? (
-                                    <ActivityIndicator size='small' color={themeColors.subText} />
-                                ) : (
-                                    <Icon name='trash' color={isSubmitting ? themeColors.subText : themeColors.subText} size={18} />
-                                )}
-                            </TouchableOpacity>
-                        )}
-                        <TouchableOpacity
-                            onPress={handleSubmit}
-                            disabled={
-                                isSubmitting ||
-                                isDeleting ||
-                                isNaN(parseFloat(weight)) ||
-                                parseFloat(weight) === 0 ||
-                                (isEditingMode && originalWeight === parseFloat(weight))
-                            }
-                        >
-                            {isSubmitting ? (
-                                <ActivityIndicator size='small' color={themeColors.text} />
-                            ) : (
-                                <Icon
-                                    name='check'
-                                    size={24}
-                                    color={
-                                        !isSubmitting &&
-                                        !isDeleting &&
-                                        !isNaN(parseFloat(weight)) &&
-                                        parseFloat(weight) !== 0 &&
-                                        (!isEditingMode || originalWeight !== parseFloat(weight))
-                                            ? themeColors.text
-                                            : lightenColor(themeColors.subText, 0.8)
-                                    }
-                                />
-                            )}
-                        </TouchableOpacity>
-                    </View>
-                </ThemedView>
-
-                {error && (
-                    <ThemedText type='bodySmall' style={[styles.errorText, { color: themeColors.red }]}>
-                        {error}
-                    </ThemedText>
-                )}
-
-                {/* Date Selection */}
-                {!showCalendar ? (
-                    <>
-                        <TouchableOpacity
-                            style={styles.dateSelector}
-                            onPress={() => !isEditing && showCalendarView()}
-                            disabled={isEditing || isSubmitting || isDeleting}
-                        >
-                            <ThemedText type='body' style={{ opacity: isEditing ? 0.5 : 1 }}>
-                                {format(selectedDate, 'dd/MM/yyyy')}
-                            </ThemedText>
-                            {!isEditing && (
-                                <Icon
-                                    name='chevron-down'
-                                    color={isSubmitting || isDeleting ? themeColors.text : themeColors.text}
-                                    size={16}
-                                    style={{ marginTop: 1, marginLeft: Spaces.XS }}
-                                />
-                            )}
-                        </TouchableOpacity>
-
-                        {/* Weight Input */}
-                        <View style={styles.inputContainer}>
-                            <ThemedText type='buttonSmall' style={styles.inputLabel}>
-                                Weight
-                            </ThemedText>
-                            <View style={[styles.inputWrapper, { backgroundColor: themeColors.background }]}>
-                                <TextInput
-                                    ref={weightInputRef}
-                                    style={[
-                                        styles.input,
-                                        {
-                                            color: themeColors.text,
-                                            opacity: isSubmitting || isDeleting ? 0.5 : 1,
-                                        },
-                                    ]}
-                                    value={weight}
-                                    onChangeText={setWeight}
-                                    keyboardType='numeric'
-                                    placeholder='0.0'
-                                    placeholderTextColor={themeColors.subText}
-                                    editable={!isSubmitting && !isDeleting}
-                                />
-                                <ThemedText type='bodySmall' style={[styles.unit, { opacity: isSubmitting || isDeleting ? 0.5 : 0.7 }]}>
-                                    kgs
-                                </ThemedText>
-                            </View>
-                        </View>
-                    </>
+                {isSuccess ? (
+                    renderSuccessAnimation()
                 ) : (
-                    <View style={styles.calendarContainer}>
-                        <View style={styles.calendarHeader}>
-                            <ThemedText type='body'>{format(displayMonth, 'MMMM yyyy')}</ThemedText>
-                            <View style={styles.calendarNav}>
-                                <TouchableOpacity onPress={handlePrevMonth} style={styles.navigationButton} disabled={isSubmitting || isDeleting}>
-                                    <Icon name='chevron-back' color={themeColors.text} />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={handleNextMonth} style={styles.navigationButton} disabled={isSubmitting || isDeleting}>
-                                    <Icon name='chevron-forward' color={themeColors.text} />
+                    <>
+                        <ThemedView style={[styles.header, { borderBottomColor: themeColors.systemBorderColor }]}>
+                            <TouchableOpacity onPress={handleClose} style={styles.headerButton} disabled={isSubmitting || isDeleting}>
+                                <Icon name='close' size={20} color={themeColors.text} />
+                            </TouchableOpacity>
+
+                            <ThemedText type='title'>{isEditingMode ? 'Edit Weight' : 'Log Weight'}</ThemedText>
+
+                            <View style={styles.headerRight}>
+                                {isEditingMode && onDelete && (
+                                    <TouchableOpacity onPress={handleDelete} style={styles.deleteButton} disabled={isSubmitting || isDeleting}>
+                                        {isDeleting ? (
+                                            <ActivityIndicator size='small' color={themeColors.subText} />
+                                        ) : (
+                                            <Icon name='trash' color={isSubmitting ? themeColors.subText : themeColors.subText} size={18} />
+                                        )}
+                                    </TouchableOpacity>
+                                )}
+                                <TouchableOpacity
+                                    onPress={handleSubmit}
+                                    disabled={
+                                        isSubmitting ||
+                                        isDeleting ||
+                                        isNaN(parseFloat(weight)) ||
+                                        parseFloat(weight) === 0 ||
+                                        (isEditingMode && originalWeight === parseFloat(weight))
+                                    }
+                                >
+                                    {isSubmitting ? (
+                                        <ActivityIndicator size='small' color={themeColors.text} />
+                                    ) : (
+                                        <Icon
+                                            name='check'
+                                            size={24}
+                                            color={
+                                                !isSubmitting &&
+                                                !isDeleting &&
+                                                !isNaN(parseFloat(weight)) &&
+                                                parseFloat(weight) !== 0 &&
+                                                (!isEditingMode || originalWeight !== parseFloat(weight))
+                                                    ? themeColors.text
+                                                    : lightenColor(themeColors.subText, 0.8)
+                                            }
+                                        />
+                                    )}
                                 </TouchableOpacity>
                             </View>
-                        </View>
+                        </ThemedView>
 
-                        <View style={styles.calendarGrid}>
-                            {generateCalendarDays(displayMonth).map((week, weekIndex) => (
-                                <View key={`week-${weekIndex}`} style={styles.calendarWeek}>
-                                    {week.map((date, dayIndex) => {
-                                        const isCurrentMonth = isSameMonth(date, displayMonth);
-                                        const isToday = isSameDay(date, new Date());
-                                        const isSelected = isSameDay(date, selectedDate);
-                                        const isFutureDate = date > new Date();
-                                        const isDisabled = isFutureDate || !isCurrentMonth;
+                        {error && (
+                            <ThemedText type='bodySmall' style={[styles.errorText, { color: themeColors.red }]}>
+                                {error}
+                            </ThemedText>
+                        )}
 
-                                        return (
-                                            <TouchableOpacity
-                                                key={`day-${dayIndex}`}
+                        <View style={styles.mainContent}>
+                            {!showCalendar ? (
+                                <>
+                                    <TouchableOpacity
+                                        style={styles.dateSelector}
+                                        onPress={() => !isEditing && showCalendarView()}
+                                        disabled={isEditing || isSubmitting || isDeleting}
+                                    >
+                                        <ThemedText type='body' style={{ opacity: isEditing ? 0.5 : 1 }}>
+                                            {format(selectedDate, 'dd/MM/yyyy')}
+                                        </ThemedText>
+                                        {!isEditing && (
+                                            <Icon
+                                                name='chevron-down'
+                                                color={isSubmitting || isDeleting ? themeColors.text : themeColors.text}
+                                                size={16}
+                                                style={{ marginTop: 1, marginLeft: Spaces.XS }}
+                                            />
+                                        )}
+                                    </TouchableOpacity>
+                                    <View style={styles.inputContainer}>
+                                        <ThemedText type='buttonSmall' style={styles.inputLabel}>
+                                            Weight
+                                        </ThemedText>
+                                        <View style={[styles.inputWrapper, { backgroundColor: themeColors.background }]}>
+                                            <TextInput
+                                                ref={weightInputRef}
                                                 style={[
-                                                    styles.calendarDay,
-                                                    isToday &&
-                                                        !isSelected && {
-                                                            borderWidth: StyleSheet.hairlineWidth,
-                                                            borderColor: themeColors.text,
-                                                        },
-                                                    isSelected && {
-                                                        backgroundColor: themeColors.text,
+                                                    styles.input,
+                                                    {
+                                                        color: themeColors.text,
+                                                        opacity: isSubmitting || isDeleting ? 0.5 : 1,
                                                     },
                                                 ]}
-                                                onPress={() => handleDateSelect(date)}
-                                                disabled={isSubmitting || isDeleting || isDisabled}
-                                            >
-                                                <ThemedText
-                                                    type='bodySmall'
-                                                    style={[
-                                                        styles.dayText,
-                                                        isSelected && {
-                                                            color: themeColors.background,
-                                                        },
-                                                        isDisabled && {
-                                                            color: themeColors.subText,
-                                                            opacity: 0.5,
-                                                        },
-                                                        isToday &&
-                                                            !isSelected && {
-                                                                color: themeColors.text,
-                                                            },
-                                                    ]}
-                                                >
-                                                    {format(date, 'd')}
-                                                </ThemedText>
+                                                value={weight}
+                                                onChangeText={setWeight}
+                                                keyboardType='numeric'
+                                                placeholder='0.0'
+                                                placeholderTextColor={themeColors.subText}
+                                                editable={!isSubmitting && !isDeleting}
+                                            />
+                                            <ThemedText type='bodySmall' style={[styles.unit, { opacity: isSubmitting || isDeleting ? 0.5 : 0.7 }]}>
+                                                kgs
+                                            </ThemedText>
+                                        </View>
+                                    </View>
+                                </>
+                            ) : (
+                                <View style={styles.calendarContainer}>
+                                    <View style={styles.calendarHeader}>
+                                        <ThemedText type='body'>{format(displayMonth, 'MMMM yyyy')}</ThemedText>
+                                        <View style={styles.calendarNav}>
+                                            <TouchableOpacity onPress={handlePrevMonth} style={styles.navigationButton} disabled={isSubmitting || isDeleting}>
+                                                <Icon name='chevron-back' color={themeColors.text} />
                                             </TouchableOpacity>
-                                        );
-                                    })}
-                                </View>
-                            ))}
-                        </View>
+                                            <TouchableOpacity onPress={handleNextMonth} style={styles.navigationButton} disabled={isSubmitting || isDeleting}>
+                                                <Icon name='chevron-forward' color={themeColors.text} />
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
 
-                        <View style={styles.calendarFooter}>
-                            <TextButton
-                                text='Go Back'
-                                onPress={hideCalendarView}
-                                style={[styles.calendarButton]}
-                                textStyle={{ color: themeColors.text }}
-                                disabled={isSubmitting || isDeleting}
-                            />
-                            <TextButton
-                                text='Go to Today'
-                                onPress={goToToday}
-                                style={[styles.calendarButton, { marginLeft: Spaces.MD }]}
-                                textStyle={{ color: themeColors.text }}
-                                disabled={isSubmitting || isDeleting}
-                            />
+                                    <View style={styles.calendarGrid}>
+                                        {generateCalendarDays(displayMonth).map((week, weekIndex) => (
+                                            <View key={`week-${weekIndex}`} style={styles.calendarWeek}>
+                                                {week.map((date, dayIndex) => {
+                                                    const isCurrentMonth = isSameMonth(date, displayMonth);
+                                                    const isToday = isSameDay(date, new Date());
+                                                    const isSelected = isSameDay(date, selectedDate);
+                                                    const isFutureDate = date > new Date();
+                                                    const isDisabled = isFutureDate || !isCurrentMonth;
+
+                                                    return (
+                                                        <TouchableOpacity
+                                                            key={`day-${dayIndex}`}
+                                                            style={[
+                                                                styles.calendarDay,
+                                                                isToday &&
+                                                                    !isSelected && {
+                                                                        borderWidth: StyleSheet.hairlineWidth,
+                                                                        borderColor: themeColors.text,
+                                                                    },
+                                                                isSelected && {
+                                                                    backgroundColor: themeColors.text,
+                                                                },
+                                                            ]}
+                                                            onPress={() => handleDateSelect(date)}
+                                                            disabled={isSubmitting || isDeleting || isDisabled}
+                                                        >
+                                                            <ThemedText
+                                                                type='bodySmall'
+                                                                style={[
+                                                                    styles.dayText,
+                                                                    isSelected && {
+                                                                        color: themeColors.background,
+                                                                    },
+                                                                    isDisabled && {
+                                                                        color: themeColors.subText,
+                                                                        opacity: 0.5,
+                                                                    },
+                                                                    isToday &&
+                                                                        !isSelected && {
+                                                                            color: themeColors.text,
+                                                                        },
+                                                                ]}
+                                                            >
+                                                                {format(date, 'd')}
+                                                            </ThemedText>
+                                                        </TouchableOpacity>
+                                                    );
+                                                })}
+                                            </View>
+                                        ))}
+                                    </View>
+
+                                    <View style={styles.calendarFooter}>
+                                        <TextButton
+                                            text='Go Back'
+                                            onPress={hideCalendarView}
+                                            style={[styles.calendarButton]}
+                                            textStyle={{ color: themeColors.text }}
+                                            disabled={isSubmitting || isDeleting}
+                                        />
+                                        <TextButton
+                                            text='Go to Today'
+                                            onPress={goToToday}
+                                            style={[styles.calendarButton, { marginLeft: Spaces.MD }]}
+                                            textStyle={{ color: themeColors.text }}
+                                            disabled={isSubmitting || isDeleting}
+                                        />
+                                    </View>
+                                </View>
+                            )}
                         </View>
-                    </View>
+                    </>
                 )}
             </View>
         </BottomSheet>
@@ -397,6 +420,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
 };
 
 const styles = StyleSheet.create({
+    mainContent: {},
     errorText: {
         textAlign: 'center',
         marginBottom: Spaces.SM,
@@ -502,5 +526,27 @@ const styles = StyleSheet.create({
     calendarButton: {
         flex: 1,
         borderWidth: 0,
+    },
+    successContainer: {
+        flex: 1,
+        alignItems: 'center',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignSelf: 'center',
+        marginTop: Sizes.bottomSpaceLarge,
+        minHeight: Sizes.bottomSpaceLarge,
+    },
+    animationContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: Spaces.XS,
+    },
+    animation: {
+        height: Sizes.imageXSHeight,
+        width: Sizes.imageXSHeight,
+    },
+    successMessage: {
+        marginTop: Spaces.MD,
+        textAlign: 'center',
     },
 });

@@ -60,7 +60,6 @@ export default function WeightTrackingScreen() {
                     weight: weight,
                 }),
             ).unwrap();
-            setIsWeightSheetVisible(false);
             setSelectedMeasurement(null);
         } catch (error) {
             console.error('Failed to update weight:', error);
@@ -76,7 +75,6 @@ export default function WeightTrackingScreen() {
                     measurementTimestamp: date.toISOString(),
                 }),
             ).unwrap();
-            setIsWeightSheetVisible(false);
             setIsAddingWeight(false);
         } catch (error) {
             console.error('Failed to log weight:', error);
