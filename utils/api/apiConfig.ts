@@ -11,7 +11,7 @@ declare module 'axios' {
 }
 
 export const API_CONFIG = {
-    BASE_URL: 'https://r5oibllip9.execute-api.ap-south-1.amazonaws.com/prod',
+    BASE_URL: 'https://p6dhi29ete.execute-api.ap-south-1.amazonaws.com/v1',
     RETRY_ATTEMPTS: 3,
     RETRY_DELAY: 1000,
     TIMEOUT: 10000,
