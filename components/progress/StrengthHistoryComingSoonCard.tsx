@@ -1,4 +1,4 @@
-// components/progress/BodyMeasurementsComingSoonCard.tsx
+// components/progress/StrengthHistoryComingSoonCard.tsx
 
 import React from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
@@ -6,51 +6,63 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { Spaces } from '@/constants/Spaces';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Path, Svg, Defs, LinearGradient, Stop } from 'react-native-svg';
+import { Path, Svg, Defs, LinearGradient, Stop, Circle, Rect } from 'react-native-svg';
 import { lightenColor } from '@/utils/colorUtils';
 
-interface BodyMeasurementsComingSoonCardProps {
+interface StrengthHistoryComingSoonCardProps {
     onPress?: () => void;
     style?: any;
 }
 
-const EmptyStateChart = ({ color }: { color: string }) => (
-    <Svg width='100%' height='100%' viewBox='0 0 100 38' preserveAspectRatio='xMidYMid meet'>
+const BarbellIllustration = ({ color }: { color: string }) => (
+    <Svg width='100%' height='100%' viewBox='0 0 100 50' preserveAspectRatio='xMidYMid meet'>
         <Defs>
-            <LinearGradient id='emptyGradient' x1='0' y1='0' x2='0' y2='1'>
-                <Stop offset='0' stopColor={color} stopOpacity='0.2' />
-                <Stop offset='1' stopColor={color} stopOpacity='0.05' />
+            <LinearGradient id='plateGradient' x1='0' y1='0' x2='1' y2='1'>
+                <Stop offset='0' stopColor={color} stopOpacity='0.3' />
+                <Stop offset='1' stopColor={color} stopOpacity='0.1' />
             </LinearGradient>
         </Defs>
-        <Path d='M 0 25 Q 25 25, 50 15 T 100 25' stroke={color} strokeWidth='0.9' strokeDasharray='2,2' fill='none' opacity='0.5' />
-        <Path d='M 0 25 Q 25 25, 50 15 T 100 25 L 100 38 L 0 38 Z' fill='url(#emptyGradient)' />
+        {/* Barbell bar */}
+        <Path d='M 25 25 L 75 25' stroke={color} strokeWidth='2' strokeLinecap='round' />
+        {/* Plates on left */}
+        <Rect x='20' y='15' width='5' height='20' fill='url(#plateGradient)' rx='1' />
+        <Rect x='15' y='17' width='5' height='16' fill='url(#plateGradient)' rx='1' />
+        {/* Plates on right */}
+        <Rect x='75' y='15' width='5' height='20' fill='url(#plateGradient)' rx='1' />
+        <Rect x='80' y='17' width='5' height='16' fill='url(#plateGradient)' rx='1' />
     </Svg>
 );
 
-export const BodyMeasurementsComingSoonCard: React.FC<BodyMeasurementsComingSoonCardProps> = ({ onPress = () => {}, style = {} }) => {
+export const StrengthHistoryComingSoonCard: React.FC<StrengthHistoryComingSoonCardProps> = ({ onPress = () => {}, style = {} }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
     return (
         <TouchableOpacity
-            style={[styles.card, { backgroundColor: themeColors.blueTransparent, borderColor: lightenColor(themeColors.blueSolid, 0.8) }, style]}
+            style={[
+                styles.card,
+                {
+                    backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.5),
+                    borderColor: lightenColor(themeColors.tangerineSolid, 0.9),
+                },
+                style,
+            ]}
             onPress={onPress}
             activeOpacity={1}
         >
             <View style={styles.emptyStateContainer}>
                 <View style={styles.emptyStateContent}>
-                    <View style={styles.iconContainer} />
-                    <View style={[styles.comingSoonBadge, { backgroundColor: themeColors.blueSolid }]}>
+                    <View style={[styles.comingSoonBadge, { backgroundColor: lightenColor(themeColors.tangerineSolid, 0.2) }]}>
                         <ThemedText type='button' style={[styles.badgeText, { color: themeColors.white }]}>
-                            Body Measurements
+                            Strength Tracking
                         </ThemedText>
                     </View>
                     <ThemedText type='bodySmall' style={[styles.emptyStateDescription, { color: themeColors.subText }]}>
-                        Track your body measurements and photos regularly to witness your transformation.
+                        Watch your strength grow over time with detailed tracking of your lifts.
                     </ThemedText>
                 </View>
                 <View style={styles.chartContainer}>
-                    <EmptyStateChart color={themeColors.blueSolid} />
+                    <BarbellIllustration color={lightenColor(themeColors.tangerineSolid, 0.4)} />
                 </View>
             </View>
         </TouchableOpacity>
@@ -61,6 +73,7 @@ const styles = StyleSheet.create({
     card: {
         borderRadius: Spaces.SM,
         paddingHorizontal: Spaces.MD,
+        paddingTop: Spaces.LG,
         alignItems: 'flex-start',
         width: '100%',
         borderWidth: 1,
@@ -74,19 +87,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: Spaces.MD,
     },
-    iconContainer: {
-        width: Spaces.LG,
-        height: Spaces.LG,
-        borderRadius: Spaces.LG,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
     emptyStateTitle: {
+        marginBottom: Spaces.SM,
         textAlign: 'center',
     },
     emptyStateDescription: {
         textAlign: 'center',
-        marginBottom: Spaces.SM,
         paddingHorizontal: 0,
     },
     comingSoonBadge: {
@@ -106,6 +112,6 @@ const styles = StyleSheet.create({
         height: 80,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: Spaces.XXS,
+        marginVertical: Spaces.XXS,
     },
 });
