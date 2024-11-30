@@ -14,10 +14,10 @@
         },
         "ios": {
             "supportsTablet": false,
+            "minimumSystemVersion": "15.6",
             "userInterfaceStyle": "automatic",
             "bundleIdentifier": "com.GiantFitness.LMC",
             "buildNumber": "1",
-            "Swift": "5.9",
             "infoPlist": {
                 "UIRequiresFullScreen": true,
                 "UIStatusBarStyle": "auto",
@@ -25,7 +25,6 @@
                 "NSPhotoLibraryUsageDescription": "This app needs access to photos for profile pictures.",
                 "NSUserNotificationUsageDescription": "We'll send you notifications about your workouts and updates.",
                 "UIRequiredDeviceCapabilities": ["arm64"],
-                "UISupportedInterfaceOrientations": ["UIInterfaceOrientationPortrait"],
                 "ITSAppUsesNonExemptEncryption": false,
                 "UIBackgroundModes": ["fetch", "remote-notification"]
             }
@@ -38,7 +37,6 @@
             "userInterfaceStyle": "automatic",
             "package": "com.GiantFitness.LMC",
             "versionCode": 1,
-            "minSdkVersion": 24,
             "permissions": ["NOTIFICATIONS", "RECEIVE_BOOT_COMPLETED", "VIBRATE", "CAMERA", "READ_MEDIA_IMAGES"]
         },
         "plugins": ["expo-router", "expo-notifications", "expo-camera", "expo-font", "expo-secure-store"],
