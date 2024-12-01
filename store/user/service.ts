@@ -1,7 +1,7 @@
 // store/user/service.ts
 
 import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, UserWeightMeasurement } from '@/types';
-import { authApiClient } from '@/utils/api/apiConfig';
+import { authUsersApiClient, authRecommendationsApiClient } from '@/utils/api/apiConfig';
 import { handleApiError } from '@/utils/api/errorUtils';
 import { authService } from '@/utils/auth';
 
@@ -10,7 +10,7 @@ const getUser = async (): Promise<User> => {
     console.log('service: getUser');
     try {
         const userId = await authService.getUserId();
-        const { data } = await authApiClient.get(`/users/${userId}`);
+        const { data } = await authUsersApiClient.get(`/users/${userId}`);
         return data.user;
     } catch (error) {
         throw handleApiError(error, 'GetUser');
@@ -23,7 +23,7 @@ const updateUser = async (updates: Partial<User>): Promise<User> => {
         const userId = await authService.getUserId();
         if (!userId) throw new Error('No user ID found');
 
-        const { data } = await authApiClient.put(`/users/${userId}`, updates);
+        const { data } = await authUsersApiClient.put(`/users/${userId}`, updates);
         if (!data.user) {
             throw new Error('Invalid response format');
         }
@@ -39,7 +39,7 @@ const getUserFitnessProfile = async (userId: string): Promise<UserFitnessProfile
     try {
         if (!userId) throw new Error('No user ID found');
 
-        const { data } = await authApiClient.get(`/users/${userId}/fitnessprofile`);
+        const { data } = await authUsersApiClient.get(`/users/${userId}/fitness-profile`);
         if (!data.userFitnessProfile) {
             throw new Error('Invalid response format');
         }
@@ -59,7 +59,7 @@ const updateUserFitnessProfile = async (
 }> => {
     console.log('service: updateUserFitnessProfile');
     try {
-        const { data } = await authApiClient.put(`/users/${userId}/fitnessprofile`, userFitnessProfile);
+        const { data } = await authUsersApiClient.put(`/users/${userId}/fitness-profile`, userFitnessProfile);
 
         if (!data.user || !data.userRecommendations || !data.userFitnessProfile) {
             throw new Error('Invalid response format');
@@ -79,7 +79,7 @@ const updateUserFitnessProfile = async (
 const getUserProgramProgress = async (userId: string): Promise<UserProgramProgress> => {
     console.log('service: getUserProgramProgress');
     try {
-        const { data } = await authApiClient.get(`/users/${userId}/programprogress`);
+        const { data } = await authUsersApiClient.get(`/users/${userId}/program-progress`);
         return data.programProgress;
     } catch (error) {
         throw handleApiError(error, 'GetUserProgramProgress');
@@ -89,7 +89,7 @@ const getUserProgramProgress = async (userId: string): Promise<UserProgramProgre
 const completeDay = async (userId: string, dayId: string): Promise<UserProgramProgress> => {
     console.log('service: completeDay');
     try {
-        const { data } = await authApiClient.put(`/users/${userId}/programprogress/complete-day`, { dayId: parseInt(dayId) });
+        const { data } = await authUsersApiClient.put(`/users/${userId}/program-progress/complete-day`, { dayId: parseInt(dayId) });
 
         if (!data.programProgress) {
             throw new Error('Program progress not found in response');
@@ -104,7 +104,7 @@ const completeDay = async (userId: string, dayId: string): Promise<UserProgramPr
 const uncompleteDay = async (userId: string, dayId: string): Promise<UserProgramProgress> => {
     console.log('service: uncompleteDay');
     try {
-        const { data } = await authApiClient.put(`/users/${userId}/programprogress/uncomplete-day`, { dayId: parseInt(dayId) });
+        const { data } = await authUsersApiClient.put(`/users/${userId}/program-progress/uncomplete-day`, { dayId: parseInt(dayId) });
 
         if (!data.programProgress) {
             throw new Error('Program progress not found in response');
@@ -118,7 +118,7 @@ const uncompleteDay = async (userId: string, dayId: string): Promise<UserProgram
 const endProgram = async (userId: string): Promise<UserProgramProgress> => {
     console.log('service: endProgram');
     try {
-        const { data } = await authApiClient.put(`/users/${userId}/programprogress/end`);
+        const { data } = await authUsersApiClient.put(`/users/${userId}/program-progress/end`);
 
         if (!data.programProgress) {
             throw new Error('Program progress not found in response');
@@ -132,7 +132,7 @@ const endProgram = async (userId: string): Promise<UserProgramProgress> => {
 const startProgram = async (userId: string, programId: string): Promise<UserProgramProgress> => {
     console.log('service: startProgram');
     try {
-        const { data } = await authApiClient.post(`/users/${userId}/programprogress`, { programId });
+        const { data } = await authUsersApiClient.post(`/users/${userId}/program-progress`, { programId });
 
         if (!data.programProgress) {
             throw new Error('Program progress not found in response');
@@ -146,7 +146,7 @@ const startProgram = async (userId: string, programId: string): Promise<UserProg
 const resetProgram = async (userId: string): Promise<UserProgramProgress> => {
     console.log('service: resetProgram');
     try {
-        const { data } = await authApiClient.put(`/users/${userId}/programprogress/reset`);
+        const { data } = await authUsersApiClient.put(`/users/${userId}/program-progress/reset`);
 
         if (!data.programProgress) {
             throw new Error('Program progress not found in response');
@@ -161,7 +161,7 @@ const resetProgram = async (userId: string): Promise<UserProgramProgress> => {
 const getWeightMeasurements = async (userId: string): Promise<UserWeightMeasurement[]> => {
     console.log('service: getWeightMeasurements');
     try {
-        const { data } = await authApiClient.get(`/users/${userId}/weight-measurements`);
+        const { data } = await authUsersApiClient.get(`/users/${userId}/weight-measurements`);
         return data.measurements || [];
     } catch (error) {
         throw handleApiError(error, 'GetWeightMeasurements');
@@ -171,7 +171,7 @@ const getWeightMeasurements = async (userId: string): Promise<UserWeightMeasurem
 const logWeightMeasurement = async (userId: string, weight: number, measurementTimestamp: string): Promise<UserWeightMeasurement> => {
     console.log('service: logWeightMeasurement');
     try {
-        const { data } = await authApiClient.post(`/users/${userId}/weight-measurements`, {
+        const { data } = await authUsersApiClient.post(`/users/${userId}/weight-measurements`, {
             weight,
             MeasurementTimestamp: measurementTimestamp,
         });
@@ -184,7 +184,7 @@ const logWeightMeasurement = async (userId: string, weight: number, measurementT
 const updateWeightMeasurement = async (userId: string, timestamp: string, weight: number): Promise<UserWeightMeasurement> => {
     console.log('service: updateWeightMeasurement');
     try {
-        const { data } = await authApiClient.put(`/users/${userId}/weight-measurements/${timestamp}`, { weight });
+        const { data } = await authUsersApiClient.put(`/users/${userId}/weight-measurements/${timestamp}`, { weight });
         return data.measurement;
     } catch (error) {
         throw handleApiError(error, 'UpdateWeightMeasurement');
@@ -194,7 +194,7 @@ const updateWeightMeasurement = async (userId: string, timestamp: string, weight
 const deleteWeightMeasurement = async (userId: string, timestamp: string): Promise<void> => {
     console.log('service: deleteWeightMeasurement');
     try {
-        await authApiClient.delete(`/users/${userId}/weight-measurements/${timestamp}`);
+        await authUsersApiClient.delete(`/users/${userId}/weight-measurements/${timestamp}`);
     } catch (error) {
         throw handleApiError(error, 'DeleteWeightMeasurement');
     }
@@ -204,7 +204,7 @@ const deleteWeightMeasurement = async (userId: string, timestamp: string): Promi
 const getUserRecommendations = async (userId: string): Promise<UserRecommendations> => {
     console.log('service: getUserRecommendations');
     try {
-        const { data } = await authApiClient.get(`/recommendations/personalized/${userId}`);
+        const { data } = await authRecommendationsApiClient.get(`/recommendations/personalized/${userId}`);
         return data.userRecommendations;
     } catch (error) {
         throw handleApiError(error, 'GetUserRecommendations');

@@ -1,6 +1,6 @@
 // store/feedback/service.ts
 
-import { authApiClient } from '@/utils/api/apiConfig';
+import { authFeedbackApiClient } from '@/utils/api/apiConfig';
 import { handleApiError } from '@/utils/api/errorUtils';
 
 // Define proper types for feedback payload
@@ -32,7 +32,7 @@ const sendProgramFeedback = async (userId: string, programId: string, feedback: 
             ...feedback,
         };
 
-        await authApiClient.post('/feedback/programs', payload);
+        await authFeedbackApiClient.post('/feedback/programs', payload);
     } catch (error) {
         throw handleApiError(error, 'SendProgramFeedback');
     }

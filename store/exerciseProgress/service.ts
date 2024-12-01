@@ -1,14 +1,14 @@
 // store/exerciseProgress/service.ts
 
 import { ExerciseSet, ExerciseLog } from '@/types/exerciseProgressTypes';
-import { authApiClient } from '@/utils/api/apiConfig';
+import { authUsersApiClient } from '@/utils/api/apiConfig';
 import { handleApiError } from '@/utils/api/errorUtils';
 
 const getExerciseLogs = async (userId: string, date?: string): Promise<{ [exerciseLogId: string]: ExerciseLog }> => {
     console.log('service: getExerciseLogs');
     try {
         const queryParams = date ? `?date=${date}` : '';
-        const { data } = await authApiClient.get(`/users/${userId}/exercise-progress${queryParams}`);
+        const { data } = await authUsersApiClient.get(`/users/${userId}/exercise-progress${queryParams}`);
         return data.logs;
     } catch (error) {
         throw handleApiError(error, 'GetExerciseLogs');
@@ -28,7 +28,7 @@ const getExerciseHistory = async (
             ...(params.limit && { limit: params.limit.toString() }),
         }).toString();
 
-        const { data } = await authApiClient.get(`/users/${userId}/exercise-progress/${exerciseId}${queryString ? `?${queryString}` : ''}`);
+        const { data } = await authUsersApiClient.get(`/users/${userId}/exercise-progress/${exerciseId}${queryString ? `?${queryString}` : ''}`);
         return data.history;
     } catch (error) {
         throw handleApiError(error, 'GetExerciseHistory');
@@ -38,7 +38,7 @@ const getExerciseHistory = async (
 const saveExerciseProgress = async (userId: string, exerciseId: string, date: string, sets: ExerciseSet[]): Promise<ExerciseLog> => {
     console.log('service: saveExerciseProgress');
     try {
-        const { data } = await authApiClient.put(`/users/${userId}/exercise-progress/${exerciseId}`, { date, sets });
+        const { data } = await authUsersApiClient.put(`/users/${userId}/exercise-progress/${exerciseId}`, { date, sets });
         return data.log;
     } catch (error) {
         throw handleApiError(error, 'SaveExerciseProgress');
@@ -48,7 +48,7 @@ const saveExerciseProgress = async (userId: string, exerciseId: string, date: st
 const deleteExerciseLog = async (userId: string, exerciseId: string, date: string): Promise<void> => {
     console.log('service: deleteExerciseLog');
     try {
-        await authApiClient.delete(`/users/${userId}/exercise-progress/${exerciseId}?date=${date}`);
+        await authUsersApiClient.delete(`/users/${userId}/exercise-progress/${exerciseId}?date=${date}`);
     } catch (error) {
         throw handleApiError(error, 'DeleteExerciseLog');
     }
