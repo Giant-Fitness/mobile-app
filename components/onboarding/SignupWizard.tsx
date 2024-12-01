@@ -4,17 +4,18 @@ import React, { useState, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { IconButton } from '@/components/buttons/IconButton';
-import { TextButton } from '@/components/buttons/TextButton';
 import { ProgressDots } from '@/components/onboarding/ProgressDots';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { router } from 'expo-router';
+import { PrimaryButton } from '../buttons/PrimaryButton';
 
 interface WizardStep {
     title: string;
     component: React.ComponentType<any>;
+    initialData?: Record<string, any>;
 }
 
 interface SignupWizardProps {
@@ -22,14 +23,15 @@ interface SignupWizardProps {
     onComplete: (data: any) => void;
     IntroScreen?: React.ComponentType<{ onStart: () => void }>;
     submitText: string;
+    initialData?: Record<string, any>;
 }
 
-export const SignupWizard: React.FC<SignupWizardProps> = ({ steps, onComplete, IntroScreen, submitText = 'Submit' }) => {
+export const SignupWizard: React.FC<SignupWizardProps> = ({ steps, onComplete, IntroScreen, submitText = 'Submit', initialData = {} }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const [showIntroScreen, setShowIntroScreen] = useState(true);
     const [currentStep, setCurrentStep] = useState(0);
-    const [formData, setFormData] = useState({});
+    const [formData, setFormData] = useState(initialData);
     const [isCurrentStepValid, setIsCurrentStepValid] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const formRef = useRef();
@@ -63,6 +65,10 @@ export const SignupWizard: React.FC<SignupWizardProps> = ({ steps, onComplete, I
     };
 
     const handleStart = () => {
+        // If we have initial data, set the current step valid immediately
+        if (steps[0]?.initialData && Object.keys(steps[0].initialData).length > 0) {
+            setIsCurrentStepValid(true);
+        }
         setShowIntroScreen(false);
     };
 
@@ -75,6 +81,7 @@ export const SignupWizard: React.FC<SignupWizardProps> = ({ steps, onComplete, I
     }
 
     const CurrentStepComponent = steps[currentStep].component;
+    const currentStepInitialData = steps[currentStep].initialData || {};
     const isLastStep = currentStep === steps.length - 1;
 
     return (
@@ -82,7 +89,12 @@ export const SignupWizard: React.FC<SignupWizardProps> = ({ steps, onComplete, I
             <View style={styles.header}>
                 <ProgressDots total={steps.length} current={currentStep} />
             </View>
-            <CurrentStepComponent ref={formRef} formData={formData} onSubmit={handleNext} onValidityChange={setIsCurrentStepValid} />
+            <CurrentStepComponent
+                ref={formRef}
+                formData={{ ...formData, ...currentStepInitialData }}
+                onSubmit={handleNext}
+                onValidityChange={setIsCurrentStepValid}
+            />
             <View style={styles.navigation}>
                 <IconButton iconName='chevron-back' onPress={handleBack} style={styles.backButton} size='MD' iconSize={Spaces.MD} />
                 {!isLastStep ? (
@@ -97,7 +109,7 @@ export const SignupWizard: React.FC<SignupWizardProps> = ({ steps, onComplete, I
                     />
                 ) : (
                     <View style={styles.submitButtonContainer}>
-                        <TextButton
+                        <PrimaryButton
                             iconName='chevron-forward'
                             onPress={() => formRef.current?.submitForm()}
                             text={submitText}

@@ -9,6 +9,8 @@ import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
 import motivationalImage from '@/assets/images/stretching.svg';
+import AnimatedHeader from '@/components/navigation/AnimatedHeader';
+import { useSharedValue } from 'react-native-reanimated';
 
 type ProgramRecommenderIntroProps = {
     onStart: () => void;
@@ -17,9 +19,11 @@ type ProgramRecommenderIntroProps = {
 export const ProgramRecommenderIntro: React.FC<ProgramRecommenderIntroProps> = ({ onStart }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const scrollY = useSharedValue(0);
 
     return (
         <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+            <AnimatedHeader scrollY={scrollY} disableColorChange={true} headerBackground={themeColors.background} />
             <ImageTextOverlay
                 image={motivationalImage}
                 containerStyle={styles.motivationalImage}

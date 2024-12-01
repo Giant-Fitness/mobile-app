@@ -104,10 +104,10 @@ export default function InactiveProgramHome() {
             show: true,
         },
         {
-            title: !isOnboardingComplete ? 'Browse Library' : 'Update Your Preferences',
+            title: !isOnboardingComplete ? 'Browse Library' : 'Retake Quiz',
             description: !isOnboardingComplete
                 ? 'Our structured training plans turn your goals into achievements'
-                : 'Retake our quiz to get an updated training plan recommendation',
+                : 'Retake the quiz to get an updated training plan recommendation',
             image: !isOnboardingComplete ? require('@/assets/images/clipboard.png') : require('@/assets/images/wand.png'),
             onPress: () => navigateTo(!isOnboardingComplete ? 'programs/browse-programs' : 'programs/program-recommender-wizard'),
             backgroundColor: !isOnboardingComplete ? lightenColor(themeColors.maroonTransparent, 0.3) : lightenColor(themeColors.tangerineTransparent, 0.7),
