@@ -87,6 +87,8 @@ export const ImageTextOverlay: React.FC<ImageTextOverlayProps> = ({
                         setIsLoading(false);
                         setInitialLoad(false);
                     }}
+                    priority='normal'
+                    recyclingKey={typeof image === 'string' ? image : image.toString()}
                 />
                 {initialLoad && (
                     <ShimmerPlaceholderComponent

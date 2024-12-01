@@ -96,6 +96,8 @@ export const TopImageInfoCard = ({
                     }}
                     contentPosition='center'
                     cachePolicy='memory-disk'
+                    priority='normal'
+                    recyclingKey={typeof image === 'string' ? image : image.toString()}
                 />
                 {initialLoad && (
                     <ShimmerPlaceholder

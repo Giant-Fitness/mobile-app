@@ -96,6 +96,8 @@ export const LeftImageInfoCard: React.FC<LeftImageInfoCardProps> = ({
                             setInitialLoad(false);
                         }}
                         cachePolicy='memory-disk'
+                        priority='normal'
+                        recyclingKey={typeof image === 'string' ? image : image.toString()}
                     />
                     {initialLoad && (
                         <ShimmerPlaceholder

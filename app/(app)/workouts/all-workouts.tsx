@@ -160,12 +160,19 @@ export default function AllWorkoutsScreen() {
                 data={filteredWorkouts}
                 renderItem={renderItem}
                 keyExtractor={keyExtractor}
-                removeClippedSubviews={true}
-                maxToRenderPerBatch={10}
-                updateCellsBatchingPeriod={50}
-                initialNumToRender={5}
-                windowSize={10}
-                contentContainerStyle={[styles.contentContainer, { backgroundColor: themeColors.background, paddingHorizontal: Spaces.MD }]}
+                removeClippedSubviews={false} // Set to false to keep items mounted
+                maxToRenderPerBatch={20} // Increase this significantly
+                updateCellsBatchingPeriod={50} // Decrease to update UI more frequently
+                initialNumToRender={10} // Show more items initially
+                windowSize={21} // Increase window size (each unit is about 1 viewport height)
+                onEndReachedThreshold={0.5}
+                contentContainerStyle={[
+                    styles.contentContainer,
+                    {
+                        backgroundColor: themeColors.background,
+                        paddingHorizontal: Spaces.MD,
+                    },
+                ]}
                 showsVerticalScrollIndicator={false}
             />
             <WorkoutsBottomBar onSortPress={handleSortPress} onFilterPress={handleFilterPress} appliedFilterCount={activeFilterTypesCount} />
