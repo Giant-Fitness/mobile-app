@@ -125,12 +125,13 @@ const createAuthenticatedApiClient = (config: ApiConfig): AxiosInstance => {
 
     client.interceptors.request.use(async (config) => {
         try {
-            const token = await authService.getAccessToken();
-            if (token) {
-                config.headers.Authorization = `Bearer ${token}`;
+            const authHeader = await authService.getAccessToken();
+            if (authHeader) {
+                config.headers.Authorization = authHeader;
             }
             return config;
         } catch (error) {
+            console.error('Error setting auth header:', error);
             return Promise.reject(error);
         }
     });
