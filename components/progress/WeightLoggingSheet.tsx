@@ -82,6 +82,21 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
         }
     }, [visible, initialWeight, initialDate, getExistingData]);
 
+    useEffect(() => {
+        if (visible && !isEditing) {
+            const existingData = getExistingData?.(selectedDate);
+            if (existingData) {
+                setWeight(existingData.Weight.toString());
+                setOriginalWeight(existingData.Weight);
+                setIsEditingMode(true);
+            } else {
+                setWeight(initialWeight?.toString() || '');
+                setOriginalWeight(undefined);
+                setIsEditingMode(false);
+            }
+        }
+    }, [selectedDate, getExistingData, visible, isEditing, initialWeight]);
+
     const handleClose = () => {
         if (isSuccess) {
             return;
