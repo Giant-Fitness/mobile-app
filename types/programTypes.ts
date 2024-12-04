@@ -1,5 +1,9 @@
 // types/programTypes.ts
 
+// Future considerations:
+// - Add support for supersets
+// - Add workout sections (warmup, main, cooldown)
+
 export interface ProgramCalendarOverviewItem {
     Title: string;
     Description: string;
@@ -59,8 +63,13 @@ export interface ProgramDay {
     DayId: string;
     DayTitle: string;
     RestDay: boolean;
-    Exercises: Exercise[];
-    PhotoUrl: string;
+    // A day can either be a video workout or a set of exercises
+    Type: 'video' | 'workout';
+    // For video type days
+    WorkoutId?: string;
+    // For workout type days
+    Exercises?: Exercise[];
+    PhotoUrl?: string;
     CreatedAt: string;
     UpdatedAt: string;
     Time: number; // Time in minutes

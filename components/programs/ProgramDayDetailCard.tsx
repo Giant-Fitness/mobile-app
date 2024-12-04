@@ -10,9 +10,11 @@ import { ThemedView } from '@/components/base/ThemedView';
 import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
-import { ProgramDay } from '@/types';
+import { ProgramDay, Workout } from '@/types';
 import { getWeekNumber, getDayOfWeek } from '@/utils/calendar';
 import { router } from 'expo-router';
+import { RootState } from '@/store/store';
+import { useSelector } from 'react-redux';
 
 type ProgramDayDetailCardProps = {
     day: ProgramDay;
@@ -21,6 +23,7 @@ type ProgramDayDetailCardProps = {
 export const ProgramDayDetailCard: React.FC<ProgramDayDetailCardProps> = ({ day }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const { workouts } = useSelector((state: RootState) => state.workouts);
 
     const navigateToProgramDay = () => {
         router.push({
@@ -32,6 +35,13 @@ export const ProgramDayDetailCard: React.FC<ProgramDayDetailCardProps> = ({ day 
         });
     };
 
+    const getDisplayImage = (day: ProgramDay, workouts: Record<string, Workout>) => {
+        if (day.Type === 'video' && day.WorkoutId && workouts[day.WorkoutId]) {
+            return { uri: workouts[day.WorkoutId].PhotoUrl };
+        }
+        return { uri: day.PhotoUrl };
+    };
+
     // **Calculate Current Week Based on dayId**
     const currentDayNumber = parseInt(day.DayId, 10);
     const currentWeek = getWeekNumber(currentDayNumber);
@@ -39,7 +49,7 @@ export const ProgramDayDetailCard: React.FC<ProgramDayDetailCardProps> = ({ day 
 
     return (
         <LeftImageInfoCard
-            image={{ uri: day.PhotoUrl }}
+            image={getDisplayImage(day, workouts)}
             onPress={navigateToProgramDay}
             title={day.DayTitle}
             extraContent={

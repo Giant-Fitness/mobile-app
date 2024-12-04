@@ -5,6 +5,7 @@ import { RootState } from '@/store/store';
 import ExerciseProgressService from '@/store/exerciseProgress/service';
 import { ExerciseSet } from '@/types/exerciseProgressTypes';
 import { isLongTermTrackedLift, LONG_TERM_TRACKED_LIFT_IDS } from '@/store/exerciseProgress/utils';
+import { REQUEST_STATE } from '@/constants/requestStates';
 
 // Load only full history for tracked/compound lifts during initialization
 export const initializeTrackedLiftsHistoryAsync = createAsyncThunk('exerciseProgress/initializeTrackedLifts', async (_, { getState, rejectWithValue }) => {
@@ -47,10 +48,33 @@ export const fetchExercisesRecentHistoryAsync = createAsyncThunk(
             // Only fetch non-tracked lifts
             const exercisesToFetch = exerciseIds.filter((id) => !isLongTermTrackedLift(id));
 
-            const recentHistoryPromises = exercisesToFetch.map((exerciseId) => ExerciseProgressService.getExerciseHistory(userId, exerciseId, { limit: 10 }));
+            // Check which exercises need to be fetched
+            const uncachedExercises = exercisesToFetch.filter((exerciseId) => {
+                // Look for logs matching this exercise ID
+                const hasRecentLogs = Object.values(state.exerciseProgress.recentLogs).some((log) => log.ExerciseId === exerciseId);
+                return !hasRecentLogs;
+            });
+
+            // If we have all exercises cached and they're not stale
+            if (uncachedExercises.length === 0 && state.exerciseProgress.recentLogsState === REQUEST_STATE.FULFILLED) {
+                // Return existing data filtered for requested exercises
+                return {
+                    recentLogs: Object.entries(state.exerciseProgress.recentLogs)
+                        .filter(([_, log]) => exercisesToFetch.includes(log.ExerciseId))
+                        .reduce(
+                            (acc, [key, value]) => ({
+                                ...acc,
+                                [key]: value,
+                            }),
+                            {},
+                        ),
+                };
+            }
+
+            const recentHistoryPromises = uncachedExercises.map((exerciseId) => ExerciseProgressService.getExerciseHistory(userId, exerciseId, { limit: 10 }));
             const recentHistories = await Promise.all(recentHistoryPromises);
 
-            const recentLogs = exercisesToFetch.reduce(
+            const recentLogs = uncachedExercises.reduce(
                 (acc, exerciseId, index) => ({
                     ...acc,
                     ...recentHistories[index],

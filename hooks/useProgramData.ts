@@ -147,17 +147,16 @@ export const useProgramData = (
 
     useEffect(() => {
         if (user && user.UserId && userProgramProgressState === REQUEST_STATE.IDLE) {
-            dispatch(getUserProgramProgressAsync(user.UserId));
+            dispatch(getUserProgramProgressAsync());
         }
         if (user && user.UserId && userRecommendationsState === REQUEST_STATE.IDLE) {
-            dispatch(getUserRecommendationsAsync(user.UserId));
+            dispatch(getUserRecommendationsAsync());
         }
     }, [dispatch, user, userProgramProgressState, userRecommendationsState]);
 
     useEffect(() => {
         const programId = specificProgramId || userProgramProgress?.ProgramId;
         const dayId = specificDayId || userProgramProgress?.CurrentDay;
-
         if (programId) {
             if (activeProgramState === REQUEST_STATE.IDLE) {
                 dispatch(getProgramAsync({ programId }));
@@ -207,14 +206,14 @@ export const useProgramData = (
         // Calculate initial month index
         let initialMonthIndex = 0;
         if (userProgramProgress?.CurrentDay) {
-            initialMonthIndex = Math.floor((parseInt(userProgramProgress.CurrentDay) - 1) / 28);
+            initialMonthIndex = Math.floor((userProgramProgress.CurrentDay - 1) / 28);
             initialMonthIndex = Math.min(initialMonthIndex, groupedMonths.length - 1);
         }
 
         return {
             months: groupedMonths,
             initialMonthIndex,
-            currentWeek: userProgramProgress?.CurrentDay ? getWeekNumber(parseInt(userProgramProgress.CurrentDay)) : 1,
+            currentWeek: userProgramProgress?.CurrentDay ? getWeekNumber(userProgramProgress.CurrentDay) : 1,
         };
     }, [activeProgram, programDays, userProgramProgress]);
 
@@ -235,7 +234,6 @@ export const useProgramData = (
         ) {
             return REQUEST_STATE.PENDING;
         }
-
         // If specificProgramId and specificDayId are provided, check for their respective states
         if (specificProgramId && specificDayId) {
             return activeProgramState === REQUEST_STATE.FULFILLED && programDayState === REQUEST_STATE.FULFILLED

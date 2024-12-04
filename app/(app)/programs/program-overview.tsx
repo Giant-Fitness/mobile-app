@@ -154,14 +154,14 @@ const ProgramOverviewScreen = () => {
                                 {DesignedFor}
                             </ThemedText>
 
-                            <View style={[styles.divider, { borderBottomColor: themeColors.systemBorderColor }]} />
+                            {/* <View style={[styles.divider, { borderBottomColor: themeColors.systemBorderColor }]} />
 
                             <ThemedText type='button' style={{ paddingBottom: Spaces.XS }}>
                                 Why Choose this Program:
                             </ThemedText>
                             <ThemedText type='body' style={{ marginBottom: Spaces.SM }}>
                                 {WhyChooseThisProgram}
-                            </ThemedText>
+                            </ThemedText> */}
                         </ThemedView>
                         <ThemedView style={styles.descriptionContainer}>
                             {CalendarOverview.map((item, index) => (
@@ -178,6 +178,15 @@ const ProgramOverviewScreen = () => {
                                 <TextButton
                                     text='Start Program'
                                     onPress={() => setIsOverwriteProgramModalVisible(true)}
+                                    textType='bodyMedium'
+                                    size='LG'
+                                    style={[styles.calendarButton, { marginTop: Spaces.MD }]}
+                                />
+                            )}
+                            {isOnAProgram && isOnThisProgram && (
+                                <TextButton
+                                    text='View Progress'
+                                    onPress={() => router.push('/(app)/programs/active-program-progress')}
                                     textType='bodyMedium'
                                     size='LG'
                                     style={[styles.calendarButton, { marginTop: Spaces.MD }]}

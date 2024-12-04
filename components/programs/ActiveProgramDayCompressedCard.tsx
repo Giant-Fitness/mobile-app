@@ -16,6 +16,8 @@ import { ImageTextOverlay } from '../media/ImageTextOverlay';
 import { router } from 'expo-router';
 import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Workout } from '@/types';
+import { ProgramDay } from '@/types';
 
 // Cast ShimmerPlaceHolder to the correct type
 const ShimmerPlaceholder = ShimmerPlaceHolder as unknown as React.ComponentType<any>;
@@ -25,6 +27,7 @@ type ActiveProgramDayCompressedCardProps = {};
 export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressedCardProps> = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const { workouts } = useSelector((state: RootState) => state.workouts);
 
     const { userProgramProgress } = useSelector((state: RootState) => state.user);
     const { programDays, programDaysState } = useSelector((state: RootState) => state.programs);
@@ -34,6 +37,13 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
 
     const currentDay = programId && dayId ? programDays[programId]?.[dayId] : null;
     const currentDayState = programId && dayId ? programDaysState[programId]?.[dayId] : REQUEST_STATE.IDLE;
+
+    const getDisplayImage = (day: ProgramDay, workouts: Record<string, Workout>) => {
+        if (day.Type === 'video' && day.WorkoutId && workouts[day.WorkoutId]) {
+            return { uri: workouts[day.WorkoutId].PhotoUrl };
+        }
+        return { uri: day.PhotoUrl };
+    };
 
     // Loading and error states are handled below
     if (currentDayState === REQUEST_STATE.PENDING || !currentDay) {
@@ -85,7 +95,7 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
         <View style={[styles.shadowContainer, { backgroundColor: themeColors.background }]}>
             <TouchableOpacity onPress={navigateToProgramDay} style={styles.cardContainer} activeOpacity={1}>
                 <ImageTextOverlay
-                    image={{ uri: day.PhotoUrl }}
+                    image={getDisplayImage(currentDay, workouts)}
                     title={day.DayTitle}
                     gradientColors={['transparent', 'rgba(0,0,0,0.65)']}
                     containerStyle={{ height: '100%' }}

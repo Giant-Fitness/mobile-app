@@ -1,9 +1,9 @@
 // app/(app)/programs/program-day.tsx
 
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, ActivityIndicator, View } from 'react-native';
+import { StyleSheet, ActivityIndicator, View, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import LottieView from 'lottie-react-native';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -25,26 +25,35 @@ import { ProgramDayUnfinishModal } from '@/components/programs/ProgramDayUnfinis
 import { BottomMenuModal } from '@/components/overlays/BottomMenuModal';
 import { AutoDismissSuccessModal } from '@/components/overlays/AutoDismissSuccessModal';
 import { ExerciseLoggingSheet } from '@/components/exercise/ExerciseLoggingSheet';
+import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle } from '@/components/media/FullScreenVideoPlayer';
 import { getDayOfWeek, getWeekNumber } from '@/utils/calendar';
 import { fetchExercisesRecentHistoryAsync } from '@/store/exerciseProgress/thunks';
-import { AppDispatch } from '@/store/store';
+import { AppDispatch, RootState } from '@/store/store';
 import { Exercise } from '@/types';
 import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
+import { AVPlaybackStatus } from 'expo-av';
+import { ThumbnailVideoPlayer } from '@/components/media/ThumbnailVideoPlayer';
 
 const ProgramDayScreen = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const dispatch = useDispatch<AppDispatch>();
+
     const [isProgramDaySkipModalVisible, setIsProgramDaySkipModalVisible] = useState(false);
     const [isResetDayModalVisible, setIsResetDayModalVisible] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
-    const confettiRef = useRef<LottieView>(null);
     const [isBottomMenuVisible, setIsBottomMenuVisible] = useState(false);
     const [showResetSuccess, setShowResetSuccess] = useState(false);
     const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
     const [isLoggingSheetVisible, setIsLoggingSheetVisible] = useState(false);
+    const [isVideoLoading, setIsVideoLoading] = useState(false);
+
+    const confettiRef = useRef<LottieView>(null);
+    const videoPlayerRef = useRef<FullScreenVideoPlayerHandle>(null);
+    const scrollY = useSharedValue(0);
 
     const { programId, dayId } = useLocalSearchParams<{ programId: string; dayId: string }>();
+    const { workouts } = useSelector((state: RootState) => state.workouts);
 
     const {
         userProgramProgress,
@@ -59,25 +68,55 @@ const ProgramDayScreen = () => {
         isUncompletingDay,
     } = useProgramData(programId, dayId);
 
-    // Load exercise histories when program day loads
-    useEffect(() => {
-        if (programDay?.Exercises && !programDay.RestDay) {
-            // Filter exercises to only include non-tracked strength exercises
-            const exerciseIds = programDay.Exercises.filter(
-                (exercise) =>
-                    // Only include if:
-                    !isLongTermTrackedLift(exercise.ExerciseId) && // Not a tracked lift
-                    exercise.Type === 'strength', // Is a strength exercise
-            ).map((exercise) => exercise.ExerciseId);
+    // Video playback tracking
+    const [lastPlaybackPosition, setLastPlaybackPosition] = useState(0);
+    const [reachedMilestones, setReachedMilestones] = useState(new Set());
+    const MILESTONES = [0.25, 0.5, 0.75, 1.0];
+    const SKIP_THRESHOLD = 0.25;
 
-            // Only fetch if we have any exercises that match our criteria
+    // Load exercise histories for workout type days
+    useEffect(() => {
+        if (programDay?.Type === 'workout' && programDay.Exercises) {
+            const exerciseIds = programDay.Exercises.filter((exercise) => !isLongTermTrackedLift(exercise.ExerciseId) && exercise.Type === 'strength').map(
+                (exercise) => exercise.ExerciseId,
+            );
+
             if (exerciseIds.length > 0) {
                 dispatch(fetchExercisesRecentHistoryAsync(exerciseIds));
             }
         }
-    }, [programDay?.Exercises, programDay?.RestDay]);
+    }, [programDay?.Type, programDay?.Exercises]);
 
-    const scrollY = useSharedValue(0);
+    const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
+        if (status.isLoaded) {
+            if (!status.isBuffering) {
+                setIsVideoLoading(false);
+            }
+
+            const duration = status.durationMillis;
+            const currentPosition = status.positionMillis;
+
+            if (duration) {
+                const progress = currentPosition / duration;
+
+                // Check if video has restarted
+                if (currentPosition < lastPlaybackPosition) {
+                    setReachedMilestones(new Set());
+                }
+
+                // Track milestones
+                MILESTONES.forEach((milestone) => {
+                    if (progress >= milestone && !reachedMilestones.has(milestone)) {
+                        console.log(`Milestone reached: ${milestone * 100}%`);
+                        setReachedMilestones((prev) => new Set(prev).add(milestone));
+                    }
+                });
+
+                setLastPlaybackPosition(currentPosition);
+            }
+        }
+    };
+
     const scrollHandler = useAnimatedScrollHandler({
         onScroll: (event) => {
             scrollY.value = event.contentOffset.y;
@@ -91,6 +130,19 @@ const ProgramDayScreen = () => {
         });
     };
 
+    const handleStartWorkout = () => {
+        if (programDay?.Type === 'video' && programDay.WorkoutId) {
+            setIsVideoLoading(true);
+            if (videoPlayerRef.current) {
+                videoPlayerRef.current.startPlayback();
+                setReachedMilestones(new Set());
+                setLastPlaybackPosition(0);
+            }
+        } else {
+            finishDayChecker();
+        }
+    };
+
     const finishDayChecker = async () => {
         if (userProgramProgress && userProgramProgress.CurrentDay < parseInt(dayId)) {
             setIsProgramDaySkipModalVisible(true);
@@ -100,7 +152,6 @@ const ProgramDayScreen = () => {
     };
 
     const completeDay = async () => {
-        var programId = userProgramProgress?.ProgramId;
         if (activeProgram && activeProgram.Days.toString() === dayId.toString()) {
             await handleCompleteDay();
             router.replace({
@@ -168,6 +219,136 @@ const ProgramDayScreen = () => {
         setSelectedExercise(null);
     };
 
+    const renderVideoDay = () => {
+        const workout = programDay?.WorkoutId ? workouts[programDay.WorkoutId] : null;
+        if (!workout || !programDay) return null;
+
+        return (
+            <>
+                <ThumbnailVideoPlayer videoUrl={workout.VideoUrl} thumbnailUrl={workout.PhotoUrl} onPlaybackStatusUpdate={handlePlaybackStatusUpdate} />
+                <ThemedView style={[styles.topCard, { backgroundColor: themeColors.background }]}>
+                    <ThemedView>
+                        <ThemedText type='titleLarge'>{programDay.DayTitle}</ThemedText>
+                        <ThemedText type='link' style={{ color: themeColors.subText, marginTop: 0, marginBottom: Spaces.SM }}>
+                            {`Week ${getWeekNumber(parseInt(dayId))} Day ${getDayOfWeek(parseInt(dayId))}`}
+                        </ThemedText>
+                    </ThemedView>
+                    <View style={styles.attributeItem}>
+                        <Icon name='stopwatch' color={themeColors.text} />
+                        <ThemedText type='body' style={[styles.attributeText]}>
+                            {workout.Time} mins
+                        </ThemedText>
+                    </View>
+                    <View style={styles.attributeItem}>
+                        <Icon name='kettlebell' color={themeColors.text} />
+                        <ThemedText type='body' style={[styles.attributeText]}>
+                            {programDay.Equipment.join(', ')}
+                        </ThemedText>
+                    </View>
+                    <ThemedView style={styles.attributeRow}>
+                        <ThemedView style={styles.attribute}>
+                            <Icon name='yoga' color={themeColors.text} />
+                            <ThemedText type='body' style={[styles.attributeText]}>
+                                {workout.TargetedMuscles.join(', ')}
+                            </ThemedText>
+                        </ThemedView>
+                    </ThemedView>
+                </ThemedView>
+                <ThemedView
+                    style={[
+                        styles.mainContainer,
+                        { backgroundColor: themeColors.backgroundTertiary },
+                        isEnrolled && { paddingBottom: Sizes.bottomSpaceLarge }, // Add this
+                    ]}
+                >
+                    <ThemedView style={[styles.descriptionContainer, { backgroundColor: themeColors.background }]}>
+                        <ThemedText type='button' style={{ color: themeColors.text, paddingBottom: Spaces.MD }}>
+                            What to Expect
+                        </ThemedText>
+                        <ThemedText type='body' style={[{ color: themeColors.text }]}>
+                            {workout.DescriptionLong.split('\n\n')[1]}
+                        </ThemedText>
+                    </ThemedView>
+                </ThemedView>
+            </>
+        );
+    };
+
+    const renderWorkoutDay = () => {
+        if (!programDay) return null;
+
+        return (
+            <>
+                <TopImageInfoCard
+                    image={{ uri: programDay.PhotoUrl }}
+                    title={`${programDay.DayTitle}`}
+                    subtitle={`Week ${getWeekNumber(parseInt(dayId))} Day ${getDayOfWeek(parseInt(dayId))}`}
+                    titleType='titleLarge'
+                    subtitleType='link'
+                    subtitleStyle={{ marginBottom: Spaces.SM, color: themeColors.subText, marginTop: 0 }}
+                    titleStyle={{ marginBottom: 0 }}
+                    containerStyle={{ elevation: 5, marginBottom: 0 }}
+                    contentContainerStyle={{
+                        backgroundColor: themeColors.background,
+                        paddingHorizontal: Spaces.LG,
+                    }}
+                    imageStyle={{ height: Sizes.imageXXLHeight }}
+                    titleFirst={true}
+                    extraContent={
+                        <ThemedView>
+                            {programDay.RestDay ? (
+                                <ThemedView style={styles.tipContainer}>
+                                    <Icon name='sleep' color={themeColors.subText} style={{ marginRight: Spaces.SM, marginTop: Spaces.XS }} />
+                                    <ThemedText type='body' style={{ color: themeColors.subText }}>
+                                        {'Take it easy today! Focus on recovery and hydration.'}
+                                    </ThemedText>
+                                </ThemedView>
+                            ) : (
+                                <ThemedView>
+                                    {[
+                                        { icon: 'stopwatch', text: `${programDay.Time} mins` },
+                                        { icon: 'kettlebell', text: programDay.Equipment.join(', ') },
+                                        { icon: 'yoga', text: programDay.MuscleGroups.join(', ') },
+                                    ].map((item, index) => (
+                                        <ThemedView key={index} style={styles.attributeRow}>
+                                            <ThemedView style={styles.attribute}>
+                                                <Icon name={item.icon} color={themeColors.text} />
+                                                <ThemedText type='body' style={styles.attributeText}>
+                                                    {item.text}
+                                                </ThemedText>
+                                            </ThemedView>
+                                        </ThemedView>
+                                    ))}
+                                </ThemedView>
+                            )}
+                        </ThemedView>
+                    }
+                />
+                {!programDay.RestDay && programDay.Exercises && (
+                    <ThemedView
+                        style={[
+                            styles.exercisesContainer,
+                            { backgroundColor: themeColors.backgroundSecondary },
+                            { paddingBottom: Spaces.XL },
+                            isEnrolled && { paddingBottom: Sizes.bottomSpaceLarge },
+                        ]}
+                    >
+                        {programDay.Exercises.map((exercise, index) => (
+                            <ExerciseCard
+                                key={exercise.ExerciseId}
+                                exercise={exercise}
+                                isEnrolled={isEnrolled}
+                                showLoggingButton={exercise.Type === 'strength'}
+                                onLogPress={() => handleExerciseLogPress(exercise)}
+                                exerciseNumber={index + 1}
+                            />
+                        ))}
+                    </ThemedView>
+                )}
+            </>
+        );
+    };
+
     if (programDayState === REQUEST_STATE.PENDING) {
         return (
             <ThemedView style={styles.loadingContainer}>
@@ -176,7 +357,7 @@ const ProgramDayScreen = () => {
         );
     }
 
-    if (programDayState === REQUEST_STATE.REJECTED) {
+    if (programDayState === REQUEST_STATE.REJECTED || !programDay) {
         return (
             <ThemedView style={styles.errorContainer}>
                 <ThemedText>Error loading the program day.</ThemedText>
@@ -185,7 +366,7 @@ const ProgramDayScreen = () => {
     }
 
     return (
-        <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
+        <ThemedView style={{ flex: 1, backgroundColor: themeColors.backgroundTertiary }}>
             <AnimatedHeader
                 scrollY={scrollY}
                 headerInterpolationStart={Spaces.XXL}
@@ -193,116 +374,48 @@ const ProgramDayScreen = () => {
                 onMenuPress={isEnrolled ? handleMenuPress : undefined}
             />
             <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
-                {programDay && (
-                    <>
-                        <TopImageInfoCard
-                            image={{ uri: programDay.PhotoUrl }}
-                            title={`${programDay.DayTitle}`}
-                            subtitle={`Week ${getWeekNumber(parseInt(dayId))} Day ${getDayOfWeek(parseInt(dayId))}`}
-                            titleType='titleLarge'
-                            subtitleType='link'
-                            subtitleStyle={{ marginBottom: Spaces.SM, color: themeColors.subText, marginTop: 0 }}
-                            titleStyle={{ marginBottom: 0 }}
-                            containerStyle={{ elevation: 5, marginBottom: 0 }}
-                            contentContainerStyle={{
-                                backgroundColor: themeColors.background,
-                                paddingHorizontal: Spaces.LG,
-                            }}
-                            imageStyle={{ height: Sizes.imageXXLHeight }}
-                            titleFirst={true}
-                            extraContent={
-                                <ThemedView>
-                                    {programDay.RestDay ? (
-                                        <ThemedView style={styles.tipContainer}>
-                                            <Icon name='sleep' color={themeColors.subText} style={{ marginRight: Spaces.SM, marginTop: Spaces.XS }} />
-                                            <ThemedText type='body' style={{ color: themeColors.subText }}>
-                                                {'Take it easy today! Focus on recovery and hydration.'}
-                                            </ThemedText>
-                                        </ThemedView>
-                                    ) : (
-                                        <ThemedView>
-                                            {[
-                                                { icon: 'stopwatch', text: `${programDay.Time} mins` },
-                                                { icon: 'kettlebell', text: programDay.Equipment.join(', ') },
-                                                { icon: 'yoga', text: programDay.MuscleGroups.join(', ') },
-                                            ].map((item, index) => (
-                                                <ThemedView key={index} style={styles.attributeRow}>
-                                                    <ThemedView style={styles.attribute}>
-                                                        <Icon name={item.icon} color={themeColors.text} />
-                                                        <ThemedText type='body' style={styles.attributeText}>
-                                                            {item.text}
-                                                        </ThemedText>
-                                                    </ThemedView>
-                                                </ThemedView>
-                                            ))}
-                                        </ThemedView>
-                                    )}
-                                </ThemedView>
-                            }
-                        />
-                        {!programDay.RestDay && (
-                            <ThemedView
-                                style={[
-                                    styles.exercisesContainer,
-                                    { backgroundColor: themeColors.backgroundSecondary },
-                                    [{ paddingBottom: Spaces.XL }],
-                                    isEnrolled && [{ paddingBottom: Sizes.bottomSpaceLarge }],
-                                ]}
-                            >
-                                {programDay.Exercises &&
-                                    programDay.Exercises.map((exercise, index) => (
-                                        <ExerciseCard
-                                            key={exercise.ExerciseId}
-                                            exercise={exercise}
-                                            isEnrolled={isEnrolled}
-                                            showLoggingButton={exercise.Type === 'strength'}
-                                            onLogPress={() => handleExerciseLogPress(exercise)}
-                                            exerciseNumber={index + 1}
-                                        />
-                                    ))}
-                            </ThemedView>
+                {programDay.Type === 'video' ? renderVideoDay() : renderWorkoutDay()}
+                {isEnrolled && (
+                    <View style={styles.buttonContainer}>
+                        {isDayCompleted ? (
+                            <TextButton
+                                text='Day Completed'
+                                textType='bodyMedium'
+                                style={[styles.completeButton, { backgroundColor: themeColors.background }]}
+                                textStyle={[{ color: themeColors.text }]}
+                                iconColor={themeColors.text}
+                                onPress={() => setIsResetDayModalVisible(true)}
+                                iconName='check-outline'
+                                size={'LG'}
+                                disabled={isUncompletingDay}
+                                loading={isUncompletingDay}
+                            />
+                        ) : (
+                            <PrimaryButton
+                                text='Complete Day'
+                                textType='bodyMedium'
+                                style={[styles.completeButton, { backgroundColor: themeColors.buttonPrimary }]}
+                                onPress={finishDayChecker}
+                                size={'LG'}
+                                disabled={isCompletingDay}
+                                loading={isCompletingDay}
+                            />
                         )}
-                        {isEnrolled && (
-                            <View style={styles.buttonContainer}>
-                                {isDayCompleted ? (
-                                    <TextButton
-                                        text='Day Completed'
-                                        textType='bodyMedium'
-                                        style={[styles.completeButton, { backgroundColor: themeColors.background }]}
-                                        textStyle={[{ color: themeColors.text }]}
-                                        iconColor={themeColors.text}
-                                        onPress={() => setIsResetDayModalVisible(true)}
-                                        iconName='check-outline'
-                                        size={'LG'}
-                                        disabled={isUncompletingDay}
-                                        loading={isUncompletingDay}
-                                    />
-                                ) : (
-                                    <PrimaryButton
-                                        text='Finish Day'
-                                        textType='bodyMedium'
-                                        style={[styles.completeButton, { backgroundColor: themeColors.buttonPrimary }]}
-                                        onPress={finishDayChecker}
-                                        size={'LG'}
-                                        disabled={isCompletingDay}
-                                        loading={isCompletingDay}
-                                    />
-                                )}
-                                {programDay.RestDay && (
-                                    <TextButton
-                                        text='Mobility Workouts'
-                                        textStyle={[{ color: themeColors.text }]}
-                                        textType='bodyMedium'
-                                        style={[styles.mobilityButton]}
-                                        size={'LG'}
-                                        onPress={() => navigateToAllWorkouts({ focus: ['Mobility'] })}
-                                    />
-                                )}
-                            </View>
-                        )}
-                    </>
+                    </View>
                 )}
             </Animated.ScrollView>
+
+            {/* Video player for video type days */}
+            {programDay.Type === 'video' && programDay.WorkoutId && workouts[programDay.WorkoutId] && (
+                <FullScreenVideoPlayer
+                    ref={videoPlayerRef}
+                    source={{ uri: workouts[programDay.WorkoutId].VideoUrl }}
+                    onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+                    onDismiss={() => setIsVideoLoading(false)}
+                />
+            )}
+
+            {/* Modals */}
             <AutoDismissSuccessModal
                 visible={showResetSuccess}
                 onDismiss={handleResetModalDismiss}
@@ -357,10 +470,25 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
         marginRight: Spaces.MD,
     },
+    attributeItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: Spaces.XL,
+        marginBottom: Spaces.SM,
+    },
     exercisesContainer: {
         paddingTop: Spaces.LG,
         paddingBottom: 0,
         paddingHorizontal: Spaces.MD,
+    },
+    mainContainer: {
+        marginTop: Spaces.LG,
+        paddingBottom: Sizes.bottomSpaceLarge,
+    },
+    descriptionContainer: {
+        paddingHorizontal: Spaces.LG,
+        paddingTop: Spaces.MD,
+        paddingBottom: Spaces.XL,
     },
     buttonContainer: {
         flexDirection: 'column',
@@ -370,6 +498,11 @@ const styles = StyleSheet.create({
         bottom: Spaces.XXXL,
         left: 0,
         right: 0,
+        backgroundColor: 'transparent', // Add this for consistency
+    },
+    topCard: {
+        paddingHorizontal: Spaces.LG,
+        paddingVertical: Spaces.MD,
     },
     completeButton: {
         width: '100%',
