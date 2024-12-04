@@ -76,7 +76,6 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
         </Animated.View>
     );
 };
-
 const styles = StyleSheet.create({
     headerContainer: {
         position: 'absolute',
@@ -93,18 +92,20 @@ const styles = StyleSheet.create({
     },
     backButton: {
         position: 'absolute',
-        top: Spaces.XXL + Spaces.SM,
-        left: Spaces.MD,
+        top: Spaces.XXL + Spaces.SM, // Adjusted to account for padding
+        left: Spaces.MD, // Adjusted to account for padding
         zIndex: 10,
+        padding: Spaces.SM, // Add padding to increase hitbox
     },
     title: {
         top: Spaces.LG,
     },
     menuButton: {
         position: 'absolute',
-        top: Spaces.XXL + Spaces.SM + Spaces.XS + Spaces.XXS,
-        right: Spaces.LG,
+        top: Spaces.XXL + Spaces.SM, // Adjusted to account for padding
+        right: Spaces.LG, // Adjusted to account for padding
         zIndex: 10,
+        padding: Spaces.SM, // Add padding to increase hitbox
     },
 });
 

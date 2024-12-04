@@ -1,7 +1,8 @@
 // components/media/ThumbnailVideoPlayer.tsx
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { StyleSheet, TouchableOpacity, View, Animated, Modal } from 'react-native';
+import { Image, ImageContentFit } from 'expo-image';
 import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle } from '@/components/media/FullScreenVideoPlayer';
 import { Spaces } from '@/constants/Spaces';
 import { Icon } from '@/components/base/Icon';
@@ -25,32 +26,34 @@ export const ThumbnailVideoPlayer: React.FC<ThumbnailVideoPlayerProps> = ({ vide
     const themeColors = Colors[colorScheme];
 
     const videoPlayerRef = useRef<FullScreenVideoPlayerHandle>(null);
-    const fadeAnim = useRef(new Animated.Value(0)).current; // Animation for fade effect
+    const fadeAnim = useRef(new Animated.Value(0)).current;
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [isLoading, setIsLoading] = useState(true); // State to manage loading
-    const imageOpacity = useRef(new Animated.Value(0)).current;
+    const [isLoading, setIsLoading] = useState(true);
+    const [initialLoad, setInitialLoad] = useState(true);
 
-    const handleImageLoadEnd = () => {
-        Animated.timing(imageOpacity, {
+    useEffect(() => {
+        const checkCache = async () => {
+            try {
+                const isCached = await Image.getCachePathAsync(thumbnailUrl);
+                if (isCached) {
+                    setIsLoading(false);
+                    setInitialLoad(false);
+                }
+            } catch (error) {
+                console.log('Cache check error:', error);
+            }
+        };
+
+        checkCache();
+    }, [thumbnailUrl]);
+
+    const handlePlayPress = () => {
+        setIsModalVisible(true);
+        Animated.timing(fadeAnim, {
             toValue: 1,
             duration: 300,
             useNativeDriver: true,
         }).start(() => {
-            setIsLoading(false);
-        });
-    };
-
-    const handlePlayPress = () => {
-        // Show the modal
-        setIsModalVisible(true);
-
-        // Start fade animation
-        Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 300, // Duration of fade animation
-            useNativeDriver: true,
-        }).start(() => {
-            // Callback after fade completes
             if (videoPlayerRef.current) {
                 videoPlayerRef.current.startPlayback();
             }
@@ -58,39 +61,44 @@ export const ThumbnailVideoPlayer: React.FC<ThumbnailVideoPlayerProps> = ({ vide
     };
 
     const handleDismiss = () => {
-        // Start fade out animation
         Animated.timing(fadeAnim, {
             toValue: 0,
-            duration: 300, // Duration of fade out
+            duration: 300,
             useNativeDriver: true,
         }).start(() => {
-            // Hide the modal after fade out
             setIsModalVisible(false);
         });
-    };
-
-    const handleImageError = () => {
-        setIsLoading(false);
     };
 
     return (
         <View style={styles.container}>
             <TouchableOpacity onPress={handlePlayPress} activeOpacity={0.9}>
                 {/* Thumbnail Image */}
-                <Animated.Image
-                    source={{ uri: thumbnailUrl }}
-                    style={[styles.thumbnail, { opacity: imageOpacity }]}
-                    onLoadEnd={handleImageLoadEnd}
-                    onError={handleImageError}
+                <Image
+                    source={thumbnailUrl}
+                    style={styles.thumbnail}
+                    contentFit='cover'
+                    cachePolicy='memory-disk'
+                    onLoadStart={() => {
+                        if (initialLoad) {
+                            setIsLoading(true);
+                        }
+                    }}
+                    onLoad={() => {
+                        setIsLoading(false);
+                        setInitialLoad(false);
+                    }}
+                    priority='normal'
+                    recyclingKey={thumbnailUrl}
                 />
 
                 {/* Shimmer Placeholder Overlay */}
-                {isLoading && (
+                {initialLoad && (
                     <ShimmerPlaceholder
                         LinearGradient={LinearGradient}
                         style={styles.shimmer}
+                        visible={!isLoading}
                         shimmerColors={colorScheme === 'dark' ? ['#1A1A1A', '#2A2A2A', '#1A1A1A'] : ['#D0D0D0', '#E0E0E0', '#D0D0D0']}
-                        autoRun={true}
                     />
                 )}
 
@@ -101,12 +109,7 @@ export const ThumbnailVideoPlayer: React.FC<ThumbnailVideoPlayerProps> = ({ vide
             </TouchableOpacity>
 
             {/* Modal for Full Screen Video */}
-            <Modal
-                visible={isModalVisible}
-                transparent={true}
-                animationType='none' // We handle animation manually
-                onRequestClose={handleDismiss}
-            >
+            <Modal visible={isModalVisible} transparent={true} animationType='none' onRequestClose={handleDismiss}>
                 <Animated.View
                     style={[
                         styles.fadeOverlay,
@@ -114,13 +117,13 @@ export const ThumbnailVideoPlayer: React.FC<ThumbnailVideoPlayerProps> = ({ vide
                             opacity: fadeAnim,
                         },
                     ]}
-                    pointerEvents='none' // Prevents the overlay from blocking touch events
+                    pointerEvents='none'
                 />
                 <FullScreenVideoPlayer
                     ref={videoPlayerRef}
                     source={{ uri: videoUrl }}
                     onPlaybackStatusUpdate={onPlaybackStatusUpdate}
-                    onDismiss={handleDismiss} // Pass the dismiss handler
+                    onDismiss={handleDismiss}
                 />
             </Modal>
         </View>
@@ -131,8 +134,8 @@ const styles = StyleSheet.create({
     container: {
         position: 'relative',
         width: '100%',
-        height: Sizes.imageXXLHeight, // Ensure this is a valid number
-        backgroundColor: '#ccc', // Temporary background for debugging
+        height: Sizes.imageXXLHeight,
+        backgroundColor: '#ccc',
     },
     thumbnail: {
         width: '100%',
@@ -155,13 +158,10 @@ const styles = StyleSheet.create({
         height: Spaces.XXXL,
         justifyContent: 'center',
         alignItems: 'center',
-        transform: [
-            { translateX: -Spaces.XL }, // Half of width
-            { translateY: -Spaces.XL }, // Half of height
-        ],
+        transform: [{ translateX: -Spaces.XL }, { translateY: -Spaces.XL }],
     },
     fadeOverlay: {
-        ...StyleSheet.absoluteFillObject, // Fills the entire screen
+        ...StyleSheet.absoluteFillObject,
         backgroundColor: 'black',
     },
 });

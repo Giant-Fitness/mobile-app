@@ -70,7 +70,6 @@ export const authService = {
         try {
             const session = await fetchAuthSession();
             const expiry = session.tokens?.accessToken?.payload?.exp;
-
             if (typeof expiry !== 'number') {
                 return true;
             }
@@ -88,34 +87,38 @@ export const authService = {
 
     getAccessToken: async () => {
         try {
-            if (await authService.isTokenExpired()) {
-                console.log('Token expired, refreshing...');
-                await authService.refreshSession();
-                await authService.storeAuthData();
+            // First try to get a fresh session token
+            const session = await fetchAuthSession();
+            const freshToken = session.tokens?.accessToken?.toString();
+
+            // If we got a fresh token and it's different from stored one
+            if (freshToken) {
+                const storedToken = await SecureStore.getItemAsync(STORAGE_KEYS.ACCESS_TOKEN);
+                if (freshToken !== storedToken) {
+                    // Update stored token if different
+                    await SecureStore.setItemAsync(STORAGE_KEYS.ACCESS_TOKEN, freshToken);
+                }
+                return `Bearer ${freshToken}`;
             }
 
-            const token = await SecureStore.getItemAsync(STORAGE_KEYS.ACCESS_TOKEN);
-            if (!token) {
+            // If we couldn't get a fresh session, fall back to stored token
+            const storedToken = await SecureStore.getItemAsync(STORAGE_KEYS.ACCESS_TOKEN);
+            if (!storedToken) {
                 throw new Error('No access token found');
             }
 
-            // Debug log for React Native
-            try {
-                const payload = token.split('.')[1];
-                const decodedData = JSON.parse(
-                    decodeURIComponent(
-                        Array.prototype.map
-                            .call(atob(payload), (c) => {
-                                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                            })
-                            .join(''),
-                    ),
-                );
-            } catch (e) {
-                console.log('Could not decode token for debugging:', e);
+            // Check if stored token is expired
+            const payload = JSON.parse(atob(storedToken.split('.')[1]));
+            if (payload.exp * 1000 < Date.now()) {
+                // Token is expired, try to refresh
+                const refreshedSession = await authService.refreshSession();
+                if (refreshedSession.tokens?.accessToken) {
+                    await authService.storeAuthData(); // Store all new tokens
+                    return `Bearer ${refreshedSession.tokens.accessToken.toString()}`;
+                }
             }
 
-            return `Bearer ${token}`;
+            return `Bearer ${storedToken}`;
         } catch (error) {
             console.error('Error getting access token:', error);
             throw error;

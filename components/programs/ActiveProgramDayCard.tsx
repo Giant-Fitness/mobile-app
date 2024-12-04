@@ -16,12 +16,15 @@ import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { getWeekNumber, getDayOfWeek } from '@/utils/calendar';
 import { router } from 'expo-router';
+import { Workout } from '@/types';
+import { ProgramDay } from '@/types';
 
 type ActiveProgramDayCardProps = {};
 
 export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const { workouts } = useSelector((state: RootState) => state.workouts);
 
     const { userProgramProgress } = useSelector((state: RootState) => state.user);
     const { programDays, programDaysState } = useSelector((state: RootState) => state.programs);
@@ -48,6 +51,13 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
         );
     }
 
+    const getDisplayImage = (day: ProgramDay, workouts: Record<string, Workout>) => {
+        if (day.Type === 'video' && day.WorkoutId && workouts[day.WorkoutId]) {
+            return { uri: workouts[day.WorkoutId].PhotoUrl };
+        }
+        return { uri: day.PhotoUrl };
+    };
+
     const navigateToProgramDay = () => {
         if (programId && dayId) {
             router.push({
@@ -68,7 +78,7 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
     return (
         <View style={[styles.shadowContainer, { backgroundColor: themeColors.background }]}>
             <TopImageInfoCard
-                image={{ uri: day.PhotoUrl }}
+                image={getDisplayImage(currentDay, workouts)}
                 title={day.DayTitle}
                 subtitle={`Week ${currentWeek} Day ${dayOfWeek}`}
                 onPress={navigateToProgramDay}
