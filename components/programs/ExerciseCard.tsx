@@ -156,6 +156,8 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
         );
     };
 
+    const repRangeLabel = exercise.LoggingType === 'time' ? 'secs' : 'Reps';
+
     return (
         <ThemedView
             style={[
@@ -193,7 +195,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
                         {exercise.RepsLower}-{exercise.RepsUpper}
                     </ThemedText>
                     <ThemedText type='bodySmall' style={[{ color: themeColors.tipText }]}>
-                        Reps
+                        {repRangeLabel}
                     </ThemedText>
                 </ThemedView>
                 <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.tipBackground }]}>

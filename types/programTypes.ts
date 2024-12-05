@@ -50,6 +50,7 @@ export interface Exercise {
     CreatedAt: string;
     UpdatedAt: string;
     Archived: boolean;
+    LoggingType: string;
     LoggingInstructions: string;
     Sets: number;
     RepsUpper: number;
