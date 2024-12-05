@@ -351,8 +351,8 @@ export const useProgramData = (
     };
 
     const hasCompletedWorkoutToday = useMemo(() => {
-        // If there's no program progress or LastActivityAt, return false
-        if (!userProgramProgress?.LastActivityAt) return false;
+        // If there's no program progress or LastActivityAt or last action was an uncomplete, return false
+        if (!userProgramProgress?.LastActivityAt || userProgramProgress.LastAction === 'uncomplete') return false;
 
         // If this is day 1, then treat it like no workouts today
         if (userProgramProgress.CurrentDay === 1) {
@@ -360,11 +360,7 @@ export const useProgramData = (
         }
 
         // Otherwise, check if they've completed a workout today
-        const wasLastActionToday = isToday(userProgramProgress.LastActivityAt);
-        if (wasLastActionToday && userProgramProgress.LastAction === 'uncomplete') {
-            return false;
-        }
-        return wasLastActionToday;
+        return isToday(userProgramProgress.LastActivityAt);
     }, [userProgramProgress, userProgramProgress?.LastActivityAt, userProgramProgress?.CurrentDay]);
 
     return {
