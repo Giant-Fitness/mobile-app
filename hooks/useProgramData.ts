@@ -360,7 +360,11 @@ export const useProgramData = (
         }
 
         // Otherwise, check if they've completed a workout today
-        return isToday(userProgramProgress.LastActivityAt);
+        const wasLastActionToday = isToday(userProgramProgress.LastActivityAt);
+        if (wasLastActionToday && userProgramProgress.LastAction === 'uncomplete') {
+            return false;
+        }
+        return wasLastActionToday;
     }, [userProgramProgress, userProgramProgress?.LastActivityAt, userProgramProgress?.CurrentDay]);
 
     return {

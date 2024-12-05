@@ -19,6 +19,7 @@ export interface UserProgramProgress {
     CompletedDays: string[];
     StartAt: string;
     LastActivityAt: string;
+    LastAction?: string;
 }
 
 export interface UserRecommendations {
