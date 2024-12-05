@@ -254,14 +254,8 @@ const ProgramDayScreen = () => {
                         </ThemedView>
                     </ThemedView>
                 </ThemedView>
-                <ThemedView
-                    style={[
-                        styles.mainContainer,
-                        { backgroundColor: themeColors.backgroundTertiary },
-                        isEnrolled && { paddingBottom: Sizes.bottomSpaceLarge }, // Add this
-                    ]}
-                >
-                    <ThemedView style={[styles.descriptionContainer, { backgroundColor: themeColors.background }]}>
+                <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.backgroundTertiary }]}>
+                    <ThemedView style={[styles.descriptionContainer, { backgroundColor: themeColors.background }, isEnrolled && { paddingBottom: Spaces.XXL }]}>
                         <ThemedText type='button' style={{ color: themeColors.text, paddingBottom: Spaces.MD }}>
                             What to Expect
                         </ThemedText>
@@ -365,8 +359,58 @@ const ProgramDayScreen = () => {
         );
     }
 
+    const renderDayButton = () => {
+        if (!isEnrolled) return null;
+
+        if (isDayCompleted) {
+            return (
+                <View style={[styles.buttonContainer, programDay.Type === 'video' && { backgroundColor: themeColors.background, paddingBottom: Spaces.XXL }]}>
+                    <TextButton
+                        text='Day Completed'
+                        textType='bodyMedium'
+                        style={[styles.completeButton, { backgroundColor: themeColors.background }]}
+                        textStyle={{ color: themeColors.text }}
+                        iconColor={themeColors.text}
+                        onPress={() => setIsResetDayModalVisible(true)}
+                        iconName='check-outline'
+                        size='LG'
+                        disabled={isUncompletingDay}
+                        loading={isUncompletingDay}
+                    />
+                </View>
+            );
+        }
+
+        const CompleteButton = programDay.Type === 'video' ? TextButton : PrimaryButton;
+
+        return (
+            <View style={[styles.buttonContainer, programDay.Type === 'video' && { backgroundColor: themeColors.background, paddingBottom: Spaces.XXL }]}>
+                <CompleteButton
+                    text='Complete Day'
+                    textType='bodyMedium'
+                    style={[styles.completeButton, programDay.Type !== 'video' && { backgroundColor: themeColors.buttonPrimary }]}
+                    onPress={finishDayChecker}
+                    size='LG'
+                    disabled={isCompletingDay}
+                    loading={isCompletingDay}
+                />
+
+                {programDay.RestDay && (
+                    <TextButton
+                        text='Mobility Workouts'
+                        textStyle={{ color: themeColors.text }}
+                        textType='bodyMedium'
+                        style={styles.mobilityButton}
+                        size='LG'
+                        onPress={() => navigateToAllWorkouts({ focus: ['Mobility'] })}
+                    />
+                )}
+            </View>
+        );
+    };
+
     return (
-        <ThemedView style={{ flex: 1, backgroundColor: themeColors.backgroundTertiary }}>
+        <ThemedView style={[{ flex: 1, backgroundColor: themeColors.backgroundSecondary }, programDay.RestDay && { backgroundColor: themeColors.background }]}>
             <AnimatedHeader
                 scrollY={scrollY}
                 headerInterpolationStart={Spaces.XXL}
@@ -375,34 +419,7 @@ const ProgramDayScreen = () => {
             />
             <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
                 {programDay.Type === 'video' ? renderVideoDay() : renderWorkoutDay()}
-                {isEnrolled && (
-                    <View style={styles.buttonContainer}>
-                        {isDayCompleted ? (
-                            <TextButton
-                                text='Day Completed'
-                                textType='bodyMedium'
-                                style={[styles.completeButton, { backgroundColor: themeColors.background }]}
-                                textStyle={[{ color: themeColors.text }]}
-                                iconColor={themeColors.text}
-                                onPress={() => setIsResetDayModalVisible(true)}
-                                iconName='check-outline'
-                                size={'LG'}
-                                disabled={isUncompletingDay}
-                                loading={isUncompletingDay}
-                            />
-                        ) : (
-                            <PrimaryButton
-                                text='Complete Day'
-                                textType='bodyMedium'
-                                style={[styles.completeButton, { backgroundColor: themeColors.buttonPrimary }]}
-                                onPress={finishDayChecker}
-                                size={'LG'}
-                                disabled={isCompletingDay}
-                                loading={isCompletingDay}
-                            />
-                        )}
-                    </View>
-                )}
+                {renderDayButton()}
             </Animated.ScrollView>
 
             {/* Video player for video type days */}
@@ -488,14 +505,13 @@ const styles = StyleSheet.create({
     descriptionContainer: {
         paddingHorizontal: Spaces.LG,
         paddingTop: Spaces.MD,
-        paddingBottom: Spaces.XL,
     },
     buttonContainer: {
         flexDirection: 'column',
         alignItems: 'center',
         paddingHorizontal: '10%',
         position: 'absolute',
-        bottom: Spaces.XXXL,
+        bottom: Spaces.XXL,
         left: 0,
         right: 0,
         backgroundColor: 'transparent', // Add this for consistency

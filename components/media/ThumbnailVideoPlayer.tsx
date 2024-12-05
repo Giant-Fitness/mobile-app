@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     container: {
         position: 'relative',
         width: '100%',
-        height: Sizes.imageXXLHeight,
+        height: Sizes.image3XLHeight,
         backgroundColor: '#ccc',
     },
     thumbnail: {

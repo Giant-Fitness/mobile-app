@@ -543,13 +543,16 @@ const styles = StyleSheet.create({
         borderWidth: 0,
     },
     successContainer: {
-        flex: 1,
         alignItems: 'center',
         flexDirection: 'column',
         justifyContent: 'center',
         alignSelf: 'center',
-        marginTop: Sizes.bottomSpaceLarge,
         minHeight: Sizes.bottomSpaceLarge,
+        flex: 1,
+        marginTop: Platform.select({
+            ios: Sizes.bottomSpaceLarge,
+            android: 0,
+        }),
     },
     animationContainer: {
         alignItems: 'center',
