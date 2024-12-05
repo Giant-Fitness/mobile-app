@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
         paddingRight: Spaces.XL,
     },
     comingSoonCard: {
-        width: 320, // Slightly wider cards
+        width: 270, // Slightly wider cards
         marginRight: Spaces.MD,
         transform: [{ scale: 1.01 }], // Subtle scale effect
     },
