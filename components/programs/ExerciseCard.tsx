@@ -18,6 +18,7 @@ import { RootState } from '@/store/store';
 import { useSelector } from 'react-redux';
 import { format } from 'date-fns';
 import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
+import { scale } from '@/utils/scaling';
 
 type LogButtonState = {
     type: 'empty' | 'partial' | 'complete';
@@ -167,13 +168,13 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
             ]}
         >
             <ThemedView style={[styles.titleContainer, { backgroundColor: themeColors.background }]}>
-                <View style={styles.titleRow}>
-                    {exerciseNumber && (
-                        <ThemedText type='titleLarge' style={[{ color: lightenColor(themeColors.text, 0.7) }]}>
-                            #{exerciseNumber}{' '}
-                        </ThemedText>
-                    )}
-                    <ThemedText type='titleLarge' style={[{ color: themeColors.text }]}>
+                <View style={[styles.titleRow, { flex: 1 }]}>
+                    <ThemedText type='titleLarge' style={[{ color: themeColors.text, flex: 1 }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>
+                        {exerciseNumber ? (
+                            <ThemedText type='titleLarge' style={[{ color: lightenColor(themeColors.text, 0.7), fontSize: scale(16) }]}>
+                                #{exerciseNumber}{' '}
+                            </ThemedText>
+                        ) : null}
                         {exercise.ExerciseName}
                     </ThemedText>
                 </View>
