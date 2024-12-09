@@ -12,6 +12,8 @@ import { Provider, useDispatch } from 'react-redux';
 import { store } from '@/store/store';
 import { AppState } from 'react-native';
 import { resetStore } from '@/store/actions';
+import { POSTHOG_CONFIG } from '@/config/posthog';
+import { PostHogProvider } from 'posthog-react-native';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -154,30 +156,70 @@ export default function RootLayout() {
     }
 
     return (
-        <Provider store={store}>
-            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                <AppStateHandler />
-                <Stack
-                    screenOptions={{
-                        headerShown: false,
-                        gestureEnabled: false,
-                        navigationBarHidden: true,
-                        animation: 'default',
-                        presentation: 'card',
-                    }}
-                >
-                    <Stack.Screen name='(app)' options={{ headerShown: false, gestureEnabled: false, animation: 'fade' }} />
-                    <Stack.Screen name='(auth)' options={{ headerShown: false, gestureEnabled: false }} />
-                    <Stack.Screen
-                        name='index'
-                        options={{
+        <PostHogProvider
+            apiKey={POSTHOG_CONFIG.apiKey}
+            autocapture={{
+                captureLifecycleEvents: true,
+                captureScreens: true,
+                ignoreLabels: [], // Any labels here will be ignored from the stack in touch events
+                navigation: {
+                    // By default, only the screen name is tracked but it is possible to track the
+                    // params or modify the name by intercepting the autocapture like so
+                    routeToName: (name, params) => {
+                        if (params && params.id) return `${name}/${params.id}`;
+                        return name;
+                    },
+                },
+            }}
+            options={{
+                host: POSTHOG_CONFIG.host,
+                enableSessionReplay: true,
+                sessionReplayConfig: {
+                    // Whether text inputs are masked. Default is true.
+                    // Password inputs are always masked regardless
+                    maskAllTextInputs: false,
+                    // Whether images are masked. Default is true.
+                    maskAllImages: false,
+                    // Capture logs automatically. Default is true.
+                    // Android only (Native Logcat only)
+                    captureLog: true,
+                    // Whether network requests are captured in recordings. Default is true
+                    // Only metric-like data like speed, size, and response code are captured.
+                    // No data is captured from the request or response body.
+                    // iOS only
+                    captureNetworkTelemetry: true,
+                    // Deboucer delay used to reduce the number of snapshots captured and reduce performance impact. Default is 500ms
+                    androidDebouncerDelayMs: 500,
+                    // Deboucer delay used to reduce the number of snapshots captured and reduce performance impact. Default is 1000ms
+                    iOSdebouncerDelayMs: 1000,
+                },
+            }}
+        >
+            <Provider store={store}>
+                <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                    <AppStateHandler />
+                    <Stack
+                        screenOptions={{
                             headerShown: false,
-                            animation: 'none',
                             gestureEnabled: false,
+                            navigationBarHidden: true,
+                            animation: 'default',
+                            presentation: 'card',
                         }}
-                    />
-                </Stack>
-            </ThemeProvider>
-        </Provider>
+                    >
+                        <Stack.Screen name='(app)' options={{ headerShown: false, gestureEnabled: false, animation: 'fade' }} />
+                        <Stack.Screen name='(auth)' options={{ headerShown: false, gestureEnabled: false }} />
+                        <Stack.Screen
+                            name='index'
+                            options={{
+                                headerShown: false,
+                                animation: 'none',
+                                gestureEnabled: false,
+                            }}
+                        />
+                    </Stack>
+                </ThemeProvider>
+            </Provider>
+        </PostHogProvider>
     );
 }

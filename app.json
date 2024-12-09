@@ -39,7 +39,7 @@
             "versionCode": 1,
             "permissions": ["NOTIFICATIONS", "RECEIVE_BOOT_COMPLETED", "VIBRATE", "CAMERA", "READ_MEDIA_IMAGES"]
         },
-        "plugins": ["expo-router", "expo-notifications", "expo-camera", "expo-font", "expo-secure-store"],
+        "plugins": ["expo-router", "expo-notifications", "expo-camera", "expo-font", "expo-secure-store", "expo-localization"],
         "experiments": {
             "typedRoutes": true
         },

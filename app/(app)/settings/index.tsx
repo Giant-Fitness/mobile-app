@@ -15,6 +15,7 @@ import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Sizes } from '@/constants/Sizes';
 import { TextButton } from '@/components/buttons/TextButton';
+import { PostHogProvider, usePostHog } from 'posthog-react-native';
 
 const SettingsIndex = () => {
     const dispatch = useDispatch();
@@ -25,14 +26,18 @@ const SettingsIndex = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
+    const posthog = usePostHog();
+
     const handleSignOut = async () => {
         if (BYPASS_AUTH) {
             router.replace('/');
         } else {
             try {
+                posthog.capture('sign_out_clicked');
+                posthog.reset();
                 await authService.clearAuthData();
                 await signOut();
-                dispatch(resetStore());
+                await dispatch(resetStore());
                 router.replace('/');
             } catch (error: unknown) {
                 console.error('Error signing out:', error);

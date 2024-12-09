@@ -74,7 +74,6 @@ const LoginPage = () => {
                                             Header={() => null}
                                             toSignIn={toSignIn}
                                             hideSignIn={true}
-                                            // Customize the footer to replace the default Sign Up button
                                             // Customize the footer to replace the default Sign Up button and add "Sign In" link
                                             Footer={() => (
                                                 <View>

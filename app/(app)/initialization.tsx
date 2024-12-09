@@ -20,6 +20,7 @@ import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { BasicSplash } from '@/components/base/BasicSplash';
 import { ThemedText } from '@/components/base/ThemedText';
 import { initializeTrackedLiftsHistoryAsync } from '@/store/exerciseProgress/thunks';
+import { PostHogProvider, usePostHog } from 'posthog-react-native';
 
 const Initialization: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -28,6 +29,7 @@ const Initialization: React.FC = () => {
     const { spotlightWorkouts, spotlightWorkoutsState, error: workoutError } = useSelector((state: RootState) => state.workouts);
     const { error: exerciseError } = useSelector((state: RootState) => state.exerciseProgress);
     const [dataLoaded, setDataLoaded] = useState<keyof typeof REQUEST_STATE>(REQUEST_STATE.PENDING);
+    const posthog = usePostHog();
 
     const fetchUserData = useCallback(async () => {
         try {
@@ -72,6 +74,7 @@ const Initialization: React.FC = () => {
         const initializeData = async () => {
             const userDataState = await fetchUserData();
             if (userDataState === REQUEST_STATE.FULFILLED) {
+                posthog.identify(user?.UserId);
                 await fetchOtherData();
             }
         };
