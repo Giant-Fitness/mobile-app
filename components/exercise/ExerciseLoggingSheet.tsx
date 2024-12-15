@@ -364,21 +364,6 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                 <TextInput
                     ref={(el) => (inputRefs.current[index] = el)}
                     style={[styles.input, { color: themeColors.text }]}
-                    value={set.reps}
-                    onChangeText={(value) => handleSetChange(index, 'reps', value)}
-                    keyboardType='numeric'
-                    placeholder='0'
-                    placeholderTextColor={themeColors.subText}
-                    onFocus={() => scrollToInput(index)}
-                    showSoftInputOnFocus={true}
-                />
-                <ThemedText type='bodySmall' style={styles.inputLabel}>
-                    {`${exercise.RepsLower}-${exercise.RepsUpper} reps`}
-                </ThemedText>
-            </View>
-            <View style={styles.setInputContainer}>
-                <TextInput
-                    style={[styles.input, { color: themeColors.text }]}
                     value={set.weight}
                     onChangeText={(value) => handleSetChange(index, 'weight', value)}
                     keyboardType='numeric'
@@ -389,6 +374,21 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                 />
                 <ThemedText type='bodySmall' style={styles.inputLabel}>
                     kg
+                </ThemedText>
+            </View>
+            <View style={styles.setInputContainer}>
+                <TextInput
+                    style={[styles.input, { color: themeColors.text }]}
+                    value={set.reps}
+                    onChangeText={(value) => handleSetChange(index, 'reps', value)}
+                    keyboardType='numeric'
+                    placeholder='0'
+                    placeholderTextColor={themeColors.subText}
+                    onFocus={() => scrollToInput(index)}
+                    showSoftInputOnFocus={true}
+                />
+                <ThemedText type='bodySmall' style={styles.inputLabel}>
+                    {`${exercise.RepsLower}-${exercise.RepsUpper} reps`}
                 </ThemedText>
             </View>
         </View>
