@@ -64,13 +64,13 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
             const existingData = getExistingData?.(initialDate || today);
 
             if (existingData) {
-                setWeight(existingData.Weight.toString());
+                setWeight(formatWeight(existingData.Weight));
                 setOriginalWeight(existingData.Weight);
                 setSelectedDate(new Date(existingData.MeasurementTimestamp));
                 setIsEditingMode(true);
             } else {
                 setOriginalWeight(undefined);
-                setWeight(initialWeight?.toString() || '');
+                setWeight(initialWeight ? formatWeight(initialWeight) : '');
                 setSelectedDate(initialDate || today);
                 setIsEditingMode(false);
             }
@@ -126,6 +126,19 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
         }, 100);
     };
 
+    const formatWeight = (weight: string | number): string => {
+        const parsed = typeof weight === 'string' ? parseFloat(weight) : weight;
+        if (isNaN(parsed)) return '';
+        
+        // If it has decimals, keep up to 2
+        if (!Number.isInteger(parsed)) {
+            return parsed.toFixed(2).toString();
+        }
+        
+        // If it's a whole number, return as is
+        return parsed.toString();
+    };
+
     const handleSubmit = async () => {
         const weightNum = parseFloat(weight);
         if (isNaN(weightNum) || weightNum <= 0) {
@@ -137,7 +150,8 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
 
         try {
             setIsSubmitting(true);
-            await onSubmit(weightNum, selectedDate);
+            const formattedWeight = Number(formatWeight(weightNum));
+            await onSubmit(formattedWeight, selectedDate);
 
             // Set states separately to ensure update
             setSuccessMessage(isEditingMode ? 'Weight updated' : 'Weight logged');

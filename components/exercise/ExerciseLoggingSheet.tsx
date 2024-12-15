@@ -197,14 +197,22 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
             setIsSubmitting(true);
             setError('');
 
+            const formatWeight = (weight: string): number => {
+                const parsed = parseFloat(weight);
+                if (Number.isInteger(parsed)) {
+                    return parsed;
+                }
+                return Number(parsed.toFixed(2));
+            };
+            
             const validSets = sets
-                .filter((set) => parseInt(set.reps) > 0)
-                .map((set, index) => ({
-                    SetNumber: index + 1,
-                    Reps: parseInt(set.reps),
-                    Weight: parseInt(set.weight) || 0,
-                    Timestamp: format(new Date(), 'HH:mm:ss'),
-                }));
+            .filter((set) => parseInt(set.reps) > 0)
+            .map((set, index) => ({
+                SetNumber: index + 1,
+                Reps: parseInt(set.reps),
+                Weight: formatWeight(set.weight) || 0,
+                Timestamp: format(new Date(), 'HH:mm:ss'),
+            }));
 
             if (validSets.length === 0) {
                 setError('Please enter at least one valid set');
