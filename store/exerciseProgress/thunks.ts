@@ -3,7 +3,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '@/store/store';
 import ExerciseProgressService from '@/store/exerciseProgress/service';
-import { ExerciseSet } from '@/types/exerciseProgressTypes';
+import { ExerciseLog, ExerciseSet } from '@/types/exerciseProgressTypes';
 import { isLongTermTrackedLift, LONG_TERM_TRACKED_LIFT_IDS } from '@/store/exerciseProgress/utils';
 import { REQUEST_STATE } from '@/constants/requestStates';
 
@@ -45,42 +45,46 @@ export const fetchExercisesRecentHistoryAsync = createAsyncThunk(
             const userId = state.user.user?.UserId;
             if (!userId) return rejectWithValue({ errorMessage: 'User ID not available' });
 
-            // Only fetch non-tracked lifts
             const exercisesToFetch = exerciseIds.filter((id) => !isLongTermTrackedLift(id));
 
             // Check which exercises need to be fetched
             const uncachedExercises = exercisesToFetch.filter((exerciseId) => {
-                // Look for logs matching this exercise ID
-                const hasRecentLogs = Object.values(state.exerciseProgress.recentLogs).some((log) => log.ExerciseId === exerciseId);
-                return !hasRecentLogs;
+                return !state.exerciseProgress.recentLogs[exerciseId] || Object.keys(state.exerciseProgress.recentLogs[exerciseId]).length === 0;
             });
 
             // If we have all exercises cached and they're not stale
             if (uncachedExercises.length === 0 && state.exerciseProgress.recentLogsState === REQUEST_STATE.FULFILLED) {
-                // Return existing data filtered for requested exercises
                 return {
-                    recentLogs: Object.entries(state.exerciseProgress.recentLogs)
-                        .filter(([_, log]) => exercisesToFetch.includes(log.ExerciseId))
-                        .reduce(
-                            (acc, [key, value]) => ({
-                                ...acc,
-                                [key]: value,
-                            }),
-                            {},
-                        ),
+                    recentLogs: exercisesToFetch.reduce(
+                        (acc, exerciseId) => ({
+                            ...acc,
+                            [exerciseId]: state.exerciseProgress.recentLogs[exerciseId] || {},
+                        }),
+                        {},
+                    ),
                 };
             }
 
             const recentHistoryPromises = uncachedExercises.map((exerciseId) => ExerciseProgressService.getExerciseHistory(userId, exerciseId, { limit: 10 }));
             const recentHistories = await Promise.all(recentHistoryPromises);
 
-            const recentLogs = uncachedExercises.reduce(
-                (acc, exerciseId, index) => ({
+            // Transform the response to object structure
+            const recentLogs = uncachedExercises.reduce((acc, exerciseId, index) => {
+                const history = recentHistories[index];
+                // Handle if history is array or object
+                const logs = Array.isArray(history) ? history : Object.values(history);
+
+                return {
                     ...acc,
-                    ...recentHistories[index],
-                }),
-                {},
-            );
+                    [exerciseId]: logs.reduce(
+                        (logAcc, log) => ({
+                            ...logAcc,
+                            [log.ExerciseLogId]: log,
+                        }),
+                        {},
+                    ),
+                };
+            }, {});
 
             return { recentLogs };
         } catch (error) {
@@ -118,9 +122,10 @@ export const saveExerciseProgressAsync = createAsyncThunk(
                 log,
                 isTrackedLift: isLongTermTrackedLift(exerciseId),
             };
-        } catch (error) {
+        } catch (error: any) {
+            // Pass the specific error message up
             return rejectWithValue({
-                errorMessage: error instanceof Error ? error.message : 'Failed to save exercise progress',
+                errorMessage: error.message || 'Failed to save exercise progress',
             });
         }
     },

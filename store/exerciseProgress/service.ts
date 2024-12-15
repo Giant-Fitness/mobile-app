@@ -39,9 +39,14 @@ const saveExerciseProgress = async (userId: string, exerciseId: string, date: st
     console.log('service: saveExerciseProgress');
     try {
         const { data } = await authUsersApiClient.put(`/users/${userId}/exercise-progress/${exerciseId}`, { date, sets });
+        if (!data.log) {
+            throw new Error(data.message || 'Failed to save exercise progress');
+        }
         return data.log;
-    } catch (error) {
-        throw handleApiError(error, 'SaveExerciseProgress');
+    } catch (error: any) {
+        // Ensure we're passing the actual error message up
+        const errorMessage = error.response?.data?.message || error.message;
+        throw new Error(errorMessage);
     }
 };
 
