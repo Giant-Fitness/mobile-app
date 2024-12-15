@@ -141,9 +141,9 @@ export default function WeightTrackingScreen() {
         const aggregated = aggregateData(userWeightMeasurements, selectedTimeRange);
 
         const weights = aggregated.map((d) => d.weight);
-        const avg = weights.reduce((a, b) => a + b) / weights.length;
-        const change = aggregated[aggregated.length - 1].weight - aggregated[0].weight;
-        const percent = (change / aggregated[0].weight) * 100;
+        const avg = weights.length > 0 ? weights.reduce((a, b) => a + b, 0) / weights.length : 0;
+        const change = weights.length > 1 ? aggregated[aggregated.length - 1].weight - aggregated[0].weight : 0;
+        const percent = aggregated.length > 0 ? (change / aggregated[0].weight) * 100 : 0;
 
         const allData = [...userWeightMeasurements].sort((a, b) => new Date(a.MeasurementTimestamp).getTime() - new Date(b.MeasurementTimestamp).getTime());
         const allTimeChange = allData[allData.length - 1].Weight - allData[0].Weight;
@@ -156,20 +156,20 @@ export default function WeightTrackingScreen() {
 
         return {
             aggregatedData: aggregated,
-            effectiveTimeRange: getTimeRangeLabel(aggregated[0].timestamp, aggregated[aggregated.length - 1].timestamp),
-            currentWeight: aggregated[aggregated.length - 1].weight,
+            effectiveTimeRange: aggregated.length > 0 ? getTimeRangeLabel(aggregated[0].timestamp, aggregated[aggregated.length - 1].timestamp) : '',
+            currentWeight: aggregated.length > 0 ? aggregated[aggregated.length - 1].weight : 0,
             weightChange: change,
             changePercent: percent,
             averageWeight: avg,
-            startWeight: aggregated[0].weight,
+            startWeight: aggregated.length > 0 ? aggregated[0].weight : 0,
             yAxisRange: {
-                min: Math.floor(minWeight - padding),
-                max: Math.ceil(maxWeight + padding),
+                min: weights.length > 0 ? Math.floor(minWeight - padding) : 0,
+                max: weights.length > 0 ? Math.ceil(maxWeight + padding) : 100,
             },
-            movingAverages: calculateMovingAverage(aggregated, selectedTimeRange),
+            movingAverages: aggregated.length > 0 ? calculateMovingAverage(aggregated, selectedTimeRange) : [],
             allTimeChange: allTimeChange,
             allTimePercent: allTimePercent,
-            allTimeStart: allData[0].Weight,
+            allTimeStart: allData[0]?.Weight || 0,
         };
     }, [userWeightMeasurements, selectedTimeRange]);
 

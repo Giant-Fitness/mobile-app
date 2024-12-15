@@ -129,12 +129,12 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
     const formatWeight = (weight: string | number): string => {
         const parsed = typeof weight === 'string' ? parseFloat(weight) : weight;
         if (isNaN(parsed)) return '';
-        
+
         // If it has decimals, keep up to 2
         if (!Number.isInteger(parsed)) {
             return parsed.toFixed(2).toString();
         }
-        
+
         // If it's a whole number, return as is
         return parsed.toString();
     };
