@@ -51,10 +51,17 @@ const exerciseProgressSlice = createSlice({
             })
             .addCase(fetchExercisesRecentHistoryAsync.fulfilled, (state, action) => {
                 state.recentLogsState = REQUEST_STATE.FULFILLED;
-                state.recentLogs = {
-                    ...state.recentLogs,
-                    ...action.payload.recentLogs,
-                };
+                // Merge new logs with existing ones
+                Object.entries(action.payload.recentLogs).forEach(([exerciseId, logs]) => {
+                    if (!state.recentLogs[exerciseId]) {
+                        state.recentLogs[exerciseId] = {};
+                    }
+                    // Ensure logs is treated as an object with ExerciseLogId keys
+                    state.recentLogs[exerciseId] = {
+                        ...state.recentLogs[exerciseId],
+                        ...(logs as { [exerciseLogId: string]: ExerciseLog }),
+                    };
+                });
             })
             .addCase(fetchExercisesRecentHistoryAsync.rejected, (state, action) => {
                 state.recentLogsState = REQUEST_STATE.REJECTED;
@@ -72,7 +79,10 @@ const exerciseProgressSlice = createSlice({
                     }
                     state.liftHistory[action.payload.exerciseId][exerciseLogId] = action.payload.log;
                 } else {
-                    state.recentLogs[exerciseLogId] = action.payload.log;
+                    if (!state.recentLogs[action.payload.exerciseId]) {
+                        state.recentLogs[action.payload.exerciseId] = {};
+                    }
+                    state.recentLogs[action.payload.exerciseId][exerciseLogId] = action.payload.log;
                 }
             })
 
@@ -82,13 +92,13 @@ const exerciseProgressSlice = createSlice({
                 const isTrackedLift = isLongTermTrackedLift(action.payload.exerciseId);
 
                 if (isTrackedLift) {
-                    // Delete from lift history only
                     if (state.liftHistory[action.payload.exerciseId]) {
                         delete state.liftHistory[action.payload.exerciseId][exerciseLogId];
                     }
                 } else {
-                    // Delete from recent logs only
-                    delete state.recentLogs[exerciseLogId];
+                    if (state.recentLogs[action.payload.exerciseId]) {
+                        delete state.recentLogs[action.payload.exerciseId][exerciseLogId];
+                    }
                 }
             })
             .addCase(deleteExerciseLogAsync.rejected, (state, action) => {

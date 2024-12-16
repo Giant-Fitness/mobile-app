@@ -60,7 +60,6 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
     const loadSetsData = () => {
         // If editing a past log
         if (editingLog) {
-            // When editing, we only show the actual logged sets
             return editingLog.Sets.map((set) => ({
                 reps: set.Reps.toString(),
                 weight: set.Weight.toString(),
@@ -70,7 +69,10 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
         // Check for today's log
         const today = format(new Date(), 'yyyy-MM-dd');
         const exerciseLogId = `${exercise.ExerciseId}#${today}`;
-        const todaysLog = recentLogs[exerciseLogId] || liftHistory[exercise.ExerciseId]?.[exerciseLogId];
+
+        // Get log from appropriate source based on exercise type
+        const isTracked = isLongTermTrackedLift(exercise.ExerciseId);
+        const todaysLog = isTracked ? liftHistory[exercise.ExerciseId]?.[exerciseLogId] : recentLogs[exercise.ExerciseId]?.[exerciseLogId];
 
         // Create array of length exercise.Sets filled with empty sets
         const emptySets = Array(exercise.Sets)
@@ -84,18 +86,15 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
             // Merge today's logged sets with empty sets
             return emptySets.map((emptySet, index) => {
                 if (index < todaysLog.Sets.length) {
-                    // Use logged set data
                     return {
                         reps: todaysLog.Sets[index].Reps.toString(),
                         weight: todaysLog.Sets[index].Weight.toString(),
                     };
                 }
-                // Use empty set for remaining rows
                 return emptySet;
             });
         }
 
-        // Return just the empty sets if no log exists
         return emptySets;
     };
 
@@ -198,12 +197,20 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
             setIsSubmitting(true);
             setError('');
 
+            const formatWeight = (weight: string): number => {
+                const parsed = parseFloat(weight);
+                if (Number.isInteger(parsed)) {
+                    return parsed;
+                }
+                return Number(parsed.toFixed(2));
+            };
+
             const validSets = sets
                 .filter((set) => parseInt(set.reps) > 0)
                 .map((set, index) => ({
                     SetNumber: index + 1,
                     Reps: parseInt(set.reps),
-                    Weight: parseInt(set.weight) || 0,
+                    Weight: formatWeight(set.weight) || 0,
                     Timestamp: format(new Date(), 'HH:mm:ss'),
                 }));
 
@@ -212,7 +219,7 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                 return;
             }
 
-            await dispatch(
+            const result = await dispatch(
                 saveExerciseProgressAsync({
                     exerciseId: exercise.ExerciseId,
                     date: format(selectedDate, 'yyyy-MM-dd'),
@@ -220,19 +227,21 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                 }),
             ).unwrap();
 
-            // Show success animation
             setShowSuccess({
                 message: editingLog ? 'Exercise log updated' : 'Exercise logged',
                 visible: true,
             });
 
-            // Auto dismiss after animation
             setTimeout(() => {
                 handleClose();
             }, 1500);
-        } catch (err) {
-            setError('Failed to save exercise progress');
-            console.error(err);
+        } catch (err: any) {
+            // Extract and display the server error message
+            const serverErrorMessage = err?.errorMessage || 'Failed to save exercise progress';
+            setError(serverErrorMessage);
+
+            // Make sure we stay on the log tab to show the error
+            setActiveTab('log');
         } finally {
             setIsSubmitting(false);
         }
@@ -324,6 +333,7 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                         setSets(loadSetsData());
                         setSelectedDate(new Date());
                         focusFirstEmptySet();
+                        setError(''); // Clear error when switching to log tab
                     }
                 }}
             >
@@ -336,6 +346,7 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                     if (!editingLog) {
                         setActiveTab('history');
                         Keyboard.dismiss();
+                        setError(''); // Clear error when switching to history tab
                     }
                 }}
             >
@@ -353,21 +364,6 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                 <TextInput
                     ref={(el) => (inputRefs.current[index] = el)}
                     style={[styles.input, { color: themeColors.text }]}
-                    value={set.reps}
-                    onChangeText={(value) => handleSetChange(index, 'reps', value)}
-                    keyboardType='numeric'
-                    placeholder='0'
-                    placeholderTextColor={themeColors.subText}
-                    onFocus={() => scrollToInput(index)}
-                    showSoftInputOnFocus={true}
-                />
-                <ThemedText type='bodySmall' style={styles.inputLabel}>
-                    {`${exercise.RepsLower}-${exercise.RepsUpper} reps`}
-                </ThemedText>
-            </View>
-            <View style={styles.setInputContainer}>
-                <TextInput
-                    style={[styles.input, { color: themeColors.text }]}
                     value={set.weight}
                     onChangeText={(value) => handleSetChange(index, 'weight', value)}
                     keyboardType='numeric'
@@ -378,6 +374,21 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                 />
                 <ThemedText type='bodySmall' style={styles.inputLabel}>
                     kg
+                </ThemedText>
+            </View>
+            <View style={styles.setInputContainer}>
+                <TextInput
+                    style={[styles.input, { color: themeColors.text }]}
+                    value={set.reps}
+                    onChangeText={(value) => handleSetChange(index, 'reps', value)}
+                    keyboardType='numeric'
+                    placeholder='0'
+                    placeholderTextColor={themeColors.subText}
+                    onFocus={() => scrollToInput(index)}
+                    showSoftInputOnFocus={true}
+                />
+                <ThemedText type='bodySmall' style={styles.inputLabel}>
+                    {`${exercise.RepsLower}-${exercise.RepsUpper} reps`}
                 </ThemedText>
             </View>
         </View>
@@ -503,17 +514,15 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
     const renderHistoryTab = () => {
         const isTrackedLift = isLongTermTrackedLift(exercise.ExerciseId);
 
-        // Get logs from ONLY ONE source based on exercise type
+        // Get logs from appropriate source based on exercise type
         let logs: ExerciseLog[] = [];
 
         if (isTrackedLift && liftHistory[exercise.ExerciseId]) {
-            // For tracked lifts, get values from the object
+            // For tracked lifts, get values from nested structure
             logs = Object.values(liftHistory[exercise.ExerciseId]);
-        } else if (!isTrackedLift) {
-            // For non-tracked lifts, filter recentLogs
-            logs = Object.entries(recentLogs)
-                .filter(([logId]) => logId.startsWith(`${exercise.ExerciseId}#`))
-                .map(([_, log]) => log);
+        } else if (!isTrackedLift && recentLogs[exercise.ExerciseId]) {
+            // For non-tracked lifts, get values from nested structure
+            logs = Object.values(recentLogs[exercise.ExerciseId]);
         }
 
         // Sort logs by date, then by updatedAt for same dates
