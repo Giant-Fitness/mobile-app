@@ -12,6 +12,7 @@ import { Spaces } from '@/constants/Spaces';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { ThemedText } from '@/components/base/ThemedText';
 import { TextInput } from '@/components/inputs/TextInput';
+import { usePostHog } from 'posthog-react-native';
 
 const NameCollectionScreen = () => {
     const [firstName, setFirstName] = useState('');
@@ -19,6 +20,7 @@ const NameCollectionScreen = () => {
     const [error, setError] = useState('');
     const dispatch = useDispatch<AppDispatch>();
     const { user } = useSelector((state: RootState) => state.user);
+    const posthog = usePostHog();
 
     // Check if we already have the user's name
     useEffect(() => {
@@ -54,10 +56,20 @@ const NameCollectionScreen = () => {
                     FirstName: firstName.trim(),
                 }),
             ).unwrap();
+            posthog.capture('onboarding_name_submitted', {
+                success: true,
+                screen: 'name-collection',
+            });
             router.replace('/(app)/initialization');
-        } catch (err) {
+        } catch (err: any) {
             console.log(err);
             setError('Failed to save your name. Please try again.');
+            posthog.capture('onboarding_name_submitted', {
+                success: false,
+                error_type: 'validation_error',
+                error_message: err.message,
+                screen: 'name-collection',
+            });
         } finally {
             setIsSubmitting(false);
         }

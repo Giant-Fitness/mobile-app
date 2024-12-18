@@ -1,4 +1,4 @@
-// app/(app)/workouts/workout-detail-page.tsx
+// app/(app)/workouts/workout-details.tsx
 
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -206,7 +206,7 @@ export default function WorkoutDetailScreen() {
                 onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
                 onDismiss={handleDismiss} // Pass the dismiss handler
             />
-            <SlideUpActionButton scrollY={scrollY} slideUpThreshold={Spaces.MD}>
+            <SlideUpActionButton scrollY={scrollY} slideUpThreshold={0}>
                 <PrimaryButton
                     text='Start Workout'
                     textType='bodyMedium'
