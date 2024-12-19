@@ -16,9 +16,10 @@ import { router } from 'expo-router';
 
 type WorkoutDetailedCardProps = {
     workout: Workout;
+    source: 'spotlight' | 'library' | 'recommended' | 'recent' | 'popular';
 };
 
-export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ workout }) => {
+export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ workout, source }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
     const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
@@ -27,6 +28,7 @@ export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ workou
             pathname: '/(app)/workouts/workout-details',
             params: {
                 workoutId: workout.WorkoutId,
+                source,
             },
         });
     };
