@@ -59,7 +59,7 @@ export default function HomeScreen() {
     };
 
     const getExistingData = (date: Date) => {
-        return userWeightMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
+        return userWeightMeasurements.find((m: any) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
     };
 
     const actionTiles = [

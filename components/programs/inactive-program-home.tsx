@@ -130,7 +130,7 @@ export default function InactiveProgramHome() {
                     </ThemedText>
                     <RecommendedProgramCard
                         program={recommendedProgram}
-                        onPress={() => navigateTo('programs/program-overview', { programId: recommendedProgram.ProgramId })}
+                        onPress={() => navigateTo('programs/program-overview', { programId: recommendedProgram.ProgramId, source: 'inactive-program-home' })}
                     />
                 </View>
             ) : (
