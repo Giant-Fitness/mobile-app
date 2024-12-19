@@ -53,5 +53,9 @@ export function useScreenTracking() {
             $screen_name: pathname,
             ...(Object.keys(trackedParams).length > 0 && { route_params: trackedParams }),
         });
+        // Set screen name globally for all subsequent events
+        posthog.register({
+            $screen_name: pathname,
+        });
     }, [pathname, localParams, globalParams, posthog]);
 }
