@@ -10,7 +10,7 @@ type AllowedParams = {
 
 const ALLOWED_ROUTE_PARAMS: AllowedParams = {
     '/workouts/workout-details': ['workoutId', 'source'],
-    '/programs/program-day': ['programId', 'dayId'],
+    '/programs/program-day': ['programId', 'dayId', 'source'],
     '/programs/program-overview': ['programId'],
     '/programs/exercise-details': ['exercise'],
 };

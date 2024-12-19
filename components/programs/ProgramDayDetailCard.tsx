@@ -18,9 +18,10 @@ import { useSelector } from 'react-redux';
 
 type ProgramDayDetailCardProps = {
     day: ProgramDay;
+    source: 'active-program-home';
 };
 
-export const ProgramDayDetailCard: React.FC<ProgramDayDetailCardProps> = ({ day }) => {
+export const ProgramDayDetailCard: React.FC<ProgramDayDetailCardProps> = ({ day, source }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const { workouts } = useSelector((state: RootState) => state.workouts);
@@ -31,6 +32,7 @@ export const ProgramDayDetailCard: React.FC<ProgramDayDetailCardProps> = ({ day 
             params: {
                 programId: day.ProgramId,
                 dayId: day.DayId,
+                source,
             },
         });
     };

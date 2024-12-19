@@ -19,9 +19,11 @@ import { router } from 'expo-router';
 import { Workout } from '@/types';
 import { ProgramDay } from '@/types';
 
-type ActiveProgramDayCardProps = {};
+type ActiveProgramDayCardProps = {
+    source: 'active-program-home';
+};
 
-export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
+export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = ({ source }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const { workouts } = useSelector((state: RootState) => state.workouts);
@@ -65,6 +67,7 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
                 params: {
                     programId,
                     dayId,
+                    source,
                 },
             });
         }

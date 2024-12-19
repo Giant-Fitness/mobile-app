@@ -96,7 +96,9 @@ export default function ActiveProgramHome() {
                             <ThemedText type='title' style={styles.subHeader}>
                                 Tomorrow&apos;s Workout
                             </ThemedText>
-                            {activeProgramCurrentDay && <ProgramDayDetailCard key={userProgramProgress?.CurrentDay} day={activeProgramCurrentDay} />}
+                            {activeProgramCurrentDay && (
+                                <ProgramDayDetailCard key={userProgramProgress?.CurrentDay} day={activeProgramCurrentDay} source={'active-program-home'} />
+                            )}
                         </ThemedView>
                     </>
                 ) : (
@@ -110,7 +112,7 @@ export default function ActiveProgramHome() {
                             </ThemedText>
                         </View>
                         <View style={styles.activeCardContainer}>
-                            <ActiveProgramDayCard />
+                            <ActiveProgramDayCard source={'active-program-home'} />
                         </View>
 
                         {activeProgramNextDays.length > 0 && (
@@ -119,7 +121,7 @@ export default function ActiveProgramHome() {
                                     Up Next
                                 </ThemedText>
                                 {activeProgramNextDays.map((day) => (
-                                    <ProgramDayDetailCard key={day.DayId} day={day} />
+                                    <ProgramDayDetailCard key={day.DayId} day={day} source={'active-program-home'} />
                                 ))}
                             </ThemedView>
                         )}

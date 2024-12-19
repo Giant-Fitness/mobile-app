@@ -52,6 +52,7 @@ const ActiveProgramProgressScreen = () => {
                 params: {
                     programId: activeProgram?.ProgramId,
                     dayId,
+                    source: 'active-program-progress',
                 },
             });
         }
