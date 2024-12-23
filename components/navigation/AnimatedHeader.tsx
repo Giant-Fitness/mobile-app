@@ -1,7 +1,7 @@
 // components/navigation/AnimatedHeader.tsx
 
 import React from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import Animated, { useAnimatedStyle, interpolateColor, useDerivedValue } from 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
@@ -10,6 +10,13 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { ThemedText } from '@/components/base/ThemedText';
 import { Icon } from '@/components/base/Icon';
+
+type ActionButtonProps = {
+    icon: string;
+    onPress: () => void;
+    isLoading?: boolean;
+    disabled?: boolean;
+};
 
 type AnimatedHeaderProps = {
     scrollY: Animated.SharedValue<number>;
@@ -23,6 +30,7 @@ type AnimatedHeaderProps = {
     menuIcon?: string;
     onMenuPress?: () => void;
     disableBackButtonAnimation?: boolean; // New prop
+    actionButton?: ActionButtonProps;
 };
 
 export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
@@ -37,6 +45,7 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
     menuIcon = 'more-horizontal',
     disableBackButtonAnimation = false,
     onMenuPress,
+    actionButton,
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -68,10 +77,25 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
                     {title}
                 </ThemedText>
             )}
-            {onMenuPress && (
-                <TouchableOpacity style={styles.menuButton} onPress={onMenuPress} activeOpacity={1}>
-                    <Icon name={menuIcon} size={22} color={animatedIconColor} />
+            {actionButton ? (
+                <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={actionButton.onPress}
+                    disabled={actionButton.isLoading || actionButton.disabled}
+                    activeOpacity={1}
+                >
+                    {actionButton.isLoading ? (
+                        <ActivityIndicator color={themeColors.text} size='small' />
+                    ) : (
+                        <Icon name={actionButton.icon} size={22} color={animatedIconColor} style={{ opacity: actionButton.disabled ? 0.5 : 1 }} />
+                    )}
                 </TouchableOpacity>
+            ) : (
+                onMenuPress && (
+                    <TouchableOpacity style={styles.menuButton} onPress={onMenuPress} activeOpacity={1}>
+                        <Icon name={menuIcon} size={22} color={animatedIconColor} />
+                    </TouchableOpacity>
+                )
             )}
         </Animated.View>
     );
@@ -106,6 +130,13 @@ const styles = StyleSheet.create({
         right: Spaces.LG, // Adjusted to account for padding
         zIndex: 10,
         padding: Spaces.SM, // Add padding to increase hitbox
+    },
+    actionButton: {
+        position: 'absolute',
+        top: Spaces.XXL + Spaces.SM,
+        right: Spaces.LG,
+        zIndex: 10,
+        padding: Spaces.SM,
     },
 });
 
