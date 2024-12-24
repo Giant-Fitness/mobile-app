@@ -12,6 +12,9 @@ import { UserWeightMeasurement } from '@/types';
 import { ThemedText } from '@/components/base/ThemedText';
 import { lightenColor } from '@/utils/colorUtils';
 import { ThemedView } from '@/components/base/ThemedView';
+import { RootState } from '@/store/store';
+import { useSelector } from 'react-redux';
+import { kgToPounds } from '@/utils/weightConversion';
 
 const CHART_PADDING = {
     top: 48,
@@ -27,6 +30,7 @@ const TOOLTIP_ARROW_SIZE = 0;
 const TOOLTIP_OFFSET_Y = 20;
 const CHART_HEIGHT = 300;
 const CHART_CONTAINER_HEIGHT = CHART_HEIGHT + 50;
+
 
 type Point = {
     x: number;
@@ -66,6 +70,9 @@ const RangeSelector = ({
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const bodyWeightPreference = useSelector((state: RootState) => state.settings.bodyWeightPreference);
+
+
 
     return (
         <View style={[styles.rangeSelector, style]}>
@@ -336,7 +343,7 @@ export const WeightChart: React.FC<WeightChartProps> = ({
                     {format(selectedPoint.timestamp, 'MMM d, yyyy')}
                 </SvgText>
                 <SvgText x={tooltipX + TOOLTIP_WIDTH / 2} y={tooltipY + TOOLTIP_PADDING + 32} fill={themeColors.text} fontSize={14} textAnchor='middle'>
-                    {selectedPoint.weight.toFixed(1)} kg
+                    {bodyWeightPreference === 'pounds'        ? `${kgToPounds(selectedPoint.weight)} lbs`        : `${selectedPoint.weight.toFixed(1)} kg`}    
                 </SvgText>
             </G>
         );
@@ -364,7 +371,8 @@ export const WeightChart: React.FC<WeightChartProps> = ({
                                     strokeDasharray='8,1'
                                 />
                                 <SvgText x={chartWidth - CHART_PADDING.right + 10} y={y + 4} fill={themeColors.subText} fontSize={12}>
-                                    {weight.toFixed(1)}
+                                {bodyWeightPreference === 'pounds'        ? `${kgToPounds(weight)} `        : `${weight.toFixed(1)} `}    
+
                                 </SvgText>
                             </React.Fragment>
                         ))}
@@ -427,7 +435,7 @@ export const WeightChart: React.FC<WeightChartProps> = ({
                                 width: TOOLTIP_WIDTH,
                                 height: TOOLTIP_HEIGHT,
                             }}
-                            onPress={() => onDataPointPress?.(selectedPoint.originalData)}
+                            onPress={() => onDataPointPress?.(selectedPoint.originalData)} // did not know what to do with this??
                         />
                     )}
                 </View>

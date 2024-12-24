@@ -19,6 +19,8 @@ import { logWeightMeasurementAsync, getWeightMeasurementsAsync } from '@/store/u
 import { AppDispatch, RootState } from '@/store/store';
 import { WorkoutCompletedSection } from '@/components/programs/WorkoutCompletedSection';
 import { router } from 'expo-router';
+import {  poundsToKg }from '@/utils/weightConversion'
+
 
 export default function HomeScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -32,13 +34,16 @@ export default function HomeScreen() {
     const { userWeightMeasurements } = useSelector((state: RootState) => state.user);
 
     const isFitnessOnboardingComplete = user?.OnboardingStatus?.fitness === true;
+    const bodyWeightPreference = useSelector((state: RootState) => state.settings.bodyWeightPreference);
+
 
     const handleLogWeight = async (weight: number, date: Date) => {
         setIsLoading(true);
         try {
+            const trueWeight = (bodyWeightPreference === 'pounds') ? poundsToKg(weight) :weight;
             await dispatch(
                 logWeightMeasurementAsync({
-                    weight: weight,
+                    weight: trueWeight,
                     measurementTimestamp: date.toISOString(),
                 }),
             ).unwrap();

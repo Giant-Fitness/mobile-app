@@ -21,6 +21,8 @@ import { ExerciseLog } from '@/types/exerciseProgressTypes';
 import { AppDispatch } from '@/store/store';
 import { Sizes } from '@/constants/Sizes';
 import { TextButton } from '@/components/buttons/TextButton';
+import { poundsToKg } from '@/utils/weightConversion';
+
 
 interface ExerciseLoggingSheetProps {
     visible: boolean;
@@ -40,6 +42,8 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
     const dispatch = useDispatch<AppDispatch>();
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const liftWeightPreference = useSelector((state: RootState) => state.settings.liftWeightPreference);
+
 
     const [activeTab, setActiveTab] = useState<Tab>('log');
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -202,7 +206,7 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                 if (Number.isInteger(parsed)) {
                     return parsed;
                 }
-                return Number(parsed.toFixed(2));
+                return Number(parsed.toFixed(1));
             };
 
             const validSets = sets
@@ -373,7 +377,7 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                     showSoftInputOnFocus={true}
                 />
                 <ThemedText type='bodySmall' style={styles.inputLabel}>
-                    kg
+                    {(liftWeightPreference === 'pounds') ? 'lbs' : 'kg'}
                 </ThemedText>
             </View>
             <View style={styles.setInputContainer}>

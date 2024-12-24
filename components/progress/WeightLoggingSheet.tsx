@@ -15,6 +15,11 @@ import { addDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameDay, i
 import { lightenColor } from '@/utils/colorUtils';
 import { UserWeightMeasurement } from '@/types';
 import { Sizes } from '@/constants/Sizes';
+import { RootState } from '@/store/store';
+import {  useSelector } from 'react-redux';
+import { kgToPounds } from '@/utils/weightConversion';
+
+
 
 interface WeightLoggingSheetProps {
     visible: boolean;
@@ -54,6 +59,8 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
     const [successMessage, setSuccessMessage] = useState('');
 
     const weightInputRef = useRef<TextInput>(null);
+    const bodyWeightPreference = useSelector((state: RootState) => state.settings.bodyWeightPreference);
+
 
     useEffect(() => {
         if (visible) {
@@ -63,9 +70,12 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
             const today = new Date();
             const existingData = getExistingData?.(initialDate || today);
 
+
             if (existingData) {
-                setWeight(formatWeight(existingData.Weight));
-                setOriginalWeight(existingData.Weight);
+
+            const convertedWeight = bodyWeightPreference === 'pounds'                 ? kgToPounds(existingData.Weight)      : existingData.Weight;
+            setWeight(formatWeight(convertedWeight));
+                setOriginalWeight(convertedWeight);
                 setSelectedDate(new Date(existingData.MeasurementTimestamp));
                 setIsEditingMode(true);
             } else {
@@ -86,7 +96,9 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
         if (visible && !isEditing) {
             const existingData = getExistingData?.(selectedDate);
             if (existingData) {
-                setWeight(existingData.Weight.toString());
+                const convertedWeight = bodyWeightPreference === 'pounds'                 ? kgToPounds(existingData.Weight)      : existingData.Weight;
+
+                setWeight(convertedWeight.toString());
                 setOriginalWeight(existingData.Weight);
                 setIsEditingMode(true);
             } else {
@@ -119,6 +131,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
         setShowCalendar(true);
     };
 
+
     const hideCalendarView = () => {
         setShowCalendar(false);
         setTimeout(() => {
@@ -130,14 +143,15 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
         const parsed = typeof weight === 'string' ? parseFloat(weight) : weight;
         if (isNaN(parsed)) return '';
 
-        // If it has decimals, keep up to 2
+        // If it has decimals, keep up to 1
         if (!Number.isInteger(parsed)) {
-            return parsed.toFixed(2).toString();
+            return parsed.toFixed(1).toString();
         }
 
         // If it's a whole number, return as is
         return parsed.toString();
     };
+
 
     const handleSubmit = async () => {
         const weightNum = parseFloat(weight);
@@ -350,7 +364,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                                                 editable={!isSubmitting && !isDeleting}
                                             />
                                             <ThemedText type='bodySmall' style={[styles.unit, { opacity: isSubmitting || isDeleting ? 0.5 : 0.7 }]}>
-                                                kgs
+                                                {bodyWeightPreference === 'pounds' ? ` lbs` : ` kg`}
                                             </ThemedText>
                                         </View>
                                     </View>

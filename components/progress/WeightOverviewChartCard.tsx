@@ -12,6 +12,9 @@ import { format } from 'date-fns';
 import Animated, { useAnimatedStyle, withRepeat, withTiming, withSequence, useSharedValue } from 'react-native-reanimated';
 import { ThemedText } from '../base/ThemedText';
 import { lightenColor } from '@/utils/colorUtils';
+import { useSelector } from 'react-redux';
+import { kgToPounds } from '@/utils/weightConversion';
+import { RootState } from '@/store/store';
 
 type WeightOverviewChartCardProps = {
     values: UserWeightMeasurement[];
@@ -39,6 +42,8 @@ const SingleDataPointState = ({ measurement, onPress, themeColors }: { measureme
     const today = new Date();
     const isToday = measurementDate.toDateString() === today.toDateString();
     const formattedDate = format(measurementDate, 'MMM d, yyyy');
+    const bodyWeightPreference = useSelector((state: RootState) => state.settings.bodyWeightPreference);
+
 
     // Create the content without the touchable wrapper
     const content = (
@@ -49,8 +54,10 @@ const SingleDataPointState = ({ measurement, onPress, themeColors }: { measureme
                         {isToday ? "Today's Measurement" : 'First Measurement'}
                     </ThemedText>
                     <ThemedText type='titleLarge' style={[styles.weightValue, { color: themeColors.purpleSolid }]}>
-                        {measurement.Weight.toFixed(1)} kg
-                    </ThemedText>
+                    {bodyWeightPreference === 'pounds'
+                        ? `${kgToPounds(measurement.Weight)} lbs`  
+                        : `${measurement.Weight.toFixed(1)} kg`}              
+                </ThemedText>
                     <ThemedText type='bodySmall' style={[styles.dateText, { color: themeColors.subText }]}>
                         {formattedDate}
                     </ThemedText>
