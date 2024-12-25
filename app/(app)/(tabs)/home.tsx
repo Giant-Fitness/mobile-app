@@ -40,7 +40,7 @@ export default function HomeScreen() {
     const handleLogWeight = async (weight: number, date: Date) => {
         setIsLoading(true);
         try {
-            const trueWeight = (bodyWeightPreference === 'pounds') ? poundsToKg(weight) :weight;
+            const trueWeight = (bodyWeightPreference === 'pounds') ? (weight)/2.20462 :weight;
             await dispatch(
                 logWeightMeasurementAsync({
                     weight: trueWeight,

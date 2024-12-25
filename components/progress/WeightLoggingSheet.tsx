@@ -72,9 +72,9 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
 
 
             if (existingData) {
+                const convertedWeight = bodyWeightPreference === 'pounds'                 ? kgToPounds(existingData.Weight)      : parseFloat(existingData.Weight.toFixed(1));
 
-            const convertedWeight = bodyWeightPreference === 'pounds'                 ? kgToPounds(existingData.Weight)      : existingData.Weight;
-            setWeight(formatWeight(convertedWeight));
+                setWeight(formatWeight(convertedWeight));
                 setOriginalWeight(convertedWeight);
                 setSelectedDate(new Date(existingData.MeasurementTimestamp));
                 setIsEditingMode(true);
@@ -96,10 +96,10 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
         if (visible && !isEditing) {
             const existingData = getExistingData?.(selectedDate);
             if (existingData) {
-                const convertedWeight = bodyWeightPreference === 'pounds'                 ? kgToPounds(existingData.Weight)      : existingData.Weight;
+                const convertedWeight = bodyWeightPreference === 'pounds'                 ? kgToPounds(existingData.Weight)      : parseFloat(existingData.Weight.toFixed(1));
 
                 setWeight(convertedWeight.toString());
-                setOriginalWeight(existingData.Weight);
+                setOriginalWeight(convertedWeight);
                 setIsEditingMode(true);
             } else {
                 setWeight(initialWeight?.toString() || '');

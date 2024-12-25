@@ -18,6 +18,7 @@ import { MeasurementCalendar } from '@/components/progress/MeasurementCalendar';
 import { AppDispatch } from '@/store/store';
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
 import { logWeightMeasurementAsync, updateWeightMeasurementAsync, deleteWeightMeasurementAsync } from '@/store/user/thunks';
+import { kgToPounds } from '@/utils/weightConversion';
 
 type CalendarData = {
     timestamp: string;
@@ -38,6 +39,7 @@ export default function AllWeightDataScreen() {
     const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date>(new Date());
 
     const { userWeightMeasurements } = useSelector((state: RootState) => state.user);
+    const bodyWeightPreference = useSelector((state : RootState) => state.settings.bodyWeightPreference);
 
     // Calculate weight change between measurements
     const getWeightChange = (currentWeight: number, previousWeight: number | null) => {
@@ -144,7 +146,8 @@ export default function AllWeightDataScreen() {
                         {`${dayOfWeek}, ${month} ${day}`}
                     </ThemedText>
                     <ThemedText type='title' style={styles.weightText}>
-                        {item.Weight.toFixed(1)} kg
+                        {(bodyWeightPreference === 'pounds') ? `${kgToPounds(item.Weight)}lbs` : `${item.Weight.toFixed(1)}kg`}
+
                     </ThemedText>
                 </View>
                 {weightChange && (
@@ -159,7 +162,9 @@ export default function AllWeightDataScreen() {
                             ]}
                         >
                             {parseFloat(weightChange) > 0 ? '+' : ''}
-                            {weightChange} kg
+                            {(bodyWeightPreference === 'pounds') ? `${kgToPounds(parseFloat(weightChange)).toString()}lbs` : `${weightChange}kg`}
+
+
                         </ThemedText>
                     </View>
                 )}

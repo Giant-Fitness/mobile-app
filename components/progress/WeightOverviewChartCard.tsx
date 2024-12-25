@@ -146,6 +146,7 @@ const PADDING_VERTICAL = 4;
 export const WeightOverviewChartCard: React.FC<WeightOverviewChartCardProps> = ({ values, onPress, onLogWeight, isLoading = false, style = {} }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const bodyWeightPreference = useSelector((state: RootState) => state.settings.bodyWeightPreference);
 
     const handlePress = () => {
         // Check if we have a measurement from today
@@ -338,7 +339,7 @@ export const WeightOverviewChartCard: React.FC<WeightOverviewChartCardProps> = (
             />
             <View style={styles.footerContainer}>
                 <ThemedText type='overline' style={[styles.value, { color: themeColors.subText }]}>
-                    {averageWeight.toFixed(1)} kg (average)
+                {(bodyWeightPreference === 'pounds') ? `${kgToPounds(averageWeight)} lbs` : `${averageWeight.toFixed(1)} kg`} (average)
                 </ThemedText>
                 <Icon name='chevron-forward' color={themeColors.subText} />
             </View>

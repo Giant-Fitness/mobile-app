@@ -21,7 +21,8 @@ import { ExerciseLog } from '@/types/exerciseProgressTypes';
 import { AppDispatch } from '@/store/store';
 import { Sizes } from '@/constants/Sizes';
 import { TextButton } from '@/components/buttons/TextButton';
-import { poundsToKg } from '@/utils/weightConversion';
+import { kgToPounds } from '@/utils/weightConversion';
+
 
 
 interface ExerciseLoggingSheetProps {
@@ -63,10 +64,20 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
 
     const loadSetsData = () => {
         // If editing a past log
+        const convertWeight = (weightInKg) => {
+            const weight = parseFloat(weightInKg); // Ensure weight is a number
+            if (isNaN(weight)) {
+                return weightInKg; // Return as is if invalid number
+            }
+            // Convert based on lift preference
+            return liftWeightPreference === 'pounds' 
+                ? (weight * 2.20462).toFixed(1) // Convert kg to lbs with 1 decimal place
+                : weight.toFixed(1); // Keep as kg with 1 decimal place
+        };
         if (editingLog) {
             return editingLog.Sets.map((set) => ({
                 reps: set.Reps.toString(),
-                weight: set.Weight.toString(),
+                weight: convertWeight(set.Weight).toString(),
             }));
         }
 
@@ -88,13 +99,14 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
 
         if (todaysLog) {
             // Merge today's logged sets with empty sets
+            
             return emptySets.map((emptySet, index) => {
                 if (index < todaysLog.Sets.length) {
                     return {
                         reps: todaysLog.Sets[index].Reps.toString(),
-                        weight: todaysLog.Sets[index].Weight.toString(),
-                    };
-                }
+                        weight: convertWeight(todaysLog.Sets[index].Weight).toString(), // Convert weight to preferred units                    };
+                };
+            }
                 return emptySet;
             });
         }
@@ -204,8 +216,11 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
             const formatWeight = (weight: string): number => {
                 const parsed = parseFloat(weight);
                 if (Number.isInteger(parsed)) {
+                    if(liftWeightPreference === 'pounds') return parsed/2.20462;
+
                     return parsed;
                 }
+                if(liftWeightPreference === 'pounds') return (parsed/2.20462);
                 return Number(parsed.toFixed(1));
             };
 
@@ -478,9 +493,13 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
             const dayOfWeek = date.toLocaleDateString('default', { weekday: 'long' });
             const month = date.toLocaleDateString('default', { month: 'short' });
             const day = date.getDate();
-            const setsDisplay = `${log.Sets.length} sets - ${log.Sets.map((set) => `${set.Weight}kg × ${set.Reps}`).join(', ')}`;
-
-            return (
+            const setsDisplay = `${log.Sets.length} sets - ${log.Sets.map(
+                (set) =>
+                    (liftWeightPreference === 'pounds'
+                        ? `${kgToPounds(set.Weight)}lbs`
+                        : `${set.Weight.toFixed(1)}kg`) + ` × ${set.Reps}`
+            ).join(', ')}`;
+                        return (
                 <TouchableOpacity
                     style={[styles.historyTile, { backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.6) }]}
                     onPress={() => {

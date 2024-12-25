@@ -32,6 +32,7 @@ const CHART_HEIGHT = 300;
 const CHART_CONTAINER_HEIGHT = CHART_HEIGHT + 50;
 
 
+
 type Point = {
     x: number;
     y: number;
@@ -70,7 +71,6 @@ const RangeSelector = ({
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
-    const bodyWeightPreference = useSelector((state: RootState) => state.settings.bodyWeightPreference);
 
 
 
@@ -187,6 +187,8 @@ export const WeightChart: React.FC<WeightChartProps> = ({
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const [selectedPoint, setSelectedPoint] = useState<Point | null>(null);
+    const bodyWeightPreference = useSelector((state: RootState) => state.settings.bodyWeightPreference);
+
 
     const screenWidth = Dimensions.get('window').width;
     const chartWidth = screenWidth - Spaces.MD * 2;

@@ -20,6 +20,7 @@ import { Icon } from '@/components/base/Icon';
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
 import { updateWeightMeasurementAsync, deleteWeightMeasurementAsync, logWeightMeasurementAsync } from '@/store/user/thunks';
 import { router } from 'expo-router';
+import { kgToPounds } from '@/utils/weightConversion';
 
 const getWeightChange = (currentWeight: number, previousWeight: number | null) => {
     if (previousWeight === null) return null;
@@ -40,6 +41,8 @@ export default function WeightTrackingScreen() {
     const [isAddingWeight, setIsAddingWeight] = useState(false);
     const [selectedMeasurement, setSelectedMeasurement] = useState<UserWeightMeasurement | null>(null);
     const dispatch = useDispatch<AppDispatch>();
+    const bodyWeightPreference = useSelector((state: RootState) => state.settings.bodyWeightPreference);
+
 
     useEffect(() => {
         if (userWeightMeasurements.length) {
@@ -154,6 +157,7 @@ export default function WeightTrackingScreen() {
         const range = maxWeight - minWeight;
         const padding = Math.max(range * 0.1, 1);
 
+
         return {
             aggregatedData: aggregated,
             effectiveTimeRange: aggregated.length > 0 ? getTimeRangeLabel(aggregated[0].timestamp, aggregated[aggregated.length - 1].timestamp) : '',
@@ -222,7 +226,8 @@ export default function WeightTrackingScreen() {
                     <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
                         Average
                     </ThemedText>
-                    <ThemedText type='titleXLarge'>{averageWeight.toFixed(1)} kg</ThemedText>
+                    <ThemedText type='titleXLarge'>{(bodyWeightPreference === 'pounds') ? `${kgToPounds(averageWeight)}lbs` : `${averageWeight.toFixed(1)}kg` }</ThemedText>
+                    
                 </View>
                 <View style={[styles.insightItem, { marginLeft: Spaces.XXXL }]}>
                     <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
@@ -230,7 +235,7 @@ export default function WeightTrackingScreen() {
                     </ThemedText>
                     <ThemedText type='titleXLarge' style={{ color: weightChange > 0 ? themeColors.maroonSolid : darkenColor(themeColors.accent, 0.3) }}>
                         {weightChange > 0 ? '+' : ''}
-                        {weightChange.toFixed(1)} kg
+                        {(bodyWeightPreference === 'pounds') ? `${kgToPounds(weightChange)} lbs` : `${weightChange.toFixed(1)}kg`}
                     </ThemedText>
                 </View>
             </View>
@@ -281,7 +286,7 @@ export default function WeightTrackingScreen() {
                         {dayOfWeek}, {`${month} ${day}`}
                     </ThemedText>
                     <ThemedText type='title' style={styles.weightText}>
-                        {item.Weight.toFixed(1)} kg
+                        {(bodyWeightPreference === 'pounds') ? `${kgToPounds(item.Weight)}lbs` : `${item.Weight.toFixed(1)}kg`}
                     </ThemedText>
                 </View>
                 {weightChange && (
@@ -296,7 +301,7 @@ export default function WeightTrackingScreen() {
                             ]}
                         >
                             {parseFloat(weightChange) > 0 ? '+' : ''}
-                            {weightChange} kg
+                            {(bodyWeightPreference === 'pounds') ? `${kgToPounds(parseFloat(weightChange)).toString()}lbs` : `${weightChange}kg`  }
                         </ThemedText>
                     </View>
                 )}
