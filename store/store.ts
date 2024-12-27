@@ -8,8 +8,7 @@ import workoutsReducer from '@/store/workouts/workoutsSlice';
 import feedbackReducer from '@/store/feedback/feedbackSlice';
 import exerciseProgressReducer from '@/store/exerciseProgress/exerciseProgressSlice';
 import { resetStore } from '@/store/actions';
-import  settingsReducer  from '@/store/settings/settingsSlice';
-
+import settingsReducer from '@/store/settings/settingsSlice';
 
 const combinedReducer = combineReducers({
     programs: programsReducer,

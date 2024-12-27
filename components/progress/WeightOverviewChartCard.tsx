@@ -44,7 +44,6 @@ const SingleDataPointState = ({ measurement, onPress, themeColors }: { measureme
     const formattedDate = format(measurementDate, 'MMM d, yyyy');
     const bodyWeightPreference = useSelector((state: RootState) => state.settings.bodyWeightPreference);
 
-
     // Create the content without the touchable wrapper
     const content = (
         <View style={styles.singleDataContainer}>
@@ -54,10 +53,8 @@ const SingleDataPointState = ({ measurement, onPress, themeColors }: { measureme
                         {isToday ? "Today's Measurement" : 'First Measurement'}
                     </ThemedText>
                     <ThemedText type='titleLarge' style={[styles.weightValue, { color: themeColors.purpleSolid }]}>
-                    {bodyWeightPreference === 'pounds'
-                        ? `${kgToPounds(measurement.Weight)} lbs`  
-                        : `${measurement.Weight.toFixed(1)} kg`}              
-                </ThemedText>
+                        {bodyWeightPreference === 'lbs' ? `${kgToPounds(measurement.Weight)} lbs` : `${measurement.Weight.toFixed(1)} kg`}
+                    </ThemedText>
                     <ThemedText type='bodySmall' style={[styles.dateText, { color: themeColors.subText }]}>
                         {formattedDate}
                     </ThemedText>
@@ -339,7 +336,7 @@ export const WeightOverviewChartCard: React.FC<WeightOverviewChartCardProps> = (
             />
             <View style={styles.footerContainer}>
                 <ThemedText type='overline' style={[styles.value, { color: themeColors.subText }]}>
-                {(bodyWeightPreference === 'pounds') ? `${kgToPounds(averageWeight)} lbs` : `${averageWeight.toFixed(1)} kg`} (average)
+                    {bodyWeightPreference === 'lbs' ? `${kgToPounds(averageWeight)} lbs` : `${averageWeight.toFixed(1)} kg`} (average)
                 </ThemedText>
                 <Icon name='chevron-forward' color={themeColors.subText} />
             </View>

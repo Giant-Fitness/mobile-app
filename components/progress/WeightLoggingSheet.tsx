@@ -16,10 +16,8 @@ import { lightenColor } from '@/utils/colorUtils';
 import { UserWeightMeasurement } from '@/types';
 import { Sizes } from '@/constants/Sizes';
 import { RootState } from '@/store/store';
-import {  useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { kgToPounds } from '@/utils/weightConversion';
-
-
 
 interface WeightLoggingSheetProps {
     visible: boolean;
@@ -61,7 +59,6 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
     const weightInputRef = useRef<TextInput>(null);
     const bodyWeightPreference = useSelector((state: RootState) => state.settings.bodyWeightPreference);
 
-
     useEffect(() => {
         if (visible) {
             // Clear success state when opening
@@ -70,9 +67,8 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
             const today = new Date();
             const existingData = getExistingData?.(initialDate || today);
 
-
             if (existingData) {
-                const convertedWeight = bodyWeightPreference === 'pounds'                 ? kgToPounds(existingData.Weight)      : parseFloat(existingData.Weight.toFixed(1));
+                const convertedWeight = bodyWeightPreference === 'lbs' ? kgToPounds(existingData.Weight) : parseFloat(existingData.Weight.toFixed(1));
 
                 setWeight(formatWeight(convertedWeight));
                 setOriginalWeight(convertedWeight);
@@ -96,7 +92,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
         if (visible && !isEditing) {
             const existingData = getExistingData?.(selectedDate);
             if (existingData) {
-                const convertedWeight = bodyWeightPreference === 'pounds'                 ? kgToPounds(existingData.Weight)      : parseFloat(existingData.Weight.toFixed(1));
+                const convertedWeight = bodyWeightPreference === 'lbs' ? kgToPounds(existingData.Weight) : parseFloat(existingData.Weight.toFixed(1));
 
                 setWeight(convertedWeight.toString());
                 setOriginalWeight(convertedWeight);
@@ -131,7 +127,6 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
         setShowCalendar(true);
     };
 
-
     const hideCalendarView = () => {
         setShowCalendar(false);
         setTimeout(() => {
@@ -152,7 +147,6 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
         return parsed.toString();
     };
 
-
     const handleSubmit = async () => {
         const weightNum = parseFloat(weight);
         if (isNaN(weightNum) || weightNum <= 0) {
@@ -164,13 +158,14 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
 
         try {
             setIsSubmitting(true);
-            const formattedWeight = Number(formatWeight(weightNum));
-            await onSubmit(formattedWeight, selectedDate);
+            // Convert to kg if user is using pounds
+            const weightInKg = bodyWeightPreference === 'lbs' ? weightNum / 2.20462 : weightNum;
 
-            // Set states separately to ensure update
+            // Send the raw kg value to the backend without formatting
+            await onSubmit(weightInKg, selectedDate);
+
             setSuccessMessage(isEditingMode ? 'Weight updated' : 'Weight logged');
             setIsSuccess(true);
-            // Wait for animation then close
             await new Promise<void>((resolve) => setTimeout(resolve, 1600));
             onClose();
         } catch (err) {
@@ -364,7 +359,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                                                 editable={!isSubmitting && !isDeleting}
                                             />
                                             <ThemedText type='bodySmall' style={[styles.unit, { opacity: isSubmitting || isDeleting ? 0.5 : 0.7 }]}>
-                                                {bodyWeightPreference === 'pounds' ? ` lbs` : ` kg`}
+                                                {bodyWeightPreference === 'lbs' ? ` lbs` : ` kgs`}
                                             </ThemedText>
                                         </View>
                                     </View>

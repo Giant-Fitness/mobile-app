@@ -21,7 +21,7 @@ import { lightenColor } from '@/utils/colorUtils';
 
 const SettingsSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <View style={styles.section}>
-        <ThemedText type='caption' style={styles.sectionTitle}>
+        <ThemedText type='overlineTransformed' style={styles.sectionTitle}>
             {title}
         </ThemedText>
         <View style={styles.sectionContent}>{children}</View>
@@ -82,7 +82,7 @@ const SettingsIndex = () => {
     };
 
     const handlePreference = () => {
-        router.push('/(app)/settings/preference');
+        router.push('/(app)/settings/measurement-units');
     };
 
     return (
@@ -122,8 +122,6 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         paddingHorizontal: Spaces.XL,
-        marginBottom: Spaces.SM,
-        textTransform: 'uppercase',
         opacity: 0.7,
     },
     sectionContent: {},

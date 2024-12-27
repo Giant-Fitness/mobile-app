@@ -19,8 +19,7 @@ import { logWeightMeasurementAsync, getWeightMeasurementsAsync } from '@/store/u
 import { AppDispatch, RootState } from '@/store/store';
 import { WorkoutCompletedSection } from '@/components/programs/WorkoutCompletedSection';
 import { router } from 'expo-router';
-import {  poundsToKg }from '@/utils/weightConversion'
-
+import { poundsToKg } from '@/utils/weightConversion';
 
 export default function HomeScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -36,11 +35,10 @@ export default function HomeScreen() {
     const isFitnessOnboardingComplete = user?.OnboardingStatus?.fitness === true;
     const bodyWeightPreference = useSelector((state: RootState) => state.settings.bodyWeightPreference);
 
-
     const handleLogWeight = async (weight: number, date: Date) => {
         setIsLoading(true);
         try {
-            const trueWeight = (bodyWeightPreference === 'pounds') ? (weight)/2.20462 :weight;
+            const trueWeight = bodyWeightPreference === 'pounds' ? weight / 2.20462 : weight;
             await dispatch(
                 logWeightMeasurementAsync({
                     weight: trueWeight,

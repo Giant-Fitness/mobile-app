@@ -61,10 +61,10 @@ const NameChangeScreen = () => {
                 headerBackground={themeColors.background}
                 title='Name'
                 actionButton={{
-                    icon: 'checkmark-sharp',
+                    icon: 'check',
                     onPress: handleChangeName,
                     isLoading: isSubmitting,
-                    disabled: !newName.trim(),
+                    disabled: !newName.trim() || newName.trim() === user?.FirstName,
                 }}
             />
             <ThemedView style={styles.content}>

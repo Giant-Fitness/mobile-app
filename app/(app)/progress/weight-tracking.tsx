@@ -43,7 +43,6 @@ export default function WeightTrackingScreen() {
     const dispatch = useDispatch<AppDispatch>();
     const bodyWeightPreference = useSelector((state: RootState) => state.settings.bodyWeightPreference);
 
-
     useEffect(() => {
         if (userWeightMeasurements.length) {
             const ranges = getAvailableTimeRanges(userWeightMeasurements);
@@ -155,8 +154,9 @@ export default function WeightTrackingScreen() {
         const minWeight = Math.min(...weights);
         const maxWeight = Math.max(...weights);
         const range = maxWeight - minWeight;
-        const padding = Math.max(range * 0.1, 1);
-
+        // Use a smaller padding factor for larger ranges
+        const paddingFactor = range > 20 ? 0.03 : 0.05; // 3% or 5% padding depending on range
+        const padding = Math.max(range * paddingFactor, 0.3); // Minimum padding of 0.3 units
 
         return {
             aggregatedData: aggregated,
@@ -167,8 +167,8 @@ export default function WeightTrackingScreen() {
             averageWeight: avg,
             startWeight: aggregated.length > 0 ? aggregated[0].weight : 0,
             yAxisRange: {
-                min: weights.length > 0 ? Math.floor(minWeight - padding) : 0,
-                max: weights.length > 0 ? Math.ceil(maxWeight + padding) : 100,
+                min: Math.max(0, Math.floor(minWeight - padding)),
+                max: Math.ceil(maxWeight + padding),
             },
             movingAverages: aggregated.length > 0 ? calculateMovingAverage(aggregated, selectedTimeRange) : [],
             allTimeChange: allTimeChange,
@@ -226,8 +226,9 @@ export default function WeightTrackingScreen() {
                     <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
                         Average
                     </ThemedText>
-                    <ThemedText type='titleXLarge'>{(bodyWeightPreference === 'pounds') ? `${kgToPounds(averageWeight)}lbs` : `${averageWeight.toFixed(1)}kg` }</ThemedText>
-                    
+                    <ThemedText type='titleXLarge'>
+                        {bodyWeightPreference === 'lbs' ? `${kgToPounds(averageWeight)}lbs` : `${averageWeight.toFixed(1)}kgs`}
+                    </ThemedText>
                 </View>
                 <View style={[styles.insightItem, { marginLeft: Spaces.XXXL }]}>
                     <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
@@ -235,7 +236,7 @@ export default function WeightTrackingScreen() {
                     </ThemedText>
                     <ThemedText type='titleXLarge' style={{ color: weightChange > 0 ? themeColors.maroonSolid : darkenColor(themeColors.accent, 0.3) }}>
                         {weightChange > 0 ? '+' : ''}
-                        {(bodyWeightPreference === 'pounds') ? `${kgToPounds(weightChange)} lbs` : `${weightChange.toFixed(1)}kg`}
+                        {bodyWeightPreference === 'lbs' ? `${kgToPounds(weightChange)} lbs` : `${weightChange.toFixed(1)}kgs`}
                     </ThemedText>
                 </View>
             </View>
@@ -286,7 +287,7 @@ export default function WeightTrackingScreen() {
                         {dayOfWeek}, {`${month} ${day}`}
                     </ThemedText>
                     <ThemedText type='title' style={styles.weightText}>
-                        {(bodyWeightPreference === 'pounds') ? `${kgToPounds(item.Weight)}lbs` : `${item.Weight.toFixed(1)}kg`}
+                        {bodyWeightPreference === 'lbs' ? `${kgToPounds(item.Weight)}lbs` : `${item.Weight.toFixed(1)}kgs`}
                     </ThemedText>
                 </View>
                 {weightChange && (
@@ -301,7 +302,7 @@ export default function WeightTrackingScreen() {
                             ]}
                         >
                             {parseFloat(weightChange) > 0 ? '+' : ''}
-                            {(bodyWeightPreference === 'pounds') ? `${kgToPounds(parseFloat(weightChange)).toString()}lbs` : `${weightChange}kg`  }
+                            {bodyWeightPreference === 'lbs' ? `${kgToPounds(parseFloat(weightChange)).toString()}lbs` : `${weightChange}kgs`}
                         </ThemedText>
                     </View>
                 )}
