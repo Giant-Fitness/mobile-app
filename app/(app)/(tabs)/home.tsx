@@ -20,12 +20,15 @@ import { AppDispatch, RootState } from '@/store/store';
 import { WorkoutCompletedSection } from '@/components/programs/WorkoutCompletedSection';
 import { router } from 'expo-router';
 
+import { SleepLoggingSheet } from '@/components/sleep/SleepLoggingSheet';
+
 export default function HomeScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const dispatch = useDispatch<AppDispatch>();
 
     const [isWeightSheetVisible, setIsWeightSheetVisible] = useState(false);
+    const [isSleepSheetVisible, setIsSleepSheetVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
     const { user, userProgramProgress, hasCompletedWorkoutToday } = useProgramData();
@@ -58,6 +61,10 @@ export default function HomeScreen() {
         setIsWeightSheetVisible(true);
     };
 
+    const handleSleepTilePress = () => {
+        setIsSleepSheetVisible(true);
+    };
+
     const getExistingData = (date: Date) => {
         return userWeightMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
     };
@@ -84,6 +91,14 @@ export default function HomeScreen() {
         //     backgroundColor: themeColors.tangerineTransparent,
         //     textColor: darkenColor(themeColors.tangerineSolid, 0.3),
         // },
+        {
+            title: 'Track Sleep',
+            image: require('@/assets/images/clipboard.png'), // Replace with actual sleep icon path
+            onPress: handleSleepTilePress,
+            backgroundColor: themeColors.blueTransparent,
+            textColor: darkenColor(themeColors.blueSolid, 0.3),
+        },
+
         {
             title: 'Why LMC?',
             image: require('@/assets/images/skipping-rope.png'),
@@ -119,7 +134,7 @@ export default function HomeScreen() {
                 </View>
 
                 <View style={styles.actionTilesContainer}>
-                    {/* <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.actionTilesScrollContainer}> */}
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.actionTilesScrollContainer}>
                     {tiles.map((tile, index) => (
                         <ActionTile
                             key={index}
@@ -129,11 +144,11 @@ export default function HomeScreen() {
                             backgroundColor={tile.backgroundColor}
                             textColor={tile.textColor}
                             width={tileWidth}
-                            style={{ borderWidth: StyleSheet.hairlineWidth, borderColor: tile.textColor }}
+                            style={{ borderWidth: StyleSheet.hairlineWidth, borderColor: tile.textColor , width: Dimensions.get('window').width *0.3}}
                             showChevron={true}
                         />
                     ))}
-                    {/* </ScrollView> */}
+                    </ScrollView>
                 </View>
             </>
         );
@@ -235,6 +250,13 @@ export default function HomeScreen() {
                 isLoading={isLoading}
                 getExistingData={getExistingData}
             />
+
+            <SleepLoggingSheet
+                visible={isSleepSheetVisible}
+                onClose={() => setIsSleepSheetVisible(false)}
+                onSubmit={console.log}
+                getExistingData={getExistingData} // Placeholder function for fetching sleep data
+            />
         </ThemedView>
     );
 }
@@ -270,7 +292,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
     },
     actionTilesScrollContainer: {
-        paddingHorizontal: Spaces.LG,
+        paddingHorizontal: Spaces.SM,
         paddingVertical: Spaces.XS,
+        flexDirection: 'row',
     },
+    actionTile:{
+        marginRight: Spaces.MD,
+    }
 });
