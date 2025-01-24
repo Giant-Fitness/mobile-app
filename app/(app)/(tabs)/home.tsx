@@ -135,19 +135,19 @@ export default function HomeScreen() {
 
                 <View style={styles.actionTilesContainer}>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.actionTilesScrollContainer}>
-                    {tiles.map((tile, index) => (
-                        <ActionTile
-                            key={index}
-                            image={tile.image}
-                            title={tile.title}
-                            onPress={tile.onPress}
-                            backgroundColor={tile.backgroundColor}
-                            textColor={tile.textColor}
-                            width={tileWidth}
-                            style={{ borderWidth: StyleSheet.hairlineWidth, borderColor: tile.textColor , width: Dimensions.get('window').width *0.3}}
-                            showChevron={true}
-                        />
-                    ))}
+                        {tiles.map((tile, index) => (
+                            <ActionTile
+                                key={index}
+                                image={tile.image}
+                                title={tile.title}
+                                onPress={tile.onPress}
+                                backgroundColor={tile.backgroundColor}
+                                textColor={tile.textColor}
+                                width={tileWidth}
+                                style={{ borderWidth: StyleSheet.hairlineWidth, borderColor: tile.textColor, width: Dimensions.get('window').width * 0.3 }}
+                                showChevron={true}
+                            />
+                        ))}
                     </ScrollView>
                 </View>
             </>
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
         paddingVertical: Spaces.XS,
         flexDirection: 'row',
     },
-    actionTile:{
+    actionTile: {
         marginRight: Spaces.MD,
-    }
+    },
 });

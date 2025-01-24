@@ -16,9 +16,7 @@ import { lightenColor } from '@/utils/colorUtils';
 // import { UserWeightMeasurement } from '@/types';
 import { Sizes } from '@/constants/Sizes';
 import { RootState } from '@/store/store';
-import {  useSelector } from 'react-redux';
-
-
+import { useSelector } from 'react-redux';
 
 interface SleepLoggingSheetProps {
     visible: boolean;
@@ -30,7 +28,7 @@ interface SleepLoggingSheetProps {
     isEditing?: boolean;
     isLoading?: boolean;
     // getExistingData?: (date: Date) => UserWeightMeasurement | undefined;
-    getExistingData?: (data : Date) => 12; // change this when we get the sleep data from the backend
+    getExistingData?: (data: Date) => 12; // change this when we get the sleep data from the backend
 }
 
 export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
@@ -62,14 +60,12 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
     const sleepInputRef = useRef<TextInput>(null);
     // const bodyWeightPreference = useSelector((state: RootState) => state.settings.bodyWeightPreference);
 
-
     useEffect(() => {
         if (visible) {
             setIsSuccess(false);
 
             const today = new Date();
             const existingData = getExistingData?.(initialDate || today);
-
 
             if (existingData) {
                 // const convertedWeight = bodyWeightPreference === 'pounds'                 ? kgToPounds(existingData.Weight)      : parseFloat(existingData.Weight.toFixed(1));
@@ -136,7 +132,6 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
         setShowCalendar(true);
     };
 
-
     const hideCalendarView = () => {
         setShowCalendar(false);
         setTimeout(() => {
@@ -153,7 +148,6 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
     //         return parsed.toFixed(1).toString();
     //     }
 
-
     //     // If it's a whole number, return as is
     //     return parsed.toString();
     // };
@@ -162,17 +156,16 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
     const formatSleep = (hours: string | number, minutes: string | number): string => {
         const parsedHours = typeof hours === 'string' ? parseInt(hours, 10) : hours;
         const parsedMinutes = typeof minutes === 'string' ? parseInt(minutes, 10) : minutes;
-    
-        if (isNaN(parsedHours)  || parsedHours < 0 || parsedMinutes < 0 || parsedMinutes >= 60) {
+
+        if (isNaN(parsedHours) || parsedHours < 0 || parsedMinutes < 0 || parsedMinutes >= 60) {
             return '';
         }
-    
+
         const totalMinutes = parsedHours * 60 + parsedMinutes;
-    
+
         // Return as a string
         return totalMinutes.toString();
     };
-
 
     const handleSubmit = async () => {
         const hoursSlept = parseFloat(sleep);
@@ -187,8 +180,8 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
 
         try {
             setIsSubmitting(true);
-            const formattedSleep = Number(formatSleep(hoursSlept, minutesSlept ) );
-            console.log("sleep time logged is :", formattedSleep)
+            const formattedSleep = Number(formatSleep(hoursSlept, minutesSlept));
+            console.log('sleep time logged is :', formattedSleep);
             await onSubmit(formattedSleep, selectedDate);
 
             // Set states separately to ensure update
@@ -379,12 +372,12 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
                                                 ]}
                                                 value={sleep}
                                                 onChangeText={setSleep}
-                                                keyboardType="numeric"
-                                                placeholder="0"
+                                                keyboardType='numeric'
+                                                placeholder='0'
                                                 placeholderTextColor={themeColors.subText}
                                                 editable={!isSubmitting && !isDeleting}
                                             />
-                                            <ThemedText type="bodySmall" style={styles.unit}>
+                                            <ThemedText type='bodySmall' style={styles.unit}>
                                                 Hours
                                             </ThemedText>
                                         </View>
@@ -400,15 +393,15 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
                                                 ]}
                                                 value={minutes}
                                                 onChangeText={setMinutes}
-                                                keyboardType="numeric"
-                                                placeholder="0"
+                                                keyboardType='numeric'
+                                                placeholder='0'
                                                 placeholderTextColor={themeColors.subText}
                                                 editable={!isSubmitting && !isDeleting}
                                             />
-                                            <ThemedText type="bodySmall" style={styles.unit}>
+                                            <ThemedText type='bodySmall' style={styles.unit}>
                                                 Minutes
                                             </ThemedText>
-                                        </View>                         
+                                        </View>
                                     </View>
                                 </>
                             ) : (
@@ -555,8 +548,8 @@ const styles = StyleSheet.create({
         paddingVertical: Spaces.SM,
         height: 48,
         borderWidth: StyleSheet.hairlineWidth,
-        flex:1,
-        marginRight:Spaces.SM,
+        flex: 1,
+        marginRight: Spaces.SM,
     },
     input: {
         flex: 1,
@@ -644,5 +637,4 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
     },
-    
 });
