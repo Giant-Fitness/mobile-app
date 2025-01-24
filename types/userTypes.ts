@@ -40,3 +40,9 @@ export interface UserWeightMeasurement {
     MeasurementTimestamp: string;
     Weight: number;
 }
+
+export interface UserSleepMeasurement {
+    UserId: string;
+    MeasurementTimestamp: string;
+    DurationInMinutes: number;
+}
