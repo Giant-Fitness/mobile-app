@@ -141,6 +141,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
 
     const handleSubmit = async () => {
         const weightNum = parseFloat(weight);
+        console.log(getExistingData);
         if (isNaN(weightNum) || weightNum <= 0) {
             setError('Please enter a valid weight');
             weightInputRef.current?.focus();

@@ -412,7 +412,6 @@ export const logSleepMeasurementAsync = createAsyncThunk<
     try {
         const state = getState();
         const userId = state.user.user?.UserId;
-
         if (!userId) {
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }

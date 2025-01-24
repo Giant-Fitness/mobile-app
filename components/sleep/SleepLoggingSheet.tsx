@@ -1,5 +1,3 @@
-// components/progress/WeightLoggingSheet.tsx
-
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, TextInput, View, TouchableOpacity, Platform, ActivityIndicator, Keyboard } from 'react-native';
 import LottieView from 'lottie-react-native';
@@ -13,10 +11,8 @@ import { Icon } from '@/components/base/Icon';
 import { TextButton } from '@/components/buttons/TextButton';
 import { addDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameDay, isSameMonth, format } from 'date-fns';
 import { lightenColor } from '@/utils/colorUtils';
-// import { UserWeightMeasurement } from '@/types';
 import { Sizes } from '@/constants/Sizes';
-import { RootState } from '@/store/store';
-import { useSelector } from 'react-redux';
+import { UserSleepMeasurement } from '@/types';
 
 interface SleepLoggingSheetProps {
     visible: boolean;
@@ -27,8 +23,7 @@ interface SleepLoggingSheetProps {
     initialDate?: Date;
     isEditing?: boolean;
     isLoading?: boolean;
-    // getExistingData?: (date: Date) => UserWeightMeasurement | undefined;
-    getExistingData?: (data: Date) => 12; // change this when we get the sleep data from the backend
+    getExistingData?: (data: Date) => UserSleepMeasurement | undefined; 
 }
 
 export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
@@ -44,7 +39,7 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
-    const [sleep, setSleep] = useState<string>('');
+    const [sleep, setSleep] = useState<string>(''); // this is for the hours
     const [minutes, setMinutes] = useState<string>('');
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [showCalendar, setShowCalendar] = useState(false);
@@ -58,7 +53,6 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
     const [successMessage, setSuccessMessage] = useState('');
 
     const sleepInputRef = useRef<TextInput>(null);
-    // const bodyWeightPreference = useSelector((state: RootState) => state.settings.bodyWeightPreference);
 
     useEffect(() => {
         if (visible) {
@@ -68,18 +62,20 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
             const existingData = getExistingData?.(initialDate || today);
 
             if (existingData) {
-                // const convertedWeight = bodyWeightPreference === 'pounds'                 ? kgToPounds(existingData.Weight)      : parseFloat(existingData.Weight.toFixed(1));
 
-                // const convertedSleep = parseFloat(existingData.Sleep);
-                const convertedSleep = 8;
+                const convertedSleep = existingData.DurationInMinutes;
+                const hours = Math.floor(convertedSleep/60);
+                const mins = convertedSleep % 60;
 
-                setSleep(formatSleep(convertedSleep));
+                setSleep((hours?.toString()));
+                setMinutes(mins?.toString());
                 setOriginalSleep(convertedSleep);
                 setSelectedDate(new Date(existingData.MeasurementTimestamp));
                 setIsEditingMode(true);
             } else {
                 setOriginalSleep(undefined);
-                setSleep(initialSleep ? formatSleep(initialSleep) : '');
+                setSleep(initialSleep ? Math.floor(initialSleep / 60).toString() : ''); 
+                setMinutes(initialSleep ? (initialSleep % 60).toString() : ''); 
                 setSelectedDate(initialDate || today);
                 setIsEditingMode(false);
             }
@@ -95,15 +91,17 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
         if (visible && !isEditing) {
             const existingData = getExistingData?.(selectedDate);
             if (existingData) {
-                // const convertedWeight = bodyWeightPreference === 'pounds'                 ? kgToPounds(existingData.Weight)      : parseFloat(existingData.Weight.toFixed(1));
-                // const convertedSleep = parseFloat(existingData.Sleep);
-                const convertedSleep = 8;
 
-                setSleep(convertedSleep.toString());
+                const convertedSleep = (existingData.DurationInMinutes);
+                const hours = Math.floor(convertedSleep/60);
+                const mins = convertedSleep % 60;
+                setSleep(hours?.toString());
+                setMinutes(mins?.toString());
                 setOriginalSleep(convertedSleep);
                 setIsEditingMode(true);
             } else {
-                setSleep(initialSleep?.toString() || '');
+                setSleep(initialSleep ? Math.floor(initialSleep / 60).toString() : '');
+                setMinutes(initialSleep ? (initialSleep % 60).toString() : '');
                 setOriginalSleep(undefined);
                 setIsEditingMode(false);
             }
@@ -153,11 +151,12 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
     // };
 
     //changed this function in order to get the total sleep time in minutes
+    
     const formatSleep = (hours: string | number, minutes: string | number): string => {
         const parsedHours = typeof hours === 'string' ? parseInt(hours, 10) : hours;
         const parsedMinutes = typeof minutes === 'string' ? parseInt(minutes, 10) : minutes;
 
-        if (isNaN(parsedHours) || parsedHours < 0 || parsedMinutes < 0 || parsedMinutes >= 60) {
+        if (isNaN(parsedHours) || parsedHours < 0 || parsedMinutes < 0 || parsedMinutes >= 60) { // can do this for hours and minutes separately
             return '';
         }
 
@@ -181,7 +180,7 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
         try {
             setIsSubmitting(true);
             const formattedSleep = Number(formatSleep(hoursSlept, minutesSlept));
-            console.log('sleep time logged is :', formattedSleep);
+            // console.log('sleep time logged is :', formattedSleep);
             await onSubmit(formattedSleep, selectedDate);
 
             // Set states separately to ensure update

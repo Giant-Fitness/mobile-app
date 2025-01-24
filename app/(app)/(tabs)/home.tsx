@@ -15,7 +15,7 @@ import { LargeActionTile } from '@/components/home/LargeActionTile';
 import { FactOfTheDay } from '@/components/home/FactOfTheDay';
 import { darkenColor } from '@/utils/colorUtils';
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
-import { logWeightMeasurementAsync, getWeightMeasurementsAsync } from '@/store/user/thunks';
+import { logWeightMeasurementAsync, getWeightMeasurementsAsync, getSleepMeasurementsAsync, logSleepMeasurementAsync } from '@/store/user/thunks';
 import { AppDispatch, RootState } from '@/store/store';
 import { WorkoutCompletedSection } from '@/components/programs/WorkoutCompletedSection';
 import { router } from 'expo-router';
@@ -33,6 +33,7 @@ export default function HomeScreen() {
 
     const { user, userProgramProgress, hasCompletedWorkoutToday } = useProgramData();
     const { userWeightMeasurements } = useSelector((state: RootState) => state.user);
+    const { userSleepMeasurements } = useSelector((state:RootState) => state.user)
 
     const isFitnessOnboardingComplete = user?.OnboardingStatus?.fitness === true;
 
@@ -55,6 +56,25 @@ export default function HomeScreen() {
         }
     };
 
+    const handleLogSleep = async (sleep: number, date: Date) => {
+        setIsLoading(true);
+        try {
+            await dispatch(
+                logSleepMeasurementAsync({
+                    durationInMinutes: sleep,
+                    measurementTimestamp: date.toISOString(),
+                }),
+            ).unwrap();
+
+            // Refresh measurements after logging
+            await dispatch(getSleepMeasurementsAsync()).unwrap();
+        } catch (error) {
+            console.error('Failed to log weight:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleWeightTilePress = () => {
         // Pre-fetch measurements when opening the sheet
         // dispatch(getWeightMeasurementsAsync());
@@ -67,6 +87,11 @@ export default function HomeScreen() {
 
     const getExistingData = (date: Date) => {
         return userWeightMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
+    };
+
+    const getExistingSleepData = (date : Date) => {
+        return userSleepMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
+
     };
 
     const actionTiles = [
@@ -254,8 +279,8 @@ export default function HomeScreen() {
             <SleepLoggingSheet
                 visible={isSleepSheetVisible}
                 onClose={() => setIsSleepSheetVisible(false)}
-                onSubmit={console.log}
-                getExistingData={getExistingData} // Placeholder function for fetching sleep data
+                onSubmit={handleLogSleep}
+                getExistingData={getExistingSleepData} // Placeholder function for fetching sleep data
             />
         </ThemedView>
     );
