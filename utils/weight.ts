@@ -1,7 +1,7 @@
 // utils/weight.ts
 
 import { startOfWeek, startOfMonth, subDays, subMonths, subYears, isSameDay, lastDayOfWeek, lastDayOfMonth, format } from 'date-fns';
-import { UserWeightMeasurement } from '@/types';
+import { UserWeightMeasurement, UserSleepMeasurement } from '@/types';
 
 export type TimeRange = '1W' | '1M' | '3M' | '6M' | '1Y' | 'All';
 
@@ -15,8 +15,9 @@ export const TIME_RANGES = {
 } as const;
 export type AggregatedData = {
     timestamp: Date;
-    weight: number;
-    originalData: UserWeightMeasurement;
+    weight?: number;
+    originalData: UserWeightMeasurement | UserSleepMeasurement;
+    durationInMinutes?: number;
 };
 
 export interface TimeRangeOption {
@@ -25,7 +26,7 @@ export interface TimeRangeOption {
     disabled: boolean;
 }
 
-export const getAvailableTimeRanges = (data: UserWeightMeasurement[]): TimeRangeOption[] => {
+export const getAvailableTimeRanges = (data: UserWeightMeasurement[] | UserSleepMeasurement[]): TimeRangeOption[] => {
     if (!data || data.length < 1) {
         return Object.entries(TIME_RANGES).map(([range, { label }]) => ({
             range: range as TimeRange,
@@ -76,7 +77,7 @@ export const getAvailableTimeRanges = (data: UserWeightMeasurement[]): TimeRange
     });
 };
 
-export const getInitialTimeRange = (data: UserWeightMeasurement[]): TimeRange => {
+export const getInitialTimeRange = (data: UserWeightMeasurement[] | UserSleepMeasurement[]): TimeRange => {
     if (!data || data.length < 1) return '1W';
 
     const availableRanges = getAvailableTimeRanges(data);
@@ -136,7 +137,7 @@ export const getTimeWindow = (timeRange: TimeRange, now: Date = new Date()) => {
     }
 };
 
-export const aggregateData = (data: UserWeightMeasurement[], timeRange: TimeRange): AggregatedData[] => {
+export const aggregateData = (data: UserWeightMeasurement[] | UserSleepMeasurement[], timeRange: TimeRange): AggregatedData[] => {
     if (!data.length) return [];
 
     const now = new Date();
