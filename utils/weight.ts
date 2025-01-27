@@ -1,7 +1,7 @@
 // utils/weight.ts
 
 import { startOfWeek, startOfMonth, subDays, subMonths, subYears, isSameDay, lastDayOfWeek, lastDayOfMonth, format } from 'date-fns';
-import { UserWeightMeasurement, UserSleepMeasurement } from '@/types';
+import { UserSleepMeasurement, UserWeightMeasurement } from '@/types';
 
 export type TimeRange = '1W' | '1M' | '3M' | '6M' | '1Y' | 'All';
 
@@ -16,8 +16,8 @@ export const TIME_RANGES = {
 export type AggregatedData = {
     timestamp: Date;
     weight?: number;
+    durationInMinutes?:number;
     originalData: UserWeightMeasurement | UserSleepMeasurement;
-    durationInMinutes?: number;
 };
 
 export interface TimeRangeOption {
@@ -140,6 +140,8 @@ export const getTimeWindow = (timeRange: TimeRange, now: Date = new Date()) => {
 export const aggregateData = (data: UserWeightMeasurement[] | UserSleepMeasurement[], timeRange: TimeRange): AggregatedData[] => {
     if (!data.length) return [];
 
+    
+
     const now = new Date();
     const { start, end } = getTimeWindow(timeRange, now);
 
@@ -152,21 +154,30 @@ export const aggregateData = (data: UserWeightMeasurement[] | UserSleepMeasureme
     // Sort by timestamp
     const sortedData = [...filteredData].sort((a, b) => new Date(a.MeasurementTimestamp).getTime() - new Date(b.MeasurementTimestamp).getTime());
 
+    const mapToAggregatedData = (
+        measurement: UserWeightMeasurement | UserSleepMeasurement
+    ): AggregatedData => ({
+        timestamp: new Date(measurement.MeasurementTimestamp),
+        weight: 'Weight' in measurement ? measurement.Weight : undefined,
+        durationInMinutes: 'DurationInMinutes' in measurement ? measurement.DurationInMinutes : undefined,
+        originalData: measurement,
+    });
     // Different aggregation strategies based on time range
     switch (timeRange) {
         case '1W':
         case '1M':
             // Show all data points
-            return sortedData.map((measurement) => ({
-                timestamp: new Date(measurement.MeasurementTimestamp),
-                weight: measurement.Weight,
-                originalData: measurement,
-            }));
+            // return sortedData.map((measurement) => ({
+            //     timestamp: new Date(measurement.MeasurementTimestamp),
+            //     weight: measurement.Weight,
+            //     originalData: measurement,
+            // }));
+            return sortedData.map(mapToAggregatedData)
 
         case '3M':
         case '6M': {
             // Show last day of each week
-            const weeklyData = new Map<string, UserWeightMeasurement>();
+            const weeklyData = new Map<string, UserWeightMeasurement | UserSleepMeasurement>();
 
             sortedData.forEach((measurement) => {
                 const date = new Date(measurement.MeasurementTimestamp);
@@ -182,20 +193,21 @@ export const aggregateData = (data: UserWeightMeasurement[] | UserSleepMeasureme
                     weeklyData.set(weekStart, measurement);
                 }
             });
+            return Array.from(weeklyData.values()).map(mapToAggregatedData).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 
-            return Array.from(weeklyData.values())
-                .map((measurement) => ({
-                    timestamp: new Date(measurement.MeasurementTimestamp),
-                    weight: measurement.Weight,
-                    originalData: measurement,
-                }))
-                .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-        }
+        //     return Array.from(weeklyData.values())
+        //         .map((measurement) => ({
+        //             timestamp: new Date(measurement.MeasurementTimestamp),
+        //             weight: measurement.Weight,
+        //             originalData: measurement,
+        //         }))
+        //         .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+         }
 
         case '1Y':
         case 'All': {
             // Show last day of each month
-            const monthlyData = new Map<string, UserWeightMeasurement>();
+            const monthlyData = new Map<string, UserWeightMeasurement | UserSleepMeasurement>();
 
             sortedData.forEach((measurement) => {
                 const date = new Date(measurement.MeasurementTimestamp);
@@ -213,11 +225,7 @@ export const aggregateData = (data: UserWeightMeasurement[] | UserSleepMeasureme
             });
 
             return Array.from(monthlyData.values())
-                .map((measurement) => ({
-                    timestamp: new Date(measurement.MeasurementTimestamp),
-                    weight: measurement.Weight,
-                    originalData: measurement,
-                }))
+                .map(mapToAggregatedData)
                 .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
         }
     }
@@ -253,7 +261,7 @@ export const calculateMovingAverage = (data: AggregatedData[], timeRange: TimeRa
         const startIdx = Math.max(0, i - Math.floor(windowSize / 2));
         const endIdx = Math.min(data.length, startIdx + windowSize);
         const window = data.slice(startIdx, endIdx);
-        const avg = window.reduce((sum, point) => sum + point.weight, 0) / window.length;
+        const avg = window.reduce((sum, point) => sum +  (point.durationInMinutes ?? point.weight ?? 0), 0) / window.length; // check this line
         ma.push(avg);
     }
 

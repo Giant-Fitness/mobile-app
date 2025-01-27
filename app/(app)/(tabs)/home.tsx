@@ -15,12 +15,12 @@ import { LargeActionTile } from '@/components/home/LargeActionTile';
 import { FactOfTheDay } from '@/components/home/FactOfTheDay';
 import { darkenColor } from '@/utils/colorUtils';
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
+import { SleepLoggingSheet } from '@/components/sleep/SleepLoggingSheet';
 import { logWeightMeasurementAsync, getWeightMeasurementsAsync, getSleepMeasurementsAsync, logSleepMeasurementAsync } from '@/store/user/thunks';
 import { AppDispatch, RootState } from '@/store/store';
 import { WorkoutCompletedSection } from '@/components/programs/WorkoutCompletedSection';
 import { router } from 'expo-router';
 
-import { SleepLoggingSheet } from '@/components/sleep/SleepLoggingSheet';
 
 export default function HomeScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';

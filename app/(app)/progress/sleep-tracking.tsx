@@ -1,5 +1,4 @@
-//getAvailableTimeRanges, getInitalTimeRanges, aggregateData, 
-
+//get available timeRanges, aggragatedData
 import React, { useState, useMemo, useEffect } from 'react';
 import { StyleSheet, View, TouchableOpacity, SectionList } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -11,14 +10,14 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { useSharedValue } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
-import { WeightChart } from '@/components/progress/WeightChart';
+import { WeightChart } from '@/components/progress/WeightChart'; // to be changed
 import { AppDispatch, RootState } from '@/store/store';
-import { TimeRange, aggregateData, calculateMovingAverage, getTimeRangeLabel, getAvailableTimeRanges, getInitialTimeRange } from '@/utils/weight';
+import { TimeRange, aggregateData, calculateMovingAverage, getTimeRangeLabel, getAvailableTimeRanges, getInitialTimeRange } from '@/utils/weight'; // to be tempered
 import { UserSleepMeasurement } from '@/types';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { Icon } from '@/components/base/Icon';
 import { SleepLoggingSheet } from '@/components/sleep/SleepLoggingSheet';
-import { logSleepMeasurementAsync } from '@/store/user/thunks';
+import { updateSleepMeasurementAsync, deleteSleepMeasurementAsync, logSleepMeasurementAsync } from '@/store/user/thunks';
 import { router } from 'expo-router';
 
 const getSleepChange = (currentSleep: number, previousSleep: number | null) => {
@@ -49,11 +48,29 @@ export default function SleepTrackingScreen() {
         }
     }, [userSleepMeasurements]);
 
-    const handleSleepAdd = async (duration: number, date: Date) => {
+    // Add handlers for weight modifications
+    const handleSleepUpdate = async (sleep: number) => {
+        if (!selectedMeasurement) return;
+
+        try {
+            await dispatch(
+                updateSleepMeasurementAsync({
+                    timestamp: selectedMeasurement.MeasurementTimestamp,
+                    durationInMinutes: sleep,
+                }),
+            ).unwrap();
+            setSelectedMeasurement(null);
+        } catch (error) {
+            console.error('Failed to update sleep:', error);
+        }
+    };
+
+    // Add the handleSleepAdd function
+    const handleSleepAdd = async (sleep: number, date: Date) => {
         try {
             await dispatch(
                 logSleepMeasurementAsync({
-                    durationInMinutes: duration,
+                    durationInMinutes: sleep,
                     measurementTimestamp: date.toISOString(),
                 }),
             ).unwrap();
@@ -63,11 +80,35 @@ export default function SleepTrackingScreen() {
         }
     };
 
+    const handleSleepDelete = async (timestamp: string) => {
+        try {
+            await dispatch(deleteSleepMeasurementAsync({ timestamp })).unwrap();
+            setIsSleepSheetVisible(false);
+            setSelectedMeasurement(null);
+        } catch (error) {
+            console.error('Failed to delete sleep:', error);
+        }
+    };
+
+    // Update the handleTilePress function
     const handleTilePress = (measurement: UserSleepMeasurement) => {
         setSelectedMeasurement(measurement);
         setIsSleepSheetVisible(true);
     };
 
+    // Update the handleDataPointPress function
+    const handleDataPointPress = (measurement: UserSleepMeasurement) => {
+        setSelectedMeasurement(measurement);
+        setIsSleepSheetVisible(true);
+    };
+
+    const handleAddSleep = () => {
+        setSelectedMeasurement(null); // Ensure we're not in edit mode
+        setIsAddingSleep(true);
+        setIsSleepSheetVisible(true);
+    };
+
+    // Add this close handler
     const handleSheetClose = () => {
         setIsSleepSheetVisible(false);
         setSelectedMeasurement(null);
@@ -75,9 +116,7 @@ export default function SleepTrackingScreen() {
     };
 
     const getExistingData = (date: Date) => {
-        return userSleepMeasurements.find(
-            (m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString(),
-        );
+        return userSleepMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
     };
 
     const { aggregatedData, effectiveTimeRange, sleepChange, averageSleep, yAxisRange, movingAverages } = useMemo(() => {
@@ -85,32 +124,51 @@ export default function SleepTrackingScreen() {
             return {
                 aggregatedData: [],
                 effectiveTimeRange: '',
+                currentSleep: 0,
                 sleepChange: 0,
+                changePercent: 0,
                 averageSleep: 0,
+                startSleep: 0,
                 yAxisRange: { min: 0, max: 100 },
                 movingAverages: [],
+                allTimeChange: 0,
+                allTimePercent: 0,
+                allTimeStart: 0,
             };
         }
 
         const aggregated = aggregateData(userSleepMeasurements, selectedTimeRange);
-        const durations = aggregated.map((d) => d.weight);
-        const avg = durations.length > 0 ? durations.reduce((a, b) => a + b, 0) / durations.length : 0;
-        const change = durations.length > 1 ? aggregated[aggregated.length - 1].weight - aggregated[0].weight : 0;
-        const minDuration = Math.min(...durations);
-        const maxDuration = Math.max(...durations);
-        const range = maxDuration - minDuration;
+
+        const sleeps = aggregated.map((d) => d.durationInMinutes);
+        const avg = sleeps.length > 0 ? sleeps.reduce((a, b) => a + b, 0) / sleeps.length : 0;
+        const change = sleeps.length > 1 ? aggregated[aggregated.length - 1].durationInMinutes - aggregated[0].durationInMinutes : 0;
+        const percent = aggregated.length > 0 ? (change / aggregated[0].durationInMinutes) * 100 : 0;
+
+        const allData = [...userSleepMeasurements].sort((a, b) => new Date(a.MeasurementTimestamp).getTime() - new Date(b.MeasurementTimestamp).getTime());
+        const allTimeChange = allData[allData.length - 1].DurationInMinutes - allData[0].DurationInMinutes;
+        const allTimePercent = (allTimeChange / allData[0].DurationInMinutes) * 100;
+
+        const minSleep = Math.min(...sleeps);
+        const maxSleep = Math.max(...sleeps);
+        const range = maxSleep - minSleep;
         const padding = Math.max(range * 0.1, 1);
 
         return {
             aggregatedData: aggregated,
             effectiveTimeRange: aggregated.length > 0 ? getTimeRangeLabel(aggregated[0].timestamp, aggregated[aggregated.length - 1].timestamp) : '',
+            currentSleep: aggregated.length > 0 ? aggregated[aggregated.length - 1].weight : 0,
             sleepChange: change,
+            changePercent: percent,
             averageSleep: avg,
+            startSleep: aggregated.length > 0 ? aggregated[0].weight : 0,
             yAxisRange: {
-                min: durations.length > 0 ? Math.floor(minDuration - padding) : 0,
-                max: durations.length > 0 ? Math.ceil(maxDuration + padding) : 100,
+                min: sleeps.length > 0 ? Math.floor(minSleep - padding) : 0,
+                max: sleeps.length > 0 ? Math.ceil(maxSleep + padding) : 100,
             },
             movingAverages: aggregated.length > 0 ? calculateMovingAverage(aggregated, selectedTimeRange) : [],
+            allTimeChange: allTimeChange,
+            allTimePercent: allTimePercent,
+            allTimeStart: allData[0]?.DurationInMinutes || 0,
         };
     }, [userSleepMeasurements, selectedTimeRange]);
 
@@ -148,33 +206,37 @@ export default function SleepTrackingScreen() {
             <View style={styles.header}>
                 <View style={styles.legendContainer}>
                     <View style={styles.legendItem}>
-                        <View style={[styles.legendDot, { borderColor: themeColors.blueSolid }]} />
-                        <ThemedText type="bodyXSmall">Sleep</ThemedText>
+                        <View style={[styles.legendDot, { borderColor: themeColors.purpleSolid }]} />
+                        <ThemedText type='bodyXSmall'>Sleep</ThemedText>
                     </View>
                     <View style={[styles.legendItem, { marginLeft: Spaces.MD }]}>
-                        <View style={[styles.legendLine, { backgroundColor: lightenColor(themeColors.blueSolid, 0.6) }]} />
-                        <ThemedText type="bodyXSmall">Trend Line</ThemedText>
+                        <View style={[styles.legendLine, { backgroundColor: lightenColor(themeColors.purpleSolid, 0.6) }]} />
+                        <ThemedText type='bodyXSmall'>Trend Line</ThemedText>
                     </View>
                 </View>
             </View>
 
-            <View style={styles.insightsContainer}>
+            {/* move this to center */}
+            <View style={styles.insightsContainer}> 
                 <View style={styles.insightItem}>
-                    <ThemedText type="bodySmall" style={[{ color: themeColors.subText }]}>Average Sleep</ThemedText>
-                    <ThemedText type="titleXLarge">{averageSleep.toFixed(1)} minutes</ThemedText>
-                </View>
-                <View style={[styles.insightItem, { marginLeft: Spaces.XXXL }]}>
-                    <ThemedText type="bodySmall" style={[{ color: themeColors.subText }]}>Change</ThemedText>
-                    <ThemedText
-                        type="titleXLarge"
-                        style={{ color: sleepChange > 0 ? themeColors.maroonSolid : darkenColor(themeColors.accent, 0.3) }}
-                    >
-                        {sleepChange > 0 ? '+' : ''}
-                        {sleepChange.toFixed(1)} minutes
+                    <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
+                        Average
                     </ThemedText>
+                    <ThemedText type='titleXLarge'>{Math.floor(averageSleep / 60)} h {(averageSleep % 60).toFixed(0) } m </ThemedText>
+
+
                 </View>
+                {/* <View style={[styles.insightItem, { marginLeft: Spaces.XXXL }]}>
+                    <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
+                        Change
+                    </ThemedText>
+                    <ThemedText type='titleXLarge' style={{ color: sleepChange > 0 ? themeColors.maroonSolid : darkenColor(themeColors.accent, 0.3) }}>
+                        {sleepChange > 0 ? '+' : ''}
+                        {sleepChange.toFixed(1)} kg
+                    </ThemedText>
+                </View> */}
             </View>
-{/* 
+
             <View style={styles.chartContainer}>
                 <WeightChart
                     data={aggregatedData}
@@ -184,19 +246,21 @@ export default function SleepTrackingScreen() {
                     yAxisRange={yAxisRange}
                     movingAverages={movingAverages}
                     effectiveTimeRange={effectiveTimeRange}
-                    onDataPointPress={handleTilePress}
+                    onDataPointPress={handleDataPointPress}
                 />
-            </View> */}
+            </View>
 
-            <TouchableOpacity style={styles.dataButton} onPress={() => router.push('/(app)/progress/all-weight-data')} activeOpacity={0.9}>
-                <ThemedText type="titleXLarge">Data</ThemedText>
-                <Icon name="chevron-forward" style={styles.dataChevron} color={themeColors.text} />
+            <TouchableOpacity style={styles.dataButton} onPress={() => router.push('/(app)/progress/all-sleep-data')} activeOpacity={0.9}>
+                <ThemedText type='titleXLarge'>Data</ThemedText>
+                <Icon name='chevron-forward' style={styles.dataChevron} color={themeColors.text} />
             </TouchableOpacity>
         </View>
     );
 
     const renderDataSectionHeader = ({ section }: { section: { title: string } }) => (
-        <ThemedText type="title" style={styles.sectionHeader}>{section.title}</ThemedText>
+        <ThemedText type='title' style={styles.sectionHeader}>
+            {section.title}
+        </ThemedText>
     );
 
     const renderDataItem = ({ item, section, index }: { item: UserSleepMeasurement; section: any; index: number }) => {
@@ -204,37 +268,40 @@ export default function SleepTrackingScreen() {
         const dayOfWeek = date.toLocaleDateString('default', { weekday: 'long' });
         const month = date.toLocaleDateString('default', { month: 'short' });
         const day = date.getDate();
-
         const previousSleep = index < section.data.length - 1 ? section.data[index + 1].DurationInMinutes : null;
         const sleepChange = getSleepChange(item.DurationInMinutes, previousSleep);
 
         return (
             <TouchableOpacity
-                style={[styles.tile, { backgroundColor: lightenColor(themeColors.blueTransparent, 0.5) }]}
+                style={[styles.tile, { backgroundColor: lightenColor(themeColors.purpleTransparent, 0.5) }]}
                 onPress={() => handleTilePress(item)}
                 activeOpacity={0.8}
             >
                 <View style={styles.tileLeft}>
-                    <ThemedText type="caption">
+                    <ThemedText type='caption'>
                         {dayOfWeek}, {`${month} ${day}`}
                     </ThemedText>
-                    <ThemedText type="title" style={styles.sleepText}>{item.DurationInMinutes} minutes</ThemedText>
+                    <ThemedText type='title' style={styles.weightText}>
+                        {/* {item.DurationInMinutes.toFixed(1)} minutes */}
+                        {Math.floor(item.DurationInMinutes / 60)} h {item.DurationInMinutes % 60} m
+                    </ThemedText>
                 </View>
                 {sleepChange && (
                     <View style={styles.tileRight}>
                         <ThemedText
-                            type="bodySmall"
+                            type='bodySmall'
                             style={[
                                 styles.changeText,
                                 {
-                                    color: parseFloat(sleepChange) > 0
-                                        ? themeColors.maroonSolid
-                                        : darkenColor(themeColors.accent, 0.3),
+                                    color: parseFloat(sleepChange) < 0 ? themeColors.maroonSolid : darkenColor(themeColors.accent, 0.3),
                                 },
                             ]}
                         >
                             {parseFloat(sleepChange) > 0 ? '+' : ''}
-                            {sleepChange} minutes
+                            {/* {sleepChange} min */}
+                            { (parseInt(sleepChange) > 0) ? (parseInt(sleepChange) > 59) ? `${Math.floor(parseInt(sleepChange) /60)} h ${parseInt(sleepChange) % 60} m` : `${sleepChange} min`
+                            :   (parseInt(sleepChange) < -59) ? `- ${Math.floor(parseInt((sleepChange)) * -1  /60)} h ${(parseInt(sleepChange) *-1) % 60} m` : `${sleepChange} min`
+                             }
                         </ThemedText>
                     </View>
                 )}
@@ -248,9 +315,9 @@ export default function SleepTrackingScreen() {
                 scrollY={scrollY}
                 disableColorChange={true}
                 headerBackground={themeColors.background}
-                title="Sleep Tracking"
-                menuIcon="plus"
-                onMenuPress={() => setIsAddingSleep(true)}
+                title='Sleep Tracking'
+                menuIcon='plus'
+                onMenuPress={handleAddSleep}
             />
 
             <SectionList
@@ -260,7 +327,9 @@ export default function SleepTrackingScreen() {
                 renderItem={renderDataItem}
                 ListHeaderComponent={renderListHeader}
                 ListEmptyComponent={() => (
-                    <ThemedText type="bodyMedium" style={styles.emptyText}>No data available.</ThemedText>
+                    <ThemedText type='bodyMedium' style={styles.emptyText}>
+                        No data available.
+                    </ThemedText>
                 )}
                 stickySectionHeadersEnabled={false}
                 contentContainerStyle={styles.listContent}
@@ -273,7 +342,8 @@ export default function SleepTrackingScreen() {
             <SleepLoggingSheet
                 visible={isSleepSheetVisible}
                 onClose={handleSheetClose}
-                onSubmit={handleSleepAdd}
+                onSubmit={isAddingSleep ? handleSleepAdd : handleSleepUpdate}
+                onDelete={handleSleepDelete}
                 initialSleep={selectedMeasurement?.DurationInMinutes}
                 initialDate={selectedMeasurement ? new Date(selectedMeasurement.MeasurementTimestamp) : undefined}
                 isEditing={!!selectedMeasurement}
@@ -344,7 +414,7 @@ const styles = StyleSheet.create({
     tileRight: {
         marginLeft: Spaces.MD,
     },
-    sleepText: {
+    weightText: {
         marginTop: Spaces.XS,
         fontWeight: '600',
     },

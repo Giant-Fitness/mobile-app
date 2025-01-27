@@ -170,7 +170,7 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
         const hoursSlept = parseFloat(sleep);
         const minutesSlept = parseFloat(minutes);
 
-        if (isNaN(hoursSlept) || hoursSlept >= 24 || hoursSlept <= 0 || minutesSlept >= 60 || minutesSlept < 0 || isNaN(minutesSlept)) {
+        if (isNaN(hoursSlept) || hoursSlept >= 24 || hoursSlept < 0 || minutesSlept >= 60 || minutesSlept < 0 || isNaN(minutesSlept)) {
             setError('Please enter a valid sleep time');
             sleepInputRef.current?.focus();
             return;
