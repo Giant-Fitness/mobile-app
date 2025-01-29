@@ -23,9 +23,10 @@ interface MeasurementCalendarProps {
     onDayPress?: (date: string) => void;
     renderTile: (item: CalendarData) => React.ReactNode;
     measurementUnit?: string;
+    isSleepData ?: boolean;
 }
 
-export const MeasurementCalendar: React.FC<MeasurementCalendarProps> = ({ data, onDayPress }) => {
+export const MeasurementCalendar: React.FC<MeasurementCalendarProps> = ({ data, onDayPress, isSleepData }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
@@ -74,7 +75,7 @@ export const MeasurementCalendar: React.FC<MeasurementCalendarProps> = ({ data, 
                 </TouchableOpacity>
             </View>
 
-            <CalendarMonth date={displayedMonth} measurementDates={measurementDates} onDayPress={onDayPress} />
+            <CalendarMonth date={displayedMonth} measurementDates={measurementDates} onDayPress={onDayPress} isSleepData={isSleepData} />
         </ThemedView>
     );
 };

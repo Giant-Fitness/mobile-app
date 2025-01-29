@@ -14,7 +14,7 @@ interface CalendarMonthProps {
     onDayPress?: (date: string) => void;
 }
 
-export const CalendarMonth: React.FC<CalendarMonthProps> = ({ date, measurementDates, onDayPress }) => {
+export const CalendarMonth: React.FC<CalendarMonthProps> = ({ date, measurementDates, onDayPress, isSleepData}) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const today = new Date();
@@ -41,8 +41,6 @@ export const CalendarMonth: React.FC<CalendarMonthProps> = ({ date, measurementD
         for (let i = 0; i < firstDay; i++) {
             days.push(<View key={`empty-${i}`} style={styles.dayCell} />);
         }
-
-        // Add the days of the month
         // Add the days of the month
         for (let i = 1; i <= daysInMonth; i++) {
             const dayDate = new Date(date.getFullYear(), date.getMonth(), i);
@@ -58,10 +56,10 @@ export const CalendarMonth: React.FC<CalendarMonthProps> = ({ date, measurementD
                     style={[
                         styles.dayCell,
                         hasMeasurement && {
-                            backgroundColor: lightenColor(themeColors.purpleSolid, 0.8),
+                            backgroundColor: !isSleepData ?  lightenColor(themeColors.purpleSolid, 0.8) : lightenColor(themeColors.blueSolid, 0.75),
                         },
                         !hasMeasurement && {
-                            borderColor: lightenColor(themeColors.purpleSolid, 0.8),
+                            borderColor: !isSleepData ?  lightenColor(themeColors.purpleSolid, 0.8) : lightenColor(themeColors.blueSolid, 0.75),
                             borderWidth: 1,
                         },
                         isFuture && {

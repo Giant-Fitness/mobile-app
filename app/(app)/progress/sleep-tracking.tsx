@@ -1,4 +1,3 @@
-//get available timeRanges, aggragatedData
 import React, { useState, useMemo, useEffect } from 'react';
 import { StyleSheet, View, TouchableOpacity, SectionList } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,9 +9,9 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { useSharedValue } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
-import { WeightChart } from '@/components/progress/WeightChart'; // to be changed
+import { WeightChart } from '@/components/progress/WeightChart';
 import { AppDispatch, RootState } from '@/store/store';
-import { TimeRange, aggregateData, calculateMovingAverage, getTimeRangeLabel, getAvailableTimeRanges, getInitialTimeRange } from '@/utils/weight'; // to be tempered
+import { TimeRange, aggregateData, calculateMovingAverage, getTimeRangeLabel, getAvailableTimeRanges, getInitialTimeRange } from '@/utils/weight'; 
 import { UserSleepMeasurement } from '@/types';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { Icon } from '@/components/base/Icon';
@@ -206,11 +205,11 @@ export default function SleepTrackingScreen() {
             <View style={styles.header}>
                 <View style={styles.legendContainer}>
                     <View style={styles.legendItem}>
-                        <View style={[styles.legendDot, { borderColor: themeColors.purpleSolid }]} />
+                        <View style={[styles.legendDot, { borderColor: themeColors.blueSolid }]} />
                         <ThemedText type='bodyXSmall'>Sleep</ThemedText>
                     </View>
                     <View style={[styles.legendItem, { marginLeft: Spaces.MD }]}>
-                        <View style={[styles.legendLine, { backgroundColor: lightenColor(themeColors.purpleSolid, 0.6) }]} />
+                        <View style={[styles.legendLine, { backgroundColor: lightenColor(themeColors.blueSolid, 0.6) }]} />
                         <ThemedText type='bodyXSmall'>Trend Line</ThemedText>
                     </View>
                 </View>
@@ -218,7 +217,7 @@ export default function SleepTrackingScreen() {
 
             {/* move this to center */}
             <View style={styles.insightsContainer}> 
-                <View style={styles.insightItem}>
+                <View style={styles.insightItem    }>
                     <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
                         Average
                     </ThemedText>
@@ -226,15 +225,7 @@ export default function SleepTrackingScreen() {
 
 
                 </View>
-                {/* <View style={[styles.insightItem, { marginLeft: Spaces.XXXL }]}>
-                    <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
-                        Change
-                    </ThemedText>
-                    <ThemedText type='titleXLarge' style={{ color: sleepChange > 0 ? themeColors.maroonSolid : darkenColor(themeColors.accent, 0.3) }}>
-                        {sleepChange > 0 ? '+' : ''}
-                        {sleepChange.toFixed(1)} kg
-                    </ThemedText>
-                </View> */}
+
             </View>
 
             <View style={styles.chartContainer}>
@@ -247,6 +238,7 @@ export default function SleepTrackingScreen() {
                     movingAverages={movingAverages}
                     effectiveTimeRange={effectiveTimeRange}
                     onDataPointPress={handleDataPointPress}
+                    isSleepData={true}
                 />
             </View>
 
@@ -273,7 +265,7 @@ export default function SleepTrackingScreen() {
 
         return (
             <TouchableOpacity
-                style={[styles.tile, { backgroundColor: lightenColor(themeColors.purpleTransparent, 0.5) }]}
+                style={[styles.tile, { backgroundColor: themeColors.blueTransparent }]}
                 onPress={() => handleTilePress(item)}
                 activeOpacity={0.8}
             >
@@ -282,7 +274,6 @@ export default function SleepTrackingScreen() {
                         {dayOfWeek}, {`${month} ${day}`}
                     </ThemedText>
                     <ThemedText type='title' style={styles.weightText}>
-                        {/* {item.DurationInMinutes.toFixed(1)} minutes */}
                         {Math.floor(item.DurationInMinutes / 60)} h {item.DurationInMinutes % 60} m
                     </ThemedText>
                 </View>
@@ -298,9 +289,8 @@ export default function SleepTrackingScreen() {
                             ]}
                         >
                             {parseFloat(sleepChange) > 0 ? '+' : ''}
-                            {/* {sleepChange} min */}
-                            { (parseInt(sleepChange) > 0) ? (parseInt(sleepChange) > 59) ? `${Math.floor(parseInt(sleepChange) /60)} h ${parseInt(sleepChange) % 60} m` : `${sleepChange} min`
-                            :   (parseInt(sleepChange) < -59) ? `- ${Math.floor(parseInt((sleepChange)) * -1  /60)} h ${(parseInt(sleepChange) *-1) % 60} m` : `${sleepChange} min`
+                            { (parseInt(sleepChange) > 0) ? (parseInt(sleepChange) > 59) ? `${Math.floor(parseInt(sleepChange) /60)} h ${parseInt(sleepChange) % 60} m` : `${sleepChange} m`
+                            :   (parseInt(sleepChange) < -59) ? `- ${Math.floor(parseInt((sleepChange)) * -1  /60)} h ${(parseInt(sleepChange) *-1) % 60} m` : `${sleepChange} m`
                              }
                         </ThemedText>
                     </View>

@@ -47,6 +47,7 @@ type WeightChartProps = {
     effectiveTimeRange: string;
     onDataPointPress?: (measurement: UserWeightMeasurement | UserSleepMeasurement) => void;
     style?: any;
+    isSleepData ?: boolean;
 };
 
 type TimeRangeOptionType = {
@@ -113,8 +114,8 @@ const EmptyStateChart = ({
     <Svg width={width} height={height} preserveAspectRatio='xMidYMid meet'>
         <Defs>
             <LinearGradient id='emptyGradient' x1='0' y1='0' x2='0' y2='1'>
-                <Stop offset='0' stopColor={themeColors.purpleSolid} stopOpacity='0.2' />
-                <Stop offset='1' stopColor={themeColors.purpleSolid} stopOpacity='0.05' />
+                <Stop offset='0' stopColor={isSleepData ? themeColors.blueSolid : themeColors.purpleSolid} stopOpacity='0.2' />
+                <Stop offset='1' stopColor={isSleepData ? themeColors.blueSolid : themeColors.purpleSolid} stopOpacity='0.05' />
             </LinearGradient>
         </Defs>
 
@@ -144,7 +145,7 @@ const EmptyStateChart = ({
                 C ${width * 0.75} ${height * 0.3}, 
                   ${width * 0.75} ${height / 2}, 
                   ${width} ${height / 2}`}
-            stroke={themeColors.purpleSolid}
+            stroke={ SleepData ? themeColors.blueSolid : themeColors.purpleSolid}
             strokeWidth='1'
             strokeDasharray='2,2'
             fill='none'
@@ -177,12 +178,12 @@ export const WeightChart: React.FC<WeightChartProps> = ({
     effectiveTimeRange,
     onDataPointPress,
     style,
+    isSleepData,
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const [selectedPoint, setSelectedPoint] = useState<Point | null>(null);
 
-    const [isSleepData, setSleepData] = useState(false);
 
     const screenWidth = Dimensions.get('window').width;
     const chartWidth = screenWidth - Spaces.MD * 2;
@@ -197,8 +198,9 @@ export const WeightChart: React.FC<WeightChartProps> = ({
             const lastPoint = points[points.length - 1];
             setSelectedPoint(lastPoint);
         }
-        setSleepData(data.some((item) => item.durationInMinutes !== undefined));        
     }, [data]);
+
+
 
     // Generate grid lines
     const gridLines = React.useMemo(() => {
@@ -285,19 +287,19 @@ export const WeightChart: React.FC<WeightChartProps> = ({
                                 <ThemedText type='title' style={styles.emptyTitle}>
                                     Track Your Progress
                                 </ThemedText>
-                                <ThemedText type='bodySmall' style={[styles.emptyMessage, { color: lightenColor(themeColors.purpleSolid, 0.3) }]}>
+                                <ThemedText type='bodySmall' style={[styles.emptyMessage, { color: !isSleepData ?  lightenColor(themeColors.purpleSolid, 0.3) : lightenColor(themeColors.blueSolid, 0.3) }]}>
                                     Add measurements to see your progress over time
                                 </ThemedText>
                             </>
                         ) : (
-                            <ThemedText type='bodyMedium' style={[styles.emptyMessage, { color: lightenColor(themeColors.purpleSolid, 0.3) }]}>
+                            <ThemedText type='bodyMedium' style={[styles.emptyMessage, {  color: !isSleepData ?  lightenColor(themeColors.purpleSolid, 0.3) : lightenColor(themeColors.blueSolid, 0.3) }]}>
                                 Add more measurements to see trends
                             </ThemedText>
                         )}
                     </View>
 
                     {data.length === 1 && points.length === 1 && (
-                        <Circle cx={points[0].x} cy={points[0].y} r={3} stroke={themeColors.purpleSolid} strokeWidth={1.5} fill={themeColors.background} />
+                        <Circle cx={points[0].x} cy={points[0].y} r={3} stroke={isSleepData ? themeColors.blueSolid : themeColors.purpleSolid} strokeWidth={1.5} fill={themeColors.background} />
                     )}
                 </View>
 
@@ -320,7 +322,7 @@ export const WeightChart: React.FC<WeightChartProps> = ({
                     y1={tooltipY + TOOLTIP_HEIGHT + TOOLTIP_ARROW_SIZE}
                     x2={selectedPoint.x}
                     y2={chartHeight - CHART_PADDING.bottom}
-                    stroke={themeColors.purpleSolid}
+                    stroke={isSleepData ? themeColors.blueSolid : themeColors.purpleSolid}
                     strokeWidth={0.8}
                     strokeDasharray='4,8'
                 />
@@ -334,7 +336,7 @@ export const WeightChart: React.FC<WeightChartProps> = ({
                         h ${-TOOLTIP_WIDTH}
                         Z
                     `}
-                    fill={themeColors.purpleTransparent}
+                    fill={isSleepData ? themeColors.blueTransparent : themeColors.purpleTransparent}
                 />
 
                 {/* Tooltip content */}
@@ -343,7 +345,7 @@ export const WeightChart: React.FC<WeightChartProps> = ({
                 </SvgText>
                 <SvgText x={tooltipX + TOOLTIP_WIDTH / 2} y={tooltipY + TOOLTIP_PADDING + 32} fill={themeColors.text} fontSize={14} textAnchor='middle'>
                     {/* {selectedPoint.weight } {isSleepData ? 'min' : 'kg'}    */}
-                    {isSleepData ? `${Math.floor(selectedPoint.weight / 60)} h ${selectedPoint.weight % 60} min` : `${selectedPoint.weight} kg`}     
+                    {isSleepData ? `${Math.floor(selectedPoint.weight / 60)} h ${selectedPoint.weight % 60} m` : `${selectedPoint.weight} kg`}     
                 </SvgText>
             </G>
         );
@@ -377,7 +379,7 @@ export const WeightChart: React.FC<WeightChartProps> = ({
                         ))}
 
                         {/* Weight line */}
-                        <Path d={generateSmoothPath(points)} stroke={themeColors.purpleSolid} strokeWidth={2} fill='none' />
+                        <Path d={generateSmoothPath(points)} stroke={isSleepData ? themeColors.blueSolid : themeColors.purpleSolid} strokeWidth={2} fill='none' />
 
                         {/* Moving average line */}
                         {movingAverages.length > 0 && (
@@ -388,7 +390,7 @@ export const WeightChart: React.FC<WeightChartProps> = ({
                                         y: CHART_PADDING.top + ((yAxisRange.max - movingAverages[i]) / (yAxisRange.max - yAxisRange.min)) * plotHeight,
                                     })),
                                 )}
-                                stroke={lightenColor(themeColors.purpleSolid, 0.6)}
+                                stroke={lightenColor(isSleepData ? themeColors.blueSolid : themeColors.purpleSolid, 0.6)}
                                 strokeWidth={1.5}
                                 fill='none'
                             />
@@ -397,7 +399,7 @@ export const WeightChart: React.FC<WeightChartProps> = ({
                         {/* Data points */}
                         {points.map((point, index) => (
                             <G key={index}>
-                                <Circle cx={point.x} cy={point.y} r={10} fill={themeColors.purpleSolid} opacity={0.05} />
+                                <Circle cx={point.x} cy={point.y} r={10} fill={isSleepData ? themeColors.blueSolid : themeColors.purpleSolid} opacity={0.05} />
                                 <Circle
                                     cx={point.x}
                                     cy={point.y}
@@ -410,9 +412,9 @@ export const WeightChart: React.FC<WeightChartProps> = ({
                                     cx={point.x}
                                     cy={point.y}
                                     r={3}
-                                    stroke={themeColors.purpleSolid}
+                                    stroke={isSleepData ? themeColors.blueSolid : themeColors.purpleSolid}
                                     strokeWidth={1.5}
-                                    fill={themeColors.purpleTransparent}
+                                    fill={isSleepData ? themeColors.blueTransparent:themeColors.purpleTransparent}
                                 />
                             </G>
                         ))}

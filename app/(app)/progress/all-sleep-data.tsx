@@ -133,7 +133,7 @@ export default function AllSleepDataScreen() {
 
         return (
             <TouchableOpacity
-                style={[styles.tile, { backgroundColor: lightenColor(themeColors.purpleTransparent, 0.1) }]}
+                style={[styles.tile, { backgroundColor: lightenColor(themeColors.blueTransparent, 0.1) }]}
                 onPress={() => handleTilePress(item)}
                 activeOpacity={0.8}
             >
@@ -189,7 +189,7 @@ export default function AllSleepDataScreen() {
             />
 
             <View style={styles.content}>
-                <MeasurementCalendar data={measurementData} onDayPress={handleDayPress} renderTile={renderListItem} measurementUnit='kg' />
+                <MeasurementCalendar data={measurementData} onDayPress={handleDayPress} renderTile={renderListItem} measurementUnit='kg' isSleepData={true}/>
             </View>
 
             <SleepLoggingSheet

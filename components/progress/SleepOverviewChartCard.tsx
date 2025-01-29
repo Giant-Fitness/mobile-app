@@ -9,7 +9,7 @@ import { Path, Svg, Circle, Defs, LinearGradient, Stop } from 'react-native-svg'
 import { format } from 'date-fns';
 import Animated, { useAnimatedStyle, withRepeat, withTiming, withSequence, useSharedValue } from 'react-native-reanimated';
 import { ThemedText } from '../base/ThemedText';
-import { lightenColor } from '@/utils/colorUtils';
+import { darkenColor, lightenColor } from '@/utils/colorUtils';
 
 type SleepOverviewChartCardProps = {
     values: UserSleepMeasurement[];
@@ -46,7 +46,7 @@ const SingleDataPointState = ({ measurement, onPress, themeColors }: { measureme
                     <ThemedText type='bodyMedium' style={styles.firstMeasurementLabel}>
                         {isToday ? "Today's Measurement" : 'First Measurement'}
                     </ThemedText>
-                    <ThemedText type='titleLarge' style={[styles.weightValue, { color: themeColors.purpleSolid }]}>
+                    <ThemedText type='titleLarge' style={[styles.weightValue, { color: themeColors.blueSolid }]}>
                         {measurement.DurationInMinutes.toFixed(1)} hours
                     </ThemedText>
                     <ThemedText type='bodySmall' style={[styles.dateText, { color: themeColors.subText }]}>
@@ -62,7 +62,7 @@ const SingleDataPointState = ({ measurement, onPress, themeColors }: { measureme
                     </View>
                 ) : (
                     <>
-                        <TouchableOpacity style={[styles.addNextButton, { backgroundColor: themeColors.purpleSolid }]} onPress={onPress} activeOpacity={0.8}>
+                        <TouchableOpacity style={[styles.addNextButton, { backgroundColor: themeColors.blueSolid }]} onPress={onPress} activeOpacity={0.8}>
                             <Icon name='plus' size={18} color={themeColors.white} style={styles.addIcon} />
                             <ThemedText type='button' style={[styles.buttonText, { color: themeColors.white }]}>
                                 Add Next Measurement
@@ -101,7 +101,7 @@ const EmptyState = ({ onPress, themeColors }: { onPress: () => void; themeColors
             <ThemedText type='bodySmall' style={[styles.emptyStateDescription, { color: themeColors.subText }]}>
                 Track your sleep regularly to see your journey take shape with charts that keep you motivated and informed.
             </ThemedText>
-            <TouchableOpacity style={[styles.addButton, { backgroundColor: themeColors.purpleSolid }]} onPress={onPress} activeOpacity={0.8}>
+            <TouchableOpacity style={[styles.addButton, { backgroundColor: themeColors.blueSolid }]} onPress={onPress} activeOpacity={0.8}>
                 <Icon name='plus' size={18} color={themeColors.white} style={styles.addIcon} />
                 <ThemedText type='button' style={[styles.buttonText, { color: themeColors.white }]}>
                     Add First Measurement
@@ -109,7 +109,7 @@ const EmptyState = ({ onPress, themeColors }: { onPress: () => void; themeColors
             </TouchableOpacity>
         </View>
         <View style={styles.chartContainer}>
-            <EmptyStateChart color={themeColors.purpleSolid} />
+            <EmptyStateChart color={themeColors.blueSolid} />
         </View>
     </View>
 );
@@ -254,7 +254,7 @@ export const SleepOverviewChartCard: React.FC<SleepOverviewChartCardProps> = ({ 
             <TouchableOpacity
                 style={[
                     styles.card,
-                    { backgroundColor: lightenColor(themeColors.purpleTransparent, 0.3), borderColor: lightenColor(themeColors.purpleSolid, 0.9) },
+                    { backgroundColor: themeColors.blueTransparent, borderColor: themeColors.blueSolid },
                     style,
                 ]}
                 onPress={handlePress}
@@ -270,7 +270,7 @@ export const SleepOverviewChartCard: React.FC<SleepOverviewChartCardProps> = ({ 
             <View
                 style={[
                     styles.card,
-                    { backgroundColor: lightenColor(themeColors.purpleTransparent, 0.3), borderColor: lightenColor(themeColors.purpleSolid, 0.9) },
+                    { backgroundColor: themeColors.blueTransparent, borderColor: themeColors.blueSolid },
                     style,
                 ]}
             >
@@ -284,7 +284,7 @@ export const SleepOverviewChartCard: React.FC<SleepOverviewChartCardProps> = ({ 
         <TouchableOpacity
             style={[
                 styles.card,
-                { backgroundColor: lightenColor(themeColors.purpleTransparent, 0.3), borderColor: lightenColor(themeColors.purpleSolid, 0.9) },
+                { backgroundColor: themeColors.blueTransparent , borderColor: lightenColor(themeColors.blueSolid, 0.9) },
                 style,
             ]}
             onPress={handlePress}
@@ -301,16 +301,16 @@ export const SleepOverviewChartCard: React.FC<SleepOverviewChartCardProps> = ({ 
             <View style={[styles.chartContainer, style.chartContainer]}>
                 {processedData && (
                     <Svg width='100%' height='100%' viewBox='0 0 100 38' preserveAspectRatio='xMidYMid meet'>
-                        <Path d={processedData} stroke={themeColors.purpleSolid} strokeWidth={0.9} fill='none' />
+                        <Path d={processedData} stroke={themeColors.blueSolid} strokeWidth={0.8} fill='none' />
                         {points.map((point, index) => (
                             <Circle
                                 key={index}
                                 cx={point.x}
                                 cy={point.y}
-                                stroke={themeColors.purpleSolid}
+                                stroke={themeColors.blueSolid}
                                 strokeWidth='0.9'
                                 r='1.5'
-                                fill={themeColors.purpleTransparent}
+                                fill={lightenColor(themeColors.blueSolid, 0.8)}
                             />
                         ))}
                     </Svg>
