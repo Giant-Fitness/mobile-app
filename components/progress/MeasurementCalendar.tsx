@@ -23,7 +23,7 @@ interface MeasurementCalendarProps {
     onDayPress?: (date: string) => void;
     renderTile: (item: CalendarData) => React.ReactNode;
     measurementUnit?: string;
-    isSleepData ?: boolean;
+    isSleepData?: boolean;
 }
 
 export const MeasurementCalendar: React.FC<MeasurementCalendarProps> = ({ data, onDayPress, isSleepData }) => {

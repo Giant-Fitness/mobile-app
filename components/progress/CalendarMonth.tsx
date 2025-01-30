@@ -14,7 +14,7 @@ interface CalendarMonthProps {
     onDayPress?: (date: string) => void;
 }
 
-export const CalendarMonth: React.FC<CalendarMonthProps> = ({ date, measurementDates, onDayPress, isSleepData}) => {
+export const CalendarMonth: React.FC<CalendarMonthProps> = ({ date, measurementDates, onDayPress, isSleepData }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const today = new Date();
@@ -56,10 +56,10 @@ export const CalendarMonth: React.FC<CalendarMonthProps> = ({ date, measurementD
                     style={[
                         styles.dayCell,
                         hasMeasurement && {
-                            backgroundColor: !isSleepData ?  lightenColor(themeColors.purpleSolid, 0.8) : lightenColor(themeColors.blueSolid, 0.75),
+                            backgroundColor: !isSleepData ? lightenColor(themeColors.purpleSolid, 0.8) : lightenColor(themeColors.blueSolid, 0.75),
                         },
                         !hasMeasurement && {
-                            borderColor: !isSleepData ?  lightenColor(themeColors.purpleSolid, 0.8) : lightenColor(themeColors.blueSolid, 0.75),
+                            borderColor: !isSleepData ? lightenColor(themeColors.purpleSolid, 0.8) : lightenColor(themeColors.blueSolid, 0.75),
                             borderWidth: 1,
                         },
                         isFuture && {

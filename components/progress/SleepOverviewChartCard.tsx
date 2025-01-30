@@ -252,11 +252,7 @@ export const SleepOverviewChartCard: React.FC<SleepOverviewChartCardProps> = ({ 
     if (!values?.length) {
         return (
             <TouchableOpacity
-                style={[
-                    styles.card,
-                    { backgroundColor: themeColors.blueTransparent, borderColor: themeColors.blueSolid },
-                    style,
-                ]}
+                style={[styles.card, { backgroundColor: themeColors.blueTransparent, borderColor: themeColors.blueSolid }, style]}
                 onPress={handlePress}
                 activeOpacity={0.9}
             >
@@ -267,13 +263,7 @@ export const SleepOverviewChartCard: React.FC<SleepOverviewChartCardProps> = ({ 
 
     if (values.length === 1) {
         return (
-            <View
-                style={[
-                    styles.card,
-                    { backgroundColor: themeColors.blueTransparent, borderColor: themeColors.blueSolid },
-                    style,
-                ]}
-            >
+            <View style={[styles.card, { backgroundColor: themeColors.blueTransparent, borderColor: themeColors.blueSolid }, style]}>
                 <SingleDataPointState measurement={values[0]} onPress={handlePress} themeColors={themeColors} />
             </View>
         );
@@ -282,11 +272,7 @@ export const SleepOverviewChartCard: React.FC<SleepOverviewChartCardProps> = ({ 
     // Regular chart view for 2+ measurements
     return (
         <TouchableOpacity
-            style={[
-                styles.card,
-                { backgroundColor: themeColors.blueTransparent , borderColor: lightenColor(themeColors.blueSolid, 0.9) },
-                style,
-            ]}
+            style={[styles.card, { backgroundColor: themeColors.blueTransparent, borderColor: lightenColor(themeColors.blueSolid, 0.9) }, style]}
             onPress={handlePress}
             activeOpacity={0.9}
         >
@@ -327,7 +313,7 @@ export const SleepOverviewChartCard: React.FC<SleepOverviewChartCardProps> = ({ 
             />
             <View style={styles.footerContainer}>
                 <ThemedText type='overline' style={[styles.value, { color: themeColors.subText }]}>
-                    {`${Math.floor(averageSleep/60)} hours ${Math.floor(averageSleep % 60)} minutes (average)`}
+                    {`${Math.floor(averageSleep / 60)} hours ${Math.floor(averageSleep % 60)} minutes (average)`}
                 </ThemedText>
                 <Icon name='chevron-forward' color={themeColors.subText} />
             </View>

@@ -23,7 +23,7 @@ interface SleepLoggingSheetProps {
     initialDate?: Date;
     isEditing?: boolean;
     isLoading?: boolean;
-    getExistingData?: (data: Date) => UserSleepMeasurement | undefined; 
+    getExistingData?: (data: Date) => UserSleepMeasurement | undefined;
 }
 
 export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
@@ -62,20 +62,19 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
             const existingData = getExistingData?.(initialDate || today);
 
             if (existingData) {
-
                 const convertedSleep = existingData.DurationInMinutes;
-                const hours = Math.floor(convertedSleep/60);
+                const hours = Math.floor(convertedSleep / 60);
                 const mins = convertedSleep % 60;
 
-                setSleep((hours?.toString()));
+                setSleep(hours?.toString());
                 setMinutes(mins?.toString());
                 setOriginalSleep(convertedSleep);
                 setSelectedDate(new Date(existingData.MeasurementTimestamp));
                 setIsEditingMode(true);
             } else {
                 setOriginalSleep(undefined);
-                setSleep(initialSleep ? Math.floor(initialSleep / 60).toString() : ''); 
-                setMinutes(initialSleep ? (initialSleep % 60).toString() : ''); 
+                setSleep(initialSleep ? Math.floor(initialSleep / 60).toString() : '');
+                setMinutes(initialSleep ? (initialSleep % 60).toString() : '');
                 setSelectedDate(initialDate || today);
                 setIsEditingMode(false);
             }
@@ -91,9 +90,8 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
         if (visible && !isEditing) {
             const existingData = getExistingData?.(selectedDate);
             if (existingData) {
-
-                const convertedSleep = (existingData.DurationInMinutes);
-                const hours = Math.floor(convertedSleep/60);
+                const convertedSleep = existingData.DurationInMinutes;
+                const hours = Math.floor(convertedSleep / 60);
                 const mins = convertedSleep % 60;
                 setSleep(hours?.toString());
                 setMinutes(mins?.toString());
@@ -151,12 +149,13 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
     // };
 
     //changed this function in order to get the total sleep time in minutes
-    
+
     const formatSleep = (hours: string | number, minutes: string | number): string => {
         const parsedHours = typeof hours === 'string' ? parseInt(hours, 10) : hours;
         const parsedMinutes = typeof minutes === 'string' ? parseInt(minutes, 10) : minutes;
 
-        if (isNaN(parsedHours) || parsedHours < 0 || parsedMinutes < 0 || parsedMinutes >= 60) { // can do this for hours and minutes separately
+        if (isNaN(parsedHours) || parsedHours < 0 || parsedMinutes < 0 || parsedMinutes >= 60) {
+            // can do this for hours and minutes separately
             return '';
         }
 
@@ -170,7 +169,15 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
         const hoursSlept = parseFloat(sleep);
         const minutesSlept = parseFloat(minutes);
 
-        if (isNaN(hoursSlept) || hoursSlept > 24 || hoursSlept < 0 || minutesSlept >= 60 || minutesSlept < 0 || isNaN(minutesSlept) || (hoursSlept === 0 && minutesSlept === 0)) {
+        if (
+            isNaN(hoursSlept) ||
+            hoursSlept > 24 ||
+            hoursSlept < 0 ||
+            minutesSlept >= 60 ||
+            minutesSlept < 0 ||
+            isNaN(minutesSlept) ||
+            (hoursSlept === 0 && minutesSlept === 0)
+        ) {
             setError('Please enter a valid sleep time');
             sleepInputRef.current?.focus();
             return;

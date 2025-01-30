@@ -12,7 +12,7 @@ import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { WeightOverviewChartCard } from '@/components/progress/WeightOverviewChartCard';
-import { SleepOverviewChartCard} from '@/components/progress/SleepOverviewChartCard'
+import { SleepOverviewChartCard } from '@/components/progress/SleepOverviewChartCard';
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
@@ -44,7 +44,7 @@ export default function ProgressScreen() {
     });
 
     const { userWeightMeasurements, userWeightMeasurementsState } = useSelector((state: RootState) => state.user);
-    const { userSleepMeasurements, userSleepMeasurementsState} = useSelector((state: RootState) => state.user)
+    const { userSleepMeasurements, userSleepMeasurementsState } = useSelector((state: RootState) => state.user);
 
     useEffect(() => {
         if (userWeightMeasurementsState === REQUEST_STATE.IDLE) {
@@ -56,7 +56,7 @@ export default function ProgressScreen() {
         if (userSleepMeasurementsState === REQUEST_STATE.IDLE) {
             dispatch(getSleepMeasurementsAsync());
         }
-    }, [dispatch, userSleepMeasurementsState])
+    }, [dispatch, userSleepMeasurementsState]);
 
     const dataLoadedState = useMemo(() => {
         if (userWeightMeasurementsState !== REQUEST_STATE.FULFILLED) {
@@ -69,7 +69,7 @@ export default function ProgressScreen() {
         if (userSleepMeasurementsState != REQUEST_STATE.FULFILLED) {
             return REQUEST_STATE.PENDING;
         }
-        return REQUEST_STATE.FULFILLED
+        return REQUEST_STATE.FULFILLED;
     }, [userSleepMeasurementsState]);
 
     const { showSplash, handleSplashComplete } = useSplashScreen({
@@ -100,22 +100,22 @@ export default function ProgressScreen() {
         }
     };
 
-    const handleLogSleep = async (sleep : number, date: Date) => {
+    const handleLogSleep = async (sleep: number, date: Date) => {
         setIsLoggingSleep(true);
 
         try {
             await dispatch(
                 logSleepMeasurementAsync({
-                    durationInMinutes:sleep,
+                    durationInMinutes: sleep,
                     measurementTimestamp: date.toISOString(),
-                })
+                }),
             ).unwrap();
         } catch (error) {
-            console.error("Failed to log sleep :", error);
+            console.error('Failed to log sleep :', error);
         } finally {
             setIsLoggingSleep(false);
         }
-    }
+    };
 
     const handleChartPress = () => {
         // Navigate to detailed view only if we have enough data points
@@ -127,12 +127,12 @@ export default function ProgressScreen() {
     };
 
     const handleSleepChartPress = () => {
-        if (userSleepMeasurements?.length >= 2){
+        if (userSleepMeasurements?.length >= 2) {
             router.push('/(app)/progress/sleep-tracking');
         } else {
             setIsLoggingSleep(true);
         }
-    }
+    };
 
     if (showSplash) {
         return <DumbbellSplash isDataLoaded={false} onAnimationComplete={handleSplashComplete} />;
@@ -157,7 +157,6 @@ export default function ProgressScreen() {
                             }}
                         />
                     </ThemedView>
-
 
                     <ThemedView style={styles.cardContainer}>
                         <SleepOverviewChartCard
@@ -202,11 +201,12 @@ export default function ProgressScreen() {
                 isLoading={isLoggingWeight}
             />
 
-            <SleepLoggingSheet 
-                visible = {isSleepSheetVisible}
-                onClose={ () => setIsSleepSheetVisible(false)}
+            <SleepLoggingSheet
+                visible={isSleepSheetVisible}
+                onClose={() => setIsSleepSheetVisible(false)}
                 onSubmit={handleLogSleep}
-                isLoading={isLoggingSleep}/>
+                isLoading={isLoggingSleep}
+            />
         </>
     );
 }

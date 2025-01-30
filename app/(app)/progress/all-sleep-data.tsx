@@ -189,7 +189,7 @@ export default function AllSleepDataScreen() {
             />
 
             <View style={styles.content}>
-                <MeasurementCalendar data={measurementData} onDayPress={handleDayPress} renderTile={renderListItem} measurementUnit='kg' isSleepData={true}/>
+                <MeasurementCalendar data={measurementData} onDayPress={handleDayPress} renderTile={renderListItem} measurementUnit='kg' isSleepData={true} />
             </View>
 
             <SleepLoggingSheet

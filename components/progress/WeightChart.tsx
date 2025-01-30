@@ -32,7 +32,7 @@ type Point = {
     x: number;
     y: number;
     weight?: number;
-    durationInMinutes?:number;
+    durationInMinutes?: number;
     timestamp: Date;
     originalData: UserWeightMeasurement | UserSleepMeasurement;
 };
@@ -47,7 +47,7 @@ type WeightChartProps = {
     effectiveTimeRange: string;
     onDataPointPress?: (measurement: UserWeightMeasurement | UserSleepMeasurement) => void;
     style?: any;
-    isSleepData ?: boolean;
+    isSleepData?: boolean;
 };
 
 type TimeRangeOptionType = {
@@ -145,7 +145,7 @@ const EmptyStateChart = ({
                 C ${width * 0.75} ${height * 0.3}, 
                   ${width * 0.75} ${height / 2}, 
                   ${width} ${height / 2}`}
-            stroke={ SleepData ? themeColors.blueSolid : themeColors.purpleSolid}
+            stroke={SleepData ? themeColors.blueSolid : themeColors.purpleSolid}
             strokeWidth='1'
             strokeDasharray='2,2'
             fill='none'
@@ -184,7 +184,6 @@ export const WeightChart: React.FC<WeightChartProps> = ({
     const themeColors = Colors[colorScheme];
     const [selectedPoint, setSelectedPoint] = useState<Point | null>(null);
 
-
     const screenWidth = Dimensions.get('window').width;
     const chartWidth = screenWidth - Spaces.MD * 2;
     const chartHeight = 300;
@@ -199,8 +198,6 @@ export const WeightChart: React.FC<WeightChartProps> = ({
             setSelectedPoint(lastPoint);
         }
     }, [data]);
-
-
 
     // Generate grid lines
     const gridLines = React.useMemo(() => {
@@ -218,7 +215,7 @@ export const WeightChart: React.FC<WeightChartProps> = ({
         if (!data.length) return [];
         if (data.length === 1) {
             // Center single point
-            
+
             const point = data[0];
 
             return [
@@ -287,19 +284,38 @@ export const WeightChart: React.FC<WeightChartProps> = ({
                                 <ThemedText type='title' style={styles.emptyTitle}>
                                     Track Your Progress
                                 </ThemedText>
-                                <ThemedText type='bodySmall' style={[styles.emptyMessage, { color: !isSleepData ?  lightenColor(themeColors.purpleSolid, 0.3) : lightenColor(themeColors.blueSolid, 0.3) }]}>
+                                <ThemedText
+                                    type='bodySmall'
+                                    style={[
+                                        styles.emptyMessage,
+                                        { color: !isSleepData ? lightenColor(themeColors.purpleSolid, 0.3) : lightenColor(themeColors.blueSolid, 0.3) },
+                                    ]}
+                                >
                                     Add measurements to see your progress over time
                                 </ThemedText>
                             </>
                         ) : (
-                            <ThemedText type='bodyMedium' style={[styles.emptyMessage, {  color: !isSleepData ?  lightenColor(themeColors.purpleSolid, 0.3) : lightenColor(themeColors.blueSolid, 0.3) }]}>
+                            <ThemedText
+                                type='bodyMedium'
+                                style={[
+                                    styles.emptyMessage,
+                                    { color: !isSleepData ? lightenColor(themeColors.purpleSolid, 0.3) : lightenColor(themeColors.blueSolid, 0.3) },
+                                ]}
+                            >
                                 Add more measurements to see trends
                             </ThemedText>
                         )}
                     </View>
 
                     {data.length === 1 && points.length === 1 && (
-                        <Circle cx={points[0].x} cy={points[0].y} r={3} stroke={isSleepData ? themeColors.blueSolid : themeColors.purpleSolid} strokeWidth={1.5} fill={themeColors.background} />
+                        <Circle
+                            cx={points[0].x}
+                            cy={points[0].y}
+                            r={3}
+                            stroke={isSleepData ? themeColors.blueSolid : themeColors.purpleSolid}
+                            strokeWidth={1.5}
+                            fill={themeColors.background}
+                        />
                     )}
                 </View>
 
@@ -345,7 +361,7 @@ export const WeightChart: React.FC<WeightChartProps> = ({
                 </SvgText>
                 <SvgText x={tooltipX + TOOLTIP_WIDTH / 2} y={tooltipY + TOOLTIP_PADDING + 32} fill={themeColors.text} fontSize={14} textAnchor='middle'>
                     {/* {selectedPoint.weight } {isSleepData ? 'min' : 'kg'}    */}
-                    {isSleepData ? `${Math.floor(selectedPoint.weight / 60)} h ${selectedPoint.weight % 60} m` : `${selectedPoint.weight} kg`}     
+                    {isSleepData ? `${Math.floor(selectedPoint.weight / 60)} h ${selectedPoint.weight % 60} m` : `${selectedPoint.weight} kg`}
                 </SvgText>
             </G>
         );
@@ -379,7 +395,12 @@ export const WeightChart: React.FC<WeightChartProps> = ({
                         ))}
 
                         {/* Weight line */}
-                        <Path d={generateSmoothPath(points)} stroke={isSleepData ? themeColors.blueSolid : themeColors.purpleSolid} strokeWidth={2} fill='none' />
+                        <Path
+                            d={generateSmoothPath(points)}
+                            stroke={isSleepData ? themeColors.blueSolid : themeColors.purpleSolid}
+                            strokeWidth={2}
+                            fill='none'
+                        />
 
                         {/* Moving average line */}
                         {movingAverages.length > 0 && (
@@ -414,7 +435,7 @@ export const WeightChart: React.FC<WeightChartProps> = ({
                                     r={3}
                                     stroke={isSleepData ? themeColors.blueSolid : themeColors.purpleSolid}
                                     strokeWidth={1.5}
-                                    fill={isSleepData ? themeColors.blueTransparent:themeColors.purpleTransparent}
+                                    fill={isSleepData ? themeColors.blueTransparent : themeColors.purpleTransparent}
                                 />
                             </G>
                         ))}

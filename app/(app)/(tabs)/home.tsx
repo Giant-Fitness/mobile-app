@@ -21,7 +21,6 @@ import { AppDispatch, RootState } from '@/store/store';
 import { WorkoutCompletedSection } from '@/components/programs/WorkoutCompletedSection';
 import { router } from 'expo-router';
 
-
 export default function HomeScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -33,7 +32,7 @@ export default function HomeScreen() {
 
     const { user, userProgramProgress, hasCompletedWorkoutToday } = useProgramData();
     const { userWeightMeasurements } = useSelector((state: RootState) => state.user);
-    const { userSleepMeasurements } = useSelector((state:RootState) => state.user)
+    const { userSleepMeasurements } = useSelector((state: RootState) => state.user);
 
     const isFitnessOnboardingComplete = user?.OnboardingStatus?.fitness === true;
 
@@ -89,9 +88,8 @@ export default function HomeScreen() {
         return userWeightMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
     };
 
-    const getExistingSleepData = (date : Date) => {
+    const getExistingSleepData = (date: Date) => {
         return userSleepMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
-
     };
 
     const actionTiles = [
@@ -312,12 +310,12 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     },
     actionTilesContainer: {
-        paddingHorizontal: Spaces.LG,
         paddingVertical: Spaces.XS,
         flexDirection: 'row',
     },
     actionTilesScrollContainer: {
-        paddingHorizontal: Spaces.SM,
+        paddingLeft: Spaces.LG,
+        paddingRight: Spaces.MD,
         paddingVertical: Spaces.XS,
         flexDirection: 'row',
     },

@@ -11,7 +11,7 @@ import { useSharedValue } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { WeightChart } from '@/components/progress/WeightChart';
 import { AppDispatch, RootState } from '@/store/store';
-import { TimeRange, aggregateData, calculateMovingAverage, getTimeRangeLabel, getAvailableTimeRanges, getInitialTimeRange } from '@/utils/weight'; 
+import { TimeRange, aggregateData, calculateMovingAverage, getTimeRangeLabel, getAvailableTimeRanges, getInitialTimeRange } from '@/utils/weight';
 import { UserSleepMeasurement } from '@/types';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { Icon } from '@/components/base/Icon';
@@ -216,16 +216,15 @@ export default function SleepTrackingScreen() {
             </View>
 
             {/* move this to center */}
-            <View style={styles.insightsContainer}> 
-                <View style={styles.insightItem    }>
+            <View style={styles.insightsContainer}>
+                <View style={styles.insightItem}>
                     <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
                         Average
                     </ThemedText>
-                    <ThemedText type='titleXLarge'>{Math.floor(averageSleep / 60)} h {(averageSleep % 60).toFixed(0) } m </ThemedText>
-
-
+                    <ThemedText type='titleXLarge'>
+                        {Math.floor(averageSleep / 60)} h {(averageSleep % 60).toFixed(0)} m{' '}
+                    </ThemedText>
                 </View>
-
             </View>
 
             <View style={styles.chartContainer}>
@@ -264,11 +263,7 @@ export default function SleepTrackingScreen() {
         const sleepChange = getSleepChange(item.DurationInMinutes, previousSleep);
 
         return (
-            <TouchableOpacity
-                style={[styles.tile, { backgroundColor: themeColors.blueTransparent }]}
-                onPress={() => handleTilePress(item)}
-                activeOpacity={0.8}
-            >
+            <TouchableOpacity style={[styles.tile, { backgroundColor: themeColors.blueTransparent }]} onPress={() => handleTilePress(item)} activeOpacity={0.8}>
                 <View style={styles.tileLeft}>
                     <ThemedText type='caption'>
                         {dayOfWeek}, {`${month} ${day}`}
@@ -289,9 +284,13 @@ export default function SleepTrackingScreen() {
                             ]}
                         >
                             {parseFloat(sleepChange) > 0 ? '+' : ''}
-                            { (parseInt(sleepChange) > 0) ? (parseInt(sleepChange) > 59) ? `${Math.floor(parseInt(sleepChange) /60)} h ${parseInt(sleepChange) % 60} m` : `${sleepChange} m`
-                            :   (parseInt(sleepChange) < -59) ? `- ${Math.floor(parseInt((sleepChange)) * -1  /60)} h ${(parseInt(sleepChange) *-1) % 60} m` : `${sleepChange} m`
-                             }
+                            {parseInt(sleepChange) > 0
+                                ? parseInt(sleepChange) > 59
+                                    ? `${Math.floor(parseInt(sleepChange) / 60)} h ${parseInt(sleepChange) % 60} m`
+                                    : `${sleepChange} m`
+                                : parseInt(sleepChange) < -59
+                                ? `- ${Math.floor((parseInt(sleepChange) * -1) / 60)} h ${(parseInt(sleepChange) * -1) % 60} m`
+                                : `${sleepChange} m`}
                         </ThemedText>
                     </View>
                 )}
