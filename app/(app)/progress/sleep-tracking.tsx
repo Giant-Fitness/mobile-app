@@ -175,7 +175,8 @@ export default function SleepTrackingScreen() {
         if (!userSleepMeasurements.length) return [];
 
         const now = new Date();
-        const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth(), 1);
+        // Set to first day of previous month
+        const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
         const filteredMeasurements = userSleepMeasurements.filter((measurement) => {
             const date = new Date(measurement.MeasurementTimestamp);

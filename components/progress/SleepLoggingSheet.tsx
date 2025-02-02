@@ -57,15 +57,15 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
     useEffect(() => {
         if (visible) {
             setIsSuccess(false);
-    
+
             const today = new Date();
             const existingData = getExistingData?.(initialDate || today);
-    
+
             if (existingData) {
                 const convertedSleep = existingData.DurationInMinutes;
                 const hours = Math.floor(convertedSleep / 60);
                 const mins = convertedSleep % 60;
-    
+
                 setSleep(hours?.toString());
                 setMinutes(mins?.toString());
                 setOriginalSleep(convertedSleep);
@@ -79,7 +79,7 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
                 setIsEditingMode(false);
             }
             setDisplayMonth(initialDate || today);
-    
+
             setTimeout(() => {
                 sleepInputRef.current?.focus();
             }, 300);
@@ -105,13 +105,12 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
             }
         }
     }, [selectedDate, getExistingData, visible, isEditing, initialSleep]);
-    
 
     const handleClose = () => {
         if (isSuccess) {
             return;
         }
-    
+
         Keyboard.dismiss();
         onClose();
         setSleep('');
