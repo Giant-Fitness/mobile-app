@@ -21,7 +21,7 @@ import { StrengthHistoryComingSoonCard } from '@/components/progress/StrengthHis
 import { ThemedText } from '@/components/base/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { SleepLoggingSheet } from '@/components/sleep/SleepLoggingSheet';
+import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
 
 export default function ProgressScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';

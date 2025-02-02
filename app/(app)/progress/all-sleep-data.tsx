@@ -14,7 +14,7 @@ import { useSharedValue } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { MeasurementCalendar } from '@/components/progress/MeasurementCalendar';
 import { AppDispatch } from '@/store/store';
-import { SleepLoggingSheet } from '@/components/sleep/SleepLoggingSheet';
+import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
 import { logSleepMeasurementAsync, updateSleepMeasurementAsync, deleteSleepMeasurementAsync } from '@/store/user/thunks';
 
 type CalendarData = {

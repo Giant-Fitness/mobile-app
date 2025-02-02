@@ -40,7 +40,7 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
     const themeColors = Colors[colorScheme];
 
     const [sleep, setSleep] = useState<string>(''); // this is for the hours
-    const [minutes, setMinutes] = useState<string>('');
+    const [minutes, setMinutes] = useState<string>('0');
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [showCalendar, setShowCalendar] = useState(false);
     const [displayMonth, setDisplayMonth] = useState<Date>(new Date());
@@ -57,15 +57,15 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
     useEffect(() => {
         if (visible) {
             setIsSuccess(false);
-
+    
             const today = new Date();
             const existingData = getExistingData?.(initialDate || today);
-
+    
             if (existingData) {
                 const convertedSleep = existingData.DurationInMinutes;
                 const hours = Math.floor(convertedSleep / 60);
                 const mins = convertedSleep % 60;
-
+    
                 setSleep(hours?.toString());
                 setMinutes(mins?.toString());
                 setOriginalSleep(convertedSleep);
@@ -74,12 +74,12 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
             } else {
                 setOriginalSleep(undefined);
                 setSleep(initialSleep ? Math.floor(initialSleep / 60).toString() : '');
-                setMinutes(initialSleep ? (initialSleep % 60).toString() : '');
+                setMinutes(initialSleep ? (initialSleep % 60).toString() : '0');
                 setSelectedDate(initialDate || today);
                 setIsEditingMode(false);
             }
             setDisplayMonth(initialDate || today);
-
+    
             setTimeout(() => {
                 sleepInputRef.current?.focus();
             }, 300);
@@ -99,21 +99,23 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
                 setIsEditingMode(true);
             } else {
                 setSleep(initialSleep ? Math.floor(initialSleep / 60).toString() : '');
-                setMinutes(initialSleep ? (initialSleep % 60).toString() : '');
+                setMinutes(initialSleep ? (initialSleep % 60).toString() : '0');
                 setOriginalSleep(undefined);
                 setIsEditingMode(false);
             }
         }
     }, [selectedDate, getExistingData, visible, isEditing, initialSleep]);
+    
 
     const handleClose = () => {
         if (isSuccess) {
             return;
         }
-
+    
         Keyboard.dismiss();
         onClose();
         setSleep('');
+        setMinutes('0');
         setSelectedDate(new Date());
         setDisplayMonth(new Date());
         setShowCalendar(false);
@@ -387,6 +389,7 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
                                                 placeholder='0'
                                                 placeholderTextColor={themeColors.subText}
                                                 editable={!isSubmitting && !isDeleting}
+                                                defaultValue='0'
                                             />
                                             <ThemedText type='bodySmall' style={styles.unit}>
                                                 Mins

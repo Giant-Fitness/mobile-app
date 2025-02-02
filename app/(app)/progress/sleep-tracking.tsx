@@ -15,7 +15,7 @@ import { TimeRange, aggregateData, calculateMovingAverage, getTimeRangeLabel, ge
 import { UserSleepMeasurement } from '@/types';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { Icon } from '@/components/base/Icon';
-import { SleepLoggingSheet } from '@/components/sleep/SleepLoggingSheet';
+import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
 import { updateSleepMeasurementAsync, deleteSleepMeasurementAsync, logSleepMeasurementAsync } from '@/store/user/thunks';
 import { router } from 'expo-router';
 

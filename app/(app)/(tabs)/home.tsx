@@ -15,7 +15,7 @@ import { LargeActionTile } from '@/components/home/LargeActionTile';
 import { FactOfTheDay } from '@/components/home/FactOfTheDay';
 import { darkenColor } from '@/utils/colorUtils';
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
-import { SleepLoggingSheet } from '@/components/sleep/SleepLoggingSheet';
+import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
 import { logWeightMeasurementAsync, getWeightMeasurementsAsync, getSleepMeasurementsAsync, logSleepMeasurementAsync } from '@/store/user/thunks';
 import { AppDispatch, RootState } from '@/store/store';
 import { WorkoutCompletedSection } from '@/components/programs/WorkoutCompletedSection';
