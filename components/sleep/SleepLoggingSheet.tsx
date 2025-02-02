@@ -135,21 +135,6 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
         }, 100);
     };
 
-    // const formatSleep = (sleep: string | number): string => {
-    //     const parsed = typeof sleep === 'string' ? parseFloat(sleep) : sleep;
-    //     if (isNaN(parsed)) return '';
-
-    //     // If it has decimals, keep up to 1
-    //     if (!Number.isInteger(parsed)) {
-    //         return parsed.toFixed(1).toString();
-    //     }
-
-    //     // If it's a whole number, return as is
-    //     return parsed.toString();
-    // };
-
-    //changed this function in order to get the total sleep time in minutes
-
     const formatSleep = (hours: string | number, minutes: string | number): string => {
         const parsedHours = typeof hours === 'string' ? parseInt(hours, 10) : hours;
         const parsedMinutes = typeof minutes === 'string' ? parseInt(minutes, 10) : minutes;
@@ -187,7 +172,6 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
         try {
             setIsSubmitting(true);
             const formattedSleep = Number(formatSleep(hoursSlept, minutesSlept));
-            // console.log('sleep time logged is :', formattedSleep);
             await onSubmit(formattedSleep, selectedDate);
 
             // Set states separately to ensure update
@@ -405,7 +389,7 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
                                                 editable={!isSubmitting && !isDeleting}
                                             />
                                             <ThemedText type='bodySmall' style={styles.unit}>
-                                                Minutes
+                                                Mins
                                             </ThemedText>
                                         </View>
                                     </View>
@@ -542,6 +526,9 @@ const styles = StyleSheet.create({
     inputContainer: {
         marginTop: Spaces.SM,
         paddingBottom: Spaces.MD,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: Spaces.MD,
     },
     inputLabel: {
         marginBottom: Spaces.SM,
@@ -555,14 +542,14 @@ const styles = StyleSheet.create({
         height: 48,
         borderWidth: StyleSheet.hairlineWidth,
         flex: 1,
-        marginRight: Spaces.SM,
     },
     input: {
         flex: 1,
     },
     unit: {
         marginLeft: Spaces.SM,
-        opacity: 0.7,
+        opacity: 0.4,
+        width: 55,
     },
     calendarContainer: {
         marginTop: Spaces.MD,

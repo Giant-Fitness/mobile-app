@@ -278,7 +278,7 @@ export default function HomeScreen() {
                 visible={isSleepSheetVisible}
                 onClose={() => setIsSleepSheetVisible(false)}
                 onSubmit={handleLogSleep}
-                getExistingData={getExistingSleepData} // Placeholder function for fetching sleep data
+                getExistingData={getExistingSleepData}
             />
         </ThemedView>
     );

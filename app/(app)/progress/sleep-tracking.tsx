@@ -9,7 +9,7 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { useSharedValue } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
-import { WeightChart } from '@/components/progress/WeightChart';
+import { SleepChart } from '@/components/progress/SleepChart';
 import { AppDispatch, RootState } from '@/store/store';
 import { TimeRange, aggregateData, calculateMovingAverage, getTimeRangeLabel, getAvailableTimeRanges, getInitialTimeRange } from '@/utils/weight';
 import { UserSleepMeasurement } from '@/types';
@@ -222,13 +222,13 @@ export default function SleepTrackingScreen() {
                         Average
                     </ThemedText>
                     <ThemedText type='titleXLarge'>
-                        {Math.floor(averageSleep / 60)} h {(averageSleep % 60).toFixed(0)} m{' '}
+                        {Math.floor(averageSleep / 60)}h {(averageSleep % 60).toFixed(0)}m
                     </ThemedText>
                 </View>
             </View>
 
             <View style={styles.chartContainer}>
-                <WeightChart
+                <SleepChart
                     data={aggregatedData}
                     timeRange={selectedTimeRange}
                     availableRanges={availableRanges}
@@ -237,7 +237,6 @@ export default function SleepTrackingScreen() {
                     movingAverages={movingAverages}
                     effectiveTimeRange={effectiveTimeRange}
                     onDataPointPress={handleDataPointPress}
-                    isSleepData={true}
                 />
             </View>
 
@@ -269,7 +268,7 @@ export default function SleepTrackingScreen() {
                         {dayOfWeek}, {`${month} ${day}`}
                     </ThemedText>
                     <ThemedText type='title' style={styles.weightText}>
-                        {Math.floor(item.DurationInMinutes / 60)} h {item.DurationInMinutes % 60} m
+                        {Math.floor(item.DurationInMinutes / 60)}h {item.DurationInMinutes % 60}m
                     </ThemedText>
                 </View>
                 {sleepChange && (
@@ -286,10 +285,10 @@ export default function SleepTrackingScreen() {
                             {parseFloat(sleepChange) > 0 ? '+' : ''}
                             {parseInt(sleepChange) > 0
                                 ? parseInt(sleepChange) > 59
-                                    ? `${Math.floor(parseInt(sleepChange) / 60)} h ${parseInt(sleepChange) % 60} m`
+                                    ? `${Math.floor(parseInt(sleepChange) / 60)}h ${parseInt(sleepChange) % 60}m`
                                     : `${sleepChange} m`
                                 : parseInt(sleepChange) < -59
-                                ? `- ${Math.floor((parseInt(sleepChange) * -1) / 60)} h ${(parseInt(sleepChange) * -1) % 60} m`
+                                ? `- ${Math.floor((parseInt(sleepChange) * -1) / 60)}h ${(parseInt(sleepChange) * -1) % 60}m`
                                 : `${sleepChange} m`}
                         </ThemedText>
                     </View>

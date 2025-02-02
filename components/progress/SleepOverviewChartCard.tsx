@@ -19,6 +19,19 @@ type SleepOverviewChartCardProps = {
     style?: any;
 };
 
+const formatSleepDuration = (minutes: number): string => {
+    const hours = Math.floor(minutes / 60);
+    const mins = Math.floor(minutes % 60);
+
+    if (hours === 0) {
+        return `${mins}mins`;
+    }
+    if (mins === 0) {
+        return `${hours}${hours === 1 ? 'hr' : 'hrs'}`;
+    }
+    return `${hours}${hours === 1 ? 'hr' : 'hrs'} ${mins}mins`;
+};
+
 const EmptyStateChart = ({ color }: { color: string }) => (
     <Svg width='100%' height='100%' viewBox='0 0 100 38' preserveAspectRatio='xMidYMid meet'>
         <Defs>
@@ -47,7 +60,7 @@ const SingleDataPointState = ({ measurement, onPress, themeColors }: { measureme
                         {isToday ? "Today's Measurement" : 'First Measurement'}
                     </ThemedText>
                     <ThemedText type='titleLarge' style={[styles.weightValue, { color: themeColors.blueSolid }]}>
-                        {measurement.DurationInMinutes.toFixed(1)} hours
+                        {formatSleepDuration(measurement.DurationInMinutes)}
                     </ThemedText>
                     <ThemedText type='bodySmall' style={[styles.dateText, { color: themeColors.subText }]}>
                         {formattedDate}
@@ -57,7 +70,7 @@ const SingleDataPointState = ({ measurement, onPress, themeColors }: { measureme
                 {isToday ? (
                     <View style={[styles.messageContainer]}>
                         <ThemedText type='bodySmall' style={[styles.helperText, { color: themeColors.subText }]}>
-                            Great start! Come back tomorrow to log your next measurement and start tracking your progress.
+                            Great start! Come back tomorrow to log your next measurement.
                         </ThemedText>
                     </View>
                 ) : (
@@ -70,7 +83,7 @@ const SingleDataPointState = ({ measurement, onPress, themeColors }: { measureme
                         </TouchableOpacity>
 
                         <ThemedText type='bodySmall' style={[styles.helperText, { color: themeColors.subText }]}>
-                            Add another measurement to start tracking your progress
+                            Add another measurement
                         </ThemedText>
                     </>
                 )}
@@ -99,7 +112,7 @@ const EmptyState = ({ onPress, themeColors }: { onPress: () => void; themeColors
                 Track Your Sleep Journey
             </ThemedText>
             <ThemedText type='bodySmall' style={[styles.emptyStateDescription, { color: themeColors.subText }]}>
-                Track your sleep regularly to see your journey take shape with charts that keep you motivated and informed.
+                Track your sleep regularly to start getting more personalized training advice.
             </ThemedText>
             <TouchableOpacity style={[styles.addButton, { backgroundColor: themeColors.blueSolid }]} onPress={onPress} activeOpacity={0.8}>
                 <Icon name='plus' size={18} color={themeColors.white} style={styles.addIcon} />
@@ -313,7 +326,7 @@ export const SleepOverviewChartCard: React.FC<SleepOverviewChartCardProps> = ({ 
             />
             <View style={styles.footerContainer}>
                 <ThemedText type='overline' style={[styles.value, { color: themeColors.subText }]}>
-                    {`${Math.floor(averageSleep / 60)} hours ${Math.floor(averageSleep % 60)} minutes (average)`}
+                    {`${Math.floor(averageSleep / 60)}hrs ${Math.floor(averageSleep % 60)}mins (average)`}
                 </ThemedText>
                 <Icon name='chevron-forward' color={themeColors.subText} />
             </View>
