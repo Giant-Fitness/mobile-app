@@ -2,7 +2,7 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import UserService from '@/store/user/service';
-import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, UserWeightMeasurement } from '@/types';
+import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, UserWeightMeasurement, UserSleepMeasurement } from '@/types';
 import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 
@@ -363,6 +363,114 @@ export const deleteWeightMeasurementAsync = createAsyncThunk<
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to delete weight measurement',
+        });
+    }
+});
+
+// Helper function to refresh sleep measurements
+const refreshSleepMeasurements = async (userId: string) => {
+    return await UserService.getSleepMeasurements(userId);
+};
+
+export const getSleepMeasurementsAsync = createAsyncThunk<
+    UserSleepMeasurement[],
+    void,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/getSleepMeasurements', async (_, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        if (state.user.userSleepMeasurements.length > 0 && state.user.userSleepMeasurementsState === REQUEST_STATE.FULFILLED) {
+            return state.user.userSleepMeasurements;
+        }
+
+        const measurements = await UserService.getSleepMeasurements(userId);
+        return measurements;
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch sleep measurements',
+        });
+    }
+});
+
+export const logSleepMeasurementAsync = createAsyncThunk<
+    UserSleepMeasurement[],
+    { durationInMinutes: number; measurementTimestamp?: string },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/logSleepMeasurement', async ({ durationInMinutes, measurementTimestamp }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        await UserService.logSleepMeasurement(userId, durationInMinutes, measurementTimestamp);
+        return await refreshSleepMeasurements(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to log sleep measurement',
+        });
+    }
+});
+
+export const updateSleepMeasurementAsync = createAsyncThunk<
+    UserSleepMeasurement[],
+    { timestamp: string; durationInMinutes: number },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/updateSleepMeasurement', async ({ timestamp, durationInMinutes }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        await UserService.updateSleepMeasurement(userId, timestamp, durationInMinutes);
+        return await refreshSleepMeasurements(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to update sleep measurement',
+        });
+    }
+});
+
+export const deleteSleepMeasurementAsync = createAsyncThunk<
+    UserSleepMeasurement[],
+    { timestamp: string },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/deleteSleepMeasurement', async ({ timestamp }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        await UserService.deleteSleepMeasurement(userId, timestamp);
+        return await refreshSleepMeasurements(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to delete sleep measurement',
         });
     }
 });

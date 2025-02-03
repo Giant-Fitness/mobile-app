@@ -9,6 +9,7 @@ import { router } from 'expo-router';
 import { getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/thunks';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
 import {
+    getSleepMeasurementsAsync,
     getUserAsync,
     getUserFitnessProfileAsync,
     getUserProgramProgressAsync,
@@ -58,6 +59,8 @@ const Initialization: React.FC = () => {
                 dispatch(getAllProgramsAsync()),
                 dispatch(getWeightMeasurementsAsync()),
                 dispatch(initializeTrackedLiftsHistoryAsync()),
+
+                dispatch(getSleepMeasurementsAsync()),
             ]);
 
             setDataLoaded(REQUEST_STATE.FULFILLED);
