@@ -9,6 +9,14 @@ import feedbackReducer from '@/store/feedback/feedbackSlice';
 import exerciseProgressReducer from '@/store/exerciseProgress/exerciseProgressSlice';
 import { resetStore } from '@/store/actions';
 import settingsReducer from '@/store/settings/settingsSlice';
+import { persistReducer, persistStore } from 'redux-persist';
+import AsyncStorage from '@react-native-async-storage/async-storage'
+
+const settingsPersistConfig = {
+    key : 'settings',
+    storage : AsyncStorage,
+}
+const persistedSettingsReducer = persistReducer(settingsPersistConfig, settingsReducer);
 
 const combinedReducer = combineReducers({
     programs: programsReducer,
@@ -17,7 +25,7 @@ const combinedReducer = combineReducers({
     workouts: workoutsReducer,
     feedback: feedbackReducer,
     exerciseProgress: exerciseProgressReducer,
-    settings: settingsReducer,
+    settings: persistedSettingsReducer,
 });
 
 // Create root reducer with reset functionality
@@ -32,6 +40,25 @@ const rootReducer = (state: ReturnType<typeof combinedReducer> | undefined, acti
 export const store = configureStore({
     reducer: rootReducer,
     devTools: true,
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+          serializableCheck: {
+            ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],  // Ignore both PERSIST and REHYDRATE actions
+          },
+        }),
+      
+
+});
+
+export const persistor = persistStore(store);
+
+// this is to manually rehydrate
+
+persistor.subscribe(() => {
+  const state = store.getState();
+  if (state._persist?.rehydrated) {
+    console.log('Rehydration completed!');
+  }
 });
 
 // Define the RootState type based on the reducers
