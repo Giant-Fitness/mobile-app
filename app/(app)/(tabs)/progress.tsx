@@ -11,8 +11,8 @@ import { router } from 'expo-router';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
-import { WeightOverviewChartCard } from '@/components/progress/WeightOverviewChartCard';
-import { SleepOverviewChartCard } from '@/components/progress/SleepOverviewChartCard';
+import { WeightTrendCard } from '@/components/progress/WeightTrendCard';
+import { SleepTrendCard } from '@/components/progress/SleepTrendCard';
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
@@ -143,7 +143,7 @@ export default function ProgressScreen() {
             <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
                 <ThemedView style={styles.container}>
                     <ThemedView style={styles.cardContainer}>
-                        <WeightOverviewChartCard
+                        <WeightTrendCard
                             values={userWeightMeasurements}
                             isLoading={userWeightMeasurementsState === REQUEST_STATE.PENDING}
                             onPress={handleChartPress}
@@ -159,7 +159,7 @@ export default function ProgressScreen() {
                     </ThemedView>
 
                     <ThemedView style={styles.cardContainer}>
-                        <SleepOverviewChartCard
+                        <SleepTrendCard
                             values={userSleepMeasurements}
                             isLoading={userSleepMeasurementsState === REQUEST_STATE.PENDING}
                             onPress={handleSleepChartPress}

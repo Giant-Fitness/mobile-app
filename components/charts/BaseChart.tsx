@@ -35,6 +35,8 @@ export type Point = {
     originalData: any;
 };
 
+type ThemeColorKey = keyof typeof Colors['light'];
+
 type BaseChartProps = {
     data: any[];
     timeRange: TimeRange;
@@ -45,8 +47,8 @@ type BaseChartProps = {
     effectiveTimeRange: string;
     onDataPointPress?: (measurement: any) => void;
     style?: any;
-    themeColor: string;
-    themeTransparentColor: string;
+    themeColor: ThemeColorKey;
+    themeTransparentColor: ThemeColorKey;
     getValue: (point: any) => number;
     formatValue: (value: number) => string;
     formatYAxisLabel?: (value: number) => string;

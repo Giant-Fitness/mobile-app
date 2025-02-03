@@ -138,10 +138,10 @@ export default function SleepTrackingScreen() {
 
         const aggregated = aggregateData(userSleepMeasurements, selectedTimeRange);
 
-        const sleeps = aggregated.map((d) => d.durationInMinutes);
+        const sleeps = aggregated.map((d) => d.durationInMinutes ?? 0);
         const avg = sleeps.length > 0 ? sleeps.reduce((a, b) => a + b, 0) / sleeps.length : 0;
-        const change = sleeps.length > 1 ? aggregated[aggregated.length - 1].durationInMinutes - aggregated[0].durationInMinutes : 0;
-        const percent = aggregated.length > 0 ? (change / aggregated[0].durationInMinutes) * 100 : 0;
+        const change = sleeps.length > 1 ? (aggregated[aggregated.length - 1]?.durationInMinutes ?? 0) - (aggregated[0]?.durationInMinutes ?? 0) : 0;
+        const percent = aggregated.length > 0 ? (change / (aggregated[0]?.durationInMinutes ?? 1)) * 100 : 0;
 
         const allData = [...userSleepMeasurements].sort((a, b) => new Date(a.MeasurementTimestamp).getTime() - new Date(b.MeasurementTimestamp).getTime());
         const allTimeChange = allData[allData.length - 1].DurationInMinutes - allData[0].DurationInMinutes;
