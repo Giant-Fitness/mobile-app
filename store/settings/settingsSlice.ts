@@ -1,27 +1,28 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'; 
-interface SettingsState { 
-    bodyWeightPreference: 'kg' | 'pounds';
-    liftWeightPreference: 'kg' | 'pounds';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
+interface SettingsState {
+    bodyWeightPreference: 'kgs' | 'lbs';
+    liftWeightPreference: 'kgs' | 'lbs';
 }
 
-const initialState: SettingsState = { 
-    bodyWeightPreference: 'kg',
-    liftWeightPreference: 'kg',
+const initialState: SettingsState = {
+    bodyWeightPreference: 'kgs',
+    liftWeightPreference: 'kgs',
 };
 
 const settingsSlice = createSlice({
-    name: 'settings', 
-    initialState, 
-    reducers: { 
-    setBodyWeightPreference: (state, action: PayloadAction<'kg' | 'pounds'>) => {
-          state.bodyWeightPreference = action.payload;
+    name: 'settings',
+    initialState,
+    reducers: {
+        setBodyWeightPreference: (state, action: PayloadAction<'kgs' | 'lbs'>) => {
+            state.bodyWeightPreference = action.payload;
         },
-    setLiftWeightPreference: (state, action: PayloadAction<'kg' | 'pounds'>) => {
-          state.liftWeightPreference = action.payload;
+        setLiftWeightPreference: (state, action: PayloadAction<'kgs' | 'lbs'>) => {
+            state.liftWeightPreference = action.payload;
         },
-      },
-    });
+    },
+});
 
-export const { setBodyWeightPreference, setLiftWeightPreference } = settingsSlice.actions; 
+export const { setBodyWeightPreference, setLiftWeightPreference } = settingsSlice.actions;
 
-export default settingsSlice.reducer; 
+export default settingsSlice.reducer;

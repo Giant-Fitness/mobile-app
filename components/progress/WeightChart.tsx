@@ -18,10 +18,11 @@ import { kgToPounds } from '@/utils/weightConversion';
 
 const CHART_PADDING = {
     top: 48,
-    right: 36,
+    right: 42,
     bottom: 10,
     left: 5,
 };
+
 const NUM_HORIZONTAL_LINES = 3;
 const TOOLTIP_HEIGHT = 50;
 const TOOLTIP_WIDTH = 120;
@@ -30,8 +31,6 @@ const TOOLTIP_ARROW_SIZE = 0;
 const TOOLTIP_OFFSET_Y = 20;
 const CHART_HEIGHT = 300;
 const CHART_CONTAINER_HEIGHT = CHART_HEIGHT + 50;
-
-
 
 type Point = {
     x: number;
@@ -58,6 +57,10 @@ type TimeRangeOptionType = {
     disabled?: boolean; // Add this line if 'disabled' is not already defined
 };
 
+const formatWeight = (weight: number, unit: 'kg' | 'lbs'): string => {
+    return `${weight.toFixed(1)}`;
+};
+
 const RangeSelector = ({
     selectedRange,
     onRangeChange,
@@ -71,8 +74,6 @@ const RangeSelector = ({
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
-
-
 
     return (
         <View style={[styles.rangeSelector, style]}>
@@ -188,7 +189,6 @@ export const WeightChart: React.FC<WeightChartProps> = ({
     const themeColors = Colors[colorScheme];
     const [selectedPoint, setSelectedPoint] = useState<Point | null>(null);
     const bodyWeightPreference = useSelector((state: RootState) => state.settings.bodyWeightPreference);
-
 
     const screenWidth = Dimensions.get('window').width;
     const chartWidth = screenWidth - Spaces.MD * 2;
@@ -345,7 +345,7 @@ export const WeightChart: React.FC<WeightChartProps> = ({
                     {format(selectedPoint.timestamp, 'MMM d, yyyy')}
                 </SvgText>
                 <SvgText x={tooltipX + TOOLTIP_WIDTH / 2} y={tooltipY + TOOLTIP_PADDING + 32} fill={themeColors.text} fontSize={14} textAnchor='middle'>
-                    {bodyWeightPreference === 'pounds'        ? `${kgToPounds(selectedPoint.weight)} lbs`        : `${selectedPoint.weight.toFixed(1)} kg`}    
+                    {bodyWeightPreference === 'lbs' ? `${kgToPounds(selectedPoint.weight)} lbs` : `${selectedPoint.weight.toFixed(1)} kg`}
                 </SvgText>
             </G>
         );
@@ -372,9 +372,8 @@ export const WeightChart: React.FC<WeightChartProps> = ({
                                     strokeWidth={0.5}
                                     strokeDasharray='8,1'
                                 />
-                                <SvgText x={chartWidth - CHART_PADDING.right + 10} y={y + 4} fill={themeColors.subText} fontSize={12}>
-                                {bodyWeightPreference === 'pounds'        ? `${kgToPounds(weight)} `        : `${weight.toFixed(1)} `}    
-
+                                <SvgText x={chartWidth - CHART_PADDING.right + 10} y={y + 4} fill={themeColors.subText} fontSize={12} textAnchor='start'>
+                                    {bodyWeightPreference === 'lbs' ? formatWeight(kgToPounds(weight), 'lbs') : formatWeight(weight, 'kg')}
                                 </SvgText>
                             </React.Fragment>
                         ))}

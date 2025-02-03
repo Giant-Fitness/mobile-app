@@ -18,6 +18,7 @@ export type ThemedTextProps = TextProps & {
         | 'link'
         | 'button'
         | 'overline'
+        | 'overlineTransformed'
         | 'italic'
         | 'buttonSmall'
         | 'titleXLarge'

@@ -39,7 +39,7 @@ export default function AllWeightDataScreen() {
     const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date>(new Date());
 
     const { userWeightMeasurements } = useSelector((state: RootState) => state.user);
-    const bodyWeightPreference = useSelector((state : RootState) => state.settings.bodyWeightPreference);
+    const bodyWeightPreference = useSelector((state: RootState) => state.settings.bodyWeightPreference);
 
     // Calculate weight change between measurements
     const getWeightChange = (currentWeight: number, previousWeight: number | null) => {
@@ -146,8 +146,7 @@ export default function AllWeightDataScreen() {
                         {`${dayOfWeek}, ${month} ${day}`}
                     </ThemedText>
                     <ThemedText type='title' style={styles.weightText}>
-                        {(bodyWeightPreference === 'pounds') ? `${kgToPounds(item.Weight)}lbs` : `${item.Weight.toFixed(1)}kg`}
-
+                        {bodyWeightPreference === 'lbs' ? `${kgToPounds(item.Weight)}lbs` : `${item.Weight.toFixed(1)}kgs`}
                     </ThemedText>
                 </View>
                 {weightChange && (
@@ -162,9 +161,7 @@ export default function AllWeightDataScreen() {
                             ]}
                         >
                             {parseFloat(weightChange) > 0 ? '+' : ''}
-                            {(bodyWeightPreference === 'pounds') ? `${kgToPounds(parseFloat(weightChange)).toString()}lbs` : `${weightChange}kg`}
-
-
+                            {bodyWeightPreference === 'lbs' ? `${kgToPounds(parseFloat(weightChange)).toString()}lbs` : `${weightChange}kgs`}
                         </ThemedText>
                     </View>
                 )}
