@@ -1,6 +1,6 @@
 // store/user/service.ts
 
-import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, UserWeightMeasurement } from '@/types';
+import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, UserWeightMeasurement, UserSleepMeasurement, UserAppSettings } from '@/types';
 import { authUsersApiClient, authRecommendationsApiClient } from '@/utils/api/apiConfig';
 import { handleApiError } from '@/utils/api/errorUtils';
 import { authService } from '@/utils/auth';
@@ -211,6 +211,80 @@ const getUserRecommendations = async (userId: string): Promise<UserRecommendatio
     }
 };
 
+// Sleep Measurements Methods
+const getSleepMeasurements = async (userId: string): Promise<UserSleepMeasurement[]> => {
+    console.log('service: getSleepMeasurements');
+    try {
+        const { data } = await authUsersApiClient.get(`/users/${userId}/sleep-measurements`);
+        return data.measurements || [];
+    } catch (error) {
+        throw handleApiError(error, 'GetSleepMeasurements');
+    }
+};
+
+const logSleepMeasurement = async (userId: string, durationInMinutes: number, measurementTimestamp: string): Promise<UserSleepMeasurement> => {
+    console.log('service: logSleepMeasurement');
+    try {
+        const { data } = await authUsersApiClient.post(`/users/${userId}/sleep-measurements`, {
+            durationInMinutes,
+            MeasurementTimestamp: measurementTimestamp,
+        });
+        return data.measurements;
+    } catch (error) {
+        throw handleApiError(error, 'LogSleepMeasurement');
+    }
+};
+
+const updateSleepMeasurement = async (userId: string, timestamp: string, durationInMinutes: number): Promise<UserSleepMeasurement> => {
+    console.log('service: updateSleepMeasurement');
+    try {
+        const { data } = await authUsersApiClient.put(`/users/${userId}/sleep-measurements/${timestamp}`, { durationInMinutes });
+        return data.measurement;
+    } catch (error) {
+        throw handleApiError(error, 'UpdateSleepMeasurement');
+    }
+};
+
+const deleteSleepMeasurement = async (userId: string, timestamp: string): Promise<void> => {
+    console.log('service: deleteSleepMeasurement');
+    try {
+        await authUsersApiClient.delete(`/users/${userId}/sleep-measurements/${timestamp}`);
+    } catch (error) {
+        throw handleApiError(error, 'DeleteSleepMeasurement');
+    }
+};
+
+// App Settings Methods
+const getUserAppSettings = async (userId: string): Promise<UserAppSettings> => {
+    console.log('service: getUserAppSettings');
+    try {
+        if (!userId) throw new Error('No user ID found');
+
+        const { data } = await authUsersApiClient.get(`/users/${userId}/app-settings`);
+        if (!data.userAppSettings) {
+            throw new Error('Invalid response format');
+        }
+        return data.userAppSettings;
+    } catch (error) {
+        throw handleApiError(error, 'GetUserAppSettings');
+    }
+};
+
+const updateUserAppSettings = async (userId: string, userAppSettings: UserAppSettings): Promise<UserAppSettings> => {
+    console.log('service: updateUserAppSettings');
+    try {
+        const { data } = await authUsersApiClient.put(`/users/${userId}/app-settings`, userAppSettings);
+
+        if (!data.userAppSettings) {
+            throw new Error('Invalid response format');
+        }
+
+        return data.userAppSettings;
+    } catch (error) {
+        throw handleApiError(error, 'UpdateUserAppSettings');
+    }
+};
+
 export default {
     // User Profile
     getUser,
@@ -232,4 +306,12 @@ export default {
     deleteWeightMeasurement,
     // Recommendations
     getUserRecommendations,
+    // Sleep measurements
+    getSleepMeasurements,
+    logSleepMeasurement,
+    updateSleepMeasurement,
+    deleteSleepMeasurement,
+    // App Settings
+    getUserAppSettings,
+    updateUserAppSettings,
 };

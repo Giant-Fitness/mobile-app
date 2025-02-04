@@ -1,5 +1,3 @@
-// app/(app)/progress/all-weight-data.tsx
-
 import React, { useState } from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
@@ -10,91 +8,89 @@ import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { RootState } from '@/store/store';
-import { UserWeightMeasurement } from '@/types';
+import { UserSleepMeasurement } from '@/types';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { useSharedValue } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { MeasurementCalendar } from '@/components/progress/MeasurementCalendar';
 import { AppDispatch } from '@/store/store';
-import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
-import { logWeightMeasurementAsync, updateWeightMeasurementAsync, deleteWeightMeasurementAsync } from '@/store/user/thunks';
-import { kgToPounds } from '@/utils/weightConversion';
+import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
+import { logSleepMeasurementAsync, updateSleepMeasurementAsync, deleteSleepMeasurementAsync } from '@/store/user/thunks';
 
 type CalendarData = {
     timestamp: string;
     value: number;
-    originalData: UserWeightMeasurement;
-    previousData?: UserWeightMeasurement;
+    originalData: UserSleepMeasurement;
+    previousData?: UserSleepMeasurement;
 };
 
-export default function AllWeightDataScreen() {
+export default function AllSleepDataScreen() {
     const dispatch = useDispatch<AppDispatch>();
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const scrollY = useSharedValue(0);
 
-    const [isWeightSheetVisible, setIsWeightSheetVisible] = useState(false);
-    const [selectedMeasurement, setSelectedMeasurement] = useState<UserWeightMeasurement | null>(null);
-    const [isAddingWeight, setIsAddingWeight] = useState(false);
+    const [isSleepSheetVisible, setIsSleepSheetVisible] = useState(false);
+    const [selectedMeasurement, setSelectedMeasurement] = useState<UserSleepMeasurement | null>(null);
+    const [isAddingSleep, setIsAddingSleep] = useState(false);
     const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date>(new Date());
 
-    const { userWeightMeasurements } = useSelector((state: RootState) => state.user);
-    const bodyWeightPreference = useSelector((state: RootState) => state.user.userAppSettings?.UnitsOfMeasurement?.BodyWeightUnits);
+    const { userSleepMeasurements } = useSelector((state: RootState) => state.user);
 
-    // Calculate weight change between measurements
-    const getWeightChange = (currentWeight: number, previousWeight: number | null) => {
-        if (previousWeight === null) return null;
-        const change = currentWeight - previousWeight;
+    // Calculate Sleep change between measurements
+    const getSleepChange = (currentSleep: number, previousSleep: number | null) => {
+        if (previousSleep === null) return null;
+        const change = currentSleep - previousSleep;
         return change !== 0 ? change.toFixed(1) : null;
     };
 
-    const handleAddWeight = () => {
+    const handleAddSleep = () => {
         setSelectedMeasurement(null);
-        setIsAddingWeight(true);
-        setIsWeightSheetVisible(true);
+        setIsAddingSleep(true);
+        setIsSleepSheetVisible(true);
     };
 
     const getExistingData = (date: Date) => {
-        return userWeightMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
+        return userSleepMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
     };
 
-    const handleWeightAdd = async (weight: number, date: Date) => {
+    const handleSleepAdd = async (weight: number, date: Date) => {
         try {
             await dispatch(
-                logWeightMeasurementAsync({
-                    weight: weight,
+                logSleepMeasurementAsync({
+                    durationInMinutes: weight,
                     measurementTimestamp: date.toISOString(),
                 }),
             ).unwrap();
-            setIsAddingWeight(false);
+            setIsAddingSleep(false);
         } catch (error) {
-            console.error('Failed to log weight:', error);
+            console.error('Failed to log sleep:', error);
         }
     };
 
-    const handleWeightUpdate = async (weight: number) => {
+    const handleSleepUpdate = async (weight: number) => {
         if (!selectedMeasurement) return;
 
         try {
             await dispatch(
-                updateWeightMeasurementAsync({
+                updateSleepMeasurementAsync({
                     timestamp: selectedMeasurement.MeasurementTimestamp,
-                    weight: weight,
+                    durationInMinutes: weight,
                 }),
             ).unwrap();
             setSelectedMeasurement(null);
         } catch (error) {
-            console.error('Failed to update weight:', error);
+            console.error('Failed to update sleep:', error);
         }
     };
 
-    const handleWeightDelete = async (timestamp: string) => {
+    const handleSleepDelete = async (timestamp: string) => {
         try {
-            await dispatch(deleteWeightMeasurementAsync({ timestamp })).unwrap();
-            setIsWeightSheetVisible(false);
+            await dispatch(deleteSleepMeasurementAsync({ timestamp })).unwrap();
+            setIsSleepSheetVisible(false);
             setSelectedMeasurement(null);
         } catch (error) {
-            console.error('Failed to delete weight:', error);
+            console.error('Failed to delete sleep:', error);
         }
     };
 
@@ -102,42 +98,42 @@ export default function AllWeightDataScreen() {
         const selectedDate = new Date(date);
         setSelectedCalendarDate(selectedDate);
 
-        const measurement = userWeightMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date);
+        const measurement = userSleepMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date);
 
         if (measurement) {
             handleTilePress(measurement);
         } else {
             setSelectedMeasurement(null);
-            setIsAddingWeight(true);
-            setIsWeightSheetVisible(true);
+            setIsAddingSleep(true);
+            setIsSleepSheetVisible(true);
         }
     };
 
     const handleSheetClose = () => {
-        setIsWeightSheetVisible(false);
+        setIsSleepSheetVisible(false);
         setSelectedMeasurement(null);
-        setIsAddingWeight(false);
+        setIsAddingSleep(false);
     };
 
     // Update tile press handler
-    const handleTilePress = (measurement: UserWeightMeasurement) => {
+    const handleTilePress = (measurement: UserSleepMeasurement) => {
         setSelectedMeasurement(measurement);
-        setIsAddingWeight(false);
-        setIsWeightSheetVisible(true);
+        setIsAddingSleep(false);
+        setIsSleepSheetVisible(true);
     };
 
     // Render tile for the measurement list
-    const renderWeightTile = (item: UserWeightMeasurement, previousItem?: UserWeightMeasurement) => {
+    const renderSleepTile = (item: UserSleepMeasurement, previousItem?: UserSleepMeasurement) => {
         const date = new Date(item.MeasurementTimestamp);
         const dayOfWeek = date.toLocaleDateString('default', { weekday: 'long' });
         const month = date.toLocaleDateString('default', { month: 'short' });
         const day = date.getDate();
 
-        const weightChange = previousItem ? getWeightChange(item.Weight, previousItem.Weight) : null;
+        const sleepChange = previousItem ? getSleepChange(item.DurationInMinutes, previousItem.DurationInMinutes) : null;
 
         return (
             <TouchableOpacity
-                style={[styles.tile, { backgroundColor: lightenColor(themeColors.purpleTransparent, 0.1) }]}
+                style={[styles.tile, { backgroundColor: lightenColor(themeColors.blueTransparent, 0.1) }]}
                 onPress={() => handleTilePress(item)}
                 activeOpacity={0.8}
             >
@@ -146,22 +142,23 @@ export default function AllWeightDataScreen() {
                         {`${dayOfWeek}, ${month} ${day}`}
                     </ThemedText>
                     <ThemedText type='title' style={styles.weightText}>
-                        {bodyWeightPreference === 'lbs' ? `${kgToPounds(item.Weight)}lbs` : `${item.Weight.toFixed(1)}kgs`}
+                        {/* {item.Weight.toFixed(1)} kg */}
+                        {Math.floor(item.DurationInMinutes / 60)} h {item.DurationInMinutes % 60} m
                     </ThemedText>
                 </View>
-                {weightChange && (
+                {sleepChange && (
                     <View style={styles.tileRight}>
                         <ThemedText
                             type='body'
                             style={[
                                 styles.changeText,
                                 {
-                                    color: parseFloat(weightChange) > 0 ? themeColors.maroonSolid : darkenColor(themeColors.accent, 0.3),
+                                    color: parseFloat(sleepChange) > 0 ? themeColors.maroonSolid : darkenColor(themeColors.accent, 0.3),
                                 },
                             ]}
                         >
-                            {parseFloat(weightChange) > 0 ? '+' : ''}
-                            {bodyWeightPreference === 'lbs' ? `${kgToPounds(parseFloat(weightChange)).toString()}lbs` : `${weightChange}kgs`}
+                            {parseFloat(sleepChange) > 0 ? '+' : ''}
+                            {Math.floor(parseInt(sleepChange) / 60)} h {parseInt(sleepChange) % 60} m
                         </ThemedText>
                     </View>
                 )}
@@ -169,15 +166,15 @@ export default function AllWeightDataScreen() {
         );
     };
 
-    const measurementData = userWeightMeasurements.map((measurement) => ({
+    const measurementData = userSleepMeasurements.map((measurement) => ({
         timestamp: measurement.MeasurementTimestamp,
-        value: measurement.Weight,
+        value: measurement.DurationInMinutes,
         originalData: measurement,
     }));
 
     // Prepare data for list rendering with previous measurements
     const renderListItem = (item: CalendarData) => {
-        return renderWeightTile(item.originalData, item.previousData);
+        return renderSleepTile(item.originalData, item.previousData);
     };
 
     return (
@@ -186,22 +183,22 @@ export default function AllWeightDataScreen() {
                 scrollY={scrollY}
                 disableColorChange={true}
                 headerBackground={themeColors.background}
-                title='Weight History'
+                title='Sleep History'
                 menuIcon='plus'
-                onMenuPress={handleAddWeight}
+                onMenuPress={handleAddSleep}
             />
 
             <View style={styles.content}>
-                <MeasurementCalendar data={measurementData} onDayPress={handleDayPress} renderTile={renderListItem} measurementUnit='kg' />
+                <MeasurementCalendar data={measurementData} onDayPress={handleDayPress} renderTile={renderListItem} measurementUnit='kg' isSleepData={true} />
             </View>
 
-            <WeightLoggingSheet
-                visible={isWeightSheetVisible}
+            <SleepLoggingSheet
+                visible={isSleepSheetVisible}
                 onClose={handleSheetClose}
-                onSubmit={isAddingWeight ? handleWeightAdd : handleWeightUpdate}
-                onDelete={handleWeightDelete}
-                initialWeight={selectedMeasurement?.Weight}
-                initialDate={isAddingWeight ? selectedCalendarDate : selectedMeasurement ? new Date(selectedMeasurement.MeasurementTimestamp) : undefined}
+                onSubmit={isAddingSleep ? handleSleepAdd : handleSleepUpdate}
+                onDelete={handleSleepDelete}
+                initialSleep={selectedMeasurement?.DurationInMinutes}
+                initialDate={isAddingSleep ? selectedCalendarDate : selectedMeasurement ? new Date(selectedMeasurement.MeasurementTimestamp) : undefined}
                 isEditing={!!selectedMeasurement}
                 getExistingData={getExistingData}
             />

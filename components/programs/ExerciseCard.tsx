@@ -13,7 +13,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { TextButton } from '@/components/buttons/TextButton';
 import { router } from 'expo-router';
-import { darkenColor, lightenColor } from '@/utils/colorUtils';
+import { lightenColor } from '@/utils/colorUtils';
 import { RootState } from '@/store/store';
 import { useSelector } from 'react-redux';
 import { format } from 'date-fns';

@@ -1,7 +1,7 @@
 // store/user/userState.ts
 
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, UserWeightMeasurement } from '@/types';
+import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, UserWeightMeasurement, UserSleepMeasurement, UserAppSettings } from '@/types';
 
 export interface UserState {
     user: User | null;
@@ -14,6 +14,10 @@ export interface UserState {
     userProgramProgressState: REQUEST_STATE;
     userWeightMeasurements: UserWeightMeasurement[];
     userWeightMeasurementsState: REQUEST_STATE;
+    userSleepMeasurements: UserSleepMeasurement[];
+    userSleepMeasurementsState: REQUEST_STATE;
+    userAppSettings: UserAppSettings | null;
+    userAppSettingsState: REQUEST_STATE;
     error: string | null;
 }
 
@@ -28,5 +32,9 @@ export const initialState: UserState = {
     userProgramProgressState: REQUEST_STATE.IDLE,
     userWeightMeasurements: [],
     userWeightMeasurementsState: REQUEST_STATE.IDLE,
+    userSleepMeasurements: [],
+    userSleepMeasurementsState: REQUEST_STATE.IDLE,
+    userAppSettings: null,
+    userAppSettingsState: REQUEST_STATE.IDLE,
     error: null,
 };

@@ -18,9 +18,15 @@ import {
     logWeightMeasurementAsync,
     updateWeightMeasurementAsync,
     deleteWeightMeasurementAsync,
+    deleteSleepMeasurementAsync,
+    updateSleepMeasurementAsync,
+    logSleepMeasurementAsync,
+    getSleepMeasurementsAsync,
+    getUserAppSettingsAsync,
+    updateUserAppSettingsAsync,
 } from '@/store/user/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, UserWeightMeasurement } from '@/types';
+import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, UserWeightMeasurement, UserSleepMeasurement, UserAppSettings } from '@/types';
 
 const userSlice = createSlice({
     name: 'user',
@@ -245,6 +251,90 @@ const userSlice = createSlice({
             .addCase(deleteWeightMeasurementAsync.rejected, (state, action) => {
                 state.userWeightMeasurementsState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'Failed to delete weight measurement';
+            })
+
+            // Get Sleep Measurements
+            .addCase(getSleepMeasurementsAsync.pending, (state) => {
+                state.userSleepMeasurementsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(getSleepMeasurementsAsync.fulfilled, (state, action: PayloadAction<UserSleepMeasurement[]>) => {
+                state.userSleepMeasurementsState = REQUEST_STATE.FULFILLED;
+                state.userSleepMeasurements = action.payload;
+            })
+            .addCase(getSleepMeasurementsAsync.rejected, (state, action) => {
+                state.userSleepMeasurementsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to fetch sleep measurements';
+            })
+
+            // Log Sleep Measurement
+            .addCase(logSleepMeasurementAsync.pending, (state) => {
+                state.userSleepMeasurementsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(logSleepMeasurementAsync.fulfilled, (state, action: PayloadAction<UserSleepMeasurement[]>) => {
+                state.userSleepMeasurementsState = REQUEST_STATE.FULFILLED;
+                state.userSleepMeasurements = action.payload;
+            })
+            .addCase(logSleepMeasurementAsync.rejected, (state, action) => {
+                state.userSleepMeasurementsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to log sleep measurement';
+            })
+
+            // Update Sleep Measurement
+            .addCase(updateSleepMeasurementAsync.pending, (state) => {
+                state.userSleepMeasurementsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(updateSleepMeasurementAsync.fulfilled, (state, action: PayloadAction<UserSleepMeasurement[]>) => {
+                state.userSleepMeasurementsState = REQUEST_STATE.FULFILLED;
+                state.userSleepMeasurements = action.payload;
+            })
+            .addCase(updateSleepMeasurementAsync.rejected, (state, action) => {
+                state.userSleepMeasurementsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to update sleep measurement';
+            })
+
+            // Delete Sleep Measurement
+            .addCase(deleteSleepMeasurementAsync.pending, (state) => {
+                state.userSleepMeasurementsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(deleteSleepMeasurementAsync.fulfilled, (state, action: PayloadAction<UserSleepMeasurement[]>) => {
+                state.userSleepMeasurementsState = REQUEST_STATE.FULFILLED;
+                state.userSleepMeasurements = action.payload;
+            })
+            .addCase(deleteSleepMeasurementAsync.rejected, (state, action) => {
+                state.userSleepMeasurementsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to delete sleep measurement';
+            })
+
+            // Get User App Settings
+            .addCase(getUserAppSettingsAsync.pending, (state) => {
+                state.userAppSettingsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(getUserAppSettingsAsync.fulfilled, (state, action: PayloadAction<UserAppSettings>) => {
+                state.userAppSettingsState = REQUEST_STATE.FULFILLED;
+                state.userAppSettings = action.payload;
+            })
+            .addCase(getUserAppSettingsAsync.rejected, (state, action) => {
+                state.userAppSettingsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to get user app settings';
+            })
+
+            // Update User App Settings
+            .addCase(updateUserAppSettingsAsync.pending, (state) => {
+                state.userAppSettingsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(updateUserAppSettingsAsync.fulfilled, (state, action) => {
+                state.userAppSettingsState = REQUEST_STATE.FULFILLED;
+                state.userAppSettings = action.payload.userAppSettings;
+            })
+            .addCase(updateUserAppSettingsAsync.rejected, (state, action) => {
+                state.userAppSettingsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to update user app settings';
             });
     },
 });

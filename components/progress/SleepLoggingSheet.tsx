@@ -1,5 +1,3 @@
-// components/progress/WeightLoggingSheet.tsx
-
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, TextInput, View, TouchableOpacity, Platform, ActivityIndicator, Keyboard } from 'react-native';
 import LottieView from 'lottie-react-native';
@@ -13,30 +11,27 @@ import { Icon } from '@/components/base/Icon';
 import { TextButton } from '@/components/buttons/TextButton';
 import { addDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameDay, isSameMonth, format } from 'date-fns';
 import { lightenColor } from '@/utils/colorUtils';
-import { UserWeightMeasurement } from '@/types';
 import { Sizes } from '@/constants/Sizes';
-import { RootState } from '@/store/store';
-import { useSelector } from 'react-redux';
-import { formatWeightForDisplay, parseWeightForStorage } from '@/utils/weightConversion';
+import { UserSleepMeasurement } from '@/types';
 
-interface WeightLoggingSheetProps {
+interface SleepLoggingSheetProps {
     visible: boolean;
     onClose: () => void;
-    onSubmit: (weight: number, date: Date) => Promise<void>;
+    onSubmit: (sleep: number, date: Date) => Promise<void>;
     onDelete?: (timestamp: string) => Promise<void>;
-    initialWeight?: number;
+    initialSleep?: number;
     initialDate?: Date;
     isEditing?: boolean;
     isLoading?: boolean;
-    getExistingData?: (date: Date) => UserWeightMeasurement | undefined;
+    getExistingData?: (data: Date) => UserSleepMeasurement | undefined;
 }
 
-export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
+export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
     visible,
     onClose,
     onSubmit,
     onDelete,
-    initialWeight,
+    initialSleep,
     initialDate,
     isEditing = false,
     getExistingData,
@@ -44,7 +39,8 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
-    const [weight, setWeight] = useState<string>('');
+    const [sleep, setSleep] = useState<string>(''); // this is for the hours
+    const [minutes, setMinutes] = useState<string>('0');
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [showCalendar, setShowCalendar] = useState(false);
     const [displayMonth, setDisplayMonth] = useState<Date>(new Date());
@@ -52,62 +48,63 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isEditingMode, setIsEditingMode] = useState(isEditing);
-    const [originalWeight, setOriginalWeight] = useState<number | undefined>(undefined);
+    const [originalSleep, setOriginalSleep] = useState<number | undefined>(undefined);
     const [isSuccess, setIsSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
 
-    const weightInputRef = useRef<TextInput>(null);
-    const bodyWeightPreference = useSelector((state: RootState) => (state.user.userAppSettings?.UnitsOfMeasurement?.BodyWeightUnits as 'kgs' | 'lbs') || 'kgs');
+    const sleepInputRef = useRef<TextInput>(null);
 
     useEffect(() => {
         if (visible) {
             setIsSuccess(false);
+
             const today = new Date();
             const existingData = getExistingData?.(initialDate || today);
 
             if (existingData) {
-                // existingData.Weight is always in kg
-                const displayWeight = formatWeightForDisplay(existingData.Weight, bodyWeightPreference).split(' ')[0]; // Remove the unit suffix
+                const convertedSleep = existingData.DurationInMinutes;
+                const hours = Math.floor(convertedSleep / 60);
+                const mins = convertedSleep % 60;
 
-                setWeight(displayWeight);
-                setOriginalWeight(parseFloat(displayWeight));
+                setSleep(hours?.toString());
+                setMinutes(mins?.toString());
+                setOriginalSleep(convertedSleep);
                 setSelectedDate(new Date(existingData.MeasurementTimestamp));
                 setIsEditingMode(true);
             } else {
-                setOriginalWeight(undefined);
-                // initialWeight is assumed to be in kg
-                const displayWeight = initialWeight ? formatWeightForDisplay(initialWeight, bodyWeightPreference).split(' ')[0] : '';
-                setWeight(displayWeight);
+                setOriginalSleep(undefined);
+                setSleep(initialSleep ? Math.floor(initialSleep / 60).toString() : '');
+                setMinutes(initialSleep ? (initialSleep % 60).toString() : '0');
                 setSelectedDate(initialDate || today);
                 setIsEditingMode(false);
             }
             setDisplayMonth(initialDate || today);
 
             setTimeout(() => {
-                weightInputRef.current?.focus();
+                sleepInputRef.current?.focus();
             }, 300);
         }
-    }, [visible, initialWeight, initialDate, getExistingData, bodyWeightPreference]);
+    }, [visible, initialSleep, initialDate, getExistingData]);
 
     useEffect(() => {
         if (visible && !isEditing) {
             const existingData = getExistingData?.(selectedDate);
             if (existingData) {
-                // existingData.Weight is in kg
-                const displayWeight = formatWeightForDisplay(existingData.Weight, bodyWeightPreference).split(' ')[0]; // Remove the unit suffix
-
-                setWeight(displayWeight);
-                setOriginalWeight(parseFloat(displayWeight));
+                const convertedSleep = existingData.DurationInMinutes;
+                const hours = Math.floor(convertedSleep / 60);
+                const mins = convertedSleep % 60;
+                setSleep(hours?.toString());
+                setMinutes(mins?.toString());
+                setOriginalSleep(convertedSleep);
                 setIsEditingMode(true);
             } else {
-                // initialWeight is in kg
-                const displayWeight = initialWeight ? formatWeightForDisplay(initialWeight, bodyWeightPreference).split(' ')[0] : '';
-                setWeight(displayWeight);
-                setOriginalWeight(undefined);
+                setSleep(initialSleep ? Math.floor(initialSleep / 60).toString() : '');
+                setMinutes(initialSleep ? (initialSleep % 60).toString() : '0');
+                setOriginalSleep(undefined);
                 setIsEditingMode(false);
             }
         }
-    }, [selectedDate, getExistingData, visible, isEditing, initialWeight, bodyWeightPreference]);
+    }, [selectedDate, getExistingData, visible, isEditing, initialSleep]);
 
     const handleClose = () => {
         if (isSuccess) {
@@ -116,7 +113,8 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
 
         Keyboard.dismiss();
         onClose();
-        setWeight('');
+        setSleep('');
+        setMinutes('0');
         setSelectedDate(new Date());
         setDisplayMonth(new Date());
         setShowCalendar(false);
@@ -134,34 +132,58 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
     const hideCalendarView = () => {
         setShowCalendar(false);
         setTimeout(() => {
-            weightInputRef.current?.focus();
+            sleepInputRef.current?.focus();
         }, 100);
     };
 
+    const formatSleep = (hours: string | number, minutes: string | number): string => {
+        const parsedHours = typeof hours === 'string' ? parseInt(hours, 10) : hours;
+        const parsedMinutes = typeof minutes === 'string' ? parseInt(minutes, 10) : minutes;
+
+        if (isNaN(parsedHours) || parsedHours < 0 || parsedMinutes < 0 || parsedMinutes >= 60) {
+            // can do this for hours and minutes separately
+            return '';
+        }
+
+        const totalMinutes = parsedHours * 60 + parsedMinutes;
+
+        // Return as a string
+        return totalMinutes.toString();
+    };
+
     const handleSubmit = async () => {
-        const weightNum = parseFloat(weight);
-        if (isNaN(weightNum) || weightNum <= 0) {
-            setError('Please enter a valid weight');
-            weightInputRef.current?.focus();
+        const hoursSlept = parseFloat(sleep);
+        const minutesSlept = parseFloat(minutes);
+
+        if (
+            isNaN(hoursSlept) ||
+            hoursSlept > 24 ||
+            hoursSlept < 0 ||
+            minutesSlept >= 60 ||
+            minutesSlept < 0 ||
+            isNaN(minutesSlept) ||
+            (hoursSlept === 0 && minutesSlept === 0)
+        ) {
+            setError('Please enter a valid sleep time');
+            sleepInputRef.current?.focus();
             return;
         }
         setError('');
 
         try {
             setIsSubmitting(true);
+            const formattedSleep = Number(formatSleep(hoursSlept, minutesSlept));
+            await onSubmit(formattedSleep, selectedDate);
 
-            // Convert input weight to kg for storage using our utility
-            const weightInKg = parseWeightForStorage(weightNum, bodyWeightPreference);
-
-            await onSubmit(weightInKg, selectedDate);
-
-            setSuccessMessage(isEditingMode ? 'Weight updated' : 'Weight logged');
+            // Set states separately to ensure update
+            setSuccessMessage(isEditingMode ? 'Sleep time updated' : 'Sleep logged');
             setIsSuccess(true);
+            // Wait for animation then close
             await new Promise<void>((resolve) => setTimeout(resolve, 1600));
             onClose();
         } catch (err) {
             console.log(err);
-            setError('Failed to save weight measurement');
+            setError('Failed to save sleep time');
         } finally {
             setIsSubmitting(false);
         }
@@ -259,7 +281,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                                 <Icon name='close' size={20} color={themeColors.text} />
                             </TouchableOpacity>
 
-                            <ThemedText type='title'>{isEditingMode ? 'Edit Weight' : 'Log Weight'}</ThemedText>
+                            <ThemedText type='title'>{isEditingMode ? 'Edit Sleep Time' : 'Log Sleep'}</ThemedText>
 
                             <View style={styles.headerRight}>
                                 {isEditingMode && onDelete && (
@@ -276,9 +298,9 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                                     disabled={
                                         isSubmitting ||
                                         isDeleting ||
-                                        isNaN(parseFloat(weight)) ||
-                                        parseFloat(weight) === 0 ||
-                                        (isEditingMode && originalWeight === parseFloat(weight))
+                                        isNaN(parseFloat(sleep)) ||
+                                        parseFloat(sleep) === 0 ||
+                                        (isEditingMode && originalSleep === parseFloat(sleep))
                                     }
                                 >
                                     {isSubmitting ? (
@@ -290,9 +312,9 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                                             color={
                                                 !isSubmitting &&
                                                 !isDeleting &&
-                                                !isNaN(parseFloat(weight)) &&
-                                                parseFloat(weight) !== 0 &&
-                                                (!isEditingMode || originalWeight !== parseFloat(weight))
+                                                !isNaN(parseFloat(sleep)) &&
+                                                parseFloat(sleep) !== 0 &&
+                                                (!isEditingMode || originalSleep !== parseFloat(sleep))
                                                     ? themeColors.text
                                                     : lightenColor(themeColors.subText, 0.8)
                                             }
@@ -329,12 +351,9 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                                         )}
                                     </TouchableOpacity>
                                     <View style={styles.inputContainer}>
-                                        <ThemedText type='buttonSmall' style={styles.inputLabel}>
-                                            Weight
-                                        </ThemedText>
                                         <View style={[styles.inputWrapper, { backgroundColor: themeColors.background }]}>
                                             <TextInput
-                                                ref={weightInputRef}
+                                                ref={sleepInputRef}
                                                 style={[
                                                     styles.input,
                                                     {
@@ -342,15 +361,37 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                                                         opacity: isSubmitting || isDeleting ? 0.5 : 1,
                                                     },
                                                 ]}
-                                                value={weight}
-                                                onChangeText={setWeight}
+                                                value={sleep}
+                                                onChangeText={setSleep}
                                                 keyboardType='numeric'
-                                                placeholder='0.0'
+                                                placeholder='0'
                                                 placeholderTextColor={themeColors.subText}
                                                 editable={!isSubmitting && !isDeleting}
                                             />
-                                            <ThemedText type='bodySmall' style={[styles.unit, { opacity: isSubmitting || isDeleting ? 0.5 : 0.7 }]}>
-                                                {bodyWeightPreference === 'lbs' ? ' lbs' : ' kgs'}
+                                            <ThemedText type='bodySmall' style={styles.unit}>
+                                                Hours
+                                            </ThemedText>
+                                        </View>
+
+                                        <View style={[styles.inputWrapper, { backgroundColor: themeColors.background, marginTop: Spaces.SM }]}>
+                                            <TextInput
+                                                style={[
+                                                    styles.input,
+                                                    {
+                                                        color: themeColors.text,
+                                                        opacity: isSubmitting || isDeleting ? 0.5 : 1,
+                                                    },
+                                                ]}
+                                                value={minutes}
+                                                onChangeText={setMinutes}
+                                                keyboardType='numeric'
+                                                placeholder='0'
+                                                placeholderTextColor={themeColors.subText}
+                                                editable={!isSubmitting && !isDeleting}
+                                                defaultValue='0'
+                                            />
+                                            <ThemedText type='bodySmall' style={styles.unit}>
+                                                Mins
                                             </ThemedText>
                                         </View>
                                     </View>
@@ -487,6 +528,9 @@ const styles = StyleSheet.create({
     inputContainer: {
         marginTop: Spaces.SM,
         paddingBottom: Spaces.MD,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: Spaces.MD,
     },
     inputLabel: {
         marginBottom: Spaces.SM,
@@ -499,13 +543,15 @@ const styles = StyleSheet.create({
         paddingVertical: Spaces.SM,
         height: 48,
         borderWidth: StyleSheet.hairlineWidth,
+        flex: 1,
     },
     input: {
         flex: 1,
     },
     unit: {
         marginLeft: Spaces.SM,
-        opacity: 0.7,
+        opacity: 0.4,
+        width: 55,
     },
     calendarContainer: {
         marginTop: Spaces.MD,
@@ -580,5 +626,10 @@ const styles = StyleSheet.create({
     successMessage: {
         marginTop: Spaces.MD,
         textAlign: 'center',
+    },
+    row: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
     },
 });

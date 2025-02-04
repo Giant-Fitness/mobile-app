@@ -1,6 +1,6 @@
 // components/programs/ActiveProgramDayCompressedCard.tsx
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';

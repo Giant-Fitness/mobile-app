@@ -63,19 +63,19 @@ const parseResponse = (response: AxiosResponse) => {
 };
 
 // Error handling helper
-const handleAxiosError = (error: any) => {
-    if (axios.isAxiosError(error)) {
-        if (error.code === 'ECONNABORTED') {
-            console.error('Request timed out:', error.message);
-        } else {
-            console.error('Axios error:', error.message);
-            console.error('Response:', error.response ? JSON.stringify(error.response.data, null, 2) : 'No response');
-        }
-    } else {
-        console.error('Unknown error:', error);
-    }
-    throw error;
-};
+// const handleAxiosError = (error: any) => {
+//     if (axios.isAxiosError(error)) {
+//         if (error.code === 'ECONNABORTED') {
+//             console.error('Request timed out:', error.message);
+//         } else {
+//             console.error('Axios error:', error.message);
+//             console.error('Response:', error.response ? JSON.stringify(error.response.data, null, 2) : 'No response');
+//         }
+//     } else {
+//         console.error('Unknown error:', error);
+//     }
+//     throw error;
+// };
 
 // Add retry mechanism to an axios instance
 const addRetryInterceptor = (client: AxiosInstance, config: ApiConfig) => {

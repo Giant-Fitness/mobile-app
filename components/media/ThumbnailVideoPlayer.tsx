@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { StyleSheet, TouchableOpacity, View, Animated, Modal } from 'react-native';
-import { Image, ImageContentFit } from 'expo-image';
+import { Image } from 'expo-image';
 import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle } from '@/components/media/FullScreenVideoPlayer';
 import { Spaces } from '@/constants/Spaces';
 import { Icon } from '@/components/base/Icon';

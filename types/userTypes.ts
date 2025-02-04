@@ -40,3 +40,19 @@ export interface UserWeightMeasurement {
     MeasurementTimestamp: string;
     Weight: number;
 }
+
+export interface UserSleepMeasurement {
+    UserId: string;
+    MeasurementTimestamp: string;
+    DurationInMinutes: number;
+}
+
+export interface UserAppSettingsMeasurementUnitsItem {
+    BodyWeightUnits: string;
+    LiftWeightUnits: string;
+}
+
+export interface UserAppSettings {
+    UserId: string;
+    UnitsOfMeasurement: UserAppSettingsMeasurementUnitsItem;
+}

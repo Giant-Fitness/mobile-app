@@ -26,6 +26,7 @@ export type ThemedTextProps = TextProps & {
         | 'bodyXSmall'
         | 'bodyMedium'
         | 'bodySmall'
+        | 'overlineTransformed'
         | 'greeting';
 };
 

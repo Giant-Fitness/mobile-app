@@ -2,12 +2,12 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import UserService from '@/store/user/service';
-import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, UserWeightMeasurement } from '@/types';
+import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, UserWeightMeasurement, UserSleepMeasurement, UserAppSettings } from '@/types';
 import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 
 export const getUserAsync = createAsyncThunk<User, void>('user/getUser', async (_, { getState }) => {
-    const state = getState();
+    const state = getState() as RootState;
     if (state.user.user) {
         return state.user.user;
     }
@@ -97,7 +97,7 @@ export const getUserRecommendationsAsync = createAsyncThunk<
     }
 >('user/getUserRecommendations', async (_, { getState, rejectWithValue }) => {
     try {
-        const state = getState();
+        const state = getState() as RootState;
         const userId = state.user.user?.UserId;
 
         // Check if user ID exists
@@ -129,7 +129,7 @@ export const getUserProgramProgressAsync = createAsyncThunk<
     }
 >('user/getUserProgramProgress', async (_, { getState, rejectWithValue }) => {
     try {
-        const state = getState();
+        const state = getState() as RootState;
         const userId = state.user.user?.UserId;
 
         // Check if user ID exists
@@ -160,7 +160,7 @@ export const completeDayAsync = createAsyncThunk<
         rejectValue: { errorMessage: string };
     }
 >('user/completeDay', async ({ dayId }, { getState, rejectWithValue }) => {
-    const state = getState();
+    const state = getState() as RootState;
     const userId = state.user.user?.UserId;
     if (!userId) {
         return rejectWithValue({ errorMessage: 'User ID not available' });
@@ -181,7 +181,7 @@ export const uncompleteDayAsync = createAsyncThunk<
         rejectValue: { errorMessage: string };
     }
 >('user/uncompleteDay', async ({ dayId }, { getState, rejectWithValue }) => {
-    const state = getState();
+    const state = getState() as RootState;
     const userId = state.user.user?.UserId;
     if (!userId) {
         return rejectWithValue({ errorMessage: 'User ID not available' });
@@ -195,14 +195,14 @@ export const uncompleteDayAsync = createAsyncThunk<
 });
 
 export const endProgramAsync = createAsyncThunk<UserProgramProgress, void>('user/endProgram', async (_, { getState, rejectWithValue }) => {
-    const state = getState();
+    const state = getState() as RootState;
     const userId = state.user.user?.UserId;
     if (!userId) {
         return rejectWithValue({ errorMessage: 'User ID not available' });
     }
     try {
-        await UserService.endProgram(userId);
-        return {};
+        const result = await UserService.endProgram(userId);
+        return result as UserProgramProgress;
     } catch (error) {
         console.log(error);
         return rejectWithValue({ errorMessage: 'Failed to end program' });
@@ -217,7 +217,7 @@ export const startProgramAsync = createAsyncThunk<
         rejectValue: { errorMessage: string };
     }
 >('user/startProgram', async ({ programId }, { getState, rejectWithValue }) => {
-    const state = getState();
+    const state = getState() as RootState;
     const userId = state.user.user?.UserId;
     if (!userId) {
         return rejectWithValue({ errorMessage: 'User ID not available' });
@@ -231,7 +231,7 @@ export const startProgramAsync = createAsyncThunk<
 });
 
 export const resetProgramAsync = createAsyncThunk<UserProgramProgress, void>('user/resetProgram', async (_, { getState, rejectWithValue }) => {
-    const state = getState();
+    const state = getState() as RootState;
     const userId = state.user.user?.UserId;
     if (!userId) {
         return rejectWithValue({ errorMessage: 'User ID not available' });
@@ -298,7 +298,8 @@ export const logWeightMeasurementAsync = createAsyncThunk<
         }
 
         // Log the new measurement
-        await UserService.logWeightMeasurement(userId, weight, measurementTimestamp);
+        const timestamp = measurementTimestamp ?? new Date().toISOString();
+        await UserService.logWeightMeasurement(userId, weight, timestamp);
 
         // Refresh and return all measurements
         return await refreshWeightMeasurements(userId);
@@ -364,5 +365,170 @@ export const deleteWeightMeasurementAsync = createAsyncThunk<
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to delete weight measurement',
         });
+    }
+});
+
+// Helper function to refresh sleep measurements
+const refreshSleepMeasurements = async (userId: string) => {
+    return await UserService.getSleepMeasurements(userId);
+};
+
+export const getSleepMeasurementsAsync = createAsyncThunk<
+    UserSleepMeasurement[],
+    void,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/getSleepMeasurements', async (_, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        if (state.user.userSleepMeasurements.length > 0 && state.user.userSleepMeasurementsState === REQUEST_STATE.FULFILLED) {
+            return state.user.userSleepMeasurements;
+        }
+
+        const measurements = await UserService.getSleepMeasurements(userId);
+        return measurements;
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch sleep measurements',
+        });
+    }
+});
+
+export const logSleepMeasurementAsync = createAsyncThunk<
+    UserSleepMeasurement[],
+    { durationInMinutes: number; measurementTimestamp?: string },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/logSleepMeasurement', async ({ durationInMinutes, measurementTimestamp }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        const timestamp = measurementTimestamp ?? new Date().toISOString();
+        await UserService.logSleepMeasurement(userId, durationInMinutes, timestamp);
+        return await refreshSleepMeasurements(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to log sleep measurement',
+        });
+    }
+});
+
+export const updateSleepMeasurementAsync = createAsyncThunk<
+    UserSleepMeasurement[],
+    { timestamp: string; durationInMinutes: number },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/updateSleepMeasurement', async ({ timestamp, durationInMinutes }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        await UserService.updateSleepMeasurement(userId, timestamp, durationInMinutes);
+        return await refreshSleepMeasurements(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to update sleep measurement',
+        });
+    }
+});
+
+export const deleteSleepMeasurementAsync = createAsyncThunk<
+    UserSleepMeasurement[],
+    { timestamp: string },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/deleteSleepMeasurement', async ({ timestamp }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        await UserService.deleteSleepMeasurement(userId, timestamp);
+        return await refreshSleepMeasurements(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to delete sleep measurement',
+        });
+    }
+});
+
+export const getUserAppSettingsAsync = createAsyncThunk<
+    UserAppSettings,
+    void,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/getUserAppSettings', async (_, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        // Check if user ID exists
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Return cached app settings if available
+        if (state.user.userAppSettings) {
+            return state.user.userAppSettings;
+        }
+
+        // Fetch and return app settings
+        const profile = await UserService.getUserAppSettings(userId);
+        return profile;
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch app settings',
+        });
+    }
+});
+
+export const updateUserAppSettingsAsync = createAsyncThunk<
+    { userAppSettings: UserAppSettings },
+    { userAppSettings: UserAppSettings },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/updateUserAppSettings', async ({ userAppSettings }, { getState, rejectWithValue }) => {
+    const state = getState();
+    const userId = state.user.user?.UserId;
+
+    if (!userId) {
+        return rejectWithValue({ errorMessage: 'User ID not available' });
+    }
+
+    try {
+        const result = await UserService.updateUserAppSettings(userId, userAppSettings);
+        return { userAppSettings: result };
+    } catch (error) {
+        console.log(error);
+        return rejectWithValue({ errorMessage: 'Failed to update app settings' });
     }
 });

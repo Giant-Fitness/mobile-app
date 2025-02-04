@@ -21,6 +21,7 @@ import { ExerciseLog } from '@/types/exerciseProgressTypes';
 import { AppDispatch } from '@/store/store';
 import { Sizes } from '@/constants/Sizes';
 import { TextButton } from '@/components/buttons/TextButton';
+import { formatWeightForDisplay, parseWeightForStorage } from '@/utils/weightConversion';
 
 interface ExerciseLoggingSheetProps {
     visible: boolean;
@@ -40,6 +41,7 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
     const dispatch = useDispatch<AppDispatch>();
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const liftWeightPreference = useSelector((state: RootState) => state.user.userAppSettings?.UnitsOfMeasurement?.LiftWeightUnits || 'kgs');
 
     const [activeTab, setActiveTab] = useState<Tab>('log');
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -62,7 +64,10 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
         if (editingLog) {
             return editingLog.Sets.map((set) => ({
                 reps: set.Reps.toString(),
-                weight: set.Weight.toString(),
+                weight:
+                    liftWeightPreference === 'lbs'
+                        ? formatWeightForDisplay(set.Weight, 'lbs').split(' ')[0] // Extract numeric value only
+                        : formatWeightForDisplay(set.Weight, 'kgs').split(' ')[0],
             }));
         }
 
@@ -88,7 +93,10 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                 if (index < todaysLog.Sets.length) {
                     return {
                         reps: todaysLog.Sets[index].Reps.toString(),
-                        weight: todaysLog.Sets[index].Weight.toString(),
+                        weight:
+                            liftWeightPreference === 'lbs'
+                                ? formatWeightForDisplay(todaysLog.Sets[index].Weight, 'lbs').split(' ')[0]
+                                : formatWeightForDisplay(todaysLog.Sets[index].Weight, 'kgs').split(' ')[0],
                     };
                 }
                 return emptySet;
@@ -196,21 +204,13 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
         try {
             setIsSubmitting(true);
             setError('');
-
-            const formatWeight = (weight: string): number => {
-                const parsed = parseFloat(weight);
-                if (Number.isInteger(parsed)) {
-                    return parsed;
-                }
-                return Number(parsed.toFixed(2));
-            };
-
+            const weightUnit: 'kgs' | 'lbs' = liftWeightPreference === 'lbs' ? 'lbs' : 'kgs';
             const validSets = sets
                 .filter((set) => parseInt(set.reps) > 0)
                 .map((set, index) => ({
                     SetNumber: index + 1,
                     Reps: parseInt(set.reps),
-                    Weight: formatWeight(set.weight) || 0,
+                    Weight: parseWeightForStorage(set.weight, weightUnit),
                     Timestamp: format(new Date(), 'HH:mm:ss'),
                 }));
 
@@ -219,7 +219,7 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                 return;
             }
 
-            const result = await dispatch(
+            await dispatch(
                 saveExerciseProgressAsync({
                     exerciseId: exercise.ExerciseId,
                     date: format(selectedDate, 'yyyy-MM-dd'),
@@ -236,11 +236,8 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                 handleClose();
             }, 1500);
         } catch (err: any) {
-            // Extract and display the server error message
             const serverErrorMessage = err?.errorMessage || 'Failed to save exercise progress';
             setError(serverErrorMessage);
-
-            // Make sure we stay on the log tab to show the error
             setActiveTab('log');
         } finally {
             setIsSubmitting(false);
@@ -373,7 +370,7 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                     showSoftInputOnFocus={true}
                 />
                 <ThemedText type='bodySmall' style={styles.inputLabel}>
-                    kg
+                    {liftWeightPreference === 'lbs' ? 'lbs' : 'kgs'}
                 </ThemedText>
             </View>
             <View style={styles.setInputContainer}>
@@ -474,7 +471,10 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
             const dayOfWeek = date.toLocaleDateString('default', { weekday: 'long' });
             const month = date.toLocaleDateString('default', { month: 'short' });
             const day = date.getDate();
-            const setsDisplay = `${log.Sets.length} sets - ${log.Sets.map((set) => `${set.Weight}kg × ${set.Reps}`).join(', ')}`;
+            const weightUnit: 'kgs' | 'lbs' = liftWeightPreference === 'lbs' ? 'lbs' : 'kgs';
+            const setsDisplay = `${log.Sets.length} sets - ${log.Sets.map((set) => formatWeightForDisplay(set.Weight, weightUnit) + ` × ${set.Reps}`).join(
+                ', ',
+            )}`;
 
             return (
                 <TouchableOpacity
@@ -486,7 +486,10 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                         setSets(
                             log.Sets.map((set) => ({
                                 reps: set.Reps.toString(),
-                                weight: set.Weight.toString(),
+                                weight:
+                                    liftWeightPreference === 'lbs'
+                                        ? formatWeightForDisplay(set.Weight, 'lbs').split(' ')[0]
+                                        : formatWeightForDisplay(set.Weight, 'kgs').split(' ')[0],
                             })),
                         );
                     }}
