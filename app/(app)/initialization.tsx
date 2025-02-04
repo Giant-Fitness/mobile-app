@@ -1,7 +1,7 @@
 // app/(app)/initialization.tsx
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { SafeAreaView, Text, StyleSheet } from 'react-native';
+import { SafeAreaView, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
@@ -10,6 +10,7 @@ import { getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/th
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
 import {
     getSleepMeasurementsAsync,
+    getUserAppSettingsAsync,
     getUserAsync,
     getUserFitnessProfileAsync,
     getUserProgramProgressAsync,
@@ -59,8 +60,8 @@ const Initialization: React.FC = () => {
                 dispatch(getAllProgramsAsync()),
                 dispatch(getWeightMeasurementsAsync()),
                 dispatch(initializeTrackedLiftsHistoryAsync()),
-
                 dispatch(getSleepMeasurementsAsync()),
+                dispatch(getUserAppSettingsAsync()),
             ]);
 
             setDataLoaded(REQUEST_STATE.FULFILLED);

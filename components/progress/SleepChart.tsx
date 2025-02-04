@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { BaseChart } from '../charts/BaseChart';
-import { AggregatedData, TimeRange, TimeRangeOption } from '@/utils/weight';
+import { AggregatedData, TimeRange, TimeRangeOption } from '@/utils/charts';
 import { UserSleepMeasurement } from '@/types';
 
 type SleepChartProps = {
@@ -30,8 +30,6 @@ const formatMinutesToHourMin = (minutes: number): string => {
 };
 
 const getSleepGridLineValues = (min: number, max: number): number[] => {
-    const range = max - min;
-
     // Define possible intervals in minutes
     const intervals = [60, 120, 180, 240];
 

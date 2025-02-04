@@ -8,6 +8,9 @@ import { Icon } from '@/components/base/Icon';
 import { TrendCard } from './TrendCard';
 import { UserWeightMeasurement } from '@/types';
 import { Spaces } from '@/constants/Spaces';
+import { formatWeightForDisplay } from '@/utils/weightConversion';
+import { RootState } from '@/store/store';
+import { useSelector } from 'react-redux';
 
 type WeightTrendCardProps = {
     values: UserWeightMeasurement[];
@@ -17,12 +20,12 @@ type WeightTrendCardProps = {
     style?: any;
 };
 
-const formatWeight = (weight: number): string => {
-    return `${weight.toFixed(1)} kg`;
+const formatWeight = (weight: number, bodyWeightPreference: 'kgs' | 'lbs'): string => {
+    return formatWeightForDisplay(weight, bodyWeightPreference);
 };
 
-const formatAverageWeight = (weight: number): string => {
-    return `${weight.toFixed(1)} kg (average)`;
+const formatAverageWeight = (weight: number, bodyWeightPreference: 'kgs' | 'lbs'): string => {
+    return formatWeightForDisplay(weight, bodyWeightPreference) + ' (average)';
 };
 
 const processWeightData = (values: UserWeightMeasurement[]) => {
@@ -44,10 +47,13 @@ const processWeightData = (values: UserWeightMeasurement[]) => {
         };
     }
 
+    // Calculate average using stored kg values for accuracy
     const avg = recentData.reduce((sum, v) => sum + v.Weight, 0) / recentData.length;
+
     const startDate = format(new Date(recentData[0].MeasurementTimestamp), 'MMM d');
     const endDate = format(new Date(recentData[recentData.length - 1].MeasurementTimestamp), 'MMM d');
 
+    // Use kg values for calculating graph dimensions
     const minWeight = Math.min(...recentData.map((d) => d.Weight));
     const maxWeight = Math.max(...recentData.map((d) => d.Weight));
     const weightPadding = (maxWeight - minWeight) * 0.5;
@@ -58,7 +64,7 @@ const processWeightData = (values: UserWeightMeasurement[]) => {
     const processedData = recentData.map((d, i) => ({
         x: (i / (recentData.length - 1)) * 100,
         y: 40 - 4 - ((d.Weight - adjustedMinWeight) / weightRange) * (40 - 8),
-        value: d.Weight,
+        value: d.Weight, // Store original kg value
     }));
 
     return {
@@ -74,6 +80,8 @@ const SingleWeightDataPoint = ({ measurement, onPress, themeColors }: { measurem
     const isToday = measurementDate.toDateString() === today.toDateString();
     const formattedDate = format(measurementDate, 'MMM d, yyyy');
 
+    const bodyWeightPreference = useSelector((state: RootState) => (state.user.userAppSettings?.UnitsOfMeasurement?.BodyWeightUnits as 'kgs' | 'lbs') || 'kgs');
+
     const content = (
         <View style={styles.singleDataContainer}>
             <View style={styles.singleDataContent}>
@@ -82,7 +90,7 @@ const SingleWeightDataPoint = ({ measurement, onPress, themeColors }: { measurem
                         {isToday ? "Today's Measurement" : 'First Measurement'}
                     </ThemedText>
                     <ThemedText type='titleLarge' style={[styles.weightValue, { color: themeColors.purpleSolid }]}>
-                        {formatWeight(measurement.Weight)}
+                        {formatWeight(measurement.Weight, bodyWeightPreference)}
                     </ThemedText>
                     <ThemedText type='bodySmall' style={[styles.dateText, { color: themeColors.subText }]}>
                         {formattedDate}
@@ -121,6 +129,8 @@ const SingleWeightDataPoint = ({ measurement, onPress, themeColors }: { measurem
 };
 
 export const WeightTrendCard: React.FC<WeightTrendCardProps> = ({ values, onPress, onLogWeight, isLoading, style }) => {
+    const bodyWeightPreference = useSelector((state: RootState) => (state.user.userAppSettings?.UnitsOfMeasurement?.BodyWeightUnits as 'kgs' | 'lbs') || 'kgs');
+
     return (
         <TrendCard
             data={values}
@@ -129,12 +139,11 @@ export const WeightTrendCard: React.FC<WeightTrendCardProps> = ({ values, onPres
             isLoading={isLoading}
             style={style}
             title='Weight Trend'
-            subtitle='Track your weight'
             themeColor='purpleSolid'
             themeTransparentColor='purpleTransparent'
             emptyStateTitle='Track Your Weight Journey'
             emptyStateDescription='Track your weight regularly to see your journey take shape with charts that keep you motivated and informed.'
-            formatValue={formatAverageWeight}
+            formatValue={(value) => formatAverageWeight(value, bodyWeightPreference)}
             processData={processWeightData}
             renderSingleDataPoint={SingleWeightDataPoint}
         />

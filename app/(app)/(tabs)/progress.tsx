@@ -19,14 +19,9 @@ import { Spaces } from '@/constants/Spaces';
 import { BodyMeasurementsComingSoonCard } from '@/components/progress/BodyMeasurementsComingSoonCard';
 import { StrengthHistoryComingSoonCard } from '@/components/progress/StrengthHistoryComingSoonCard';
 import { ThemedText } from '@/components/base/ThemedText';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
 
 export default function ProgressScreen() {
-    const colorScheme = useColorScheme() as 'light' | 'dark';
-    const themeColors = Colors[colorScheme];
-
     const dispatch = useDispatch<AppDispatch>();
     const scrollY = useSharedValue(0);
 
@@ -59,25 +54,15 @@ export default function ProgressScreen() {
     }, [dispatch, userSleepMeasurementsState]);
 
     const dataLoadedState = useMemo(() => {
-        if (userWeightMeasurementsState !== REQUEST_STATE.FULFILLED) {
+        if (userWeightMeasurementsState !== REQUEST_STATE.FULFILLED || userSleepMeasurementsState != REQUEST_STATE.FULFILLED) {
             return REQUEST_STATE.PENDING;
         }
         return REQUEST_STATE.FULFILLED;
-    }, [userWeightMeasurementsState]);
-
-    const sleepDataLoadedState = useMemo(() => {
-        if (userSleepMeasurementsState != REQUEST_STATE.FULFILLED) {
-            return REQUEST_STATE.PENDING;
-        }
-        return REQUEST_STATE.FULFILLED;
-    }, [userSleepMeasurementsState]);
+    }, [userWeightMeasurementsState, userSleepMeasurementsState]);
 
     const { showSplash, handleSplashComplete } = useSplashScreen({
         dataLoadedState: dataLoadedState,
-        // sleepDataLoadedState:sleepDataLoadedState,
     });
-
-    // look into what this does and if their is a need to replicate it
 
     // Handle weight logging
     const handleLogWeight = async (weight: number, date: Date) => {

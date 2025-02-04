@@ -13,13 +13,14 @@ import { useSharedValue } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { WeightChart } from '@/components/progress/WeightChart';
 import { AppDispatch, RootState } from '@/store/store';
-import { TimeRange, aggregateData, calculateMovingAverage, getTimeRangeLabel, getAvailableTimeRanges, getInitialTimeRange } from '@/utils/weight';
+import { TimeRange, aggregateData, calculateMovingAverage, getTimeRangeLabel, getAvailableTimeRanges, getInitialTimeRange } from '@/utils/charts';
 import { UserWeightMeasurement } from '@/types';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { Icon } from '@/components/base/Icon';
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
 import { updateWeightMeasurementAsync, deleteWeightMeasurementAsync, logWeightMeasurementAsync } from '@/store/user/thunks';
 import { router } from 'expo-router';
+import { kgToPounds } from '@/utils/weightConversion';
 
 const getWeightChange = (currentWeight: number, previousWeight: number | null) => {
     if (previousWeight === null) return null;
@@ -39,6 +40,7 @@ export default function WeightTrackingScreen() {
     const [isWeightSheetVisible, setIsWeightSheetVisible] = useState(false);
     const [isAddingWeight, setIsAddingWeight] = useState(false);
     const [selectedMeasurement, setSelectedMeasurement] = useState<UserWeightMeasurement | null>(null);
+    const bodyWeightPreference = useSelector((state: RootState) => state.user.userAppSettings?.UnitsOfMeasurement?.BodyWeightUnits);
     const dispatch = useDispatch<AppDispatch>();
 
     useEffect(() => {
@@ -140,10 +142,10 @@ export default function WeightTrackingScreen() {
 
         const aggregated = aggregateData(userWeightMeasurements, selectedTimeRange);
 
-        const weights = aggregated.map((d) => d.weight);
+        const weights = aggregated.map((d) => d.weight ?? 0);
         const avg = weights.length > 0 ? weights.reduce((a, b) => a + b, 0) / weights.length : 0;
-        const change = weights.length > 1 ? aggregated[aggregated.length - 1].weight - aggregated[0].weight : 0;
-        const percent = aggregated.length > 0 ? (change / aggregated[0].weight) * 100 : 0;
+        const change = weights.length > 1 ? (aggregated[aggregated.length - 1]?.weight ?? 0) - (aggregated[0]?.weight ?? 0) : 0;
+        const percent = aggregated.length > 0 ? (change / (aggregated[0]?.weight ?? 1)) * 100 : 0;
 
         const allData = [...userWeightMeasurements].sort((a, b) => new Date(a.MeasurementTimestamp).getTime() - new Date(b.MeasurementTimestamp).getTime());
         const allTimeChange = allData[allData.length - 1].Weight - allData[0].Weight;
@@ -152,7 +154,8 @@ export default function WeightTrackingScreen() {
         const minWeight = Math.min(...weights);
         const maxWeight = Math.max(...weights);
         const range = maxWeight - minWeight;
-        const padding = Math.max(range * 0.1, 1);
+        const paddingFactor = range > 20 ? 0.03 : 0.05; // 3% or 5% padding depending on range
+        const padding = Math.max(range * paddingFactor, 0.3); // Minimum padding of 0.3 units
 
         return {
             aggregatedData: aggregated,
@@ -163,8 +166,8 @@ export default function WeightTrackingScreen() {
             averageWeight: avg,
             startWeight: aggregated.length > 0 ? aggregated[0].weight : 0,
             yAxisRange: {
-                min: weights.length > 0 ? Math.floor(minWeight - padding) : 0,
-                max: weights.length > 0 ? Math.ceil(maxWeight + padding) : 100,
+                min: Math.max(0, Math.floor(minWeight - padding)),
+                max: Math.ceil(maxWeight + padding),
             },
             movingAverages: aggregated.length > 0 ? calculateMovingAverage(aggregated, selectedTimeRange) : [],
             allTimeChange: allTimeChange,
@@ -222,7 +225,9 @@ export default function WeightTrackingScreen() {
                     <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
                         Average
                     </ThemedText>
-                    <ThemedText type='titleXLarge'>{averageWeight.toFixed(1)} kg</ThemedText>
+                    <ThemedText type='titleXLarge'>
+                        {bodyWeightPreference === 'lbs' ? `${kgToPounds(averageWeight)}lbs` : `${averageWeight.toFixed(1)}kgs`}
+                    </ThemedText>
                 </View>
                 <View style={[styles.insightItem, { marginLeft: Spaces.XXXL }]}>
                     <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
@@ -230,7 +235,7 @@ export default function WeightTrackingScreen() {
                     </ThemedText>
                     <ThemedText type='titleXLarge' style={{ color: weightChange > 0 ? themeColors.maroonSolid : darkenColor(themeColors.accent, 0.3) }}>
                         {weightChange > 0 ? '+' : ''}
-                        {weightChange.toFixed(1)} kg
+                        {bodyWeightPreference === 'lbs' ? `${kgToPounds(weightChange)} lbs` : `${weightChange.toFixed(1)}kgs`}
                     </ThemedText>
                 </View>
             </View>
@@ -281,7 +286,7 @@ export default function WeightTrackingScreen() {
                         {dayOfWeek}, {`${month} ${day}`}
                     </ThemedText>
                     <ThemedText type='title' style={styles.weightText}>
-                        {item.Weight.toFixed(1)} kg
+                        {bodyWeightPreference === 'lbs' ? `${kgToPounds(item.Weight)}lbs` : `${item.Weight.toFixed(1)}kgs`}
                     </ThemedText>
                 </View>
                 {weightChange && (
@@ -296,7 +301,7 @@ export default function WeightTrackingScreen() {
                             ]}
                         >
                             {parseFloat(weightChange) > 0 ? '+' : ''}
-                            {weightChange} kg
+                            {bodyWeightPreference === 'lbs' ? `${kgToPounds(parseFloat(weightChange)).toString()}lbs` : `${weightChange}kgs`}
                         </ThemedText>
                     </View>
                 )}

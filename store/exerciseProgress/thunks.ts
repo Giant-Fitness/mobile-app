@@ -3,7 +3,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '@/store/store';
 import ExerciseProgressService from '@/store/exerciseProgress/service';
-import { ExerciseLog, ExerciseSet } from '@/types/exerciseProgressTypes';
+import { ExerciseSet } from '@/types/exerciseProgressTypes';
 import { isLongTermTrackedLift, LONG_TERM_TRACKED_LIFT_IDS } from '@/store/exerciseProgress/utils';
 import { REQUEST_STATE } from '@/constants/requestStates';
 

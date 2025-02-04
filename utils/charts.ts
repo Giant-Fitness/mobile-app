@@ -1,4 +1,4 @@
-// utils/weight.ts
+// utils/charts.ts
 
 import { startOfWeek, startOfMonth, subDays, subMonths, subYears, isSameDay, lastDayOfWeek, lastDayOfMonth, format } from 'date-fns';
 import { UserSleepMeasurement, UserWeightMeasurement } from '@/types';

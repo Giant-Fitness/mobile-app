@@ -84,7 +84,7 @@ export default function HomeScreen() {
         setIsSleepSheetVisible(true);
     };
 
-    const getExistingData = (date: Date) => {
+    const getExistingWeightData = (date: Date) => {
         return userWeightMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
     };
 
@@ -271,7 +271,7 @@ export default function HomeScreen() {
                 onClose={() => setIsWeightSheetVisible(false)}
                 onSubmit={handleLogWeight}
                 isLoading={isLoading}
-                getExistingData={getExistingData}
+                getExistingData={getExistingWeightData}
             />
 
             <SleepLoggingSheet

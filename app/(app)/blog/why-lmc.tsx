@@ -1,7 +1,7 @@
 // app/(app)/blog/why-lmc.tsx
 
 import React from 'react';
-import { StyleSheet, View, Image, Text, Platform } from 'react-native';
+import { StyleSheet, View, Image, Platform } from 'react-native';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
