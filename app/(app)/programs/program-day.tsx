@@ -1,7 +1,7 @@
 // app/(app)/programs/program-day.tsx
 
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, ActivityIndicator, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, ActivityIndicator, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import LottieView from 'lottie-react-native';
@@ -46,7 +46,6 @@ const ProgramDayScreen = () => {
     const [showResetSuccess, setShowResetSuccess] = useState(false);
     const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
     const [isLoggingSheetVisible, setIsLoggingSheetVisible] = useState(false);
-    const [isVideoLoading, setIsVideoLoading] = useState(false);
 
     const confettiRef = useRef<LottieView>(null);
     const videoPlayerRef = useRef<FullScreenVideoPlayerHandle>(null);
@@ -72,7 +71,7 @@ const ProgramDayScreen = () => {
     const [lastPlaybackPosition, setLastPlaybackPosition] = useState(0);
     const [reachedMilestones, setReachedMilestones] = useState(new Set());
     const MILESTONES = [0.25, 0.5, 0.75, 1.0];
-    const SKIP_THRESHOLD = 0.25;
+    // const SKIP_THRESHOLD = 0.25;
 
     // Load exercise histories for workout type days
     useEffect(() => {
@@ -90,7 +89,6 @@ const ProgramDayScreen = () => {
     const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
         if (status.isLoaded) {
             if (!status.isBuffering) {
-                setIsVideoLoading(false);
             }
 
             const duration = status.durationMillis;
@@ -130,18 +128,17 @@ const ProgramDayScreen = () => {
         });
     };
 
-    const handleStartWorkout = () => {
-        if (programDay?.Type === 'video' && programDay.WorkoutId) {
-            setIsVideoLoading(true);
-            if (videoPlayerRef.current) {
-                videoPlayerRef.current.startPlayback();
-                setReachedMilestones(new Set());
-                setLastPlaybackPosition(0);
-            }
-        } else {
-            finishDayChecker();
-        }
-    };
+    // const handleStartWorkout = () => {
+    //     if (programDay?.Type === 'video' && programDay.WorkoutId) {
+    //         if (videoPlayerRef.current) {
+    //             videoPlayerRef.current.startPlayback();
+    //             setReachedMilestones(new Set());
+    //             setLastPlaybackPosition(0);
+    //         }
+    //     } else {
+    //         finishDayChecker();
+    //     }
+    // };
 
     const finishDayChecker = async () => {
         if (userProgramProgress && userProgramProgress.CurrentDay < parseInt(dayId)) {
@@ -428,7 +425,7 @@ const ProgramDayScreen = () => {
                     ref={videoPlayerRef}
                     source={{ uri: workouts[programDay.WorkoutId].VideoUrl }}
                     onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
-                    onDismiss={() => setIsVideoLoading(false)}
+                    onDismiss={() => {}}
                 />
             )}
 

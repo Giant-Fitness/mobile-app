@@ -22,9 +22,11 @@ import {
     updateSleepMeasurementAsync,
     logSleepMeasurementAsync,
     getSleepMeasurementsAsync,
+    getUserAppSettingsAsync,
+    updateUserAppSettingsAsync,
 } from '@/store/user/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, UserWeightMeasurement, UserSleepMeasurement } from '@/types';
+import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, UserWeightMeasurement, UserSleepMeasurement, UserAppSettings } from '@/types';
 
 const userSlice = createSlice({
     name: 'user',
@@ -305,6 +307,34 @@ const userSlice = createSlice({
             .addCase(deleteSleepMeasurementAsync.rejected, (state, action) => {
                 state.userSleepMeasurementsState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'Failed to delete sleep measurement';
+            })
+
+            // Get User App Settings
+            .addCase(getUserAppSettingsAsync.pending, (state) => {
+                state.userAppSettingsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(getUserAppSettingsAsync.fulfilled, (state, action: PayloadAction<UserAppSettings>) => {
+                state.userAppSettingsState = REQUEST_STATE.FULFILLED;
+                state.userAppSettings = action.payload;
+            })
+            .addCase(getUserAppSettingsAsync.rejected, (state, action) => {
+                state.userAppSettingsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to get user app settings';
+            })
+
+            // Update User App Settings
+            .addCase(updateUserAppSettingsAsync.pending, (state) => {
+                state.userAppSettingsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(updateUserAppSettingsAsync.fulfilled, (state, action) => {
+                state.userAppSettingsState = REQUEST_STATE.FULFILLED;
+                state.userAppSettings = action.payload.userAppSettings;
+            })
+            .addCase(updateUserAppSettingsAsync.rejected, (state, action) => {
+                state.userAppSettingsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to update user app settings';
             });
     },
 });

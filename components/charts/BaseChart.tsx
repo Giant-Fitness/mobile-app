@@ -7,14 +7,14 @@ import { format } from 'date-fns';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Spaces } from '@/constants/Spaces';
-import { TimeRange, TimeRangeOption } from '@/utils/weight';
+import { TimeRange, TimeRangeOption } from '@/utils/charts';
 import { ThemedText } from '@/components/base/ThemedText';
 import { lightenColor } from '@/utils/colorUtils';
 import { ThemedView } from '@/components/base/ThemedView';
 
 const CHART_PADDING = {
     top: 48,
-    right: 32,
+    right: 42,
     bottom: 10,
     left: 5,
 };

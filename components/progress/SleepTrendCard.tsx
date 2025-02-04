@@ -1,4 +1,5 @@
 // components/progress/SleepTrendCard.tsx
+
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { format } from 'date-fns';
@@ -25,9 +26,7 @@ const formatSleepDuration = (minutes: number): string => {
 };
 
 const formatAverageSleep = (minutes: number): string => {
-    const hours = Math.floor(minutes / 60);
-    const mins = Math.floor(minutes % 60);
-    return `${hours}h ${mins}m (average)`;
+    return formatSleepDuration(minutes) + ' (average)';
 };
 
 const processSleepData = (values: UserSleepMeasurement[]) => {
@@ -134,7 +133,6 @@ export const SleepTrendCard: React.FC<SleepTrendCardProps> = ({ values, onPress,
             isLoading={isLoading}
             style={style}
             title='Sleep Trend'
-            subtitle='Track your sleep'
             themeColor='blueSolid'
             themeTransparentColor='blueTransparent'
             emptyStateTitle='Track Your Sleep Journey'

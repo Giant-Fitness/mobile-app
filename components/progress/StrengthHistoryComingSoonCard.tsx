@@ -6,7 +6,7 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { Spaces } from '@/constants/Spaces';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Path, Svg, Defs, LinearGradient, Stop, Circle, Rect } from 'react-native-svg';
+import { Path, Svg, Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import { lightenColor } from '@/utils/colorUtils';
 
 interface StrengthHistoryComingSoonCardProps {

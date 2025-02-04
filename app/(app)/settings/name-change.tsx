@@ -2,14 +2,12 @@
 
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { router } from 'expo-router';
 import { AppDispatch, RootState } from '@/store/store';
 import { updateUserAsync } from '@/store/user/thunks';
 import { ThemedView } from '@/components/base/ThemedView';
 import { Spaces } from '@/constants/Spaces';
-import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { ThemedText } from '@/components/base/ThemedText';
 import { TextInput } from '@/components/inputs/TextInput';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
@@ -61,10 +59,10 @@ const NameChangeScreen = () => {
                 headerBackground={themeColors.background}
                 title='Name'
                 actionButton={{
-                    icon: 'checkmark-sharp',
+                    icon: 'check',
                     onPress: handleChangeName,
                     isLoading: isSubmitting,
-                    disabled: !newName.trim(),
+                    disabled: !newName.trim() || newName.trim() === user?.FirstName,
                 }}
             />
             <ThemedView style={styles.content}>

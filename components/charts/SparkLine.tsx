@@ -1,11 +1,10 @@
 // components/charts/SparkLine.tsx
+
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Path, Svg, Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-
-const PADDING_VERTICAL = 4;
 
 type Point = {
     x: number;

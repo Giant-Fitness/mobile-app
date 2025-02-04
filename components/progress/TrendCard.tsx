@@ -15,7 +15,6 @@ type ThemeColorKey = keyof typeof Colors['light'];
 
 type TrendCardProps = {
     title: string;
-    subtitle: string;
     data: any[];
     onPress: () => void;
     onLogData: () => void;
@@ -31,7 +30,7 @@ type TrendCardProps = {
         dateRange: string;
         average: number;
     };
-    renderSingleDataPoint: (data: any, onPress: () => void, themeColors: any) => React.ReactNode;
+    renderSingleDataPoint: (props: { measurement: any; onPress: () => void; themeColors: any }) => React.ReactNode;
 };
 
 const ShimmerEffect = ({ style }: { style: any }) => {
@@ -54,7 +53,6 @@ const ShimmerEffect = ({ style }: { style: any }) => {
 
 export const TrendCard: React.FC<TrendCardProps> = ({
     title,
-    subtitle,
     data,
     onPress,
     onLogData,
@@ -70,7 +68,6 @@ export const TrendCard: React.FC<TrendCardProps> = ({
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
-
     const handlePress = () => {
         if (data?.length === 1) {
             const measurementDate = new Date(data[0].MeasurementTimestamp);
@@ -141,7 +138,11 @@ export const TrendCard: React.FC<TrendCardProps> = ({
             <View
                 style={[styles.card, { backgroundColor: themeColors[themeTransparentColor], borderColor: lightenColor(themeColors[themeColor], 0.9) }, style]}
             >
-                {renderSingleDataPoint(data[0], handlePress, themeColors)}
+                {renderSingleDataPoint({
+                    measurement: data[0],
+                    onPress: handlePress,
+                    themeColors,
+                })}
             </View>
         );
     }

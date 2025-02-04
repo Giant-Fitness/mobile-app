@@ -1,6 +1,6 @@
 // store/user/service.ts
 
-import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, UserWeightMeasurement, UserSleepMeasurement } from '@/types';
+import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, UserWeightMeasurement, UserSleepMeasurement, UserAppSettings } from '@/types';
 import { authUsersApiClient, authRecommendationsApiClient } from '@/utils/api/apiConfig';
 import { handleApiError } from '@/utils/api/errorUtils';
 import { authService } from '@/utils/auth';
@@ -254,6 +254,37 @@ const deleteSleepMeasurement = async (userId: string, timestamp: string): Promis
     }
 };
 
+// App Settings Methods
+const getUserAppSettings = async (userId: string): Promise<UserAppSettings> => {
+    console.log('service: getUserAppSettings');
+    try {
+        if (!userId) throw new Error('No user ID found');
+
+        const { data } = await authUsersApiClient.get(`/users/${userId}/app-settings`);
+        if (!data.userAppSettings) {
+            throw new Error('Invalid response format');
+        }
+        return data.userAppSettings;
+    } catch (error) {
+        throw handleApiError(error, 'GetUserAppSettings');
+    }
+};
+
+const updateUserAppSettings = async (userId: string, userAppSettings: UserAppSettings): Promise<UserAppSettings> => {
+    console.log('service: updateUserAppSettings');
+    try {
+        const { data } = await authUsersApiClient.put(`/users/${userId}/app-settings`, userAppSettings);
+
+        if (!data.userAppSettings) {
+            throw new Error('Invalid response format');
+        }
+
+        return data.userAppSettings;
+    } catch (error) {
+        throw handleApiError(error, 'UpdateUserAppSettings');
+    }
+};
+
 export default {
     // User Profile
     getUser,
@@ -280,4 +311,7 @@ export default {
     logSleepMeasurement,
     updateSleepMeasurement,
     deleteSleepMeasurement,
+    // App Settings
+    getUserAppSettings,
+    updateUserAppSettings,
 };

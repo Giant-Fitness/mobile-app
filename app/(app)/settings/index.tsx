@@ -21,7 +21,7 @@ import { lightenColor } from '@/utils/colorUtils';
 
 const SettingsSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <View style={styles.section}>
-        <ThemedText type='caption' style={styles.sectionTitle}>
+        <ThemedText type='overlineTransformed' style={styles.sectionTitle}>
             {title}
         </ThemedText>
         <View style={styles.sectionContent}>{children}</View>
@@ -81,6 +81,10 @@ const SettingsIndex = () => {
         router.push('/(app)/settings/name-change');
     };
 
+    const handlePreference = () => {
+        router.push('/(app)/settings/measurement-units');
+    };
+
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
             <AnimatedHeader scrollY={scrollY} disableColorChange={true} headerBackground={themeColors.background} title='Settings' />
@@ -90,7 +94,7 @@ const SettingsIndex = () => {
                 </SettingsSection>
 
                 <SettingsSection title='Preferences'>
-                    <SettingItem text='Measurement Units' onPress={() => {}} iconName='pencil-ruler' />
+                    <SettingItem text='Measurement Units' onPress={handlePreference} iconName='pencil-ruler' />
                 </SettingsSection>
 
                 <TextButton text='Sign Out' onPress={handleSignOut} iconName='exit' size='MD' style={styles.signOutButton} />
@@ -118,8 +122,6 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         paddingHorizontal: Spaces.XL,
-        marginBottom: Spaces.SM,
-        textTransform: 'uppercase',
         opacity: 0.7,
     },
     sectionContent: {},

@@ -87,7 +87,7 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
                     {actionButton.isLoading ? (
                         <ActivityIndicator color={themeColors.text} size='small' />
                     ) : (
-                        <Icon name={actionButton.icon} size={22} color={animatedIconColor} style={{ opacity: actionButton.disabled ? 0.5 : 1 }} />
+                        <Icon name={actionButton.icon} size={22} color={animatedIconColor} style={{ opacity: actionButton.disabled ? 0.2 : 1 }} />
                     )}
                 </TouchableOpacity>
             ) : (
@@ -100,6 +100,7 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
         </Animated.View>
     );
 };
+
 const styles = StyleSheet.create({
     headerContainer: {
         position: 'absolute',

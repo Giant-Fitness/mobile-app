@@ -23,7 +23,7 @@ export const Colors = {
         white: '#FEFEFE', // White
         red: '#D64545', // Error color
         redTransparent: 'rgba(255, 0, 0, 0.12)',
-        blueTransparent: 'rgba(135, 206, 235, 0.2)',
+        blueTransparent: 'rgb(230, 242, 248)',
         blueSolid: '#5DADE2',
         purpleTransparent: '#F3E8FF',
         purpleSolid: '#7B3EE8',
@@ -66,7 +66,7 @@ export const Colors = {
         white: '#FEFEFE', // White
         red: '#cc4533', // Error color
         redTransparent: 'rgba(204, 69, 51, 0.5)',
-        blueTransparent: 'rgba(135, 206, 235, 0.2)',
+        blueTransparent: 'rgb(230, 242, 248)',
         blueSolid: '#5DADE2',
         purpleTransparent: '#F3E8FF',
         purpleSolid: '#7B3EE8',

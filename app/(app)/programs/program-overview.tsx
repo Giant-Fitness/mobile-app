@@ -89,7 +89,7 @@ const ProgramOverviewScreen = () => {
         );
     }
 
-    const { ProgramName, PhotoUrl, Weeks, Frequency, Goal, Level, DescriptionLong, Equipment, DesignedFor, CalendarOverview, WhyChooseThisProgram } = program;
+    const { ProgramName, PhotoUrl, Weeks, Frequency, Goal, Level, DescriptionLong, Equipment, DesignedFor, CalendarOverview } = program;
 
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.backgroundSecondary }]}>

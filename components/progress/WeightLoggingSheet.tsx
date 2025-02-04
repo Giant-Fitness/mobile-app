@@ -15,6 +15,9 @@ import { addDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameDay, i
 import { lightenColor } from '@/utils/colorUtils';
 import { UserWeightMeasurement } from '@/types';
 import { Sizes } from '@/constants/Sizes';
+import { RootState } from '@/store/store';
+import { useSelector } from 'react-redux';
+import { formatWeightForDisplay, parseWeightForStorage } from '@/utils/weightConversion';
 
 interface WeightLoggingSheetProps {
     visible: boolean;
@@ -54,23 +57,27 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
     const [successMessage, setSuccessMessage] = useState('');
 
     const weightInputRef = useRef<TextInput>(null);
+    const bodyWeightPreference = useSelector((state: RootState) => (state.user.userAppSettings?.UnitsOfMeasurement?.BodyWeightUnits as 'kgs' | 'lbs') || 'kgs');
 
     useEffect(() => {
         if (visible) {
-            // Clear success state when opening
             setIsSuccess(false);
-
             const today = new Date();
             const existingData = getExistingData?.(initialDate || today);
 
             if (existingData) {
-                setWeight(formatWeight(existingData.Weight));
-                setOriginalWeight(existingData.Weight);
+                // existingData.Weight is always in kg
+                const displayWeight = formatWeightForDisplay(existingData.Weight, bodyWeightPreference).split(' ')[0]; // Remove the unit suffix
+
+                setWeight(displayWeight);
+                setOriginalWeight(parseFloat(displayWeight));
                 setSelectedDate(new Date(existingData.MeasurementTimestamp));
                 setIsEditingMode(true);
             } else {
                 setOriginalWeight(undefined);
-                setWeight(initialWeight ? formatWeight(initialWeight) : '');
+                // initialWeight is assumed to be in kg
+                const displayWeight = initialWeight ? formatWeightForDisplay(initialWeight, bodyWeightPreference).split(' ')[0] : '';
+                setWeight(displayWeight);
                 setSelectedDate(initialDate || today);
                 setIsEditingMode(false);
             }
@@ -80,22 +87,27 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                 weightInputRef.current?.focus();
             }, 300);
         }
-    }, [visible, initialWeight, initialDate, getExistingData]);
+    }, [visible, initialWeight, initialDate, getExistingData, bodyWeightPreference]);
 
     useEffect(() => {
         if (visible && !isEditing) {
             const existingData = getExistingData?.(selectedDate);
             if (existingData) {
-                setWeight(existingData.Weight.toString());
-                setOriginalWeight(existingData.Weight);
+                // existingData.Weight is in kg
+                const displayWeight = formatWeightForDisplay(existingData.Weight, bodyWeightPreference).split(' ')[0]; // Remove the unit suffix
+
+                setWeight(displayWeight);
+                setOriginalWeight(parseFloat(displayWeight));
                 setIsEditingMode(true);
             } else {
-                setWeight(initialWeight?.toString() || '');
+                // initialWeight is in kg
+                const displayWeight = initialWeight ? formatWeightForDisplay(initialWeight, bodyWeightPreference).split(' ')[0] : '';
+                setWeight(displayWeight);
                 setOriginalWeight(undefined);
                 setIsEditingMode(false);
             }
         }
-    }, [selectedDate, getExistingData, visible, isEditing, initialWeight]);
+    }, [selectedDate, getExistingData, visible, isEditing, initialWeight, bodyWeightPreference]);
 
     const handleClose = () => {
         if (isSuccess) {
@@ -126,22 +138,8 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
         }, 100);
     };
 
-    const formatWeight = (weight: string | number): string => {
-        const parsed = typeof weight === 'string' ? parseFloat(weight) : weight;
-        if (isNaN(parsed)) return '';
-
-        // If it has decimals, keep up to 2
-        if (!Number.isInteger(parsed)) {
-            return parsed.toFixed(2).toString();
-        }
-
-        // If it's a whole number, return as is
-        return parsed.toString();
-    };
-
     const handleSubmit = async () => {
         const weightNum = parseFloat(weight);
-        console.log(getExistingData);
         if (isNaN(weightNum) || weightNum <= 0) {
             setError('Please enter a valid weight');
             weightInputRef.current?.focus();
@@ -151,13 +149,14 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
 
         try {
             setIsSubmitting(true);
-            const formattedWeight = Number(formatWeight(weightNum));
-            await onSubmit(formattedWeight, selectedDate);
 
-            // Set states separately to ensure update
+            // Convert input weight to kg for storage using our utility
+            const weightInKg = parseWeightForStorage(weightNum, bodyWeightPreference);
+
+            await onSubmit(weightInKg, selectedDate);
+
             setSuccessMessage(isEditingMode ? 'Weight updated' : 'Weight logged');
             setIsSuccess(true);
-            // Wait for animation then close
             await new Promise<void>((resolve) => setTimeout(resolve, 1600));
             onClose();
         } catch (err) {
@@ -351,7 +350,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                                                 editable={!isSubmitting && !isDeleting}
                                             />
                                             <ThemedText type='bodySmall' style={[styles.unit, { opacity: isSubmitting || isDeleting ? 0.5 : 0.7 }]}>
-                                                kgs
+                                                {bodyWeightPreference === 'lbs' ? ' lbs' : ' kgs'}
                                             </ThemedText>
                                         </View>
                                     </View>

@@ -11,7 +11,7 @@ import { useSharedValue } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { SleepChart } from '@/components/progress/SleepChart';
 import { AppDispatch, RootState } from '@/store/store';
-import { TimeRange, aggregateData, calculateMovingAverage, getTimeRangeLabel, getAvailableTimeRanges, getInitialTimeRange } from '@/utils/weight';
+import { TimeRange, aggregateData, calculateMovingAverage, getTimeRangeLabel, getAvailableTimeRanges, getInitialTimeRange } from '@/utils/charts';
 import { UserSleepMeasurement } from '@/types';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { Icon } from '@/components/base/Icon';
@@ -118,7 +118,7 @@ export default function SleepTrackingScreen() {
         return userSleepMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
     };
 
-    const { aggregatedData, effectiveTimeRange, sleepChange, averageSleep, yAxisRange, movingAverages } = useMemo(() => {
+    const { aggregatedData, effectiveTimeRange, averageSleep, yAxisRange, movingAverages } = useMemo(() => {
         if (!userSleepMeasurements.length) {
             return {
                 aggregatedData: [],
