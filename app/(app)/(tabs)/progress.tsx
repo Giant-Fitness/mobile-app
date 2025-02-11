@@ -3,7 +3,14 @@
 import { ScrollView, StyleSheet } from 'react-native';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ThemedView } from '@/components/base/ThemedView';
-import { getWeightMeasurementsAsync, logWeightMeasurementAsync, getSleepMeasurementsAsync, logSleepMeasurementAsync } from '@/store/user/thunks';
+import {
+    getWeightMeasurementsAsync,
+    logWeightMeasurementAsync,
+    getSleepMeasurementsAsync,
+    logSleepMeasurementAsync,
+    deleteSleepMeasurementAsync,
+    deleteWeightMeasurementAsync,
+} from '@/store/user/thunks';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
@@ -119,6 +126,24 @@ export default function ProgressScreen() {
         }
     };
 
+    const handleWeightDelete = async (timestamp: string) => {
+        try {
+            await dispatch(deleteWeightMeasurementAsync({ timestamp })).unwrap();
+            setIsWeightSheetVisible(false);
+        } catch (error) {
+            console.error('Failed to delete weight:', error);
+        }
+    };
+
+    const handleSleepDelete = async (timestamp: string) => {
+        try {
+            await dispatch(deleteSleepMeasurementAsync({ timestamp })).unwrap();
+            setIsSleepSheetVisible(false);
+        } catch (err) {
+            console.error('Failed to delete sleep:', err);
+        }
+    };
+
     if (showSplash) {
         return <DumbbellSplash isDataLoaded={false} onAnimationComplete={handleSplashComplete} />;
     }
@@ -183,6 +208,7 @@ export default function ProgressScreen() {
                 visible={isWeightSheetVisible}
                 onClose={() => setIsWeightSheetVisible(false)}
                 onSubmit={handleLogWeight}
+                onDelete={handleWeightDelete}
                 isLoading={isLoggingWeight}
             />
 
@@ -190,6 +216,7 @@ export default function ProgressScreen() {
                 visible={isSleepSheetVisible}
                 onClose={() => setIsSleepSheetVisible(false)}
                 onSubmit={handleLogSleep}
+                onDelete={handleSleepDelete}
                 isLoading={isLoggingSleep}
             />
         </>
