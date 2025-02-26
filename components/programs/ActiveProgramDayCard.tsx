@@ -18,6 +18,7 @@ import { getWeekNumber, getDayOfWeek } from '@/utils/calendar';
 import { router } from 'expo-router';
 import { Workout } from '@/types';
 import { ProgramDay } from '@/types';
+import { debounce } from '@/utils/debounce';
 
 type ActiveProgramDayCardProps = {};
 
@@ -60,7 +61,7 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = () => {
 
     const navigateToProgramDay = () => {
         if (programId && dayId) {
-            router.push({
+            debounce(router, {
                 pathname: '/(app)/programs/program-day',
                 params: {
                     programId,

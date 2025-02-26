@@ -13,6 +13,7 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { Workout } from '@/types';
 import { router } from 'expo-router';
+import { debounce } from '@/utils/debounce';
 
 type WorkoutDetailedCardProps = {
     workout: Workout;
@@ -23,7 +24,7 @@ export const WorkoutDetailedCard: React.FC<WorkoutDetailedCardProps> = ({ workou
     const themeColors = Colors[colorScheme]; // Access theme-specific colors
 
     const navigateToWorkoutDetails = () => {
-        router.push({
+        debounce(router, {
             pathname: '/(app)/workouts/workout-details',
             params: {
                 workoutId: workout.WorkoutId,

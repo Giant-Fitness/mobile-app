@@ -10,10 +10,15 @@ import { Platform } from 'react-native';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { moderateScale } from '@/utils/scaling';
+import { debounce } from '@/utils/debounce';
 
 export default function TabLayout() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+
+    const handleSettingPress = () => {
+        debounce(router, '/(app)/settings');
+    };
 
     return (
         <Tabs
@@ -54,7 +59,7 @@ export default function TabLayout() {
                 headerShown: true,
                 tabBarShowLabel: true,
                 headerLeft: () => (
-                    <TouchableOpacity activeOpacity={1} onPress={() => router.push('/(app)/settings')}>
+                    <TouchableOpacity activeOpacity={1} onPress={handleSettingPress}>
                         <Icon name='person' size={28} color={themeColors.subText} style={{ marginLeft: Spaces.LG }} />
                     </TouchableOpacity>
                 ),

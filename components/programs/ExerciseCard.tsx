@@ -19,6 +19,7 @@ import { useSelector } from 'react-redux';
 import { format } from 'date-fns';
 import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
 import { scale } from '@/utils/scaling';
+import { debounce } from '@/utils/debounce';
 
 type LogButtonState = {
     type: 'empty' | 'partial' | 'complete';
@@ -73,7 +74,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
     }, [exercise.ExerciseId, exercise.Sets, recentLogs, liftHistory]);
 
     const navigateToExerciseDetail = () => {
-        router.push({
+        debounce(router, {
             pathname: '/(app)/programs/exercise-details',
             params: {
                 exercise: JSON.stringify(exercise),

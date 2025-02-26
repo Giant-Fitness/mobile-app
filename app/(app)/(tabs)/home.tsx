@@ -20,6 +20,7 @@ import { logWeightMeasurementAsync, getWeightMeasurementsAsync, getSleepMeasurem
 import { AppDispatch, RootState } from '@/store/store';
 import { WorkoutCompletedSection } from '@/components/programs/WorkoutCompletedSection';
 import { router } from 'expo-router';
+import { debounce } from '@/utils/debounce';
 
 export default function HomeScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -125,7 +126,7 @@ export default function HomeScreen() {
         {
             title: 'Why LMC?',
             image: require('@/assets/images/skipping-rope.png'),
-            onPress: () => router.push('/(app)/blog/why-lmc'),
+            onPress: () => debounce(router, '/(app)/blog/why-lmc'),
             backgroundColor: themeColors.maroonTransparent,
             textColor: darkenColor(themeColors.maroonSolid, 0.3),
         },
@@ -189,7 +190,7 @@ export default function HomeScreen() {
                     </View>
 
                     {hasCompletedWorkoutToday ? (
-                        <WorkoutCompletedSection onBrowseSolos={() => router.push('/(app)/workouts/all-workouts')} />
+                        <WorkoutCompletedSection onBrowseSolos={() => debounce(router, '/(app)/workouts/all-workouts')} />
                     ) : (
                         <>
                             <View style={styles.header}>
@@ -218,7 +219,7 @@ export default function HomeScreen() {
                     <LargeActionTile
                         title='Start Training'
                         description='Our structured training plans turn your goals into achievements'
-                        onPress={() => router.push('/(app)/programs/browse-programs')}
+                        onPress={() => debounce(router, '/(app)/programs/browse-programs')}
                         backgroundColor={themeColors.containerHighlight}
                         image={require('@/assets/images/logo.png')}
                         textColor={themeColors.highlightContainerText}
@@ -241,7 +242,7 @@ export default function HomeScreen() {
                 <LargeActionTile
                     title='Get Started'
                     description='Let us recommend a training plan tailored to your goals'
-                    onPress={() => router.push('/(app)/programs/program-recommender-wizard')}
+                    onPress={() => debounce(router, '/(app)/programs/program-recommender-wizard')}
                     backgroundColor={themeColors.containerHighlight}
                     image={require('@/assets/images/nutrition.png')}
                     textColor={themeColors.highlightContainerText}
