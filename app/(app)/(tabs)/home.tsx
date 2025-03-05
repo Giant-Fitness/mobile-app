@@ -16,7 +16,14 @@ import { FactOfTheDay } from '@/components/home/FactOfTheDay';
 import { darkenColor } from '@/utils/colorUtils';
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
 import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
-import { logWeightMeasurementAsync, getWeightMeasurementsAsync, getSleepMeasurementsAsync, logSleepMeasurementAsync } from '@/store/user/thunks';
+import {
+    logWeightMeasurementAsync,
+    getWeightMeasurementsAsync,
+    getSleepMeasurementsAsync,
+    logSleepMeasurementAsync,
+    deleteSleepMeasurementAsync,
+    deleteWeightMeasurementAsync,
+} from '@/store/user/thunks';
 import { AppDispatch, RootState } from '@/store/store';
 import { WorkoutCompletedSection } from '@/components/programs/WorkoutCompletedSection';
 import { router } from 'expo-router';
@@ -76,8 +83,6 @@ export default function HomeScreen() {
     };
 
     const handleWeightTilePress = () => {
-        // Pre-fetch measurements when opening the sheet
-        // dispatch(getWeightMeasurementsAsync());
         setIsWeightSheetVisible(true);
     };
 
@@ -91,6 +96,24 @@ export default function HomeScreen() {
 
     const getExistingSleepData = (date: Date) => {
         return userSleepMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
+    };
+
+    const handleWeightDelete = async (timestamp: string) => {
+        try {
+            await dispatch(deleteWeightMeasurementAsync({ timestamp })).unwrap();
+            setIsWeightSheetVisible(false);
+        } catch (error) {
+            console.error('Failed to delete weight:', error);
+        }
+    };
+
+    const handleSleepDelete = async (timestamp: string) => {
+        try {
+            await dispatch(deleteSleepMeasurementAsync({ timestamp })).unwrap();
+            setIsSleepSheetVisible(false);
+        } catch (err) {
+            console.error('Failed to delete sleep:', err);
+        }
     };
 
     const actionTiles = [
@@ -271,6 +294,7 @@ export default function HomeScreen() {
                 visible={isWeightSheetVisible}
                 onClose={() => setIsWeightSheetVisible(false)}
                 onSubmit={handleLogWeight}
+                onDelete={handleWeightDelete}
                 isLoading={isLoading}
                 getExistingData={getExistingWeightData}
             />
@@ -279,6 +303,7 @@ export default function HomeScreen() {
                 visible={isSleepSheetVisible}
                 onClose={() => setIsSleepSheetVisible(false)}
                 onSubmit={handleLogSleep}
+                onDelete={handleSleepDelete}
                 getExistingData={getExistingSleepData}
             />
         </ThemedView>
