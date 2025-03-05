@@ -18,6 +18,7 @@ import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { Icon } from '@/components/base/Icon';
 import { WorkoutCompletedSection } from './WorkoutCompletedSection';
 import { router } from 'expo-router';
+import { debounce } from '@/utils/debounce';
 
 export default function ActiveProgramHome() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -54,7 +55,7 @@ export default function ActiveProgramHome() {
         );
     }
     const navigateTo = (route: 'programs/active-program-progress' | 'programs/browse-programs', params = {}) => {
-        router.push({ pathname: `/(app)/${route}` as const, params });
+        debounce(router, { pathname: `/(app)/${route}` as const, params }, 1500);
     };
 
     const menuItems = [
@@ -91,7 +92,7 @@ export default function ActiveProgramHome() {
 
                 {hasCompletedWorkoutToday ? (
                     <>
-                        <WorkoutCompletedSection onBrowseSolos={() => router.push('/(app)/workouts/all-workouts')} />
+                        <WorkoutCompletedSection onBrowseSolos={() => debounce(router, '/(app)/workouts/all-workouts')} />
                         <ThemedView style={[styles.upNextContainer, { backgroundColor: themeColors.backgroundSecondary, marginTop: Spaces.MD }]}>
                             <ThemedText type='title' style={styles.subHeader}>
                                 Tomorrow&apos;s Workout

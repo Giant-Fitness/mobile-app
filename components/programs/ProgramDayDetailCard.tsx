@@ -15,6 +15,7 @@ import { getWeekNumber, getDayOfWeek } from '@/utils/calendar';
 import { router } from 'expo-router';
 import { RootState } from '@/store/store';
 import { useSelector } from 'react-redux';
+import { debounce } from '@/utils/debounce';
 
 type ProgramDayDetailCardProps = {
     day: ProgramDay;
@@ -26,7 +27,7 @@ export const ProgramDayDetailCard: React.FC<ProgramDayDetailCardProps> = ({ day 
     const { workouts } = useSelector((state: RootState) => state.workouts);
 
     const navigateToProgramDay = () => {
-        router.push({
+        debounce(router, {
             pathname: '/(app)/programs/program-day',
             params: {
                 programId: day.ProgramId,

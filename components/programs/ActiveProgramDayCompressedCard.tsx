@@ -18,6 +18,7 @@ import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Workout } from '@/types';
 import { ProgramDay } from '@/types';
+import { debounce } from '@/utils/debounce';
 
 // Cast ShimmerPlaceHolder to the correct type
 const ShimmerPlaceholder = ShimmerPlaceHolder as unknown as React.ComponentType<any>;
@@ -79,13 +80,17 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
 
     const navigateToProgramDay = () => {
         if (programId && dayId) {
-            router.push({
-                pathname: '/(app)/programs/program-day',
-                params: {
-                    programId,
-                    dayId,
+            debounce(
+                router,
+                {
+                    pathname: '/(app)/programs/program-day',
+                    params: {
+                        programId,
+                        dayId,
+                    },
                 },
-            });
+                1200,
+            );
         }
     };
 

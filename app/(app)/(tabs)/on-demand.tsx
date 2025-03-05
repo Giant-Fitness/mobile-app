@@ -16,6 +16,7 @@ import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { ActionTile } from '@/components/home/ActionTile';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
+import { debounce } from '@/utils/debounce';
 import { router } from 'expo-router';
 
 export default function WorkoutsScreen() {
@@ -63,10 +64,14 @@ export default function WorkoutsScreen() {
     }
 
     const navigateToAllWorkouts = (initialFilters = {}) => {
-        router.push({
-            pathname: '/(app)/workouts/all-workouts',
-            params: { initialFilters: JSON.stringify(initialFilters) },
-        });
+        debounce(
+            router,
+            {
+                pathname: '/(app)/workouts/all-workouts',
+                params: { initialFilters: JSON.stringify(initialFilters) },
+            },
+            1200,
+        );
     };
 
     const renderWorkoutCards = (workoutIds: string[]) => {
