@@ -255,7 +255,7 @@ export default function HomeScreen() {
                                 debounce(router, {
                                     pathname: '/(app)/workouts/all-workouts',
                                     params: {
-                                        source: 'home',
+                                        source: 'home-program-day-completed-tile',
                                     },
                                 })
                             }

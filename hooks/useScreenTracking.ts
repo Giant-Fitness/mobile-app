@@ -10,9 +10,10 @@ type AllowedParams = {
 
 const ALLOWED_ROUTE_PARAMS: AllowedParams = {
     '/workouts/workout-details': ['workoutId', 'source'],
+    '/workouts/all-workouts': ['source'],
     '/programs/program-day': ['programId', 'dayId', 'source'],
     '/programs/program-overview': ['programId', 'source'],
-    '/programs/exercise-details': ['exercise'],
+    '/programs/exercise-details': ['exerciseId'],
 };
 
 export function useScreenTracking() {

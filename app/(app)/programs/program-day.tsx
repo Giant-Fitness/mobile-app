@@ -125,7 +125,7 @@ const ProgramDayScreen = () => {
     const navigateToAllWorkouts = (initialFilters = {}) => {
         router.push({
             pathname: '/(app)/workouts/all-workouts',
-            params: { initialFilters: JSON.stringify(initialFilters) },
+            params: { initialFilters: JSON.stringify(initialFilters), source: 'program-rest-day' },
         });
     };
 

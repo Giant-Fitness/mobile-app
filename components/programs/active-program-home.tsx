@@ -92,7 +92,11 @@ export default function ActiveProgramHome() {
 
                 {hasCompletedWorkoutToday ? (
                     <>
-                        <WorkoutCompletedSection onBrowseSolos={() => debounce(router, '/(app)/workouts/all-workouts')} />
+                        <WorkoutCompletedSection
+                            onBrowseSolos={() =>
+                                debounce(router, { pathname: '/(app)/workouts/all-workouts', params: { source: 'program-home-day-completed-tile' } })
+                            }
+                        />
                         <ThemedView style={[styles.upNextContainer, { backgroundColor: themeColors.backgroundSecondary, marginTop: Spaces.MD }]}>
                             <ThemedText type='title' style={styles.subHeader}>
                                 Tomorrow&apos;s Workout
