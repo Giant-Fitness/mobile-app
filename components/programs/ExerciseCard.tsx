@@ -54,7 +54,10 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
         const exerciseLogId = `${exercise.ExerciseId}#${today}`;
 
         // Get today's log from either source
-        const todaysLog = recentLogs[exerciseLogId] || (isLongTermTrackedLift(exercise.ExerciseId) ? liftHistory[exercise.ExerciseId]?.[exerciseLogId] : null);
+
+        const todaysLog =
+            recentLogs[exercise.ExerciseId]?.[exerciseLogId] ||
+            (isLongTermTrackedLift(exercise.ExerciseId) ? liftHistory[exercise.ExerciseId]?.[exerciseLogId] : null);
 
         if (!todaysLog) {
             return { type: 'empty' };
