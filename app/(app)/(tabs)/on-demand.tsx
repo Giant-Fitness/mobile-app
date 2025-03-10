@@ -1,7 +1,7 @@
 // app/(app)/(tabs)/on-demand.tsx
 
 import React, { useEffect, useMemo } from 'react';
-import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import { Dimensions, StyleSheet, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -16,7 +16,11 @@ import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { ActionTile } from '@/components/home/ActionTile';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
+import { debounce } from '@/utils/debounce';
 import { router } from 'expo-router';
+import { getAllWorkoutsAsync } from '@/store/workouts/thunks';
+import PullToRefresh from '@/components/base/PullToRefresh';
+import { ScrollView } from 'react-native';
 
 export default function WorkoutsScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -44,11 +48,9 @@ export default function WorkoutsScreen() {
         if (spotlightWorkoutsState !== REQUEST_STATE.FULFILLED) {
             return REQUEST_STATE.PENDING;
         }
-
         if (!spotlightWorkouts) {
             return REQUEST_STATE.REJECTED;
         }
-
         const allWorkoutsLoaded = spotlightWorkouts.WorkoutIds.every((id) => workouts[id] && workoutStates[id] === REQUEST_STATE.FULFILLED);
 
         return allWorkoutsLoaded ? REQUEST_STATE.FULFILLED : REQUEST_STATE.PENDING;
@@ -63,10 +65,14 @@ export default function WorkoutsScreen() {
     }
 
     const navigateToAllWorkouts = (initialFilters = {}) => {
-        router.push({
-            pathname: '/(app)/workouts/all-workouts',
-            params: { initialFilters: JSON.stringify(initialFilters) },
-        });
+        debounce(
+            router,
+            {
+                pathname: '/(app)/workouts/all-workouts',
+                params: { initialFilters: JSON.stringify(initialFilters) },
+            },
+            1200,
+        );
     };
 
     const renderWorkoutCards = (workoutIds: string[]) => {
@@ -90,6 +96,14 @@ export default function WorkoutsScreen() {
     const gap = Spaces.MD; // Gap between tiles
     const numberOfColumns = 2;
     const tileWidth = (screenWidth - 1.01 * padding - gap) / numberOfColumns;
+
+    const handleRefresh = async () => {
+        try {
+            await Promise.all([dispatch(getSpotlightWorkoutsAsync({ forceRefresh: true })), dispatch(getAllWorkoutsAsync({ forceRefresh: true }))]);
+        } catch (err) {
+            console.error('Error refreshing workouts:', err);
+        }
+    };
 
     const workoutCategories = [
         {
@@ -123,13 +137,14 @@ export default function WorkoutsScreen() {
     ];
 
     return (
-        <ScrollView style={[styles.container, { backgroundColor: themeColors.background }]} showsVerticalScrollIndicator={false}>
+        <PullToRefresh onRefresh={handleRefresh} style={styles.container} useNativeScrollView={true}>
             <ThemedView>
                 <ThemedView style={[styles.infoContainer, { backgroundColor: themeColors.tealTransparent }]}>
                     <ThemedText type='bodySmall' style={[styles.infoText, { color: darkenColor(themeColors.tealSolid, 0.3) }]}>
                         {'Solos are one-off sessions that fit your schedule and mood!'}
                     </ThemedText>
                 </ThemedView>
+
                 <ThemedText type='titleLarge' style={[styles.header, { color: themeColors.text }]}>
                     {'Spotlight'}
                 </ThemedText>
@@ -167,7 +182,7 @@ export default function WorkoutsScreen() {
                     ))}
                 </View>
             </ThemedView>
-        </ScrollView>
+        </PullToRefresh>
     );
 }
 

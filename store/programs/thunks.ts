@@ -6,22 +6,29 @@ import { Program, ProgramDay } from '@/types';
 import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 
-export const getAllProgramsAsync = createAsyncThunk<Program[], void>('programs/getAllPrograms', async (_, { getState }) => {
-    const state = getState() as RootState;
-    // If programs are already loaded, return them
-    if (state.programs.allProgramsState === REQUEST_STATE.FULFILLED) {
-        return Object.values(state.programs.programs);
-    }
-    return await ProgramService.getAllPrograms();
-});
+export const getAllProgramsAsync = createAsyncThunk<Program[], { forceRefresh?: boolean } | void>(
+    'programs/getAllPrograms',
+    async (args = {}, { getState }) => {
+        const { forceRefresh = false } = typeof args === 'object' ? args : {};
+        const state = getState() as RootState;
 
-export const getProgramAsync = createAsyncThunk<Program | undefined, { programId: string }, { state: RootState }>(
+        // If programs are already loaded and not forcing refresh, return them
+        if (state.programs.allProgramsState === REQUEST_STATE.FULFILLED && !forceRefresh) {
+            return Object.values(state.programs.programs);
+        }
+
+        return await ProgramService.getAllPrograms();
+    },
+);
+
+export const getProgramAsync = createAsyncThunk<Program | undefined, { programId: string; forceRefresh?: boolean }, { state: RootState }>(
     'programs/getProgram',
-    async ({ programId }, { getState, rejectWithValue }) => {
+    async ({ programId, forceRefresh = false }, { getState, rejectWithValue }) => {
         const state = getState();
         const existingProgram = state.programs.programs[programId];
-        if (existingProgram) {
-            // If already exists, return it
+
+        // If already exists and not forcing refresh, return it
+        if (existingProgram && !forceRefresh) {
             return existingProgram;
         }
 
@@ -33,15 +40,16 @@ export const getProgramAsync = createAsyncThunk<Program | undefined, { programId
     },
 );
 
-export const getAllProgramDaysAsync = createAsyncThunk<ProgramDay[], { programId: string }, { state: RootState }>(
+export const getAllProgramDaysAsync = createAsyncThunk<ProgramDay[], { programId: string; forceRefresh?: boolean }, { state: RootState }>(
     'programs/getAllProgramDays',
-    async ({ programId }, { getState, rejectWithValue }) => {
+    async ({ programId, forceRefresh = false }, { getState, rejectWithValue }) => {
         try {
             const state = getState();
             const existingDays = state.programs.programDays[programId];
             const expectedDayCount = state.programs.programs[programId]?.Days;
 
-            if (existingDays && expectedDayCount && Object.keys(existingDays).length === expectedDayCount) {
+            // If days are already loaded and not forcing refresh, return them
+            if (!forceRefresh && existingDays && expectedDayCount && Object.keys(existingDays).length === expectedDayCount) {
                 return Object.values(existingDays);
             }
 
@@ -57,14 +65,15 @@ export const getAllProgramDaysAsync = createAsyncThunk<ProgramDay[], { programId
     },
 );
 
-export const getProgramDayAsync = createAsyncThunk<ProgramDay, { programId: string; dayId: string }, { state: RootState }>(
+export const getProgramDayAsync = createAsyncThunk<ProgramDay, { programId: string; dayId: string; forceRefresh?: boolean }, { state: RootState }>(
     'programs/getProgramDay',
-    async ({ programId, dayId }, { getState, rejectWithValue }) => {
+    async ({ programId, dayId, forceRefresh = false }, { getState, rejectWithValue }) => {
         const state = getState();
         // Check if the program day already exists in the state
         const existingDay = state.programs.programDays[programId]?.[dayId];
-        if (existingDay) {
-            // If already exists, return it
+
+        // If already exists and not forcing refresh, return it
+        if (existingDay && !forceRefresh) {
             return existingDay;
         }
 
@@ -77,11 +86,15 @@ export const getProgramDayAsync = createAsyncThunk<ProgramDay, { programId: stri
     },
 );
 
-export const getMultipleProgramDaysAsync = createAsyncThunk<ProgramDay[], { programId: string; dayIds: string[] }, { state: RootState }>(
-    'programs/getMultipleProgramDays',
-    async ({ programId, dayIds }, { getState, rejectWithValue }) => {
-        const state = getState();
+export const getMultipleProgramDaysAsync = createAsyncThunk<
+    ProgramDay[],
+    { programId: string; dayIds: string[]; forceRefresh?: boolean },
+    { state: RootState }
+>('programs/getMultipleProgramDays', async ({ programId, dayIds, forceRefresh = false }, { getState, rejectWithValue }) => {
+    const state = getState();
 
+    // If not forcing refresh, check for existing days
+    if (!forceRefresh) {
         const existingDays = dayIds.map((dayId) => state.programs.programDays[programId]?.[dayId]).filter((day) => day !== undefined);
         if (existingDays.length === dayIds.length) {
             // If all days exist in the state, return them
@@ -100,5 +113,17 @@ export const getMultipleProgramDaysAsync = createAsyncThunk<ProgramDay[], { prog
             console.log(error);
             return rejectWithValue('Error fetching program days.');
         }
-    },
-);
+    } else {
+        // Force refresh - fetch all requested days
+        try {
+            const fetchedDays = await ProgramService.getProgramDaysFiltered(programId, dayIds);
+            if (!fetchedDays || fetchedDays.length === 0) {
+                return rejectWithValue('Program days not found.');
+            }
+            return fetchedDays;
+        } catch (error) {
+            console.log(error);
+            return rejectWithValue('Error fetching program days.');
+        }
+    }
+});

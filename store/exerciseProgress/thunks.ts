@@ -8,38 +8,51 @@ import { isLongTermTrackedLift, LONG_TERM_TRACKED_LIFT_IDS } from '@/store/exerc
 import { REQUEST_STATE } from '@/constants/requestStates';
 
 // Load only full history for tracked/compound lifts during initialization
-export const initializeTrackedLiftsHistoryAsync = createAsyncThunk('exerciseProgress/initializeTrackedLifts', async (_, { getState, rejectWithValue }) => {
-    try {
-        const state = getState() as RootState;
-        const userId = state.user.user?.UserId;
-        if (!userId) return rejectWithValue({ errorMessage: 'User ID not available' });
+export const initializeTrackedLiftsHistoryAsync = createAsyncThunk<any, { forceRefresh?: boolean } | void>(
+    'exerciseProgress/initializeTrackedLifts',
+    async (args = {}, { getState, rejectWithValue }) => {
+        try {
+            const { forceRefresh = false } = typeof args === 'object' ? args : {};
+            const state = getState() as RootState;
+            const userId = state.user.user?.UserId;
+            if (!userId) return rejectWithValue({ errorMessage: 'User ID not available' });
 
-        // Get full history for tracked lifts only
-        const trackedLiftsHistoryPromises = Object.keys(LONG_TERM_TRACKED_LIFT_IDS).map((exerciseId) =>
-            ExerciseProgressService.getExerciseHistory(userId, exerciseId, {}),
-        );
-        const trackedLiftsHistories = await Promise.all(trackedLiftsHistoryPromises);
+            // Check if we already have history loaded and not forcing refresh
+            if (
+                !forceRefresh &&
+                state.exerciseProgress.liftHistoryState === REQUEST_STATE.FULFILLED &&
+                Object.keys(state.exerciseProgress.liftHistory).length > 0
+            ) {
+                return { liftHistory: state.exerciseProgress.liftHistory };
+            }
 
-        // Create mapping of exercise IDs to their full histories
-        const liftHistory = Object.keys(LONG_TERM_TRACKED_LIFT_IDS).reduce(
-            (acc, exerciseId, index) => ({
-                ...acc,
-                [exerciseId]: trackedLiftsHistories[index],
-            }),
-            {},
-        );
-        return { liftHistory };
-    } catch (error) {
-        return rejectWithValue({
-            errorMessage: error instanceof Error ? error.message : 'Failed to initialize tracked lifts history',
-        });
-    }
-});
+            // Get full history for tracked lifts only
+            const trackedLiftsHistoryPromises = Object.keys(LONG_TERM_TRACKED_LIFT_IDS).map((exerciseId) =>
+                ExerciseProgressService.getExerciseHistory(userId, exerciseId, {}),
+            );
+            const trackedLiftsHistories = await Promise.all(trackedLiftsHistoryPromises);
+
+            // Create mapping of exercise IDs to their full histories
+            const liftHistory = Object.keys(LONG_TERM_TRACKED_LIFT_IDS).reduce(
+                (acc, exerciseId, index) => ({
+                    ...acc,
+                    [exerciseId]: trackedLiftsHistories[index],
+                }),
+                {},
+            );
+            return { liftHistory };
+        } catch (error) {
+            return rejectWithValue({
+                errorMessage: error instanceof Error ? error.message : 'Failed to initialize tracked lifts history',
+            });
+        }
+    },
+);
 
 // Fetch recent history for specific exercises (when viewing a program day)
 export const fetchExercisesRecentHistoryAsync = createAsyncThunk(
     'exerciseProgress/fetchExercisesRecentHistory',
-    async (exerciseIds: string[], { getState, rejectWithValue }) => {
+    async ({ exerciseIds, forceRefresh = false }: { exerciseIds: string[]; forceRefresh?: boolean }, { getState, rejectWithValue }) => {
         try {
             const state = getState() as RootState;
             const userId = state.user.user?.UserId;
@@ -49,11 +62,13 @@ export const fetchExercisesRecentHistoryAsync = createAsyncThunk(
 
             // Check which exercises need to be fetched
             const uncachedExercises = exercisesToFetch.filter((exerciseId) => {
-                return !state.exerciseProgress.recentLogs[exerciseId] || Object.keys(state.exerciseProgress.recentLogs[exerciseId]).length === 0;
+                return (
+                    forceRefresh || !state.exerciseProgress.recentLogs[exerciseId] || Object.keys(state.exerciseProgress.recentLogs[exerciseId]).length === 0
+                );
             });
 
-            // If we have all exercises cached and they're not stale
-            if (uncachedExercises.length === 0 && state.exerciseProgress.recentLogsState === REQUEST_STATE.FULFILLED) {
+            // If we have all exercises cached and they're not stale and not forcing refresh
+            if (uncachedExercises.length === 0 && state.exerciseProgress.recentLogsState === REQUEST_STATE.FULFILLED && !forceRefresh) {
                 return {
                     recentLogs: exercisesToFetch.reduce(
                         (acc, exerciseId) => ({

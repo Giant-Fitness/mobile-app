@@ -19,6 +19,7 @@ import { useSelector } from 'react-redux';
 import { format } from 'date-fns';
 import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
 import { scale } from '@/utils/scaling';
+import { debounce } from '@/utils/debounce';
 
 type LogButtonState = {
     type: 'empty' | 'partial' | 'complete';
@@ -53,7 +54,10 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
         const exerciseLogId = `${exercise.ExerciseId}#${today}`;
 
         // Get today's log from either source
-        const todaysLog = recentLogs[exerciseLogId] || (isLongTermTrackedLift(exercise.ExerciseId) ? liftHistory[exercise.ExerciseId]?.[exerciseLogId] : null);
+
+        const todaysLog =
+            recentLogs[exercise.ExerciseId]?.[exerciseLogId] ||
+            (isLongTermTrackedLift(exercise.ExerciseId) ? liftHistory[exercise.ExerciseId]?.[exerciseLogId] : null);
 
         if (!todaysLog) {
             return { type: 'empty' };
@@ -73,7 +77,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
     }, [exercise.ExerciseId, exercise.Sets, recentLogs, liftHistory]);
 
     const navigateToExerciseDetail = () => {
-        router.push({
+        debounce(router, {
             pathname: '/(app)/programs/exercise-details',
             params: {
                 exercise: JSON.stringify(exercise),

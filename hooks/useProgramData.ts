@@ -26,12 +26,11 @@ interface PreloadedData {
 
 let preloadedProgressData: { [key: string]: PreloadedData } = {};
 
-export const preloadProgramProgressData = async (dispatch: AppDispatch, programId: string) => {
-    // Start loading program days
-    await dispatch(getAllProgramDaysAsync({ programId })).unwrap();
+export const preloadProgramProgressData = async (dispatch: AppDispatch, programId: string, forceRefresh: boolean = false) => {
+    // Load program days with optional force refresh
+    const programDaysResult = await dispatch(getAllProgramDaysAsync({ programId, forceRefresh })).unwrap();
 
-    // Pre-calculate months data
-    const programDaysResult = await dispatch(getAllProgramDaysAsync({ programId })).unwrap();
+    // Process the data we just received
     const programDaysArray = Object.values(programDaysResult);
     const groupedWeeks = groupProgramDaysIntoWeeks(programDaysArray);
     const groupedMonths = groupWeeksIntoMonths(groupedWeeks);
@@ -50,12 +49,13 @@ const isToday = (dateString: string) => {
 
 interface UseProgramDataOptions {
     fetchAllDays?: boolean;
+    forceRefresh?: boolean;
 }
 
 export const useProgramData = (
     specificProgramId?: string,
     specificDayId?: string,
-    options: UseProgramDataOptions = { fetchAllDays: false }, // Default to false
+    options: UseProgramDataOptions = { fetchAllDays: false, forceRefresh: false }, // Added forceRefresh option
 ) => {
     const dispatch = useDispatch<AppDispatch>();
 
@@ -140,45 +140,58 @@ export const useProgramData = (
 
     // Effects for data fetching
     useEffect(() => {
-        if (userState === REQUEST_STATE.IDLE) {
-            dispatch(getUserAsync());
+        // Use forceRefresh flag for initial data fetch if specified
+        if (userState === REQUEST_STATE.IDLE || options.forceRefresh) {
+            dispatch(getUserAsync({ forceRefresh: options.forceRefresh }));
         }
-    }, [dispatch, userState]);
+    }, [dispatch, userState, options.forceRefresh]);
 
     useEffect(() => {
-        if (user && user.UserId && userProgramProgressState === REQUEST_STATE.IDLE) {
-            dispatch(getUserProgramProgressAsync());
+        if (user && user.UserId) {
+            if (userProgramProgressState === REQUEST_STATE.IDLE || options.forceRefresh) {
+                dispatch(getUserProgramProgressAsync({ forceRefresh: options.forceRefresh }));
+            }
+            if (userRecommendationsState === REQUEST_STATE.IDLE || options.forceRefresh) {
+                dispatch(getUserRecommendationsAsync({ forceRefresh: options.forceRefresh }));
+            }
         }
-        if (user && user.UserId && userRecommendationsState === REQUEST_STATE.IDLE) {
-            dispatch(getUserRecommendationsAsync());
-        }
-    }, [dispatch, user, userProgramProgressState, userRecommendationsState]);
+    }, [dispatch, user, userProgramProgressState, userRecommendationsState, options.forceRefresh]);
 
     useEffect(() => {
         const programId = specificProgramId || userProgramProgress?.ProgramId;
         const dayId = specificDayId || userProgramProgress?.CurrentDay;
         if (programId) {
-            if (activeProgramState === REQUEST_STATE.IDLE) {
-                dispatch(getProgramAsync({ programId }));
+            if (activeProgramState === REQUEST_STATE.IDLE || options.forceRefresh) {
+                dispatch(getProgramAsync({ programId, forceRefresh: options.forceRefresh }));
             }
-            if (dayId && programDayState === REQUEST_STATE.IDLE) {
-                dispatch(getProgramDayAsync({ programId, dayId }));
+            if (dayId && (programDayState === REQUEST_STATE.IDLE || options.forceRefresh)) {
+                dispatch(getProgramDayAsync({ programId, dayId, forceRefresh: options.forceRefresh }));
             }
 
-            if (options.fetchAllDays && Object.keys(programDaysState[programId] || {}).length === 0) {
-                dispatch(getAllProgramDaysAsync({ programId }));
+            if ((options.fetchAllDays && Object.keys(programDaysState[programId] || {}).length === 0) || options.forceRefresh) {
+                dispatch(getAllProgramDaysAsync({ programId, forceRefresh: options.forceRefresh }));
             }
         }
-    }, [dispatch, specificProgramId, specificDayId, userProgramProgress, activeProgramState, programDayState, programDaysState, options.fetchAllDays]);
+    }, [
+        dispatch,
+        specificProgramId,
+        specificDayId,
+        userProgramProgress,
+        activeProgramState,
+        programDayState,
+        programDaysState,
+        options.fetchAllDays,
+        options.forceRefresh,
+    ]);
 
     useEffect(() => {
-        if (workoutQuoteState !== REQUEST_STATE.FULFILLED) {
-            dispatch(getWorkoutQuoteAsync());
+        if (workoutQuoteState !== REQUEST_STATE.FULFILLED || options.forceRefresh) {
+            dispatch(getWorkoutQuoteAsync({ forceRefresh: options.forceRefresh }));
         }
-        if (restDayQuoteState !== REQUEST_STATE.FULFILLED) {
-            dispatch(getRestDayQuoteAsync());
+        if (restDayQuoteState !== REQUEST_STATE.FULFILLED || options.forceRefresh) {
+            dispatch(getRestDayQuoteAsync({ forceRefresh: options.forceRefresh }));
         }
-    }, [dispatch, workoutQuoteState, restDayQuoteState]);
+    }, [dispatch, workoutQuoteState, restDayQuoteState, options.forceRefresh]);
 
     const programCalendarData = useMemo(() => {
         const programId = activeProgram?.ProgramId;
@@ -283,6 +296,7 @@ export const useProgramData = (
     }, [
         userState,
         userProgramProgressState,
+        userRecommendationsState,
         specificProgramId,
         specificDayId,
         userProgramProgress,
@@ -290,9 +304,9 @@ export const useProgramData = (
         programDayState,
         workoutQuoteState,
         restDayQuoteState,
-        options.fetchAllDays, // Include options.fetchAllDays in dependencies
-        activeProgram?.Days, // Include activeProgram?.Days if it's used in the computation
-        programDaysState, // If necessary
+        options.fetchAllDays,
+        activeProgram?.Days,
+        programDaysState,
     ]);
 
     // Additional computed values

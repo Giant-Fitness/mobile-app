@@ -138,6 +138,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
         }, 100);
     };
 
+    // for every new entry it takes in the time as 12am, else it preserves the original timestamp
     const handleSubmit = async () => {
         const weightNum = parseFloat(weight);
         if (isNaN(weightNum) || weightNum <= 0) {
@@ -150,11 +151,22 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
         try {
             setIsSubmitting(true);
 
-            // Convert input weight to kg for storage using our utility
             const weightInKg = parseWeightForStorage(weightNum, bodyWeightPreference);
 
-            await onSubmit(weightInKg, selectedDate);
+            let finalTimestamp;
+            const localSelectedDate = new Date(selectedDate);
 
+            if (isEditingMode && originalWeight !== undefined) {
+                finalTimestamp = new Date(selectedDate.getTime());
+            } else {
+                localSelectedDate.setHours(0, 0, 0, 0);
+
+                const utcMidnight = new Date(Date.UTC(localSelectedDate.getFullYear(), localSelectedDate.getMonth(), localSelectedDate.getDate(), 0, 0, 0));
+
+                finalTimestamp = utcMidnight;
+            }
+
+            await onSubmit(weightInKg, finalTimestamp);
             setSuccessMessage(isEditingMode ? 'Weight updated' : 'Weight logged');
             setIsSuccess(true);
             await new Promise<void>((resolve) => setTimeout(resolve, 1600));
@@ -182,13 +194,18 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
             </View>
         );
     };
-
     const handleDelete = async () => {
-        if (!initialDate || !onDelete) return;
+        if (!onDelete) return;
 
         setIsDeleting(true);
         try {
-            await onDelete(initialDate.toISOString());
+            const localSelectedDate = new Date(selectedDate);
+
+            localSelectedDate.setHours(0, 0, 0, 0);
+
+            const utcMidnight = new Date(Date.UTC(localSelectedDate.getFullYear(), localSelectedDate.getMonth(), localSelectedDate.getDate(), 0, 0, 0));
+            await onDelete(utcMidnight.toISOString());
+
             handleClose();
         } catch (err) {
             console.log(err);

@@ -1,7 +1,7 @@
 // hooks/useScreenTracking.ts
 
 import { useEffect } from 'react';
-import { useLocalSearchParams, usePathname, useSegments, useGlobalSearchParams } from 'expo-router';
+import { useLocalSearchParams, usePathname, useGlobalSearchParams } from 'expo-router';
 import { usePostHog } from 'posthog-react-native';
 
 type AllowedParams = {
@@ -17,7 +17,6 @@ const ALLOWED_ROUTE_PARAMS: AllowedParams = {
 
 export function useScreenTracking() {
     const pathname = usePathname();
-    const segments = useSegments();
     const localParams = useLocalSearchParams();
     const globalParams = useGlobalSearchParams();
     const posthog = usePostHog();
@@ -30,14 +29,6 @@ export function useScreenTracking() {
             ...globalParams,
             ...localParams,
         };
-
-        // console.log('Tracking Debug:', {
-        //   pathname,
-        //   segments,
-        //   localParams,
-        //   globalParams,
-        //   combinedParams: params
-        // });
 
         const allowedParams = ALLOWED_ROUTE_PARAMS[pathname] || [];
 

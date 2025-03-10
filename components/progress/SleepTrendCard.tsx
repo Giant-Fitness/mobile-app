@@ -57,7 +57,7 @@ const processSleepData = (values: UserSleepMeasurement[]) => {
     const sleepPadding = (maxSleep - minSleep) * 0.5;
     const adjustedMinSleep = Math.max(0, minSleep - sleepPadding);
     const adjustedMaxSleep = maxSleep + sleepPadding;
-    const sleepRange = adjustedMaxSleep - adjustedMinSleep;
+    const sleepRange = adjustedMaxSleep - adjustedMinSleep || 1;
 
     const processedData = recentData.map((d, i) => ({
         x: (i / (recentData.length - 1)) * 100,

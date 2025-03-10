@@ -23,6 +23,8 @@ import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { Workout } from '@/types';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 
+import PullToRefresh from '@/components/base/PullToRefresh';
+
 const MemoizedWorkoutDetailedCard = React.memo(WorkoutDetailedCard);
 
 interface WorkoutFilters extends Record<string, string[]> {
@@ -145,6 +147,14 @@ export default function AllWorkoutsScreen() {
         dataLoadedState: allWorkoutsState,
     });
 
+    const handleRefresh = async () => {
+        try {
+            await dispatch(getAllWorkoutsAsync({ forceRefresh: true }));
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
     if (showSplash) {
         return <DumbbellSplash isDataLoaded={false} />;
     }
@@ -156,28 +166,31 @@ export default function AllWorkoutsScreen() {
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.background }}>
             <AnimatedHeader scrollY={scrollY} disableColorChange={true} title='All Workouts' />
-            <ThemedText type='overline' style={[styles.countContainer, { color: themeColors.subText }]}>
-                {workoutCount} {workoutLabel}
-            </ThemedText>
-            <FlatList
-                data={filteredWorkouts}
-                renderItem={renderItem}
-                keyExtractor={keyExtractor}
-                removeClippedSubviews={false} // Set to false to keep items mounted
-                maxToRenderPerBatch={20} // Increase this significantly
-                updateCellsBatchingPeriod={50} // Decrease to update UI more frequently
-                initialNumToRender={10} // Show more items initially
-                windowSize={21} // Increase window size (each unit is about 1 viewport height)
-                onEndReachedThreshold={0.5}
-                contentContainerStyle={[
-                    styles.contentContainer,
-                    {
-                        backgroundColor: themeColors.background,
-                        paddingHorizontal: Spaces.MD,
-                    },
-                ]}
-                showsVerticalScrollIndicator={false}
-            />
+            <PullToRefresh onRefresh={handleRefresh} useNativeScrollView={false} disableChildrenScrolling={false}>
+                <ThemedText type='overline' style={[styles.countContainer, { color: themeColors.subText }]}>
+                    {workoutCount} {workoutLabel}
+                </ThemedText>
+
+                <FlatList
+                    data={filteredWorkouts}
+                    renderItem={renderItem}
+                    keyExtractor={keyExtractor}
+                    removeClippedSubviews={false} // Set to false to keep items mounted
+                    maxToRenderPerBatch={20} // Increase this significantly
+                    updateCellsBatchingPeriod={50} // Decrease to update UI more frequently
+                    initialNumToRender={10} // Show more items initially
+                    windowSize={21} // Increase window size (each unit is about 1 viewport height)
+                    onEndReachedThreshold={0.5}
+                    contentContainerStyle={[
+                        styles.contentContainer,
+                        {
+                            backgroundColor: themeColors.background,
+                            paddingHorizontal: Spaces.MD,
+                        },
+                    ]}
+                    showsVerticalScrollIndicator={false}
+                />
+            </PullToRefresh>
             <WorkoutsBottomBar onSortPress={handleSortPress} onFilterPress={handleFilterPress} appliedFilterCount={activeFilterTypesCount} />
             <WorkoutsFilterDrawer
                 visible={isFilterVisible}

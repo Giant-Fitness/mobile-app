@@ -21,9 +21,14 @@ import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { SlideUpActionButton } from '@/components/buttons/SlideUpActionButton';
 import { useProgramData } from '@/hooks/useProgramData';
 import { OverwriteProgramModal } from '@/components/programs/OverwriteProgramModal';
+import PullToRefresh from '@/components/base/PullToRefresh';
+import { useDispatch } from 'react-redux';
+import { getProgramAsync } from '@/store/programs/thunks';
+import { AppDispatch } from '@/store/store';
 
 const ProgramOverviewScreen = () => {
     const router = useRouter();
+    const dispatch = useDispatch<AppDispatch>();
     const { programId } = useLocalSearchParams<{ programId: string }>();
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -45,6 +50,14 @@ const ProgramOverviewScreen = () => {
 
     const isOnThisProgram = userProgramProgress?.ProgramId === programId;
     const isOnAProgram = !!userProgramProgress?.ProgramId;
+
+    const handleRefresh = async () => {
+        try {
+            await dispatch(getProgramAsync({ programId, forceRefresh: true }));
+        } catch (err) {
+            console.log('Refresh error:', err);
+        }
+    };
 
     const handleStartProgram = () => {
         startProgram();
@@ -94,108 +107,109 @@ const ProgramOverviewScreen = () => {
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.backgroundSecondary }]}>
             <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Spaces.XXL} headerInterpolationEnd={Sizes.imageLGHeight} />
-            <Animated.ScrollView
-                contentContainerStyle={{ flexGrow: 1 }}
-                showsVerticalScrollIndicator={false}
-                overScrollMode='never'
-                onScroll={scrollHandler}
-                scrollEventThrottle={16}
+
+            <PullToRefresh
+                onRefresh={handleRefresh}
+                headerHeight={Spaces.LG}
+                style={styles.pullToRefreshContainer}
+                useNativeScrollView={false}
+                disableChildrenScrolling={false}
             >
-                <ThemedView style={{ backgroundColor: themeColors.backgroundSecondary }}>
-                    <TopImageInfoCard
-                        image={{ uri: PhotoUrl }}
-                        title={ProgramName}
-                        titleType='titleLarge'
-                        titleStyle={{ marginBottom: Spaces.XS }}
-                        contentContainerStyle={{
-                            backgroundColor: themeColors.background,
-                            paddingHorizontal: Spaces.LG,
-                            paddingBottom: Spaces.XXS,
-                        }}
-                        imageStyle={{ height: Sizes.image3XLHeight }}
-                        extraContent={
-                            <ThemedView>
-                                <ThemedView style={styles.attributeRow}>
-                                    {[
-                                        { icon: 'stopwatch', text: `${Weeks} Weeks` },
-                                        { icon: 'calendar', text: Frequency },
-                                        { icon: 'target', text: Goal },
-                                        { icon: getLevelIcon(Level), text: Level },
-                                    ].map((attr, index) => (
-                                        <View key={index} style={styles.attributeItem}>
-                                            <Icon name={attr.icon} size={Sizes.fontSizeDefault} color={themeColors.text} />
-                                            <ThemedText type='buttonSmall' style={styles.attributeText}>
-                                                {attr.text}
-                                            </ThemedText>
-                                        </View>
-                                    ))}
+                <Animated.ScrollView
+                    contentContainerStyle={{ flexGrow: 1 }}
+                    showsVerticalScrollIndicator={false}
+                    overScrollMode='never'
+                    onScroll={scrollHandler}
+                    scrollEventThrottle={16}
+                >
+                    <ThemedView style={{ backgroundColor: themeColors.backgroundSecondary }}>
+                        <TopImageInfoCard
+                            image={{ uri: PhotoUrl }}
+                            title={ProgramName}
+                            titleType='titleLarge'
+                            titleStyle={{ marginBottom: Spaces.XS }}
+                            contentContainerStyle={{
+                                backgroundColor: themeColors.background,
+                                paddingHorizontal: Spaces.LG,
+                                paddingBottom: Spaces.XXS,
+                            }}
+                            imageStyle={{ height: Sizes.image3XLHeight }}
+                            extraContent={
+                                <ThemedView>
+                                    <ThemedView style={styles.attributeRow}>
+                                        {[
+                                            { icon: 'stopwatch', text: `${Weeks} Weeks` },
+                                            { icon: 'calendar', text: Frequency },
+                                            { icon: 'target', text: Goal },
+                                            { icon: getLevelIcon(Level), text: Level },
+                                        ].map((attr, index) => (
+                                            <View key={index} style={styles.attributeItem}>
+                                                <Icon name={attr.icon} size={Sizes.fontSizeDefault} color={themeColors.text} />
+                                                <ThemedText type='buttonSmall' style={styles.attributeText}>
+                                                    {attr.text}
+                                                </ThemedText>
+                                            </View>
+                                        ))}
+                                    </ThemedView>
+                                    <ThemedText type='body' style={{ paddingBottom: Spaces.LG, paddingTop: Spaces.MD }}>
+                                        {DescriptionLong}
+                                    </ThemedText>
                                 </ThemedView>
-                                <ThemedText type='body' style={{ paddingBottom: Spaces.LG, paddingTop: Spaces.MD }}>
-                                    {DescriptionLong}
+                            }
+                        />
+                        <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
+                            <ThemedView style={styles.descriptionContainer}>
+                                <ThemedText type='button' style={{ paddingBottom: Spaces.XS }}>
+                                    Equipment Required:
+                                </ThemedText>
+                                <ThemedText type='body' style={{ marginBottom: Spaces.LG }}>
+                                    {Equipment.join(', ')}
+                                </ThemedText>
+
+                                <View style={[styles.divider, { borderBottomColor: themeColors.systemBorderColor }]} />
+
+                                <ThemedText type='button' style={{ paddingBottom: Spaces.XS }}>
+                                    Designed For:
+                                </ThemedText>
+                                <ThemedText type='body' style={{ marginBottom: Spaces.LG }}>
+                                    {DesignedFor}
                                 </ThemedText>
                             </ThemedView>
-                        }
-                    />
-                    <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
-                        <ThemedView style={styles.descriptionContainer}>
-                            <ThemedText type='button' style={{ paddingBottom: Spaces.XS }}>
-                                Equipment Required:
-                            </ThemedText>
-                            <ThemedText type='body' style={{ marginBottom: Spaces.LG }}>
-                                {Equipment.join(', ')}
-                            </ThemedText>
-
-                            <View style={[styles.divider, { borderBottomColor: themeColors.systemBorderColor }]} />
-
-                            <ThemedText type='button' style={{ paddingBottom: Spaces.XS }}>
-                                Designed For:
-                            </ThemedText>
-                            <ThemedText type='body' style={{ marginBottom: Spaces.LG }}>
-                                {DesignedFor}
-                            </ThemedText>
-
-                            {/* <View style={[styles.divider, { borderBottomColor: themeColors.systemBorderColor }]} />
-
-                            <ThemedText type='button' style={{ paddingBottom: Spaces.XS }}>
-                                Why Choose this Program:
-                            </ThemedText>
-                            <ThemedText type='body' style={{ marginBottom: Spaces.SM }}>
-                                {WhyChooseThisProgram}
-                            </ThemedText> */}
-                        </ThemedView>
-                        <ThemedView style={styles.descriptionContainer}>
-                            {CalendarOverview.map((item, index) => (
-                                <ThemedView key={index} style={{ marginTop: Spaces.MD }}>
-                                    <ThemedText type='button' style={{ paddingBottom: Spaces.XS }}>
-                                        {item.Title}:
-                                    </ThemedText>
-                                    <ThemedText type='body'>{item.Description}</ThemedText>
-                                </ThemedView>
-                            ))}
-                        </ThemedView>
-                        <ThemedView style={styles.bottomButtonContainer}>
-                            {isOnAProgram && !isOnThisProgram && (
-                                <TextButton
-                                    text='Start Program'
-                                    onPress={() => setIsOverwriteProgramModalVisible(true)}
-                                    textType='bodyMedium'
-                                    size='LG'
-                                    style={[styles.calendarButton, { marginTop: Spaces.MD }]}
-                                />
-                            )}
-                            {isOnAProgram && isOnThisProgram && (
-                                <TextButton
-                                    text='View Progress'
-                                    onPress={() => router.push('/(app)/programs/active-program-progress')}
-                                    textType='bodyMedium'
-                                    size='LG'
-                                    style={[styles.calendarButton, { marginTop: Spaces.MD }]}
-                                />
-                            )}
+                            <ThemedView style={styles.descriptionContainer}>
+                                {CalendarOverview.map((item, index) => (
+                                    <ThemedView key={index} style={{ marginTop: Spaces.MD }}>
+                                        <ThemedText type='button' style={{ paddingBottom: Spaces.XS }}>
+                                            {item.Title}:
+                                        </ThemedText>
+                                        <ThemedText type='body'>{item.Description}</ThemedText>
+                                    </ThemedView>
+                                ))}
+                            </ThemedView>
+                            <ThemedView style={styles.bottomButtonContainer}>
+                                {isOnAProgram && !isOnThisProgram && (
+                                    <TextButton
+                                        text='Start Program'
+                                        onPress={() => setIsOverwriteProgramModalVisible(true)}
+                                        textType='bodyMedium'
+                                        size='LG'
+                                        style={[styles.calendarButton, { marginTop: Spaces.MD }]}
+                                    />
+                                )}
+                                {isOnAProgram && isOnThisProgram && (
+                                    <TextButton
+                                        text='View Progress'
+                                        onPress={() => router.push('/(app)/programs/active-program-progress')}
+                                        textType='bodyMedium'
+                                        size='LG'
+                                        style={[styles.calendarButton, { marginTop: Spaces.MD }]}
+                                    />
+                                )}
+                            </ThemedView>
                         </ThemedView>
                     </ThemedView>
-                </ThemedView>
-            </Animated.ScrollView>
+                </Animated.ScrollView>
+            </PullToRefresh>
+
             {!isOnAProgram && (
                 <SlideUpActionButton scrollY={scrollY} slideUpThreshold={0}>
                     <PrimaryButton text='Start Program' textType='bodyMedium' style={styles.startButton} onPress={handleStartProgram} size='LG' />
@@ -212,6 +226,9 @@ const ProgramOverviewScreen = () => {
 
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
+    },
+    pullToRefreshContainer: {
         flex: 1,
     },
     errorContainer: {

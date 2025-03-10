@@ -104,7 +104,7 @@ const programSlice = createSlice({
                 dayIds.forEach((dayId) => {
                     state.programDaysState[programId][dayId] = REQUEST_STATE.PENDING;
                 });
-                state.programDaysError = null;
+                state.error = null;
             })
             .addCase(getMultipleProgramDaysAsync.fulfilled, (state, action: PayloadAction<ProgramDay[]>) => {
                 const { programId } = action.meta.arg;
@@ -121,7 +121,7 @@ const programSlice = createSlice({
                 dayIds.forEach((dayId) => {
                     state.programDaysState[programId][dayId] = REQUEST_STATE.REJECTED;
                 });
-                state.programDaysError = action.error.message || 'Failed to fetch multiple program days';
+                state.error = action.error.message || 'Failed to fetch multiple program days';
             });
     },
 });

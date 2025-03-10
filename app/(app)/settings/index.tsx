@@ -18,7 +18,7 @@ import { TextButton } from '@/components/buttons/TextButton';
 import { ThemedText } from '@/components/base/ThemedText';
 import { Icon } from '@/components/base/Icon';
 import { lightenColor } from '@/utils/colorUtils';
-import { PostHogProvider, usePostHog } from 'posthog-react-native';
+import { usePostHog } from 'posthog-react-native';
 
 const SettingsSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <View style={styles.section}>

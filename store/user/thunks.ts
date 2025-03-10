@@ -6,9 +6,11 @@ import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, Use
 import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 
-export const getUserAsync = createAsyncThunk<User, void>('user/getUser', async (_, { getState }) => {
+export const getUserAsync = createAsyncThunk<User, { forceRefresh?: boolean } | void>('user/getUser', async (args = {}, { getState }) => {
+    const { forceRefresh = false } = typeof args === 'object' ? args : {};
     const state = getState() as RootState;
-    if (state.user.user) {
+
+    if (state.user.user && !forceRefresh) {
         return state.user.user;
     }
     return await UserService.getUser();
@@ -35,13 +37,14 @@ export const updateUserAsync = createAsyncThunk<
 
 export const getUserFitnessProfileAsync = createAsyncThunk<
     UserFitnessProfile,
-    void,
+    { forceRefresh?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
->('user/getUserFitnessProfile', async (_, { getState, rejectWithValue }) => {
+>('user/getUserFitnessProfile', async (args = {}, { getState, rejectWithValue }) => {
     try {
+        const { forceRefresh = false } = typeof args === 'object' ? args : {};
         const state = getState();
         const userId = state.user.user?.UserId;
 
@@ -50,8 +53,8 @@ export const getUserFitnessProfileAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Return cached fitness profile if available
-        if (state.user.userFitnessProfile) {
+        // Return cached fitness profile if available and not forcing refresh
+        if (state.user.userFitnessProfile && !forceRefresh) {
             return state.user.userFitnessProfile;
         }
 
@@ -90,13 +93,14 @@ export const updateUserFitnessProfileAsync = createAsyncThunk<
 
 export const getUserRecommendationsAsync = createAsyncThunk<
     UserRecommendations,
-    void,
+    { forceRefresh?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
->('user/getUserRecommendations', async (_, { getState, rejectWithValue }) => {
+>('user/getUserRecommendations', async (args = {}, { getState, rejectWithValue }) => {
     try {
+        const { forceRefresh = false } = typeof args === 'object' ? args : {};
         const state = getState() as RootState;
         const userId = state.user.user?.UserId;
 
@@ -105,8 +109,8 @@ export const getUserRecommendationsAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Return cached recommendations if available
-        if (state.user.userRecommendations) {
+        // Return cached recommendations if available and not forcing refresh
+        if (state.user.userRecommendations && !forceRefresh) {
             return state.user.userRecommendations;
         }
 
@@ -122,13 +126,14 @@ export const getUserRecommendationsAsync = createAsyncThunk<
 
 export const getUserProgramProgressAsync = createAsyncThunk<
     UserProgramProgress,
-    void,
+    { forceRefresh?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
->('user/getUserProgramProgress', async (_, { getState, rejectWithValue }) => {
+>('user/getUserProgramProgress', async (args = {}, { getState, rejectWithValue }) => {
     try {
+        const { forceRefresh = false } = typeof args === 'object' ? args : {};
         const state = getState() as RootState;
         const userId = state.user.user?.UserId;
 
@@ -137,8 +142,8 @@ export const getUserProgramProgressAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Return cached progress if available
-        if (state.user.userProgramProgress) {
+        // Return cached progress if available and not forcing refresh
+        if (state.user.userProgramProgress && !forceRefresh) {
             return state.user.userProgramProgress;
         }
 
@@ -247,13 +252,14 @@ export const resetProgramAsync = createAsyncThunk<UserProgramProgress, void>('us
 // Get all weight measurements
 export const getWeightMeasurementsAsync = createAsyncThunk<
     UserWeightMeasurement[],
-    void,
+    { forceRefresh?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
->('user/getWeightMeasurements', async (_, { getState, rejectWithValue }) => {
+>('user/getWeightMeasurements', async (args = {}, { getState, rejectWithValue }) => {
     try {
+        const { forceRefresh = false } = typeof args === 'object' ? args : {};
         const state = getState();
         const userId = state.user.user?.UserId;
 
@@ -261,8 +267,8 @@ export const getWeightMeasurementsAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Return cached measurements if available
-        if (state.user.userWeightMeasurements.length > 0 && state.user.userWeightMeasurementsState === REQUEST_STATE.FULFILLED) {
+        // Return cached measurements if available and not forcing refresh
+        if (state.user.userWeightMeasurements.length > 0 && state.user.userWeightMeasurementsState === REQUEST_STATE.FULFILLED && !forceRefresh) {
             return state.user.userWeightMeasurements;
         }
 
@@ -375,13 +381,14 @@ const refreshSleepMeasurements = async (userId: string) => {
 
 export const getSleepMeasurementsAsync = createAsyncThunk<
     UserSleepMeasurement[],
-    void,
+    { forceRefresh?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
->('user/getSleepMeasurements', async (_, { getState, rejectWithValue }) => {
+>('user/getSleepMeasurements', async (args = {}, { getState, rejectWithValue }) => {
     try {
+        const { forceRefresh = false } = typeof args === 'object' ? args : {};
         const state = getState();
         const userId = state.user.user?.UserId;
 
@@ -389,7 +396,7 @@ export const getSleepMeasurementsAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        if (state.user.userSleepMeasurements.length > 0 && state.user.userSleepMeasurementsState === REQUEST_STATE.FULFILLED) {
+        if (state.user.userSleepMeasurements.length > 0 && state.user.userSleepMeasurementsState === REQUEST_STATE.FULFILLED && !forceRefresh) {
             return state.user.userSleepMeasurements;
         }
 
@@ -479,13 +486,14 @@ export const deleteSleepMeasurementAsync = createAsyncThunk<
 
 export const getUserAppSettingsAsync = createAsyncThunk<
     UserAppSettings,
-    void,
+    { forceRefresh?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
->('user/getUserAppSettings', async (_, { getState, rejectWithValue }) => {
+>('user/getUserAppSettings', async (args = {}, { getState, rejectWithValue }) => {
     try {
+        const { forceRefresh = false } = typeof args === 'object' ? args : {};
         const state = getState();
         const userId = state.user.user?.UserId;
 
@@ -494,8 +502,8 @@ export const getUserAppSettingsAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Return cached app settings if available
-        if (state.user.userAppSettings) {
+        // Return cached app settings if available and not forcing refresh
+        if (state.user.userAppSettings && !forceRefresh) {
             return state.user.userAppSettings;
         }
 

@@ -3,7 +3,14 @@
 import { ScrollView, StyleSheet } from 'react-native';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ThemedView } from '@/components/base/ThemedView';
-import { getWeightMeasurementsAsync, logWeightMeasurementAsync, getSleepMeasurementsAsync, logSleepMeasurementAsync } from '@/store/user/thunks';
+import {
+    getWeightMeasurementsAsync,
+    logWeightMeasurementAsync,
+    getSleepMeasurementsAsync,
+    logSleepMeasurementAsync,
+    deleteSleepMeasurementAsync,
+    deleteWeightMeasurementAsync,
+} from '@/store/user/thunks';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
@@ -20,6 +27,7 @@ import { BodyMeasurementsComingSoonCard } from '@/components/progress/BodyMeasur
 import { StrengthHistoryComingSoonCard } from '@/components/progress/StrengthHistoryComingSoonCard';
 import { ThemedText } from '@/components/base/ThemedText';
 import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
+import { debounce } from '@/utils/debounce';
 
 export default function ProgressScreen() {
     const dispatch = useDispatch<AppDispatch>();
@@ -105,7 +113,7 @@ export default function ProgressScreen() {
     const handleChartPress = () => {
         // Navigate to detailed view only if we have enough data points
         if (userWeightMeasurements?.length >= 2) {
-            router.push('/(app)/progress/weight-tracking');
+            debounce(router, '/(app)/progress/weight-tracking');
         } else {
             setIsWeightSheetVisible(true);
         }
@@ -113,9 +121,27 @@ export default function ProgressScreen() {
 
     const handleSleepChartPress = () => {
         if (userSleepMeasurements?.length >= 2) {
-            router.push('/(app)/progress/sleep-tracking');
+            debounce(router, '/(app)/progress/sleep-tracking');
         } else {
             setIsLoggingSleep(true);
+        }
+    };
+
+    const handleWeightDelete = async (timestamp: string) => {
+        try {
+            await dispatch(deleteWeightMeasurementAsync({ timestamp })).unwrap();
+            setIsWeightSheetVisible(false);
+        } catch (error) {
+            console.error('Failed to delete weight:', error);
+        }
+    };
+
+    const handleSleepDelete = async (timestamp: string) => {
+        try {
+            await dispatch(deleteSleepMeasurementAsync({ timestamp })).unwrap();
+            setIsSleepSheetVisible(false);
+        } catch (err) {
+            console.error('Failed to delete sleep:', err);
         }
     };
 
@@ -183,6 +209,7 @@ export default function ProgressScreen() {
                 visible={isWeightSheetVisible}
                 onClose={() => setIsWeightSheetVisible(false)}
                 onSubmit={handleLogWeight}
+                onDelete={handleWeightDelete}
                 isLoading={isLoggingWeight}
             />
 
@@ -190,6 +217,7 @@ export default function ProgressScreen() {
                 visible={isSleepSheetVisible}
                 onClose={() => setIsSleepSheetVisible(false)}
                 onSubmit={handleLogSleep}
+                onDelete={handleSleepDelete}
                 isLoading={isLoggingSleep}
             />
         </>

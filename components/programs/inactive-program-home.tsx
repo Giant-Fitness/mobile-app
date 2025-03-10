@@ -15,6 +15,7 @@ import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { Icon } from '@/components/base/Icon';
 import { useInactiveProgramData } from '@/hooks/useInactiveProgramData';
 import { router } from 'expo-router';
+import { debounce } from '@/utils/debounce';
 
 interface MenuItemProps {
     title: string;
@@ -87,7 +88,7 @@ export default function InactiveProgramHome() {
     }
 
     const navigateTo = (route: 'programs/program-recommender-wizard' | 'programs/browse-programs' | 'programs/program-overview', params = {}) => {
-        router.push({ pathname: `/(app)/${route}` as const, params });
+        debounce(router, { pathname: `/(app)/${route}` as const, params });
     };
 
     const menuItems = [
