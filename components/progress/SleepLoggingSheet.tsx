@@ -173,12 +173,21 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
         try {
             setIsSubmitting(true);
             const formattedSleep = Number(formatSleep(hoursSlept, minutesSlept));
-            await onSubmit(formattedSleep, selectedDate);
 
-            // Set states separately to ensure update
+            let finalTimestamp;
+            const localSelectedDate = new Date(selectedDate);
+
+            if (isEditingMode) {
+                finalTimestamp = new Date(selectedDate.getTime());
+            } else {
+                localSelectedDate.setHours(0, 0, 0, 0);
+
+                finalTimestamp = new Date(Date.UTC(localSelectedDate.getFullYear(), localSelectedDate.getMonth(), localSelectedDate.getDate(), 0, 0, 0));
+            }
+
+            await onSubmit(formattedSleep, finalTimestamp);
             setSuccessMessage(isEditingMode ? 'Sleep time updated' : 'Sleep logged');
             setIsSuccess(true);
-            // Wait for animation then close
             await new Promise<void>((resolve) => setTimeout(resolve, 1600));
             onClose();
         } catch (err) {
@@ -206,11 +215,17 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
     };
 
     const handleDelete = async () => {
-        if (!initialDate || !onDelete) return;
+        if (!onDelete) return;
 
         setIsDeleting(true);
         try {
-            await onDelete(initialDate.toISOString());
+            const localSelectedDate = new Date(selectedDate);
+
+            localSelectedDate.setHours(0, 0, 0, 0);
+
+            const utcMidnight = new Date(Date.UTC(localSelectedDate.getFullYear(), localSelectedDate.getMonth(), localSelectedDate.getDate(), 0, 0, 0));
+            await onDelete(utcMidnight.toISOString());
+
             handleClose();
         } catch (err) {
             console.log(err);
