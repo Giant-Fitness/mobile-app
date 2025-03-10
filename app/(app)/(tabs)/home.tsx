@@ -1,7 +1,7 @@
 // app/(app)/(tabs)/home.tsx
 
 import React, { useState } from 'react';
-import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import { Dimensions, StyleSheet, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -21,12 +21,23 @@ import {
     getWeightMeasurementsAsync,
     getSleepMeasurementsAsync,
     logSleepMeasurementAsync,
+    getUserAsync,
+    getUserFitnessProfileAsync,
+    getUserProgramProgressAsync,
+    getUserRecommendationsAsync,
     deleteSleepMeasurementAsync,
     deleteWeightMeasurementAsync,
 } from '@/store/user/thunks';
 import { AppDispatch, RootState } from '@/store/store';
 import { WorkoutCompletedSection } from '@/components/programs/WorkoutCompletedSection';
+import PullToRefresh from '@/components/base/PullToRefresh';
 import { router } from 'expo-router';
+import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
+import { getSpotlightWorkoutsAsync, getAllWorkoutsAsync } from '@/store/workouts/thunks';
+import { initializeTrackedLiftsHistoryAsync } from '@/store/exerciseProgress/thunks';
+import { getUserAppSettingsAsync } from '@/store/user/thunks';
+import { getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/thunks';
+import { ScrollView } from 'react-native';
 import { debounce } from '@/utils/debounce';
 
 export default function HomeScreen() {
@@ -98,6 +109,33 @@ export default function HomeScreen() {
         return userSleepMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
     };
 
+    const handleRefresh = async () => {
+        try {
+            await dispatch(getUserAsync());
+            if (user?.UserId) {
+                await Promise.all([
+                    dispatch(getUserFitnessProfileAsync({ forceRefresh: true })),
+                    dispatch(getUserProgramProgressAsync({ forceRefresh: true })),
+                    dispatch(getUserRecommendationsAsync({ forceRefresh: true })),
+                    dispatch(getWorkoutQuoteAsync({ forceRefresh: true })),
+                    dispatch(getRestDayQuoteAsync({ forceRefresh: true })),
+                    dispatch(getSpotlightWorkoutsAsync({ forceRefresh: true })),
+                    dispatch(getAllProgramsAsync({ forceRefresh: true })),
+                    dispatch(getWeightMeasurementsAsync({ forceRefresh: true })),
+                    dispatch(getSleepMeasurementsAsync({ forceRefresh: true })),
+                    dispatch(initializeTrackedLiftsHistoryAsync({ forceRefresh: true })),
+                    dispatch(getUserAppSettingsAsync({ forceRefresh: true })),
+                    dispatch(getAllWorkoutsAsync({ forceRefresh: true })),
+                ]);
+                if (userProgramProgress?.ProgramId) {
+                    await dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId, forceRefresh: true }));
+                }
+            }
+        } catch (error) {
+            console.error('Refresh failed:', error);
+        }
+    };
+
     const handleWeightDelete = async (timestamp: string) => {
         try {
             await dispatch(deleteWeightMeasurementAsync({ timestamp })).unwrap();
@@ -140,12 +178,11 @@ export default function HomeScreen() {
         // },
         {
             title: 'Track Sleep',
-            image: require('@/assets/images/clipboard.png'), // Replace with actual sleep icon path
+            image: require('@/assets/images/clipboard.png'),
             onPress: handleSleepTilePress,
             backgroundColor: themeColors.blueTransparent,
             textColor: darkenColor(themeColors.blueSolid, 0.3),
         },
-
         {
             title: 'Why LMC?',
             image: require('@/assets/images/skipping-rope.png'),
@@ -280,15 +317,14 @@ export default function HomeScreen() {
 
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
-            <ScrollView
+            <PullToRefresh
+                onRefresh={handleRefresh}
                 style={styles.scrollContainer}
-                contentContainerStyle={{
-                    justifyContent: 'flex-start',
-                }}
-                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: Spaces.XL }}
+                useNativeScrollView={true}
             >
                 {renderContent()}
-            </ScrollView>
+            </PullToRefresh>
 
             <WeightLoggingSheet
                 visible={isWeightSheetVisible}
@@ -317,7 +353,6 @@ const styles = StyleSheet.create({
     scrollContainer: {
         width: '100%',
     },
-
     greeting: {
         marginTop: Spaces.LG,
         paddingHorizontal: Spaces.LG,

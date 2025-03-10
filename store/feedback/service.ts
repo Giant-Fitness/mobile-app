@@ -12,7 +12,7 @@ interface ProgramFeedback {
     additionalFeedback?: string;
     WouldRecommend?: boolean;
     AchievedGoals?: boolean;
-    OverallRating: number;
+    OverallRating?: number;
     FavoriteAspects?: string[];
 }
 

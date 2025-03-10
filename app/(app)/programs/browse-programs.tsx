@@ -14,7 +14,6 @@ import { AppDispatch, RootState } from '@/store/store';
 import { getAllProgramsAsync } from '@/store/programs/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProgramCard } from '@/components/programs/ProgramCard';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { useProgramData } from '@/hooks/useProgramData';
@@ -22,6 +21,7 @@ import { darkenColor } from '@/utils/colorUtils';
 import { useSharedValue } from 'react-native-reanimated';
 import { router } from 'expo-router';
 import { Program } from '@/types/programTypes';
+import PullToRefresh from '@/components/base/PullToRefresh';
 
 const MemoizedProgramCard = React.memo(ProgramCard);
 
@@ -31,7 +31,7 @@ const ProgramInfo = () => {
 
     return (
         <ThemedView style={[styles.infoContainer, { backgroundColor: themeColors.tealTransparent }]}>
-            <View style={styles.contentWrapper}>
+            <View style={styles.infoContentWrapper}>
                 <View style={styles.content}>
                     <ThemedText
                         type='title'
@@ -79,11 +79,18 @@ export default function BrowseProgramsScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const dispatch = useDispatch<AppDispatch>();
-    const insets = useSafeAreaInsets();
     const scrollY = useSharedValue(0);
 
     const { userProgramProgress, userRecommendations } = useProgramData();
     const { programs, allProgramsState } = useSelector((state: RootState) => state.programs);
+
+    const handleRefresh = async () => {
+        try {
+            await dispatch(getAllProgramsAsync({ forceRefresh: true }));
+        } catch (error) {
+            console.error('Failed to refresh programs:', error);
+        }
+    };
 
     const fetchData = useCallback(async () => {
         if (allProgramsState !== REQUEST_STATE.FULFILLED) {
@@ -91,7 +98,8 @@ export default function BrowseProgramsScreen() {
         }
     }, [dispatch, allProgramsState]);
 
-    const { showSplash, handleSplashComplete } = useSplashScreen({
+    // Modified to keep track of splash state but not use full-screen splash
+    const { showSplash } = useSplashScreen({
         dataLoadedState: allProgramsState,
     });
 
@@ -128,7 +136,7 @@ export default function BrowseProgramsScreen() {
 
         return (
             <View>
-                <View style={{ marginTop: Sizes.headerHeight + Spaces.LG }}>
+                <View style={{ marginTop: Spaces.MD }}>
                     <ProgramInfo />
                 </View>
                 {activeProgram && (
@@ -155,35 +163,51 @@ export default function BrowseProgramsScreen() {
                 )}
             </View>
         );
-    }, [insets.top, themeColors.subText, programs, userProgramProgress, userRecommendations, navigateToProgramOverview]);
+    }, [programs, userProgramProgress, userRecommendations, navigateToProgramOverview]);
 
     const programList = useMemo(() => {
         const topProgramId = userProgramProgress?.ProgramId || userRecommendations?.RecommendedProgramID;
         return Object.values(programs).filter((program) => program.ProgramId !== topProgramId);
     }, [programs, userProgramProgress, userRecommendations]);
 
-    if (showSplash) {
-        return <DumbbellSplash onAnimationComplete={handleSplashComplete} isDataLoaded={allProgramsState === REQUEST_STATE.FULFILLED} />;
-    }
-
     return (
         <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.background }]}>
             <AnimatedHeader scrollY={scrollY} disableColorChange={true} title='Browse' headerBackground={themeColors.background} />
-            <FlatList
-                data={programList}
-                renderItem={renderItem}
-                keyExtractor={keyExtractor}
-                ListHeaderComponent={renderHeader}
-                contentContainerStyle={[
-                    styles.contentContainer,
-                    { backgroundColor: themeColors.background },
-                    userProgramProgress?.ProgramId || userRecommendations?.RecommendedProgramID ? { paddingBottom: Spaces.XXL } : undefined,
-                ]}
-                showsVerticalScrollIndicator={false}
-                maxToRenderPerBatch={10}
-                updateCellsBatchingPeriod={50}
-                windowSize={5}
-            />
+
+            <View style={styles.mainContentWrapper}>
+                {/* Show either the splash screen or the content */}
+                {showSplash ? (
+                    <View style={[styles.inlineSplashContainer]}>
+                        <DumbbellSplash isDataLoaded={allProgramsState === REQUEST_STATE.FULFILLED} />
+                    </View>
+                ) : (
+                    <PullToRefresh
+                        onRefresh={handleRefresh}
+                        style={styles.pullToRefreshContainer}
+                        contentContainerStyle={styles.pullToRefreshContent}
+                        useNativeScrollView={false}
+                        disableChildrenScrolling={false}
+                    >
+                        <View style={{ paddingTop: Sizes.headerHeight }}>
+                            <FlatList
+                                data={programList}
+                                renderItem={renderItem}
+                                keyExtractor={keyExtractor}
+                                ListHeaderComponent={renderHeader}
+                                contentContainerStyle={[
+                                    styles.contentContainer,
+                                    { backgroundColor: themeColors.background },
+                                    userProgramProgress?.ProgramId || userRecommendations?.RecommendedProgramID ? { paddingBottom: Spaces.XXL } : undefined,
+                                ]}
+                                showsVerticalScrollIndicator={false}
+                                maxToRenderPerBatch={10}
+                                updateCellsBatchingPeriod={50}
+                                windowSize={5}
+                            />
+                        </View>
+                    </PullToRefresh>
+                )}
+            </View>
         </ThemedView>
     );
 }
@@ -191,6 +215,16 @@ export default function BrowseProgramsScreen() {
 const styles = StyleSheet.create({
     mainContainer: {
         flex: 1,
+    },
+    mainContentWrapper: {
+        flex: 1,
+        zIndex: 1,
+    },
+    pullToRefreshContainer: {
+        flex: 1,
+    },
+    pullToRefreshContent: {
+        flexGrow: 1,
     },
     contentContainer: {
         flexGrow: 1,
@@ -204,7 +238,7 @@ const styles = StyleSheet.create({
         borderRadius: Spaces.MD,
         overflow: 'hidden',
     },
-    contentWrapper: {
+    infoContentWrapper: {
         position: 'relative',
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -226,5 +260,10 @@ const styles = StyleSheet.create({
         right: -Spaces.XL - Spaces.SM,
         width: 200,
         height: '60%',
+    },
+    inlineSplashContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });

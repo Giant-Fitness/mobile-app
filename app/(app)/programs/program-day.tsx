@@ -34,6 +34,7 @@ import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
 import { AVPlaybackStatus } from 'expo-av';
 import { ThumbnailVideoPlayer } from '@/components/media/ThumbnailVideoPlayer';
 
+// fullscreenvidoeplayer, fullscreenvidoeplayerhandle,
 const ProgramDayScreen = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -81,7 +82,7 @@ const ProgramDayScreen = () => {
             );
 
             if (exerciseIds.length > 0) {
-                dispatch(fetchExercisesRecentHistoryAsync(exerciseIds));
+                dispatch(fetchExercisesRecentHistoryAsync({ exerciseIds }));
             }
         }
     }, [programDay?.Type, programDay?.Exercises]);

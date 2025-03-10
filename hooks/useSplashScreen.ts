@@ -22,13 +22,18 @@ export const useSplashScreen = ({ dataLoadedState }: UseSplashScreenProps) => {
                 return;
             }
         }
-
         if (dataLoadedState === REQUEST_STATE.IDLE || dataLoadedState === REQUEST_STATE.PENDING) {
             splashStartTime.current = Date.now();
             setShowSplash(true);
             setDataLoaded(false);
         } else if (dataLoadedState === REQUEST_STATE.FULFILLED) {
             setDataLoaded(true);
+        } else if (dataLoadedState === REQUEST_STATE.REJECTED) {
+            const timeElapsed = splashStartTime.current ? Date.now() - splashStartTime.current : 0;
+            const remainingTime = Math.max(0, 3000 - timeElapsed);
+            setTimeout(() => {
+                setShowSplash(false);
+            }, remainingTime);
         }
     }, [dataLoadedState]);
 
