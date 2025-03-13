@@ -21,6 +21,7 @@ import { useProgramData } from '@/hooks/useProgramData';
 import { EndProgramModal } from '@/components/programs/EndProgramModal';
 import { ResetProgramModal } from '@/components/programs/ResetProgramModal';
 import { AutoDismissSuccessModal } from '@/components/overlays/AutoDismissSuccessModal';
+import { usePostHog } from 'posthog-react-native';
 
 const ActiveProgramProgressScreen = () => {
     // 1. Hooks Section - All hooks must be called before any conditionals
@@ -28,6 +29,7 @@ const ActiveProgramProgressScreen = () => {
     const themeColors = Colors[colorScheme];
     const screenWidth = Dimensions.get('window').width;
     const scrollY = useSharedValue(0);
+    const posthog = usePostHog();
 
     // State hooks
     const [isBottomMenuVisible, setIsBottomMenuVisible] = useState(false);
@@ -70,12 +72,30 @@ const ActiveProgramProgressScreen = () => {
         }
     };
 
-    const handleEndProgramConfirm = () => {
-        endProgram();
+    const handleEndProgramConfirm = async () => {
+        // Track analytics event for program abandonment
+        posthog.capture('program_abandoned', {
+            program_id: activeProgram?.ProgramId,
+            program_name: activeProgram?.ProgramName,
+            days_completed: userProgramProgress?.CompletedDays?.length || 0,
+            completed_percentage: userProgramProgress?.CompletedDays?.length
+                ? Math.round((userProgramProgress.CompletedDays.length / (activeProgram?.Days || 1)) * 100)
+                : 0,
+        });
+
+        await endProgram();
         setIsEndProgramModalVisible(false);
     };
 
     const handleResetProgramConfirm = () => {
+        posthog.capture('program_reset', {
+            program_id: activeProgram?.ProgramId,
+            program_name: activeProgram?.ProgramName,
+            days_completed: userProgramProgress?.CompletedDays?.length || 0,
+            completed_percentage: userProgramProgress?.CompletedDays?.length
+                ? Math.round((userProgramProgress.CompletedDays.length / (activeProgram?.Days || 1)) * 100)
+                : 0,
+        });
         resetProgram();
         setIsResetProgramModalVisible(false);
         setShowResetSuccess(true);
