@@ -178,7 +178,7 @@ export default function HomeScreen() {
         // },
         {
             title: 'Track Sleep',
-            image: require('@/assets/images/clipboard.png'),
+            image: require('@/assets/images/sleep_clock.png'),
             onPress: handleSleepTilePress,
             backgroundColor: themeColors.blueTransparent,
             textColor: darkenColor(themeColors.blueSolid, 0.3),
