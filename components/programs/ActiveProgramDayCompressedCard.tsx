@@ -23,9 +23,11 @@ import { debounce } from '@/utils/debounce';
 // Cast ShimmerPlaceHolder to the correct type
 const ShimmerPlaceholder = ShimmerPlaceHolder as unknown as React.ComponentType<any>;
 
-type ActiveProgramDayCompressedCardProps = {};
+type ActiveProgramDayCompressedCardProps = {
+    source: 'home';
+};
 
-export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressedCardProps> = () => {
+export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressedCardProps> = ({ source }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const { workouts } = useSelector((state: RootState) => state.workouts);
@@ -87,6 +89,7 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
                     params: {
                         programId,
                         dayId,
+                        source,
                     },
                 },
                 1200,

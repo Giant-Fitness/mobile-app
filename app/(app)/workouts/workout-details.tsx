@@ -1,4 +1,4 @@
-// app/(app)/workouts/workout-detail-page.tsx
+// app/(app)/workouts/workout-details.tsx
 
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -24,12 +24,15 @@ import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { SlideUpActionButton } from '@/components/buttons/SlideUpActionButton';
 import { AVPlaybackStatus } from 'expo-av';
+import { usePostHog } from 'posthog-react-native';
 import PullToRefresh from '@/components/base/PullToRefresh';
 
 export default function WorkoutDetailScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const [isVideoLoading, setIsVideoLoading] = useState(false);
+    const [videoDuration, setVideoDuration] = useState<number | null>(null);
+    const posthog = usePostHog();
 
     const dispatch = useDispatch<AppDispatch>();
     const { workoutId } = useLocalSearchParams() as { workoutId: string };
@@ -76,6 +79,13 @@ export default function WorkoutDetailScreen() {
             // Reset milestones when starting the workout
             setReachedMilestones(new Set());
             setLastPlaybackPosition(0);
+
+            // Track workout start event
+            posthog.capture('workout_started', {
+                workout_id: workoutId,
+                workout_name: workout.WorkoutName,
+                screen: 'workout-details',
+            });
         }
     };
 
@@ -96,12 +106,24 @@ export default function WorkoutDetailScreen() {
             const duration = status.durationMillis;
             const currentPosition = status.positionMillis;
 
+            // Store duration when we receive it
+            if (duration && !videoDuration) {
+                setVideoDuration(duration);
+            }
+
             if (duration) {
                 const progress = currentPosition / duration;
 
                 // Check if video has restarted
                 if (currentPosition < lastPlaybackPosition) {
                     setReachedMilestones(new Set());
+
+                    // Track workout restart
+                    posthog.capture('workout_restarted', {
+                        workout_id: workoutId,
+                        workout_name: workout.WorkoutName,
+                        screen: 'workout-details',
+                    });
                 }
 
                 // Check and log milestones
@@ -109,6 +131,14 @@ export default function WorkoutDetailScreen() {
                     if (progress >= milestone && !reachedMilestones.has(milestone)) {
                         console.log(`Milestone reached: ${milestone * 100}%`);
                         setReachedMilestones((prev) => new Set(prev).add(milestone));
+
+                        // Track milestone reached
+                        posthog.capture('workout_milestone_reached', {
+                            workout_id: workoutId,
+                            workout_name: workout.WorkoutName,
+                            milestone_percentage: milestone * 100,
+                            screen: 'workout-details',
+                        });
                     }
                 });
 
@@ -117,6 +147,14 @@ export default function WorkoutDetailScreen() {
                     console.log(`Skip detected from ${lastPlaybackPosition / 1000}s to ${currentPosition / 1000}s`);
                 }
 
+                // Track workout completion
+                if (progress >= 1.0 && !reachedMilestones.has(1.0)) {
+                    posthog.capture('workout_completed', {
+                        workout_id: workoutId,
+                        workout_name: workout.WorkoutName,
+                        screen: 'workout-details',
+                    });
+                }
                 // Update the last playback position
                 setLastPlaybackPosition(currentPosition);
             }
@@ -127,6 +165,16 @@ export default function WorkoutDetailScreen() {
 
     const handleDismiss = () => {
         setIsVideoLoading(false);
+
+        // Track early dismissal
+        if (lastPlaybackPosition > 0 && videoDuration) {
+            posthog.capture('workout_dismissed', {
+                workout_id: workoutId,
+                workout_name: workout.WorkoutName,
+                completion_percentage: (lastPlaybackPosition / videoDuration) * 100,
+                screen: 'workout-details',
+            });
+        }
     };
 
     // Scroll Handler for Animated Header

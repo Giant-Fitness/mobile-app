@@ -33,12 +33,14 @@ import { Exercise } from '@/types';
 import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
 import { AVPlaybackStatus } from 'expo-av';
 import { ThumbnailVideoPlayer } from '@/components/media/ThumbnailVideoPlayer';
+import { usePostHog } from 'posthog-react-native';
 
 // fullscreenvidoeplayer, fullscreenvidoeplayerhandle,
 const ProgramDayScreen = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const dispatch = useDispatch<AppDispatch>();
+    const posthog = usePostHog();
 
     const [isProgramDaySkipModalVisible, setIsProgramDaySkipModalVisible] = useState(false);
     const [isResetDayModalVisible, setIsResetDayModalVisible] = useState(false);
@@ -125,7 +127,7 @@ const ProgramDayScreen = () => {
     const navigateToAllWorkouts = (initialFilters = {}) => {
         router.push({
             pathname: '/(app)/workouts/all-workouts',
-            params: { initialFilters: JSON.stringify(initialFilters) },
+            params: { initialFilters: JSON.stringify(initialFilters), source: 'program-rest-day' },
         });
     };
 
@@ -150,6 +152,7 @@ const ProgramDayScreen = () => {
     };
 
     const completeDay = async () => {
+        posthog.capture('program_day_completed');
         if (activeProgram && activeProgram.Days.toString() === dayId.toString()) {
             await handleCompleteDay();
             router.replace({
@@ -169,11 +172,13 @@ const ProgramDayScreen = () => {
 
     const handleProgramDaySkip = async () => {
         setIsProgramDaySkipModalVisible(false);
+        posthog.capture('program_day_skipped');
         completeDay();
     };
 
     const resetDay = () => {
         handleUncompleteDay();
+        posthog.capture('program_day_reset');
         setIsResetDayModalVisible(false);
         setShowResetSuccess(true);
     };

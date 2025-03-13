@@ -81,6 +81,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
             pathname: '/(app)/programs/exercise-details',
             params: {
                 exercise: JSON.stringify(exercise),
+                exerciseId: exercise.ExerciseId,
                 isEnrolled: isEnrolled.toString(),
             },
         });

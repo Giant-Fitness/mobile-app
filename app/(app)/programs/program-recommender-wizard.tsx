@@ -13,12 +13,14 @@ import { ProgramRecommenderIntro } from '@/components/onboarding/fitness/Program
 import { updateUserFitnessProfileAsync } from '@/store/user/thunks';
 import { AutoDismissSuccessModal } from '@/components/overlays/AutoDismissSuccessModal';
 import { AppDispatch, RootState } from '@/store/store';
+import { usePostHog } from 'posthog-react-native';
 
 const ProgramRecommenderWizardScreen = () => {
     const dispatch = useDispatch<AppDispatch>();
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const posthog = usePostHog();
 
     // Get the existing fitness profile from Redux store
     const userFitnessProfile = useSelector((state: RootState) => state.user.userFitnessProfile);
@@ -29,8 +31,21 @@ const ProgramRecommenderWizardScreen = () => {
             if (result.user && result.userRecommendations && result.userFitnessProfile) {
                 setShowSuccessModal(true);
             }
-        } catch (error) {
+            posthog.capture('program_recommendation_completed', {
+                success: true,
+                selected_goal: data.PrimaryFitnessGoal, // e.g., "muscle_gain", "strength", "weight_loss"
+                equipment_access: data.AccessToEquipment, // e.g., "full_gym", "home_gym", "minimal"
+                weekly_frequency: data.DaysPerWeekDesired, // number
+                experience_level: data.GymExperienceLevel,
+                screen: 'program-recommender-wizard',
+            });
+        } catch (error: any) {
             console.error('Failed to update fitness profile:', error);
+            posthog.capture('program_recommendation_error', {
+                success: false,
+                error_message: error.message,
+                screen: 'program-recommender-wizard',
+            });
             // Handle error case
         }
     };

@@ -111,7 +111,7 @@ export default function BrowseProgramsScreen() {
     const navigateToProgramOverview = useCallback((programId: string) => {
         router.push({
             pathname: '/programs/program-overview',
-            params: { programId },
+            params: { programId, source: 'library' },
         });
     }, []);
 

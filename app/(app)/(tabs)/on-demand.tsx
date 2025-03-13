@@ -79,7 +79,7 @@ export default function WorkoutsScreen() {
         return workoutIds.map((id) => {
             const workout = workouts[id];
             if (!workout) return null;
-            return <WorkoutOverviewCard key={id} workout={workout} />;
+            return <WorkoutOverviewCard key={id} workout={workout} source={'spotlight'} />;
         });
     };
 

@@ -14,9 +14,10 @@ import { debounce } from '@/utils/debounce';
 
 type WorkoutOverviewCardProps = {
     workout: Workout;
+    source: 'spotlight' | 'library' | 'recommended' | 'recent' | 'popular';
 };
 
-export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ workout }) => {
+export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ workout, source }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
@@ -25,6 +26,7 @@ export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ workou
             pathname: '/(app)/workouts/workout-details',
             params: {
                 workoutId: workout.WorkoutId,
+                source,
             },
         });
     };

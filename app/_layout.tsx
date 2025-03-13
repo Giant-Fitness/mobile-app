@@ -12,6 +12,9 @@ import { Provider, useDispatch } from 'react-redux';
 import { store } from '@/store/store';
 import { AppState } from 'react-native';
 import { resetStore } from '@/store/actions';
+import { POSTHOG_CONFIG } from '@/config/posthog';
+import { PostHogProvider } from 'posthog-react-native';
+import { useScreenTracking } from '@/hooks/useScreenTracking';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -24,30 +27,18 @@ function AppStateHandler() {
     useEffect(() => {
         const INACTIVITY_TIMEOUT = 45 * 60 * 1000; // 45 minutes
 
-        // console.log('Setting up app state listener. Timeout:', INACTIVITY_TIMEOUT / 1000, 'seconds');
-
         const subscription = AppState.addEventListener('change', (nextAppState) => {
-            // console.log('App state changed:', {
-            //     from: appStateRef.current,
-            //     to: nextAppState,
-            // });
-
             if (appStateRef.current.match(/inactive|background/) && nextAppState === 'active') {
                 const timeAway = Date.now() - lastActiveTimestamp.current;
-                // console.log('Time away:', Math.round(timeAway / 1000), 'seconds');
 
                 if (timeAway > INACTIVITY_TIMEOUT) {
-                    // console.log('Timeout exceeded, clearing store and refreshing app...');
                     dispatch(resetStore());
                     router.replace('/');
-                } else {
-                    // console.log('Within timeout, continuing normally');
                 }
             }
 
             if (nextAppState.match(/inactive|background/)) {
                 lastActiveTimestamp.current = Date.now();
-                // console.log('App backgrounded at:', new Date().toLocaleTimeString());
             }
 
             appStateRef.current = nextAppState;
@@ -61,6 +52,12 @@ function AppStateHandler() {
 
 export default function RootLayout() {
     const colorScheme = useColorScheme();
+
+    function ScreenTrackingWrapper({ children }: { children: React.ReactNode }) {
+        useScreenTracking(); // Hook is used here
+        return <>{children}</>;
+    }
+
     const [loaded] = useFonts({
         InterBlack: require('../assets/fonts/Inter_18pt-Black.ttf'),
         InterBlackItalic: require('../assets/fonts/Inter_18pt-BlackItalic.ttf'),
@@ -154,30 +151,53 @@ export default function RootLayout() {
     }
 
     return (
-        <Provider store={store}>
-            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                <AppStateHandler />
-                <Stack
-                    screenOptions={{
-                        headerShown: false,
-                        gestureEnabled: false,
-                        navigationBarHidden: true,
-                        animation: 'default',
-                        presentation: 'card',
-                    }}
-                >
-                    <Stack.Screen name='(app)' options={{ headerShown: false, gestureEnabled: false, animation: 'fade' }} />
-                    <Stack.Screen name='(auth)' options={{ headerShown: false, gestureEnabled: false }} />
-                    <Stack.Screen
-                        name='index'
-                        options={{
-                            headerShown: false,
-                            animation: 'none',
-                            gestureEnabled: false,
-                        }}
-                    />
-                </Stack>
-            </ThemeProvider>
-        </Provider>
+        <PostHogProvider
+            apiKey={POSTHOG_CONFIG.apiKey}
+            autocapture={{
+                captureLifecycleEvents: true,
+                captureScreens: false, // Disable default screen capture since we're using our hook
+                ignoreLabels: [],
+            }}
+            options={{
+                host: POSTHOG_CONFIG.host,
+                enableSessionReplay: true,
+                sessionReplayConfig: {
+                    maskAllTextInputs: false,
+                    maskAllImages: false,
+                    captureLog: true,
+                    captureNetworkTelemetry: true,
+                    androidDebouncerDelayMs: 500,
+                    iOSdebouncerDelayMs: 1000,
+                },
+            }}
+        >
+            <Provider store={store}>
+                <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                    <AppStateHandler />
+                    <ScreenTrackingWrapper>
+                        <Stack
+                            screenOptions={{
+                                headerShown: false,
+                                gestureEnabled: false,
+                                navigationBarHidden: true,
+                                animation: 'default',
+                                presentation: 'card',
+                            }}
+                        >
+                            <Stack.Screen name='(app)' options={{ headerShown: false, gestureEnabled: false, animation: 'fade' }} />
+                            <Stack.Screen name='(auth)' options={{ headerShown: false, gestureEnabled: false }} />
+                            <Stack.Screen
+                                name='index'
+                                options={{
+                                    headerShown: false,
+                                    animation: 'none',
+                                    gestureEnabled: false,
+                                }}
+                            />
+                        </Stack>
+                    </ScreenTrackingWrapper>
+                </ThemeProvider>
+            </Provider>
+        </PostHogProvider>
     );
 }

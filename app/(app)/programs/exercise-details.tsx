@@ -17,11 +17,15 @@ import { BulletedList } from '@/components/layout/BulletedList';
 import { Icon } from '@/components/base/Icon';
 import { OneRepMaxCalculator } from '@/components/programs/OneRepMaxCalculator';
 import { useLocalSearchParams } from 'expo-router';
+import { usePostHog } from 'posthog-react-native';
+import { AVPlaybackStatus } from 'expo-av';
 
 const ExerciseDetailsScreen = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const [isCalculatorVisible, setCalculatorVisible] = useState<boolean>(false);
+    const [hasVideoStarted, setHasVideoStarted] = useState<boolean>(false);
+    const posthog = usePostHog();
 
     // Get params using expo-router
     const params = useLocalSearchParams<{
@@ -49,6 +53,23 @@ const ExerciseDetailsScreen = () => {
         setCalculatorVisible(false);
     };
 
+    // Handle video playback status updates
+    const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
+        // Check if video is loaded and has started playing for the first time
+        if (status.isLoaded && status.isPlaying && !hasVideoStarted) {
+            // Track the event with PostHog
+            posthog.capture('exercise_video_started', {
+                exercise_name: exercise.ExerciseName,
+                exercise_id: exercise.ExerciseId,
+                video_url: exercise.VideoUrl,
+                is_enrolled: isEnrolled,
+            });
+
+            // Update state to prevent duplicate events
+            setHasVideoStarted(true);
+        }
+    };
+
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.backgroundSecondary }}>
             <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Spaces.XXL} headerInterpolationEnd={Sizes.imageLGHeight} />
@@ -66,7 +87,7 @@ const ExerciseDetailsScreen = () => {
                         isEnrolled && exercise.ORMPercentage ? { paddingBottom: Sizes.bottomSpaceLarge } : null,
                     ]}
                 >
-                    <ThumbnailVideoPlayer videoUrl={exercise.VideoUrl} onPlaybackStatusUpdate={() => {}} thumbnailUrl={exercise.PhotoUrl} />
+                    <ThumbnailVideoPlayer videoUrl={exercise.VideoUrl} onPlaybackStatusUpdate={handlePlaybackStatusUpdate} thumbnailUrl={exercise.PhotoUrl} />
                     <ThemedView style={[styles.topCard, { backgroundColor: themeColors.background }]}>
                         <ThemedView style={styles.titleContainer}>
                             <ThemedText type='titleLarge'>{exercise.ExerciseName}</ThemedText>

@@ -1,5 +1,3 @@
-// app/(app)/programs/program-overview.tsx
-
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -25,6 +23,7 @@ import PullToRefresh from '@/components/base/PullToRefresh';
 import { useDispatch } from 'react-redux';
 import { getProgramAsync } from '@/store/programs/thunks';
 import { AppDispatch } from '@/store/store';
+import { usePostHog } from 'posthog-react-native';
 
 const ProgramOverviewScreen = () => {
     const router = useRouter();
@@ -32,6 +31,7 @@ const ProgramOverviewScreen = () => {
     const { programId } = useLocalSearchParams<{ programId: string }>();
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const posthog = usePostHog();
 
     const { activeProgram: program, userProgramProgress, dataLoadedState, startProgram, error } = useProgramData(programId, undefined, { fetchAllDays: false });
 
@@ -60,11 +60,24 @@ const ProgramOverviewScreen = () => {
     };
 
     const handleStartProgram = () => {
+        // Track event: user started a new program (not replacing an existing one)
+        posthog?.capture('program_started', {
+            program_id: programId,
+            program_name: program?.ProgramName,
+        });
+
         startProgram();
         router.replace('/(app)/programs/program-start-splash');
     };
 
     const handleStartProgramConfirm = () => {
+        // Track event: user replaced an existing program with a new one
+        posthog?.capture('program_replaced', {
+            new_program_id: programId,
+            new_program_name: program?.ProgramName,
+            previous_program_id: userProgramProgress?.ProgramId,
+        });
+
         startProgram();
         setIsOverwriteProgramModalVisible(false);
     };

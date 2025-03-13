@@ -22,6 +22,7 @@ import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { BasicSplash } from '@/components/base/BasicSplash';
 import { ThemedText } from '@/components/base/ThemedText';
 import { initializeTrackedLiftsHistoryAsync } from '@/store/exerciseProgress/thunks';
+import { usePostHog } from 'posthog-react-native';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
@@ -35,6 +36,8 @@ const Initialization: React.FC = () => {
     const { error: exerciseError } = useSelector((state: RootState) => state.exerciseProgress);
 
     const [dataLoaded, setDataLoaded] = useState<keyof typeof REQUEST_STATE>(REQUEST_STATE.PENDING);
+    const posthog = usePostHog();
+
     const [retryAttempt, setRetryAttempt] = useState(0);
     const [isRetrying, setIsRetrying] = useState(false);
 
@@ -90,6 +93,7 @@ const Initialization: React.FC = () => {
                 setIsRetrying(false);
                 const userDataState = await fetchUserData();
                 if (userDataState === REQUEST_STATE.FULFILLED) {
+                    posthog.identify(user?.UserId);
                     await fetchOtherData();
                 } else {
                     setDataLoaded(REQUEST_STATE.REJECTED);

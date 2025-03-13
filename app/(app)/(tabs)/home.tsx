@@ -250,14 +250,23 @@ export default function HomeScreen() {
                     </View>
 
                     {hasCompletedWorkoutToday ? (
-                        <WorkoutCompletedSection onBrowseSolos={() => debounce(router, '/(app)/workouts/all-workouts')} />
+                        <WorkoutCompletedSection
+                            onBrowseSolos={() =>
+                                debounce(router, {
+                                    pathname: '/(app)/workouts/all-workouts',
+                                    params: {
+                                        source: 'home-program-day-completed-tile',
+                                    },
+                                })
+                            }
+                        />
                     ) : (
                         <>
                             <View style={styles.header}>
                                 <ThemedText type='titleLarge'>Today&apos;s Workout</ThemedText>
                             </View>
                             <View style={styles.workoutDayCard}>
-                                <ActiveProgramDayCompressedCard />
+                                <ActiveProgramDayCompressedCard source={'home'} />
                             </View>
                         </>
                     )}

@@ -348,8 +348,20 @@ export const useProgramData = (
         }
     };
 
-    const endProgram = () => {
-        dispatch(endProgramAsync());
+    const endProgram = async () => {
+        try {
+            // Dispatch the action and wait for it to complete
+            await dispatch(endProgramAsync()).unwrap();
+
+            // Force refresh of user program progress state
+            // This ensures we have the latest state after ending the program
+            await dispatch(getUserProgramProgressAsync({ forceRefresh: true })).unwrap();
+
+            return true;
+        } catch (error) {
+            console.error('Error ending program:', error);
+            return false;
+        }
     };
 
     const startProgram = () => {

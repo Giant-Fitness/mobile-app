@@ -18,6 +18,7 @@ import { TextButton } from '@/components/buttons/TextButton';
 import { ThemedText } from '@/components/base/ThemedText';
 import { Icon } from '@/components/base/Icon';
 import { lightenColor } from '@/utils/colorUtils';
+import { usePostHog } from 'posthog-react-native';
 
 const SettingsSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <View style={styles.section}>
@@ -60,14 +61,18 @@ const SettingsIndex = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
+    const posthog = usePostHog();
+
     const handleSignOut = async () => {
         if (BYPASS_AUTH) {
             router.replace('/');
         } else {
             try {
+                posthog.capture('sign_out_clicked');
+                posthog.reset();
                 await authService.clearAuthData();
                 await signOut();
-                dispatch(resetStore());
+                await dispatch(resetStore());
                 router.replace('/');
             } catch (error: unknown) {
                 console.error('Error signing out:', error);
