@@ -2,7 +2,16 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import UserService from '@/store/user/service';
-import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, UserWeightMeasurement, UserSleepMeasurement, UserAppSettings } from '@/types';
+import {
+    UserProgramProgress,
+    User,
+    UserRecommendations,
+    UserFitnessProfile,
+    UserWeightMeasurement,
+    UserSleepMeasurement,
+    UserAppSettings,
+    UserBodyMeasurement,
+} from '@/types';
 import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 
@@ -538,5 +547,129 @@ export const updateUserAppSettingsAsync = createAsyncThunk<
     } catch (error) {
         console.log(error);
         return rejectWithValue({ errorMessage: 'Failed to update app settings' });
+    }
+});
+
+const refreshBodyMeasurements = async (userId: string) => {
+    return await UserService.getBodyMeasurements(userId);
+};
+
+// Get all body measurements
+export const getBodyMeasurementsAsync = createAsyncThunk<
+    UserBodyMeasurement[],
+    { forceRefresh?: boolean } | void,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/getBodyMeasurements', async (args = {}, { getState, rejectWithValue }) => {
+    try {
+        const { forceRefresh = false } = typeof args === 'object' ? args : {};
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Return cached measurements if available and not forcing refresh
+        if (state.user.userBodyMeasurements.length > 0 && state.user.userBodyMeasurementsState === REQUEST_STATE.FULFILLED && !forceRefresh) {
+            return state.user.userBodyMeasurements;
+        }
+
+        const measurements = await UserService.getBodyMeasurements(userId);
+        return measurements;
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch body measurements',
+        });
+    }
+});
+
+// Log new body measurement
+export const logBodyMeasurementAsync = createAsyncThunk<
+    UserBodyMeasurement[],
+    { measurements: Record<string, number>; measurementTimestamp?: string },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/logBodyMeasurement', async ({ measurements, measurementTimestamp }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Log the new measurement
+        const timestamp = measurementTimestamp ?? new Date().toISOString();
+        await UserService.logBodyMeasurement(userId, measurements, timestamp);
+
+        // Refresh and return all measurements
+        return await refreshBodyMeasurements(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to log body measurement',
+        });
+    }
+});
+
+// Update body measurement
+export const updateBodyMeasurementAsync = createAsyncThunk<
+    UserBodyMeasurement[],
+    { timestamp: string; measurements: Record<string, number> },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/updateBodyMeasurement', async ({ timestamp, measurements }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Update the measurement
+        await UserService.updateBodyMeasurement(userId, timestamp, measurements);
+
+        // Refresh and return all measurements
+        return await refreshBodyMeasurements(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to update body measurement',
+        });
+    }
+});
+
+// Delete body measurement
+export const deleteBodyMeasurementAsync = createAsyncThunk<
+    UserBodyMeasurement[],
+    { timestamp: string },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/deleteBodyMeasurement', async ({ timestamp }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Delete the measurement
+        await UserService.deleteBodyMeasurement(userId, timestamp);
+
+        // Refresh and return all measurements
+        return await refreshBodyMeasurements(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to delete body measurement',
+        });
     }
 });

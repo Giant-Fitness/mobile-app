@@ -24,9 +24,22 @@ import {
     getSleepMeasurementsAsync,
     getUserAppSettingsAsync,
     updateUserAppSettingsAsync,
+    getBodyMeasurementsAsync,
+    logBodyMeasurementAsync,
+    updateBodyMeasurementAsync,
+    deleteBodyMeasurementAsync,
 } from '@/store/user/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, UserWeightMeasurement, UserSleepMeasurement, UserAppSettings } from '@/types';
+import {
+    UserProgramProgress,
+    User,
+    UserRecommendations,
+    UserFitnessProfile,
+    UserWeightMeasurement,
+    UserSleepMeasurement,
+    UserAppSettings,
+    UserBodyMeasurement,
+} from '@/types';
 
 const userSlice = createSlice({
     name: 'user',
@@ -335,6 +348,62 @@ const userSlice = createSlice({
             .addCase(updateUserAppSettingsAsync.rejected, (state, action) => {
                 state.userAppSettingsState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'Failed to update user app settings';
+            })
+
+            // Get Body Measurements
+            .addCase(getBodyMeasurementsAsync.pending, (state) => {
+                state.userBodyMeasurementsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(getBodyMeasurementsAsync.fulfilled, (state, action: PayloadAction<UserBodyMeasurement[]>) => {
+                state.userBodyMeasurementsState = REQUEST_STATE.FULFILLED;
+                state.userBodyMeasurements = action.payload;
+            })
+            .addCase(getBodyMeasurementsAsync.rejected, (state, action) => {
+                state.userBodyMeasurementsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to fetch body measurements';
+            })
+
+            // Log Body Measurement
+            .addCase(logBodyMeasurementAsync.pending, (state) => {
+                state.userBodyMeasurementsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(logBodyMeasurementAsync.fulfilled, (state, action: PayloadAction<UserBodyMeasurement[]>) => {
+                state.userBodyMeasurementsState = REQUEST_STATE.FULFILLED;
+                state.userBodyMeasurements = action.payload;
+            })
+            .addCase(logBodyMeasurementAsync.rejected, (state, action) => {
+                state.userBodyMeasurementsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to log body measurement';
+            })
+
+            // Update Body Measurement
+            .addCase(updateBodyMeasurementAsync.pending, (state) => {
+                state.userBodyMeasurementsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(updateBodyMeasurementAsync.fulfilled, (state, action: PayloadAction<UserBodyMeasurement[]>) => {
+                state.userBodyMeasurementsState = REQUEST_STATE.FULFILLED;
+                state.userBodyMeasurements = action.payload;
+            })
+            .addCase(updateBodyMeasurementAsync.rejected, (state, action) => {
+                state.userBodyMeasurementsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to update body measurement';
+            })
+
+            // Delete Body Measurement
+            .addCase(deleteBodyMeasurementAsync.pending, (state) => {
+                state.userBodyMeasurementsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(deleteBodyMeasurementAsync.fulfilled, (state, action: PayloadAction<UserBodyMeasurement[]>) => {
+                state.userBodyMeasurementsState = REQUEST_STATE.FULFILLED;
+                state.userBodyMeasurements = action.payload;
+            })
+            .addCase(deleteBodyMeasurementAsync.rejected, (state, action) => {
+                state.userBodyMeasurementsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to delete body measurement';
             });
     },
 });

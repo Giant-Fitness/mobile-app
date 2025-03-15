@@ -1,3 +1,5 @@
+// app/(app)/progress/all-waist-data.tsx
+
 import React, { useState } from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
@@ -8,43 +10,47 @@ import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { RootState } from '@/store/store';
-import { UserSleepMeasurement } from '@/types';
+import { UserBodyMeasurement } from '@/types';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { useSharedValue } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { MeasurementCalendar } from '@/components/progress/MeasurementCalendar';
 import { AppDispatch } from '@/store/store';
-import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
-import { logSleepMeasurementAsync, updateSleepMeasurementAsync, deleteSleepMeasurementAsync } from '@/store/user/thunks';
+import { BodyMeasurementsLoggingSheet } from '@/components/progress/BodyMeasurementsLoggingSheet';
+import { logBodyMeasurementAsync, updateBodyMeasurementAsync, deleteBodyMeasurementAsync } from '@/store/user/thunks';
+import { formatMeasurementForDisplay, cmToInches } from '@/utils/unitConversion';
 
 type CalendarData = {
     timestamp: string;
     value: number;
-    originalData: UserSleepMeasurement;
-    previousData?: UserSleepMeasurement;
+    originalData: UserBodyMeasurement;
+    previousData?: UserBodyMeasurement;
 };
 
-export default function AllSleepDataScreen() {
+export default function AllBodyMeasurementsDataScreen() {
     const dispatch = useDispatch<AppDispatch>();
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const scrollY = useSharedValue(0);
 
-    const [isSleepSheetVisible, setIsSleepSheetVisible] = useState(false);
-    const [selectedMeasurement, setSelectedMeasurement] = useState<UserSleepMeasurement | null>(null);
-    const [isAddingSleep, setIsAddingSleep] = useState(false);
+    const [isBodyMeasurementsSheetVisible, setIsBodyMeasurementsSheetVisible] = useState(false);
+    const [selectedMeasurement, setSelectedMeasurement] = useState<UserBodyMeasurement | null>(null);
+    const [isAddingMeasurement, setIsAddingMeasurement] = useState(false);
     const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date>(new Date());
 
-    const { userSleepMeasurements } = useSelector((state: RootState) => state.user);
+    const { userBodyMeasurements } = useSelector((state: RootState) => state.user);
+    const measurementUnit = useSelector(
+        (state: RootState) => (state.user.userAppSettings?.UnitsOfMeasurement?.BodyMeasurementUnits as 'cms' | 'inches') || 'cms',
+    );
 
-    // Calculate Sleep change between measurements
-    const getSleepChange = (currentSleep: number, previousSleep: number | null) => {
-        if (previousSleep === null) return null;
-        const change = currentSleep - previousSleep;
+    // Calculate measurement change between measurements
+    const getWaistChange = (currentWaist: number | undefined, previousWaist: number | undefined) => {
+        if (previousWaist === undefined || currentWaist === undefined) return null;
+        const change = currentWaist - previousWaist;
         return change !== 0 ? change.toFixed(1) : null;
     };
 
-    const handleAddSleep = () => {
+    const handleAddMeasurement = () => {
         // Reset the selected measurement
         setSelectedMeasurement(null);
 
@@ -53,51 +59,51 @@ export default function AllSleepDataScreen() {
         setSelectedCalendarDate(today);
 
         // Set mode to adding and show the sheet
-        setIsAddingSleep(true);
-        setIsSleepSheetVisible(true);
+        setIsAddingMeasurement(true);
+        setIsBodyMeasurementsSheetVisible(true);
     };
 
     const getExistingData = (date: Date) => {
-        return userSleepMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
+        return userBodyMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
     };
 
-    const handleSleepAdd = async (weight: number, date: Date) => {
+    const handleMeasurementAdd = async (measurements: Record<string, number>, date: Date) => {
         try {
             await dispatch(
-                logSleepMeasurementAsync({
-                    durationInMinutes: weight,
+                logBodyMeasurementAsync({
+                    measurements,
                     measurementTimestamp: date.toISOString(),
                 }),
             ).unwrap();
-            setIsAddingSleep(false);
+            setIsAddingMeasurement(false);
         } catch (error) {
-            console.error('Failed to log sleep:', error);
+            console.error('Failed to log body measurement:', error);
         }
     };
 
-    const handleSleepUpdate = async (weight: number) => {
+    const handleMeasurementUpdate = async (measurements: Record<string, number>) => {
         if (!selectedMeasurement) return;
 
         try {
             await dispatch(
-                updateSleepMeasurementAsync({
+                updateBodyMeasurementAsync({
                     timestamp: selectedMeasurement.MeasurementTimestamp,
-                    durationInMinutes: weight,
+                    measurements,
                 }),
             ).unwrap();
             setSelectedMeasurement(null);
         } catch (error) {
-            console.error('Failed to update sleep:', error);
+            console.error('Failed to update body measurement:', error);
         }
     };
 
-    const handleSleepDelete = async (timestamp: string) => {
+    const handleMeasurementDelete = async (timestamp: string) => {
         try {
-            await dispatch(deleteSleepMeasurementAsync({ timestamp })).unwrap();
-            setIsSleepSheetVisible(false);
+            await dispatch(deleteBodyMeasurementAsync({ timestamp })).unwrap();
+            setIsBodyMeasurementsSheetVisible(false);
             setSelectedMeasurement(null);
         } catch (error) {
-            console.error('Failed to delete sleep:', error);
+            console.error('Failed to delete body measurement:', error);
         }
     };
 
@@ -105,42 +111,44 @@ export default function AllSleepDataScreen() {
         const selectedDate = new Date(date);
         setSelectedCalendarDate(selectedDate);
 
-        const measurement = userSleepMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date);
+        const measurement = userBodyMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === selectedDate.toDateString());
 
         if (measurement) {
             handleTilePress(measurement);
         } else {
             setSelectedMeasurement(null);
-            setIsAddingSleep(true);
-            setIsSleepSheetVisible(true);
+            setIsAddingMeasurement(true);
+            setIsBodyMeasurementsSheetVisible(true);
         }
     };
 
     const handleSheetClose = () => {
-        setIsSleepSheetVisible(false);
+        setIsBodyMeasurementsSheetVisible(false);
         setSelectedMeasurement(null);
-        setIsAddingSleep(false);
+        setIsAddingMeasurement(false);
     };
 
     // Update tile press handler
-    const handleTilePress = (measurement: UserSleepMeasurement) => {
+    const handleTilePress = (measurement: UserBodyMeasurement) => {
         setSelectedMeasurement(measurement);
-        setIsAddingSleep(false);
-        setIsSleepSheetVisible(true);
+        setIsAddingMeasurement(false);
+        setIsBodyMeasurementsSheetVisible(true);
     };
 
     // Render tile for the measurement list
-    const renderSleepTile = (item: UserSleepMeasurement, previousItem?: UserSleepMeasurement) => {
+    const renderMeasurementTile = (item: UserBodyMeasurement, previousItem?: UserBodyMeasurement) => {
+        if (item.waist === undefined) return null;
+
         const date = new Date(item.MeasurementTimestamp);
         const dayOfWeek = date.toLocaleDateString('default', { weekday: 'long' });
         const month = date.toLocaleDateString('default', { month: 'short' });
         const day = date.getDate();
 
-        const sleepChange = previousItem ? getSleepChange(item.DurationInMinutes, previousItem.DurationInMinutes) : null;
+        const waistChange = getWaistChange(item.waist, previousItem?.waist);
 
         return (
             <TouchableOpacity
-                style={[styles.tile, { backgroundColor: lightenColor(themeColors.blueTransparent, 0.1) }]}
+                style={[styles.tile, { backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.1) }]}
                 onPress={() => handleTilePress(item)}
                 activeOpacity={0.8}
             >
@@ -148,24 +156,23 @@ export default function AllSleepDataScreen() {
                     <ThemedText type='caption' style={styles.dateText}>
                         {`${dayOfWeek}, ${month} ${day}`}
                     </ThemedText>
-                    <ThemedText type='title' style={styles.weightText}>
-                        {/* {item.Weight.toFixed(1)} kg */}
-                        {Math.floor(item.DurationInMinutes / 60)} h {item.DurationInMinutes % 60} m
+                    <ThemedText type='title' style={styles.measurementText}>
+                        {formatMeasurementForDisplay(item.waist || 0, measurementUnit)}
                     </ThemedText>
                 </View>
-                {sleepChange && (
+                {waistChange && (
                     <View style={styles.tileRight}>
                         <ThemedText
                             type='body'
                             style={[
                                 styles.changeText,
                                 {
-                                    color: parseFloat(sleepChange) > 0 ? themeColors.maroonSolid : darkenColor(themeColors.accent, 0.3),
+                                    color: parseFloat(waistChange) > 0 ? themeColors.maroonSolid : darkenColor(themeColors.accent, 0.3),
                                 },
                             ]}
                         >
-                            {parseFloat(sleepChange) > 0 ? '+' : ''}
-                            {Math.floor(parseInt(sleepChange) / 60)} h {parseInt(sleepChange) % 60} m
+                            {parseFloat(waistChange) > 0 ? '+' : ''}
+                            {measurementUnit === 'inches' ? `${cmToInches(parseFloat(waistChange)).toFixed(1)} in` : `${waistChange} cm`}
                         </ThemedText>
                     </View>
                 )}
@@ -173,15 +180,18 @@ export default function AllSleepDataScreen() {
         );
     };
 
-    const measurementData = userSleepMeasurements.map((measurement) => ({
-        timestamp: measurement.MeasurementTimestamp,
-        value: measurement.DurationInMinutes,
-        originalData: measurement,
-    }));
+    // Filter and prepare measurements data that have waist values
+    const measurementData = userBodyMeasurements
+        .filter((m) => m.waist !== undefined)
+        .map((measurement) => ({
+            timestamp: measurement.MeasurementTimestamp,
+            value: measurement.waist || 0,
+            originalData: measurement,
+        }));
 
     // Prepare data for list rendering with previous measurements
     const renderListItem = (item: CalendarData) => {
-        return renderSleepTile(item.originalData, item.previousData);
+        return renderMeasurementTile(item.originalData, item.previousData);
     };
 
     return (
@@ -190,23 +200,22 @@ export default function AllSleepDataScreen() {
                 scrollY={scrollY}
                 disableColorChange={true}
                 headerBackground={themeColors.background}
-                title='Sleep History'
+                title='Body Measurements History'
                 menuIcon='plus'
-                onMenuPress={handleAddSleep}
+                onMenuPress={handleAddMeasurement}
             />
 
             <View style={styles.content}>
-                <MeasurementCalendar data={measurementData} onDayPress={handleDayPress} renderTile={renderListItem} backgroundColor='blueSolid' />
+                <MeasurementCalendar data={measurementData} onDayPress={handleDayPress} renderTile={renderListItem} backgroundColor='tangerineSolid' />
             </View>
 
-            <SleepLoggingSheet
-                visible={isSleepSheetVisible}
+            <BodyMeasurementsLoggingSheet
+                visible={isBodyMeasurementsSheetVisible}
                 onClose={handleSheetClose}
-                onSubmit={isAddingSleep ? handleSleepAdd : handleSleepUpdate}
-                onDelete={handleSleepDelete}
-                initialSleep={selectedMeasurement?.DurationInMinutes}
-                initialDate={isAddingSleep ? selectedCalendarDate : selectedMeasurement ? new Date(selectedMeasurement.MeasurementTimestamp) : undefined}
-                isEditing={!!selectedMeasurement}
+                onSubmit={isAddingMeasurement ? handleMeasurementAdd : handleMeasurementUpdate}
+                onDelete={handleMeasurementDelete}
+                initialDate={isAddingMeasurement ? selectedCalendarDate : selectedMeasurement ? new Date(selectedMeasurement.MeasurementTimestamp) : undefined}
+                isLoading={false}
                 getExistingData={getExistingData}
             />
         </ThemedView>
@@ -241,7 +250,7 @@ const styles = StyleSheet.create({
     dateText: {
         marginBottom: Spaces.XS,
     },
-    weightText: {
+    measurementText: {
         fontWeight: '600',
     },
     changeText: {

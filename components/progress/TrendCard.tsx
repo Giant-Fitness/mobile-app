@@ -6,9 +6,10 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Icon } from '@/components/base/Icon';
 import { Spaces } from '@/constants/Spaces';
-import { SparkLine, EmptySparkLine } from '../charts/SparkLine';
+import { SparkLine, EmptySparkLine, SinglePointSparkLine } from '../charts/SparkLine';
 import { ThemedText } from '../base/ThemedText';
 import { lightenColor } from '@/utils/colorUtils';
+import { format } from 'date-fns';
 import Animated, { useAnimatedStyle, withRepeat, withTiming, withSequence, useSharedValue } from 'react-native-reanimated';
 
 type ThemeColorKey = keyof typeof Colors['light'];
@@ -22,15 +23,13 @@ type TrendCardProps = {
     style?: any;
     themeColor: ThemeColorKey;
     themeTransparentColor: ThemeColorKey;
-    emptyStateTitle: string;
-    emptyStateDescription: string;
-    formatValue: (value: number) => string;
+    formatAvgValue: (value: number) => string;
     processData: (data: any[]) => {
         processedData: { x: number; y: number; value: number }[];
         dateRange: string;
         average: number;
     };
-    renderSingleDataPoint: (props: { measurement: any; onPress: () => void; themeColors: any }) => React.ReactNode;
+    valueKey?: string;
 };
 
 const ShimmerEffect = ({ style }: { style: any }) => {
@@ -60,14 +59,13 @@ export const TrendCard: React.FC<TrendCardProps> = ({
     style = {},
     themeColor,
     themeTransparentColor,
-    emptyStateTitle,
-    emptyStateDescription,
-    formatValue,
+    formatAvgValue,
     processData,
-    renderSingleDataPoint,
+    valueKey = 'Value',
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+
     const handlePress = () => {
         if (data?.length === 1) {
             const measurementDate = new Date(data[0].MeasurementTimestamp);
@@ -82,6 +80,25 @@ export const TrendCard: React.FC<TrendCardProps> = ({
             onPress();
         }
     };
+
+    // Common card styling for all states
+    const cardStyle = [
+        styles.card,
+        {
+            backgroundColor: themeColors[themeTransparentColor],
+            borderColor: lightenColor(themeColors[themeColor], 0.7),
+        },
+        style,
+    ];
+
+    // Common divider styling for consistent placement
+    const dividerStyle = [
+        styles.divider,
+        {
+            borderBottomColor: themeColors.systemBorderColor,
+            borderBottomWidth: StyleSheet.hairlineWidth,
+        },
+    ];
 
     if (isLoading) {
         return (
@@ -104,74 +121,107 @@ export const TrendCard: React.FC<TrendCardProps> = ({
 
     if (!data?.length) {
         return (
-            <TouchableOpacity
-                style={[styles.card, { backgroundColor: themeColors[themeTransparentColor], borderColor: lightenColor(themeColors[themeColor], 0.9) }, style]}
-                onPress={handlePress}
-                activeOpacity={0.9}
-            >
-                <View style={styles.emptyStateContainer}>
-                    <View style={styles.emptyStateContent}>
-                        <View style={[styles.iconContainer]} />
-                        <ThemedText type='title' style={styles.emptyStateTitle}>
-                            {emptyStateTitle}
+            <TouchableOpacity style={cardStyle} onPress={handlePress} activeOpacity={0.9}>
+                <View style={styles.textContainer}>
+                    <ThemedText type='button' style={styles.title}>
+                        {title}
+                    </ThemedText>
+                    <ThemedText type='bodySmall' style={[styles.subtitle, { color: themeColors.subText }]}>
+                        No data available
+                    </ThemedText>
+                </View>
+                <View style={[styles.chartContainer, style.chartContainer]}>
+                    <EmptySparkLine color={lightenColor(themeColors[themeColor], 0.5)} />
+                </View>
+                <View style={dividerStyle} />
+                <View style={styles.footerContainer}>
+                    <TouchableOpacity style={styles.addButtonSmall} onPress={handlePress} activeOpacity={0.8}>
+                        <Icon name='plus' size={14} color={themeColors[themeColor]} style={styles.addIconSmall} />
+                        <ThemedText type='button' style={[styles.buttonText, { color: themeColors[themeColor] }]}>
+                            Start
                         </ThemedText>
-                        <ThemedText type='bodySmall' style={[styles.emptyStateDescription, { color: themeColors.subText }]}>
-                            {emptyStateDescription}
-                        </ThemedText>
-                        <TouchableOpacity style={[styles.addButton, { backgroundColor: themeColors[themeColor] }]} onPress={handlePress} activeOpacity={0.8}>
-                            <Icon name='plus' size={18} color={themeColors.white} style={styles.addIcon} />
-                            <ThemedText type='button' style={[styles.buttonText, { color: themeColors.white }]}>
-                                Add First Measurement
-                            </ThemedText>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.chartContainer}>
-                        <EmptySparkLine color={themeColors[themeColor]} />
-                    </View>
+                    </TouchableOpacity>
+                    <Icon name='chevron-forward' size={14} color={themeColors.subText} style={{ marginTop: Spaces.XXS }} />
                 </View>
             </TouchableOpacity>
         );
     }
 
     if (data.length === 1) {
+        const measurement = data[0];
+        const measurementDate = new Date(measurement.MeasurementTimestamp);
+        const today = new Date();
+        const isToday = measurementDate.toDateString() === today.toDateString();
+        const formattedDate = format(measurementDate, 'MMM d, yyyy');
+
+        // Get value using valueKey
+        const value = measurement[valueKey] !== undefined ? measurement[valueKey] : 0;
+
         return (
-            <View
-                style={[styles.card, { backgroundColor: themeColors[themeTransparentColor], borderColor: lightenColor(themeColors[themeColor], 0.9) }, style]}
-            >
-                {renderSingleDataPoint({
-                    measurement: data[0],
-                    onPress: handlePress,
-                    themeColors,
-                })}
-            </View>
+            <TouchableOpacity style={cardStyle} onPress={handlePress} activeOpacity={0.9} disabled={isToday}>
+                <View style={styles.textContainer}>
+                    <ThemedText type='button' style={styles.title}>
+                        {title}
+                    </ThemedText>
+                </View>
+
+                <View style={styles.singlePointContainer}>
+                    {isToday ? (
+                        <>
+                            <View style={styles.singlePointMessage}>
+                                <ThemedText type='bodySmall' style={[styles.singlePointHelperText, { color: themeColors.subText }]}>
+                                    Great start! Add another tomorrow to start tracking your trend.
+                                </ThemedText>
+                            </View>
+                        </>
+                    ) : (
+                        <>
+                            <View style={styles.textContainer}>
+                                <ThemedText type='bodySmall' style={[styles.subtitle, { color: themeColors.subText }]}>
+                                    {formattedDate}
+                                </ThemedText>
+                            </View>
+                            <View style={[styles.chartContainer, style.chartContainer]}>
+                                <SinglePointSparkLine value={value} color={lightenColor(themeColors[themeColor], 0.5)} />
+                            </View>
+                            <View style={dividerStyle} />
+                            <View style={styles.footerContainer}>
+                                <TouchableOpacity style={styles.addButtonSmall} onPress={handlePress} activeOpacity={0.8}>
+                                    <Icon name='plus' size={14} color={themeColors[themeColor]} style={styles.addIconSmall} />
+                                    <ThemedText type='button' style={[styles.buttonText, { color: themeColors[themeColor] }]}>
+                                        Add next
+                                    </ThemedText>
+                                </TouchableOpacity>
+                                <Icon name='chevron-forward' size={14} color={themeColors.subText} style={{ marginTop: Spaces.XXS }} />
+                            </View>
+                        </>
+                    )}
+                </View>
+            </TouchableOpacity>
         );
     }
 
     const { processedData, dateRange, average } = processData(data);
 
     return (
-        <TouchableOpacity
-            style={[styles.card, { backgroundColor: themeColors[themeTransparentColor], borderColor: lightenColor(themeColors[themeColor], 0.9) }, style]}
-            onPress={handlePress}
-            activeOpacity={0.9}
-        >
+        <TouchableOpacity style={cardStyle} onPress={handlePress} activeOpacity={0.9}>
             <View style={styles.textContainer}>
-                <ThemedText type='title' style={styles.title}>
+                <ThemedText type='button' style={styles.title}>
                     {title}
                 </ThemedText>
-                <ThemedText type='body' style={[styles.subtitle, { color: themeColors.subText }]}>
+                <ThemedText type='bodySmall' style={[styles.subtitle, { color: themeColors.subText }]}>
                     {dateRange}
                 </ThemedText>
             </View>
             <View style={[styles.chartContainer, style.chartContainer]}>
                 <SparkLine data={processedData} color={themeColors[themeColor]} dotFillColor={themeColors[themeTransparentColor]} />
             </View>
-            <View style={[styles.divider, { borderBottomColor: themeColors.systemBorderColor, borderBottomWidth: StyleSheet.hairlineWidth }]} />
+            <View style={dividerStyle} />
             <View style={styles.footerContainer}>
                 <ThemedText type='overline' style={[styles.value, { color: themeColors.subText }]}>
-                    {formatValue(average)}
+                    {formatAvgValue(average)}
                 </ThemedText>
-                <Icon name='chevron-forward' color={themeColors.subText} />
+                <Icon name='chevron-forward' size={14} color={themeColors.subText} style={{ marginTop: Spaces.XXS }} />
             </View>
         </TouchableOpacity>
     );
@@ -180,17 +230,20 @@ export const TrendCard: React.FC<TrendCardProps> = ({
 const styles = StyleSheet.create({
     card: {
         borderRadius: Spaces.SM,
-        padding: Spaces.MD,
+        paddingHorizontal: Spaces.SM,
+        paddingVertical: Spaces.XS,
         alignItems: 'flex-start',
         width: '100%',
-        borderWidth: 1,
+        borderWidth: StyleSheet.hairlineWidth,
     },
     chartContainer: {
-        width: '100%',
-        height: 80,
+        width: '90%',
+        height: 60,
         justifyContent: 'center',
         alignItems: 'center',
+        alignSelf: 'center',
         marginVertical: Spaces.XXS,
+        position: 'relative',
     },
     textContainer: {
         width: '100%',
@@ -218,47 +271,38 @@ const styles = StyleSheet.create({
         width: '100%',
         alignSelf: 'center',
     },
-    emptyStateContainer: {
-        width: '100%',
-        alignItems: 'center',
-        paddingVertical: Spaces.SM,
-    },
-    emptyStateContent: {
-        alignItems: 'center',
-        paddingHorizontal: Spaces.MD,
-    },
-    iconContainer: {
-        width: Spaces.LG,
-        height: Spaces.LG,
-        borderRadius: Spaces.LG,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    emptyStateTitle: {
-        marginBottom: Spaces.SM,
-        textAlign: 'center',
-    },
-    emptyStateDescription: {
-        textAlign: 'center',
-        marginBottom: Spaces.MD,
-        paddingHorizontal: 0,
-    },
-    addButton: {
+    addButtonSmall: {
         flexDirection: 'row',
         alignItems: 'center',
+    },
+    addIconSmall: {
+        marginRight: Spaces.XXS,
+    },
+    buttonText: {},
+    // Single data point styles
+    singlePointContainer: {
+        width: '100%',
+        alignItems: 'center',
+    },
+    singlePointMessage: {
+        width: '100%',
+        paddingHorizontal: Spaces.SM,
+        justifyContent: 'center',
+        minHeight: 120,
+    },
+    singlePointHelperText: {
+        textAlign: 'center',
+    },
+    addNextButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
         paddingHorizontal: Spaces.MD,
         paddingVertical: Spaces.SM,
         borderRadius: 20,
-        marginBottom: Spaces.SM,
-        marginTop: Spaces.SM,
+        marginBottom: Spaces.XS,
     },
     addIcon: {
         marginRight: Spaces.XXS,
-    },
-    buttonText: {
-        fontWeight: '600',
-    },
-    contentWrapper: {
-        width: '100%',
     },
 });

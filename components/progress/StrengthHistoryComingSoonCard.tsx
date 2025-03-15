@@ -39,20 +39,13 @@ export const StrengthHistoryComingSoonCard: React.FC<StrengthHistoryComingSoonCa
 
     return (
         <TouchableOpacity
-            style={[
-                styles.card,
-                {
-                    backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.5),
-                    borderColor: lightenColor(themeColors.tangerineSolid, 0.9),
-                },
-                style,
-            ]}
+            style={[styles.card, { backgroundColor: themeColors.tealTransparent, borderColor: lightenColor(themeColors.tealSolid, 0.9) }, style]}
             onPress={onPress}
             activeOpacity={1}
         >
             <View style={styles.emptyStateContainer}>
                 <View style={styles.emptyStateContent}>
-                    <View style={[styles.comingSoonBadge, { backgroundColor: lightenColor(themeColors.tangerineSolid, 0.2) }]}>
+                    <View style={[styles.comingSoonBadge, { backgroundColor: themeColors.tealSolid }]}>
                         <ThemedText type='button' style={[styles.badgeText, { color: themeColors.white }]}>
                             Strength Tracking
                         </ThemedText>
@@ -62,7 +55,7 @@ export const StrengthHistoryComingSoonCard: React.FC<StrengthHistoryComingSoonCa
                     </ThemedText>
                 </View>
                 <View style={styles.chartContainer}>
-                    <BarbellIllustration color={lightenColor(themeColors.tangerineSolid, 0.4)} />
+                    <BarbellIllustration color={lightenColor(themeColors.tealSolid, 0.4)} />
                 </View>
             </View>
         </TouchableOpacity>
@@ -76,7 +69,7 @@ const styles = StyleSheet.create({
         paddingTop: Spaces.LG,
         alignItems: 'flex-start',
         width: '100%',
-        borderWidth: 1,
+        borderWidth: StyleSheet.hairlineWidth,
     },
     emptyStateContainer: {
         width: '100%',

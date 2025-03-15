@@ -20,7 +20,7 @@ import { Icon } from '@/components/base/Icon';
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
 import { updateWeightMeasurementAsync, deleteWeightMeasurementAsync, logWeightMeasurementAsync } from '@/store/user/thunks';
 import { router } from 'expo-router';
-import { kgToPounds } from '@/utils/weightConversion';
+import { kgToPounds } from '@/utils/unitConversion';
 
 const getWeightChange = (currentWeight: number, previousWeight: number | null) => {
     if (previousWeight === null) return null;
@@ -184,7 +184,7 @@ export default function WeightTrackingScreen() {
 
         const filteredMeasurements = userWeightMeasurements.filter((measurement) => {
             const date = new Date(measurement.MeasurementTimestamp);
-            return date >= twoMonthsAgo && date <= now;
+            return date >= twoMonthsAgo;
         });
 
         filteredMeasurements.sort((a, b) => new Date(b.MeasurementTimestamp).getTime() - new Date(a.MeasurementTimestamp).getTime());

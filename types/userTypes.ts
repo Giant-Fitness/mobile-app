@@ -50,9 +50,31 @@ export interface UserSleepMeasurement {
 export interface UserAppSettingsMeasurementUnitsItem {
     BodyWeightUnits: string;
     LiftWeightUnits: string;
+    BodyMeasurementUnits: string;
 }
 
 export interface UserAppSettings {
     UserId: string;
     UnitsOfMeasurement: UserAppSettingsMeasurementUnitsItem;
+}
+
+export interface UserBodyMeasurement {
+    UserId: string;
+    MeasurementTimestamp: string;
+    // Specific measurements
+    waist?: number;
+    hip?: number;
+    chest?: number;
+    neck?: number;
+    shoulder?: number;
+    abdomen?: number;
+    leftBicep?: number;
+    rightBicep?: number;
+    leftThigh?: number;
+    rightThigh?: number;
+    leftCalf?: number;
+    rightCalf?: number;
+    // Derived measurements
+    waistHipRatio?: number;
+    UpdatedAt: string;
 }

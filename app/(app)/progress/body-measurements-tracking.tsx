@@ -1,3 +1,5 @@
+// app/(app)/progress/body-measurements-tracking.tsx
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { StyleSheet, View, TouchableOpacity, SectionList } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -9,23 +11,24 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { useSharedValue } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
-import { SleepChart } from '@/components/progress/SleepChart';
+import { WaistChart } from '@/components/progress/WaistChart';
 import { AppDispatch, RootState } from '@/store/store';
 import { TimeRange, aggregateData, calculateMovingAverage, getTimeRangeLabel, getAvailableTimeRanges, getInitialTimeRange } from '@/utils/charts';
-import { UserSleepMeasurement } from '@/types';
+import { UserBodyMeasurement } from '@/types';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { Icon } from '@/components/base/Icon';
-import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
-import { updateSleepMeasurementAsync, deleteSleepMeasurementAsync, logSleepMeasurementAsync } from '@/store/user/thunks';
+import { BodyMeasurementsLoggingSheet } from '@/components/progress/BodyMeasurementsLoggingSheet';
+import { updateBodyMeasurementAsync, deleteBodyMeasurementAsync, logBodyMeasurementAsync } from '@/store/user/thunks';
 import { router } from 'expo-router';
+import { formatMeasurementForDisplay, cmToInches } from '@/utils/unitConversion';
 
-const getSleepChange = (currentSleep: number, previousSleep: number | null) => {
-    if (previousSleep === null) return null;
-    const change = currentSleep - previousSleep;
+const getWaistChange = (currentWaist: number, previousWaist: number | null) => {
+    if (previousWaist === null) return null;
+    const change = currentWaist - previousWaist;
     return change !== 0 ? change.toFixed(1) : null;
 };
 
-export default function SleepTrackingScreen() {
+export default function BodyMeasurementsTrackingScreen() {
     const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRange>('1W');
     const [availableRanges, setAvailableRanges] = useState<ReturnType<typeof getAvailableTimeRanges>>([]);
     const scrollY = useSharedValue(0);
@@ -33,159 +36,152 @@ export default function SleepTrackingScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
-    const { userSleepMeasurements } = useSelector((state: RootState) => state.user);
-    const [isSleepSheetVisible, setIsSleepSheetVisible] = useState(false);
-    const [isAddingSleep, setIsAddingSleep] = useState(false);
-    const [selectedMeasurement, setSelectedMeasurement] = useState<UserSleepMeasurement | null>(null);
+    const { userBodyMeasurements } = useSelector((state: RootState) => state.user);
+    const [isBodyMeasurementsSheetVisible, setIsBodyMeasurementsSheetVisible] = useState(false);
+    const [isAddingBodyMeasurement, setIsAddingBodyMeasurement] = useState(false);
+    const [selectedMeasurement, setSelectedMeasurement] = useState<UserBodyMeasurement | null>(null);
+    const measurementUnit = useSelector(
+        (state: RootState) => (state.user.userAppSettings?.UnitsOfMeasurement?.BodyMeasurementUnits as 'cms' | 'inches') || 'cms',
+    );
     const dispatch = useDispatch<AppDispatch>();
 
     useEffect(() => {
-        if (userSleepMeasurements.length) {
-            const ranges = getAvailableTimeRanges(userSleepMeasurements);
+        if (userBodyMeasurements.length) {
+            const ranges = getAvailableTimeRanges(userBodyMeasurements);
             setAvailableRanges(ranges);
-            setSelectedTimeRange(getInitialTimeRange(userSleepMeasurements));
+            setSelectedTimeRange(getInitialTimeRange(userBodyMeasurements));
         }
-    }, [userSleepMeasurements]);
+    }, [userBodyMeasurements]);
 
-    // Add handlers for weight modifications
-    const handleSleepUpdate = async (sleep: number) => {
+    // Handlers for body measurements modifications
+    const handleBodyMeasurementUpdate = async (measurements: Record<string, number>) => {
         if (!selectedMeasurement) return;
 
         try {
             await dispatch(
-                updateSleepMeasurementAsync({
+                updateBodyMeasurementAsync({
                     timestamp: selectedMeasurement.MeasurementTimestamp,
-                    durationInMinutes: sleep,
+                    measurements: measurements,
                 }),
             ).unwrap();
             setSelectedMeasurement(null);
         } catch (error) {
-            console.error('Failed to update sleep:', error);
+            console.error('Failed to update body measurement:', error);
         }
     };
 
-    // Add the handleSleepAdd function
-    const handleSleepAdd = async (sleep: number, date: Date) => {
+    const handleBodyMeasurementAdd = async (measurements: Record<string, number>, date: Date) => {
         try {
             await dispatch(
-                logSleepMeasurementAsync({
-                    durationInMinutes: sleep,
+                logBodyMeasurementAsync({
+                    measurements: measurements,
                     measurementTimestamp: date.toISOString(),
                 }),
             ).unwrap();
-            setIsAddingSleep(false);
+            setIsAddingBodyMeasurement(false);
         } catch (error) {
-            console.error('Failed to log sleep:', error);
+            console.error('Failed to log body measurement:', error);
         }
     };
 
-    const handleSleepDelete = async (timestamp: string) => {
+    const handleBodyMeasurementDelete = async (timestamp: string) => {
         try {
-            await dispatch(deleteSleepMeasurementAsync({ timestamp })).unwrap();
-            setIsSleepSheetVisible(false);
+            await dispatch(deleteBodyMeasurementAsync({ timestamp })).unwrap();
+            setIsBodyMeasurementsSheetVisible(false);
             setSelectedMeasurement(null);
         } catch (error) {
-            console.error('Failed to delete sleep:', error);
+            console.error('Failed to delete body measurement:', error);
         }
     };
 
-    // Update the handleTilePress function
-    const handleTilePress = (measurement: UserSleepMeasurement) => {
+    const handleTilePress = (measurement: UserBodyMeasurement) => {
         setSelectedMeasurement(measurement);
-        setIsSleepSheetVisible(true);
+        setIsBodyMeasurementsSheetVisible(true);
     };
 
-    // Update the handleDataPointPress function
-    const handleDataPointPress = (measurement: UserSleepMeasurement) => {
+    const handleDataPointPress = (measurement: UserBodyMeasurement) => {
         setSelectedMeasurement(measurement);
-        setIsSleepSheetVisible(true);
+        setIsBodyMeasurementsSheetVisible(true);
     };
 
-    const handleAddSleep = () => {
+    const handleAddBodyMeasurement = () => {
         setSelectedMeasurement(null); // Ensure we're not in edit mode
-        setIsAddingSleep(true);
-        setIsSleepSheetVisible(true);
+        setIsAddingBodyMeasurement(true);
+        setIsBodyMeasurementsSheetVisible(true);
     };
 
-    // Add this close handler
     const handleSheetClose = () => {
-        setIsSleepSheetVisible(false);
+        setIsBodyMeasurementsSheetVisible(false);
         setSelectedMeasurement(null);
-        setIsAddingSleep(false);
+        setIsAddingBodyMeasurement(false);
     };
 
     const getExistingData = (date: Date) => {
-        return userSleepMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
+        return userBodyMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
     };
 
-    const { aggregatedData, effectiveTimeRange, averageSleep, yAxisRange, movingAverages } = useMemo(() => {
-        if (!userSleepMeasurements.length) {
+    // Filter and process body measurements data to match chart format
+    const processedBodyMeasurements = useMemo(() => {
+        return userBodyMeasurements
+            .filter((m) => m.waist !== undefined)
+            .sort((a, b) => new Date(a.MeasurementTimestamp).getTime() - new Date(b.MeasurementTimestamp).getTime());
+    }, [userBodyMeasurements]);
+
+    const { aggregatedData, effectiveTimeRange, waistChange, averageWaist, yAxisRange, movingAverages } = useMemo(() => {
+        if (!processedBodyMeasurements.length) {
             return {
                 aggregatedData: [],
                 effectiveTimeRange: '',
-                currentSleep: 0,
-                sleepChange: 0,
-                changePercent: 0,
-                averageSleep: 0,
-                startSleep: 0,
+                waistChange: 0,
+                averageWaist: 0,
                 yAxisRange: { min: 0, max: 100 },
                 movingAverages: [],
-                allTimeChange: 0,
-                allTimePercent: 0,
-                allTimeStart: 0,
             };
         }
 
-        const aggregated = aggregateData(userSleepMeasurements, selectedTimeRange);
+        const aggregated = aggregateData(processedBodyMeasurements, selectedTimeRange);
 
-        const sleeps = aggregated.map((d) => d.durationInMinutes ?? 0);
-        const avg = sleeps.length > 0 ? sleeps.reduce((a, b) => a + b, 0) / sleeps.length : 0;
-        const change = sleeps.length > 1 ? (aggregated[aggregated.length - 1]?.durationInMinutes ?? 0) - (aggregated[0]?.durationInMinutes ?? 0) : 0;
-        const percent = aggregated.length > 0 ? (change / (aggregated[0]?.durationInMinutes ?? 1)) * 100 : 0;
+        // Map the waist values from the aggregated data
+        const waistValues = aggregated.map((d) => d.waist ?? 0);
 
-        const allData = [...userSleepMeasurements].sort((a, b) => new Date(a.MeasurementTimestamp).getTime() - new Date(b.MeasurementTimestamp).getTime());
-        const allTimeChange = allData[allData.length - 1].DurationInMinutes - allData[0].DurationInMinutes;
-        const allTimePercent = (allTimeChange / allData[0].DurationInMinutes) * 100;
+        const avg = waistValues.length > 0 ? waistValues.reduce((a, b) => a + b, 0) / waistValues.length : 0;
+        const change = waistValues.length > 1 ? (aggregated[aggregated.length - 1]?.waist ?? 0) - (aggregated[0]?.waist ?? 0) : 0;
 
-        const minSleep = Math.min(...sleeps);
-        const maxSleep = Math.max(...sleeps);
-        const range = maxSleep - minSleep;
-        const padding = Math.max(range * 0.1, 1);
+        const minWaist = Math.min(...waistValues);
+        const maxWaist = Math.max(...waistValues);
+        const range = maxWaist - minWaist;
+        const paddingFactor = range > 20 ? 0.03 : 0.05; // 3% or 5% padding depending on range
+        const padding = Math.max(range * paddingFactor, 0.3); // Minimum padding of 0.3 units
 
         return {
             aggregatedData: aggregated,
             effectiveTimeRange: aggregated.length > 0 ? getTimeRangeLabel(aggregated[0].timestamp, aggregated[aggregated.length - 1].timestamp) : '',
-            currentSleep: aggregated.length > 0 ? aggregated[aggregated.length - 1].weight : 0,
-            sleepChange: change,
-            changePercent: percent,
-            averageSleep: avg,
-            startSleep: aggregated.length > 0 ? aggregated[0].weight : 0,
+            waistChange: change,
+            averageWaist: avg,
             yAxisRange: {
-                min: sleeps.length > 0 ? Math.floor(minSleep - padding) : 0,
-                max: sleeps.length > 0 ? Math.ceil(maxSleep + padding) : 100,
+                min: Math.max(0, Math.floor(minWaist - padding)),
+                max: Math.ceil(maxWaist + padding),
             },
             movingAverages: aggregated.length > 0 ? calculateMovingAverage(aggregated, selectedTimeRange) : [],
-            allTimeChange: allTimeChange,
-            allTimePercent: allTimePercent,
-            allTimeStart: allData[0]?.DurationInMinutes || 0,
         };
-    }, [userSleepMeasurements, selectedTimeRange]);
+    }, [processedBodyMeasurements, selectedTimeRange]);
 
     const groupedData = useMemo(() => {
-        if (!userSleepMeasurements.length) return [];
+        if (!userBodyMeasurements.length) return [];
 
         const now = new Date();
-        // Set to first day of previous month
-        const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth(), 1);
 
-        const filteredMeasurements = userSleepMeasurements.filter((measurement) => {
-            const date = new Date(measurement.MeasurementTimestamp);
-            return date >= twoMonthsAgo;
-        });
+        const filteredMeasurements = userBodyMeasurements
+            .filter((m) => m.waist !== undefined)
+            .filter((measurement) => {
+                const date = new Date(measurement.MeasurementTimestamp);
+                return date >= twoMonthsAgo;
+            });
 
         filteredMeasurements.sort((a, b) => new Date(b.MeasurementTimestamp).getTime() - new Date(a.MeasurementTimestamp).getTime());
 
-        const groups: { title: string; data: UserSleepMeasurement[] }[] = [];
+        const groups: { title: string; data: UserBodyMeasurement[] }[] = [];
         filteredMeasurements.forEach((measurement) => {
             const date = new Date(measurement.MeasurementTimestamp);
             const monthYear = date.toLocaleString('default', { month: 'long', year: 'numeric' });
@@ -199,37 +195,48 @@ export default function SleepTrackingScreen() {
         });
 
         return groups;
-    }, [userSleepMeasurements]);
+    }, [userBodyMeasurements]);
 
     const renderListHeader = () => (
         <View>
             <View style={styles.header}>
                 <View style={styles.legendContainer}>
                     <View style={styles.legendItem}>
-                        <View style={[styles.legendDot, { borderColor: themeColors.blueSolid }]} />
-                        <ThemedText type='bodyXSmall'>Sleep</ThemedText>
+                        <View style={[styles.legendDot, { borderColor: themeColors.tangerineSolid }]} />
+                        <ThemedText type='bodyXSmall'>Waist</ThemedText>
                     </View>
                     <View style={[styles.legendItem, { marginLeft: Spaces.MD }]}>
-                        <View style={[styles.legendLine, { backgroundColor: lightenColor(themeColors.blueSolid, 0.6) }]} />
+                        <View style={[styles.legendLine, { backgroundColor: lightenColor(themeColors.tangerineSolid, 0.6) }]} />
                         <ThemedText type='bodyXSmall'>Trend Line</ThemedText>
                     </View>
                 </View>
             </View>
 
-            {/* move this to center */}
             <View style={styles.insightsContainer}>
                 <View style={styles.insightItem}>
                     <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
                         Average
                     </ThemedText>
-                    <ThemedText type='titleXLarge'>
-                        {Math.floor(averageSleep / 60)}h {(averageSleep % 60).toFixed(0)}m
+                    <ThemedText type='titleXLarge'>{formatMeasurementForDisplay(averageWaist, measurementUnit)}</ThemedText>
+                </View>
+                <View style={[styles.insightItem, { marginLeft: Spaces.XXXL }]}>
+                    <ThemedText type='bodySmall' style={[{ color: themeColors.subText }]}>
+                        Change
+                    </ThemedText>
+                    <ThemedText
+                        type='titleXLarge'
+                        style={{
+                            color: waistChange > 0 ? themeColors.maroonSolid : darkenColor(themeColors.accent, 0.3),
+                        }}
+                    >
+                        {waistChange > 0 ? '+' : ''}
+                        {formatMeasurementForDisplay(waistChange, measurementUnit)}
                     </ThemedText>
                 </View>
             </View>
 
             <View style={styles.chartContainer}>
-                <SleepChart
+                <WaistChart
                     data={aggregatedData}
                     timeRange={selectedTimeRange}
                     availableRanges={availableRanges}
@@ -241,7 +248,7 @@ export default function SleepTrackingScreen() {
                 />
             </View>
 
-            <TouchableOpacity style={styles.dataButton} onPress={() => router.push('/(app)/progress/all-sleep-data')} activeOpacity={0.9}>
+            <TouchableOpacity style={styles.dataButton} onPress={() => router.push('/(app)/progress/all-waist-data')} activeOpacity={0.9}>
                 <ThemedText type='titleXLarge'>Data</ThemedText>
                 <Icon name='chevron-forward' style={styles.dataChevron} color={themeColors.text} />
             </TouchableOpacity>
@@ -254,43 +261,44 @@ export default function SleepTrackingScreen() {
         </ThemedText>
     );
 
-    const renderDataItem = ({ item, section, index }: { item: UserSleepMeasurement; section: any; index: number }) => {
+    const renderDataItem = ({ item, section, index }: { item: UserBodyMeasurement; section: any; index: number }) => {
+        if (item.waist === undefined) return null;
+
         const date = new Date(item.MeasurementTimestamp);
         const dayOfWeek = date.toLocaleDateString('default', { weekday: 'long' });
         const month = date.toLocaleDateString('default', { month: 'short' });
         const day = date.getDate();
-        const previousSleep = index < section.data.length - 1 ? section.data[index + 1].DurationInMinutes : null;
-        const sleepChange = getSleepChange(item.DurationInMinutes, previousSleep);
+
+        const previousWaist = index < section.data.length - 1 ? section.data[index + 1].waist : null;
+        const waistChange = getWaistChange(item.waist || 0, previousWaist);
 
         return (
-            <TouchableOpacity style={[styles.tile, { backgroundColor: themeColors.blueTransparent }]} onPress={() => handleTilePress(item)} activeOpacity={0.8}>
+            <TouchableOpacity
+                style={[styles.tile, { backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.5) }]}
+                onPress={() => handleTilePress(item)}
+                activeOpacity={0.8}
+            >
                 <View style={styles.tileLeft}>
                     <ThemedText type='caption'>
                         {dayOfWeek}, {`${month} ${day}`}
                     </ThemedText>
-                    <ThemedText type='title' style={styles.weightText}>
-                        {Math.floor(item.DurationInMinutes / 60)}h {item.DurationInMinutes % 60}m
+                    <ThemedText type='title' style={styles.waistText}>
+                        {formatMeasurementForDisplay(item.waist || 0, measurementUnit)}
                     </ThemedText>
                 </View>
-                {sleepChange && (
+                {waistChange && (
                     <View style={styles.tileRight}>
                         <ThemedText
                             type='bodySmall'
                             style={[
                                 styles.changeText,
                                 {
-                                    color: parseFloat(sleepChange) < 0 ? themeColors.maroonSolid : darkenColor(themeColors.accent, 0.3),
+                                    color: parseFloat(waistChange) > 0 ? themeColors.maroonSolid : darkenColor(themeColors.accent, 0.3),
                                 },
                             ]}
                         >
-                            {parseFloat(sleepChange) > 0 ? '+' : ''}
-                            {parseInt(sleepChange) > 0
-                                ? parseInt(sleepChange) > 59
-                                    ? `${Math.floor(parseInt(sleepChange) / 60)}h ${parseInt(sleepChange) % 60}m`
-                                    : `${sleepChange} m`
-                                : parseInt(sleepChange) < -59
-                                ? `- ${Math.floor((parseInt(sleepChange) * -1) / 60)}h ${(parseInt(sleepChange) * -1) % 60}m`
-                                : `${sleepChange} m`}
+                            {parseFloat(waistChange) > 0 ? '+' : ''}
+                            {measurementUnit === 'inches' ? `${cmToInches(parseFloat(waistChange)).toFixed(1)} in` : `${waistChange} cm`}
                         </ThemedText>
                     </View>
                 )}
@@ -304,9 +312,9 @@ export default function SleepTrackingScreen() {
                 scrollY={scrollY}
                 disableColorChange={true}
                 headerBackground={themeColors.background}
-                title='Sleep Tracking'
+                title='Waist Tracking'
                 menuIcon='plus'
-                onMenuPress={handleAddSleep}
+                onMenuPress={handleAddBodyMeasurement}
             />
 
             <SectionList
@@ -328,15 +336,15 @@ export default function SleepTrackingScreen() {
                 }}
             />
 
-            <SleepLoggingSheet
-                visible={isSleepSheetVisible}
+            <BodyMeasurementsLoggingSheet
+                visible={isBodyMeasurementsSheetVisible}
                 onClose={handleSheetClose}
-                onSubmit={isAddingSleep ? handleSleepAdd : handleSleepUpdate}
-                onDelete={handleSleepDelete}
-                initialSleep={selectedMeasurement?.DurationInMinutes}
+                onSubmit={isAddingBodyMeasurement ? handleBodyMeasurementAdd : handleBodyMeasurementUpdate}
+                onDelete={handleBodyMeasurementDelete}
+                isLoading={false}
+                getExistingData={getExistingData}
                 initialDate={selectedMeasurement ? new Date(selectedMeasurement.MeasurementTimestamp) : undefined}
                 isEditing={!!selectedMeasurement}
-                getExistingData={getExistingData}
             />
         </ThemedView>
     );
@@ -403,7 +411,7 @@ const styles = StyleSheet.create({
     tileRight: {
         marginLeft: Spaces.MD,
     },
-    weightText: {
+    waistText: {
         marginTop: Spaces.XS,
         fontWeight: '600',
     },

@@ -23,12 +23,18 @@ const UnitsSelectionScreen = () => {
     const userAppSettings = useSelector((state: RootState) => state.user.userAppSettings);
     const bodyWeightPreference = userAppSettings?.UnitsOfMeasurement?.BodyWeightUnits || 'kgs';
     const liftWeightPreference = userAppSettings?.UnitsOfMeasurement?.LiftWeightUnits || 'kgs';
+    const bodyMeasurementPreference = userAppSettings?.UnitsOfMeasurement?.BodyMeasurementUnits || 'cms';
 
     const [tempLiftWeightPreference, setTempLiftWeightPreference] = useState<string>(liftWeightPreference);
     const [tempBodyWeightPreference, setTempBodyWeightPreference] = useState<string>(bodyWeightPreference);
+    const [tempBodyMeasurementPreference, setTempBodyMeasurementPreference] = useState<string>(bodyMeasurementPreference);
+
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const hasChanges = bodyWeightPreference !== tempBodyWeightPreference || liftWeightPreference !== tempLiftWeightPreference;
+    const hasChanges =
+        bodyWeightPreference !== tempBodyWeightPreference ||
+        liftWeightPreference !== tempLiftWeightPreference ||
+        bodyMeasurementPreference !== tempBodyMeasurementPreference;
 
     const scrollY = useSharedValue(0);
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -47,6 +53,7 @@ const UnitsSelectionScreen = () => {
                 UnitsOfMeasurement: {
                     BodyWeightUnits: tempBodyWeightPreference,
                     LiftWeightUnits: tempLiftWeightPreference,
+                    BodyMeasurementUnits: tempBodyMeasurementPreference,
                 },
             };
             await dispatch(updateUserAppSettingsAsync({ userAppSettings: updatedSettings }));
@@ -89,6 +96,23 @@ const UnitsSelectionScreen = () => {
                     <View style={[styles.options, { backgroundColor: themeColors.backgroundSecondary }]}>
                         <RadioPill selected={tempLiftWeightPreference === 'kgs'} onPress={() => setTempLiftWeightPreference('kgs')} text='Kilograms' />
                         <RadioPill selected={tempLiftWeightPreference === 'lbs'} onPress={() => setTempLiftWeightPreference('lbs')} text='Pounds' />
+                    </View>
+                </View>
+                <View style={styles.section}>
+                    <ThemedText type='overlineTransformed' style={styles.sectionTitle}>
+                        Body Measurements
+                    </ThemedText>
+                    <View style={[styles.options, { backgroundColor: themeColors.backgroundSecondary }]}>
+                        <RadioPill
+                            selected={tempBodyMeasurementPreference === 'cms'}
+                            onPress={() => setTempBodyMeasurementPreference('cms')}
+                            text='Centimeters'
+                        />
+                        <RadioPill
+                            selected={tempBodyMeasurementPreference === 'inches'}
+                            onPress={() => setTempBodyMeasurementPreference('inches')}
+                            text='Inches'
+                        />
                     </View>
                 </View>
             </ThemedView>

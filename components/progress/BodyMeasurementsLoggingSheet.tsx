@@ -1,7 +1,7 @@
-// components/progress/WeightLoggingSheet.tsx
+// components/progress/BodyMeasurementsLoggingSheet.tsx
 
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, TextInput, View, TouchableOpacity, Platform, ActivityIndicator, Keyboard } from 'react-native';
+import { StyleSheet, TextInput, View, TouchableOpacity, Platform, ActivityIndicator, Keyboard, ScrollView } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { BottomSheet } from '@/components/overlays/BottomSheet';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -13,38 +13,41 @@ import { Icon } from '@/components/base/Icon';
 import { TextButton } from '@/components/buttons/TextButton';
 import { addDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameDay, isSameMonth, format } from 'date-fns';
 import { lightenColor } from '@/utils/colorUtils';
-import { UserWeightMeasurement } from '@/types';
+import { UserBodyMeasurement } from '@/types';
 import { Sizes } from '@/constants/Sizes';
 import { RootState } from '@/store/store';
 import { useSelector } from 'react-redux';
-import { formatWeightForDisplay, parseWeightForStorage } from '@/utils/unitConversion';
+import { formatMeasurementForDisplay, parseMeasurementForStorage } from '@/utils/unitConversion';
 
-interface WeightLoggingSheetProps {
+interface BodyMeasurementsLoggingSheetProps {
     visible: boolean;
     onClose: () => void;
-    onSubmit: (weight: number, date: Date) => Promise<void>;
+    onSubmit: (measurements: Record<string, number>, date: Date) => Promise<void>;
     onDelete?: (timestamp: string) => Promise<void>;
-    initialWeight?: number;
+    isLoading?: boolean;
+    getExistingData?: (date: Date) => UserBodyMeasurement | undefined;
     initialDate?: Date;
     isEditing?: boolean;
-    isLoading?: boolean;
-    getExistingData?: (date: Date) => UserWeightMeasurement | undefined;
 }
 
-export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
+export const BodyMeasurementsLoggingSheet: React.FC<BodyMeasurementsLoggingSheetProps> = ({
     visible,
     onClose,
     onSubmit,
     onDelete,
-    initialWeight,
+    getExistingData,
     initialDate,
     isEditing = false,
-    getExistingData,
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
-    const [weight, setWeight] = useState<string>('');
+    // Move the useSelector hook to the top level of the component
+    const measurementUnit = useSelector(
+        (state: RootState) => (state.user.userAppSettings?.UnitsOfMeasurement?.BodyMeasurementUnits as 'cms' | 'inches') || 'cms',
+    );
+
+    const [waist, setWaist] = useState<string>('');
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [showCalendar, setShowCalendar] = useState(false);
     const [displayMonth, setDisplayMonth] = useState<Date>(new Date());
@@ -52,62 +55,59 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isEditingMode, setIsEditingMode] = useState(isEditing);
-    const [originalWeight, setOriginalWeight] = useState<number | undefined>(undefined);
+    const [originalWaist, setOriginalWaist] = useState<number | undefined>(undefined);
     const [isSuccess, setIsSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
 
-    const weightInputRef = useRef<TextInput>(null);
-    const bodyWeightPreference = useSelector((state: RootState) => (state.user.userAppSettings?.UnitsOfMeasurement?.BodyWeightUnits as 'kgs' | 'lbs') || 'kgs');
+    const waistInputRef = useRef<TextInput>(null);
 
     useEffect(() => {
         if (visible) {
             setIsSuccess(false);
-            const today = new Date();
-            const existingData = getExistingData?.(initialDate || today);
+            // Use initialDate if provided, otherwise use today
+            const dateToUse = initialDate || new Date();
+            const existingData = getExistingData?.(dateToUse);
 
             if (existingData) {
-                // existingData.Weight is always in kg
-                const displayWeight = formatWeightForDisplay(existingData.Weight, bodyWeightPreference).split(' ')[0]; // Remove the unit suffix
+                // Convert waist measurement from cm to display unit (cms or inches)
+                const displayWaist = existingData.waist ? formatMeasurementForDisplay(existingData.waist, measurementUnit).split(' ')[0] : '';
 
-                setWeight(displayWeight);
-                setOriginalWeight(parseFloat(displayWeight));
+                setWaist(displayWaist);
+                setOriginalWaist(parseFloat(displayWaist));
                 setSelectedDate(new Date(existingData.MeasurementTimestamp));
                 setIsEditingMode(true);
             } else {
-                setOriginalWeight(undefined);
-                // initialWeight is assumed to be in kg
-                const displayWeight = initialWeight ? formatWeightForDisplay(initialWeight, bodyWeightPreference).split(' ')[0] : '';
-                setWeight(displayWeight);
-                setSelectedDate(initialDate || today);
-                setIsEditingMode(false);
+                setOriginalWaist(undefined);
+                setWaist('');
+                setSelectedDate(dateToUse);
+                setIsEditingMode(isEditing);
             }
-            setDisplayMonth(initialDate || today);
+            // Set the display month to match the selected date
+            setDisplayMonth(dateToUse);
 
             setTimeout(() => {
-                weightInputRef.current?.focus();
+                waistInputRef.current?.focus();
             }, 300);
         }
-    }, [visible, initialWeight, initialDate, getExistingData, bodyWeightPreference]);
+    }, [visible, getExistingData, initialDate, isEditing, measurementUnit]);
 
     useEffect(() => {
         if (visible && !isEditing) {
             const existingData = getExistingData?.(selectedDate);
             if (existingData) {
-                // existingData.Weight is in kg
-                const displayWeight = formatWeightForDisplay(existingData.Weight, bodyWeightPreference).split(' ')[0]; // Remove the unit suffix
+                // Convert waist measurement from cm to display unit (cms or inches)
+                const displayWaist = existingData.waist ? formatMeasurementForDisplay(existingData.waist, measurementUnit).split(' ')[0] : '';
 
-                setWeight(displayWeight);
-                setOriginalWeight(parseFloat(displayWeight));
+                setWaist(displayWaist);
+                setOriginalWaist(parseFloat(displayWaist));
                 setIsEditingMode(true);
             } else {
-                // initialWeight is in kg
-                const displayWeight = initialWeight ? formatWeightForDisplay(initialWeight, bodyWeightPreference).split(' ')[0] : '';
-                setWeight(displayWeight);
-                setOriginalWeight(undefined);
+                setWaist('');
+                setOriginalWaist(undefined);
                 setIsEditingMode(false);
             }
         }
-    }, [selectedDate, getExistingData, visible, isEditing, initialWeight, bodyWeightPreference]);
+    }, [selectedDate, getExistingData, visible, isEditing, measurementUnit]);
 
     const handleClose = () => {
         if (isSuccess) {
@@ -116,7 +116,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
 
         Keyboard.dismiss();
         onClose();
-        setWeight('');
+        setWaist('');
         setSelectedDate(new Date());
         setDisplayMonth(new Date());
         setShowCalendar(false);
@@ -134,16 +134,15 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
     const hideCalendarView = () => {
         setShowCalendar(false);
         setTimeout(() => {
-            weightInputRef.current?.focus();
+            waistInputRef.current?.focus();
         }, 100);
     };
 
-    // for every new entry it takes in the time as 12am, else it preserves the original timestamp
     const handleSubmit = async () => {
-        const weightNum = parseFloat(weight);
-        if (isNaN(weightNum) || weightNum <= 0) {
-            setError('Please enter a valid weight');
-            weightInputRef.current?.focus();
+        const waistNum = parseFloat(waist);
+        if (isNaN(waistNum) || waistNum <= 0) {
+            setError('Please enter a valid waist measurement');
+            waistInputRef.current?.focus();
             return;
         }
         setError('');
@@ -151,35 +150,37 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
         try {
             setIsSubmitting(true);
 
-            const weightInKg = parseWeightForStorage(weightNum, bodyWeightPreference);
+            // Convert from display unit (cms or inches) to cm for storage
+            const waistCm = parseMeasurementForStorage(waistNum, measurementUnit);
+
+            const measurements: Record<string, number> = {
+                waist: waistCm,
+            };
 
             let finalTimestamp;
             const localSelectedDate = new Date(selectedDate);
 
-            if (isEditingMode && originalWeight !== undefined) {
+            if (isEditingMode && originalWaist !== undefined) {
                 finalTimestamp = new Date(selectedDate.getTime());
             } else {
                 localSelectedDate.setHours(0, 0, 0, 0);
-
                 const utcMidnight = new Date(Date.UTC(localSelectedDate.getFullYear(), localSelectedDate.getMonth(), localSelectedDate.getDate(), 0, 0, 0));
-
                 finalTimestamp = utcMidnight;
             }
 
-            await onSubmit(weightInKg, finalTimestamp);
-            setSuccessMessage(isEditingMode ? 'Weight updated' : 'Weight logged');
+            await onSubmit(measurements, finalTimestamp);
+            setSuccessMessage(isEditingMode ? 'Measurements updated' : 'Measurements logged');
             setIsSuccess(true);
             await new Promise<void>((resolve) => setTimeout(resolve, 1600));
             onClose();
         } catch (err) {
             console.log(err);
-            setError('Failed to save weight measurement');
+            setError('Failed to save body measurements');
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    // Modify your render logic
     const renderSuccessAnimation = () => {
         if (!isSuccess) return null;
 
@@ -194,18 +195,16 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
             </View>
         );
     };
+
     const handleDelete = async () => {
         if (!onDelete) return;
 
         setIsDeleting(true);
         try {
             const localSelectedDate = new Date(selectedDate);
-
             localSelectedDate.setHours(0, 0, 0, 0);
-
             const utcMidnight = new Date(Date.UTC(localSelectedDate.getFullYear(), localSelectedDate.getMonth(), localSelectedDate.getDate(), 0, 0, 0));
             await onDelete(utcMidnight.toISOString());
-
             handleClose();
         } catch (err) {
             console.log(err);
@@ -276,7 +275,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                                 <Icon name='close' size={20} color={themeColors.text} />
                             </TouchableOpacity>
 
-                            <ThemedText type='title'>{isEditingMode ? 'Edit Weight' : 'Log Weight'}</ThemedText>
+                            <ThemedText type='title'>{isEditingMode ? 'Edit Waist Measurement' : 'Log Waist Measurement'}</ThemedText>
 
                             <View style={styles.headerRight}>
                                 {isEditingMode && onDelete && (
@@ -293,9 +292,9 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                                     disabled={
                                         isSubmitting ||
                                         isDeleting ||
-                                        isNaN(parseFloat(weight)) ||
-                                        parseFloat(weight) === 0 ||
-                                        (isEditingMode && originalWeight === parseFloat(weight))
+                                        isNaN(parseFloat(waist)) ||
+                                        parseFloat(waist) === 0 ||
+                                        (isEditingMode && originalWaist === parseFloat(waist))
                                     }
                                 >
                                     {isSubmitting ? (
@@ -307,9 +306,9 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                                             color={
                                                 !isSubmitting &&
                                                 !isDeleting &&
-                                                !isNaN(parseFloat(weight)) &&
-                                                parseFloat(weight) !== 0 &&
-                                                (!isEditingMode || originalWeight !== parseFloat(weight))
+                                                !isNaN(parseFloat(waist)) &&
+                                                parseFloat(waist) !== 0 &&
+                                                (!isEditingMode || originalWaist !== parseFloat(waist))
                                                     ? themeColors.text
                                                     : lightenColor(themeColors.subText, 0.8)
                                             }
@@ -339,38 +338,40 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                                         {!isEditing && (
                                             <Icon
                                                 name='chevron-down'
-                                                color={isSubmitting || isDeleting ? themeColors.text : themeColors.text}
+                                                color={isSubmitting || isDeleting ? themeColors.subText : themeColors.text}
                                                 size={16}
                                                 style={{ marginTop: 1, marginLeft: Spaces.XS }}
                                             />
                                         )}
                                     </TouchableOpacity>
-                                    <View style={styles.inputContainer}>
-                                        <ThemedText type='buttonSmall' style={styles.inputLabel}>
-                                            Weight
-                                        </ThemedText>
-                                        <View style={[styles.inputWrapper, { backgroundColor: themeColors.background }]}>
-                                            <TextInput
-                                                ref={weightInputRef}
-                                                style={[
-                                                    styles.input,
-                                                    {
-                                                        color: themeColors.text,
-                                                        opacity: isSubmitting || isDeleting ? 0.5 : 1,
-                                                    },
-                                                ]}
-                                                value={weight}
-                                                onChangeText={setWeight}
-                                                keyboardType='numeric'
-                                                placeholder='0.0'
-                                                placeholderTextColor={themeColors.subText}
-                                                editable={!isSubmitting && !isDeleting}
-                                            />
-                                            <ThemedText type='bodySmall' style={[styles.unit, { opacity: isSubmitting || isDeleting ? 0.5 : 0.7 }]}>
-                                                {bodyWeightPreference === 'lbs' ? ' lbs' : ' kgs'}
+                                    <ScrollView style={styles.inputContainer}>
+                                        <View style={styles.measurementInputContainer}>
+                                            <ThemedText type='buttonSmall' style={styles.inputLabel}>
+                                                Waist
                                             </ThemedText>
+                                            <View style={[styles.inputWrapper, { backgroundColor: themeColors.background }]}>
+                                                <TextInput
+                                                    ref={waistInputRef}
+                                                    style={[
+                                                        styles.input,
+                                                        {
+                                                            color: themeColors.text,
+                                                            opacity: isSubmitting || isDeleting ? 0.5 : 1,
+                                                        },
+                                                    ]}
+                                                    value={waist}
+                                                    onChangeText={setWaist}
+                                                    keyboardType='numeric'
+                                                    placeholder='0.0'
+                                                    placeholderTextColor={themeColors.subText}
+                                                    editable={!isSubmitting && !isDeleting}
+                                                />
+                                                <ThemedText type='bodySmall' style={[styles.unit, { opacity: isSubmitting || isDeleting ? 0.5 : 0.7 }]}>
+                                                    {measurementUnit === 'inches' ? ' in' : ' cm'}
+                                                </ThemedText>
+                                            </View>
                                         </View>
-                                    </View>
+                                    </ScrollView>
                                 </>
                             ) : (
                                 <View style={styles.calendarContainer}>
@@ -480,6 +481,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingTop: Spaces.MD,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        paddingBottom: Spaces.MD,
+        marginBottom: Spaces.MD,
     },
     headerButton: {
         minWidth: 60,
@@ -523,6 +527,9 @@ const styles = StyleSheet.create({
     unit: {
         marginLeft: Spaces.SM,
         opacity: 0.7,
+    },
+    measurementInputContainer: {
+        marginBottom: Spaces.MD,
     },
     calendarContainer: {
         marginTop: Spaces.MD,
