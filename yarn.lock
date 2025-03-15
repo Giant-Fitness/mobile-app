@@ -14798,6 +14798,11 @@ postgres-interval@^1.1.0:
   dependencies:
     xtend "^4.0.0"
 
+posthog-react-native-session-replay@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/posthog-react-native-session-replay/-/posthog-react-native-session-replay-1.0.5.tgz#c029e5c218027c1fdaa3471b21517fd124e1ebea"
+  integrity sha512-clz//SSU1wq3fNQkiVtDtEgp4JXiX0XlyPUbWu10F6yNtRAV4YinAAm+TEbxQj+fNu9FeWdUtpkW88EgS7lUpQ==
+
 posthog-react-native@^3.5.0:
   version "3.5.0"
   resolved "https://registry.yarnpkg.com/posthog-react-native/-/posthog-react-native-3.5.0.tgz#97256627c7fc8c2c14ecd832526fb3d8b5844174"
