@@ -16,6 +16,7 @@ import {
     getUserProgramProgressAsync,
     getUserRecommendationsAsync,
     getWeightMeasurementsAsync,
+    getBodyMeasurementsAsync,
 } from '@/store/user/thunks';
 import { getAllWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
@@ -72,6 +73,7 @@ const Initialization: React.FC = () => {
                 dispatch(getSpotlightWorkoutsAsync()),
                 dispatch(getAllProgramsAsync()),
                 dispatch(getWeightMeasurementsAsync()),
+                dispatch(getBodyMeasurementsAsync()),
                 dispatch(initializeTrackedLiftsHistoryAsync()),
                 dispatch(getSleepMeasurementsAsync()),
                 dispatch(getUserAppSettingsAsync()),

@@ -1,14 +1,11 @@
-// components/progress/WeightChart.tsx
-
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { BaseChart } from '../charts/BaseChart';
 import { AggregatedData, TimeRange, TimeRangeOption } from '@/utils/charts';
-import { UserWeightMeasurement } from '@/types';
 import { RootState } from '@/store/store';
-import { kgToPounds } from '@/utils/unitConversion';
+import { cmToInches } from '@/utils/unitConversion';
 
-type WeightChartProps = {
+type WaistChartProps = {
     data: AggregatedData[];
     timeRange: TimeRange;
     availableRanges: TimeRangeOption[];
@@ -16,42 +13,44 @@ type WeightChartProps = {
     yAxisRange: { min: number; max: number };
     movingAverages: number[];
     effectiveTimeRange: string;
-    onDataPointPress?: (measurement: UserWeightMeasurement) => void;
+    onDataPointPress?: (measurement: any) => void;
     style?: any;
 };
 
-export const WeightChart: React.FC<WeightChartProps> = ({ data, yAxisRange, movingAverages, ...props }) => {
-    const bodyWeightPreference = useSelector((state: RootState) => (state.user.userAppSettings?.UnitsOfMeasurement?.BodyWeightUnits as 'kgs' | 'lbs') || 'kgs');
+export const WaistChart: React.FC<WaistChartProps> = ({ data, yAxisRange, movingAverages, ...props }) => {
+    const measurementUnit = useSelector(
+        (state: RootState) => (state.user.userAppSettings?.UnitsOfMeasurement?.BodyMeasurementUnits as 'cms' | 'inches') || 'cms',
+    );
 
-    // Convert everything to the display unit (kg or lbs) before giving to BaseChart
+    // Convert everything to the display unit (cm or inches) before giving to BaseChart
     const convertedData = useMemo(() => {
-        if (bodyWeightPreference === 'lbs') {
+        if (measurementUnit === 'inches') {
             return data.map((point) => ({
                 ...point,
-                weight: point.weight, // Keep original kg value
+                waist: point.waist, // Keep original cm value
             }));
         }
         return data;
-    }, [data, bodyWeightPreference]);
+    }, [data, measurementUnit]);
 
     // Convert axis range to display unit
     const convertedAxisRange = useMemo(() => {
-        if (bodyWeightPreference === 'lbs') {
+        if (measurementUnit === 'inches') {
             return {
-                min: kgToPounds(yAxisRange.min),
-                max: kgToPounds(yAxisRange.max),
+                min: cmToInches(yAxisRange.min),
+                max: cmToInches(yAxisRange.max),
             };
         }
         return yAxisRange;
-    }, [yAxisRange, bodyWeightPreference]);
+    }, [yAxisRange, measurementUnit]);
 
-    // Keep moving averages in kg
+    // Convert moving averages to display unit
     const convertedMovingAverages = useMemo(() => {
-        if (bodyWeightPreference === 'lbs') {
-            return movingAverages.map((avg) => kgToPounds(avg));
+        if (measurementUnit === 'inches') {
+            return movingAverages.map((avg) => cmToInches(avg));
         }
         return movingAverages;
-    }, [movingAverages, bodyWeightPreference]);
+    }, [movingAverages, measurementUnit]);
 
     const getGridLineValues = (min: number, max: number) => {
         const range = max - min;
@@ -69,10 +68,10 @@ export const WeightChart: React.FC<WeightChartProps> = ({ data, yAxisRange, movi
             data={convertedData}
             yAxisRange={convertedAxisRange}
             movingAverages={convertedMovingAverages}
-            themeColor='purpleSolid'
-            themeTransparentColor='purpleTransparent'
-            getValue={(point) => (bodyWeightPreference === 'lbs' ? kgToPounds(point.weight) : point.weight)}
-            formatValue={(value) => (bodyWeightPreference === 'lbs' ? `${value.toFixed(1)} lbs` : `${value.toFixed(1)} kg`)}
+            themeColor='tangerineSolid'
+            themeTransparentColor='tangerineTransparent'
+            getValue={(point) => (measurementUnit === 'inches' ? cmToInches(point.waist || 0) : point.waist || 0)}
+            formatValue={(value) => (measurementUnit === 'inches' ? `${value.toFixed(1)} in` : `${value.toFixed(1)} cm`)}
             formatYAxisLabel={(value) => value.toFixed(1)}
             getGridLineValues={getGridLineValues}
         />

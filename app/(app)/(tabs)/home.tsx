@@ -16,6 +16,7 @@ import { FactOfTheDay } from '@/components/home/FactOfTheDay';
 import { darkenColor } from '@/utils/colorUtils';
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
 import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
+import { BodyMeasurementsLoggingSheet } from '@/components/progress/BodyMeasurementsLoggingSheet';
 import {
     logWeightMeasurementAsync,
     getWeightMeasurementsAsync,
@@ -27,6 +28,9 @@ import {
     getUserRecommendationsAsync,
     deleteSleepMeasurementAsync,
     deleteWeightMeasurementAsync,
+    getBodyMeasurementsAsync,
+    logBodyMeasurementAsync,
+    deleteBodyMeasurementAsync,
 } from '@/store/user/thunks';
 import { AppDispatch, RootState } from '@/store/store';
 import { WorkoutCompletedSection } from '@/components/programs/WorkoutCompletedSection';
@@ -47,11 +51,13 @@ export default function HomeScreen() {
 
     const [isWeightSheetVisible, setIsWeightSheetVisible] = useState(false);
     const [isSleepSheetVisible, setIsSleepSheetVisible] = useState(false);
+    const [isBodyMeasurementsSheetVisible, setIsBodyMeasurementsSheetVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
     const { user, userProgramProgress, hasCompletedWorkoutToday } = useProgramData();
     const { userWeightMeasurements } = useSelector((state: RootState) => state.user);
     const { userSleepMeasurements } = useSelector((state: RootState) => state.user);
+    const { userBodyMeasurements } = useSelector((state: RootState) => state.user);
 
     const isFitnessOnboardingComplete = user?.OnboardingStatus?.fitness === true;
 
@@ -93,6 +99,25 @@ export default function HomeScreen() {
         }
     };
 
+    const handleLogBodyMeasurements = async (measurements: Record<string, number>, date: Date) => {
+        setIsLoading(true);
+        try {
+            await dispatch(
+                logBodyMeasurementAsync({
+                    measurements,
+                    measurementTimestamp: date.toISOString(),
+                }),
+            ).unwrap();
+
+            // Refresh measurements after logging
+            await dispatch(getBodyMeasurementsAsync()).unwrap();
+        } catch (error) {
+            console.error('Failed to log body measurements:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleWeightTilePress = () => {
         setIsWeightSheetVisible(true);
     };
@@ -101,12 +126,20 @@ export default function HomeScreen() {
         setIsSleepSheetVisible(true);
     };
 
+    const handleBodyMeasurementsTilePress = () => {
+        setIsBodyMeasurementsSheetVisible(true);
+    };
+
     const getExistingWeightData = (date: Date) => {
         return userWeightMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
     };
 
     const getExistingSleepData = (date: Date) => {
         return userSleepMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
+    };
+
+    const getExistingBodyMeasurementsData = (date: Date) => {
+        return userBodyMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
     };
 
     const handleRefresh = async () => {
@@ -126,6 +159,7 @@ export default function HomeScreen() {
                     dispatch(initializeTrackedLiftsHistoryAsync({ forceRefresh: true })),
                     dispatch(getUserAppSettingsAsync({ forceRefresh: true })),
                     dispatch(getAllWorkoutsAsync({ forceRefresh: true })),
+                    dispatch(getBodyMeasurementsAsync({ forceRefresh: true })),
                 ]);
                 if (userProgramProgress?.ProgramId) {
                     await dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId, forceRefresh: true }));
@@ -154,6 +188,15 @@ export default function HomeScreen() {
         }
     };
 
+    const handleBodyMeasurementsDelete = async (timestamp: string) => {
+        try {
+            await dispatch(deleteBodyMeasurementAsync({ timestamp })).unwrap();
+            setIsBodyMeasurementsSheetVisible(false);
+        } catch (error) {
+            console.error('Failed to delete body measurements:', error);
+        }
+    };
+
     const actionTiles = [
         {
             title: 'Track Weight',
@@ -163,13 +206,6 @@ export default function HomeScreen() {
             textColor: darkenColor(themeColors.purpleSolid, 0.3),
         },
         // {
-        //     title: 'Body Measurements',
-        //     image: require('@/assets/images/measure.png'),
-        //     onPress: () => console.log('LogMeasurements'),
-        //     backgroundColor: themeColors.blueTransparent,
-        //     textColor: darkenColor(themeColors.blueSolid, 0.3),
-        // },
-        // {
         //     title: 'Capture Progress',
         //     image: require('@/assets/images/camera.png'),
         //     onPress: () => console.log('ProgressPhotos'),
@@ -177,19 +213,26 @@ export default function HomeScreen() {
         //     textColor: darkenColor(themeColors.tangerineSolid, 0.3),
         // },
         {
+            title: 'Track Waist',
+            image: require('@/assets/images/measure.png'),
+            onPress: handleBodyMeasurementsTilePress,
+            backgroundColor: themeColors.tangerineTransparent,
+            textColor: darkenColor(themeColors.tangerineSolid, 0.3),
+        },
+        {
             title: 'Track Sleep',
             image: require('@/assets/images/sleep_clock.png'),
             onPress: handleSleepTilePress,
             backgroundColor: themeColors.blueTransparent,
-            textColor: darkenColor(themeColors.blueSolid, 0.3),
+            textColor: darkenColor(themeColors.blueSolid, 0.25),
         },
-        {
-            title: 'Why LMC?',
-            image: require('@/assets/images/skipping-rope.png'),
-            onPress: () => debounce(router, '/(app)/blog/why-lmc'),
-            backgroundColor: themeColors.maroonTransparent,
-            textColor: darkenColor(themeColors.maroonSolid, 0.3),
-        },
+        // {
+        //     title: 'Why LMC?',
+        //     image: require('@/assets/images/skipping-rope.png'),
+        //     onPress: () => debounce(router, '/(app)/blog/why-lmc'),
+        //     backgroundColor: themeColors.maroonTransparent,
+        //     textColor: darkenColor(themeColors.maroonSolid, 0.3),
+        // },
     ];
 
     const renderForYouSection = (reorderTiles = false) => {
@@ -214,7 +257,7 @@ export default function HomeScreen() {
         return (
             <>
                 <View style={styles.header}>
-                    <ThemedText type='titleLarge'>For You</ThemedText>
+                    <ThemedText type='titleLarge'>Quick Add</ThemedText>
                 </View>
 
                 <View style={styles.actionTilesContainer}>
@@ -350,6 +393,15 @@ export default function HomeScreen() {
                 onSubmit={handleLogSleep}
                 onDelete={handleSleepDelete}
                 getExistingData={getExistingSleepData}
+            />
+
+            <BodyMeasurementsLoggingSheet
+                visible={isBodyMeasurementsSheetVisible}
+                onClose={() => setIsBodyMeasurementsSheetVisible(false)}
+                onSubmit={handleLogBodyMeasurements}
+                onDelete={handleBodyMeasurementsDelete}
+                isLoading={isLoading}
+                getExistingData={getExistingBodyMeasurementsData}
             />
         </ThemedView>
     );

@@ -8,13 +8,16 @@ import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 
+type ThemeColorKey = keyof typeof Colors['light'];
+
 interface CalendarMonthProps {
     date: Date;
     measurementDates: Map<string, any>;
     onDayPress?: (date: string) => void;
+    backgroundColor: ThemeColorKey;
 }
 
-export const CalendarMonth: React.FC<CalendarMonthProps> = ({ date, measurementDates, onDayPress, isSleepData }) => {
+export const CalendarMonth: React.FC<CalendarMonthProps> = ({ date, measurementDates, onDayPress, backgroundColor }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const today = new Date();
@@ -56,10 +59,10 @@ export const CalendarMonth: React.FC<CalendarMonthProps> = ({ date, measurementD
                     style={[
                         styles.dayCell,
                         hasMeasurement && {
-                            backgroundColor: !isSleepData ? lightenColor(themeColors.purpleSolid, 0.8) : lightenColor(themeColors.blueSolid, 0.75),
+                            backgroundColor: lightenColor(themeColors[backgroundColor], 0.8),
                         },
                         !hasMeasurement && {
-                            borderColor: !isSleepData ? lightenColor(themeColors.purpleSolid, 0.8) : lightenColor(themeColors.blueSolid, 0.75),
+                            borderColor: lightenColor(themeColors[backgroundColor], 0.8),
                             borderWidth: 1,
                         },
                         isFuture && {

@@ -21,7 +21,7 @@ import { ExerciseLog } from '@/types/exerciseProgressTypes';
 import { AppDispatch } from '@/store/store';
 import { Sizes } from '@/constants/Sizes';
 import { TextButton } from '@/components/buttons/TextButton';
-import { formatWeightForDisplay, parseWeightForStorage } from '@/utils/weightConversion';
+import { formatWeightForDisplay, parseWeightForStorage } from '@/utils/unitConversion';
 
 interface ExerciseLoggingSheetProps {
     visible: boolean;

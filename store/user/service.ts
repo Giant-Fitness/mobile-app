@@ -1,6 +1,15 @@
 // store/user/service.ts
 
-import { UserProgramProgress, User, UserRecommendations, UserFitnessProfile, UserWeightMeasurement, UserSleepMeasurement, UserAppSettings } from '@/types';
+import {
+    UserProgramProgress,
+    User,
+    UserRecommendations,
+    UserFitnessProfile,
+    UserWeightMeasurement,
+    UserSleepMeasurement,
+    UserAppSettings,
+    UserBodyMeasurement,
+} from '@/types';
 import { authUsersApiClient, authRecommendationsApiClient } from '@/utils/api/apiConfig';
 import { handleApiError } from '@/utils/api/errorUtils';
 import { authService } from '@/utils/auth';
@@ -285,6 +294,51 @@ const updateUserAppSettings = async (userId: string, userAppSettings: UserAppSet
     }
 };
 
+// Body Measurements Methods
+const getBodyMeasurements = async (userId: string): Promise<UserBodyMeasurement[]> => {
+    console.log('service: getBodyMeasurements');
+    try {
+        const { data } = await authUsersApiClient.get(`/users/${userId}/body-measurements`);
+        return data.measurements || [];
+    } catch (error) {
+        throw handleApiError(error, 'GetBodyMeasurements');
+    }
+};
+
+const logBodyMeasurement = async (userId: string, measurements: Record<string, number>, measurementTimestamp: string): Promise<UserBodyMeasurement> => {
+    console.log('service: logBodyMeasurement');
+    try {
+        const { data } = await authUsersApiClient.post(`/users/${userId}/body-measurements`, {
+            measurements,
+            MeasurementTimestamp: measurementTimestamp,
+        });
+        return data.measurement;
+    } catch (error) {
+        throw handleApiError(error, 'LogBodyMeasurement');
+    }
+};
+
+const updateBodyMeasurement = async (userId: string, timestamp: string, measurements: Record<string, number>): Promise<UserBodyMeasurement> => {
+    console.log('service: updateBodyMeasurement');
+    try {
+        const { data } = await authUsersApiClient.put(`/users/${userId}/body-measurements/${timestamp}`, {
+            measurements,
+        });
+        return data.measurement;
+    } catch (error) {
+        throw handleApiError(error, 'UpdateBodyMeasurement');
+    }
+};
+
+const deleteBodyMeasurement = async (userId: string, timestamp: string): Promise<void> => {
+    console.log('service: deleteBodyMeasurement');
+    try {
+        await authUsersApiClient.delete(`/users/${userId}/body-measurements/${timestamp}`);
+    } catch (error) {
+        throw handleApiError(error, 'DeleteBodyMeasurement');
+    }
+};
+
 export default {
     // User Profile
     getUser,
@@ -314,4 +368,9 @@ export default {
     // App Settings
     getUserAppSettings,
     updateUserAppSettings,
+    // Body Measurements
+    getBodyMeasurements,
+    logBodyMeasurement,
+    updateBodyMeasurement,
+    deleteBodyMeasurement,
 };

@@ -1,13 +1,9 @@
 // components/progress/SleepTrendCard.tsx
 
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { format } from 'date-fns';
-import { ThemedText } from '@/components/base/ThemedText';
-import { Icon } from '@/components/base/Icon';
 import { TrendCard } from './TrendCard';
 import { UserSleepMeasurement } from '@/types';
-import { Spaces } from '@/constants/Spaces';
 
 type SleepTrendCardProps = {
     values: UserSleepMeasurement[];
@@ -72,58 +68,6 @@ const processSleepData = (values: UserSleepMeasurement[]) => {
     };
 };
 
-const SingleSleepDataPoint = ({ measurement, onPress, themeColors }: { measurement: UserSleepMeasurement; onPress: () => void; themeColors: any }) => {
-    const measurementDate = new Date(measurement.MeasurementTimestamp);
-    const today = new Date();
-    const isToday = measurementDate.toDateString() === today.toDateString();
-    const formattedDate = format(measurementDate, 'MMM d, yyyy');
-
-    const content = (
-        <View style={styles.singleDataContainer}>
-            <View style={styles.singleDataContent}>
-                <View style={styles.firstMeasurementContainer}>
-                    <ThemedText type='bodyMedium' style={styles.firstMeasurementLabel}>
-                        {isToday ? "Today's Measurement" : 'First Measurement'}
-                    </ThemedText>
-                    <ThemedText type='titleLarge' style={[styles.sleepValue, { color: themeColors.blueSolid }]}>
-                        {formatSleepDuration(measurement.DurationInMinutes)}
-                    </ThemedText>
-                    <ThemedText type='bodySmall' style={[styles.dateText, { color: themeColors.subText }]}>
-                        {formattedDate}
-                    </ThemedText>
-                </View>
-                {isToday ? (
-                    <View style={styles.messageContainer}>
-                        <ThemedText type='bodySmall' style={[styles.helperText, { color: themeColors.subText }]}>
-                            Great start! Come back tomorrow to log your next measurement.
-                        </ThemedText>
-                    </View>
-                ) : (
-                    <>
-                        <TouchableOpacity style={[styles.addNextButton, { backgroundColor: themeColors.blueSolid }]} onPress={onPress} activeOpacity={0.8}>
-                            <Icon name='plus' size={18} color={themeColors.white} style={styles.addIcon} />
-                            <ThemedText type='button' style={[styles.buttonText, { color: themeColors.white }]}>
-                                Add Next Measurement
-                            </ThemedText>
-                        </TouchableOpacity>
-                        <ThemedText type='bodySmall' style={[styles.helperText, { color: themeColors.subText }]}>
-                            Add another measurement
-                        </ThemedText>
-                    </>
-                )}
-            </View>
-        </View>
-    );
-
-    return isToday ? (
-        content
-    ) : (
-        <TouchableOpacity style={styles.contentWrapper} onPress={onPress} activeOpacity={0.8}>
-            {content}
-        </TouchableOpacity>
-    );
-};
-
 export const SleepTrendCard: React.FC<SleepTrendCardProps> = ({ values, onPress, onLogSleep, isLoading, style }) => {
     return (
         <TrendCard
@@ -135,67 +79,8 @@ export const SleepTrendCard: React.FC<SleepTrendCardProps> = ({ values, onPress,
             title='Sleep Trend'
             themeColor='blueSolid'
             themeTransparentColor='blueTransparent'
-            emptyStateTitle='Track Your Sleep Journey'
-            emptyStateDescription='Track your sleep regularly to start getting more personalized training advice.'
-            formatValue={formatAverageSleep}
+            formatAvgValue={formatAverageSleep}
             processData={processSleepData}
-            renderSingleDataPoint={SingleSleepDataPoint}
         />
     );
 };
-
-const styles = StyleSheet.create({
-    singleDataContainer: {
-        width: '100%',
-        alignItems: 'center',
-        paddingVertical: Spaces.SM,
-    },
-    singleDataContent: {
-        width: '100%',
-        alignItems: 'center',
-        paddingHorizontal: Spaces.SM,
-    },
-    firstMeasurementContainer: {
-        alignItems: 'center',
-        marginBottom: Spaces.MD,
-    },
-    firstMeasurementLabel: {
-        marginBottom: Spaces.XXS,
-    },
-    sleepValue: {
-        fontSize: 28,
-        fontWeight: '600',
-        paddingTop: Spaces.MD,
-        marginBottom: Spaces.XXS,
-    },
-    dateText: {
-        marginBottom: Spaces.SM,
-    },
-    messageContainer: {
-        borderRadius: Spaces.SM,
-        paddingHorizontal: Spaces.MD,
-        paddingBottom: Spaces.MD,
-        width: '100%',
-    },
-    helperText: {
-        textAlign: 'center',
-        marginTop: Spaces.XXS,
-    },
-    addNextButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: Spaces.MD,
-        paddingVertical: Spaces.SM,
-        borderRadius: 20,
-        marginBottom: Spaces.SM,
-    },
-    addIcon: {
-        marginRight: Spaces.XXS,
-    },
-    buttonText: {
-        fontWeight: '600',
-    },
-    contentWrapper: {
-        width: '100%',
-    },
-});

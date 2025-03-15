@@ -18,7 +18,7 @@ import { MeasurementCalendar } from '@/components/progress/MeasurementCalendar';
 import { AppDispatch } from '@/store/store';
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
 import { logWeightMeasurementAsync, updateWeightMeasurementAsync, deleteWeightMeasurementAsync } from '@/store/user/thunks';
-import { kgToPounds } from '@/utils/weightConversion';
+import { kgToPounds } from '@/utils/unitConversion';
 
 type CalendarData = {
     timestamp: string;
@@ -49,7 +49,14 @@ export default function AllWeightDataScreen() {
     };
 
     const handleAddWeight = () => {
+        // Reset the selected measurement
         setSelectedMeasurement(null);
+
+        // Reset to today's date when adding a new measurement
+        const today = new Date();
+        setSelectedCalendarDate(today);
+
+        // Set mode to adding and show the sheet
         setIsAddingWeight(true);
         setIsWeightSheetVisible(true);
     };
@@ -192,7 +199,7 @@ export default function AllWeightDataScreen() {
             />
 
             <View style={styles.content}>
-                <MeasurementCalendar data={measurementData} onDayPress={handleDayPress} renderTile={renderListItem} measurementUnit='kg' />
+                <MeasurementCalendar data={measurementData} onDayPress={handleDayPress} renderTile={renderListItem} backgroundColor='purpleSolid' />
             </View>
 
             <WeightLoggingSheet

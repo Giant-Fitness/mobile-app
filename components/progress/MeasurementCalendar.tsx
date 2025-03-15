@@ -11,6 +11,8 @@ import { Icon } from '@/components/base/Icon';
 import { CalendarMonth } from '@/components/progress/CalendarMonth';
 import { lightenColor } from '@/utils/colorUtils';
 
+type ThemeColorKey = keyof typeof Colors['light'];
+
 interface CalendarData {
     timestamp: string;
     value: number;
@@ -22,11 +24,10 @@ interface MeasurementCalendarProps {
     data: CalendarData[];
     onDayPress?: (date: string) => void;
     renderTile: (item: CalendarData) => React.ReactNode;
-    measurementUnit?: string;
-    isSleepData?: boolean;
+    backgroundColor: ThemeColorKey;
 }
 
-export const MeasurementCalendar: React.FC<MeasurementCalendarProps> = ({ data, onDayPress, isSleepData }) => {
+export const MeasurementCalendar: React.FC<MeasurementCalendarProps> = ({ data, onDayPress, backgroundColor }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
@@ -75,7 +76,7 @@ export const MeasurementCalendar: React.FC<MeasurementCalendarProps> = ({ data, 
                 </TouchableOpacity>
             </View>
 
-            <CalendarMonth date={displayedMonth} measurementDates={measurementDates} onDayPress={onDayPress} isSleepData={isSleepData} />
+            <CalendarMonth date={displayedMonth} measurementDates={measurementDates} onDayPress={onDayPress} backgroundColor={backgroundColor} />
         </ThemedView>
     );
 };
