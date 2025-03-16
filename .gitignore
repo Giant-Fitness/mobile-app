@@ -52,3 +52,5 @@ amplifytools.xcconfig
 .env
 
 posthog.json
+
+package-lock.json
