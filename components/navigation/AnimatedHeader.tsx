@@ -1,7 +1,7 @@
 // components/navigation/AnimatedHeader.tsx
 
 import React from 'react';
-import { ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import Animated, { useAnimatedStyle, interpolateColor, useDerivedValue } from 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
@@ -107,7 +107,14 @@ const styles = StyleSheet.create({
         top: 0,
         left: 0,
         right: 0,
-        height: Sizes.headerHeight,
+        ...Platform.select({
+            ios: {
+                height: Sizes.headerHeight,
+            },
+            android: {
+                height: Sizes.headerHeight,
+            },
+        }),
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
@@ -117,24 +124,52 @@ const styles = StyleSheet.create({
     },
     backButton: {
         position: 'absolute',
-        top: Spaces.XXL + Spaces.SM, // Adjusted to account for padding
-        left: Spaces.MD, // Adjusted to account for padding
+        ...Platform.select({
+            ios: {
+                top: Spaces.XXL + Spaces.SM, // iOS-specific top positioning
+            },
+            android: {
+                top: Spaces.XXL, // android-specific top positioning
+            },
+        }),
+        left: Spaces.MD,
         zIndex: 10,
         padding: Spaces.SM, // Add padding to increase hitbox
     },
     title: {
-        top: Spaces.LG,
+        ...Platform.select({
+            ios: {
+                top: Spaces.LG, // iOS-specific top positioning
+            },
+            android: {
+                top: Spaces.SM + Spaces.XS, // android-specific top positioning
+            },
+        }),
     },
     menuButton: {
         position: 'absolute',
-        top: Spaces.XXL + Spaces.SM, // Adjusted to account for padding
-        right: Spaces.LG, // Adjusted to account for padding
+        ...Platform.select({
+            ios: {
+                top: Spaces.XXL + Spaces.SM, // iOS-specific top positioning
+            },
+            android: {
+                top: Spaces.XL + Spaces.SM + Spaces.XS, // android-specific top positioning
+            },
+        }),
+        right: Spaces.LG,
         zIndex: 10,
-        padding: Spaces.SM, // Add padding to increase hitbox
+        padding: Spaces.SM,
     },
     actionButton: {
         position: 'absolute',
-        top: Spaces.XXL + Spaces.SM,
+        ...Platform.select({
+            ios: {
+                top: Spaces.XXL + Spaces.SM, // iOS-specific top positioning
+            },
+            android: {
+                top: Spaces.XXL, // android-specific top positioning
+            },
+        }),
         right: Spaces.LG,
         zIndex: 10,
         padding: Spaces.SM,

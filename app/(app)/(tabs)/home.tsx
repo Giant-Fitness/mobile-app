@@ -1,7 +1,7 @@
 // app/(app)/(tabs)/home.tsx
 
 import React, { useState } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Platform } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -237,11 +237,6 @@ export default function HomeScreen() {
 
     const renderForYouSection = (reorderTiles = false) => {
         let tiles = [...actionTiles];
-        const screenWidth = Dimensions.get('window').width;
-        const padding = Spaces.LG * 2; // Left and right padding
-        const gap = Spaces.MD; // Gap between tiles
-        const numberOfTiles = tiles.length;
-        const tileWidth = (screenWidth - padding - gap * (numberOfTiles - 1)) / numberOfTiles;
 
         if (reorderTiles) {
             // Find the app info tile index
@@ -270,8 +265,7 @@ export default function HomeScreen() {
                                 onPress={tile.onPress}
                                 backgroundColor={tile.backgroundColor}
                                 textColor={tile.textColor}
-                                width={tileWidth}
-                                style={{ borderWidth: StyleSheet.hairlineWidth, borderColor: tile.textColor, width: Dimensions.get('window').width * 0.3 }}
+                                style={{ borderWidth: StyleSheet.hairlineWidth, borderColor: tile.textColor }}
                                 showChevron={true}
                             />
                         ))}
@@ -415,7 +409,14 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     greeting: {
-        marginTop: Spaces.LG,
+        ...Platform.select({
+            ios: {
+                marginTop: Spaces.LG,
+            },
+            android: {
+                marginTop: Spaces.SM,
+            },
+        }),
         paddingHorizontal: Spaces.LG,
         marginBottom: Spaces.LG,
     },

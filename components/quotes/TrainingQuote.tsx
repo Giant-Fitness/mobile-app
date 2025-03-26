@@ -1,7 +1,7 @@
 // components/quotes/TrainingQuote.tsx
 
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Platform } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -43,7 +43,14 @@ export const TrainingQuote: React.FC<TrainingQuoteProps> = ({ quote, isLastDay }
 
 const styles = StyleSheet.create({
     quoteContainer: {
-        marginTop: Spaces.MD,
+        ...Platform.select({
+            ios: {
+                marginTop: Spaces.LG,
+            },
+            android: {
+                marginTop: Spaces.SM,
+            },
+        }),
         paddingTop: Spaces.MD,
         paddingBottom: Spaces.MD,
         paddingHorizontal: Spaces.XL,
@@ -56,7 +63,14 @@ const styles = StyleSheet.create({
     },
     tipContainer: {
         marginHorizontal: Spaces.SM,
-        marginTop: Spaces.XL,
+        ...Platform.select({
+            ios: {
+                marginTop: Spaces.LG,
+            },
+            android: {
+                marginTop: Spaces.SM,
+            },
+        }),
         marginBottom: Spaces.LG,
     },
 });

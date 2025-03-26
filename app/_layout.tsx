@@ -10,7 +10,7 @@ import React from 'react';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Provider, useDispatch } from 'react-redux';
 import { store } from '@/store/store';
-import { AppState } from 'react-native';
+import { AppState, StatusBar } from 'react-native';
 import { resetStore } from '@/store/actions';
 import { POSTHOG_CONFIG } from '@/config/posthog';
 import { PostHogProvider } from 'posthog-react-native';
@@ -151,53 +151,56 @@ export default function RootLayout() {
     }
 
     return (
-        <PostHogProvider
-            apiKey={POSTHOG_CONFIG.apiKey}
-            autocapture={{
-                captureLifecycleEvents: true,
-                captureScreens: false, // Disable default screen capture since we're using our hook
-                ignoreLabels: [],
-            }}
-            options={{
-                host: POSTHOG_CONFIG.host,
-                enableSessionReplay: true,
-                sessionReplayConfig: {
-                    maskAllTextInputs: false,
-                    maskAllImages: false,
-                    captureLog: true,
-                    captureNetworkTelemetry: true,
-                    androidDebouncerDelayMs: 500,
-                    iOSdebouncerDelayMs: 1000,
-                },
-            }}
-        >
-            <Provider store={store}>
-                <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                    <AppStateHandler />
-                    <ScreenTrackingWrapper>
-                        <Stack
-                            screenOptions={{
-                                headerShown: false,
-                                gestureEnabled: false,
-                                navigationBarHidden: true,
-                                animation: 'default',
-                                presentation: 'card',
-                            }}
-                        >
-                            <Stack.Screen name='(app)' options={{ headerShown: false, gestureEnabled: false, animation: 'fade' }} />
-                            <Stack.Screen name='(auth)' options={{ headerShown: false, gestureEnabled: false }} />
-                            <Stack.Screen
-                                name='index'
-                                options={{
+        <>
+            <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} backgroundColor='transparent' translucent={true} />
+            <PostHogProvider
+                apiKey={POSTHOG_CONFIG.apiKey}
+                autocapture={{
+                    captureLifecycleEvents: true,
+                    captureScreens: false, // Disable default screen capture since we're using our hook
+                    ignoreLabels: [],
+                }}
+                options={{
+                    host: POSTHOG_CONFIG.host,
+                    enableSessionReplay: true,
+                    sessionReplayConfig: {
+                        maskAllTextInputs: false,
+                        maskAllImages: false,
+                        captureLog: true,
+                        captureNetworkTelemetry: true,
+                        androidDebouncerDelayMs: 500,
+                        iOSdebouncerDelayMs: 1000,
+                    },
+                }}
+            >
+                <Provider store={store}>
+                    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                        <AppStateHandler />
+                        <ScreenTrackingWrapper>
+                            <Stack
+                                screenOptions={{
                                     headerShown: false,
-                                    animation: 'none',
                                     gestureEnabled: false,
+                                    navigationBarHidden: true,
+                                    animation: 'default',
+                                    presentation: 'card',
                                 }}
-                            />
-                        </Stack>
-                    </ScreenTrackingWrapper>
-                </ThemeProvider>
-            </Provider>
-        </PostHogProvider>
+                            >
+                                <Stack.Screen name='(app)' options={{ headerShown: false, gestureEnabled: false, animation: 'fade' }} />
+                                <Stack.Screen name='(auth)' options={{ headerShown: false, gestureEnabled: false }} />
+                                <Stack.Screen
+                                    name='index'
+                                    options={{
+                                        headerShown: false,
+                                        animation: 'none',
+                                        gestureEnabled: false,
+                                    }}
+                                />
+                            </Stack>
+                        </ScreenTrackingWrapper>
+                    </ThemeProvider>
+                </Provider>
+            </PostHogProvider>
+        </>
     );
 }

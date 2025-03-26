@@ -1,7 +1,7 @@
 // app/(app)/(tabs)/on-demand.tsx
 
 import React, { useEffect, useMemo } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { Dimensions, StyleSheet, View, Platform } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -191,7 +191,14 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     infoContainer: {
-        marginTop: Spaces.XL,
+        ...Platform.select({
+            ios: {
+                marginTop: Spaces.LG,
+            },
+            android: {
+                marginTop: Spaces.SM,
+            },
+        }),
         paddingVertical: Spaces.MD,
         paddingHorizontal: Spaces.MD,
         borderRadius: Spaces.MD,
