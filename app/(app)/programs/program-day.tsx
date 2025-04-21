@@ -10,7 +10,7 @@ import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { ExerciseCard } from '@/components/programs/ExerciseCard';
+import { ExerciseCard } from '@/components/exercise/ExerciseCard';
 import { Icon } from '@/components/base/Icon';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
@@ -336,8 +336,9 @@ const ProgramDayScreen = () => {
                                 exercise={exercise}
                                 isEnrolled={isEnrolled}
                                 showLoggingButton={exercise.Type === 'strength'}
-                                onLogPress={() => handleExerciseLogPress(exercise)}
+                                onLogPress={handleExerciseLogPress}
                                 exerciseNumber={index + 1}
+                                programId={programId}
                             />
                         ))}
                     </ThemedView>

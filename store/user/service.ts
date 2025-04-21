@@ -9,7 +9,12 @@ import {
     UserSleepMeasurement,
     UserAppSettings,
     UserBodyMeasurement,
+    UserExerciseSubstitution,
+    CreateSubstitutionParams,
+    UpdateSubstitutionParams,
+    GetSubstitutionsParams,
 } from '@/types';
+
 import { authUsersApiClient, authRecommendationsApiClient } from '@/utils/api/apiConfig';
 import { handleApiError } from '@/utils/api/errorUtils';
 import { authService } from '@/utils/auth';
@@ -339,6 +344,46 @@ const deleteBodyMeasurement = async (userId: string, timestamp: string): Promise
     }
 };
 
+// Exercise Substitution Methods
+const getUserExerciseSubstitutions = async (userId: string, params?: GetSubstitutionsParams): Promise<UserExerciseSubstitution[]> => {
+    console.log('service: getUserExerciseSubstitutions');
+    try {
+        const { data } = await authUsersApiClient.get(`/users/${userId}/exercise-substitutions`, { params });
+        return data.substitutions || [];
+    } catch (error) {
+        throw handleApiError(error, 'GetUserExerciseSubstitutions');
+    }
+};
+
+const createExerciseSubstitution = async (userId: string, substitutionData: CreateSubstitutionParams): Promise<UserExerciseSubstitution> => {
+    console.log('service: createExerciseSubstitution');
+    try {
+        const { data } = await authUsersApiClient.post(`/users/${userId}/exercise-substitutions`, substitutionData);
+        return data.substitution;
+    } catch (error) {
+        throw handleApiError(error, 'CreateExerciseSubstitution');
+    }
+};
+
+const updateExerciseSubstitution = async (userId: string, substitutionId: string, updates: UpdateSubstitutionParams): Promise<UserExerciseSubstitution> => {
+    console.log('service: updateExerciseSubstitution');
+    try {
+        const { data } = await authUsersApiClient.put(`/users/${userId}/exercise-substitutions/${substitutionId}`, updates);
+        return data.substitution;
+    } catch (error) {
+        throw handleApiError(error, 'UpdateExerciseSubstitution');
+    }
+};
+
+const deleteExerciseSubstitution = async (userId: string, substitutionId: string): Promise<void> => {
+    console.log('service: deleteExerciseSubstitution');
+    try {
+        await authUsersApiClient.delete(`/users/${userId}/exercise-substitutions/${substitutionId}`);
+    } catch (error) {
+        throw handleApiError(error, 'DeleteExerciseSubstitution');
+    }
+};
+
 export default {
     // User Profile
     getUser,
@@ -373,4 +418,9 @@ export default {
     logBodyMeasurement,
     updateBodyMeasurement,
     deleteBodyMeasurement,
+    // Exercise Substitutions
+    getUserExerciseSubstitutions,
+    createExerciseSubstitution,
+    updateExerciseSubstitution,
+    deleteExerciseSubstitution,
 };

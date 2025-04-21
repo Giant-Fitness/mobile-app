@@ -10,6 +10,7 @@ import {
     UserSleepMeasurement,
     UserAppSettings,
     UserBodyMeasurement,
+    UserExerciseSubstitution,
 } from '@/types';
 
 export interface UserState {
@@ -29,6 +30,8 @@ export interface UserState {
     userAppSettingsState: REQUEST_STATE;
     userBodyMeasurements: UserBodyMeasurement[];
     userBodyMeasurementsState: REQUEST_STATE;
+    userExerciseSubstitutions: UserExerciseSubstitution[];
+    userExerciseSubstitutionsState: REQUEST_STATE;
     error: string | null;
 }
 
@@ -49,5 +52,7 @@ export const initialState: UserState = {
     userAppSettingsState: REQUEST_STATE.IDLE,
     userBodyMeasurements: [],
     userBodyMeasurementsState: REQUEST_STATE.IDLE,
+    userExerciseSubstitutions: [],
+    userExerciseSubstitutionsState: REQUEST_STATE.IDLE,
     error: null,
 };

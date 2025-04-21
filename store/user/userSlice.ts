@@ -28,6 +28,10 @@ import {
     logBodyMeasurementAsync,
     updateBodyMeasurementAsync,
     deleteBodyMeasurementAsync,
+    getUserExerciseSubstitutionsAsync,
+    createExerciseSubstitutionAsync,
+    updateExerciseSubstitutionAsync,
+    deleteExerciseSubstitutionAsync,
 } from '@/store/user/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import {
@@ -39,6 +43,7 @@ import {
     UserSleepMeasurement,
     UserAppSettings,
     UserBodyMeasurement,
+    UserExerciseSubstitution,
 } from '@/types';
 
 const userSlice = createSlice({
@@ -404,6 +409,57 @@ const userSlice = createSlice({
             .addCase(deleteBodyMeasurementAsync.rejected, (state, action) => {
                 state.userBodyMeasurementsState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'Failed to delete body measurement';
+            })
+            .addCase(getUserExerciseSubstitutionsAsync.pending, (state) => {
+                state.userExerciseSubstitutionsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(getUserExerciseSubstitutionsAsync.fulfilled, (state, action: PayloadAction<UserExerciseSubstitution[]>) => {
+                state.userExerciseSubstitutionsState = REQUEST_STATE.FULFILLED;
+                state.userExerciseSubstitutions = action.payload;
+            })
+            .addCase(getUserExerciseSubstitutionsAsync.rejected, (state, action) => {
+                state.userExerciseSubstitutionsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to fetch exercise substitutions';
+            })
+
+            .addCase(createExerciseSubstitutionAsync.pending, (state) => {
+                state.userExerciseSubstitutionsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(createExerciseSubstitutionAsync.fulfilled, (state, action: PayloadAction<UserExerciseSubstitution[]>) => {
+                state.userExerciseSubstitutionsState = REQUEST_STATE.FULFILLED;
+                state.userExerciseSubstitutions = action.payload;
+            })
+            .addCase(createExerciseSubstitutionAsync.rejected, (state, action) => {
+                state.userExerciseSubstitutionsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to create exercise substitution';
+            })
+
+            .addCase(updateExerciseSubstitutionAsync.pending, (state) => {
+                state.userExerciseSubstitutionsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(updateExerciseSubstitutionAsync.fulfilled, (state, action: PayloadAction<UserExerciseSubstitution[]>) => {
+                state.userExerciseSubstitutionsState = REQUEST_STATE.FULFILLED;
+                state.userExerciseSubstitutions = action.payload;
+            })
+            .addCase(updateExerciseSubstitutionAsync.rejected, (state, action) => {
+                state.userExerciseSubstitutionsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to update exercise substitution';
+            })
+
+            .addCase(deleteExerciseSubstitutionAsync.pending, (state) => {
+                state.userExerciseSubstitutionsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(deleteExerciseSubstitutionAsync.fulfilled, (state, action: PayloadAction<UserExerciseSubstitution[]>) => {
+                state.userExerciseSubstitutionsState = REQUEST_STATE.FULFILLED;
+                state.userExerciseSubstitutions = action.payload;
+            })
+            .addCase(deleteExerciseSubstitutionAsync.rejected, (state, action) => {
+                state.userExerciseSubstitutionsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to delete exercise substitution';
             });
     },
 });

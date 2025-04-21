@@ -17,12 +17,14 @@ import {
     getUserRecommendationsAsync,
     getWeightMeasurementsAsync,
     getBodyMeasurementsAsync,
+    getUserExerciseSubstitutionsAsync,
 } from '@/store/user/thunks';
 import { getAllWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
+import { initializeTrackedLiftsHistoryAsync } from '@/store/exerciseProgress/thunks';
+import { fetchAllExercisesAsync } from '@/store/exercises/thunks';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { BasicSplash } from '@/components/base/BasicSplash';
 import { ThemedText } from '@/components/base/ThemedText';
-import { initializeTrackedLiftsHistoryAsync } from '@/store/exerciseProgress/thunks';
 import { usePostHog } from 'posthog-react-native';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -78,6 +80,8 @@ const Initialization: React.FC = () => {
                 dispatch(getSleepMeasurementsAsync()),
                 dispatch(getUserAppSettingsAsync()),
                 dispatch(getAllWorkoutsAsync()),
+                dispatch(fetchAllExercisesAsync()),
+                dispatch(getUserExerciseSubstitutionsAsync()),
             ]);
 
             setDataLoaded(REQUEST_STATE.FULFILLED);

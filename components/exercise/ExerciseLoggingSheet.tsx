@@ -580,7 +580,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingVertical: Spaces.MD,
-        paddingHorizontal: Spaces.MD,
         borderBottomWidth: StyleSheet.hairlineWidth,
     },
     headerButton: {
