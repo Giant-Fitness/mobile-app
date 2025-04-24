@@ -180,6 +180,8 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
             return <AnimatedIonicons name='checkmark-sharp' {...commonProps} />;
         case 'pencil-ruler':
             return <AnimatedMaterialCommunityIcons name='pencil-ruler' {...commonProps} />;
+        case 'swap':
+            return <AnimatedMaterialIcons name='swap-horizontal-circle' {...commonProps} />;
         default:
             return <AnimatedIonicons name='alert-circle-outline' {...commonProps} />;
     }

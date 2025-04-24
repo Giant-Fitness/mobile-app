@@ -52,11 +52,11 @@ export interface Exercise {
     Archived: boolean;
     LoggingType: string;
     LoggingInstructions: string;
-    Sets: number;
-    RepsUpper: number;
-    RepsLower: number;
-    Rest: number;
-    ORMPercentage: number;
+    Sets?: number;
+    RepsUpper?: number;
+    RepsLower?: number;
+    Rest?: number;
+    ORMPercentage?: number;
 }
 
 export interface ProgramDay {

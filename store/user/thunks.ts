@@ -11,6 +11,10 @@ import {
     UserSleepMeasurement,
     UserAppSettings,
     UserBodyMeasurement,
+    UserExerciseSubstitution,
+    CreateSubstitutionParams,
+    UpdateSubstitutionParams,
+    GetSubstitutionsParams,
 } from '@/types';
 import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
@@ -670,6 +674,135 @@ export const deleteBodyMeasurementAsync = createAsyncThunk<
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to delete body measurement',
+        });
+    }
+});
+
+// Helper function to refresh exercise substitutions
+const refreshExerciseSubstitutions = async (userId: string, params?: GetSubstitutionsParams) => {
+    return await UserService.getUserExerciseSubstitutions(userId, params);
+};
+
+// Get all exercise substitutions for a user
+export const getUserExerciseSubstitutionsAsync = createAsyncThunk<
+    UserExerciseSubstitution[],
+    { params?: GetSubstitutionsParams; forceRefresh?: boolean } | void,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/getUserExerciseSubstitutions', async (args = {}, { getState, rejectWithValue }) => {
+    try {
+        const { params, forceRefresh = false } = typeof args === 'object' ? args : {};
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Return cached substitutions if available and not forcing refresh
+        if (
+            state.user.userExerciseSubstitutions.length > 0 &&
+            state.user.userExerciseSubstitutionsState === REQUEST_STATE.FULFILLED &&
+            !forceRefresh &&
+            !params // Only use cache if not filtering
+        ) {
+            return state.user.userExerciseSubstitutions;
+        }
+
+        const substitutions = await UserService.getUserExerciseSubstitutions(userId, params);
+        return substitutions;
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch exercise substitutions',
+        });
+    }
+});
+
+// Create a new exercise substitution
+export const createExerciseSubstitutionAsync = createAsyncThunk<
+    UserExerciseSubstitution[],
+    CreateSubstitutionParams,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/createExerciseSubstitution', async (substitutionData, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Create the substitution
+        await UserService.createExerciseSubstitution(userId, substitutionData);
+
+        // Refresh and return all substitutions
+        return await refreshExerciseSubstitutions(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to create exercise substitution',
+        });
+    }
+});
+
+// Update an existing exercise substitution
+export const updateExerciseSubstitutionAsync = createAsyncThunk<
+    UserExerciseSubstitution[],
+    { substitutionId: string; updates: UpdateSubstitutionParams },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/updateExerciseSubstitution', async ({ substitutionId, updates }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Update the substitution
+        await UserService.updateExerciseSubstitution(userId, substitutionId, updates);
+
+        // Refresh and return all substitutions
+        return await refreshExerciseSubstitutions(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to update exercise substitution',
+        });
+    }
+});
+
+// Delete an exercise substitution
+export const deleteExerciseSubstitutionAsync = createAsyncThunk<
+    UserExerciseSubstitution[],
+    { substitutionId: string },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/deleteExerciseSubstitution', async ({ substitutionId }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Delete the substitution
+        await UserService.deleteExerciseSubstitution(userId, substitutionId);
+
+        // Refresh and return all substitutions
+        return await refreshExerciseSubstitutions(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to delete exercise substitution',
         });
     }
 });

@@ -135,7 +135,7 @@ const ExerciseDetailsScreen = () => {
                     </ThemedView>
                 </ThemedView>
             </Animated.ScrollView>
-            <OneRepMaxCalculator visible={isCalculatorVisible} onClose={closeCalculator} ormPercentage={exercise.ORMPercentage} />
+            <OneRepMaxCalculator visible={isCalculatorVisible} onClose={closeCalculator} ormPercentage={exercise.ORMPercentage!} />
         </ThemedView>
     );
 };

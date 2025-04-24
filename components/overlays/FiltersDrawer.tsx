@@ -9,7 +9,7 @@ import { TextButton } from '@/components/buttons/TextButton';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Icon } from '@/components/base/Icon';
-import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { scale, moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 
@@ -189,13 +189,13 @@ const styles = StyleSheet.create({
     },
     resetButton: {
         position: 'absolute',
-        left: 0,
-        top: verticalScale(12),
+        right: 0,
+        top: 0,
     },
     closeButton: {
         position: 'absolute',
-        right: 0,
-        top: verticalScale(12),
+        left: 0,
+        top: 0,
     },
     categoryContainer: {
         marginBottom: Spaces.LG,

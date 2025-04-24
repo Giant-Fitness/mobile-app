@@ -1,7 +1,7 @@
-// components/programs/ExerciseCard.tsx
+// components/exercise/ExerciseCard.tsx
 
-import React, { useMemo } from 'react';
-import { StyleSheet, View, Platform } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { StyleSheet, View, Platform, TouchableOpacity } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -20,6 +20,7 @@ import { format } from 'date-fns';
 import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
 import { scale } from '@/utils/scaling';
 import { debounce } from '@/utils/debounce';
+import { ExerciseAlternativesBottomSheet } from '@/components/exercise/ExerciseAlternativesBottomSheet';
 
 type LogButtonState = {
     type: 'empty' | 'partial' | 'complete';
@@ -30,8 +31,9 @@ type ExerciseCardProps = {
     exercise: Exercise;
     isEnrolled: boolean;
     showLoggingButton?: boolean;
-    onLogPress?: () => void;
+    onLogPress?: (exercise: Exercise) => void;
     exerciseNumber?: number;
+    programId?: string;
 };
 
 const defaultLogPress = () => {};
@@ -42,29 +44,55 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
     showLoggingButton = false,
     onLogPress = defaultLogPress,
     exerciseNumber,
+    programId,
 }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme as 'light' | 'dark'];
+    const [showAlternativesSheet, setShowAlternativesSheet] = useState(false);
+    const [forceUpdate, setForceUpdate] = useState(0);
 
     const { recentLogs, liftHistory } = useSelector((state: RootState) => state.exerciseProgress);
+    const { userExerciseSubstitutions } = useSelector((state: RootState) => state.user);
+    const { exercises } = useSelector((state: RootState) => state.exercises);
+
+    // Find if this exercise has a substitution
+    const substitution = useMemo(() => {
+        if (!programId) return null;
+
+        return userExerciseSubstitutions.find(
+            (sub) =>
+                sub.OriginalExerciseId === exercise.ExerciseId &&
+                (sub.ProgramId === programId || sub.ProgramId === null) &&
+                // For temporary substitutions, check if it's for today
+                (!sub.IsTemporary || (sub.IsTemporary && sub.TemporaryDate === format(new Date(), 'yyyy-MM-dd'))),
+        );
+    }, [exercise.ExerciseId, programId, userExerciseSubstitutions, forceUpdate]);
+
+    // Get the substituted exercise name (if substituted)
+    const substituteExercise = useMemo(() => {
+        if (substitution && exercises[substitution.SubstituteExerciseId]) {
+            return exercises[substitution.SubstituteExerciseId];
+        }
+        return null;
+    }, [substitution, exercises, forceUpdate]);
 
     // Calculate log button state based on today's progress
     const logButtonState = useMemo<LogButtonState>(() => {
         const today = format(new Date(), 'yyyy-MM-dd');
-        const exerciseLogId = `${exercise.ExerciseId}#${today}`;
+        // When logging, we want to log against the substitute exercise ID if it exists
+        const exerciseIdToLog = substituteExercise ? substituteExercise.ExerciseId : exercise.ExerciseId;
+        const exerciseLogId = `${exerciseIdToLog}#${today}`;
 
         // Get today's log from either source
-
         const todaysLog =
-            recentLogs[exercise.ExerciseId]?.[exerciseLogId] ||
-            (isLongTermTrackedLift(exercise.ExerciseId) ? liftHistory[exercise.ExerciseId]?.[exerciseLogId] : null);
+            recentLogs[exerciseIdToLog]?.[exerciseLogId] || (isLongTermTrackedLift(exerciseIdToLog) ? liftHistory[exerciseIdToLog]?.[exerciseLogId] : null);
 
         if (!todaysLog) {
             return { type: 'empty' };
         }
 
         const loggedSets = todaysLog.Sets.length;
-        const requiredSets = exercise.Sets;
+        const requiredSets = exercise.Sets ?? 0;
 
         if (loggedSets >= requiredSets) {
             return { type: 'complete' };
@@ -74,17 +102,71 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
             type: 'partial',
             progress: loggedSets / requiredSets,
         };
-    }, [exercise.ExerciseId, exercise.Sets, recentLogs, liftHistory]);
+    }, [exercise.ExerciseId, exercise.Sets, substituteExercise, recentLogs, liftHistory]);
 
     const navigateToExerciseDetail = () => {
+        // When navigating to a substituted exercise, we want to keep the workout parameters
+        // from the original exercise but show the details of the substituted exercise
+        let targetExercise;
+
+        if (substituteExercise) {
+            // Create a new object that combines substitute exercise details with original exercise parameters
+            targetExercise = {
+                ...substituteExercise,
+                // Inject the original exercise's workout parameters
+                Sets: exercise.Sets,
+                RepsLower: exercise.RepsLower,
+                RepsUpper: exercise.RepsUpper,
+                Rest: exercise.Rest,
+                ORMPercentage: exercise.ORMPercentage, // Include One Rep Max percentage if available
+            };
+        } else {
+            targetExercise = exercise;
+        }
+
         debounce(router, {
             pathname: '/(app)/programs/exercise-details',
             params: {
-                exercise: JSON.stringify(exercise),
-                exerciseId: exercise.ExerciseId,
+                exercise: JSON.stringify(targetExercise),
+                exerciseId: targetExercise.ExerciseId,
                 isEnrolled: isEnrolled.toString(),
             },
         });
+    };
+
+    const handleSwapPress = () => {
+        setShowAlternativesSheet(true);
+    };
+
+    // Handle the bottom sheet closing - trigger a re-render
+    const handleSheetClose = () => {
+        setShowAlternativesSheet(false);
+        // Force a re-render after closing the sheet
+        setForceUpdate((prev) => prev + 1);
+    };
+
+    // Handle logging with substituted exercise
+    const handleLogPress = () => {
+        // If this exercise has a substitution, pass the substitute exercise to the log handler
+        if (substituteExercise) {
+            // Create an exercise object that combines the substitute exercise's details
+            // with the original exercise's workout parameters
+            const logExercise = {
+                ...substituteExercise,
+                // Keep the original exercise's workout parameters
+                Sets: exercise.Sets,
+                RepsLower: exercise.RepsLower,
+                RepsUpper: exercise.RepsUpper,
+                Rest: exercise.Rest,
+                ORMPercentage: exercise.ORMPercentage,
+            };
+
+            // Pass the combined exercise to the log handler
+            onLogPress(logExercise);
+        } else {
+            // No substitution, use the original exercise
+            onLogPress(exercise);
+        }
     };
 
     const renderLogButton = () => {
@@ -155,7 +237,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
         }
 
         return (
-            <TextButton onPress={onLogPress} style={[styles.logButton, { backgroundColor: lightenColor(themeColors.buttonPrimary, 0.1) }]}>
+            <TextButton onPress={handleLogPress} style={[styles.logButton, { backgroundColor: lightenColor(themeColors.buttonPrimary, 0.1) }]}>
                 {buttonContent}
             </TextButton>
         );
@@ -175,15 +257,34 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
             ]}
         >
             <ThemedView style={[styles.titleContainer, { backgroundColor: themeColors.background }]}>
-                <View style={[styles.titleRow, { flex: 1 }]}>
-                    <ThemedText type='titleLarge' style={[{ color: themeColors.text, flex: 1 }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>
-                        {exerciseNumber ? (
-                            <ThemedText type='titleLarge' style={[{ color: lightenColor(themeColors.text, 0.7), fontSize: scale(16) }]}>
-                                #{exerciseNumber}{' '}
-                            </ThemedText>
-                        ) : null}
-                        {exercise.ExerciseName}
-                    </ThemedText>
+                <View style={styles.titleRow}>
+                    <View style={styles.exerciseNameContainer}>
+                        <ThemedText type='titleLarge' style={[{ color: themeColors.text }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>
+                            {exerciseNumber ? (
+                                <ThemedText type='titleLarge' style={[{ color: lightenColor(themeColors.text, 0.7), fontSize: scale(16) }]}>
+                                    #{exerciseNumber}{' '}
+                                </ThemedText>
+                            ) : null}
+                            {substituteExercise ? substituteExercise.ExerciseName : exercise.ExerciseName}
+                        </ThemedText>
+
+                        {/* Substitution Tag */}
+                        {substitution && (
+                            <View style={styles.substitutionTag}>
+                                <Icon name='swap' size={14} color={themeColors.tangerineSolid} />
+                                <ThemedText type='caption' style={[styles.substitutionText, { color: themeColors.tangerineSolid }]}>
+                                    {substitution.IsTemporary ? 'Today only' : 'Substituted'}
+                                </ThemedText>
+                            </View>
+                        )}
+                    </View>
+
+                    {/* Swap Icon Button */}
+                    {isEnrolled && (
+                        <TouchableOpacity onPress={handleSwapPress} style={styles.swapButton} hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}>
+                            <Icon name='swap' size={24} color={substitution ? themeColors.tangerineSolid : themeColors.text} />
+                        </TouchableOpacity>
+                    )}
                 </View>
             </ThemedView>
             <ThemedView style={styles.infoContainer}>
@@ -212,11 +313,11 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
                     </ThemedText>
                 </ThemedView>
             </ThemedView>
-            {exercise.QuickTip && (
+            {(substituteExercise?.QuickTip || exercise.QuickTip) && (
                 <ThemedView style={styles.tipContainer}>
                     <Icon name='bulb' size={Sizes.fontSizeDefault} color={themeColors.text} style={{ marginTop: Spaces.XS }} />
                     <ThemedText type='italic' style={styles.quickTip}>
-                        {exercise.QuickTip}
+                        {substituteExercise?.QuickTip || exercise.QuickTip}
                     </ThemedText>
                 </ThemedView>
             )}
@@ -235,6 +336,14 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
                 />
                 {isEnrolled && showLoggingButton && renderLogButton()}
             </View>
+
+            {/* Exercise Alternatives Bottom Sheet */}
+            <ExerciseAlternativesBottomSheet
+                visible={showAlternativesSheet}
+                onClose={handleSheetClose}
+                exercise={exercise} // Pass the original exercise for substitution logic
+                programId={programId}
+            />
         </ThemedView>
     );
 };
@@ -242,7 +351,21 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
 const styles = StyleSheet.create({
     titleRow: {
         flexDirection: 'row',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+    },
+    exerciseNameContainer: {
+        flex: 1,
+        flexDirection: 'column',
+    },
+    substitutionTag: {
+        flexDirection: 'row',
         alignItems: 'center',
+        marginTop: 4,
+    },
+    substitutionText: {
+        marginLeft: 4,
+        fontStyle: 'italic',
     },
     card: {
         borderRadius: Spaces.SM,
@@ -286,10 +409,6 @@ const styles = StyleSheet.create({
         marginLeft: Spaces.XS,
         flex: 1,
     },
-    detailsButton: {
-        paddingVertical: Spaces.SM,
-        marginTop: Spaces.SM,
-    },
     buttonContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -319,5 +438,8 @@ const styles = StyleSheet.create({
     progressRing: {
         marginRight: Spaces.MD,
         marginTop: 1,
+    },
+    swapButton: {
+        padding: Spaces.XS,
     },
 });

@@ -106,8 +106,8 @@ const styles = StyleSheet.create({
     },
     closeButton: {
         position: 'absolute',
-        right: Spaces.LG,
-        top: Spaces.XS,
+        left: Spaces.LG,
+        top: 0,
     },
     optionContainer: {
         paddingBottom: Spaces.MD,

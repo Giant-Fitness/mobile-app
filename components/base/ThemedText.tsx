@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     },
     button: {
         fontSize: moderateScale(14),
-        lineHeight: moderateScale(24),
+        lineHeight: moderateScale(20),
         fontFamily: 'InterSemiBold',
     },
     buttonSmall: {
