@@ -378,7 +378,8 @@ export const useProgramData = (
 
     const hasCompletedWorkoutToday = useMemo(() => {
         // If there's no program progress or LastActivityAt or last action was an uncomplete, return false
-        if (!userProgramProgress?.LastActivityAt || userProgramProgress.LastAction === 'uncomplete') return false;
+        if (!userProgramProgress?.LastActivityAt || userProgramProgress.LastAction === 'uncomplete' || userProgramProgress.LastActionWasAutoComplete)
+            return false;
 
         // If this is day 1, then treat it like no workouts today
         if (userProgramProgress.CurrentDay === 1) {
@@ -388,6 +389,93 @@ export const useProgramData = (
         // Otherwise, check if they've completed a workout today
         return isToday(userProgramProgress.LastActivityAt);
     }, [userProgramProgress, userProgramProgress?.LastActivityAt, userProgramProgress?.CurrentDay]);
+
+    const handleAutoCompleteRestDays = async () => {
+        // Use user's current program progress
+        if (!userProgramProgress?.LastActivityAt || !userProgramProgress?.ProgramId) {
+            return 0;
+        }
+
+        try {
+            // Calculate days elapsed since last activity
+            const lastActive = new Date(userProgramProgress.LastActivityAt);
+            const now = new Date();
+            const timeDiffMillis = now.getTime() - lastActive.getTime();
+            const daysPassed = Math.floor(timeDiffMillis / (1000 * 60 * 60 * 24));
+
+            // Only auto-complete if more than 1 day has passed
+            if (daysPassed <= 1) {
+                return 0;
+            }
+
+            const programId = userProgramProgress.ProgramId;
+
+            // Load all program days and wait for the result
+            const loadedProgramDays = await dispatch(
+                getAllProgramDaysAsync({
+                    programId,
+                    forceRefresh: true,
+                }),
+            ).unwrap();
+
+            const totalProgramDays = programs[programId]?.Days || 0;
+            const currentDay = userProgramProgress.CurrentDay;
+
+            // Get current day data - accounting for 0-based array indexing
+            const currentDayData = loadedProgramDays[currentDay - 1];
+
+            let daysToComplete = [];
+
+            // Only proceed if the current day is a rest day
+            if (currentDayData?.RestDay) {
+                // Don't auto-complete the last day of the program
+                if (currentDay - 1 < totalProgramDays - 1) {
+                    daysToComplete.push(currentDay - 1);
+
+                    // Track how many days we've auto-completed
+                    let daysAutoCompleted = 1;
+
+                    // Check for consecutive rest days after this one
+                    let nextDayToCheck = currentDay + 1;
+
+                    // We can auto-complete up to daysPassed days
+                    const maxDaysToAutoComplete = daysPassed;
+
+                    while (nextDayToCheck - 1 < totalProgramDays - 1 && daysAutoCompleted < maxDaysToAutoComplete) {
+                        const nextDay = loadedProgramDays[nextDayToCheck - 1];
+
+                        // If the next day is also a rest day, add it to our list
+                        if (nextDay?.RestDay) {
+                            daysToComplete.push(nextDayToCheck - 1);
+                            nextDayToCheck++;
+                            daysAutoCompleted++;
+                        } else {
+                            // Stop when we hit a non-rest day
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // If we have days to complete, just complete the last one
+            // The backend will automatically mark in-between days as complete
+            if (daysToComplete.length > 0) {
+                // Get the last day to complete (highest day number)
+                const lastDayToComplete = Math.max(...daysToComplete);
+
+                // Complete only the last day
+                await dispatch(completeDayAsync({ dayId: lastDayToComplete.toString(), isAutoComplete: true })).unwrap();
+
+                // Refresh the program progress
+                await dispatch(getUserProgramProgressAsync({ forceRefresh: true })).unwrap();
+            }
+
+            return daysToComplete.length;
+        } catch (error) {
+            console.error('Auto-complete rest days failed:', error);
+            return 0;
+        }
+    };
 
     return {
         user,
@@ -416,6 +504,7 @@ export const useProgramData = (
         currentMonthIndex,
         setCurrentMonthIndex,
         hasCompletedWorkoutToday,
+        handleAutoCompleteRestDays,
         currentWeek: programCalendarData.currentWeek,
         error: programError || quoteError,
     };

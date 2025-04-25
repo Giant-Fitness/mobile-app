@@ -20,6 +20,7 @@ export interface UserProgramProgress {
     StartAt: string;
     LastActivityAt: string;
     LastAction?: string;
+    LastActionWasAutoComplete?: boolean;
 }
 
 export interface UserRecommendations {

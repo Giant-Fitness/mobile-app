@@ -100,10 +100,13 @@ const getUserProgramProgress = async (userId: string): Promise<UserProgramProgre
     }
 };
 
-const completeDay = async (userId: string, dayId: string): Promise<UserProgramProgress> => {
+const completeDay = async (userId: string, dayId: string, isAutoComplete: boolean): Promise<UserProgramProgress> => {
     console.log('service: completeDay');
     try {
-        const { data } = await authUsersApiClient.put(`/users/${userId}/program-progress/complete-day`, { dayId: parseInt(dayId) });
+        const { data } = await authUsersApiClient.put(`/users/${userId}/program-progress/complete-day`, {
+            dayId: parseInt(dayId),
+            isAutoComplete: isAutoComplete,
+        });
 
         if (!data.programProgress) {
             throw new Error('Program progress not found in response');
