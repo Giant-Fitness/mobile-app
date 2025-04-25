@@ -22,6 +22,7 @@ import {
 import { getAllWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
 import { initializeTrackedLiftsHistoryAsync } from '@/store/exerciseProgress/thunks';
 import { fetchAllExercisesAsync } from '@/store/exercises/thunks';
+import { useProgramData } from '@/hooks/useProgramData';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { BasicSplash } from '@/components/base/BasicSplash';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -46,6 +47,8 @@ const Initialization: React.FC = () => {
 
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+
+    const { programDay, handleAutoCompleteRestDays } = useProgramData(undefined, undefined);
 
     const fetchUserData = useCallback(async () => {
         try {
@@ -118,6 +121,25 @@ const Initialization: React.FC = () => {
             dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId }));
         }
     }, [userProgramProgress, dispatch, userProgramProgressState]);
+
+    useEffect(() => {
+        if (!userProgramProgress?.LastActivityAt || userProgramProgressState !== REQUEST_STATE.FULFILLED) return;
+
+        const checkAndAutoCompleteRestDays = async () => {
+            try {
+                if (programDay && userProgramProgress) {
+                    const completedDaysCount = await handleAutoCompleteRestDays();
+                    if (completedDaysCount && completedDaysCount > 0) {
+                        console.log(`Auto-completed ${completedDaysCount} rest days`);
+                    }
+                }
+            } catch (error) {
+                console.error('Auto-complete rest days check failed:', error);
+            }
+        };
+
+        checkAndAutoCompleteRestDays();
+    }, [userProgramProgress, userProgramProgressState, programDay, handleAutoCompleteRestDays]);
 
     const { showSplash } = useSplashScreen({
         dataLoadedState: dataLoaded,
