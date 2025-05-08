@@ -4,7 +4,6 @@ import React from 'react';
 import { StyleSheet, Alert, View, ScrollView, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { ThemedView } from '@/components/base/ThemedView';
-import { signOut } from 'aws-amplify/auth';
 import { authService } from '@/utils/auth';
 import { resetStore } from '@/store/actions';
 import { useDispatch } from 'react-redux';
@@ -41,7 +40,7 @@ const SettingItem = ({ text, onPress, iconName }: SettingItemProps) => {
 
     return (
         <TouchableOpacity
-            style={[styles.settingItem, , { backgroundColor: lightenColor(themeColors.backgroundSecondary, 0.3) }]}
+            style={[styles.settingItem, { backgroundColor: lightenColor(themeColors.backgroundSecondary, 0.3) }]}
             onPress={onPress}
             activeOpacity={0.7}
         >
@@ -68,16 +67,45 @@ const SettingsIndex = () => {
             router.replace('/');
         } else {
             try {
+                // Capture analytics event
                 posthog.capture('sign_out_clicked');
                 posthog.reset();
-                await authService.clearAuthData();
-                await signOut();
+
+                const success = await authService.signOut();
+
+                // Clear store state regardless of signOut result
                 await dispatch(resetStore());
-                router.replace('/');
+
+                // Navigate to welcome screen with a slight delay to ensure cleanup
+                setTimeout(() => {
+                    router.replace('/');
+                }, 100);
+
+                if (!success) {
+                    // If sign out failed through normal channels, still ensure local cleanup
+                    console.warn('Sign out through Amplify failed, but local state has been cleared');
+                }
             } catch (error: unknown) {
-                console.error('Error signing out:', error);
-                const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-                Alert.alert('Sign out Error', errorMessage);
+                console.error('Error during sign out process:', error);
+
+                // Even on error, clean up local state and redirect
+                try {
+                    await authService.clearAuthData();
+                    await dispatch(resetStore());
+                    setTimeout(() => {
+                        router.replace('/');
+                    }, 100);
+                } catch (cleanupError: unknown) {
+                    const errorMessage =
+                        error instanceof Error
+                            ? error.message
+                                ? error.message
+                                : cleanupError instanceof Error
+                                ? cleanupError.message
+                                : 'An unexpected error occurred'
+                            : 'An unexpected error occurred';
+                    Alert.alert('Sign out Error', errorMessage);
+                }
             }
         }
     };

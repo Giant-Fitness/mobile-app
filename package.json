@@ -15,6 +15,7 @@
     "dependencies": {
         "@aws-amplify/core": "^6.7.0",
         "@aws-amplify/react-native": "^1.1.6",
+        "@aws-amplify/rtn-web-browser": "^1.1.2",
         "@aws-amplify/ui-react-native": "^2.2.16",
         "@aws-sdk/client-cloudformation": "^3.624.0",
         "@aws-sdk/client-s3": "^3.624.0",
@@ -35,8 +36,10 @@
         "date-fns": "^4.1.0",
         "expo": "^52.0.46",
         "expo-application": "~6.0.2",
+        "expo-auth-session": "^6.0.3",
         "expo-av": "~15.0.2",
         "expo-blur": "~14.0.3",
+        "expo-build-properties": "~0.13.2",
         "expo-camera": "~16.0.18",
         "expo-constants": "~17.0.8",
         "expo-dev-client": "~5.0.20",
@@ -50,7 +53,7 @@
         "expo-linking": "~7.0.5",
         "expo-localization": "~16.0.1",
         "expo-notifications": "~0.29.14",
-        "expo-router": "~4.0.20",
+        "expo-router": "~4.0.21",
         "expo-screen-orientation": "~8.0.4",
         "expo-secure-store": "~14.0.1",
         "expo-skeleton-placeholder": "^1.0.0",
@@ -113,5 +116,16 @@
         "tsx": "^4.19.2",
         "typescript": "~5.3.3"
     },
-    "private": true
+    "private": true,
+    "expo": {
+        "doctor": {
+            "reactNativeDirectoryCheck": {
+                "exclude": [
+                    "react-native-keyboard-aware-scroll-view",
+                    "posthog-react-native-session-replay"
+                ],
+                "listUnknownPackages": false
+            }
+        }
+    }
 }

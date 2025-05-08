@@ -32,6 +32,7 @@ export const Sizes = {
     fontSizeDefault: moderateScale(14),
     fontSizeSmall: moderateScale(13),
     headerHeight: moderateScale(100),
+    headerHeightAndroid: moderateScale(70),
     footerHeightIOS: moderateScale(90),
     footerHeightAndroid: moderateScale(70),
 };

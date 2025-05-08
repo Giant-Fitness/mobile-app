@@ -1,13 +1,16 @@
 // utils/auth.ts
 
 import * as SecureStore from 'expo-secure-store';
-import { fetchAuthSession } from 'aws-amplify/auth';
+import { fetchAuthSession, signOut as amplifySignOut } from 'aws-amplify/auth';
+import * as WebBrowser from 'expo-web-browser';
+import { Platform } from 'react-native';
 
 const STORAGE_KEYS = {
     USER_ID: 'userId',
     ACCESS_TOKEN: 'accessToken',
     ID_TOKEN: 'idToken',
     USER_INFO: 'userInfo',
+    AUTH_PROVIDER: 'authProvider',
 };
 
 export const authService = {
@@ -29,18 +32,46 @@ export const authService = {
             // Store ID token
             if (session.tokens.idToken) {
                 promises.push(SecureStore.setItemAsync(STORAGE_KEYS.ID_TOKEN, session.tokens.idToken.toString()));
+
+                // Determine and store the auth provider
+                const payload = session.tokens.idToken.payload;
+                let authProvider = 'cognito';
+
+                // Safe handling of identities with proper type checks
+                if (payload && 'identities' in payload) {
+                    const identities = payload.identities;
+
+                    // Careful type narrowing to ensure we have a valid array of identities
+                    if (Array.isArray(identities) && identities.length > 0) {
+                        const firstIdentity = identities[0];
+
+                        // Type check to ensure the identity has providerType
+                        if (
+                            typeof firstIdentity === 'object' &&
+                            firstIdentity !== null &&
+                            'providerType' in firstIdentity &&
+                            typeof firstIdentity.providerType === 'string'
+                        ) {
+                            authProvider = firstIdentity.providerType.toLowerCase();
+                        }
+                    }
+                }
+
+                promises.push(SecureStore.setItemAsync(STORAGE_KEYS.AUTH_PROVIDER, authProvider));
             }
 
             // Store user info
             if (session.tokens.idToken?.payload) {
+                const payload = session.tokens.idToken.payload;
+
                 const userInfo = {
-                    sub: session.tokens.idToken.payload.sub,
-                    email: session.tokens.idToken.payload.email,
-                    email_verified: session.tokens.idToken.payload.email_verified,
-                    auth_time: session.tokens.idToken.payload.auth_time,
-                    username: session.tokens.idToken.payload['cognito:username'],
-                    role: session.tokens.idToken.payload['custom:role'] || 'USER',
-                    subStatus: session.tokens.idToken.payload['custom:subStatus'] || 'FREE',
+                    sub: payload.sub || '',
+                    email: typeof payload.email === 'string' ? payload.email : '',
+                    email_verified: payload.email_verified || false,
+                    auth_time: payload.auth_time || 0,
+                    username: typeof payload['cognito:username'] === 'string' ? payload['cognito:username'] : '',
+                    role: typeof payload['custom:role'] === 'string' ? payload['custom:role'] : 'USER',
+                    subStatus: typeof payload['custom:subStatus'] === 'string' ? payload['custom:subStatus'] : 'FREE',
                 };
 
                 promises.push(SecureStore.setItemAsync(STORAGE_KEYS.USER_INFO, JSON.stringify(userInfo)));
@@ -63,6 +94,43 @@ export const authService = {
                 code: (error as any).code,
             });
             throw error;
+        }
+    },
+
+    signOut: async () => {
+        try {
+            // Get the auth provider to determine the right sign-out flow
+            const authProvider = (await SecureStore.getItemAsync(STORAGE_KEYS.AUTH_PROVIDER)) || 'cognito';
+
+            // For Google authentication, use a more cautious approach
+            if (authProvider === 'google') {
+                // First clear local auth data
+                await authService.clearAuthData();
+
+                // Close any open browser sessions to prevent redirects (iOS only)
+                if (Platform.OS === 'ios') {
+                    WebBrowser.dismissAuthSession();
+                }
+
+                // Then perform a local-only sign out (no global sign out)
+                await amplifySignOut({ global: false });
+
+                return true;
+            } else {
+                // For Cognito email/password auth, use normal sign out
+                await amplifySignOut({ global: false });
+                await authService.clearAuthData();
+                return true;
+            }
+        } catch (error) {
+            console.error('Error signing out:', error);
+            // Even if there's an error with Amplify, clear local data
+            try {
+                await authService.clearAuthData();
+            } catch (clearError) {
+                console.error('Error clearing auth data during sign-out failure:', clearError);
+            }
+            return false;
         }
     },
 
@@ -176,5 +244,9 @@ export const authService = {
                 session: null,
             };
         }
+    },
+
+    getAuthProvider: async () => {
+        return (await SecureStore.getItemAsync(STORAGE_KEYS.AUTH_PROVIDER)) || 'cognito';
     },
 };

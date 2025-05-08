@@ -43,14 +43,23 @@ export default function TabLayout() {
                 }),
                 lazy: true, // This helps with performance
                 tabBarItemStyle: {
-                    paddingVertical: Spaces.SM, // Add some vertical padding
-                    flexDirection: 'column', // Ensure vertical stacking
-                    alignItems: 'center',
-                    justifyContent: 'flex-start', // Start from top instead of space-between
+                    flexDirection: 'column', // Applied to both platforms
+                    alignItems: 'center', // Applied to both platforms
+                    justifyContent: 'flex-start', // Applied to both platforms
+                    // iOS-specific padding
+                    ...Platform.select({
+                        ios: {
+                            paddingVertical: Spaces.SM,
+                        },
+                        android: {}, // No additional padding for Android
+                    }),
                 },
-                tabBarLabelStyle: {
-                    marginTop: Spaces.XS,
-                },
+                tabBarLabelStyle: Platform.select({
+                    ios: {
+                        marginTop: Spaces.XS,
+                    },
+                    android: {}, // Default margin for Android
+                }),
                 headerTitleContainerStyle: {
                     paddingLeft: 0,
                 },
@@ -64,18 +73,21 @@ export default function TabLayout() {
                     </TouchableOpacity>
                 ),
             }}
-            sceneContainerStyle={{
-                backgroundColor: themeColors.background,
-                flex: 1, // Ensure proper layout
-            }}
         >
             <Tabs.Screen
                 name='home'
                 options={{
-                    headerStyle: {
-                        backgroundColor: themeColors.background,
-                        height: Sizes.headerHeight,
-                    },
+                    headerStyle: Platform.select({
+                        ios: {
+                            backgroundColor: themeColors.background,
+                            height: Sizes.headerHeight,
+                        },
+                        android: {
+                            backgroundColor: themeColors.background,
+                            elevation: 0,
+                            // No height specified for Android - will use default height
+                        },
+                    }),
                     headerTitleStyle: { color: themeColors.text, fontSize: moderateScale(16) },
                     title: 'Home',
                     tabBarIcon: ({ color, focused }) => <Icon name={focused ? 'home-active' : 'home-inactive'} size={22} color={color} />,
@@ -84,10 +96,17 @@ export default function TabLayout() {
             <Tabs.Screen
                 name='programs'
                 options={{
-                    headerStyle: {
-                        backgroundColor: themeColors.background,
-                        height: Sizes.headerHeight,
-                    },
+                    headerStyle: Platform.select({
+                        ios: {
+                            backgroundColor: themeColors.background,
+                            height: Sizes.headerHeight,
+                        },
+                        android: {
+                            backgroundColor: themeColors.background,
+                            elevation: 0,
+                            // No height specified for Android - will use default height
+                        },
+                    }),
                     headerTitleStyle: { color: themeColors.text, fontSize: moderateScale(16) },
                     title: 'Plans',
                     tabBarIcon: ({ color, focused }) => <Icon name={focused ? 'plan-active' : 'plan-inactive'} size={22} color={color} />,
@@ -96,10 +115,17 @@ export default function TabLayout() {
             <Tabs.Screen
                 name='on-demand'
                 options={{
-                    headerStyle: {
-                        backgroundColor: themeColors.background,
-                        height: Sizes.headerHeight,
-                    },
+                    headerStyle: Platform.select({
+                        ios: {
+                            backgroundColor: themeColors.background,
+                            height: Sizes.headerHeight,
+                        },
+                        android: {
+                            backgroundColor: themeColors.background,
+                            elevation: 0,
+                            // No height specified for Android - will use default height
+                        },
+                    }),
                     headerTitleStyle: { color: themeColors.text, fontSize: moderateScale(16) },
                     title: 'Solos',
                     tabBarIcon: ({ color, focused }) => <Icon name={focused ? 'lightning-active' : 'lightning-inactive'} size={23} color={color} />,
@@ -108,10 +134,17 @@ export default function TabLayout() {
             <Tabs.Screen
                 name='progress'
                 options={{
-                    headerStyle: {
-                        backgroundColor: themeColors.background,
-                        height: Sizes.headerHeight,
-                    },
+                    headerStyle: Platform.select({
+                        ios: {
+                            backgroundColor: themeColors.background,
+                            height: Sizes.headerHeight,
+                        },
+                        android: {
+                            backgroundColor: themeColors.background,
+                            elevation: 0,
+                            // No height specified for Android - will use default height
+                        },
+                    }),
                     headerTitleStyle: { color: themeColors.text, fontSize: moderateScale(16) },
                     title: 'Progress',
                     tabBarIcon: ({ color, focused }) => <Icon name={focused ? 'progress-active' : 'progress-inactive'} size={21} color={color} />,

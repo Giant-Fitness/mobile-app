@@ -1,4 +1,4 @@
-// components/onboarding/WelcomeScreens
+// components/onboarding/WelcomeScreens.tsx
 
 import * as React from 'react';
 import { View, Dimensions, StyleSheet, Image, ImageSourcePropType } from 'react-native';

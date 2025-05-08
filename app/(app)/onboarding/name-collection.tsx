@@ -1,7 +1,7 @@
 // app/(app)/onboarding/name-collection.tsx
 
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { router } from 'expo-router';
@@ -13,6 +13,9 @@ import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { ThemedText } from '@/components/base/ThemedText';
 import { TextInput } from '@/components/inputs/TextInput';
 import { usePostHog } from 'posthog-react-native';
+import { Icon } from '@/components/base/Icon';
+import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 const NameCollectionScreen = () => {
     const [firstName, setFirstName] = useState('');
@@ -21,6 +24,9 @@ const NameCollectionScreen = () => {
     const dispatch = useDispatch<AppDispatch>();
     const { user } = useSelector((state: RootState) => state.user);
     const posthog = usePostHog();
+
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
 
     // Check if we already have the user's name
     useEffect(() => {
@@ -77,6 +83,18 @@ const NameCollectionScreen = () => {
 
     return (
         <ThemedView style={styles.container}>
+            {/* Simple Check Button in the top right */}
+            <SafeAreaView style={styles.checkButtonContainer}>
+                <TouchableOpacity style={styles.checkButton} onPress={handleSubmit} disabled={isSubmitting || !firstName.trim()} activeOpacity={0.7}>
+                    {isSubmitting ? (
+                        <ActivityIndicator color={themeColors.text} size='small' />
+                    ) : (
+                        <Icon name='check' size={22} color={themeColors.text} style={{ opacity: !firstName.trim() ? 0.2 : 1 }} />
+                    )}
+                </TouchableOpacity>
+            </SafeAreaView>
+
+            {/* Main Content */}
             <SafeAreaView style={styles.content}>
                 <View style={styles.welcomeContent}>
                     <ThemedText type='titleLarge' style={styles.welcomeDescription}>
@@ -102,7 +120,7 @@ const NameCollectionScreen = () => {
                 </View>
 
                 <View style={styles.buttonContainer}>
-                    <PrimaryButton text='Continue' onPress={handleSubmit} disabled={isSubmitting} style={styles.button} size='MD' />
+                    <PrimaryButton text='Continue' onPress={handleSubmit} disabled={isSubmitting || !firstName.trim()} style={styles.button} size='MD' />
                 </View>
             </SafeAreaView>
         </ThemedView>
@@ -113,9 +131,19 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
+    checkButtonContainer: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        zIndex: 10,
+    },
+    checkButton: {
+        padding: Spaces.MD,
+        margin: Spaces.SM,
+    },
     content: {
         flex: 1,
-        paddingHorizontal: Spaces.MD,
+        paddingHorizontal: Spaces.LG,
         paddingVertical: Spaces.XL,
     },
     welcomeContent: {

@@ -1,6 +1,6 @@
 // app/(app)/(tabs)/progress.tsx
 
-import { StyleSheet, Dimensions, View } from 'react-native';
+import { StyleSheet, Dimensions, View, Platform } from 'react-native';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ThemedView } from '@/components/base/ThemedView';
 import {
@@ -216,7 +216,18 @@ export default function ProgressScreen() {
         <>
             <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
                 <ThemedView style={styles.container}>
-                    <ThemedView style={{ marginTop: Spaces.LG }}>
+                    <ThemedView
+                        style={{
+                            ...Platform.select({
+                                ios: {
+                                    marginTop: Spaces.LG,
+                                },
+                                android: {
+                                    marginTop: Spaces.SM,
+                                },
+                            }),
+                        }}
+                    >
                         <ThemedView style={[styles.sectionBadge]}>
                             <ThemedText type='titleLarge' style={styles.sectionTitle}>
                                 Health Tracking

@@ -5,7 +5,7 @@
         "version": "0.0.1",
         "orientation": "portrait",
         "icon": "./assets/images/icon.png",
-        "scheme": "myapp",
+        "scheme": "giantfitness",
         "userInterfaceStyle": "automatic",
         "splash": {
             "image": "./assets/images/splash.png",
@@ -13,11 +13,10 @@
             "backgroundColor": "#ffffff"
         },
         "ios": {
+            "googleServicesFile": "./GoogleService-Info.plist",
             "supportsTablet": false,
-            "minimumSystemVersion": "15.6",
             "userInterfaceStyle": "automatic",
             "bundleIdentifier": "com.GiantFitness.LMC",
-            "buildNumber": "1",
             "infoPlist": {
                 "UIRequiresFullScreen": true,
                 "UIStatusBarStyle": "auto",
@@ -36,8 +35,17 @@
             },
             "userInterfaceStyle": "automatic",
             "package": "com.GiantFitness.LMC",
-            "versionCode": 1,
-            "permissions": ["NOTIFICATIONS", "RECEIVE_BOOT_COMPLETED", "VIBRATE", "CAMERA", "READ_MEDIA_IMAGES"]
+            "permissions": ["NOTIFICATIONS", "RECEIVE_BOOT_COMPLETED", "VIBRATE", "CAMERA", "READ_MEDIA_IMAGES"],
+            "intentFilters": [
+                {
+                    "action": "VIEW",
+                    "autoVerify": true,
+                    "data": {
+                        "scheme": "giantfitness"
+                    },
+                    "category": ["BROWSABLE", "DEFAULT"]
+                }
+            ]
         },
         "plugins": ["expo-router", "expo-notifications", "expo-camera", "expo-font", "expo-secure-store", "expo-localization"],
         "experiments": {
