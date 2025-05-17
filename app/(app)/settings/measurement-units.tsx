@@ -57,7 +57,7 @@ const UnitsSelectionScreen = () => {
                 },
             };
             await dispatch(updateUserAppSettingsAsync({ userAppSettings: updatedSettings }));
-            router.navigate('/(app)/settings');
+            router.back();
         } catch (error) {
             console.error('Error saving preferences:', error);
         } finally {

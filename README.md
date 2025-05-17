@@ -1,6 +1,6 @@
-# LMC Mobile App
+# Kyn Mobile App
 
-React Native Expo application for Giant Fitness LMC.
+React Native Expo application for Giant Fitness Kyn.
 
 ## 🛠 Setup
 

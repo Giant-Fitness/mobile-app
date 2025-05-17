@@ -96,7 +96,11 @@ const addRetryInterceptor = (client: AxiosInstance, config: ApiConfig) => {
                 axiosConfig.retryCount += 1;
                 const delay = axiosConfig.retryCount * config.RETRY_DELAY;
                 await new Promise((resolve) => setTimeout(resolve, delay));
-                console.log(`Retrying request (${axiosConfig.retryCount}/${config.RETRY_ATTEMPTS})`);
+
+                // Build the full URL for logging
+                const fullUrl = axiosConfig.url?.startsWith('http') ? axiosConfig.url : `${axiosConfig.baseURL || ''}${axiosConfig.url || ''}`;
+
+                console.log(`Retrying request (${axiosConfig.retryCount}/${config.RETRY_ATTEMPTS}) for URL: ${fullUrl}`);
                 return client(axiosConfig);
             }
 

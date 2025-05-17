@@ -12,14 +12,14 @@ module.exports = ({ config }) => {
                 ...config.ios.infoPlist,
                 CFBundleURLTypes: [
                     {
-                        CFBundleURLSchemes: ['com.GiantFitness.LMC', 'com.googleusercontent.apps.139187083800-mon0i5bgpk2a0huc6hum3d43300a311h'],
+                        CFBundleURLSchemes: ['com.giantfitness.kyn', 'com.googleusercontent.apps.139187083800-mon0i5bgpk2a0huc6hum3d43300a311h'],
                     },
                 ],
             },
         },
         android: {
             ...config.android,
-            package: 'com.GiantFitness.LMC',
+            package: 'com.giantfitness.kyn',
             // Remove the scheme property from here
             intentFilters: [
                 {

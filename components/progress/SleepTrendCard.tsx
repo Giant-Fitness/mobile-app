@@ -76,9 +76,10 @@ export const SleepTrendCard: React.FC<SleepTrendCardProps> = ({ values, onPress,
             onLogData={onLogSleep}
             isLoading={isLoading}
             style={style}
-            title='Sleep Trend'
+            title='Sleep'
             themeColor='blueSolid'
             themeTransparentColor='blueTransparent'
+            lightenBackground={false}
             formatAvgValue={formatAverageSleep}
             processData={processSleepData}
         />

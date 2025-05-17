@@ -30,6 +30,8 @@ export const Colors = {
         tangerineTransparent: '#FFEDD9',
         tangerineSolid: '#E65100',
         tealTransparent: '#ECFDF5',
+        coralSolid: '#C82A19',
+        coralTransparent: '#FEF7F6',
         tealSolid: '#059669',
         maroonTransparent: '#FBEAEA', // A soft, light maroon for a background
         maroonSolid: '#8B1E3F', // A deep maroon for a solid accent
@@ -74,6 +76,8 @@ export const Colors = {
         tangerineSolid: '#FF6D00',
         tealTransparent: '#ECFDF5',
         tealSolid: '#059669',
+        coralSolid: '#C82A19',
+        coralTransparent: '#FEF7F6',
         mintTransparent: 'rgba(52, 211, 153, 0.15)',
         mintSolid: '#059669',
         maroonTransparent: '#FBEAEA', // A soft, light maroon for a background

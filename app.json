@@ -1,7 +1,7 @@
 {
     "expo": {
-        "name": "LMC",
-        "slug": "lmc-app",
+        "name": "Kyn",
+        "slug": "kyn-app",
         "version": "0.0.1",
         "orientation": "portrait",
         "icon": "./assets/images/icon.png",
@@ -16,7 +16,7 @@
             "googleServicesFile": "./GoogleService-Info.plist",
             "supportsTablet": false,
             "userInterfaceStyle": "automatic",
-            "bundleIdentifier": "com.GiantFitness.LMC",
+            "bundleIdentifier": "com.giantfitness.kyn",
             "infoPlist": {
                 "UIRequiresFullScreen": true,
                 "UIStatusBarStyle": "auto",
@@ -34,7 +34,7 @@
                 "backgroundColor": "#ffffff"
             },
             "userInterfaceStyle": "automatic",
-            "package": "com.GiantFitness.LMC",
+            "package": "com.giantfitness.kyn",
             "permissions": ["NOTIFICATIONS", "RECEIVE_BOOT_COMPLETED", "VIBRATE", "CAMERA", "READ_MEDIA_IMAGES"],
             "intentFilters": [
                 {
@@ -53,7 +53,7 @@
         },
         "extra": {
             "eas": {
-                "projectId": "8f1030a1-b4d2-4668-9c53-b1e7cfbabf24"
+                "projectId": "50a3b9c4-ecf8-4351-9942-4d464982f7ad"
             }
         },
         "owner": "hustleclub",
@@ -61,7 +61,7 @@
             "policy": "appVersion"
         },
         "updates": {
-            "url": "https://u.expo.dev/8f1030a1-b4d2-4668-9c53-b1e7cfbabf24",
+            "url": "https://u.expo.dev/50a3b9c4-ecf8-4351-9942-4d464982f7ad",
             "enabled": true,
             "fallbackToCacheTimeout": 0,
             "checkAutomatically": "ON_LOAD"

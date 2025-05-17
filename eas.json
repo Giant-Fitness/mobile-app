@@ -21,44 +21,12 @@
                 "buildType": "apk"
             }
         },
-        "feature": {
-            "distribution": "internal",
-            "channel": "feature",
-            "autoIncrement": true,
-            "env": {
-                "APP_ENV": "feature"
-            },
-            "ios": {
-                "resourceClass": "medium",
-                "buildConfiguration": "Release"
-            },
-            "android": {
-                "resourceClass": "medium",
-                "buildType": "apk"
-            }
-        },
-        "staging": {
-            "distribution": "internal",
-            "channel": "staging",
-            "autoIncrement": true,
-            "env": {
-                "APP_ENV": "staging"
-            },
-            "ios": {
-                "resourceClass": "medium",
-                "buildConfiguration": "Release"
-            },
-            "android": {
-                "resourceClass": "medium",
-                "buildType": "apk"
-            }
-        },
-        "release": {
+        "preview": {
             "distribution": "store",
-            "channel": "release",
+            "channel": "preview",
             "autoIncrement": true,
             "env": {
-                "APP_ENV": "release"
+                "APP_ENV": "preview"
             },
             "ios": {
                 "resourceClass": "medium",

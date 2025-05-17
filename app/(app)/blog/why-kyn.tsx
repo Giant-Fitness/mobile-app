@@ -1,4 +1,4 @@
-// app/(app)/blog/why-lmc.tsx
+// app/(app)/blog/why-kyn.tsx
 
 import React from 'react';
 import { StyleSheet, View, Image, Platform } from 'react-native';
@@ -14,7 +14,7 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { darkenColor } from '@/utils/colorUtils';
 
-const WhyLMCScreen = () => {
+const WhyKynScreen = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const scrollY = useSharedValue(0);
@@ -130,7 +130,7 @@ const WhyLMCScreen = () => {
             <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
                 <TopImageInfoCard
                     image={require('@/assets/images/team.svg')}
-                    title='The LMC Difference'
+                    title='The Kyn Difference'
                     subtitle='Fitness – Simplified and Supercharged'
                     titleType='titleLarge'
                     subtitleType='link'
@@ -165,7 +165,7 @@ const WhyLMCScreen = () => {
                                         {' '}
                                         &quot;How do I stay on track?&quot;
                                     </ThemedText>
-                                    {'\n\n'}That&apos;s why we created LMC: to guide you every step of the way and give you everything you need to succeed.
+                                    {'\n\n'}That&apos;s why we created Kyn: to guide you every step of the way and give you everything you need to succeed.
                                 </ThemedText>
                                 <ThemedText
                                     type='link'
@@ -176,7 +176,7 @@ const WhyLMCScreen = () => {
                                         },
                                     ]}
                                 >
-                                    But LMC isn&apos;t just another fitness app; it&apos;s a community-first platform where your feedback counts, your favorite
+                                    But Kyn isn&apos;t just another fitness app; it&apos;s a community-first platform where your feedback counts, your favorite
                                     trainers inspire, and your friends keep you accountable, just as with your gym crew.
                                 </ThemedText>
                             </View>
@@ -270,4 +270,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default WhyLMCScreen;
+export default WhyKynScreen;

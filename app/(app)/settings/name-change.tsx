@@ -42,7 +42,7 @@ const NameChangeScreen = () => {
                     FirstName: newName.trim(),
                 }),
             ).unwrap();
-            router.navigate('/(app)/settings');
+            router.back();
         } catch (err) {
             console.log(err);
             setError('Failed to save your name. Please try again.');

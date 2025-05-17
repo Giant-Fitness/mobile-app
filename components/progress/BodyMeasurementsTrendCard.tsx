@@ -79,7 +79,7 @@ export const BodyMeasurementsTrendCard: React.FC<BodyMeasurementsTrendCardProps>
             onLogData={onLogBodyMeasurements}
             isLoading={isLoading}
             style={style}
-            title='Waist Trend'
+            title='Waist'
             themeColor='tangerineSolid'
             themeTransparentColor='tangerineTransparent'
             formatAvgValue={(value) => formatAverageWaistMeasurement(value, measurementUnit)}

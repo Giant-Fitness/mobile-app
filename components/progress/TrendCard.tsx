@@ -23,6 +23,7 @@ type TrendCardProps = {
     style?: any;
     themeColor: ThemeColorKey;
     themeTransparentColor: ThemeColorKey;
+    lightenBackground?: boolean;
     formatAvgValue: (value: number) => string;
     processData: (data: any[]) => {
         processedData: { x: number; y: number; value: number }[];
@@ -61,6 +62,7 @@ export const TrendCard: React.FC<TrendCardProps> = ({
     themeTransparentColor,
     formatAvgValue,
     processData,
+    lightenBackground = true,
     valueKey = 'Value',
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -85,7 +87,7 @@ export const TrendCard: React.FC<TrendCardProps> = ({
     const cardStyle = [
         styles.card,
         {
-            backgroundColor: themeColors[themeTransparentColor],
+            backgroundColor: lightenBackground ? lightenColor(themeColors[themeTransparentColor], 0.5) : themeColors[themeTransparentColor],
             borderColor: lightenColor(themeColors[themeColor], 0.7),
         },
         style,

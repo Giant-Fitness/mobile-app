@@ -7,9 +7,9 @@ import outputs from '../amplify_outputs.json';
 export const configureAmplify = () => {
     try {
         // Determine the platform-specific redirect URI
-        const redirectSignIn = Platform.OS === 'android' ? ['giantfitness:/oauthredirect'] : ['com.GiantFitness.LMC:/oauthredirect'];
+        const redirectSignIn = Platform.OS === 'android' ? ['giantfitness:/oauthredirect'] : ['com.giantfitness.kyn:/oauthredirect'];
 
-        const redirectSignOut = Platform.OS === 'android' ? ['giantfitness:/'] : ['com.GiantFitness.LMC:/'];
+        const redirectSignOut = Platform.OS === 'android' ? ['giantfitness:/'] : ['com.giantfitness.kyn:/'];
 
         Amplify.configure({
             Auth: {

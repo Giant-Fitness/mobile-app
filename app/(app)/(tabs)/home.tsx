@@ -13,7 +13,7 @@ import { useProgramData } from '@/hooks/useProgramData';
 import { ActionTile } from '@/components/home/ActionTile';
 import { LargeActionTile } from '@/components/home/LargeActionTile';
 import { FactOfTheDay } from '@/components/home/FactOfTheDay';
-import { darkenColor } from '@/utils/colorUtils';
+import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
 import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
 import { BodyMeasurementsLoggingSheet } from '@/components/progress/BodyMeasurementsLoggingSheet';
@@ -202,8 +202,8 @@ export default function HomeScreen() {
             title: 'Track Weight',
             image: require('@/assets/images/weight.png'),
             onPress: handleWeightTilePress,
-            backgroundColor: themeColors.purpleTransparent,
-            textColor: darkenColor(themeColors.purpleSolid, 0.3),
+            backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.7),
+            textColor: darkenColor(themeColors.tangerineSolid, 0.2),
         },
         // {
         //     title: 'Capture Progress',
@@ -216,20 +216,20 @@ export default function HomeScreen() {
             title: 'Track Waist',
             image: require('@/assets/images/measure.png'),
             onPress: handleBodyMeasurementsTilePress,
-            backgroundColor: themeColors.tangerineTransparent,
-            textColor: darkenColor(themeColors.tangerineSolid, 0.3),
+            backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.7),
+            textColor: darkenColor(themeColors.tangerineSolid, 0.2),
         },
         {
             title: 'Track Sleep',
             image: require('@/assets/images/sleep_clock.png'),
             onPress: handleSleepTilePress,
-            backgroundColor: themeColors.blueTransparent,
-            textColor: darkenColor(themeColors.blueSolid, 0.25),
+            backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.7),
+            textColor: darkenColor(themeColors.tangerineSolid, 0.2),
         },
         // {
-        //     title: 'Why LMC?',
+        //     title: 'Why Kyn?',
         //     image: require('@/assets/images/skipping-rope.png'),
-        //     onPress: () => debounce(router, '/(app)/blog/why-lmc'),
+        //     onPress: () => debounce(router, '/(app)/blog/why-kyn'),
         //     backgroundColor: themeColors.maroonTransparent,
         //     textColor: darkenColor(themeColors.maroonSolid, 0.3),
         // },
@@ -240,7 +240,7 @@ export default function HomeScreen() {
 
         if (reorderTiles) {
             // Find the app info tile index
-            const appInfoIndex = tiles.findIndex((tile) => tile.title === 'Is LMC for you?');
+            const appInfoIndex = tiles.findIndex((tile) => tile.title === 'Is Kyn for you?');
             if (appInfoIndex !== -1) {
                 // Remove and store the app info tile
                 const [appInfoTile] = tiles.splice(appInfoIndex, 1);
