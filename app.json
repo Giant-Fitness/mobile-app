@@ -4,13 +4,20 @@
         "slug": "kyn-app",
         "version": "0.0.1",
         "orientation": "portrait",
-        "icon": "./assets/images/icon.png",
+        "icon": "./assets/icons/ios-dark.png",
         "scheme": "giantfitness",
         "userInterfaceStyle": "automatic",
         "splash": {
-            "image": "./assets/images/splash.png",
+            "image": "./assets/icons/splash-icon-dark.png",
             "resizeMode": "contain",
-            "backgroundColor": "#ffffff"
+            "imageWidth": 200,
+            "backgroundColor": "#fcfffc",
+            "dark": {
+                "image": "./assets/icons/splash-icon-light.png",
+                "resizeMode": "contain",
+                "imageWidth": 200,
+                "backgroundColor": "#090909"
+            }
         },
         "ios": {
             "googleServicesFile": "./GoogleService-Info.plist",
@@ -29,10 +36,6 @@
             }
         },
         "android": {
-            "adaptiveIcon": {
-                "foregroundImage": "./assets/images/adaptive-icon.png",
-                "backgroundColor": "#ffffff"
-            },
             "userInterfaceStyle": "automatic",
             "package": "com.giantfitness.kyn",
             "permissions": ["NOTIFICATIONS", "RECEIVE_BOOT_COMPLETED", "VIBRATE", "CAMERA", "READ_MEDIA_IMAGES"],

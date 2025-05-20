@@ -33,7 +33,7 @@ export const BasicSplash: React.FC<BasicSplashProps> = ({ isDataLoaded = false, 
 
     return (
         <Animated.View style={[styles.container, { backgroundColor: themeColors.background }, { opacity: fadeAnim }]}>
-            <Image source={require('@/assets/images/splash.png')} style={styles.splash} resizeMode='contain' />
+            <Image source={require('@/assets/icons/splash-icon-dark.png')} style={styles.splash} resizeMode='contain' />
             {showLoadingText && (
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size='large' color={themeColors.text} />

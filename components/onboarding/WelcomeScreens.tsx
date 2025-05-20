@@ -41,7 +41,7 @@ const WelcomeScreens: React.FC = () => {
             id: 0,
             title: "Let's Get Started!",
             description: ['Welcome to Kyn—the ultimate space to kickstart your fitness journey with guidance and motivation from the best'],
-            image: require('@/assets/images/logo.png'),
+            image: require('@/assets/images/fist.png'),
         },
         {
             id: 1,

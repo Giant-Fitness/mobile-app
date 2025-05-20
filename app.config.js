@@ -3,11 +3,8 @@
 module.exports = ({ config }) => {
     return {
         ...config,
-        // Set scheme at root level (used primarily for Android)
-        scheme: 'giantfitness',
         ios: {
             ...config.ios,
-            // Remove the scheme property from here
             infoPlist: {
                 ...config.ios.infoPlist,
                 CFBundleURLTypes: [
@@ -16,11 +13,16 @@ module.exports = ({ config }) => {
                     },
                 ],
             },
+            icon: {
+                dark: './assets/icons/ios-dark.png',
+                light: './assets/icons/ios-dark.png',
+                tinted: './assets/icons/ios-tinted.png',
+            },
         },
         android: {
             ...config.android,
+            scheme: 'giantfitness',
             package: 'com.giantfitness.kyn',
-            // Remove the scheme property from here
             intentFilters: [
                 {
                     action: 'VIEW',
@@ -33,6 +35,11 @@ module.exports = ({ config }) => {
                     category: ['BROWSABLE', 'DEFAULT'],
                 },
             ],
+            adaptiveIcon: {
+                foregroundImage: './assets/icons/adaptive-icon.png',
+                monochromeImage: './assets/icons/adaptive-icon.png',
+                backgroundColor: '#090909',
+            },
         },
         plugins: [...config.plugins],
     };

@@ -327,7 +327,7 @@ export default function HomeScreen() {
                         description='Our structured training plans turn your goals into achievements'
                         onPress={() => debounce(router, '/(app)/programs/browse-programs')}
                         backgroundColor={themeColors.containerHighlight}
-                        image={require('@/assets/images/logo.png')}
+                        image={require('@/assets/images/fist.png')}
                         textColor={themeColors.highlightContainerText}
                     />
 

@@ -25,7 +25,7 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({ containerStyle, logo
 
     return (
         <View style={[styles.headerContainer, containerStyle]}>
-            <Image source={require('@/assets/images/logo.png')} style={[styles.logo, logoStyle]} resizeMode='contain' />
+            <Image source={require('@/assets/images/fist.png')} style={[styles.logo, logoStyle]} resizeMode='contain' />
             <View style={[styles.textContainer, textContainerStyle]}>
                 <ThemedText type='headline' style={[styles.headerText, { color: themeColors.text }, textStyle]}>
                     Gain Muscle

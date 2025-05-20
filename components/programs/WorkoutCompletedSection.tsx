@@ -24,7 +24,7 @@ const COMPLETION_MESSAGES = [
 
 const ACTION_TITLES = ['Ready for More?', 'Want to Keep Going?', 'Push Your Limits?', 'Take It Up a Notch?', 'Challenge Yourself?', 'Level Up Your Day?'];
 
-const IMAGES = [require('@/assets/images/logo.png'), require('@/assets/images/boxing-glove.png'), require('@/assets/images/dumbbell-sketch.png')];
+const IMAGES = [require('@/assets/images/fist.png'), require('@/assets/images/boxing-glove.png'), require('@/assets/images/dumbbell-sketch.png')];
 
 export const WorkoutCompletedSection = ({ onBrowseSolos }: WorkoutCompletedSectionProps) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
