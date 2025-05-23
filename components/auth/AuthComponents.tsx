@@ -25,16 +25,13 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({ containerStyle, logo
 
     return (
         <View style={[styles.headerContainer, containerStyle]}>
-            <Image source={require('@/assets/images/fist.png')} style={[styles.logo, logoStyle]} resizeMode='contain' />
+            <Image source={require('@/assets/icons/splash-icon-dark.png')} style={[styles.logo, logoStyle]} resizeMode='contain' />
             <View style={[styles.textContainer, textContainerStyle]}>
                 <ThemedText type='headline' style={[styles.headerText, { color: themeColors.text }, textStyle]}>
-                    Gain Muscle
+                    Fitness, Simplified
                 </ThemedText>
                 <ThemedText type='headline' style={[styles.headerText, { color: themeColors.text }, textStyle]}>
-                    Lose Weight
-                </ThemedText>
-                <ThemedText type='headline' style={[styles.headerText, { color: themeColors.text }, textStyle]}>
-                    Maintain Results
+                    Progress, Supercharged
                 </ThemedText>
             </View>
         </View>
@@ -48,10 +45,10 @@ const styles = StyleSheet.create({
     logo: {
         width: Sizes.imageMDWidth,
         height: Sizes.imageMDHeight,
-        marginLeft: -Spaces.SM,
+        marginLeft: -Spaces.MD,
     },
     textContainer: {
-        marginTop: Spaces.MD,
+        marginTop: -Spaces.LG - Spaces.SM,
         flex: 1,
         justifyContent: 'center',
         marginLeft: Spaces.MD,

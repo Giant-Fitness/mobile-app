@@ -122,7 +122,7 @@ const LoginPage = () => {
                         components={{
                             SignIn: ({ fields, toSignUp, socialProviders, ...props }) => (
                                 <View style={{ flex: 1, width: '100%' }}>
-                                    <CustomHeader containerStyle={{ marginLeft: Spaces.MD, paddingBottom: Spaces.LG }} />
+                                    <CustomHeader containerStyle={{ marginLeft: Spaces.MD, paddingBottom: Spaces.XXXL }} />
                                     <View>
                                         <Authenticator.SignIn
                                             {...props}

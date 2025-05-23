@@ -40,33 +40,28 @@ const WelcomeScreens: React.FC = () => {
         {
             id: 0,
             title: "Let's Get Started!",
-            description: ['Welcome to Kyn—the ultimate space to kickstart your fitness journey with guidance and motivation from the best'],
+            description: [
+                'Confused where to start? Struggling to stay on track?',
+                'With clear plans, guided videos, and a growing community, Kyn is fitness that fits',
+            ],
             image: require('@/assets/images/fist.png'),
         },
         {
             id: 1,
-            title: 'Workouts Designed for Your Goals',
-            description: [
-                'Whether at home or the gym, follow multi-week routines created by experts, with guided videos from the coaches you trust to keep you motivated',
-            ],
+            title: 'Smart Training Plans',
+            description: ['No guesswork — just expert-designed programs for home or gym, built for all fitness levels.'],
             image: require('@/assets/images/workouts.png'),
         },
         {
             id: 2,
-            title: 'Personalized Nutrition for Visible Results',
-            description: [
-                "Personalized calorie tracking that adapts with your goals and progress, ensuring you're always on track",
-                'With meal plans and recipes crafted for the Indian diet, keeping you fueled with the flavors you love',
-            ],
-            image: require('@/assets/images/nutrition.png'),
+            title: 'Guided Follow-Along Workouts',
+            description: ['Hit play and train with confidence — no thinking, just moving with support.'],
+            image: require('@/assets/images/boxing-glove.png'),
         },
         {
             id: 3,
-            title: 'Smarter Tracking for Stronger Progress',
-            description: [
-                'Track your workouts, log measurements, and capture photos to see your progress unfold',
-                'Get tailored lift recommendations to keep pushing safely, and share milestones with friends for extra motivation',
-            ],
+            title: 'Supercharged Progress Tracking',
+            description: ['Simple logging that keeps you honest — and progress you can actually see.'],
             image: require('@/assets/images/progress.png'),
         },
     ];
@@ -126,9 +121,11 @@ const WelcomeScreens: React.FC = () => {
                     <ThemedText type='headline' style={styles.welcomeTitle}>
                         {item.title}
                     </ThemedText>
-                    <ThemedText type='overline' style={styles.welcomeDescription}>
-                        {item.description[0]}
-                    </ThemedText>
+                    {item.description.map((paragraph, index) => (
+                        <ThemedText key={`paragraph-${item.id}-${index}`} type='overline' style={styles.featureDescription}>
+                            {paragraph}
+                        </ThemedText>
+                    ))}
                 </View>
             </View>
         </View>
@@ -221,8 +218,7 @@ const styles = StyleSheet.create({
     },
     // Feature Screen Specific Styles
     featureSlide: {
-        justifyContent: 'flex-start',
-        paddingTop: Sizes.headerHeight + Spaces.XL,
+        justifyContent: 'center',
     },
     featureContent: {
         alignItems: 'center',
