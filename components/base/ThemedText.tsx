@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     headlineLarge: {
         fontSize: moderateScale(32),
         lineHeight: moderateScale(48),
-        fontFamily: 'MontserratBold',
+        fontFamily: 'InterBold',
         textTransform: 'uppercase',
     },
     title: {
