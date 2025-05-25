@@ -7,7 +7,8 @@
         "android": "expo run:android",
         "ios": "expo run:ios",
         "web": "expo start --web",
-        "test": "jest --watchAll"
+        "test": "jest --watchAll",
+        "postinstall": "patch-package"
     },
     "jest": {
         "preset": "jest-expo"
@@ -112,6 +113,7 @@
         "globals": "^15.8.0",
         "jest": "^29.7.0",
         "jest-expo": "~52.0.6",
+        "patch-package": "^8.0.0",
         "react-test-renderer": "~18.0.0",
         "tsx": "^4.19.2",
         "typescript": "~5.3.3"
