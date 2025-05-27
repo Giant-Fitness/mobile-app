@@ -19,6 +19,7 @@ import { OneRepMaxCalculator } from '@/components/programs/OneRepMaxCalculator';
 import { useLocalSearchParams } from 'expo-router';
 import { usePostHog } from 'posthog-react-native';
 import { AVPlaybackStatus } from 'expo-av';
+import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
 
 const ExerciseDetailsScreen = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -87,8 +88,49 @@ const ExerciseDetailsScreen = () => {
                         isEnrolled && exercise.ORMPercentage ? { paddingBottom: Sizes.bottomSpaceLarge } : null,
                     ]}
                 >
-                    <ThumbnailVideoPlayer videoUrl={exercise.VideoUrl} onPlaybackStatusUpdate={handlePlaybackStatusUpdate} thumbnailUrl={exercise.PhotoUrl} />
-                    <ThemedView style={[styles.topCard, { backgroundColor: themeColors.background }]}>
+                    {/* <ThumbnailVideoPlayer videoUrl={exercise.VideoUrl} onPlaybackStatusUpdate={handlePlaybackStatusUpdate} thumbnailUrl={exercise.PhotoUrl} /> */}
+                    <TopImageInfoCard
+                        image={{ uri: exercise.PhotoUrl }}
+                        title={exercise.ExerciseName}
+                        titleType='titleLarge'
+                        titleStyle={{ marginBottom: Spaces.XS }}
+                        contentContainerStyle={{
+                            backgroundColor: themeColors.background,
+                            paddingHorizontal: Spaces.LG,
+                            paddingBottom: Spaces.XXS,
+                        }}
+                        imageStyle={{ height: Sizes.imageXLHeight }}
+                        extraContent={
+                            <ThemedView>
+                                <ThemedView style={styles.attributeRow}>
+                                    {[
+                                        { icon: 'counter', text: `Reps: ${exercise.RepsLower}-${exercise.RepsUpper}` },
+                                        { icon: 'repeat', text: `Sets: ${exercise.Sets}` },
+                                        { icon: 'hourglass', text: `Rest: ${exercise.Rest}s` },
+                                    ].map((attr, index) => (
+                                        <View key={index} style={styles.attributeItem}>
+                                            <Icon name={attr.icon} size={Sizes.fontSizeDefault} color={themeColors.text} />
+                                            <ThemedText type='buttonSmall' style={styles.attributeText}>
+                                                {attr.text}
+                                            </ThemedText>
+                                        </View>
+                                    ))}
+                                </ThemedView>
+                                {isEnrolled && exercise.ORMPercentage && (
+                                    <View style={styles.buttonContainer}>
+                                        <TextButton
+                                            text='Weight Calculator'
+                                            textType='buttonSmall'
+                                            style={[styles.calculatorButton]}
+                                            onPress={openCalculator}
+                                            size={'LG'}
+                                        />
+                                    </View>
+                                )}
+                            </ThemedView>
+                        }
+                    />
+                    {/* <ThemedView style={[styles.topCard, { backgroundColor: themeColors.background }]}>
                         <ThemedView style={styles.titleContainer}>
                             <ThemedText type='titleLarge'>{exercise.ExerciseName}</ThemedText>
                         </ThemedView>
@@ -125,7 +167,7 @@ const ExerciseDetailsScreen = () => {
                                 />
                             </View>
                         )}
-                    </ThemedView>
+                    </ThemedView> */}
 
                     <ThemedView style={styles.instructionContainer}>
                         <ThemedText type='subtitle' style={{ color: themeColors.text, paddingBottom: Spaces.MD }}>
@@ -146,10 +188,10 @@ const styles = StyleSheet.create({
     },
     titleContainer: {
         paddingHorizontal: Spaces.LG,
-        paddingTop: Spaces.MD,
+        // paddingTop: Spaces.MD,
+        paddingTop: Sizes.headerHeight,
     },
     topCard: {
-        marginBottom: Spaces.XL,
         paddingBottom: Spaces.LG,
     },
     buttonContainer: {
@@ -186,6 +228,7 @@ const styles = StyleSheet.create({
         marginRight: Spaces.SM,
     },
     instructionContainer: {
+        marginTop: Spaces.XL,
         paddingVertical: Spaces.MD,
         paddingHorizontal: Spaces.LG,
     },
@@ -194,7 +237,7 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap', // Allow wrapping if needed
         alignItems: 'center',
         paddingBottom: Spaces.SM,
-        paddingHorizontal: Spaces.LG,
+        // paddingHorizontal: Spaces.LG,
     },
     attributeItem: {
         flexDirection: 'row',

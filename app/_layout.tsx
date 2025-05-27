@@ -74,7 +74,7 @@ export default function RootLayout() {
 
         MontserratAlternatesBold: require('@/assets/fonts/Montserrat_Alternates/MontserratAlternates-Bold.ttf'),
 
-        NunitoBlack: require('@/assets/fonts/Nunito/Nunito-Black.ttf'),
+        NunitoBold: require('@/assets/fonts/Nunito/Nunito-Bold.ttf'),
         NunitoMedium: require('@/assets/fonts/Nunito/Nunito-Medium.ttf'),
     });
 
