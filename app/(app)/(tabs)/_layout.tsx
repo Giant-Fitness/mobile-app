@@ -81,6 +81,7 @@ export default function TabLayout() {
                         ios: {
                             backgroundColor: themeColors.background,
                             height: Sizes.headerHeight,
+                            shadowColor: 'transparent',
                         },
                         android: {
                             backgroundColor: themeColors.background,
@@ -100,6 +101,7 @@ export default function TabLayout() {
                         ios: {
                             backgroundColor: themeColors.background,
                             height: Sizes.headerHeight,
+                            shadowColor: 'transparent',
                         },
                         android: {
                             backgroundColor: themeColors.background,
@@ -119,6 +121,7 @@ export default function TabLayout() {
                         ios: {
                             backgroundColor: themeColors.background,
                             height: Sizes.headerHeight,
+                            shadowColor: 'transparent',
                         },
                         android: {
                             backgroundColor: themeColors.background,
@@ -138,6 +141,7 @@ export default function TabLayout() {
                         ios: {
                             backgroundColor: themeColors.background,
                             height: Sizes.headerHeight,
+                            shadowColor: 'transparent',
                         },
                         android: {
                             backgroundColor: themeColors.background,
