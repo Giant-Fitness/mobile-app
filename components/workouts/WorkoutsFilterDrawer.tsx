@@ -6,7 +6,8 @@ import { FiltersDrawer } from '@/components/overlays/FiltersDrawer';
 const workoutFilterAttributes = {
     level: ['Beginner', 'Intermediate', 'Advanced'],
     equipment: ['None', 'Basic', 'Full Gym'],
-    focus: ['Strength', 'Endurance', 'Mobility'],
+    // focus: ['Strength', 'Endurance', 'Mobility'],
+    focus: ['Strength', 'Endurance'],
 };
 
 interface WorkoutsFilterDrawerProps {

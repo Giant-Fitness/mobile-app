@@ -106,13 +106,13 @@ export default function WorkoutsScreen() {
     };
 
     const workoutCategories = [
-        {
-            title: 'Mobility',
-            image: require('@/assets/images/stretching.png'),
-            onPress: () => navigateToAllWorkouts({ focus: ['Mobility'] }),
-            backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.6),
-            textColor: darkenColor(themeColors.tangerineSolid, 0.3),
-        },
+        // {
+        //     title: 'Mobility',
+        //     image: require('@/assets/images/stretching.png'),
+        //     onPress: () => navigateToAllWorkouts({ focus: ['Mobility'] }),
+        //     backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.6),
+        //     textColor: darkenColor(themeColors.tangerineSolid, 0.3),
+        // },
         {
             title: 'Strength',
             image: require('@/assets/images/dumbbell.png'),
