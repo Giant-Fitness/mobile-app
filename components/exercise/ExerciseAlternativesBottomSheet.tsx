@@ -1,11 +1,11 @@
 // components/exercise/ExerciseAlternativesBottomSheet.tsx
 
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, ActivityIndicator, FlatList, Platform } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { BottomSheet } from '@/components/overlays/BottomSheet';
 import { ThemedText } from '@/components/base/ThemedText';
-import { PrimaryButton } from '@/components/buttons/PrimaryButton';
+import { ThemedView } from '@/components/base/ThemedView';
 import { TextButton } from '@/components/buttons/TextButton';
 import { Icon } from '@/components/base/Icon';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -20,6 +20,7 @@ import { createExerciseSubstitutionAsync, deleteExerciseSubstitutionAsync, getUs
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { format } from 'date-fns';
 import { CenteredModal } from '@/components/overlays/CenteredModal';
+import { darkenColor, lightenColor } from '@/utils/colorUtils';
 
 interface ExerciseAlternativesBottomSheetProps {
     visible: boolean;
@@ -228,72 +229,58 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
         </View>
     );
 
-    // Render the current exercise section
-    // const renderCurrentExercise = () => (
-    //     <ThemedView style={styles.currentExerciseContainer}>
-    //         <ThemedView
-    //             style={[
-    //                 styles.currentExerciseCard,
-    //                 {
-    //                     backgroundColor: existingSubstitution ? themeColors.tipBackground : themeColors.background,
-    //                     borderColor: existingSubstitution ? themeColors.systemBorderColor : themeColors.systemBorderColor,
-    //                 },
-    //             ]}
-    //         >
-    //             <ThemedText type='button'>{exercise.ExerciseName}</ThemedText>
-    //             {existingSubstitution && (
-    //                 <View style={styles.substitutedIndicator}>
-    //                     <View style={[styles.checkIconContainer, { backgroundColor: '#4CAF50' }]}>
-    //                         <Icon name='check' size={14} color='#fff' />
-    //                     </View>
-    //                     <ThemedText type='bodySmall' style={styles.substitutedText}>
-    //                         Substituted
-    //                     </ThemedText>
-    //                 </View>
-    //             )}
-    //         </ThemedView>
-    //     </ThemedView>
-    // );
+    // Get lighter version of match color for background
+    const getLightMatchColor = (score: number) => {
+        const baseColor = getMatchColor(score);
+        return lightenColor(baseColor, 0.85); // Much lighter version
+    };
+
+    // Get darker version of match color for background
+    const getDarkMatchColor = (score: number) => {
+        const baseColor = getMatchColor(score);
+        return darkenColor(baseColor, 0.3); // Slightly darker version
+    };
 
     // Render an individual alternative item
     const renderAlternativeItem = ({ item }: { item: ExerciseAlternative }) => {
         const isSelected = selectedAlternative?.ExerciseId === item.ExerciseId;
         const matchScore = Math.round(item.MatchScore);
-        const matchColor = getMatchColor(matchScore);
+        const matchColor = getDarkMatchColor(matchScore);
+        const lightMatchColor = getLightMatchColor(matchScore);
 
         return (
-            <TouchableOpacity
+            <ThemedView
                 style={[
                     styles.alternativeCard,
                     {
                         backgroundColor: isSelected ? themeColors.tangerineTransparent : themeColors.background,
                         borderColor: isSelected ? themeColors.tangerineSolid : themeColors.systemBorderColor,
                     },
+                    Platform.OS === 'ios' ? styles.shadowIOS : styles.shadowAndroid,
                 ]}
-                onPress={() => handleSelectAlternative(item)}
-                activeOpacity={0.7}
             >
-                <View style={styles.matchScoreContainer}>
+                <TouchableOpacity onPress={() => handleSelectAlternative(item)} activeOpacity={0.7} style={styles.cardTouchable}>
                     <View style={styles.alternativeContent}>
-                        <ThemedText type='button' style={styles.exerciseName} numberOfLines={2}>
-                            {item.ExerciseName}
-                        </ThemedText>
+                        <View style={styles.exerciseNameRow}>
+                            <ThemedText type='button' style={styles.exerciseName} numberOfLines={2}>
+                                {item.ExerciseName}
+                            </ThemedText>
+                            {isSelected && (
+                                <View style={styles.selectedIndicator}>
+                                    <Icon name='check' size={14} color={themeColors.tangerineSolid} />
+                                </View>
+                            )}
+                        </View>
 
-                        <View style={styles.matchScoreRow}>
+                        <View style={[styles.matchContainer, { backgroundColor: lightMatchColor }]}>
                             <View style={[styles.matchIndicator, { backgroundColor: matchColor }]} />
-                            <ThemedText type='caption' style={styles.matchText}>
-                                Match: {matchScore}%
+                            <ThemedText type='caption' style={[styles.matchText, { color: matchColor }]}>
+                                {matchScore}% Match
                             </ThemedText>
                         </View>
                     </View>
-
-                    {isSelected && (
-                        <View style={[styles.selectedIndicator]}>
-                            <Icon name='check' size={14} color={themeColors.tangerineSolid} />
-                        </View>
-                    )}
-                </View>
-            </TouchableOpacity>
+                </TouchableOpacity>
+            </ThemedView>
         );
     };
 
@@ -387,15 +374,13 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
     const isSwapEnabled = selectedAlternative && (!existingSubstitution || existingSubstitution.SubstituteExerciseId !== selectedAlternative.ExerciseId);
 
     return (
-        <BottomSheet visible={visible} onClose={handleSheetClose} style={{ height: '90%', maxHeight: '90%' }}>
+        <BottomSheet visible={visible} onClose={handleSheetClose} style={{ maxHeight: '90%' }}>
             {renderHeader()}
 
             {showSuccess?.visible ? (
                 renderSuccessAnimation()
             ) : (
                 <>
-                    {/* {renderCurrentExercise()} */}
-
                     {/* Loading, Error or Results */}
                     {loadingAlternatives ? (
                         renderLoading()
@@ -403,7 +388,6 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
                         renderError()
                     ) : (
                         <FlatList
-                            key='grid-view'
                             data={alternatives}
                             renderItem={renderAlternativeItem}
                             keyExtractor={(item) => item.ExerciseId}
@@ -417,6 +401,7 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
                                     </ThemedText>
                                 </View>
                             }
+                            showsVerticalScrollIndicator={false}
                         />
                     )}
 
@@ -426,20 +411,19 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
                             {existingSubstitution && (
                                 <TextButton
                                     text='Reset'
-                                    size='LG'
                                     onPress={handleRevertToOriginal}
-                                    style={[styles.revertButton, { borderRadius: Spaces.LG }]}
-                                    textStyle={{ color: themeColors.buttonPrimary }}
+                                    textStyle={[{ color: themeColors.text }]}
                                     loading={isSwapLoading}
                                     disabled={isSwapLoading}
+                                    style={[styles.revertButton]}
                                 />
                             )}
 
-                            <PrimaryButton
+                            <TextButton
                                 text='Swap'
-                                size='LG'
                                 onPress={handleSwapClick}
-                                style={[styles.swapButton, { borderRadius: Spaces.LG }]}
+                                textStyle={[{ color: themeColors.background }]}
+                                style={[styles.swapButton, { backgroundColor: lightenColor(themeColors.buttonPrimary, 0.1) }]}
                                 disabled={!isSwapEnabled || isSwapLoading}
                                 loading={isSwapLoading}
                             />
@@ -479,34 +463,6 @@ const styles = StyleSheet.create({
         left: Spaces.MD,
         zIndex: 10,
     },
-    currentExerciseContainer: {
-        marginHorizontal: Spaces.MD,
-        marginVertical: Spaces.MD,
-    },
-    currentExerciseCard: {
-        padding: Spaces.MD,
-        borderRadius: Spaces.LG,
-        borderWidth: StyleSheet.hairlineWidth,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    substitutedIndicator: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    checkIconContainer: {
-        backgroundColor: '#4CAF50',
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: Spaces.XS,
-    },
-    substitutedText: {
-        marginLeft: Spaces.XS,
-    },
     loadingContainer: {
         padding: Spaces.XXL,
         alignItems: 'center',
@@ -519,52 +475,71 @@ const styles = StyleSheet.create({
     },
     alternativesList: {
         paddingTop: Spaces.MD,
-        paddingBottom: Spaces.XL,
+        paddingBottom: Spaces.MD,
     },
     alternativeCard: {
-        borderWidth: StyleSheet.hairlineWidth,
-        borderRadius: Spaces.SM + Spaces.XS,
+        borderRadius: Spaces.SM,
         marginBottom: Spaces.MD,
+        borderWidth: StyleSheet.hairlineWidth,
         overflow: 'hidden',
-        height: 90,
         flex: 1,
+        height: 100,
     },
-    matchScoreContainer: {
-        flex: 1,
-        position: 'relative',
+    shadowIOS: {
+        shadowColor: '#777',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    },
+    shadowAndroid: {
+        elevation: 5,
     },
     gridRow: {
         justifyContent: 'space-between',
         gap: Spaces.SM,
+    },
+    cardTouchable: {
+        flex: 1,
     },
     alternativeContent: {
         padding: Spaces.SM,
         flex: 1,
         justifyContent: 'space-between',
     },
-    exerciseName: {
+    exerciseNameRow: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
         marginBottom: Spaces.XS,
     },
-    matchScoreRow: {
+    exerciseName: {
+        flex: 1,
+        marginRight: Spaces.XS,
+    },
+    selectedIndicator: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    matchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: Spaces.XS,
+        paddingHorizontal: Spaces.SM,
+        paddingVertical: Spaces.XS,
+        borderRadius: Spaces.XS,
+        alignSelf: 'flex-start',
     },
     matchIndicator: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
+        width: 8,
+        height: 8,
+        borderRadius: 4,
         marginRight: Spaces.XS,
     },
     matchText: {
-        fontSize: 12,
-    },
-    selectedIndicator: {
-        position: 'absolute',
-        bottom: Spaces.SM,
-        right: Spaces.SM,
-        alignItems: 'center',
-        justifyContent: 'center',
+        fontSize: 11,
+        fontWeight: '500',
     },
     emptyContainer: {
         padding: Spaces.XXL,
@@ -590,16 +565,20 @@ const styles = StyleSheet.create({
     },
     buttonContainer: {
         flexDirection: 'row',
-        paddingHorizontal: Spaces.MD,
-        paddingBottom: Spaces.XL,
-        gap: Spaces.SM,
+        paddingBottom: Spaces.XL + Spaces.SM,
+        gap: Spaces.MD,
+        justifyContent: 'flex-end',
     },
     revertButton: {
         flex: 1,
-        alignSelf: 'center',
+        borderRadius: Spaces.SM,
     },
     swapButton: {
         flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: Spaces.SM,
     },
     successContainer: {
         flex: 1,
@@ -619,26 +598,6 @@ const styles = StyleSheet.create({
     successMessage: {
         marginTop: Spaces.MD,
         textAlign: 'center',
-    },
-    modalContent: {
-        padding: Spaces.LG,
-        alignItems: 'center',
-        width: '80%',
-    },
-    modalDescription: {
-        marginBottom: Spaces.LG,
-        textAlign: 'center',
-    },
-    optionButton: {
-        width: '100%',
-        padding: Spaces.MD,
-        borderRadius: Spaces.SM,
-        borderWidth: 1,
-        marginBottom: Spaces.MD,
-        alignItems: 'center',
-    },
-    cancelButton: {
-        marginTop: Spaces.SM,
     },
     modalContainer: {
         alignItems: 'center',
