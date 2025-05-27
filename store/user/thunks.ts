@@ -18,15 +18,37 @@ import {
 } from '@/types';
 import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
+import { cacheService, CacheTTL } from '@/utils/cache';
 
-export const getUserAsync = createAsyncThunk<User, { forceRefresh?: boolean } | void>('user/getUser', async (args = {}, { getState }) => {
-    const { forceRefresh = false } = typeof args === 'object' ? args : {};
+export const getUserAsync = createAsyncThunk<User, { forceRefresh?: boolean; useCache?: boolean } | void>('user/getUser', async (args = {}, { getState }) => {
+    const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
     const state = getState() as RootState;
 
     if (state.user.user && !forceRefresh) {
         return state.user.user;
     }
-    return await UserService.getUser();
+
+    // Try cache first if enabled and not forcing refresh
+    if (useCache && !forceRefresh) {
+        const cached = await cacheService.get<User>('user_data');
+        const isExpired = await cacheService.isExpired('user_data');
+
+        if (cached && !isExpired) {
+            console.log('Loaded user data from cache');
+            return cached;
+        }
+    }
+
+    // Load from API
+    console.log('Loading user data from API');
+    const user = await UserService.getUser();
+
+    // Cache the result if useCache is enabled
+    if (useCache) {
+        await cacheService.set('user_data', user, CacheTTL.LONG);
+    }
+
+    return user;
 });
 
 export const updateUserAsync = createAsyncThunk<
@@ -36,10 +58,19 @@ export const updateUserAsync = createAsyncThunk<
         state: RootState;
         rejectValue: { errorMessage: string };
     }
->('user/updateUser', async (updates, { rejectWithValue }) => {
+>('user/updateUser', async (updates, { getState, rejectWithValue }) => {
     try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
         // Update the user
         const updatedUser = await UserService.updateUser(updates);
+
+        // Invalidate user cache after update
+        if (userId) {
+            await cacheService.remove('user_data');
+        }
+
         return updatedUser;
     } catch (error) {
         return rejectWithValue({
@@ -50,14 +81,14 @@ export const updateUserAsync = createAsyncThunk<
 
 export const getUserFitnessProfileAsync = createAsyncThunk<
     UserFitnessProfile,
-    { forceRefresh?: boolean } | void,
+    { forceRefresh?: boolean; useCache?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
 >('user/getUserFitnessProfile', async (args = {}, { getState, rejectWithValue }) => {
     try {
-        const { forceRefresh = false } = typeof args === 'object' ? args : {};
+        const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
         const state = getState();
         const userId = state.user.user?.UserId;
 
@@ -71,8 +102,28 @@ export const getUserFitnessProfileAsync = createAsyncThunk<
             return state.user.userFitnessProfile;
         }
 
-        // Fetch and return fitness profile
+        // Try cache first if enabled and not forcing refresh
+        if (useCache && !forceRefresh) {
+            const cacheKey = `user_fitness_profile_${userId}`;
+            const cached = await cacheService.get<UserFitnessProfile>(cacheKey);
+            const isExpired = await cacheService.isExpired(cacheKey);
+
+            if (cached && !isExpired) {
+                console.log('Loaded user fitness profile from cache');
+                return cached;
+            }
+        }
+
+        // Load from API
+        console.log('Loading user fitness profile from API');
         const profile = await UserService.getUserFitnessProfile(userId);
+
+        // Cache the result if useCache is enabled
+        if (useCache) {
+            const cacheKey = `user_fitness_profile_${userId}`;
+            await cacheService.set(cacheKey, profile, CacheTTL.LONG);
+        }
+
         return profile;
     } catch (error) {
         return rejectWithValue({
@@ -97,7 +148,16 @@ export const updateUserFitnessProfileAsync = createAsyncThunk<
     }
 
     try {
-        return await UserService.updateUserFitnessProfile(userId, userFitnessProfile);
+        const result = await UserService.updateUserFitnessProfile(userId, userFitnessProfile);
+
+        // Invalidate related caches after update
+        await Promise.all([
+            cacheService.remove(`user_fitness_profile_${userId}`),
+            cacheService.remove(`user_recommendations_${userId}`),
+            cacheService.remove('user_data'),
+        ]);
+
+        return result;
     } catch (error) {
         console.log(error);
         return rejectWithValue({ errorMessage: 'Failed to update fitness profile' });
@@ -106,14 +166,14 @@ export const updateUserFitnessProfileAsync = createAsyncThunk<
 
 export const getUserRecommendationsAsync = createAsyncThunk<
     UserRecommendations,
-    { forceRefresh?: boolean } | void,
+    { forceRefresh?: boolean; useCache?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
 >('user/getUserRecommendations', async (args = {}, { getState, rejectWithValue }) => {
     try {
-        const { forceRefresh = false } = typeof args === 'object' ? args : {};
+        const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
         const state = getState() as RootState;
         const userId = state.user.user?.UserId;
 
@@ -127,8 +187,28 @@ export const getUserRecommendationsAsync = createAsyncThunk<
             return state.user.userRecommendations;
         }
 
-        // Fetch and return recommendations
+        // Try cache first if enabled and not forcing refresh
+        if (useCache && !forceRefresh) {
+            const cacheKey = `user_recommendations_${userId}`;
+            const cached = await cacheService.get<UserRecommendations>(cacheKey);
+            const isExpired = await cacheService.isExpired(cacheKey);
+
+            if (cached && !isExpired) {
+                console.log('Loaded user recommendations from cache');
+                return cached;
+            }
+        }
+
+        // Load from API
+        console.log('Loading user recommendations from API');
         const userRecommendations = await UserService.getUserRecommendations(userId);
+
+        // Cache the result if useCache is enabled
+        if (useCache) {
+            const cacheKey = `user_recommendations_${userId}`;
+            await cacheService.set(cacheKey, userRecommendations, CacheTTL.LONG);
+        }
+
         return userRecommendations;
     } catch (error) {
         return rejectWithValue({
@@ -137,6 +217,7 @@ export const getUserRecommendationsAsync = createAsyncThunk<
     }
 });
 
+// Program progress is always fresh - never cached
 export const getUserProgramProgressAsync = createAsyncThunk<
     UserProgramProgress,
     { forceRefresh?: boolean } | void,
@@ -160,7 +241,8 @@ export const getUserProgramProgressAsync = createAsyncThunk<
             return state.user.userProgramProgress;
         }
 
-        // Fetch and return progress
+        // Always fetch fresh program progress (too critical to cache)
+        console.log('Loading user program progress from API (always fresh)');
         const userProgramProgress = await UserService.getUserProgramProgress(userId);
         return userProgramProgress;
     } catch (error) {
@@ -184,7 +266,9 @@ export const completeDayAsync = createAsyncThunk<
         return rejectWithValue({ errorMessage: 'User ID not available' });
     }
     try {
-        return await UserService.completeDay(userId, dayId, isAutoComplete);
+        const result = await UserService.completeDay(userId, dayId, isAutoComplete);
+        // No cache invalidation needed since program progress is never cached
+        return result;
     } catch (error) {
         console.log(error);
         return rejectWithValue({ errorMessage: 'Failed to complete day' });
@@ -205,7 +289,9 @@ export const uncompleteDayAsync = createAsyncThunk<
         return rejectWithValue({ errorMessage: 'User ID not available' });
     }
     try {
-        return await UserService.uncompleteDay(userId, dayId);
+        const result = await UserService.uncompleteDay(userId, dayId);
+        // No cache invalidation needed since program progress is never cached
+        return result;
     } catch (error) {
         console.log(error);
         return rejectWithValue({ errorMessage: 'Failed to uncomplete day' });
@@ -220,6 +306,7 @@ export const endProgramAsync = createAsyncThunk<UserProgramProgress, void>('user
     }
     try {
         const result = await UserService.endProgram(userId);
+        // No cache invalidation needed since program progress is never cached
         return result as UserProgramProgress;
     } catch (error) {
         console.log(error);
@@ -241,7 +328,9 @@ export const startProgramAsync = createAsyncThunk<
         return rejectWithValue({ errorMessage: 'User ID not available' });
     }
     try {
-        return await UserService.startProgram(userId, programId);
+        const result = await UserService.startProgram(userId, programId);
+        // No cache invalidation needed since program progress is never cached
+        return result;
     } catch (error) {
         console.log(error);
         return rejectWithValue({ errorMessage: 'Failed to start program' });
@@ -255,14 +344,266 @@ export const resetProgramAsync = createAsyncThunk<UserProgramProgress, void>('us
         return rejectWithValue({ errorMessage: 'User ID not available' });
     }
     try {
-        return UserService.resetProgram(userId);
+        const result = await UserService.resetProgram(userId);
+        // No cache invalidation needed since program progress is never cached
+        return result;
     } catch (error) {
         console.log(error);
         return rejectWithValue({ errorMessage: 'Failed to reset program' });
     }
 });
 
-// Get all weight measurements
+export const getUserAppSettingsAsync = createAsyncThunk<
+    UserAppSettings,
+    { forceRefresh?: boolean; useCache?: boolean } | void,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/getUserAppSettings', async (args = {}, { getState, rejectWithValue }) => {
+    try {
+        const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        // Check if user ID exists
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Return cached app settings if available and not forcing refresh
+        if (state.user.userAppSettings && !forceRefresh) {
+            return state.user.userAppSettings;
+        }
+
+        // Try cache first if enabled and not forcing refresh
+        if (useCache && !forceRefresh) {
+            const cacheKey = `user_app_settings_${userId}`;
+            const cached = await cacheService.get<UserAppSettings>(cacheKey);
+            const isExpired = await cacheService.isExpired(cacheKey);
+
+            if (cached && !isExpired) {
+                console.log('Loaded user app settings from cache');
+                return cached;
+            }
+        }
+
+        // Load from API
+        console.log('Loading user app settings from API');
+        const profile = await UserService.getUserAppSettings(userId);
+
+        // Cache the result if useCache is enabled
+        if (useCache) {
+            const cacheKey = `user_app_settings_${userId}`;
+            await cacheService.set(cacheKey, profile, CacheTTL.LONG);
+        }
+
+        return profile;
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch app settings',
+        });
+    }
+});
+
+export const updateUserAppSettingsAsync = createAsyncThunk<
+    { userAppSettings: UserAppSettings },
+    { userAppSettings: UserAppSettings },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/updateUserAppSettings', async ({ userAppSettings }, { getState, rejectWithValue }) => {
+    const state = getState();
+    const userId = state.user.user?.UserId;
+
+    if (!userId) {
+        return rejectWithValue({ errorMessage: 'User ID not available' });
+    }
+
+    try {
+        const result = await UserService.updateUserAppSettings(userId, userAppSettings);
+
+        // Invalidate app settings cache after update
+        const cacheKey = `user_app_settings_${userId}`;
+        await cacheService.remove(cacheKey);
+
+        return { userAppSettings: result };
+    } catch (error) {
+        console.log(error);
+        return rejectWithValue({ errorMessage: 'Failed to update app settings' });
+    }
+});
+
+export const getUserExerciseSubstitutionsAsync = createAsyncThunk<
+    UserExerciseSubstitution[],
+    { params?: GetSubstitutionsParams; forceRefresh?: boolean; useCache?: boolean } | void,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/getUserExerciseSubstitutions', async (args = {}, { getState, rejectWithValue }) => {
+    try {
+        const { params, forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Return cached substitutions if available and not forcing refresh (only if no params)
+        if (
+            state.user.userExerciseSubstitutions.length > 0 &&
+            state.user.userExerciseSubstitutionsState === REQUEST_STATE.FULFILLED &&
+            !forceRefresh &&
+            !params // Only use cache if not filtering
+        ) {
+            return state.user.userExerciseSubstitutions;
+        }
+
+        // Try cache first if enabled and not forcing refresh and no params
+        if (useCache && !forceRefresh && !params) {
+            const cacheKey = `exercise_substitutions_${userId}`;
+            const cached = await cacheService.get<UserExerciseSubstitution[]>(cacheKey);
+            const isExpired = await cacheService.isExpired(cacheKey);
+
+            if (cached && !isExpired) {
+                console.log('Loaded exercise substitutions from cache');
+                return cached;
+            }
+        }
+
+        // Load from API
+        console.log('Loading exercise substitutions from API');
+        const substitutions = await UserService.getUserExerciseSubstitutions(userId, params);
+
+        // Cache the result if useCache is enabled and no params (full list)
+        if (useCache && !params) {
+            const cacheKey = `exercise_substitutions_${userId}`;
+            await cacheService.set(cacheKey, substitutions, CacheTTL.VERY_LONG);
+        }
+
+        return substitutions;
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch exercise substitutions',
+        });
+    }
+});
+
+// Helper function to refresh exercise substitutions
+const refreshExerciseSubstitutions = async (userId: string, params?: GetSubstitutionsParams) => {
+    return await UserService.getUserExerciseSubstitutions(userId, params);
+};
+
+// Create a new exercise substitution
+export const createExerciseSubstitutionAsync = createAsyncThunk<
+    UserExerciseSubstitution[],
+    CreateSubstitutionParams,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/createExerciseSubstitution', async (substitutionData, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Create the substitution
+        await UserService.createExerciseSubstitution(userId, substitutionData);
+
+        // Invalidate cache after creation
+        const cacheKey = `exercise_substitutions_${userId}`;
+        await cacheService.remove(cacheKey);
+
+        // Refresh and return all substitutions
+        return await refreshExerciseSubstitutions(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to create exercise substitution',
+        });
+    }
+});
+
+// Update an existing exercise substitution
+export const updateExerciseSubstitutionAsync = createAsyncThunk<
+    UserExerciseSubstitution[],
+    { substitutionId: string; updates: UpdateSubstitutionParams },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/updateExerciseSubstitution', async ({ substitutionId, updates }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Update the substitution
+        await UserService.updateExerciseSubstitution(userId, substitutionId, updates);
+
+        // Invalidate cache after update
+        const cacheKey = `exercise_substitutions_${userId}`;
+        await cacheService.remove(cacheKey);
+
+        // Refresh and return all substitutions
+        return await refreshExerciseSubstitutions(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to update exercise substitution',
+        });
+    }
+});
+
+// Delete an exercise substitution
+export const deleteExerciseSubstitutionAsync = createAsyncThunk<
+    UserExerciseSubstitution[],
+    { substitutionId: string },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/deleteExerciseSubstitution', async ({ substitutionId }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Delete the substitution
+        await UserService.deleteExerciseSubstitution(userId, substitutionId);
+
+        // Invalidate cache after deletion
+        const cacheKey = `exercise_substitutions_${userId}`;
+        await cacheService.remove(cacheKey);
+
+        // Refresh and return all substitutions
+        return await refreshExerciseSubstitutions(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to delete exercise substitution',
+        });
+    }
+});
+
+// MEASUREMENT THUNKS - These are always fresh due to their real-time nature
+
+// Helper function to refresh weight measurements
+const refreshWeightMeasurements = async (userId: string) => {
+    return await UserService.getWeightMeasurements(userId);
+};
+
+// Get all weight measurements - Always fresh, no caching
 export const getWeightMeasurementsAsync = createAsyncThunk<
     UserWeightMeasurement[],
     { forceRefresh?: boolean } | void,
@@ -285,6 +626,8 @@ export const getWeightMeasurementsAsync = createAsyncThunk<
             return state.user.userWeightMeasurements;
         }
 
+        // Always fetch fresh measurements (too dynamic to cache effectively)
+        console.log('Loading weight measurements from API (always fresh)');
         const measurements = await UserService.getWeightMeasurements(userId);
         return measurements;
     } catch (error) {
@@ -293,11 +636,6 @@ export const getWeightMeasurementsAsync = createAsyncThunk<
         });
     }
 });
-
-// Helper function to refresh weight measurements
-const refreshWeightMeasurements = async (userId: string) => {
-    return await UserService.getWeightMeasurements(userId);
-};
 
 // Log new weight measurement
 export const logWeightMeasurementAsync = createAsyncThunk<
@@ -413,6 +751,8 @@ export const getSleepMeasurementsAsync = createAsyncThunk<
             return state.user.userSleepMeasurements;
         }
 
+        // Always fetch fresh sleep measurements (too dynamic to cache effectively)
+        console.log('Loading sleep measurements from API (always fresh)');
         const measurements = await UserService.getSleepMeasurements(userId);
         return measurements;
     } catch (error) {
@@ -497,68 +837,11 @@ export const deleteSleepMeasurementAsync = createAsyncThunk<
     }
 });
 
-export const getUserAppSettingsAsync = createAsyncThunk<
-    UserAppSettings,
-    { forceRefresh?: boolean } | void,
-    {
-        state: RootState;
-        rejectValue: { errorMessage: string };
-    }
->('user/getUserAppSettings', async (args = {}, { getState, rejectWithValue }) => {
-    try {
-        const { forceRefresh = false } = typeof args === 'object' ? args : {};
-        const state = getState();
-        const userId = state.user.user?.UserId;
-
-        // Check if user ID exists
-        if (!userId) {
-            return rejectWithValue({ errorMessage: 'User ID not available' });
-        }
-
-        // Return cached app settings if available and not forcing refresh
-        if (state.user.userAppSettings && !forceRefresh) {
-            return state.user.userAppSettings;
-        }
-
-        // Fetch and return app settings
-        const profile = await UserService.getUserAppSettings(userId);
-        return profile;
-    } catch (error) {
-        return rejectWithValue({
-            errorMessage: error instanceof Error ? error.message : 'Failed to fetch app settings',
-        });
-    }
-});
-
-export const updateUserAppSettingsAsync = createAsyncThunk<
-    { userAppSettings: UserAppSettings },
-    { userAppSettings: UserAppSettings },
-    {
-        state: RootState;
-        rejectValue: { errorMessage: string };
-    }
->('user/updateUserAppSettings', async ({ userAppSettings }, { getState, rejectWithValue }) => {
-    const state = getState();
-    const userId = state.user.user?.UserId;
-
-    if (!userId) {
-        return rejectWithValue({ errorMessage: 'User ID not available' });
-    }
-
-    try {
-        const result = await UserService.updateUserAppSettings(userId, userAppSettings);
-        return { userAppSettings: result };
-    } catch (error) {
-        console.log(error);
-        return rejectWithValue({ errorMessage: 'Failed to update app settings' });
-    }
-});
-
 const refreshBodyMeasurements = async (userId: string) => {
     return await UserService.getBodyMeasurements(userId);
 };
 
-// Get all body measurements
+// Get all body measurements - Always fresh, no caching
 export const getBodyMeasurementsAsync = createAsyncThunk<
     UserBodyMeasurement[],
     { forceRefresh?: boolean } | void,
@@ -581,6 +864,8 @@ export const getBodyMeasurementsAsync = createAsyncThunk<
             return state.user.userBodyMeasurements;
         }
 
+        // Always fetch fresh body measurements (too dynamic to cache effectively)
+        console.log('Loading body measurements from API (always fresh)');
         const measurements = await UserService.getBodyMeasurements(userId);
         return measurements;
     } catch (error) {
@@ -674,135 +959,6 @@ export const deleteBodyMeasurementAsync = createAsyncThunk<
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to delete body measurement',
-        });
-    }
-});
-
-// Helper function to refresh exercise substitutions
-const refreshExerciseSubstitutions = async (userId: string, params?: GetSubstitutionsParams) => {
-    return await UserService.getUserExerciseSubstitutions(userId, params);
-};
-
-// Get all exercise substitutions for a user
-export const getUserExerciseSubstitutionsAsync = createAsyncThunk<
-    UserExerciseSubstitution[],
-    { params?: GetSubstitutionsParams; forceRefresh?: boolean } | void,
-    {
-        state: RootState;
-        rejectValue: { errorMessage: string };
-    }
->('user/getUserExerciseSubstitutions', async (args = {}, { getState, rejectWithValue }) => {
-    try {
-        const { params, forceRefresh = false } = typeof args === 'object' ? args : {};
-        const state = getState();
-        const userId = state.user.user?.UserId;
-
-        if (!userId) {
-            return rejectWithValue({ errorMessage: 'User ID not available' });
-        }
-
-        // Return cached substitutions if available and not forcing refresh
-        if (
-            state.user.userExerciseSubstitutions.length > 0 &&
-            state.user.userExerciseSubstitutionsState === REQUEST_STATE.FULFILLED &&
-            !forceRefresh &&
-            !params // Only use cache if not filtering
-        ) {
-            return state.user.userExerciseSubstitutions;
-        }
-
-        const substitutions = await UserService.getUserExerciseSubstitutions(userId, params);
-        return substitutions;
-    } catch (error) {
-        return rejectWithValue({
-            errorMessage: error instanceof Error ? error.message : 'Failed to fetch exercise substitutions',
-        });
-    }
-});
-
-// Create a new exercise substitution
-export const createExerciseSubstitutionAsync = createAsyncThunk<
-    UserExerciseSubstitution[],
-    CreateSubstitutionParams,
-    {
-        state: RootState;
-        rejectValue: { errorMessage: string };
-    }
->('user/createExerciseSubstitution', async (substitutionData, { getState, rejectWithValue }) => {
-    try {
-        const state = getState();
-        const userId = state.user.user?.UserId;
-
-        if (!userId) {
-            return rejectWithValue({ errorMessage: 'User ID not available' });
-        }
-
-        // Create the substitution
-        await UserService.createExerciseSubstitution(userId, substitutionData);
-
-        // Refresh and return all substitutions
-        return await refreshExerciseSubstitutions(userId);
-    } catch (error) {
-        return rejectWithValue({
-            errorMessage: error instanceof Error ? error.message : 'Failed to create exercise substitution',
-        });
-    }
-});
-
-// Update an existing exercise substitution
-export const updateExerciseSubstitutionAsync = createAsyncThunk<
-    UserExerciseSubstitution[],
-    { substitutionId: string; updates: UpdateSubstitutionParams },
-    {
-        state: RootState;
-        rejectValue: { errorMessage: string };
-    }
->('user/updateExerciseSubstitution', async ({ substitutionId, updates }, { getState, rejectWithValue }) => {
-    try {
-        const state = getState();
-        const userId = state.user.user?.UserId;
-
-        if (!userId) {
-            return rejectWithValue({ errorMessage: 'User ID not available' });
-        }
-
-        // Update the substitution
-        await UserService.updateExerciseSubstitution(userId, substitutionId, updates);
-
-        // Refresh and return all substitutions
-        return await refreshExerciseSubstitutions(userId);
-    } catch (error) {
-        return rejectWithValue({
-            errorMessage: error instanceof Error ? error.message : 'Failed to update exercise substitution',
-        });
-    }
-});
-
-// Delete an exercise substitution
-export const deleteExerciseSubstitutionAsync = createAsyncThunk<
-    UserExerciseSubstitution[],
-    { substitutionId: string },
-    {
-        state: RootState;
-        rejectValue: { errorMessage: string };
-    }
->('user/deleteExerciseSubstitution', async ({ substitutionId }, { getState, rejectWithValue }) => {
-    try {
-        const state = getState();
-        const userId = state.user.user?.UserId;
-
-        if (!userId) {
-            return rejectWithValue({ errorMessage: 'User ID not available' });
-        }
-
-        // Delete the substitution
-        await UserService.deleteExerciseSubstitution(userId, substitutionId);
-
-        // Refresh and return all substitutions
-        return await refreshExerciseSubstitutions(userId);
-    } catch (error) {
-        return rejectWithValue({
-            errorMessage: error instanceof Error ? error.message : 'Failed to delete exercise substitution',
         });
     }
 });

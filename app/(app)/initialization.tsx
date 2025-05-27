@@ -1,169 +1,134 @@
 // app/(app)/initialization.tsx
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { router } from 'expo-router';
-import { getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/thunks';
-import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
-import {
-    getSleepMeasurementsAsync,
-    getUserAppSettingsAsync,
-    getUserAsync,
-    getUserFitnessProfileAsync,
-    getUserProgramProgressAsync,
-    getUserRecommendationsAsync,
-    getWeightMeasurementsAsync,
-    getBodyMeasurementsAsync,
-    getUserExerciseSubstitutionsAsync,
-} from '@/store/user/thunks';
-import { getAllWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
-import { initializeTrackedLiftsHistoryAsync } from '@/store/exerciseProgress/thunks';
-import { fetchAllExercisesAsync } from '@/store/exercises/thunks';
-import { useProgramData } from '@/hooks/useProgramData';
-import { useSplashScreen } from '@/hooks/useSplashScreen';
-import { BasicSplash } from '@/components/base/BasicSplash';
+import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { ThemedText } from '@/components/base/ThemedText';
-import { usePostHog } from 'posthog-react-native';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
+import { InitializationService } from '@/utils/initializationService';
+import { setInitialized, incrementRetryAttempt, resetRetryAttempt, reset as resetInitialization } from '@/store/initialization/initializationSlice';
+import { getUserProgramProgressAsync } from '@/store/user/thunks';
+import { getAllProgramDaysAsync } from '@/store/programs/thunks';
+import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
+import { getWeightMeasurementsAsync, getBodyMeasurementsAsync, getSleepMeasurementsAsync } from '@/store/user/thunks';
+import { initializeTrackedLiftsHistoryAsync } from '@/store/exerciseProgress/thunks';
 
 const Initialization: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const { user, userState, userProgramProgress, userProgramProgressState, error: userError } = useSelector((state: RootState) => state.user);
-    const { error: programError } = useSelector((state: RootState) => state.programs);
-    const { error: workoutError } = useSelector((state: RootState) => state.workouts);
-    const { error: exerciseError } = useSelector((state: RootState) => state.exerciseProgress);
-
-    const [dataLoaded, setDataLoaded] = useState<keyof typeof REQUEST_STATE>(REQUEST_STATE.PENDING);
-    const posthog = usePostHog();
-
-    const [retryAttempt, setRetryAttempt] = useState(0);
-    const [isRetrying, setIsRetrying] = useState(false);
-
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
-    const { programDay, handleAutoCompleteRestDays } = useProgramData(undefined, undefined);
+    // Redux state
+    const initialization = useSelector((state: RootState) => state.initialization);
+    const { userProgramProgress, userProgramProgressState } = useSelector((state: RootState) => state.user);
 
-    const fetchUserData = useCallback(async () => {
+    // Local state
+    const [isRetrying, setIsRetrying] = useState(false);
+    const initServiceRef = useRef<InitializationService | null>(null);
+
+    // Initialize service
+    useEffect(() => {
+        initServiceRef.current = new InitializationService(dispatch);
+    }, [dispatch]);
+
+    // Main initialization flow
+    const initializeApp = useCallback(async () => {
+        if (!initServiceRef.current) return;
+
         try {
-            await dispatch(getUserAsync());
-            while (userState !== REQUEST_STATE.FULFILLED) {
-                await new Promise((resolve) => setTimeout(resolve, 50));
-            }
-            return REQUEST_STATE.FULFILLED;
+            setIsRetrying(false);
+            dispatch(resetRetryAttempt());
+
+            // Step 1: Check cache status
+            await initServiceRef.current.checkCacheStatus();
+
+            // Step 2: Load critical data (with cache-first strategy)
+            const criticalSuccess = await initServiceRef.current.loadCriticalData();
+            if (!criticalSuccess) return; // Stop if critical data fails
+
+            // Step 3: Load secondary data (with cache-first strategy)
+            const secondarySuccess = await initServiceRef.current.loadSecondaryData();
+            if (!secondarySuccess) return; // Stop if required secondary data fails
+
+            // Step 4: Load real-time data that can't be cached
+            await loadRealTimeData();
+
+            // Step 5: Mark as initialized and navigate
+            dispatch(setInitialized(true));
+            router.replace('/(app)/(tabs)/home');
+
+            // Step 6: Start background sync (non-blocking)
+            setTimeout(() => {
+                initServiceRef.current?.startBackgroundSync();
+            }, 1000);
         } catch (error) {
-            console.log('Error fetching user data:', error);
-            return REQUEST_STATE.REJECTED;
+            console.error('Initialization failed:', error);
         }
-    }, [dispatch, user]);
+    }, [dispatch]);
 
-    const fetchOtherData = useCallback(async () => {
+    // Load data that must always be fresh (can't be cached)
+    const loadRealTimeData = async () => {
         try {
-            if (!user || !user.UserId) {
-                throw new Error('User data not available');
-            }
+            // These are critical and must be current
+            await dispatch(getUserProgramProgressAsync());
 
-            await Promise.all([
-                dispatch(getUserFitnessProfileAsync()),
-                dispatch(getUserProgramProgressAsync()),
-                dispatch(getUserRecommendationsAsync()),
+            // These are important for UX but not blocking
+            const nonBlockingPromises = [
                 dispatch(getWorkoutQuoteAsync()),
                 dispatch(getRestDayQuoteAsync()),
-                dispatch(getSpotlightWorkoutsAsync()),
-                dispatch(getAllProgramsAsync()),
                 dispatch(getWeightMeasurementsAsync()),
                 dispatch(getBodyMeasurementsAsync()),
-                dispatch(initializeTrackedLiftsHistoryAsync()),
                 dispatch(getSleepMeasurementsAsync()),
-                dispatch(getUserAppSettingsAsync()),
-                dispatch(getAllWorkoutsAsync()),
-                dispatch(fetchAllExercisesAsync()),
-                dispatch(getUserExerciseSubstitutionsAsync()),
-            ]);
+                dispatch(initializeTrackedLiftsHistoryAsync()),
+            ];
 
-            setDataLoaded(REQUEST_STATE.FULFILLED);
-            return REQUEST_STATE.FULFILLED;
+            // Don't wait for these to complete
+            Promise.allSettled(nonBlockingPromises).then((results) => {
+                results.forEach((result) => {
+                    if (result.status === 'rejected') {
+                        console.warn(`Non-blocking data load failed:`, result.reason);
+                    }
+                });
+            });
         } catch (error) {
-            console.log('Error fetching other data:', error);
-            setDataLoaded(REQUEST_STATE.REJECTED);
-            return REQUEST_STATE.REJECTED;
+            console.error('Real-time data loading failed:', error);
+            throw error;
         }
-    }, [dispatch, user]);
+    };
 
-    useEffect(() => {
-        const initializeData = async () => {
-            try {
-                setIsRetrying(false);
-                const userDataState = await fetchUserData();
-                if (userDataState === REQUEST_STATE.FULFILLED) {
-                    posthog.identify(user?.UserId);
-                    await fetchOtherData();
-                } else {
-                    setDataLoaded(REQUEST_STATE.REJECTED);
-                }
-            } catch (error) {
-                console.log('Initialization error:', error);
-                setDataLoaded(REQUEST_STATE.REJECTED);
-            }
-        };
-
-        initializeData();
-    }, [fetchUserData, fetchOtherData, retryAttempt]);
-
+    // Load program days when user program progress is available
     useEffect(() => {
         if (userProgramProgressState === REQUEST_STATE.FULFILLED && userProgramProgress?.ProgramId) {
             dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId }));
         }
     }, [userProgramProgress, dispatch, userProgramProgressState]);
 
+    // Start initialization on mount
     useEffect(() => {
-        if (!userProgramProgress?.LastActivityAt || userProgramProgressState !== REQUEST_STATE.FULFILLED) return;
+        initializeApp();
+    }, [initializeApp]);
 
-        const checkAndAutoCompleteRestDays = async () => {
-            try {
-                if (programDay && userProgramProgress) {
-                    const completedDaysCount = await handleAutoCompleteRestDays();
-                    if (completedDaysCount && completedDaysCount > 0) {
-                        console.log(`Auto-completed ${completedDaysCount} rest days`);
-                    }
-                }
-            } catch (error) {
-                console.error('Auto-complete rest days check failed:', error);
-            }
-        };
-
-        checkAndAutoCompleteRestDays();
-    }, [userProgramProgress, userProgramProgressState, programDay, handleAutoCompleteRestDays]);
-
-    const { showSplash } = useSplashScreen({
-        dataLoadedState: dataLoaded,
-    });
-
-    useEffect(() => {
-        if (dataLoaded === REQUEST_STATE.FULFILLED && !showSplash && !userError && !programError && !workoutError && !exerciseError) {
-            router.replace('/(app)/(tabs)/home');
-        }
-    }, [dataLoaded, showSplash, userError, programError, workoutError, exerciseError]);
-
-    const handleRetry = () => {
+    // Retry handler
+    const handleRetry = useCallback(() => {
         setIsRetrying(true);
-        setDataLoaded(REQUEST_STATE.PENDING);
-        setRetryAttempt((prev) => prev + 1);
+        dispatch(incrementRetryAttempt());
+        dispatch(resetInitialization());
+        initializeApp();
+    }, [dispatch, initializeApp]);
+
+    const getLoadingMessage = () => {
+        return 'Loading...';
     };
 
-    if (showSplash && dataLoaded !== REQUEST_STATE.REJECTED) {
-        return <BasicSplash isDataLoaded={dataLoaded === REQUEST_STATE.FULFILLED} showLoadingText={false} />;
-    }
-
-    const hasError = dataLoaded === REQUEST_STATE.REJECTED || userError || programError || workoutError || exerciseError;
-
-    if (hasError) {
+    // Show error state
+    if (initialization.criticalError && initialization.retryAttempt < 3) {
         return (
             <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
                 <View style={styles.errorContainer}>
@@ -174,8 +139,15 @@ const Initialization: React.FC = () => {
                     <ThemedText style={styles.errorMessage}>
                         We couldn&apos;t connect to our servers. Please check your internet connection and try again.
                     </ThemedText>
+
                     <View style={styles.buttonContainer}>
-                        <PrimaryButton size='MD' text='Retry' onPress={handleRetry} loading={isRetrying} style={styles.retryButton} />
+                        <PrimaryButton
+                            size='MD'
+                            text={`Retry (${initialization.retryAttempt}/3)`}
+                            onPress={handleRetry}
+                            loading={isRetrying}
+                            style={styles.retryButton}
+                        />
                     </View>
 
                     {__DEV__ && (
@@ -184,7 +156,10 @@ const Initialization: React.FC = () => {
                                 Error Details (Dev Only):
                             </ThemedText>
                             <ThemedText type='caption' style={styles.devErrorText}>
-                                {userError || programError || workoutError || exerciseError || 'Unknown error occurred'}
+                                {initialization.criticalError}
+                            </ThemedText>
+                            <ThemedText type='caption' style={styles.devErrorText}>
+                                Failed items: {initialization.failedItems.join(', ')}
                             </ThemedText>
                         </View>
                     )}
@@ -193,7 +168,29 @@ const Initialization: React.FC = () => {
         );
     }
 
-    return <></>;
+    // Show permanent failure state after 3 retries
+    if (initialization.criticalError && initialization.retryAttempt >= 3) {
+        return (
+            <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
+                <View style={styles.errorContainer}>
+                    <ThemedText type='titleXLarge' style={styles.errorTitle}>
+                        Unable to Connect
+                    </ThemedText>
+
+                    <ThemedText style={styles.errorMessage}>
+                        We&apos;re having trouble connecting to our servers. Please try again later or contact support if the problem persists.
+                    </ThemedText>
+
+                    <View style={styles.buttonContainer}>
+                        <PrimaryButton size='MD' text='Try Again' onPress={handleRetry} loading={isRetrying} style={styles.retryButton} />
+                    </View>
+                </View>
+            </SafeAreaView>
+        );
+    }
+
+    // Show loading state with DumbbellSplash and basic loading text
+    return <DumbbellSplash isDataLoaded={initialization.isInitialized} showLoadingText={true} loadingText={getLoadingMessage()} />;
 };
 
 const styles = StyleSheet.create({
@@ -203,7 +200,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     errorContainer: {
-        width: '70%',
+        width: '80%',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -220,14 +217,22 @@ const styles = StyleSheet.create({
         marginBottom: Spaces.LG,
     },
     retryButton: {
-        width: '60%',
+        width: '70%',
         alignSelf: 'center',
     },
     devErrorDetails: {
         marginTop: Spaces.LG,
+        padding: Spaces.MD,
+        backgroundColor: 'rgba(255, 0, 0, 0.1)',
+        borderRadius: 8,
     },
-    devErrorTitle: {},
-    devErrorText: {},
+    devErrorTitle: {
+        fontWeight: 'bold',
+        marginBottom: Spaces.SM,
+    },
+    devErrorText: {
+        marginBottom: Spaces.XS,
+    },
 });
 
 export default Initialization;

@@ -19,9 +19,9 @@ import { useScreenTracking } from '@/hooks/useScreenTracking';
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-// Set splash animation options
+// Set splash animation options - much shorter now
 SplashScreen.setOptions({
-    duration: 400,
+    duration: 200, // Reduced from 400ms
     fade: true,
 });
 
@@ -80,6 +80,7 @@ export default function RootLayout() {
 
     useEffect(() => {
         if (loaded) {
+            // Hide splash quickly to transition to custom loading
             SplashScreen.hide();
         }
     }, [loaded]);

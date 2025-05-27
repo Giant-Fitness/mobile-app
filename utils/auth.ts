@@ -4,6 +4,7 @@ import * as SecureStore from 'expo-secure-store';
 import { fetchAuthSession, signOut as amplifySignOut } from 'aws-amplify/auth';
 import * as WebBrowser from 'expo-web-browser';
 import { Platform } from 'react-native';
+import { cacheService } from './cache'; // Import your cache service
 
 const STORAGE_KEYS = {
     USER_ID: 'userId',
@@ -134,6 +135,23 @@ export const authService = {
         }
     },
 
+    // Enhanced clearAuthData to include cache clearing
+    clearAuthData: async () => {
+        try {
+            // Clear secure store auth data
+            const keys = Object.values(STORAGE_KEYS);
+            await Promise.all(keys.map((key) => SecureStore.deleteItemAsync(key)));
+
+            // Clear all cached data
+            await cacheService.clear();
+
+            console.log('All auth data and cache cleared successfully');
+        } catch (error) {
+            console.error('Error clearing auth data and cache:', error);
+            throw error;
+        }
+    },
+
     isTokenExpired: async () => {
         try {
             const session = await fetchAuthSession();
@@ -204,14 +222,6 @@ export const authService = {
             console.error('Error refreshing session:', error);
             throw error;
         }
-    },
-
-    clearAuthData: async () => {
-        const keys = Object.values(STORAGE_KEYS);
-        await Promise.all(keys.map((key) => SecureStore.deleteItemAsync(key))).catch((error) => {
-            console.error('Error clearing auth data:', error);
-            throw error;
-        });
     },
 
     getUserId: async () => {

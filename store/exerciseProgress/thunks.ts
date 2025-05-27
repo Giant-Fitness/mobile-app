@@ -6,13 +6,14 @@ import ExerciseProgressService from '@/store/exerciseProgress/service';
 import { ExerciseSet } from '@/types/exerciseProgressTypes';
 import { isLongTermTrackedLift, LONG_TERM_TRACKED_LIFT_IDS } from '@/store/exerciseProgress/utils';
 import { REQUEST_STATE } from '@/constants/requestStates';
+import { cacheService, CacheTTL } from '@/utils/cache';
 
 // Load only full history for tracked/compound lifts during initialization
-export const initializeTrackedLiftsHistoryAsync = createAsyncThunk<any, { forceRefresh?: boolean } | void>(
+export const initializeTrackedLiftsHistoryAsync = createAsyncThunk<any, { forceRefresh?: boolean; useCache?: boolean } | void>(
     'exerciseProgress/initializeTrackedLifts',
     async (args = {}, { getState, rejectWithValue }) => {
         try {
-            const { forceRefresh = false } = typeof args === 'object' ? args : {};
+            const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
             const state = getState() as RootState;
             const userId = state.user.user?.UserId;
             if (!userId) return rejectWithValue({ errorMessage: 'User ID not available' });
@@ -26,6 +27,20 @@ export const initializeTrackedLiftsHistoryAsync = createAsyncThunk<any, { forceR
                 return { liftHistory: state.exerciseProgress.liftHistory };
             }
 
+            // Try cache first if enabled and not forcing refresh
+            if (useCache && !forceRefresh) {
+                const cacheKey = `tracked_lifts_history_${userId}`;
+                const cached = await cacheService.get<any>(cacheKey);
+                const isExpired = await cacheService.isExpired(cacheKey);
+
+                if (cached && !isExpired) {
+                    console.log('Loaded tracked lifts history from cache');
+                    return { liftHistory: cached };
+                }
+            }
+
+            // Load from API
+            console.log('Loading tracked lifts history from API');
             // Get full history for tracked lifts only
             const trackedLiftsHistoryPromises = Object.keys(LONG_TERM_TRACKED_LIFT_IDS).map((exerciseId) =>
                 ExerciseProgressService.getExerciseHistory(userId, exerciseId, {}),
@@ -40,6 +55,13 @@ export const initializeTrackedLiftsHistoryAsync = createAsyncThunk<any, { forceR
                 }),
                 {},
             );
+
+            // Cache the result if useCache is enabled
+            if (useCache) {
+                const cacheKey = `tracked_lifts_history_${userId}`;
+                await cacheService.set(cacheKey, liftHistory, CacheTTL.LONG);
+            }
+
             return { liftHistory };
         } catch (error) {
             return rejectWithValue({
@@ -52,7 +74,18 @@ export const initializeTrackedLiftsHistoryAsync = createAsyncThunk<any, { forceR
 // Fetch recent history for specific exercises (when viewing a program day)
 export const fetchExercisesRecentHistoryAsync = createAsyncThunk(
     'exerciseProgress/fetchExercisesRecentHistory',
-    async ({ exerciseIds, forceRefresh = false }: { exerciseIds: string[]; forceRefresh?: boolean }, { getState, rejectWithValue }) => {
+    async (
+        {
+            exerciseIds,
+            forceRefresh = false,
+            useCache = true,
+        }: {
+            exerciseIds: string[];
+            forceRefresh?: boolean;
+            useCache?: boolean;
+        },
+        { getState, rejectWithValue },
+    ) => {
         try {
             const state = getState() as RootState;
             const userId = state.user.user?.UserId;
@@ -80,26 +113,65 @@ export const fetchExercisesRecentHistoryAsync = createAsyncThunk(
                 };
             }
 
-            const recentHistoryPromises = uncachedExercises.map((exerciseId) => ExerciseProgressService.getExerciseHistory(userId, exerciseId, { limit: 10 }));
-            const recentHistories = await Promise.all(recentHistoryPromises);
+            // Check cache for missing exercises
+            const cachedExercises: string[] = [];
+            const apiExercises: string[] = [];
+            let cachedRecentLogs: any = {};
 
-            // Transform the response to object structure
-            const recentLogs = uncachedExercises.reduce((acc, exerciseId, index) => {
-                const history = recentHistories[index];
-                // Handle if history is array or object
-                const logs = Array.isArray(history) ? history : Object.values(history);
+            if (useCache && !forceRefresh) {
+                for (const exerciseId of uncachedExercises) {
+                    const cacheKey = `recent_logs_${userId}_${exerciseId}`;
+                    const cached = await cacheService.get<any>(cacheKey);
+                    const isExpired = await cacheService.isExpired(cacheKey);
 
-                return {
-                    ...acc,
-                    [exerciseId]: logs.reduce(
+                    if (cached && !isExpired) {
+                        cachedRecentLogs[exerciseId] = cached;
+                        cachedExercises.push(exerciseId);
+                        console.log(`Loaded recent logs for ${exerciseId} from cache`);
+                    } else {
+                        apiExercises.push(exerciseId);
+                    }
+                }
+            } else {
+                apiExercises.push(...uncachedExercises);
+            }
+
+            // Fetch uncached exercises from API
+            let apiRecentLogs: any = {};
+            if (apiExercises.length > 0) {
+                console.log(`Loading recent logs from API for: ${apiExercises.join(', ')}`);
+                const recentHistoryPromises = apiExercises.map((exerciseId) => ExerciseProgressService.getExerciseHistory(userId, exerciseId, { limit: 10 }));
+                const recentHistories = await Promise.all(recentHistoryPromises);
+
+                // Transform the response to object structure
+                apiRecentLogs = apiExercises.reduce((acc, exerciseId, index) => {
+                    const history = recentHistories[index];
+                    // Handle if history is array or object
+                    const logs = Array.isArray(history) ? history : Object.values(history);
+
+                    const exerciseLogs = logs.reduce(
                         (logAcc, log) => ({
                             ...logAcc,
                             [log.ExerciseLogId]: log,
                         }),
                         {},
-                    ),
-                };
-            }, {});
+                    );
+
+                    // Cache the result if useCache is enabled
+                    if (useCache) {
+                        const cacheKey = `recent_logs_${userId}_${exerciseId}`;
+                        cacheService.set(cacheKey, exerciseLogs, CacheTTL.LONG);
+                    }
+
+                    return {
+                        ...acc,
+                        [exerciseId]: exerciseLogs,
+                    };
+                }, {});
+            }
+
+            // Combine cached and API results
+            const recentLogs = { ...cachedRecentLogs, ...apiRecentLogs };
 
             return { recentLogs };
         } catch (error) {
@@ -131,11 +203,24 @@ export const saveExerciseProgressAsync = createAsyncThunk(
 
             const log = await ExerciseProgressService.saveExerciseProgress(userId, exerciseId, date, sets);
 
+            // Invalidate relevant caches after saving
+            const isTracked = isLongTermTrackedLift(exerciseId);
+
+            // Clear cache for this exercise's recent logs
+            const recentLogsCacheKey = `recent_logs_${userId}_${exerciseId}`;
+            await cacheService.remove(recentLogsCacheKey);
+
+            // If it's a tracked lift, also clear the tracked lifts history cache
+            if (isTracked) {
+                const trackedHistoryCacheKey = `tracked_lifts_history_${userId}`;
+                await cacheService.remove(trackedHistoryCacheKey);
+            }
+
             return {
                 exerciseId,
                 date,
                 log,
-                isTrackedLift: isLongTermTrackedLift(exerciseId),
+                isTrackedLift: isTracked,
             };
         } catch (error: any) {
             // Pass the specific error message up
@@ -165,10 +250,23 @@ export const deleteExerciseLogAsync = createAsyncThunk(
 
             await ExerciseProgressService.deleteExerciseLog(userId, exerciseId, date);
 
+            // Invalidate relevant caches after deletion
+            const isTracked = isLongTermTrackedLift(exerciseId);
+
+            // Clear cache for this exercise's recent logs
+            const recentLogsCacheKey = `recent_logs_${userId}_${exerciseId}`;
+            await cacheService.remove(recentLogsCacheKey);
+
+            // If it's a tracked lift, also clear the tracked lifts history cache
+            if (isTracked) {
+                const trackedHistoryCacheKey = `tracked_lifts_history_${userId}`;
+                await cacheService.remove(trackedHistoryCacheKey);
+            }
+
             return {
                 exerciseId,
                 date,
-                isTrackedLift: isLongTermTrackedLift(exerciseId),
+                isTrackedLift: isTracked,
             };
         } catch (error) {
             return rejectWithValue({

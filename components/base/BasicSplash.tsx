@@ -36,7 +36,7 @@ export const BasicSplash: React.FC<BasicSplashProps> = ({ isDataLoaded = false, 
             <Image source={require('@/assets/icons/splash-icon-dark.png')} style={styles.splash} resizeMode='contain' />
             {showLoadingText && (
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size='large' color={themeColors.text} />
+                    <ActivityIndicator size='small' color={themeColors.subText} />
                     <ThemedText style={styles.text}>Loading...</ThemedText>
                 </View>
             )}
@@ -60,8 +60,7 @@ const styles = StyleSheet.create({
         height: '100%',
     },
     loadingContainer: {
-        position: 'absolute',
-        bottom: 100,
+        marginTop: Spaces.XXL,
         alignItems: 'center',
     },
     text: {

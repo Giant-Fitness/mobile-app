@@ -7,18 +7,6 @@
         "icon": "./assets/icons/ios-dark.png",
         "scheme": "giantfitness",
         "userInterfaceStyle": "automatic",
-        "splash": {
-            "image": "./assets/icons/splash-icon-dark.png",
-            "resizeMode": "contain",
-            "imageWidth": 200,
-            "backgroundColor": "#fcfffc",
-            "dark": {
-                "image": "./assets/icons/splash-icon-light.png",
-                "resizeMode": "contain",
-                "imageWidth": 200,
-                "backgroundColor": "#090909"
-            }
-        },
         "ios": {
             "googleServicesFile": "./GoogleService-Info.plist",
             "supportsTablet": false,
@@ -32,7 +20,8 @@
                 "NSUserNotificationUsageDescription": "We'll send you notifications about your workouts and updates.",
                 "UIRequiredDeviceCapabilities": ["arm64"],
                 "ITSAppUsesNonExemptEncryption": false,
-                "UIBackgroundModes": ["fetch", "remote-notification"]
+                "UIBackgroundModes": ["fetch", "remote-notification"],
+                "UILaunchStoryboardName": "SplashScreen"
             }
         },
         "android": {
@@ -50,7 +39,26 @@
                 }
             ]
         },
-        "plugins": ["expo-router", "expo-notifications", "expo-camera", "expo-font", "expo-secure-store", "expo-localization"],
+        "plugins": [
+            "expo-router",
+            "expo-notifications", 
+            "expo-camera",
+            "expo-font",
+            "expo-secure-store",
+            "expo-localization",
+            [
+                "expo-splash-screen",
+                {
+                    "backgroundColor": "#fcfffc",
+                    "image": "./assets/icons/splash-icon-dark.png",
+                    "dark": {
+                        "backgroundColor": "#090909",
+                        "image": "./assets/icons/splash-icon-light.png"
+                    },
+                    "imageWidth": 200
+                }
+            ]
+        ],
         "experiments": {
             "typedRoutes": true
         },

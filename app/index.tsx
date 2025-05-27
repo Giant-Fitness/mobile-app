@@ -8,11 +8,12 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/store/store';
 import { getUserAsync } from '@/store/user/thunks';
 import { configureAmplify } from '@/config/amplify';
-import { BasicSplash } from '@/components/base/BasicSplash';
+import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 
 export default function Index() {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
     const [userHasName, setUserHasName] = useState<boolean | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
     const dispatch = useDispatch<AppDispatch>();
 
     // Initialize Amplify first
@@ -28,11 +29,13 @@ export default function Index() {
                 setIsAuthenticated(sessionAuthenticated);
 
                 if (sessionAuthenticated) {
-                    const resultAction = await dispatch(getUserAsync());
+                    // Use cache-aware getUserAsync for faster startup
+                    const resultAction = await dispatch(getUserAsync({ useCache: true }));
                     if (getUserAsync.fulfilled.match(resultAction)) {
                         const userData = resultAction.payload;
                         if (!userData) {
                             setIsAuthenticated(false);
+                            setIsLoading(false);
                             return;
                         }
                         setUserHasName(!!userData.FirstName);
@@ -40,9 +43,11 @@ export default function Index() {
                         setIsAuthenticated(false);
                     }
                 }
+                setIsLoading(false);
             } catch (error) {
                 console.log(error);
                 setIsAuthenticated(false);
+                setIsLoading(false);
             }
         };
 
@@ -51,7 +56,7 @@ export default function Index() {
 
     // Separate effect for handling navigation based on auth state
     useEffect(() => {
-        if (isAuthenticated === null || userHasName === null) {
+        if (isLoading) {
             return; // Still loading
         }
         if (isAuthenticated === false) {
@@ -65,17 +70,13 @@ export default function Index() {
             router.replace('/(app)/initialization');
             return;
         }
-    }, [isAuthenticated, userHasName]);
+    }, [isAuthenticated, userHasName, isLoading]);
 
     // Render logic
-    if (isAuthenticated === false) {
+    if (isAuthenticated === false && !isLoading) {
         return <WelcomeScreens />;
     }
 
-    if (isAuthenticated === null || userHasName === null) {
-        return <BasicSplash showLoadingText={false} />;
-    }
-
-    // Return null as navigation will be handled by the effect
-    return <BasicSplash showLoadingText={false} />;
+    // Show loading splash while authenticating or fetching user data
+    return <DumbbellSplash isDataLoaded={!isLoading} showLoadingText={false} />;
 }
