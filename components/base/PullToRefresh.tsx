@@ -1,9 +1,10 @@
 // components/base/PullToRefresh.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, ViewStyle, View, FlatList } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useFocusEffect } from '@react-navigation/native';
 import Animated from 'react-native-reanimated';
 
 interface PullToRefreshProps {
@@ -31,19 +32,85 @@ const PullToRefresh: React.FC<PullToRefreshProps> = ({
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
+    // Refs to track scroll state and prevent stuck animations
+    const scrollViewRef = useRef<ScrollView>(null);
+    const isNavigatingAway = useRef(false);
+    const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const resetTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Handle focus/blur to reset stuck animations
+    useFocusEffect(
+        useCallback(() => {
+            isNavigatingAway.current = false;
+
+            // If we were stuck in refreshing state, reset it
+            if (refreshing) {
+                // Small delay to allow any pending operations to complete
+                resetTimeoutRef.current = setTimeout(() => {
+                    setRefreshing(false);
+                }, 100);
+            }
+
+            return () => {
+                isNavigatingAway.current = true;
+
+                // Clear any pending timeouts
+                if (refreshTimeoutRef.current) {
+                    clearTimeout(refreshTimeoutRef.current);
+                    refreshTimeoutRef.current = null;
+                }
+                if (resetTimeoutRef.current) {
+                    clearTimeout(resetTimeoutRef.current);
+                    resetTimeoutRef.current = null;
+                }
+
+                // Force reset the refresh state when navigating away
+                // This prevents the stuck animation issue
+                if (refreshing) {
+                    setRefreshing(false);
+                }
+
+                // Try to reset scroll position to prevent visual artifacts
+                if (scrollViewRef.current) {
+                    try {
+                        scrollViewRef.current.scrollTo({ y: 0, animated: false });
+                    } catch (error) {
+                        // Ignore errors if ScrollView is already unmounted
+                        console.log(error);
+                    }
+                }
+            };
+        }, [refreshing]),
+    );
+
     const handleRefresh = async () => {
-        if (refreshing) return;
+        // Prevent refresh if we're navigating away or already refreshing
+        if (refreshing || isNavigatingAway.current) return;
+
         setRefreshing(true);
+
         try {
             await onRefresh();
         } catch (error) {
             console.error('Refresh error:', error);
         } finally {
-            setRefreshing(false);
+            // Only reset refreshing state if we're still on this screen
+            if (!isNavigatingAway.current) {
+                // Add a small delay to ensure smooth animation completion
+                refreshTimeoutRef.current = setTimeout(() => {
+                    if (!isNavigatingAway.current) {
+                        setRefreshing(false);
+                    }
+                    refreshTimeoutRef.current = null;
+                }, 300);
+            } else {
+                // If we're navigating away, reset immediately
+                setRefreshing(false);
+            }
         }
     };
 
-    // Create the refresh control that we'll use in both cases
+    // Enhanced refresh control with better state management
     const refreshControl = (
         <RefreshControl
             refreshing={refreshing}
@@ -53,6 +120,7 @@ const PullToRefresh: React.FC<PullToRefreshProps> = ({
             title='' // For iOS
             titleColor={themeColors.subText} // For iOS
             progressViewOffset={headerHeight}
+            progressBackgroundColor={themeColors.background} // For Android
         />
     );
 
@@ -95,10 +163,15 @@ const PullToRefresh: React.FC<PullToRefreshProps> = ({
         // If no direct FlatList, proceed with native ScrollView
         return (
             <ScrollView
+                ref={scrollViewRef}
                 style={[styles.container, style]}
                 contentContainerStyle={[styles.contentContainer, contentContainerStyle]}
                 refreshControl={refreshControl}
                 showsVerticalScrollIndicator={false}
+                // Add these props to improve scroll behavior
+                bounces={true} // Enable bouncing for iOS
+                alwaysBounceVertical={true} // Always allow vertical bounce on iOS
+                scrollEventThrottle={16} // Smooth scrolling
             >
                 {children}
             </ScrollView>
@@ -128,6 +201,12 @@ const PullToRefresh: React.FC<PullToRefreshProps> = ({
             return React.cloneElement(child, {
                 refreshControl,
                 scrollEnabled: disableChildrenScrolling ? false : child.props.scrollEnabled !== false,
+                // Add ref if it's a regular ScrollView
+                ...(child.type === ScrollView && { ref: scrollViewRef }),
+                // Add bounce properties for better behavior
+                bounces: true,
+                alwaysBounceVertical: true,
+                scrollEventThrottle: 16,
                 ...child.props,
             });
         }

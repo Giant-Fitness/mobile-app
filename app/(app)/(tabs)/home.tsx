@@ -1,10 +1,10 @@
 // app/(app)/(tabs)/home.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { StyleSheet, View, Platform } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { useFocusEffect } from '@react-navigation/native';
 import { ThemedText } from '@/components/base/ThemedText';
-import { ThemedView } from '@/components/base/ThemedView';
 import { ActiveProgramDayCompressedCard } from '@/components/programs/ActiveProgramDayCompressedCard';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
@@ -43,6 +43,7 @@ import { getUserAppSettingsAsync } from '@/store/user/thunks';
 import { getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/thunks';
 import { ScrollView } from 'react-native';
 import { debounce } from '@/utils/debounce';
+import { ThemedView } from '@/components/base/ThemedView';
 
 export default function HomeScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -53,6 +54,11 @@ export default function HomeScreen() {
     const [isSleepSheetVisible, setIsSleepSheetVisible] = useState(false);
     const [isBodyMeasurementsSheetVisible, setIsBodyMeasurementsSheetVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+
+    // Ref to track if component is mounted and focused
+    const isMountedAndFocused = useRef(true);
+    const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const { user, userProgramProgress, hasCompletedWorkoutToday } = useProgramData();
     const { userWeightMeasurements } = useSelector((state: RootState) => state.user);
@@ -60,6 +66,26 @@ export default function HomeScreen() {
     const { userBodyMeasurements } = useSelector((state: RootState) => state.user);
 
     const isFitnessOnboardingComplete = user?.OnboardingStatus?.fitness === true;
+
+    // Handle focus/blur events to manage refresh state
+    useFocusEffect(
+        useCallback(() => {
+            isMountedAndFocused.current = true;
+
+            return () => {
+                isMountedAndFocused.current = false;
+                // Clear any pending refresh timeout
+                if (refreshTimeoutRef.current) {
+                    clearTimeout(refreshTimeoutRef.current);
+                    refreshTimeoutRef.current = null;
+                }
+                // Reset refresh state when leaving screen
+                if (isRefreshing) {
+                    setIsRefreshing(false);
+                }
+            };
+        }, [isRefreshing]),
+    );
 
     const handleLogWeight = async (weight: number, date: Date) => {
         setIsLoading(true);
@@ -76,7 +102,9 @@ export default function HomeScreen() {
         } catch (error) {
             console.error('Failed to log weight:', error);
         } finally {
-            setIsLoading(false);
+            if (isMountedAndFocused.current) {
+                setIsLoading(false);
+            }
         }
     };
 
@@ -93,9 +121,11 @@ export default function HomeScreen() {
             // Refresh measurements after logging
             await dispatch(getSleepMeasurementsAsync()).unwrap();
         } catch (error) {
-            console.error('Failed to log weight:', error);
+            console.error('Failed to log sleep:', error);
         } finally {
-            setIsLoading(false);
+            if (isMountedAndFocused.current) {
+                setIsLoading(false);
+            }
         }
     };
 
@@ -114,7 +144,9 @@ export default function HomeScreen() {
         } catch (error) {
             console.error('Failed to log body measurements:', error);
         } finally {
-            setIsLoading(false);
+            if (isMountedAndFocused.current) {
+                setIsLoading(false);
+            }
         }
     };
 
@@ -143,10 +175,16 @@ export default function HomeScreen() {
     };
 
     const handleRefresh = async () => {
+        // Prevent multiple simultaneous refreshes
+        if (isRefreshing) return;
+
+        setIsRefreshing(true);
+
         try {
             await dispatch(getUserAsync());
             if (user?.UserId) {
                 await Promise.all([
+                    dispatch(getUserAsync({forceRefresh: true})),
                     dispatch(getUserFitnessProfileAsync({ forceRefresh: true })),
                     dispatch(getUserProgramProgressAsync({ forceRefresh: true })),
                     dispatch(getUserRecommendationsAsync({ forceRefresh: true })),
@@ -167,6 +205,14 @@ export default function HomeScreen() {
             }
         } catch (error) {
             console.error('Refresh failed:', error);
+        } finally {
+            // Add a small delay to ensure smooth animation completion
+            refreshTimeoutRef.current = setTimeout(() => {
+                if (isMountedAndFocused.current) {
+                    setIsRefreshing(false);
+                }
+                refreshTimeoutRef.current = null;
+            }, 300);
         }
     };
 
@@ -205,13 +251,6 @@ export default function HomeScreen() {
             backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.7),
             textColor: darkenColor(themeColors.tangerineSolid, 0.2),
         },
-        // {
-        //     title: 'Capture Progress',
-        //     image: require('@/assets/images/camera.png'),
-        //     onPress: () => console.log('ProgressPhotos'),
-        //     backgroundColor: themeColors.tangerineTransparent,
-        //     textColor: darkenColor(themeColors.tangerineSolid, 0.3),
-        // },
         {
             title: 'Track Waist',
             image: require('@/assets/images/measure.png'),
@@ -226,13 +265,6 @@ export default function HomeScreen() {
             backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.7),
             textColor: darkenColor(themeColors.tangerineSolid, 0.2),
         },
-        // {
-        //     title: 'Why Kyn?',
-        //     image: require('@/assets/images/skipping-rope.png'),
-        //     onPress: () => debounce(router, '/(app)/blog/why-kyn'),
-        //     backgroundColor: themeColors.maroonTransparent,
-        //     textColor: darkenColor(themeColors.maroonSolid, 0.3),
-        // },
     ];
 
     const renderForYouSection = (reorderTiles = false) => {
@@ -362,51 +394,43 @@ export default function HomeScreen() {
     };
 
     return (
-        <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
-            <PullToRefresh
-                onRefresh={handleRefresh}
-                style={styles.scrollContainer}
-                contentContainerStyle={{ paddingBottom: Spaces.XL }}
-                useNativeScrollView={true}
-            >
+        <PullToRefresh onRefresh={handleRefresh} style={{ ...styles.container }} useNativeScrollView={true}>
+            <ThemedView style={{ paddingBottom: Spaces.SM }}>
                 {renderContent()}
-            </PullToRefresh>
 
-            <WeightLoggingSheet
-                visible={isWeightSheetVisible}
-                onClose={() => setIsWeightSheetVisible(false)}
-                onSubmit={handleLogWeight}
-                onDelete={handleWeightDelete}
-                isLoading={isLoading}
-                getExistingData={getExistingWeightData}
-            />
+                <WeightLoggingSheet
+                    visible={isWeightSheetVisible}
+                    onClose={() => setIsWeightSheetVisible(false)}
+                    onSubmit={handleLogWeight}
+                    onDelete={handleWeightDelete}
+                    isLoading={isLoading}
+                    getExistingData={getExistingWeightData}
+                />
 
-            <SleepLoggingSheet
-                visible={isSleepSheetVisible}
-                onClose={() => setIsSleepSheetVisible(false)}
-                onSubmit={handleLogSleep}
-                onDelete={handleSleepDelete}
-                getExistingData={getExistingSleepData}
-            />
+                <SleepLoggingSheet
+                    visible={isSleepSheetVisible}
+                    onClose={() => setIsSleepSheetVisible(false)}
+                    onSubmit={handleLogSleep}
+                    onDelete={handleSleepDelete}
+                    getExistingData={getExistingSleepData}
+                />
 
-            <BodyMeasurementsLoggingSheet
-                visible={isBodyMeasurementsSheetVisible}
-                onClose={() => setIsBodyMeasurementsSheetVisible(false)}
-                onSubmit={handleLogBodyMeasurements}
-                onDelete={handleBodyMeasurementsDelete}
-                isLoading={isLoading}
-                getExistingData={getExistingBodyMeasurementsData}
-            />
-        </ThemedView>
+                <BodyMeasurementsLoggingSheet
+                    visible={isBodyMeasurementsSheetVisible}
+                    onClose={() => setIsBodyMeasurementsSheetVisible(false)}
+                    onSubmit={handleLogBodyMeasurements}
+                    onDelete={handleBodyMeasurementsDelete}
+                    isLoading={isLoading}
+                    getExistingData={getExistingBodyMeasurementsData}
+                />
+            </ThemedView>
+        </PullToRefresh>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-    },
-    scrollContainer: {
-        width: '100%',
     },
     greeting: {
         ...Platform.select({
