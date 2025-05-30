@@ -1,7 +1,7 @@
 // app/(app)/(tabs)/home.tsx
 
 import React, { useState, useRef, useCallback } from 'react';
-import { StyleSheet, View, Platform } from 'react-native';
+import { StyleSheet, View, Platform, RefreshControl } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFocusEffect } from '@react-navigation/native';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -34,7 +34,6 @@ import {
 } from '@/store/user/thunks';
 import { AppDispatch, RootState } from '@/store/store';
 import { WorkoutCompletedSection } from '@/components/programs/WorkoutCompletedSection';
-import PullToRefresh from '@/components/base/PullToRefresh';
 import { router } from 'expo-router';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
 import { getSpotlightWorkoutsAsync, getAllWorkoutsAsync } from '@/store/workouts/thunks';
@@ -184,7 +183,7 @@ export default function HomeScreen() {
             await dispatch(getUserAsync());
             if (user?.UserId) {
                 await Promise.all([
-                    dispatch(getUserAsync({forceRefresh: true})),
+                    dispatch(getUserAsync({ forceRefresh: true })),
                     dispatch(getUserFitnessProfileAsync({ forceRefresh: true })),
                     dispatch(getUserProgramProgressAsync({ forceRefresh: true })),
                     dispatch(getUserRecommendationsAsync({ forceRefresh: true })),
@@ -212,7 +211,7 @@ export default function HomeScreen() {
                     setIsRefreshing(false);
                 }
                 refreshTimeoutRef.current = null;
-            }, 300);
+            }, 200);
         }
     };
 
@@ -394,7 +393,14 @@ export default function HomeScreen() {
     };
 
     return (
-        <PullToRefresh onRefresh={handleRefresh} style={{ ...styles.container }} useNativeScrollView={true}>
+        <ScrollView
+            showsVerticalScrollIndicator={false}
+            overScrollMode='never'
+            refreshControl={
+                <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[themeColors.iconSelected]} tintColor={themeColors.iconSelected} />
+            }
+            style={{ ...styles.container }}
+        >
             <ThemedView style={{ paddingBottom: Spaces.SM }}>
                 {renderContent()}
 
@@ -424,7 +430,7 @@ export default function HomeScreen() {
                     getExistingData={getExistingBodyMeasurementsData}
                 />
             </ThemedView>
-        </PullToRefresh>
+        </ScrollView>
     );
 }
 

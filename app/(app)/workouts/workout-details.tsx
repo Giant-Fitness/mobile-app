@@ -1,7 +1,7 @@
 // app/(app)/workouts/workout-details.tsx
 
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { RefreshControl, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useSelector, useDispatch } from 'react-redux';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -25,11 +25,11 @@ import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { SlideUpActionButton } from '@/components/buttons/SlideUpActionButton';
 import { AVPlaybackStatus } from 'expo-av';
 import { usePostHog } from 'posthog-react-native';
-import PullToRefresh from '@/components/base/PullToRefresh';
 
 export default function WorkoutDetailScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const [refreshing, setRefreshing] = useState(false);
     const [isVideoLoading, setIsVideoLoading] = useState(false);
     const [videoDuration, setVideoDuration] = useState<number | null>(null);
     const posthog = usePostHog();
@@ -91,7 +91,11 @@ export default function WorkoutDetailScreen() {
 
     const handleRefresh = async () => {
         try {
+            setRefreshing(true);
             await dispatch(getWorkoutAsync({ workoutId, forceRefresh: true })).unwrap();
+            setTimeout(() => {
+                setRefreshing(false);
+            }, 200);
         } catch (err) {
             console.log('Refresh error:', err);
         }
@@ -187,101 +191,100 @@ export default function WorkoutDetailScreen() {
     return (
         <ThemedView style={styles.container}>
             <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Spaces.XXL} headerInterpolationEnd={Sizes.imageLGHeight} />
-            <PullToRefresh
-                onRefresh={handleRefresh}
-                headerHeight={Spaces.LG}
-                style={styles.pullToRefreshContainer}
-                useNativeScrollView={false}
-                disableChildrenScrolling={false}
+            <Animated.ScrollView
+                contentContainerStyle={{ flexGrow: 1 }}
+                showsVerticalScrollIndicator={false}
+                overScrollMode='never'
+                onScroll={scrollHandler}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={handleRefresh}
+                        colors={[themeColors.iconSelected]}
+                        tintColor={themeColors.iconSelected}
+                    />
+                }
             >
-                <Animated.ScrollView
-                    contentContainerStyle={{ flexGrow: 1 }}
-                    showsVerticalScrollIndicator={false}
-                    overScrollMode='never'
-                    onScroll={scrollHandler}
-                    scrollEventThrottle={16}
-                >
-                    <TopImageInfoCard
-                        image={{ uri: PhotoUrl }}
-                        title={WorkoutName}
-                        titleType='titleLarge'
-                        titleStyle={{ marginBottom: Spaces.XS }}
-                        containerStyle={{ elevation: 5, marginBottom: 0 }}
-                        contentContainerStyle={{
-                            backgroundColor: themeColors.background,
-                            paddingHorizontal: Spaces.LG,
-                        }}
-                        imageStyle={{ height: Sizes.image3XLHeight }}
-                        titleFirst={true}
-                        extraContent={
-                            <ThemedView>
-                                {/* Attributes in a Row */}
-                                <ThemedView style={[styles.attributeRow]}>
-                                    {/* Attribute 1: Length */}
-                                    <View style={styles.attributeItem}>
-                                        <Icon name='stopwatch' color={themeColors.text} />
-                                        <ThemedText type='buttonSmall' style={[styles.attributeText]}>
-                                            {Time} mins
-                                        </ThemedText>
-                                    </View>
+                <TopImageInfoCard
+                    image={{ uri: PhotoUrl }}
+                    title={WorkoutName}
+                    titleType='titleLarge'
+                    titleStyle={{ marginBottom: Spaces.XS }}
+                    containerStyle={{ elevation: 5, marginBottom: 0 }}
+                    contentContainerStyle={{
+                        backgroundColor: themeColors.background,
+                        paddingHorizontal: Spaces.LG,
+                    }}
+                    imageStyle={{ height: Sizes.image3XLHeight }}
+                    titleFirst={true}
+                    extraContent={
+                        <ThemedView>
+                            {/* Attributes in a Row */}
+                            <ThemedView style={[styles.attributeRow]}>
+                                {/* Attribute 1: Length */}
+                                <View style={styles.attributeItem}>
+                                    <Icon name='stopwatch' color={themeColors.text} />
+                                    <ThemedText type='buttonSmall' style={[styles.attributeText]}>
+                                        {Time} mins
+                                    </ThemedText>
+                                </View>
 
-                                    {/* Attribute 2: Level */}
-                                    <View style={styles.attributeItem}>
-                                        <Icon name={levelIcon} size={verticalScale(12)} color={themeColors.text} />
-                                        <ThemedText type='buttonSmall' style={[styles.attributeText]}>
-                                            {Level}
-                                        </ThemedText>
-                                    </View>
+                                {/* Attribute 2: Level */}
+                                <View style={styles.attributeItem}>
+                                    <Icon name={levelIcon} size={verticalScale(12)} color={themeColors.text} />
+                                    <ThemedText type='buttonSmall' style={[styles.attributeText]}>
+                                        {Level}
+                                    </ThemedText>
+                                </View>
 
-                                    {/* Attribute 3: Equipment */}
-                                    <View style={styles.attributeItem}>
-                                        <Icon name='kettlebell' color={themeColors.text} />
-                                        <ThemedText type='buttonSmall' style={[styles.attributeText]}>
-                                            {EquipmentCategory}
-                                        </ThemedText>
-                                    </View>
+                                {/* Attribute 3: Equipment */}
+                                <View style={styles.attributeItem}>
+                                    <Icon name='kettlebell' color={themeColors.text} />
+                                    <ThemedText type='buttonSmall' style={[styles.attributeText]}>
+                                        {EquipmentCategory}
+                                    </ThemedText>
+                                </View>
 
-                                    {/* Attribute 4: Focus */}
-                                    <View style={styles.attributeItem}>
-                                        <Icon name='yoga' color={themeColors.text} />
-                                        <ThemedText type='buttonSmall' style={[styles.attributeText]}>
-                                            {targetMuscles}
-                                        </ThemedText>
-                                    </View>
-                                </ThemedView>
+                                {/* Attribute 4: Focus */}
+                                <View style={styles.attributeItem}>
+                                    <Icon name='yoga' color={themeColors.text} />
+                                    <ThemedText type='buttonSmall' style={[styles.attributeText]}>
+                                        {targetMuscles}
+                                    </ThemedText>
+                                </View>
                             </ThemedView>
-                        }
-                    />
-                    <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.backgroundTertiary }]}>
-                        {/* Description Container */}
-                        <ThemedView style={[styles.descriptionContainer, { backgroundColor: themeColors.background }]}>
-                            <ThemedText type='button' style={{ color: themeColors.text, paddingBottom: Spaces.MD }}>
-                                What to Expect
-                            </ThemedText>
-                            <ThemedText type='body' style={[{ color: themeColors.text }]}>
-                                {DescriptionLong}
-                            </ThemedText>
                         </ThemedView>
-                    </ThemedView>
-                </Animated.ScrollView>
-                <FullScreenVideoPlayer
-                    ref={videoPlayerRef}
-                    source={{ uri: VideoUrl }}
-                    onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
-                    onDismiss={handleDismiss}
+                    }
                 />
-                <SlideUpActionButton scrollY={scrollY} slideUpThreshold={0}>
-                    <PrimaryButton
-                        text='Start Workout'
-                        textType='bodyMedium'
-                        style={styles.startButton}
-                        onPress={handleStartWorkout}
-                        size='LG'
-                        loading={isVideoLoading}
-                        disabled={isVideoLoading}
-                    />
-                </SlideUpActionButton>
-            </PullToRefresh>
+                <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.backgroundTertiary }]}>
+                    {/* Description Container */}
+                    <ThemedView style={[styles.descriptionContainer, { backgroundColor: themeColors.background }]}>
+                        <ThemedText type='button' style={{ color: themeColors.text, paddingBottom: Spaces.MD }}>
+                            What to Expect
+                        </ThemedText>
+                        <ThemedText type='body' style={[{ color: themeColors.text }]}>
+                            {DescriptionLong}
+                        </ThemedText>
+                    </ThemedView>
+                </ThemedView>
+            </Animated.ScrollView>
+            <FullScreenVideoPlayer
+                ref={videoPlayerRef}
+                source={{ uri: VideoUrl }}
+                onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+                onDismiss={handleDismiss}
+            />
+            <SlideUpActionButton scrollY={scrollY} slideUpThreshold={0}>
+                <PrimaryButton
+                    text='Start Workout'
+                    textType='bodyMedium'
+                    style={styles.startButton}
+                    onPress={handleStartWorkout}
+                    size='LG'
+                    loading={isVideoLoading}
+                    disabled={isVideoLoading}
+                />
+            </SlideUpActionButton>
         </ThemedView>
     );
 }

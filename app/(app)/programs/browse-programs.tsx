@@ -1,7 +1,7 @@
 // app/(app)/programs/browse-programs.tsx
 
-import React, { useEffect, useCallback, useMemo } from 'react';
-import { FlatList, StyleSheet, View, Image } from 'react-native';
+import React, { useEffect, useCallback, useMemo, useState } from 'react';
+import { FlatList, StyleSheet, View, Image, RefreshControl } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -21,7 +21,6 @@ import { darkenColor } from '@/utils/colorUtils';
 import { useSharedValue } from 'react-native-reanimated';
 import { router } from 'expo-router';
 import { Program } from '@/types/programTypes';
-import PullToRefresh from '@/components/base/PullToRefresh';
 
 const MemoizedProgramCard = React.memo(ProgramCard);
 
@@ -83,12 +82,17 @@ export default function BrowseProgramsScreen() {
 
     const { userProgramProgress, userRecommendations } = useProgramData();
     const { programs, allProgramsState } = useSelector((state: RootState) => state.programs);
+    const [refreshing, setRefreshing] = useState(false);
 
     const handleRefresh = async () => {
         try {
+            setRefreshing(true);
             await dispatch(getAllProgramsAsync({ forceRefresh: true }));
-        } catch (error) {
-            console.error('Failed to refresh programs:', error);
+            setTimeout(() => {
+                setRefreshing(false);
+            }, 200);
+        } catch (err) {
+            console.log('Refresh error:', err);
         }
     };
 
@@ -181,31 +185,34 @@ export default function BrowseProgramsScreen() {
                         <DumbbellSplash isDataLoaded={allProgramsState === REQUEST_STATE.FULFILLED} />
                     </View>
                 ) : (
-                    <PullToRefresh
-                        onRefresh={handleRefresh}
-                        style={styles.pullToRefreshContainer}
-                        contentContainerStyle={styles.pullToRefreshContent}
-                        useNativeScrollView={false}
-                        disableChildrenScrolling={false}
-                    >
-                        <View style={{ paddingTop: Sizes.headerHeight }}>
-                            <FlatList
-                                data={programList}
-                                renderItem={renderItem}
-                                keyExtractor={keyExtractor}
-                                ListHeaderComponent={renderHeader}
-                                contentContainerStyle={[
-                                    styles.contentContainer,
-                                    { backgroundColor: themeColors.background },
-                                    userProgramProgress?.ProgramId || userRecommendations?.RecommendedProgramID ? { paddingBottom: Spaces.XXL } : undefined,
-                                ]}
-                                showsVerticalScrollIndicator={false}
-                                maxToRenderPerBatch={10}
-                                updateCellsBatchingPeriod={50}
-                                windowSize={5}
-                            />
-                        </View>
-                    </PullToRefresh>
+                    <View style={{ paddingTop: Sizes.headerHeight }}>
+                        <FlatList
+                            data={programList}
+                            renderItem={renderItem}
+                            keyExtractor={keyExtractor}
+                            ListHeaderComponent={renderHeader}
+                            contentContainerStyle={[
+                                styles.contentContainer,
+                                { backgroundColor: themeColors.background },
+                                userProgramProgress?.ProgramId || userRecommendations?.RecommendedProgramID ? { paddingBottom: Spaces.XXL } : undefined,
+                            ]}
+                            showsVerticalScrollIndicator={false}
+                            removeClippedSubviews={false} // Set to false to keep items mounted
+                            maxToRenderPerBatch={20} // Increase this significantly
+                            updateCellsBatchingPeriod={50} // Decrease to update UI more frequently
+                            initialNumToRender={10} // Show more items initially
+                            windowSize={21} // Increase window size (each unit is about 1 viewport height)
+                            onEndReachedThreshold={0.5}
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={refreshing}
+                                    onRefresh={handleRefresh}
+                                    colors={[themeColors.iconSelected]}
+                                    tintColor={themeColors.iconSelected}
+                                />
+                            }
+                        />
+                    </View>
                 )}
             </View>
         </ThemedView>
