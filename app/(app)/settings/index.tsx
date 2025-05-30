@@ -55,7 +55,6 @@ const SettingItem = ({ text, onPress, iconName }: SettingItemProps) => {
 
 const SettingsIndex = () => {
     const dispatch = useDispatch();
-    const BYPASS_AUTH = false;
     const scrollY = useSharedValue(0);
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -63,49 +62,49 @@ const SettingsIndex = () => {
     const posthog = usePostHog();
 
     const handleSignOut = async () => {
-        if (BYPASS_AUTH) {
-            router.replace('/');
-        } else {
+        try {
+            // Capture analytics event
+            posthog.capture('sign_out_clicked');
+            posthog.reset();
+
+            const success = await authService.signOut();
+
+            // Clear store state (this now also clears cache via authService.clearAuthData)
+            await dispatch(resetStore());
+
+            // Navigate to welcome screen with a slight delay to ensure cleanup
+            setTimeout(() => {
+                router.replace('/');
+            }, 100);
+
+            if (!success) {
+                // If sign out failed through normal channels, still ensure local cleanup
+                console.warn('Sign out through Amplify failed, but local state and cache have been cleared');
+            }
+        } catch (error: unknown) {
+            console.error('Error during sign out process:', error);
+
+            // Even on error, ensure complete cleanup
             try {
-                // Capture analytics event
-                posthog.capture('sign_out_clicked');
-                posthog.reset();
-
-                const success = await authService.signOut();
-
-                // Clear store state regardless of signOut result
+                // This will clear both auth data AND cache
+                await authService.clearAuthData();
                 await dispatch(resetStore());
 
-                // Navigate to welcome screen with a slight delay to ensure cleanup
                 setTimeout(() => {
                     router.replace('/');
                 }, 100);
 
-                if (!success) {
-                    // If sign out failed through normal channels, still ensure local cleanup
-                    console.warn('Sign out through Amplify failed, but local state has been cleared');
-                }
-            } catch (error: unknown) {
-                console.error('Error during sign out process:', error);
-
-                // Even on error, clean up local state and redirect
-                try {
-                    await authService.clearAuthData();
-                    await dispatch(resetStore());
-                    setTimeout(() => {
-                        router.replace('/');
-                    }, 100);
-                } catch (cleanupError: unknown) {
-                    const errorMessage =
-                        error instanceof Error
+                console.log('Fallback cleanup completed - auth data, cache, and Redux store cleared');
+            } catch (cleanupError: unknown) {
+                const errorMessage =
+                    error instanceof Error
+                        ? error.message
                             ? error.message
-                                ? error.message
-                                : cleanupError instanceof Error
-                                ? cleanupError.message
-                                : 'An unexpected error occurred'
-                            : 'An unexpected error occurred';
-                    Alert.alert('Sign out Error', errorMessage);
-                }
+                            : cleanupError instanceof Error
+                            ? cleanupError.message
+                            : 'An unexpected error occurred'
+                        : 'An unexpected error occurred';
+                Alert.alert('Sign out Error', errorMessage);
             }
         }
     };
