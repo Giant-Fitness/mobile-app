@@ -687,6 +687,7 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
                                                     const isSelected = isSameDay(date, selectedDate);
                                                     const isFutureDate = date > new Date();
                                                     const isDisabled = isFutureDate || !isCurrentMonth;
+                                                    const hasEntry = getExistingData ? getExistingData(date) !== undefined : false;
 
                                                     return (
                                                         <TouchableOpacity
@@ -701,6 +702,12 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
                                                                 isSelected && {
                                                                     backgroundColor: themeColors.text,
                                                                 },
+                                                                hasEntry &&
+                                                                    !isSelected &&
+                                                                    isCurrentMonth && {
+                                                                        borderColor: lightenColor(themeColors.text, 0.3),
+                                                                        borderWidth: StyleSheet.hairlineWidth,
+                                                                    },
                                                             ]}
                                                             onPress={() => handleDateSelect(date)}
                                                             disabled={isSubmitting || isDeleting || isDisabled}

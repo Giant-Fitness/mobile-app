@@ -396,6 +396,7 @@ export const BodyMeasurementsLoggingSheet: React.FC<BodyMeasurementsLoggingSheet
                                                     const isSelected = isSameDay(date, selectedDate);
                                                     const isFutureDate = date > new Date();
                                                     const isDisabled = isFutureDate || !isCurrentMonth;
+                                                    const hasEntry = getExistingData ? getExistingData(date) !== undefined : false;
 
                                                     return (
                                                         <TouchableOpacity
@@ -410,6 +411,12 @@ export const BodyMeasurementsLoggingSheet: React.FC<BodyMeasurementsLoggingSheet
                                                                 isSelected && {
                                                                     backgroundColor: themeColors.text,
                                                                 },
+                                                                hasEntry &&
+                                                                    !isSelected &&
+                                                                    isCurrentMonth && {
+                                                                        borderColor: lightenColor(themeColors.text, 0.3),
+                                                                        borderWidth: StyleSheet.hairlineWidth,
+                                                                    },
                                                             ]}
                                                             onPress={() => handleDateSelect(date)}
                                                             disabled={isSubmitting || isDeleting || isDisabled}

@@ -250,7 +250,9 @@ const styles = StyleSheet.create({
     textContainer: {
         width: '100%',
     },
-    title: {},
+    title: {
+        fontWeight: 500,
+    },
     subtitle: {},
     value: {},
     footerContainer: {
