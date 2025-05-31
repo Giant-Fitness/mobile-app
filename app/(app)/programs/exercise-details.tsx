@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { ThemedView } from '@/components/base/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Linking, Alert } from 'react-native';
 import { Exercise } from '@/types';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
@@ -71,6 +71,23 @@ const ExerciseDetailsScreen = () => {
         }
     };
 
+    const handleDemoPress = async () => {
+        if (!exercise.YTDemoUrl) return;
+
+        try {
+            await Linking.openURL(exercise.YTDemoUrl);
+            posthog.capture('exercise_demo_clicked', {
+                exercise_name: exercise.ExerciseName,
+                exercise_id: exercise.ExerciseId,
+                demo_url: exercise.YTDemoUrl,
+                is_enrolled: isEnrolled,
+            });
+        } catch (error) {
+            console.error('Error opening demo:', error);
+            Alert.alert('Error', 'Unable to open demo video');
+        }
+    };
+
     return (
         <ThemedView style={{ flex: 1, backgroundColor: themeColors.backgroundSecondary }}>
             <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Spaces.XXL} headerInterpolationEnd={Sizes.imageLGHeight} />
@@ -116,15 +133,27 @@ const ExerciseDetailsScreen = () => {
                                         </View>
                                     ))}
                                 </ThemedView>
-                                {isEnrolled && exercise.ORMPercentage && (
+                                {(exercise.YTDemoUrl || (isEnrolled && exercise.ORMPercentage)) && (
                                     <View style={styles.buttonContainer}>
-                                        <TextButton
-                                            text='Weight Calculator'
-                                            textType='buttonSmall'
-                                            style={[styles.calculatorButton]}
-                                            onPress={openCalculator}
-                                            size={'LG'}
-                                        />
+                                        {exercise.YTDemoUrl && (
+                                            <TextButton
+                                                text='Watch Demo'
+                                                iconName='play'
+                                                iconSize={14}
+                                                onPress={handleDemoPress}
+                                                size='MD'
+                                                style={styles.demoButton}
+                                            />
+                                        )}
+                                        {isEnrolled && exercise.ORMPercentage && (
+                                            <TextButton
+                                                text='Weight Calculator'
+                                                textType='buttonSmall'
+                                                style={styles.calculatorButton}
+                                                onPress={openCalculator}
+                                                size='LG'
+                                            />
+                                        )}
                                     </View>
                                 )}
                             </ThemedView>
@@ -168,7 +197,6 @@ const ExerciseDetailsScreen = () => {
                             </View>
                         )}
                     </ThemedView> */}
-
                     <ThemedView style={styles.instructionContainer}>
                         <ThemedText type='subtitle' style={{ color: themeColors.text, paddingBottom: Spaces.MD }}>
                             Instructions
@@ -183,6 +211,12 @@ const ExerciseDetailsScreen = () => {
 };
 
 const styles = StyleSheet.create({
+    demoContainer: {
+        marginTop: Spaces.LG,
+        paddingVertical: Spaces.MD,
+        paddingHorizontal: Spaces.LG,
+        alignItems: 'center',
+    },
     mainContainer: {
         paddingBottom: Spaces.XXL,
     },
@@ -197,7 +231,15 @@ const styles = StyleSheet.create({
     buttonContainer: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'space-between',
         marginHorizontal: Spaces.MD,
+        gap: Spaces.MD,
+        paddingBottom: Spaces.MD,
+    },
+    demoButton: {
+        flex: 1,
+        borderRadius: Spaces.SM,
+        width: '50%',
     },
     logButton: {
         width: '50%',

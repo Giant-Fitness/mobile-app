@@ -57,6 +57,7 @@ export interface Exercise {
     RepsLower?: number;
     Rest?: number;
     ORMPercentage?: number;
+    YTDemoUrl?: string;
 }
 
 export interface ProgramDay {
