@@ -182,6 +182,12 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
             return <AnimatedMaterialCommunityIcons name='pencil-ruler' {...commonProps} />;
         case 'swap':
             return <AnimatedMaterialIcons name='swap-horizontal-circle' {...commonProps} />;
+        case 'open-outline':
+            return <AnimatedIonicons name='open-outline' {...commonProps} />;
+        case 'logo-instagram':
+            return <AnimatedIonicons name='logo-instagram' {...commonProps} />;
+        case 'logo-whatsapp':
+            return <AnimatedIonicons name='logo-whatsapp' {...commonProps} />;
         default:
             return <AnimatedIonicons name='alert-circle-outline' {...commonProps} />;
     }

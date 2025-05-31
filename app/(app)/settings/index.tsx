@@ -1,7 +1,7 @@
 // app/(app)/settings/index.tsx
 
 import React from 'react';
-import { StyleSheet, Alert, View, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Alert, View, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import { router } from 'expo-router';
 import { ThemedView } from '@/components/base/ThemedView';
 import { authService } from '@/utils/auth';
@@ -32,9 +32,10 @@ type SettingItemProps = {
     text: string;
     onPress: () => void;
     iconName?: string;
+    endIcon?: string;
 };
 
-const SettingItem = ({ text, onPress, iconName }: SettingItemProps) => {
+const SettingItem = ({ text, onPress, iconName, endIcon = 'chevron-forward' }: SettingItemProps) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
@@ -48,7 +49,7 @@ const SettingItem = ({ text, onPress, iconName }: SettingItemProps) => {
                 {iconName && <Icon name={iconName} size={18} color={themeColors.iconDefault} style={styles.settingItemIcon} />}
                 <ThemedText type='body'>{text}</ThemedText>
             </View>
-            <Icon name='chevron-forward' size={16} color={themeColors.iconDefault} style={{ opacity: 0.5 }} />
+            <Icon name={endIcon} size={16} color={themeColors.iconDefault} style={{ opacity: 0.5 }} />
         </TouchableOpacity>
     );
 };
@@ -117,6 +118,35 @@ const SettingsIndex = () => {
         router.push('/(app)/settings/measurement-units');
     };
 
+    const handleInstagramPress = async () => {
+        const instagramUrl = 'https://instagram.com/kynfit.in';
+
+        try {
+            await Linking.openURL(instagramUrl);
+            posthog.capture('instagram_link_clicked');
+        } catch (error) {
+            console.error('Error opening Instagram:', error);
+            Alert.alert('Error', 'Unable to open Instagram');
+        }
+    };
+
+    const handleWhatsAppPress = async () => {
+        const whatsappGroupUrl = 'https://chat.whatsapp.com/ECLltc3OGZ28yhSdVS4KHe';
+
+        try {
+            const canOpen = await Linking.canOpenURL(whatsappGroupUrl);
+            if (canOpen) {
+                await Linking.openURL(whatsappGroupUrl);
+                posthog.capture('whatsapp_beta_group_clicked');
+            } else {
+                Alert.alert('Error', 'WhatsApp is not installed on this device');
+            }
+        } catch (error) {
+            console.error('Error opening WhatsApp:', error);
+            Alert.alert('Error', 'Unable to open WhatsApp group');
+        }
+    };
+
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
             <AnimatedHeader scrollY={scrollY} disableColorChange={true} headerBackground={themeColors.background} title='Settings' />
@@ -129,11 +159,19 @@ const SettingsIndex = () => {
                     <SettingItem text='Measurement Units' onPress={handlePreference} iconName='pencil-ruler' />
                 </SettingsSection>
 
+                <SettingsSection title='Join our kyn'>
+                    <SettingItem text='Instagram' onPress={handleInstagramPress} iconName='logo-instagram' endIcon='open-outline' />
+                    <SettingItem text='Whatsapp' onPress={handleWhatsAppPress} iconName='logo-whatsapp' endIcon='open-outline' />
+                </SettingsSection>
+
                 <TextButton text='Sign Out' onPress={handleSignOut} iconName='exit' size='MD' style={styles.signOutButton} />
 
                 <View style={styles.versionContainer}>
+                    <ThemedText type='headline' style={styles.versionText}>
+                        kyn
+                    </ThemedText>
                     <ThemedText type='caption' style={styles.versionText}>
-                        Version 0.0.1
+                        v0.0.1
                     </ThemedText>
                 </View>
             </ScrollView>
@@ -155,6 +193,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         paddingHorizontal: Spaces.XL,
         opacity: 0.7,
+        fontSize: 13,
     },
     sectionContent: {},
     settingButton: {
@@ -165,7 +204,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: Spaces.MD,
     },
     versionContainer: {
-        padding: Spaces.LG,
+        padding: Spaces.MD,
         alignItems: 'center',
     },
     versionText: {
