@@ -1,3 +1,5 @@
+// components/progress/SleepLoggingSheet.tsx
+
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, TextInput, View, TouchableOpacity, Platform, ActivityIndicator, Keyboard } from 'react-native';
 import LottieView from 'lottie-react-native';
@@ -12,12 +14,12 @@ import { TextButton } from '@/components/buttons/TextButton';
 import { addDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameDay, isSameMonth, format } from 'date-fns';
 import { lightenColor } from '@/utils/colorUtils';
 import { Sizes } from '@/constants/Sizes';
-import { UserSleepMeasurement } from '@/types';
+import { SleepSubmissionData, UserSleepMeasurement } from '@/types';
 
 interface SleepLoggingSheetProps {
     visible: boolean;
     onClose: () => void;
-    onSubmit: (sleep: number, date: Date) => Promise<void>;
+    onSubmit: (sleepData: SleepSubmissionData, date: Date) => Promise<void>;
     onDelete?: (timestamp: string) => Promise<void>;
     initialSleep?: number;
     initialDate?: Date;
@@ -39,8 +41,16 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
-    const [sleep, setSleep] = useState<string>(''); // this is for the hours
-    const [minutes, setMinutes] = useState<string>('0');
+    // Time input states (12-hour format)
+    const [sleepHour, setSleepHour] = useState<string>('');
+    const [sleepMinute, setSleepMinute] = useState<string>('');
+    const [sleepAmPm, setSleepAmPm] = useState<'AM' | 'PM'>('PM');
+
+    const [wakeHour, setWakeHour] = useState<string>('');
+    const [wakeMinute, setWakeMinute] = useState<string>('');
+    const [wakeAmPm, setWakeAmPm] = useState<'AM' | 'PM'>('AM');
+
+    // Common states
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [showCalendar, setShowCalendar] = useState(false);
     const [displayMonth, setDisplayMonth] = useState<Date>(new Date());
@@ -48,11 +58,84 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isEditingMode, setIsEditingMode] = useState(isEditing);
-    const [originalSleep, setOriginalSleep] = useState<number | undefined>(undefined);
+    const [originalSleepData, setOriginalSleepData] = useState<UserSleepMeasurement | undefined>(undefined);
+    const [originalTimestamp, setOriginalTimestamp] = useState<string | undefined>(undefined);
     const [isSuccess, setIsSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
 
-    const sleepInputRef = useRef<TextInput>(null);
+    const sleepHourInputRef = useRef<TextInput>(null);
+
+    // Helper functions
+    const convertTo24Hour = (hour: string, minute: string, ampm: 'AM' | 'PM'): string => {
+        let h = parseInt(hour) || 0;
+        const m = (parseInt(minute) || 0).toString().padStart(2, '0');
+
+        if (h < 1 || h > 12) throw new Error('Invalid hour');
+
+        if (ampm === 'AM') {
+            h = h === 12 ? 0 : h;
+        } else {
+            h = h === 12 ? 12 : h + 12;
+        }
+
+        return `${h.toString().padStart(2, '0')}:${m}`;
+    };
+
+    const convertFrom24Hour = (time24: string): { hour: string; minute: string; ampm: 'AM' | 'PM' } => {
+        const [hour24, minute] = time24.split(':');
+        let hour = parseInt(hour24);
+        const ampm: 'AM' | 'PM' = hour >= 12 ? 'PM' : 'AM';
+
+        if (hour === 0) {
+            hour = 12;
+        } else if (hour > 12) {
+            hour = hour - 12;
+        }
+
+        return {
+            hour: hour.toString(),
+            minute: minute,
+            ampm,
+        };
+    };
+
+    const calculateDurationFromTimes = (sleepTime24: string, wakeTime24: string): number => {
+        const [sleepHour, sleepMin] = sleepTime24.split(':').map(Number);
+        const [wakeHour, wakeMin] = wakeTime24.split(':').map(Number);
+
+        let sleepMinutes = sleepHour * 60 + sleepMin;
+        let wakeMinutes = wakeHour * 60 + wakeMin;
+
+        // Handle cross-midnight sleep
+        if (wakeMinutes <= sleepMinutes) {
+            wakeMinutes += 24 * 60; // Add 24 hours
+        }
+
+        const duration = wakeMinutes - sleepMinutes;
+
+        if (duration <= 0 || duration > 1440) {
+            throw new Error('Invalid sleep duration');
+        }
+
+        return duration;
+    };
+
+    const getDefaultSleepTimes = (durationMinutes?: number) => {
+        // Default to 10:00 PM sleep time, calculate wake time from duration
+        const defaultSleepTime = '22:00';
+        let defaultWakeTime = '06:00';
+
+        if (durationMinutes) {
+            const sleepDate = new Date();
+            sleepDate.setHours(22, 0, 0, 0);
+            const wakeDate = new Date(sleepDate.getTime() + durationMinutes * 60 * 1000);
+            const wakeHours = wakeDate.getHours().toString().padStart(2, '0');
+            const wakeMinutes = wakeDate.getMinutes().toString().padStart(2, '0');
+            defaultWakeTime = `${wakeHours}:${wakeMinutes}`;
+        }
+
+        return { sleepTime: defaultSleepTime, wakeTime: defaultWakeTime };
+    };
 
     useEffect(() => {
         if (visible) {
@@ -62,26 +145,54 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
             const existingData = getExistingData?.(initialDate || today);
 
             if (existingData) {
-                const convertedSleep = existingData.DurationInMinutes;
-                const hours = Math.floor(convertedSleep / 60);
-                const mins = convertedSleep % 60;
+                let sleepTime24, wakeTime24;
 
-                setSleep(hours?.toString());
-                setMinutes(mins?.toString());
-                setOriginalSleep(convertedSleep);
+                // If we have sleep/wake times, use them; otherwise create from duration
+                if (existingData.SleepTime && existingData.WakeTime) {
+                    sleepTime24 = existingData.SleepTime;
+                    wakeTime24 = existingData.WakeTime;
+                } else {
+                    // Create times from duration using default logic
+                    const defaultTimes = getDefaultSleepTimes(existingData.DurationInMinutes);
+                    sleepTime24 = defaultTimes.sleepTime;
+                    wakeTime24 = defaultTimes.wakeTime;
+                }
+
+                // Convert to 12-hour format for display
+                const sleepTime12 = convertFrom24Hour(sleepTime24);
+                const wakeTime12 = convertFrom24Hour(wakeTime24);
+
+                setSleepHour(sleepTime12.hour);
+                setSleepMinute(sleepTime12.minute);
+                setSleepAmPm(sleepTime12.ampm);
+
+                setWakeHour(wakeTime12.hour);
+                setWakeMinute(wakeTime12.minute);
+                setWakeAmPm(wakeTime12.ampm);
+
                 setSelectedDate(new Date(existingData.MeasurementTimestamp));
+                setOriginalSleepData(existingData);
+                setOriginalTimestamp(existingData.MeasurementTimestamp);
                 setIsEditingMode(true);
             } else {
-                setOriginalSleep(undefined);
-                setSleep(initialSleep ? Math.floor(initialSleep / 60).toString() : '');
-                setMinutes(initialSleep ? (initialSleep % 60).toString() : '0');
+                // New entry - set reasonable defaults
+                setSleepHour('10');
+                setSleepMinute('00');
+                setSleepAmPm('PM');
+
+                setWakeHour('6');
+                setWakeMinute('00');
+                setWakeAmPm('AM');
+
                 setSelectedDate(initialDate || today);
+                setOriginalSleepData(undefined);
+                setOriginalTimestamp(undefined);
                 setIsEditingMode(false);
             }
             setDisplayMonth(initialDate || today);
 
             setTimeout(() => {
-                sleepInputRef.current?.focus();
+                sleepHourInputRef.current?.focus();
             }, 300);
         }
     }, [visible, initialSleep, initialDate, getExistingData]);
@@ -90,17 +201,43 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
         if (visible && !isEditing) {
             const existingData = getExistingData?.(selectedDate);
             if (existingData) {
-                const convertedSleep = existingData.DurationInMinutes;
-                const hours = Math.floor(convertedSleep / 60);
-                const mins = convertedSleep % 60;
-                setSleep(hours?.toString());
-                setMinutes(mins?.toString());
-                setOriginalSleep(convertedSleep);
+                let sleepTime24, wakeTime24;
+
+                if (existingData.SleepTime && existingData.WakeTime) {
+                    sleepTime24 = existingData.SleepTime;
+                    wakeTime24 = existingData.WakeTime;
+                } else {
+                    const defaultTimes = getDefaultSleepTimes(existingData.DurationInMinutes);
+                    sleepTime24 = defaultTimes.sleepTime;
+                    wakeTime24 = defaultTimes.wakeTime;
+                }
+
+                const sleepTime12 = convertFrom24Hour(sleepTime24);
+                const wakeTime12 = convertFrom24Hour(wakeTime24);
+
+                setSleepHour(sleepTime12.hour);
+                setSleepMinute(sleepTime12.minute);
+                setSleepAmPm(sleepTime12.ampm);
+
+                setWakeHour(wakeTime12.hour);
+                setWakeMinute(wakeTime12.minute);
+                setWakeAmPm(wakeTime12.ampm);
+
+                setOriginalSleepData(existingData);
+                setOriginalTimestamp(existingData.MeasurementTimestamp);
                 setIsEditingMode(true);
             } else {
-                setSleep(initialSleep ? Math.floor(initialSleep / 60).toString() : '');
-                setMinutes(initialSleep ? (initialSleep % 60).toString() : '0');
-                setOriginalSleep(undefined);
+                // Reset to defaults for new entry
+                setSleepHour('10');
+                setSleepMinute('00');
+                setSleepAmPm('PM');
+
+                setWakeHour('6');
+                setWakeMinute('00');
+                setWakeAmPm('AM');
+
+                setOriginalSleepData(undefined);
+                setOriginalTimestamp(undefined);
                 setIsEditingMode(false);
             }
         }
@@ -113,8 +250,12 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
 
         Keyboard.dismiss();
         onClose();
-        setSleep('');
-        setMinutes('0');
+        setSleepHour('');
+        setSleepMinute('');
+        setSleepAmPm('PM');
+        setWakeHour('');
+        setWakeMinute('');
+        setWakeAmPm('AM');
         setSelectedDate(new Date());
         setDisplayMonth(new Date());
         setShowCalendar(false);
@@ -122,6 +263,8 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
         setIsSubmitting(false);
         setIsDeleting(false);
         setIsSuccess(false);
+        setOriginalSleepData(undefined);
+        setOriginalTimestamp(undefined);
     };
 
     const showCalendarView = () => {
@@ -132,73 +275,87 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
     const hideCalendarView = () => {
         setShowCalendar(false);
         setTimeout(() => {
-            sleepInputRef.current?.focus();
+            sleepHourInputRef.current?.focus();
         }, 100);
     };
 
-    const formatSleep = (hours: string | number, minutes: string | number): string => {
-        const parsedHours = typeof hours === 'string' ? parseInt(hours, 10) : hours;
-        const parsedMinutes = typeof minutes === 'string' ? parseInt(minutes, 10) : minutes;
+    const validateAndCalculateDuration = (): { sleepTime24: string; wakeTime24: string; duration: number } => {
+        // Validate inputs
+        const sHour = parseInt(sleepHour);
+        const sMinute = parseInt(sleepMinute) || 0;
+        const wHour = parseInt(wakeHour);
+        const wMinute = parseInt(wakeMinute) || 0;
 
-        if (isNaN(parsedHours) || parsedHours < 0 || parsedMinutes < 0 || parsedMinutes >= 60) {
-            // can do this for hours and minutes separately
-            return '';
+        if (!sleepHour || sHour < 1 || sHour > 12) {
+            throw new Error('Please enter a valid sleep hour (1-12)');
+        }
+        if (sMinute < 0 || sMinute > 59) {
+            throw new Error('Please enter valid sleep minutes (0-59)');
+        }
+        if (!wakeHour || wHour < 1 || wHour > 12) {
+            throw new Error('Please enter a valid wake hour (1-12)');
+        }
+        if (wMinute < 0 || wMinute > 59) {
+            throw new Error('Please enter valid wake minutes (0-59)');
         }
 
-        const totalMinutes = parsedHours * 60 + parsedMinutes;
+        // Convert to 24-hour format
+        const sleepTime24 = convertTo24Hour(sleepHour, sleepMinute, sleepAmPm);
+        const wakeTime24 = convertTo24Hour(wakeHour, wakeMinute, wakeAmPm);
 
-        // Return as a string
-        return totalMinutes.toString();
+        // Calculate and validate duration
+        const duration = calculateDurationFromTimes(sleepTime24, wakeTime24);
+
+        // Additional validation for reasonable sleep duration
+        if (duration < 10) {
+            throw new Error('Sleep duration seems too short (less than 10 minutes)');
+        }
+        if (duration > 960) {
+            // 16 hours
+            throw new Error('Sleep duration seems too long (more than 16 hours)');
+        }
+
+        return { sleepTime24, wakeTime24, duration };
     };
 
     const handleSubmit = async () => {
-        const hoursSlept = parseFloat(sleep);
-        const minutesSlept = parseFloat(minutes);
-
-        if (
-            isNaN(hoursSlept) ||
-            hoursSlept > 24 ||
-            hoursSlept < 0 ||
-            minutesSlept >= 60 ||
-            minutesSlept < 0 ||
-            isNaN(minutesSlept) ||
-            (hoursSlept === 0 && minutesSlept === 0)
-        ) {
-            setError('Please enter a valid sleep time');
-            sleepInputRef.current?.focus();
-            return;
-        }
         setError('');
 
         try {
             setIsSubmitting(true);
-            const formattedSleep = Number(formatSleep(hoursSlept, minutesSlept));
+
+            const { sleepTime24, wakeTime24 } = validateAndCalculateDuration();
+
+            const sleepData: SleepSubmissionData = {
+                sleepTime: sleepTime24,
+                wakeTime: wakeTime24,
+            };
 
             let finalTimestamp;
             const localSelectedDate = new Date(selectedDate);
 
-            if (isEditingMode) {
-                finalTimestamp = new Date(selectedDate.getTime());
+            if (isEditingMode && originalTimestamp !== undefined) {
+                // Preserve exact original timestamp when editing existing measurement
+                finalTimestamp = new Date(originalTimestamp);
             } else {
+                // Snap to UTC midnight for new measurements
                 localSelectedDate.setHours(0, 0, 0, 0);
-
                 finalTimestamp = new Date(Date.UTC(localSelectedDate.getFullYear(), localSelectedDate.getMonth(), localSelectedDate.getDate(), 0, 0, 0));
             }
 
-            await onSubmit(formattedSleep, finalTimestamp);
+            await onSubmit(sleepData, finalTimestamp);
             setSuccessMessage(isEditingMode ? 'Sleep time updated' : 'Sleep logged');
             setIsSuccess(true);
             await new Promise<void>((resolve) => setTimeout(resolve, 1600));
             onClose();
-        } catch (err) {
+        } catch (err: any) {
             console.log(err);
-            setError('Failed to save sleep time');
+            setError(err.message || 'Failed to save sleep time');
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    // Modify your render logic
     const renderSuccessAnimation = () => {
         if (!isSuccess) return null;
 
@@ -220,12 +377,9 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
         setIsDeleting(true);
         try {
             const localSelectedDate = new Date(selectedDate);
-
             localSelectedDate.setHours(0, 0, 0, 0);
-
             const utcMidnight = new Date(Date.UTC(localSelectedDate.getFullYear(), localSelectedDate.getMonth(), localSelectedDate.getDate(), 0, 0, 0));
             await onDelete(utcMidnight.toISOString());
-
             handleClose();
         } catch (err) {
             console.log(err);
@@ -284,8 +438,135 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
         return days;
     };
 
+    const hasChanges = (): boolean => {
+        if (!isEditingMode || !originalSleepData) {
+            return true; // For new entries, always allow saving
+        }
+
+        try {
+            // Get current values in 24-hour format
+            const currentSleepTime24 = convertTo24Hour(sleepHour, sleepMinute, sleepAmPm);
+            const currentWakeTime24 = convertTo24Hour(wakeHour, wakeMinute, wakeAmPm);
+
+            // Get original values in 24-hour format
+            let originalSleepTime24, originalWakeTime24;
+
+            if (originalSleepData.SleepTime && originalSleepData.WakeTime) {
+                originalSleepTime24 = originalSleepData.SleepTime;
+                originalWakeTime24 = originalSleepData.WakeTime;
+            } else {
+                // If original data only has duration, recreate the default times
+                const defaultTimes = getDefaultSleepTimes(originalSleepData.DurationInMinutes);
+                originalSleepTime24 = defaultTimes.sleepTime;
+                originalWakeTime24 = defaultTimes.wakeTime;
+            }
+
+            // Compare times
+            return currentSleepTime24 !== originalSleepTime24 || currentWakeTime24 !== originalWakeTime24;
+        } catch {
+            // If there's an error in conversion, treat as having changes
+            return true;
+        }
+    };
+
+    const renderTimeInput = (
+        title: string,
+        hour: string,
+        setHour: (value: string) => void,
+        minute: string,
+        setMinute: (value: string) => void,
+        ampm: 'AM' | 'PM',
+        setAmPm: (value: 'AM' | 'PM') => void,
+        hourRef?: React.RefObject<TextInput>,
+    ) => (
+        <View style={styles.timeInputSection}>
+            <View style={styles.timeInputRow}>
+                <ThemedText type='bodySmall' style={styles.timeTitle}>
+                    {title}
+                </ThemedText>
+                <TextInput
+                    ref={hourRef}
+                    style={[styles.timeDigitInput, { color: themeColors.text, borderColor: themeColors.systemBorderColor }]}
+                    value={hour}
+                    onChangeText={(text) => {
+                        const num = parseInt(text);
+                        if (text === '' || (num >= 1 && num <= 12)) {
+                            setHour(text);
+                        }
+                    }}
+                    placeholder='12'
+                    placeholderTextColor={themeColors.subText}
+                    keyboardType='numeric'
+                    maxLength={2}
+                    editable={!isSubmitting && !isDeleting}
+                />
+
+                <ThemedText type='title' style={styles.timeSeparator}>
+                    :
+                </ThemedText>
+
+                <TextInput
+                    style={[styles.timeDigitInput, { color: themeColors.text, borderColor: themeColors.systemBorderColor }]}
+                    value={minute}
+                    onChangeText={(text) => {
+                        const num = parseInt(text);
+                        if (text === '' || (num >= 0 && num <= 59)) {
+                            setMinute(text.padStart(2, '0'));
+                        }
+                    }}
+                    placeholder='00'
+                    placeholderTextColor={themeColors.subText}
+                    keyboardType='numeric'
+                    maxLength={2}
+                    editable={!isSubmitting && !isDeleting}
+                />
+
+                <View style={styles.ampmContainer}>
+                    <TouchableOpacity
+                        style={[
+                            styles.ampmButton,
+                            ampm === 'AM' && styles.ampmButtonActive,
+                            { backgroundColor: ampm === 'AM' ? themeColors.text : 'transparent', borderColor: themeColors.systemBorderColor },
+                        ]}
+                        onPress={() => setAmPm('AM')}
+                        disabled={isSubmitting || isDeleting}
+                    >
+                        <ThemedText type='bodySmall' style={[styles.ampmText, { color: ampm === 'AM' ? themeColors.background : themeColors.text }]}>
+                            AM
+                        </ThemedText>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[
+                            styles.ampmButton,
+                            ampm === 'PM' && styles.ampmButtonActive,
+                            { backgroundColor: ampm === 'PM' ? themeColors.text : 'transparent', borderColor: themeColors.systemBorderColor },
+                        ]}
+                        onPress={() => setAmPm('PM')}
+                        disabled={isSubmitting || isDeleting}
+                    >
+                        <ThemedText type='bodySmall' style={[styles.ampmText, { color: ampm === 'PM' ? themeColors.background : themeColors.text }]}>
+                            PM
+                        </ThemedText>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </View>
+    );
+
+    // Calculate duration for display
+    const getDurationDisplay = () => {
+        try {
+            const { duration } = validateAndCalculateDuration();
+            const hours = Math.floor(duration / 60);
+            const minutes = duration % 60;
+            return `${hours}h ${minutes}m`;
+        } catch {
+            return '';
+        }
+    };
+
     return (
-        <BottomSheet visible={visible} onClose={handleClose} style={Platform.OS === 'ios' ? { height: '62%' } : undefined}>
+        <BottomSheet visible={visible} onClose={handleClose} style={Platform.OS === 'ios' ? { height: '75%' } : undefined}>
             <View style={styles.container}>
                 {isSuccess ? (
                     renderSuccessAnimation()
@@ -310,13 +591,7 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
                                 )}
                                 <TouchableOpacity
                                     onPress={handleSubmit}
-                                    disabled={
-                                        isSubmitting ||
-                                        isDeleting ||
-                                        isNaN(parseFloat(sleep)) ||
-                                        parseFloat(sleep) === 0 ||
-                                        (isEditingMode && originalSleep === parseFloat(sleep))
-                                    }
+                                    disabled={isSubmitting || isDeleting || !sleepHour || !wakeHour || (isEditingMode && !hasChanges())}
                                 >
                                     {isSubmitting ? (
                                         <ActivityIndicator size='small' color={themeColors.text} />
@@ -325,11 +600,7 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
                                             name='check'
                                             size={24}
                                             color={
-                                                !isSubmitting &&
-                                                !isDeleting &&
-                                                !isNaN(parseFloat(sleep)) &&
-                                                parseFloat(sleep) !== 0 &&
-                                                (!isEditingMode || originalSleep !== parseFloat(sleep))
+                                                !isSubmitting && !isDeleting && sleepHour && wakeHour && (!isEditingMode || hasChanges())
                                                     ? themeColors.text
                                                     : lightenColor(themeColors.subText, 0.8)
                                             }
@@ -339,76 +610,58 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
                             </View>
                         </ThemedView>
 
-                        {error && (
-                            <ThemedText type='bodySmall' style={[styles.errorText, { color: themeColors.red }]}>
-                                {error}
-                            </ThemedText>
-                        )}
-
                         <View style={styles.mainContent}>
                             {!showCalendar ? (
                                 <>
                                     <TouchableOpacity
-                                        style={styles.dateSelector}
+                                        style={[
+                                            styles.dateSelector,
+                                            {
+                                                backgroundColor: themeColors.background,
+                                                borderColor: themeColors.systemBorderColor,
+                                                opacity: isEditing ? 0.5 : 1,
+                                            },
+                                        ]}
                                         onPress={() => !isEditing && showCalendarView()}
                                         disabled={isEditing || isSubmitting || isDeleting}
                                     >
-                                        <ThemedText type='body' style={{ opacity: isEditing ? 0.5 : 1 }}>
-                                            {format(selectedDate, 'dd/MM/yyyy')}
-                                        </ThemedText>
+                                        <ThemedText type='body'>{format(selectedDate, 'dd/MM/yyyy')}</ThemedText>
                                         {!isEditing && (
                                             <Icon
                                                 name='chevron-down'
                                                 color={isSubmitting || isDeleting ? themeColors.text : themeColors.text}
                                                 size={16}
-                                                style={{ marginTop: 1, marginLeft: Spaces.XS }}
+                                                style={{ marginLeft: Spaces.XS }}
                                             />
                                         )}
                                     </TouchableOpacity>
+
                                     <View style={styles.inputContainer}>
-                                        <View style={[styles.inputWrapper, { backgroundColor: themeColors.background }]}>
-                                            <TextInput
-                                                ref={sleepInputRef}
-                                                style={[
-                                                    styles.input,
-                                                    {
-                                                        color: themeColors.text,
-                                                        opacity: isSubmitting || isDeleting ? 0.5 : 1,
-                                                    },
-                                                ]}
-                                                value={sleep}
-                                                onChangeText={setSleep}
-                                                keyboardType='numeric'
-                                                placeholder='0'
-                                                placeholderTextColor={themeColors.subText}
-                                                editable={!isSubmitting && !isDeleting}
-                                            />
-                                            <ThemedText type='bodySmall' style={styles.unit}>
-                                                Hours
-                                            </ThemedText>
+                                        <View style={styles.timeInputContainer}>
+                                            {renderTimeInput(
+                                                'Sleep Time',
+                                                sleepHour,
+                                                setSleepHour,
+                                                sleepMinute,
+                                                setSleepMinute,
+                                                sleepAmPm,
+                                                setSleepAmPm,
+                                                sleepHourInputRef,
+                                            )}
+
+                                            {renderTimeInput('Wake Time', wakeHour, setWakeHour, wakeMinute, setWakeMinute, wakeAmPm, setWakeAmPm)}
                                         </View>
 
-                                        <View style={[styles.inputWrapper, { backgroundColor: themeColors.background, marginTop: Spaces.SM }]}>
-                                            <TextInput
-                                                style={[
-                                                    styles.input,
-                                                    {
-                                                        color: themeColors.text,
-                                                        opacity: isSubmitting || isDeleting ? 0.5 : 1,
-                                                    },
-                                                ]}
-                                                value={minutes}
-                                                onChangeText={setMinutes}
-                                                keyboardType='numeric'
-                                                placeholder='0'
-                                                placeholderTextColor={themeColors.subText}
-                                                editable={!isSubmitting && !isDeleting}
-                                                defaultValue='0'
-                                            />
-                                            <ThemedText type='bodySmall' style={styles.unit}>
-                                                Mins
-                                            </ThemedText>
-                                        </View>
+                                        {getDurationDisplay() && (
+                                            <View style={styles.durationDisplay}>
+                                                <ThemedText type='caption' style={styles.durationLabel}>
+                                                    Total Sleep:
+                                                </ThemedText>
+                                                <ThemedText type='body' style={styles.durationValue}>
+                                                    {getDurationDisplay()}
+                                                </ThemedText>
+                                            </View>
+                                        )}
                                     </View>
                                 </>
                             ) : (
@@ -496,6 +749,11 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
                                     </View>
                                 </View>
                             )}
+                            {error && (
+                                <ThemedText type='bodySmall' style={[styles.errorText, { color: themeColors.red }]}>
+                                    {error}
+                                </ThemedText>
+                            )}
                         </View>
                     </>
                 )}
@@ -519,6 +777,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingTop: Spaces.MD,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        paddingBottom: Spaces.MD,
+        marginBottom: Spaces.MD,
     },
     headerButton: {
         minWidth: 60,
@@ -542,31 +803,72 @@ const styles = StyleSheet.create({
     },
     inputContainer: {
         marginTop: Spaces.SM,
-        paddingBottom: Spaces.MD,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: Spaces.MD,
     },
-    inputLabel: {
-        marginBottom: Spaces.SM,
-    },
-    inputWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderRadius: Spaces.SM,
+    inputLabel: {},
+    timeInputContainer: {
         paddingHorizontal: Spaces.MD,
+        paddingBottom: Spaces.MD,
+    },
+    timeInputSection: {
+        marginBottom: Spaces.MD,
+    },
+    timeTitle: {
+        textAlign: 'center',
+        opacity: 0.8,
+    },
+    timeInputRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: Spaces.SM,
+    },
+    timeDigitInput: {
+        width: 50,
+        height: 40,
+        borderWidth: 1,
+        borderRadius: Spaces.SM,
+        textAlign: 'center',
         paddingVertical: Spaces.SM,
-        height: 48,
-        borderWidth: StyleSheet.hairlineWidth,
-        flex: 1,
     },
-    input: {
-        flex: 1,
-    },
-    unit: {
+    timeSeparator: {},
+    ampmContainer: {
+        flexDirection: 'row',
+        gap: 4,
         marginLeft: Spaces.SM,
-        opacity: 0.4,
-        width: 55,
+    },
+    ampmButton: {
+        paddingHorizontal: Spaces.SM,
+        paddingVertical: Spaces.XS,
+        borderRadius: Spaces.XS,
+        borderWidth: 1,
+        minWidth: 40,
+        alignItems: 'center',
+    },
+    ampmButtonActive: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    ampmText: {
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    durationDisplay: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: Spaces.MD,
+        marginHorizontal: Spaces.MD,
+        borderRadius: Spaces.SM,
+        gap: Spaces.SM,
+    },
+    durationLabel: {
+        opacity: 0.7,
+    },
+    durationValue: {
+        fontWeight: '600',
     },
     calendarContainer: {
         marginTop: Spaces.MD,
@@ -592,7 +894,7 @@ const styles = StyleSheet.create({
     },
     calendarWeek: {
         flexDirection: 'row',
-        justifyContent: 'flex-start',
+        justifyContent: 'space-between',
         width: '100%',
         marginBottom: 2,
     },
@@ -604,7 +906,6 @@ const styles = StyleSheet.create({
         height: 40,
         justifyContent: 'center',
         alignItems: 'center',
-        marginHorizontal: 4,
         borderRadius: 20,
     },
     calendarFooter: {
@@ -641,10 +942,5 @@ const styles = StyleSheet.create({
     successMessage: {
         marginTop: Spaces.MD,
         textAlign: 'center',
-    },
-    row: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
     },
 });

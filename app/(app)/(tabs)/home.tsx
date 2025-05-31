@@ -107,17 +107,16 @@ export default function HomeScreen() {
         }
     };
 
-    const handleLogSleep = async (sleep: number, date: Date) => {
+    const handleLogSleep = async (sleepData: any, date: Date) => {
         setIsLoading(true);
         try {
             await dispatch(
                 logSleepMeasurementAsync({
-                    durationInMinutes: sleep,
+                    ...sleepData, // This will contain either {durationInMinutes} or {sleepTime, wakeTime}
                     measurementTimestamp: date.toISOString(),
                 }),
             ).unwrap();
 
-            // Refresh measurements after logging
             await dispatch(getSleepMeasurementsAsync()).unwrap();
         } catch (error) {
             console.error('Failed to log sleep:', error);

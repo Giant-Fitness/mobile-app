@@ -764,12 +764,17 @@ export const getSleepMeasurementsAsync = createAsyncThunk<
 
 export const logSleepMeasurementAsync = createAsyncThunk<
     UserSleepMeasurement[],
-    { durationInMinutes: number; measurementTimestamp?: string },
+    {
+        durationInMinutes?: number;
+        sleepTime?: string;
+        wakeTime?: string;
+        measurementTimestamp?: string;
+    },
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
->('user/logSleepMeasurement', async ({ durationInMinutes, measurementTimestamp }, { getState, rejectWithValue }) => {
+>('user/logSleepMeasurement', async (params, { getState, rejectWithValue }) => {
     try {
         const state = getState();
         const userId = state.user.user?.UserId;
@@ -777,8 +782,9 @@ export const logSleepMeasurementAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
+        const { measurementTimestamp, ...sleepParams } = params;
         const timestamp = measurementTimestamp ?? new Date().toISOString();
-        await UserService.logSleepMeasurement(userId, durationInMinutes, timestamp);
+        await UserService.logSleepMeasurement(userId, sleepParams, timestamp);
         return await refreshSleepMeasurements(userId);
     } catch (error) {
         return rejectWithValue({
@@ -789,12 +795,17 @@ export const logSleepMeasurementAsync = createAsyncThunk<
 
 export const updateSleepMeasurementAsync = createAsyncThunk<
     UserSleepMeasurement[],
-    { timestamp: string; durationInMinutes: number },
+    {
+        timestamp: string;
+        durationInMinutes?: number;
+        sleepTime?: string;
+        wakeTime?: string;
+    },
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
->('user/updateSleepMeasurement', async ({ timestamp, durationInMinutes }, { getState, rejectWithValue }) => {
+>('user/updateSleepMeasurement', async (params, { getState, rejectWithValue }) => {
     try {
         const state = getState();
         const userId = state.user.user?.UserId;
@@ -803,7 +814,13 @@ export const updateSleepMeasurementAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        await UserService.updateSleepMeasurement(userId, timestamp, durationInMinutes);
+        // Extract timestamp and sleep parameters
+        const { timestamp, ...sleepParams } = params;
+
+        // Update the measurement with the new service method
+        await UserService.updateSleepMeasurement(userId, timestamp, sleepParams);
+
+        // Refresh and return all measurements
         return await refreshSleepMeasurements(userId);
     } catch (error) {
         return rejectWithValue({

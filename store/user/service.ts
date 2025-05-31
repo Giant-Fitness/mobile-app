@@ -19,6 +19,13 @@ import { authUsersApiClient, authRecommendationsApiClient } from '@/utils/api/ap
 import { handleApiError } from '@/utils/api/errorUtils';
 import { authService } from '@/utils/auth';
 
+// Types for sleep measurement parameters
+interface SleepMeasurementParams {
+    durationInMinutes?: number;
+    sleepTime?: string;
+    wakeTime?: string;
+}
+
 // User Profile Methods
 const getUser = async (): Promise<User> => {
     console.log('service: getUser');
@@ -239,23 +246,48 @@ const getSleepMeasurements = async (userId: string): Promise<UserSleepMeasuremen
     }
 };
 
-const logSleepMeasurement = async (userId: string, durationInMinutes: number, measurementTimestamp: string): Promise<UserSleepMeasurement> => {
+// Updated to support both duration and sleep/wake time formats
+const logSleepMeasurement = async (userId: string, sleepParams: SleepMeasurementParams, measurementTimestamp: string): Promise<UserSleepMeasurement> => {
     console.log('service: logSleepMeasurement');
     try {
-        const { data } = await authUsersApiClient.post(`/users/${userId}/sleep-measurements`, {
-            durationInMinutes,
+        const requestBody: any = {
             MeasurementTimestamp: measurementTimestamp,
-        });
+        };
+
+        // Add the appropriate fields based on what's provided
+        if (sleepParams.durationInMinutes !== undefined) {
+            requestBody.durationInMinutes = sleepParams.durationInMinutes;
+        }
+
+        if (sleepParams.sleepTime && sleepParams.wakeTime) {
+            requestBody.sleepTime = sleepParams.sleepTime;
+            requestBody.wakeTime = sleepParams.wakeTime;
+        }
+
+        const { data } = await authUsersApiClient.post(`/users/${userId}/sleep-measurements`, requestBody);
         return data.measurements;
     } catch (error) {
         throw handleApiError(error, 'LogSleepMeasurement');
     }
 };
 
-const updateSleepMeasurement = async (userId: string, timestamp: string, durationInMinutes: number): Promise<UserSleepMeasurement> => {
+// Updated to support both duration and sleep/wake time formats
+const updateSleepMeasurement = async (userId: string, timestamp: string, sleepParams: SleepMeasurementParams): Promise<UserSleepMeasurement> => {
     console.log('service: updateSleepMeasurement');
     try {
-        const { data } = await authUsersApiClient.put(`/users/${userId}/sleep-measurements/${timestamp}`, { durationInMinutes });
+        const requestBody: any = {};
+
+        // Add the appropriate fields based on what's provided
+        if (sleepParams.durationInMinutes !== undefined) {
+            requestBody.durationInMinutes = sleepParams.durationInMinutes;
+        }
+
+        if (sleepParams.sleepTime && sleepParams.wakeTime) {
+            requestBody.sleepTime = sleepParams.sleepTime;
+            requestBody.wakeTime = sleepParams.wakeTime;
+        }
+
+        const { data } = await authUsersApiClient.put(`/users/${userId}/sleep-measurements/${timestamp}`, requestBody);
         return data.measurement;
     } catch (error) {
         throw handleApiError(error, 'UpdateSleepMeasurement');

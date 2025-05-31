@@ -265,7 +265,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
     };
 
     return (
-        <BottomSheet visible={visible} onClose={handleClose} style={Platform.OS === 'ios' ? { height: '62%' } : undefined}>
+        <BottomSheet visible={visible} onClose={handleClose} style={Platform.OS === 'ios' ? { height: '66%' } : undefined}>
             <View style={styles.container}>
                 {isSuccess ? (
                     renderSuccessAnimation()
@@ -480,6 +480,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingTop: Spaces.MD,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        paddingBottom: Spaces.MD,
+        marginBottom: Spaces.MD,
     },
     headerButton: {
         minWidth: 60,

@@ -46,6 +46,8 @@ export interface UserSleepMeasurement {
     UserId: string;
     MeasurementTimestamp: string;
     DurationInMinutes: number;
+    SleepTime?: string;
+    WakeTime?: string;
 }
 
 export interface UserAppSettingsMeasurementUnitsItem {
@@ -79,3 +81,10 @@ export interface UserBodyMeasurement {
     waistHipRatio?: number;
     UpdatedAt: string;
 }
+
+// Type for sleep submission data
+export type SleepSubmissionData = {
+    durationInMinutes?: number;
+    sleepTime?: string;
+    wakeTime?: string;
+};

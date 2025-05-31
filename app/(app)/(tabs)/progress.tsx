@@ -117,18 +117,19 @@ export default function ProgressScreen() {
         }
     };
 
-    const handleLogSleep = async (sleep: number, date: Date) => {
+    const handleLogSleep = async (sleepData: any, date: Date) => {
         setIsLoggingSleep(true);
-
         try {
             await dispatch(
                 logSleepMeasurementAsync({
-                    durationInMinutes: sleep,
+                    ...sleepData, // This will contain either {durationInMinutes} or {sleepTime, wakeTime}
                     measurementTimestamp: date.toISOString(),
                 }),
             ).unwrap();
+
+            await dispatch(getSleepMeasurementsAsync()).unwrap();
         } catch (error) {
-            console.error('Failed to log sleep :', error);
+            console.error('Failed to log sleep:', error);
         } finally {
             setIsLoggingSleep(false);
         }
@@ -144,6 +145,9 @@ export default function ProgressScreen() {
                     measurementTimestamp: date.toISOString(),
                 }),
             ).unwrap();
+
+            // Refresh measurements after logging
+            await dispatch(getBodyMeasurementsAsync()).unwrap();
             setIsBodyMeasurementsSheetVisible(false);
         } catch (error) {
             console.error('Failed to log body measurements:', error);

@@ -1,3 +1,5 @@
+// app/(app)/progress/all-sleep-data.tsx
+
 import React, { useState } from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
@@ -8,7 +10,7 @@ import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { RootState } from '@/store/store';
-import { UserSleepMeasurement } from '@/types';
+import { UserSleepMeasurement, SleepSubmissionData } from '@/types';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { useSharedValue } from 'react-native-reanimated';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
@@ -44,6 +46,33 @@ export default function AllSleepDataScreen() {
         return change !== 0 ? change.toFixed(1) : null;
     };
 
+    // Helper function to format sleep time display
+    const formatSleepDisplay = (measurement: UserSleepMeasurement) => {
+        const hours = Math.floor(measurement.DurationInMinutes / 60);
+        const minutes = measurement.DurationInMinutes % 60;
+
+        // If we have sleep/wake times, show them; otherwise show duration
+        if (measurement.SleepTime && measurement.WakeTime) {
+            return `${measurement.SleepTime} - ${measurement.WakeTime}`;
+        }
+
+        return `${hours}h ${minutes}m`;
+    };
+
+    // Helper function to format sleep duration for change display
+    const formatSleepDuration = (minutes: number) => {
+        const hours = Math.floor(Math.abs(minutes) / 60);
+        const mins = Math.abs(minutes) % 60;
+
+        if (hours > 0 && mins > 0) {
+            return `${hours}h ${mins}m`;
+        } else if (hours > 0) {
+            return `${hours}h`;
+        } else {
+            return `${mins}m`;
+        }
+    };
+
     const handleAddSleep = () => {
         // Reset the selected measurement
         setSelectedMeasurement(null);
@@ -61,11 +90,12 @@ export default function AllSleepDataScreen() {
         return userSleepMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
     };
 
-    const handleSleepAdd = async (weight: number, date: Date) => {
+    // Updated to handle both duration and sleep/wake time data
+    const handleSleepAdd = async (sleepData: SleepSubmissionData, date: Date) => {
         try {
             await dispatch(
                 logSleepMeasurementAsync({
-                    durationInMinutes: weight,
+                    ...sleepData,
                     measurementTimestamp: date.toISOString(),
                 }),
             ).unwrap();
@@ -75,14 +105,15 @@ export default function AllSleepDataScreen() {
         }
     };
 
-    const handleSleepUpdate = async (weight: number) => {
+    // Updated to handle both duration and sleep/wake time data
+    const handleSleepUpdate = async (sleepData: SleepSubmissionData) => {
         if (!selectedMeasurement) return;
 
         try {
             await dispatch(
                 updateSleepMeasurementAsync({
                     timestamp: selectedMeasurement.MeasurementTimestamp,
-                    durationInMinutes: weight,
+                    ...sleepData,
                 }),
             ).unwrap();
             setSelectedMeasurement(null);
@@ -148,10 +179,15 @@ export default function AllSleepDataScreen() {
                     <ThemedText type='caption' style={styles.dateText}>
                         {`${dayOfWeek}, ${month} ${day}`}
                     </ThemedText>
-                    <ThemedText type='title' style={styles.weightText}>
-                        {/* {item.Weight.toFixed(1)} kg */}
-                        {Math.floor(item.DurationInMinutes / 60)} h {item.DurationInMinutes % 60} m
+                    <ThemedText type='title' style={styles.sleepText}>
+                        {formatSleepDisplay(item)}
                     </ThemedText>
+                    {/* Show duration as subtitle if we have sleep/wake times */}
+                    {item.SleepTime && item.WakeTime && (
+                        <ThemedText type='caption' style={styles.durationSubtext}>
+                            {Math.floor(item.DurationInMinutes / 60)}h {item.DurationInMinutes % 60}m sleep
+                        </ThemedText>
+                    )}
                 </View>
                 {sleepChange && (
                     <View style={styles.tileRight}>
@@ -165,7 +201,7 @@ export default function AllSleepDataScreen() {
                             ]}
                         >
                             {parseFloat(sleepChange) > 0 ? '+' : ''}
-                            {Math.floor(parseInt(sleepChange) / 60)} h {parseInt(sleepChange) % 60} m
+                            {formatSleepDuration(parseInt(sleepChange))}
                         </ThemedText>
                     </View>
                 )}
@@ -241,8 +277,12 @@ const styles = StyleSheet.create({
     dateText: {
         marginBottom: Spaces.XS,
     },
-    weightText: {
+    sleepText: {
         fontWeight: '600',
+    },
+    durationSubtext: {
+        marginTop: Spaces.XS,
+        opacity: 0.7,
     },
     changeText: {
         fontWeight: '500',

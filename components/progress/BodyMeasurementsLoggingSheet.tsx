@@ -264,7 +264,7 @@ export const BodyMeasurementsLoggingSheet: React.FC<BodyMeasurementsLoggingSheet
     };
 
     return (
-        <BottomSheet visible={visible} onClose={handleClose} style={Platform.OS === 'ios' ? { height: '62%' } : undefined}>
+        <BottomSheet visible={visible} onClose={handleClose} style={Platform.OS === 'ios' ? { height: '66%' } : undefined}>
             <View style={styles.container}>
                 {isSuccess ? (
                     renderSuccessAnimation()

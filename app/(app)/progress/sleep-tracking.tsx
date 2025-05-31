@@ -12,7 +12,7 @@ import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { SleepChart } from '@/components/progress/SleepChart';
 import { AppDispatch, RootState } from '@/store/store';
 import { TimeRange, aggregateData, calculateMovingAverage, getTimeRangeLabel, getAvailableTimeRanges, getInitialTimeRange } from '@/utils/charts';
-import { UserSleepMeasurement } from '@/types';
+import { UserSleepMeasurement, SleepSubmissionData } from '@/types';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { Icon } from '@/components/base/Icon';
 import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
@@ -23,6 +23,48 @@ const getSleepChange = (currentSleep: number, previousSleep: number | null) => {
     if (previousSleep === null) return null;
     const change = currentSleep - previousSleep;
     return change !== 0 ? change.toFixed(1) : null;
+};
+
+// Helper function to format time for display
+const formatTimeDisplay = (measurement: UserSleepMeasurement) => {
+    // If we have sleep/wake times, show them; otherwise show duration
+    if (measurement.SleepTime && measurement.WakeTime) {
+        // Convert 24-hour to 12-hour format for display
+        const formatTime = (time24: string) => {
+            const [hour24, minute] = time24.split(':');
+            let hour = parseInt(hour24);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+
+            if (hour === 0) {
+                hour = 12;
+            } else if (hour > 12) {
+                hour = hour - 12;
+            }
+
+            return `${hour}:${minute} ${ampm}`;
+        };
+
+        return `${formatTime(measurement.SleepTime)} - ${formatTime(measurement.WakeTime)}`;
+    }
+
+    // Fallback to duration display for legacy records
+    const hours = Math.floor(measurement.DurationInMinutes / 60);
+    const minutes = measurement.DurationInMinutes % 60;
+    return `${hours}h ${minutes}m`;
+};
+
+// Helper function to format duration for change display
+const formatSleepDuration = (minutes: number) => {
+    const hours = Math.floor(Math.abs(minutes) / 60);
+    const mins = Math.abs(minutes) % 60;
+
+    if (hours > 0 && mins > 0) {
+        return `${hours}h ${mins}m`;
+    } else if (hours > 0) {
+        return `${hours}h`;
+    } else {
+        return `${mins}m`;
+    }
 };
 
 export default function SleepTrackingScreen() {
@@ -47,15 +89,16 @@ export default function SleepTrackingScreen() {
         }
     }, [userSleepMeasurements]);
 
-    // Add handlers for weight modifications
-    const handleSleepUpdate = async (sleep: number) => {
+    // Updated handler for sleep modifications using new time-based format
+    const handleSleepUpdate = async (sleepData: SleepSubmissionData) => {
         if (!selectedMeasurement) return;
 
         try {
             await dispatch(
                 updateSleepMeasurementAsync({
                     timestamp: selectedMeasurement.MeasurementTimestamp,
-                    durationInMinutes: sleep,
+                    sleepTime: sleepData.sleepTime,
+                    wakeTime: sleepData.wakeTime,
                 }),
             ).unwrap();
             setSelectedMeasurement(null);
@@ -64,12 +107,13 @@ export default function SleepTrackingScreen() {
         }
     };
 
-    // Add the handleSleepAdd function
-    const handleSleepAdd = async (sleep: number, date: Date) => {
+    // Updated handler for adding sleep using new time-based format
+    const handleSleepAdd = async (sleepData: SleepSubmissionData, date: Date) => {
         try {
             await dispatch(
                 logSleepMeasurementAsync({
-                    durationInMinutes: sleep,
+                    sleepTime: sleepData.sleepTime,
+                    wakeTime: sleepData.wakeTime,
                     measurementTimestamp: date.toISOString(),
                 }),
             ).unwrap();
@@ -268,9 +312,15 @@ export default function SleepTrackingScreen() {
                     <ThemedText type='caption'>
                         {dayOfWeek}, {`${month} ${day}`}
                     </ThemedText>
-                    <ThemedText type='title' style={styles.weightText}>
-                        {Math.floor(item.DurationInMinutes / 60)}h {item.DurationInMinutes % 60}m
+                    <ThemedText type='title' style={styles.sleepText}>
+                        {formatTimeDisplay(item)}
                     </ThemedText>
+                    {/* Show duration as subtitle if we have sleep/wake times */}
+                    {item.SleepTime && item.WakeTime && (
+                        <ThemedText type='caption' style={styles.durationSubtext}>
+                            {Math.floor(item.DurationInMinutes / 60)}h {item.DurationInMinutes % 60}m sleep
+                        </ThemedText>
+                    )}
                 </View>
                 {sleepChange && (
                     <View style={styles.tileRight}>
@@ -283,14 +333,8 @@ export default function SleepTrackingScreen() {
                                 },
                             ]}
                         >
-                            {parseFloat(sleepChange) > 0 ? '+' : ''}
-                            {parseInt(sleepChange) > 0
-                                ? parseInt(sleepChange) > 59
-                                    ? `${Math.floor(parseInt(sleepChange) / 60)}h ${parseInt(sleepChange) % 60}m`
-                                    : `${sleepChange} m`
-                                : parseInt(sleepChange) < -59
-                                ? `- ${Math.floor((parseInt(sleepChange) * -1) / 60)}h ${(parseInt(sleepChange) * -1) % 60}m`
-                                : `${sleepChange} m`}
+                            {parseFloat(sleepChange) > 0 ? '+' : '-'}
+                            {formatSleepDuration(parseInt(sleepChange))}
                         </ThemedText>
                     </View>
                 )}
@@ -403,9 +447,13 @@ const styles = StyleSheet.create({
     tileRight: {
         marginLeft: Spaces.MD,
     },
-    weightText: {
+    sleepText: {
         marginTop: Spaces.XS,
         fontWeight: '600',
+    },
+    durationSubtext: {
+        marginTop: Spaces.XS,
+        opacity: 0.7,
     },
     changeText: {
         fontWeight: '500',
