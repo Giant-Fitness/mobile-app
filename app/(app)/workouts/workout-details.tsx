@@ -189,7 +189,7 @@ export default function WorkoutDetailScreen() {
     });
 
     return (
-        <ThemedView style={styles.container}>
+        <ThemedView style={[styles.container, { backgroundColor: themeColors.backgroundSecondary }]}>
             <AnimatedHeader scrollY={scrollY} headerInterpolationStart={Spaces.XXL} headerInterpolationEnd={Sizes.imageLGHeight} />
             <Animated.ScrollView
                 contentContainerStyle={{ flexGrow: 1 }}
@@ -256,7 +256,7 @@ export default function WorkoutDetailScreen() {
                         </ThemedView>
                     }
                 />
-                <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.backgroundTertiary }]}>
+                <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
                     {/* Description Container */}
                     <ThemedView style={[styles.descriptionContainer, { backgroundColor: themeColors.background }]}>
                         <ThemedText type='button' style={{ color: themeColors.text, paddingBottom: Spaces.MD }}>

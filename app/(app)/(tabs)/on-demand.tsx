@@ -158,7 +158,7 @@ export default function WorkoutsScreen() {
                     progressBackgroundColor={themeColors.background}
                 />
             }
-            style={styles.container}
+            style={[styles.container, { backgroundColor: themeColors.background }]}
             contentContainerStyle={styles.contentContainer}
         >
             <ThemedView style={styles.innerContainer}>

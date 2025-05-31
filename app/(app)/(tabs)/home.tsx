@@ -398,7 +398,7 @@ export default function HomeScreen() {
             refreshControl={
                 <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[themeColors.iconSelected]} tintColor={themeColors.iconSelected} />
             }
-            style={{ ...styles.container }}
+            style={[styles.container, { backgroundColor: themeColors.background }]}
         >
             <ThemedView style={{ paddingBottom: Spaces.SM }}>
                 {renderContent()}

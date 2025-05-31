@@ -68,6 +68,7 @@ export default function ProgramsScreen() {
     return (
         <ScrollView
             contentContainerStyle={{ flexGrow: 1 }}
+            style={[{ backgroundColor: themeColors.background }]}
             showsVerticalScrollIndicator={false}
             overScrollMode='never'
             refreshControl={

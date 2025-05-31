@@ -31,6 +31,8 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
 import { BodyMeasurementsLoggingSheet } from '@/components/progress/BodyMeasurementsLoggingSheet';
 import { debounce } from '@/utils/debounce';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/Colors';
 
 // Calculate card widths based on screen width (2 cards per row with gap)
 const { width } = Dimensions.get('window');
@@ -39,6 +41,8 @@ const HORIZONTAL_PADDING = Spaces.LG * 2; // Left and right padding
 const CARD_WIDTH = (width - HORIZONTAL_PADDING - CARD_GAP) / 2;
 
 export default function ProgressScreen() {
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
     const dispatch = useDispatch<AppDispatch>();
     const scrollY = useSharedValue(0);
 
@@ -218,7 +222,13 @@ export default function ProgressScreen() {
 
     return (
         <>
-            <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
+            <Animated.ScrollView
+                onScroll={scrollHandler}
+                scrollEventThrottle={16}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ flexGrow: 1 }}
+                style={[{ backgroundColor: themeColors.background }]}
+            >
                 <ThemedView style={styles.container}>
                     <ThemedView
                         style={{
