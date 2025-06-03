@@ -85,7 +85,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
 
             setTimeout(() => {
                 weightInputRef.current?.focus();
-            }, 300);
+            }, 100);
         }
     }, [visible, initialWeight, initialDate, getExistingData, bodyWeightPreference]);
 

@@ -145,7 +145,7 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
             setTimeout(() => {
                 inputRefs.current[firstEmptyIndex]?.focus();
                 scrollToInput(firstEmptyIndex);
-            }, 100);
+            }, 10);
         }
     };
 
@@ -182,7 +182,7 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
         if (visible && activeTab === 'log') {
             const timeoutId = setTimeout(() => {
                 focusFirstEmptySet();
-            }, 300);
+            }, 100);
             return () => clearTimeout(timeoutId);
         }
     }, [visible, activeTab, sets.length, extraSets.length]);

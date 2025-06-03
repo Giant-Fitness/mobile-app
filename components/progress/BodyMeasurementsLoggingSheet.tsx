@@ -87,7 +87,7 @@ export const BodyMeasurementsLoggingSheet: React.FC<BodyMeasurementsLoggingSheet
 
             setTimeout(() => {
                 waistInputRef.current?.focus();
-            }, 300);
+            }, 100);
         }
     }, [visible, getExistingData, initialDate, isEditing, measurementUnit]);
 

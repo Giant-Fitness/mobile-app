@@ -193,7 +193,7 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
 
             setTimeout(() => {
                 sleepHourInputRef.current?.focus();
-            }, 300);
+            }, 100);
         }
     }, [visible, initialSleep, initialDate, getExistingData]);
 
