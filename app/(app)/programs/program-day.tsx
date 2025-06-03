@@ -18,6 +18,7 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { TextButton } from '@/components/buttons/TextButton';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
+import { SlideUpActionButton } from '@/components/buttons/SlideUpActionButton';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { useProgramData } from '@/hooks/useProgramData';
 import { ProgramDaySkipModal } from '@/components/programs/ProgramDaySkipModal';
@@ -35,7 +36,6 @@ import { AVPlaybackStatus } from 'expo-av';
 import { ThumbnailVideoPlayer } from '@/components/media/ThumbnailVideoPlayer';
 import { usePostHog } from 'posthog-react-native';
 
-// fullscreenvidoeplayer, fullscreenvidoeplayerhandle,
 const ProgramDayScreen = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -53,6 +53,8 @@ const ProgramDayScreen = () => {
     const confettiRef = useRef<LottieView>(null);
     const videoPlayerRef = useRef<FullScreenVideoPlayerHandle>(null);
     const scrollY = useSharedValue(0);
+    const contentHeight = useSharedValue(0);
+    const scrollViewHeight = useSharedValue(0);
 
     const { programId, dayId } = useLocalSearchParams<{ programId: string; dayId: string }>();
     const { workouts } = useSelector((state: RootState) => state.workouts);
@@ -74,7 +76,6 @@ const ProgramDayScreen = () => {
     const [lastPlaybackPosition, setLastPlaybackPosition] = useState(0);
     const [reachedMilestones, setReachedMilestones] = useState(new Set());
     const MILESTONES = [0.25, 0.5, 0.75, 1.0];
-    // const SKIP_THRESHOLD = 0.25;
 
     // Load exercise histories for workout type days
     useEffect(() => {
@@ -124,24 +125,20 @@ const ProgramDayScreen = () => {
         },
     });
 
+    const handleContentSizeChange = (contentWidth: number, contentHeightValue: number) => {
+        contentHeight.value = contentHeightValue;
+    };
+
+    const handleScrollViewLayout = (event: any) => {
+        scrollViewHeight.value = event.nativeEvent.layout.height;
+    };
+
     const navigateToAllWorkouts = (initialFilters = {}) => {
         router.push({
             pathname: '/(app)/workouts/all-workouts',
             params: { initialFilters: JSON.stringify(initialFilters), source: 'program-rest-day' },
         });
     };
-
-    // const handleStartWorkout = () => {
-    //     if (programDay?.Type === 'video' && programDay.WorkoutId) {
-    //         if (videoPlayerRef.current) {
-    //             videoPlayerRef.current.startPlayback();
-    //             setReachedMilestones(new Set());
-    //             setLastPlaybackPosition(0);
-    //         }
-    //     } else {
-    //         finishDayChecker();
-    //     }
-    // };
 
     const finishDayChecker = async () => {
         if (userProgramProgress && userProgramProgress.CurrentDay < parseInt(dayId)) {
@@ -327,7 +324,7 @@ const ProgramDayScreen = () => {
                             styles.exercisesContainer,
                             { backgroundColor: themeColors.backgroundSecondary },
                             { paddingBottom: Spaces.XL },
-                            isEnrolled && { paddingBottom: Sizes.bottomSpaceLarge },
+                            // Remove bottom padding for slide up button
                         ]}
                     >
                         {programDay.Exercises.map((exercise, index) => (
@@ -363,42 +360,35 @@ const ProgramDayScreen = () => {
         );
     }
 
-    const renderDayButton = () => {
-        if (!isEnrolled) return null;
-
+    const renderDayButtonContent = () => {
         if (isDayCompleted) {
             return (
-                <View style={[styles.buttonContainer, programDay.Type === 'video' && { backgroundColor: themeColors.background, paddingBottom: Spaces.XXL }]}>
-                    <TextButton
-                        text='Day Completed'
-                        textType='bodyMedium'
-                        style={[styles.completeButton, { backgroundColor: themeColors.background }]}
-                        textStyle={{ color: themeColors.text }}
-                        iconColor={themeColors.text}
-                        onPress={() => setIsResetDayModalVisible(true)}
-                        iconName='check-outline'
-                        size='LG'
-                        disabled={isUncompletingDay}
-                        loading={isUncompletingDay}
-                    />
-                </View>
+                <TextButton
+                    text='Day Completed'
+                    textType='bodyMedium'
+                    style={[styles.completeButton, { backgroundColor: themeColors.background }]}
+                    textStyle={{ color: themeColors.text }}
+                    iconColor={themeColors.text}
+                    onPress={() => setIsResetDayModalVisible(true)}
+                    iconName='check-outline'
+                    size='LG'
+                    disabled={isUncompletingDay}
+                    loading={isUncompletingDay}
+                />
             );
         }
 
-        const CompleteButton = programDay.Type === 'video' ? TextButton : PrimaryButton;
-
         return (
-            <View style={[styles.buttonContainer, programDay.Type === 'video' && { backgroundColor: themeColors.background, paddingBottom: Spaces.XXL }]}>
-                <CompleteButton
+            <>
+                <PrimaryButton
                     text='Complete Day'
                     textType='bodyMedium'
-                    style={[styles.completeButton, programDay.Type !== 'video' && { backgroundColor: themeColors.buttonPrimary }]}
+                    style={[styles.completeButton, { backgroundColor: themeColors.buttonPrimary }]}
                     onPress={finishDayChecker}
                     size='LG'
                     disabled={isCompletingDay}
                     loading={isCompletingDay}
                 />
-
                 {programDay.RestDay && (
                     <TextButton
                         text='Mobility Workouts'
@@ -409,7 +399,55 @@ const ProgramDayScreen = () => {
                         onPress={() => navigateToAllWorkouts({ focus: ['Mobility'] })}
                     />
                 )}
-            </View>
+            </>
+        );
+    };
+
+    const renderDayButton = () => {
+        if (!isEnrolled) return null;
+
+        // For video days, keep the current absolute positioning
+        if (programDay.Type === 'video') {
+            return (
+                <View style={[styles.buttonContainer, { backgroundColor: themeColors.background, paddingBottom: Spaces.XXL }]}>
+                    {isDayCompleted ? (
+                        <TextButton
+                            text='Day Completed'
+                            textType='bodyMedium'
+                            style={[styles.completeButton, { backgroundColor: themeColors.background }]}
+                            textStyle={{ color: themeColors.text }}
+                            iconColor={themeColors.text}
+                            onPress={() => setIsResetDayModalVisible(true)}
+                            iconName='check-outline'
+                            size='LG'
+                            disabled={isUncompletingDay}
+                            loading={isUncompletingDay}
+                        />
+                    ) : (
+                        <TextButton
+                            text='Complete Day'
+                            textType='bodyMedium'
+                            style={styles.completeButton}
+                            onPress={finishDayChecker}
+                            size='LG'
+                            disabled={isCompletingDay}
+                            loading={isCompletingDay}
+                        />
+                    )}
+                </View>
+            );
+        }
+
+        // For completed days or rest days, use absolute positioning (old behavior)
+        if (isDayCompleted || programDay.RestDay) {
+            return <View style={[styles.buttonContainer, { backgroundColor: 'transparent' }]}>{renderDayButtonContent()}</View>;
+        }
+
+        // For active workout days, use the slide up button
+        return (
+            <SlideUpActionButton scrollY={scrollY} contentHeight={contentHeight} screenHeight={scrollViewHeight} bottomProximity={400} hideOnScrollUp={true}>
+                {renderDayButtonContent()}
+            </SlideUpActionButton>
         );
     };
 
@@ -421,10 +459,21 @@ const ProgramDayScreen = () => {
                 headerInterpolationEnd={Sizes.imageLGHeight}
                 onMenuPress={isEnrolled ? handleMenuPress : undefined}
             />
-            <Animated.ScrollView onScroll={scrollHandler} scrollEventThrottle={16} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
+            <Animated.ScrollView
+                onScroll={scrollHandler}
+                scrollEventThrottle={16}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ flexGrow: 1, paddingBottom: Spaces.XXXL }}
+                onContentSizeChange={handleContentSizeChange}
+                onLayout={handleScrollViewLayout}
+            >
                 {programDay.Type === 'video' ? renderVideoDay() : renderWorkoutDay()}
-                {renderDayButton()}
+                {/* Only render inline button for video days */}
+                {programDay.Type === 'video' && renderDayButton()}
             </Animated.ScrollView>
+
+            {/* Slide up button for workout days */}
+            {programDay.Type !== 'video' && renderDayButton()}
 
             {/* Video player for video type days */}
             {programDay.Type === 'video' && programDay.WorkoutId && workouts[programDay.WorkoutId] && (
@@ -517,10 +566,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: '10%',
         position: 'absolute',
-        bottom: Spaces.XXL,
+        bottom: Spaces.XL,
         left: 0,
         right: 0,
-        backgroundColor: 'transparent', // Add this for consistency
+        backgroundColor: 'transparent',
     },
     topCard: {
         paddingHorizontal: Spaces.LG,
