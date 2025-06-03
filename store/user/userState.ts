@@ -11,6 +11,7 @@ import {
     UserAppSettings,
     UserBodyMeasurement,
     UserExerciseSubstitution,
+    UserExerciseSetModification,
 } from '@/types';
 
 export interface UserState {
@@ -32,6 +33,8 @@ export interface UserState {
     userBodyMeasurementsState: REQUEST_STATE;
     userExerciseSubstitutions: UserExerciseSubstitution[];
     userExerciseSubstitutionsState: REQUEST_STATE;
+    userExerciseSetModifications: UserExerciseSetModification[];
+    userExerciseSetModificationsState: REQUEST_STATE;
     error: string | null;
 }
 
@@ -54,5 +57,7 @@ export const initialState: UserState = {
     userBodyMeasurementsState: REQUEST_STATE.IDLE,
     userExerciseSubstitutions: [],
     userExerciseSubstitutionsState: REQUEST_STATE.IDLE,
+    userExerciseSetModifications: [],
+    userExerciseSetModificationsState: REQUEST_STATE.IDLE,
     error: null,
 };

@@ -15,6 +15,10 @@ import {
     CreateSubstitutionParams,
     UpdateSubstitutionParams,
     GetSubstitutionsParams,
+    UserExerciseSetModification,
+    CreateSetModificationParams,
+    UpdateSetModificationParams,
+    GetSetModificationsParams,
 } from '@/types';
 import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
@@ -976,6 +980,167 @@ export const deleteBodyMeasurementAsync = createAsyncThunk<
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to delete body measurement',
+        });
+    }
+});
+
+export const getUserExerciseSetModificationsAsync = createAsyncThunk<
+    UserExerciseSetModification[],
+    { params?: GetSetModificationsParams; forceRefresh?: boolean; useCache?: boolean } | void,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/getUserExerciseSetModifications', async (args = {}, { getState, rejectWithValue }) => {
+    try {
+        const { params, forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Return cached modifications if available and not forcing refresh (only if no params)
+        if (
+            state.user.userExerciseSetModifications.length > 0 &&
+            state.user.userExerciseSetModificationsState === REQUEST_STATE.FULFILLED &&
+            !forceRefresh &&
+            !params // Only use cache if not filtering
+        ) {
+            return state.user.userExerciseSetModifications;
+        }
+
+        // Try cache first if enabled and not forcing refresh and no params
+        if (useCache && !forceRefresh && !params) {
+            const cacheKey = `exercise_set_modifications_${userId}`;
+            const cached = await cacheService.get<UserExerciseSetModification[]>(cacheKey);
+            const isExpired = await cacheService.isExpired(cacheKey);
+
+            if (cached && !isExpired) {
+                console.log('Loaded exercise set modifications from cache');
+                return cached;
+            }
+        }
+
+        // Load from API
+        console.log('Loading exercise set modifications from API');
+        const modifications = await UserService.getUserExerciseSetModifications(userId, params);
+
+        // Cache the result if useCache is enabled and no params (full list)
+        if (useCache && !params) {
+            const cacheKey = `exercise_set_modifications_${userId}`;
+            await cacheService.set(cacheKey, modifications, CacheTTL.LONG);
+        }
+
+        return modifications;
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch exercise set modifications',
+        });
+    }
+});
+
+// Helper function to refresh exercise set modifications
+const refreshExerciseSetModifications = async (userId: string, params?: GetSetModificationsParams) => {
+    return await UserService.getUserExerciseSetModifications(userId, params);
+};
+
+// Create a new exercise set modification
+export const createExerciseSetModificationAsync = createAsyncThunk<
+    UserExerciseSetModification[],
+    CreateSetModificationParams,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/createExerciseSetModification', async (modificationData, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Create the modification
+        await UserService.createExerciseSetModification(userId, modificationData);
+
+        // Invalidate cache after creation
+        const cacheKey = `exercise_set_modifications_${userId}`;
+        await cacheService.remove(cacheKey);
+
+        // Refresh and return all modifications
+        return await refreshExerciseSetModifications(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to create exercise set modification',
+        });
+    }
+});
+
+// Update an existing exercise set modification
+export const updateExerciseSetModificationAsync = createAsyncThunk<
+    UserExerciseSetModification[],
+    { modificationId: string; updates: UpdateSetModificationParams },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/updateExerciseSetModification', async ({ modificationId, updates }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Update the modification
+        await UserService.updateExerciseSetModification(userId, modificationId, updates);
+
+        // Invalidate cache after update
+        const cacheKey = `exercise_set_modifications_${userId}`;
+        await cacheService.remove(cacheKey);
+
+        // Refresh and return all modifications
+        return await refreshExerciseSetModifications(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to update exercise set modification',
+        });
+    }
+});
+
+// Delete an exercise set modification
+export const deleteExerciseSetModificationAsync = createAsyncThunk<
+    UserExerciseSetModification[],
+    { modificationId: string },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/deleteExerciseSetModification', async ({ modificationId }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Delete the modification
+        await UserService.deleteExerciseSetModification(userId, modificationId);
+
+        // Invalidate cache after deletion
+        const cacheKey = `exercise_set_modifications_${userId}`;
+        await cacheService.remove(cacheKey);
+
+        // Refresh and return all modifications
+        return await refreshExerciseSetModifications(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to delete exercise set modification',
         });
     }
 });

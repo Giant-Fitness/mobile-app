@@ -20,6 +20,7 @@ import {
     getUserAppSettingsAsync,
     getUserRecommendationsAsync,
     getUserExerciseSubstitutionsAsync,
+    getUserExerciseSetModificationsAsync,
 } from '@/store/user/thunks';
 import { getAllProgramsAsync } from '@/store/programs/thunks';
 import { getAllWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
@@ -109,6 +110,14 @@ export class InitializationService {
             thunk: getUserExerciseSubstitutionsAsync,
             cacheKey: 'exercise_substitutions',
             ttl: CacheTTL.VERY_LONG,
+            required: false,
+            args: { useCache: true },
+        },
+        {
+            key: 'exerciseSetModifications',
+            thunk: getUserExerciseSetModificationsAsync,
+            cacheKey: 'exercise_set_modifications',
+            ttl: CacheTTL.LONG,
             required: false,
             args: { useCache: true },
         },

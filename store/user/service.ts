@@ -13,6 +13,10 @@ import {
     CreateSubstitutionParams,
     UpdateSubstitutionParams,
     GetSubstitutionsParams,
+    UserExerciseSetModification,
+    CreateSetModificationParams,
+    UpdateSetModificationParams,
+    GetSetModificationsParams,
 } from '@/types';
 
 import { authUsersApiClient, authRecommendationsApiClient } from '@/utils/api/apiConfig';
@@ -419,6 +423,50 @@ const deleteExerciseSubstitution = async (userId: string, substitutionId: string
     }
 };
 
+// Exercise Set Modification Methods
+const getUserExerciseSetModifications = async (userId: string, params?: GetSetModificationsParams): Promise<UserExerciseSetModification[]> => {
+    console.log('service: getUserExerciseSetModifications');
+    try {
+        const { data } = await authUsersApiClient.get(`/users/${userId}/exercise-set-modifications`, { params });
+        return data.modifications || [];
+    } catch (error) {
+        throw handleApiError(error, 'GetUserExerciseSetModifications');
+    }
+};
+
+const createExerciseSetModification = async (userId: string, modificationData: CreateSetModificationParams): Promise<UserExerciseSetModification> => {
+    console.log('service: createExerciseSetModification');
+    try {
+        const { data } = await authUsersApiClient.post(`/users/${userId}/exercise-set-modifications`, modificationData);
+        return data.modification;
+    } catch (error) {
+        throw handleApiError(error, 'CreateExerciseSetModification');
+    }
+};
+
+const updateExerciseSetModification = async (
+    userId: string,
+    modificationId: string,
+    updates: UpdateSetModificationParams,
+): Promise<UserExerciseSetModification> => {
+    console.log('service: updateExerciseSetModification');
+    try {
+        const { data } = await authUsersApiClient.put(`/users/${userId}/exercise-set-modifications/${modificationId}`, updates);
+        return data.modification;
+    } catch (error) {
+        throw handleApiError(error, 'UpdateExerciseSetModification');
+    }
+};
+
+const deleteExerciseSetModification = async (userId: string, modificationId: string): Promise<void> => {
+    console.log('service: deleteExerciseSetModification');
+    try {
+        await authUsersApiClient.delete(`/users/${userId}/exercise-set-modifications/${modificationId}`);
+    } catch (error) {
+        throw handleApiError(error, 'DeleteExerciseSetModification');
+    }
+};
+
 export default {
     // User Profile
     getUser,
@@ -458,4 +506,9 @@ export default {
     createExerciseSubstitution,
     updateExerciseSubstitution,
     deleteExerciseSubstitution,
+    // Exercise Set Modifications
+    getUserExerciseSetModifications,
+    createExerciseSetModification,
+    updateExerciseSetModification,
+    deleteExerciseSetModification,
 };

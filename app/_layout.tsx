@@ -66,6 +66,7 @@ export default function RootLayout() {
 
     const [loaded] = useFonts({
         InterBold: require('../assets/fonts/Inter/Inter_18pt-Bold.ttf'),
+        InterSemiBold: require('../assets/fonts/Inter/Inter_18pt-SemiBold.ttf'),
         InterItalic: require('../assets/fonts/Inter/Inter_18pt-Italic.ttf'),
         InterMedium: require('../assets/fonts/Inter/Inter_18pt-Medium.ttf'),
         InterRegular: require('../assets/fonts/Inter/Inter_18pt-Regular.ttf'),

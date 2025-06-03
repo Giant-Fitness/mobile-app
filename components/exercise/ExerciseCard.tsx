@@ -52,7 +52,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
     const [forceUpdate, setForceUpdate] = useState(0);
 
     const { recentLogs, liftHistory } = useSelector((state: RootState) => state.exerciseProgress);
-    const { userExerciseSubstitutions } = useSelector((state: RootState) => state.user);
+    const { userExerciseSubstitutions, userExerciseSetModifications } = useSelector((state: RootState) => state.user);
     const { exercises } = useSelector((state: RootState) => state.exercises);
 
     // Find if this exercise has a substitution
@@ -76,6 +76,28 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
         return null;
     }, [substitution, exercises, forceUpdate]);
 
+    // Find applicable set modification for this exercise
+    const setModification = useMemo(() => {
+        if (!programId) return null;
+
+        const today = format(new Date(), 'yyyy-MM-dd');
+        const exerciseId = substituteExercise ? substituteExercise.ExerciseId : exercise.ExerciseId;
+
+        return userExerciseSetModifications.find(
+            (mod) =>
+                mod.ExerciseId === exerciseId &&
+                mod.ProgramId === programId &&
+                mod.OriginalSets === (exercise.Sets ?? 0) &&
+                // For temporary modifications, check if it's for today
+                (!mod.IsTemporary || (mod.IsTemporary && mod.TemporaryDate === today)),
+        );
+    }, [exercise.ExerciseId, exercise.Sets, programId, substituteExercise, userExerciseSetModifications, forceUpdate]);
+
+    // Calculate the effective number of sets (original + additional)
+    const effectiveSets = useMemo(() => {
+        return (exercise.Sets ?? 0) + (setModification?.AdditionalSets || 0);
+    }, [exercise.Sets, setModification]);
+
     // Calculate log button state based on today's progress
     const logButtonState = useMemo<LogButtonState>(() => {
         const today = format(new Date(), 'yyyy-MM-dd');
@@ -92,7 +114,8 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
         }
 
         const loggedSets = todaysLog.Sets.length;
-        const requiredSets = exercise.Sets ?? 0;
+        // Use effective sets (including modifications) for progress calculation
+        const requiredSets = effectiveSets;
 
         if (loggedSets >= requiredSets) {
             return { type: 'complete' };
@@ -102,7 +125,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
             type: 'partial',
             progress: loggedSets / requiredSets,
         };
-    }, [exercise.ExerciseId, exercise.Sets, substituteExercise, recentLogs, liftHistory]);
+    }, [exercise.ExerciseId, effectiveSets, substituteExercise, recentLogs, liftHistory]);
 
     const navigateToExerciseDetail = () => {
         // When navigating to a substituted exercise, we want to keep the workout parameters
@@ -113,15 +136,19 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
             // Create a new object that combines substitute exercise details with original exercise parameters
             targetExercise = {
                 ...substituteExercise,
-                // Inject the original exercise's workout parameters
-                Sets: exercise.Sets,
+                // Inject the original exercise's workout parameters (with modifications applied)
+                Sets: effectiveSets,
                 RepsLower: exercise.RepsLower,
                 RepsUpper: exercise.RepsUpper,
                 Rest: exercise.Rest,
                 ORMPercentage: exercise.ORMPercentage, // Include One Rep Max percentage if available
             };
         } else {
-            targetExercise = exercise;
+            targetExercise = {
+                ...exercise,
+                // Apply set modifications to original exercise
+                Sets: effectiveSets,
+            };
         }
 
         debounce(router, {
@@ -145,27 +172,42 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
         setForceUpdate((prev) => prev + 1);
     };
 
-    // Handle logging with substituted exercise
+    // Handle logging with substituted exercise and set modifications
     const handleLogPress = () => {
-        // If this exercise has a substitution, pass the substitute exercise to the log handler
+        // Create a callback to trigger re-render when logging sheet closes
+        const onLoggingSheetClose = () => {
+            setForceUpdate((prev) => prev + 1);
+        };
+
+        // FIXED: Pass the original exercise definition without set modifications applied
+        // The ExerciseLoggingSheet will handle modifications internally
         if (substituteExercise) {
             // Create an exercise object that combines the substitute exercise's details
-            // with the original exercise's workout parameters
+            // with the original exercise's workout parameters (WITHOUT set modifications)
             const logExercise = {
                 ...substituteExercise,
-                // Keep the original exercise's workout parameters
-                Sets: exercise.Sets,
+                // Keep the original exercise's workout parameters WITHOUT modifications
+                Sets: exercise.Sets, // Use original sets count, not effectiveSets
                 RepsLower: exercise.RepsLower,
                 RepsUpper: exercise.RepsUpper,
                 Rest: exercise.Rest,
                 ORMPercentage: exercise.ORMPercentage,
+                // Add callback for when logging completes
+                onLoggingComplete: onLoggingSheetClose,
             };
 
             // Pass the combined exercise to the log handler
             onLogPress(logExercise);
         } else {
-            // No substitution, use the original exercise
-            onLogPress(exercise);
+            // No substitution, use the original exercise WITHOUT set modifications
+            const logExercise = {
+                ...exercise,
+                // Don't modify Sets here - let ExerciseLoggingSheet handle it
+                // Sets: effectiveSets, // REMOVED - this was causing the double counting
+                // Add callback for when logging completes
+                onLoggingComplete: onLoggingSheetClose,
+            };
+            onLogPress(logExercise);
         }
     };
 
@@ -277,6 +319,15 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
                                 </ThemedText>
                             </View>
                         )}
+
+                        {/* Set Modification Tag */}
+                        {setModification && (
+                            <View style={styles.modificationTag}>
+                                <ThemedText type='caption' style={[styles.modificationText, { color: themeColors.tangerineSolid }]}>
+                                    {setModification.IsTemporary ? `+${setModification.AdditionalSets} sets today` : `+${setModification.AdditionalSets} sets`}
+                                </ThemedText>
+                            </View>
+                        )}
                     </View>
 
                     {/* Swap Icon Button */}
@@ -289,9 +340,11 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
             </ThemedView>
             <ThemedView style={styles.infoContainer}>
                 <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.tipBackground }]}>
-                    <ThemedText type='bodyMedium' style={[{ color: themeColors.tipText }]}>
-                        {exercise.Sets}
-                    </ThemedText>
+                    <View style={styles.setsContainer}>
+                        <ThemedText type='bodyMedium' style={[{ color: themeColors.tipText }]}>
+                            {effectiveSets}
+                        </ThemedText>
+                    </View>
                     <ThemedText type='bodySmall' style={[{ color: themeColors.tipText }]}>
                         Sets
                     </ThemedText>
@@ -366,6 +419,20 @@ const styles = StyleSheet.create({
     substitutionText: {
         marginLeft: 4,
         fontStyle: 'italic',
+    },
+    modificationTag: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 4,
+    },
+    modificationText: {
+        marginLeft: 4,
+        fontStyle: 'italic',
+        opacity: 0.8,
+    },
+    setsContainer: {
+        flexDirection: 'row',
+        alignItems: 'baseline',
     },
     card: {
         borderRadius: Spaces.SM,

@@ -303,7 +303,7 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
     // Render loading state
     const renderLoading = () => (
         <View style={styles.loadingContainer}>
-            <ActivityIndicator size='large' color={themeColors.buttonPrimary} />
+            <ActivityIndicator size='small' color={themeColors.subText} />
             <ThemedText type='body' style={styles.loadingText}>
                 Finding alternatives...
             </ThemedText>

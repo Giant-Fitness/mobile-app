@@ -31,6 +31,8 @@ import {
     getBodyMeasurementsAsync,
     logBodyMeasurementAsync,
     deleteBodyMeasurementAsync,
+    getUserExerciseSetModificationsAsync,
+    getUserExerciseSubstitutionsAsync,
 } from '@/store/user/thunks';
 import { AppDispatch, RootState } from '@/store/store';
 import { WorkoutCompletedSection } from '@/components/programs/WorkoutCompletedSection';
@@ -196,6 +198,8 @@ export default function HomeScreen() {
                     dispatch(getUserAppSettingsAsync({ forceRefresh: true })),
                     dispatch(getAllWorkoutsAsync({ forceRefresh: true })),
                     dispatch(getBodyMeasurementsAsync({ forceRefresh: true })),
+                    dispatch(getUserExerciseSetModificationsAsync({ forceRefresh: true })),
+                    dispatch(getUserExerciseSubstitutionsAsync({ forceRefresh: true })),
                 ]);
                 if (userProgramProgress?.ProgramId) {
                     await dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId, forceRefresh: true }));

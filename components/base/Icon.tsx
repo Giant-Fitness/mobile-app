@@ -114,6 +114,8 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
             return <AnimatedIonicons name='radio-button-off' {...commonProps} />;
         case 'plus':
             return <AnimatedFeather name='plus' {...commonProps} />;
+        case 'add':
+            return <AnimatedIonicons name='add-circle-outline' {...commonProps} />;
         case 'bed':
             return <AnimatedMaterialCommunityIcons name='bed-outline' {...commonProps} />;
         case 'bulb':

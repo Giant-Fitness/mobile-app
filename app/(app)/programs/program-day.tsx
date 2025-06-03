@@ -462,7 +462,9 @@ const ProgramDayScreen = () => {
                     />
                 </View>
             )}
-            {selectedExercise && <ExerciseLoggingSheet visible={isLoggingSheetVisible} onClose={handleLoggingSheetClose} exercise={selectedExercise} />}
+            {selectedExercise && (
+                <ExerciseLoggingSheet visible={isLoggingSheetVisible} onClose={handleLoggingSheetClose} exercise={selectedExercise} programId={programId} />
+            )}
             <BottomMenuModal isVisible={isBottomMenuVisible} onClose={() => setIsBottomMenuVisible(false)} options={menuOptions} />
         </ThemedView>
     );

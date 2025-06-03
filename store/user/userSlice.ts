@@ -32,6 +32,10 @@ import {
     createExerciseSubstitutionAsync,
     updateExerciseSubstitutionAsync,
     deleteExerciseSubstitutionAsync,
+    getUserExerciseSetModificationsAsync,
+    createExerciseSetModificationAsync,
+    updateExerciseSetModificationAsync,
+    deleteExerciseSetModificationAsync,
 } from '@/store/user/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import {
@@ -44,6 +48,7 @@ import {
     UserAppSettings,
     UserBodyMeasurement,
     UserExerciseSubstitution,
+    UserExerciseSetModification,
 } from '@/types';
 
 const userSlice = createSlice({
@@ -460,6 +465,62 @@ const userSlice = createSlice({
             .addCase(deleteExerciseSubstitutionAsync.rejected, (state, action) => {
                 state.userExerciseSubstitutionsState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'Failed to delete exercise substitution';
+            })
+
+            // Get Exercise Set Modifications
+            .addCase(getUserExerciseSetModificationsAsync.pending, (state) => {
+                state.userExerciseSetModificationsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(getUserExerciseSetModificationsAsync.fulfilled, (state, action: PayloadAction<UserExerciseSetModification[]>) => {
+                state.userExerciseSetModificationsState = REQUEST_STATE.FULFILLED;
+                state.userExerciseSetModifications = action.payload;
+            })
+            .addCase(getUserExerciseSetModificationsAsync.rejected, (state, action) => {
+                state.userExerciseSetModificationsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to fetch exercise set modifications';
+            })
+
+            // Create Exercise Set Modification
+            .addCase(createExerciseSetModificationAsync.pending, (state) => {
+                state.userExerciseSetModificationsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(createExerciseSetModificationAsync.fulfilled, (state, action: PayloadAction<UserExerciseSetModification[]>) => {
+                state.userExerciseSetModificationsState = REQUEST_STATE.FULFILLED;
+                state.userExerciseSetModifications = action.payload;
+            })
+            .addCase(createExerciseSetModificationAsync.rejected, (state, action) => {
+                state.userExerciseSetModificationsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to create exercise set modification';
+            })
+
+            // Update Exercise Set Modification
+            .addCase(updateExerciseSetModificationAsync.pending, (state) => {
+                state.userExerciseSetModificationsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(updateExerciseSetModificationAsync.fulfilled, (state, action: PayloadAction<UserExerciseSetModification[]>) => {
+                state.userExerciseSetModificationsState = REQUEST_STATE.FULFILLED;
+                state.userExerciseSetModifications = action.payload;
+            })
+            .addCase(updateExerciseSetModificationAsync.rejected, (state, action) => {
+                state.userExerciseSetModificationsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to update exercise set modification';
+            })
+
+            // Delete Exercise Set Modification
+            .addCase(deleteExerciseSetModificationAsync.pending, (state) => {
+                state.userExerciseSetModificationsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(deleteExerciseSetModificationAsync.fulfilled, (state, action: PayloadAction<UserExerciseSetModification[]>) => {
+                state.userExerciseSetModificationsState = REQUEST_STATE.FULFILLED;
+                state.userExerciseSetModifications = action.payload;
+            })
+            .addCase(deleteExerciseSetModificationAsync.rejected, (state, action) => {
+                state.userExerciseSetModificationsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to delete exercise set modification';
             });
     },
 });
