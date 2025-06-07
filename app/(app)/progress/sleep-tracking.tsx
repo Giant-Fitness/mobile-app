@@ -1,3 +1,5 @@
+// app/(app)/progress/sleep-tracking.tsx
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { StyleSheet, View, TouchableOpacity, SectionList } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -89,7 +91,6 @@ export default function SleepTrackingScreen() {
         }
     }, [userSleepMeasurements]);
 
-    // Updated handler for sleep modifications using new time-based format
     const handleSleepUpdate = async (sleepData: SleepSubmissionData) => {
         if (!selectedMeasurement) return;
 
@@ -107,7 +108,6 @@ export default function SleepTrackingScreen() {
         }
     };
 
-    // Updated handler for adding sleep using new time-based format
     const handleSleepAdd = async (sleepData: SleepSubmissionData, date: Date) => {
         try {
             await dispatch(

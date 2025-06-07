@@ -90,7 +90,6 @@ export default function AllSleepDataScreen() {
         return userSleepMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
     };
 
-    // Updated to handle both duration and sleep/wake time data
     const handleSleepAdd = async (sleepData: SleepSubmissionData, date: Date) => {
         try {
             await dispatch(
@@ -105,7 +104,6 @@ export default function AllSleepDataScreen() {
         }
     };
 
-    // Updated to handle both duration and sleep/wake time data
     const handleSleepUpdate = async (sleepData: SleepSubmissionData) => {
         if (!selectedMeasurement) return;
 

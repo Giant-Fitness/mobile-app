@@ -250,7 +250,6 @@ const getSleepMeasurements = async (userId: string): Promise<UserSleepMeasuremen
     }
 };
 
-// Updated to support both duration and sleep/wake time formats
 const logSleepMeasurement = async (userId: string, sleepParams: SleepMeasurementParams, measurementTimestamp: string): Promise<UserSleepMeasurement> => {
     console.log('service: logSleepMeasurement');
     try {
@@ -275,7 +274,6 @@ const logSleepMeasurement = async (userId: string, sleepParams: SleepMeasurement
     }
 };
 
-// Updated to support both duration and sleep/wake time formats
 const updateSleepMeasurement = async (userId: string, timestamp: string, sleepParams: SleepMeasurementParams): Promise<UserSleepMeasurement> => {
     console.log('service: updateSleepMeasurement');
     try {
