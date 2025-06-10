@@ -18,7 +18,15 @@ import { RootState } from '@/store/store';
 import { Exercise } from '@/types/programTypes';
 import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
 import { lightenColor } from '@/utils/colorUtils';
-import { ExerciseLog } from '@/types/exerciseProgressTypes';
+import {
+    ExerciseLog,
+    SetInput,
+    getExerciseLoggingMode,
+    supportsWeight,
+    requiresWeight,
+    formatTimeDisplay,
+    parseTimeInput,
+} from '@/types/exerciseProgressTypes';
 import { AppDispatch } from '@/store/store';
 import { Sizes } from '@/constants/Sizes';
 import { TextButton } from '@/components/buttons/TextButton';
@@ -33,11 +41,6 @@ interface ExerciseLoggingSheetProps {
 }
 
 type Tab = 'log' | 'history';
-
-interface SetInput {
-    reps: string;
-    weight: string;
-}
 
 export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visible, onClose, exercise, editDate, programId }) => {
     const dispatch = useDispatch<AppDispatch>();
@@ -65,6 +68,12 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
     const scrollViewRef = useRef<ScrollView>(null);
     const inputRefs = useRef<(TextInput | null)[]>([]);
 
+    // Get exercise logging mode
+    const loggingMode = getExerciseLoggingMode(exercise);
+    const showWeight = supportsWeight(loggingMode);
+    const weightRequired = requiresWeight(loggingMode);
+    const isTimeBasedLogging = exercise.LoggingType === 'time';
+
     // Find existing modification for this exercise
     const existingModification = React.useMemo(() => {
         if (!programId) return null;
@@ -78,13 +87,29 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
     const loadSetsData = () => {
         // If editing a past log
         if (editingLog) {
-            const logSets = editingLog.Sets.map((set) => ({
-                reps: set.Reps.toString(),
-                weight:
-                    liftWeightPreference === 'lbs'
-                        ? formatWeightForDisplay(set.Weight, 'lbs').split(' ')[0]
-                        : formatWeightForDisplay(set.Weight, 'kgs').split(' ')[0],
-            }));
+            const logSets = editingLog.Sets.map((set) => {
+                const setData: SetInput = {};
+
+                // Handle reps
+                if (set.Reps !== undefined) {
+                    setData.reps = set.Reps.toString();
+                }
+
+                // Handle time
+                if (set.Time !== undefined) {
+                    setData.time = formatTimeDisplay(set.Time);
+                }
+
+                // Handle weight
+                if (set.Weight !== undefined) {
+                    setData.weight =
+                        liftWeightPreference === 'lbs'
+                            ? formatWeightForDisplay(set.Weight, 'lbs').split(' ')[0]
+                            : formatWeightForDisplay(set.Weight, 'kgs').split(' ')[0];
+                }
+
+                return setData;
+            });
 
             // Split into original and extra sets based on exercise definition
             const originalSetsCount = exercise.Sets ?? 0;
@@ -109,21 +134,47 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
         // Create empty structure
         const emptySets = Array(totalExpectedSets)
             .fill(null)
-            .map(() => ({ reps: '', weight: '' }));
+            .map(() => {
+                const setData: SetInput = {};
+                if (!isTimeBasedLogging) setData.reps = '';
+                if (isTimeBasedLogging) setData.time = '';
+                if (showWeight) setData.weight = '';
+                return setData;
+            });
 
         if (todaysLog) {
             // Fill with existing log data, but maintain the original/extra split
-            const filledSets = todaysLog.Sets.map((set) => ({
-                reps: set.Reps.toString(),
-                weight:
-                    liftWeightPreference === 'lbs'
-                        ? formatWeightForDisplay(set.Weight, 'lbs').split(' ')[0]
-                        : formatWeightForDisplay(set.Weight, 'kgs').split(' ')[0],
-            }));
+            const filledSets = todaysLog.Sets.map((set) => {
+                const setData: SetInput = {};
+
+                // Handle reps
+                if (set.Reps !== undefined) {
+                    setData.reps = set.Reps.toString();
+                }
+
+                // Handle time
+                if (set.Time !== undefined) {
+                    setData.time = formatTimeDisplay(set.Time);
+                }
+
+                // Handle weight
+                if (set.Weight !== undefined) {
+                    setData.weight =
+                        liftWeightPreference === 'lbs'
+                            ? formatWeightForDisplay(set.Weight, 'lbs').split(' ')[0]
+                            : formatWeightForDisplay(set.Weight, 'kgs').split(' ')[0];
+                }
+
+                return setData;
+            });
 
             // Pad with empty sets if needed
             while (filledSets.length < totalExpectedSets) {
-                filledSets.push({ reps: '', weight: '' });
+                const setData: SetInput = {};
+                if (!isTimeBasedLogging) setData.reps = '';
+                if (isTimeBasedLogging) setData.time = '';
+                if (showWeight) setData.weight = '';
+                filledSets.push(setData);
             }
 
             return {
@@ -140,7 +191,13 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
 
     const focusFirstEmptySet = () => {
         const allSets = [...sets, ...extraSets];
-        const firstEmptyIndex = allSets.findIndex((set) => !set.reps);
+        const firstEmptyIndex = allSets.findIndex((set) => {
+            if (isTimeBasedLogging) {
+                return !set.time;
+            } else {
+                return !set.reps;
+            }
+        });
         if (firstEmptyIndex >= 0) {
             setTimeout(() => {
                 inputRefs.current[firstEmptyIndex]?.focus();
@@ -187,7 +244,7 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
         }
     }, [visible, activeTab, sets.length, extraSets.length]);
 
-    const handleSetChange = (index: number, field: 'reps' | 'weight', value: string) => {
+    const handleSetChange = (index: number, field: keyof SetInput, value: string) => {
         const allSets = [...sets, ...extraSets];
         const newSets = [...allSets];
         newSets[index][field] = value;
@@ -198,7 +255,11 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
     };
 
     const addExtraSet = () => {
-        const newExtraSet = { reps: '', weight: '' };
+        const newExtraSet: SetInput = {};
+        if (!isTimeBasedLogging) newExtraSet.reps = '';
+        if (isTimeBasedLogging) newExtraSet.time = '';
+        if (showWeight) newExtraSet.weight = '';
+
         setExtraSets([...extraSets, newExtraSet]);
 
         setTimeout(() => {
@@ -236,21 +297,18 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
         }
 
         // Check if exercise data actually changed (using same logic as handleSave)
-
         const setsChanged = sets.some((set, index) => {
             if (index >= initialSetsSnapshot.length) {
                 return false;
             }
-            const changed = set.reps !== initialSetsSnapshot[index]?.reps || set.weight !== initialSetsSnapshot[index]?.weight;
-            return changed;
+            return JSON.stringify(set) !== JSON.stringify(initialSetsSnapshot[index]);
         });
 
         const extraSetsDataChanged = extraSets.some((set, index) => {
             if (index >= initialExtraSetsSnapshot.length) {
                 return false;
             }
-            const changed = set.reps !== initialExtraSetsSnapshot[index]?.reps || set.weight !== initialExtraSetsSnapshot[index]?.weight;
-            return changed;
+            return JSON.stringify(set) !== JSON.stringify(initialExtraSetsSnapshot[index]);
         });
 
         const exerciseDataChanged = setsChanged || extraSetsDataChanged;
@@ -263,7 +321,15 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
         // For exercise data changes, ensure we have valid sets
         if (exerciseDataChanged) {
             const allSets = [...sets, ...extraSets];
-            const validSets = allSets.filter((set) => parseInt(set.reps) > 0 && (parseInt(set.weight) >= 0 || set.weight === ''));
+            const validSets = allSets.filter((set) => {
+                if (isTimeBasedLogging) {
+                    const timeValue = parseTimeInput(set.time || '');
+                    return timeValue > 0;
+                } else {
+                    const repsValue = parseInt(set.reps || '');
+                    return repsValue > 0;
+                }
+            });
             const hasValidSets = validSets.length > 0;
 
             if (hasValidSets) {
@@ -321,6 +387,7 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
             </View>
         );
     };
+
     const getSuccessMessage = () => {
         // If editing an existing log
         if (editingLog) {
@@ -329,22 +396,28 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
 
         // For new logs, check what type of change was made
         const allCurrentSets = [...sets, ...extraSets];
-        const hasActualExerciseData = allCurrentSets.some((set) => parseInt(set.reps) > 0 && set.weight && set.weight !== '');
+        const hasActualExerciseData = allCurrentSets.some((set) => {
+            if (isTimeBasedLogging) {
+                return parseTimeInput(set.time || '') > 0;
+            } else {
+                return parseInt(set.reps || '') > 0;
+            }
+        });
 
         // Check if only the set structure changed (extra sets added/removed)
         const initialExtraSetCount = initialExtraSetsSnapshot.length;
         const currentExtraSetCount = extraSets.length;
         const extraSetsChanged = initialExtraSetCount !== currentExtraSetCount;
 
-        // Check if actual exercise data changed (using same logic as handleSave)
+        // Check if actual exercise data changed
         const setsChanged = sets.some((set, index) => {
             if (index >= initialSetsSnapshot.length) return false;
-            return set.reps !== initialSetsSnapshot[index]?.reps || set.weight !== initialSetsSnapshot[index]?.weight;
+            return JSON.stringify(set) !== JSON.stringify(initialSetsSnapshot[index]);
         });
 
         const extraSetsDataChanged = extraSets.some((set, index) => {
             if (index >= initialExtraSetsSnapshot.length) return false;
-            return set.reps !== initialExtraSetsSnapshot[index]?.reps || set.weight !== initialExtraSetsSnapshot[index]?.weight;
+            return JSON.stringify(set) !== JSON.stringify(initialExtraSetsSnapshot[index]);
         });
 
         const exerciseDataChanged = setsChanged || extraSetsDataChanged;
@@ -374,30 +447,50 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
             const allSets = [...sets, ...extraSets];
 
             const validSets = allSets
-                .filter((set) => parseInt(set.reps) > 0)
-                .map((set, index) => ({
-                    SetNumber: index + 1,
-                    Reps: parseInt(set.reps),
-                    Weight: parseWeightForStorage(set.weight, weightUnit),
-                    Timestamp: format(new Date(), 'HH:mm:ss'),
-                }));
+                .filter((set) => {
+                    if (isTimeBasedLogging) {
+                        return parseTimeInput(set.time || '') > 0;
+                    } else {
+                        return parseInt(set.reps || '') > 0;
+                    }
+                })
+                .map((set, index) => {
+                    const exerciseSet: any = {
+                        SetNumber: index + 1,
+                        Timestamp: format(new Date(), 'HH:mm:ss'),
+                    };
 
-            // Check if exercise data actually changed (not just exists)
-            // Only compare sets that existed initially - don't count new empty sets as "data changed"
+                    // Add reps if it's a reps-based exercise
+                    if (!isTimeBasedLogging && set.reps) {
+                        exerciseSet.Reps = parseInt(set.reps);
+                    }
+
+                    // Add time if it's a time-based exercise
+                    if (isTimeBasedLogging && set.time) {
+                        exerciseSet.Time = parseTimeInput(set.time);
+                    }
+
+                    // Add weight if it's supported and provided
+                    if (showWeight && set.weight) {
+                        exerciseSet.Weight = parseWeightForStorage(set.weight, weightUnit);
+                    }
+
+                    return exerciseSet;
+                });
+
+            // Check if exercise data actually changed
             const setsChanged = sets.some((set, index) => {
                 if (index >= initialSetsSnapshot.length) {
                     return false;
                 }
-                const changed = set.reps !== initialSetsSnapshot[index]?.reps || set.weight !== initialSetsSnapshot[index]?.weight;
-                return changed;
+                return JSON.stringify(set) !== JSON.stringify(initialSetsSnapshot[index]);
             });
 
             const extraSetsDataChanged = extraSets.some((set, index) => {
                 if (index >= initialExtraSetsSnapshot.length) {
                     return false;
                 }
-                const changed = set.reps !== initialExtraSetsSnapshot[index]?.reps || set.weight !== initialExtraSetsSnapshot[index]?.weight;
-                return changed;
+                return JSON.stringify(set) !== JSON.stringify(initialExtraSetsSnapshot[index]);
             });
 
             const exerciseDataChanged = setsChanged || extraSetsDataChanged;
@@ -480,7 +573,7 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                 }
             }
 
-            // Show success and close - this will now show for both exercise logging and set modifications
+            // Show success and close
             const successMessage = getSuccessMessage();
 
             setShowSuccess({
@@ -644,38 +737,41 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                     </ThemedText>
                 </View>
 
-                {/* Weight input */}
-                <View style={styles.setInputContainer}>
-                    <TextInput
-                        ref={(el) => (inputRefs.current[index] = el)}
-                        style={[styles.input, { color: themeColors.text }, isExtraSet && { borderColor: themeColors.text }]}
-                        value={set.weight}
-                        onChangeText={(value) => handleSetChange(index, 'weight', value)}
-                        keyboardType='numeric'
-                        placeholder='0'
-                        placeholderTextColor={themeColors.subText}
-                        onFocus={() => scrollToInput(index)}
-                        showSoftInputOnFocus={true}
-                    />
-                    <ThemedText type='bodySmall' style={styles.inputLabel}>
-                        {liftWeightPreference === 'lbs' ? 'lbs' : 'kgs'}
-                    </ThemedText>
-                </View>
+                {/* Weight input (if supported) */}
+                {showWeight && (
+                    <View style={styles.setInputContainer}>
+                        <TextInput
+                            ref={(el) => (inputRefs.current[index * 3] = el)}
+                            style={[styles.input, { color: themeColors.text }, isExtraSet && { borderColor: themeColors.text }]}
+                            value={set.weight || ''}
+                            onChangeText={(value) => handleSetChange(index, 'weight', value)}
+                            keyboardType='numeric'
+                            placeholder={weightRequired ? '0' : 'optional'}
+                            placeholderTextColor={themeColors.subText}
+                            onFocus={() => scrollToInput(index)}
+                            showSoftInputOnFocus={true}
+                        />
+                        <ThemedText type='bodySmall' style={styles.inputLabel}>
+                            {liftWeightPreference === 'lbs' ? 'lbs' : 'kgs'}
+                        </ThemedText>
+                    </View>
+                )}
 
-                {/* Reps input */}
+                {/* Primary metric input (reps or time) */}
                 <View style={styles.setInputContainer}>
                     <TextInput
+                        ref={(el) => (inputRefs.current[index * 3 + 1] = el)}
                         style={[styles.input, { color: themeColors.text }, isExtraSet && { borderColor: themeColors.text }]}
-                        value={set.reps}
-                        onChangeText={(value) => handleSetChange(index, 'reps', value)}
-                        keyboardType='numeric'
-                        placeholder='0'
+                        value={isTimeBasedLogging ? set.time || '' : set.reps || ''}
+                        onChangeText={(value) => handleSetChange(index, isTimeBasedLogging ? 'time' : 'reps', value)}
+                        keyboardType={isTimeBasedLogging ? 'default' : 'numeric'}
+                        placeholder={isTimeBasedLogging ? '0:00' : '0'}
                         placeholderTextColor={themeColors.subText}
                         onFocus={() => scrollToInput(index)}
                         showSoftInputOnFocus={true}
                     />
                     <ThemedText type='bodySmall' style={styles.inputLabel}>
-                        {`${exercise.RepsLower}-${exercise.RepsUpper} reps`}
+                        {isTimeBasedLogging ? 'mm:ss' : `${exercise.RepsLower}-${exercise.RepsUpper} reps`}
                     </ThemedText>
                 </View>
 
@@ -729,10 +825,6 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                 renderSuccessAnimation()
             ) : (
                 <>
-                    {/* <ThemedText type='body' style={styles.dateText}>
-                        {format(selectedDate, 'dd/MM/yyyy')}
-                    </ThemedText> */}
-
                     <ScrollView
                         ref={scrollViewRef}
                         keyboardShouldPersistTaps='always'
@@ -779,9 +871,24 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
             const month = date.toLocaleDateString('default', { month: 'short' });
             const day = date.getDate();
             const weightUnit: 'kgs' | 'lbs' = liftWeightPreference === 'lbs' ? 'lbs' : 'kgs';
-            const setsDisplay = `${log.Sets.length} sets - ${log.Sets.map((set) => formatWeightForDisplay(set.Weight, weightUnit) + ` × ${set.Reps}`).join(
-                ', ',
-            )}`;
+
+            const setsDisplay = `${log.Sets.length} ${log.Sets.length === 1 ? 'set' : 'sets'} - ${log.Sets.map((set) => {
+                let setStr = '';
+
+                if (set.Weight !== undefined && showWeight) {
+                    setStr += formatWeightForDisplay(set.Weight, weightUnit);
+                }
+
+                if (set.Reps !== undefined) {
+                    setStr += setStr ? ` × ${set.Reps}` : `${set.Reps} ${set.Reps === 1 ? 'rep' : 'reps'}`;
+                }
+
+                if (set.Time !== undefined) {
+                    setStr += setStr ? ` × ${formatTimeDisplay(set.Time)}` : formatTimeDisplay(set.Time);
+                }
+
+                return setStr;
+            }).join(', ')}`;
 
             return (
                 <TouchableOpacity
@@ -791,13 +898,29 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                         setActiveTab('log');
                         setSelectedDate(date);
 
-                        const logSets = log.Sets.map((set) => ({
-                            reps: set.Reps.toString(),
-                            weight:
-                                liftWeightPreference === 'lbs'
-                                    ? formatWeightForDisplay(set.Weight, 'lbs').split(' ')[0]
-                                    : formatWeightForDisplay(set.Weight, 'kgs').split(' ')[0],
-                        }));
+                        const logSets = log.Sets.map((set) => {
+                            const setData: SetInput = {};
+
+                            // Handle reps
+                            if (set.Reps !== undefined) {
+                                setData.reps = set.Reps.toString();
+                            }
+
+                            // Handle time
+                            if (set.Time !== undefined) {
+                                setData.time = formatTimeDisplay(set.Time);
+                            }
+
+                            // Handle weight
+                            if (set.Weight !== undefined) {
+                                setData.weight =
+                                    liftWeightPreference === 'lbs'
+                                        ? formatWeightForDisplay(set.Weight, 'lbs').split(' ')[0]
+                                        : formatWeightForDisplay(set.Weight, 'kgs').split(' ')[0];
+                            }
+
+                            return setData;
+                        });
 
                         const originalSetsCount = exercise.Sets ?? 0;
                         const newSets = logSets.slice(0, originalSetsCount);
@@ -913,12 +1036,6 @@ const styles = StyleSheet.create({
         paddingBottom: Spaces.SM,
         borderBottomWidth: 2,
         borderBottomColor: 'transparent',
-    },
-    dateText: {
-        textAlign: 'center',
-        marginTop: Spaces.MD,
-        paddingBottom: Spaces.SM,
-        paddingHorizontal: Spaces.SM,
     },
     logContainer: {
         flex: 1,

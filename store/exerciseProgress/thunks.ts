@@ -201,6 +201,36 @@ export const saveExerciseProgressAsync = createAsyncThunk(
             const userId = state.user.user?.UserId;
             if (!userId) return rejectWithValue({ errorMessage: 'User ID not available' });
 
+            // Validate sets before sending to backend
+            if (!sets || sets.length === 0) {
+                return rejectWithValue({ errorMessage: 'At least one set is required' });
+            }
+
+            // Basic validation for sets
+            for (let i = 0; i < sets.length; i++) {
+                const set = sets[i];
+
+                // At least one of Reps or Time must be provided
+                if ((set.Reps === undefined || set.Reps === null) && (set.Time === undefined || set.Time === null)) {
+                    return rejectWithValue({ errorMessage: `Set ${i + 1}: Either reps or time must be provided` });
+                }
+
+                // If Reps is provided, it must be > 0
+                if (set.Reps !== undefined && set.Reps !== null && set.Reps <= 0) {
+                    return rejectWithValue({ errorMessage: `Set ${i + 1}: Reps must be greater than 0` });
+                }
+
+                // If Time is provided, it must be > 0
+                if (set.Time !== undefined && set.Time !== null && set.Time <= 0) {
+                    return rejectWithValue({ errorMessage: `Set ${i + 1}: Time must be greater than 0 seconds` });
+                }
+
+                // If Weight is provided, it must be >= 0
+                if (set.Weight !== undefined && set.Weight !== null && set.Weight < 0) {
+                    return rejectWithValue({ errorMessage: `Set ${i + 1}: Weight must be greater than or equal to 0` });
+                }
+            }
+
             const log = await ExerciseProgressService.saveExerciseProgress(userId, exerciseId, date, sets);
 
             // Invalidate relevant caches after saving

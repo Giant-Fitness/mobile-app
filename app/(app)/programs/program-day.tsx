@@ -30,7 +30,7 @@ import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle } from '@/components
 import { getDayOfWeek, getWeekNumber } from '@/utils/calendar';
 import { fetchExercisesRecentHistoryAsync } from '@/store/exerciseProgress/thunks';
 import { AppDispatch, RootState } from '@/store/store';
-import { Exercise } from '@/types';
+import { Exercise, isExerciseLoggable } from '@/types';
 import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
 import { AVPlaybackStatus } from 'expo-av';
 import { ThumbnailVideoPlayer } from '@/components/media/ThumbnailVideoPlayer';
@@ -80,7 +80,7 @@ const ProgramDayScreen = () => {
     // Load exercise histories for workout type days
     useEffect(() => {
         if (programDay?.Type === 'workout' && programDay.Exercises) {
-            const exerciseIds = programDay.Exercises.filter((exercise) => !isLongTermTrackedLift(exercise.ExerciseId) && exercise.Type === 'strength').map(
+            const exerciseIds = programDay.Exercises.filter((exercise) => !isLongTermTrackedLift(exercise.ExerciseId) && isExerciseLoggable(exercise)).map(
                 (exercise) => exercise.ExerciseId,
             );
 
@@ -332,7 +332,7 @@ const ProgramDayScreen = () => {
                                 key={exercise.ExerciseId}
                                 exercise={exercise}
                                 isEnrolled={isEnrolled}
-                                showLoggingButton={exercise.Type === 'strength'}
+                                showLoggingButton={isExerciseLoggable(exercise)}
                                 onLogPress={handleExerciseLogPress}
                                 exerciseNumber={index + 1}
                                 programId={programId}

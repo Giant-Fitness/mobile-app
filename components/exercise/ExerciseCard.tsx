@@ -21,6 +21,7 @@ import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
 import { scale } from '@/utils/scaling';
 import { debounce } from '@/utils/debounce';
 import { ExerciseAlternativesBottomSheet } from '@/components/exercise/ExerciseAlternativesBottomSheet';
+import { isExerciseLoggable } from '@/types/exerciseProgressTypes';
 
 type LogButtonState = {
     type: 'empty' | 'partial' | 'complete';
@@ -54,6 +55,9 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
     const { recentLogs, liftHistory } = useSelector((state: RootState) => state.exerciseProgress);
     const { userExerciseSubstitutions, userExerciseSetModifications } = useSelector((state: RootState) => state.user);
     const { exercises } = useSelector((state: RootState) => state.exercises);
+
+    // Determine if this exercise can be logged
+    const canLog = isExerciseLoggable(exercise);
 
     // Find if this exercise has a substitution
     const substitution = useMemo(() => {
@@ -100,6 +104,8 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
 
     // Calculate log button state based on today's progress
     const logButtonState = useMemo<LogButtonState>(() => {
+        if (!canLog) return { type: 'empty' };
+
         const today = format(new Date(), 'yyyy-MM-dd');
         // When logging, we want to log against the substitute exercise ID if it exists
         const exerciseIdToLog = substituteExercise ? substituteExercise.ExerciseId : exercise.ExerciseId;
@@ -125,7 +131,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
             type: 'partial',
             progress: loggedSets / requiredSets,
         };
-    }, [exercise.ExerciseId, effectiveSets, substituteExercise, recentLogs, liftHistory]);
+    }, [exercise.ExerciseId, effectiveSets, substituteExercise, recentLogs, liftHistory, canLog]);
 
     const navigateToExerciseDetail = () => {
         // When navigating to a substituted exercise, we want to keep the workout parameters
@@ -203,7 +209,6 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
             const logExercise = {
                 ...exercise,
                 // Don't modify Sets here - let ExerciseLoggingSheet handle it
-                // Sets: effectiveSets, // REMOVED - this was causing the double counting
                 // Add callback for when logging completes
                 onLoggingComplete: onLoggingSheetClose,
             };
@@ -212,7 +217,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
     };
 
     const renderLogButton = () => {
-        if (!showLoggingButton) return null;
+        if (!showLoggingButton || !canLog) return null;
 
         let buttonContent;
         switch (logButtonState.type) {
@@ -285,7 +290,21 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
         );
     };
 
-    const repRangeLabel = exercise.LoggingType === 'time' ? 'secs' : 'Reps';
+    // Get appropriate label for reps/time display
+    const getMetricLabel = () => {
+        if (exercise.LoggingType === 'time') {
+            return 'secs';
+        }
+        return 'Reps';
+    };
+
+    const getMetricRange = () => {
+        if (exercise.LoggingType === 'time') {
+            // For time-based exercises, show the time range if available
+            return exercise.RepsLower && exercise.RepsUpper ? `${exercise.RepsLower}-${exercise.RepsUpper}` : 'Target';
+        }
+        return `${exercise.RepsLower}-${exercise.RepsUpper}`;
+    };
 
     return (
         <ThemedView
@@ -351,10 +370,10 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
                 </ThemedView>
                 <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.tipBackground }]}>
                     <ThemedText type='bodyMedium' style={[{ color: themeColors.tipText }]}>
-                        {exercise.RepsLower}-{exercise.RepsUpper}
+                        {getMetricRange()}
                     </ThemedText>
                     <ThemedText type='bodySmall' style={[{ color: themeColors.tipText }]}>
-                        {repRangeLabel}
+                        {getMetricLabel()}
                     </ThemedText>
                 </ThemedView>
                 <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.tipBackground }]}>
