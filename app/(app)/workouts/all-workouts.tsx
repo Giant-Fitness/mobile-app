@@ -22,6 +22,7 @@ import { REQUEST_STATE } from '@/constants/requestStates';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { Workout } from '@/types';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
+import { trigger } from 'react-native-haptic-feedback';
 
 const MemoizedWorkoutDetailedCard = React.memo(WorkoutDetailedCard);
 
@@ -149,6 +150,7 @@ export default function AllWorkoutsScreen() {
     const handleRefresh = async () => {
         try {
             setRefreshing(true);
+            trigger('impactHeavy');
             await dispatch(getAllWorkoutsAsync({ forceRefresh: true }));
             setTimeout(() => {
                 setRefreshing(false);

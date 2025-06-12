@@ -8,6 +8,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
+import { trigger } from 'react-native-haptic-feedback';
 
 interface WorkoutCompletedSectionProps {
     onBrowseSolos: () => void;
@@ -51,7 +52,10 @@ export const WorkoutCompletedSection = ({ onBrowseSolos }: WorkoutCompletedSecti
             <LargeActionTile
                 title={actionTitle}
                 description='Explore solo workouts to supplement your training'
-                onPress={onBrowseSolos}
+                onPress={() => {
+                    onBrowseSolos();
+                    trigger('impactMedium');
+                }}
                 backgroundColor={themeColors.containerHighlight}
                 textColor={themeColors.highlightContainerText}
                 image={image}

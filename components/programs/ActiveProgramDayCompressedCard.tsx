@@ -1,7 +1,5 @@
-// components/programs/ActiveProgramDayCompressedCard.tsx
-
-import React from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import React, { useRef } from 'react';
+import { StyleSheet, View, Animated } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -19,9 +17,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Workout } from '@/types';
 import { ProgramDay } from '@/types';
 import { debounce } from '@/utils/debounce';
+import { trigger } from 'react-native-haptic-feedback';
 
 // Cast ShimmerPlaceHolder to the correct type
 const ShimmerPlaceholder = ShimmerPlaceHolder as unknown as React.ComponentType<any>;
+
+// Create an Animated Touchable
+const AnimatedTouchable = Animated.createAnimatedComponent(Animated.View as any);
 
 type ActiveProgramDayCompressedCardProps = {
     source: 'home';
@@ -41,6 +43,9 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
     const currentDay = programId && dayId ? programDays[programId]?.[dayId] : null;
     const currentDayState = programId && dayId ? programDaysState[programId]?.[dayId] : REQUEST_STATE.IDLE;
 
+    // Animation value
+    const scaleAnim = useRef(new Animated.Value(1)).current;
+
     const getDisplayImage = (day: ProgramDay, workouts: Record<string, Workout>) => {
         if (day.Type === 'video' && day.WorkoutId && workouts[day.WorkoutId]) {
             return { uri: workouts[day.WorkoutId].PhotoUrl };
@@ -48,9 +53,8 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
         return { uri: day.PhotoUrl };
     };
 
-    // Loading and error states are handled below
+    // Loading and error states
     if (currentDayState === REQUEST_STATE.PENDING || !currentDay) {
-        // Render shimmer effect
         return (
             <View style={[styles.shadowContainer, { backgroundColor: themeColors.background }]}>
                 <ShimmerPlaceholder
@@ -72,7 +76,6 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
     }
 
     if (currentDayState === REQUEST_STATE.REJECTED || !currentDay) {
-        // Render an error message or placeholder
         return (
             <ThemedView style={[styles.cardContainer, { backgroundColor: themeColors.background }]}>
                 <ThemedText>Error loading the current day.</ThemedText>
@@ -80,31 +83,49 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
         );
     }
 
+    const handlePressIn = () => {
+        Animated.spring(scaleAnim, {
+            toValue: 0.97,
+            friction: 3,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const handlePressOut = () => {
+        Animated.spring(scaleAnim, {
+            toValue: 1,
+            friction: 3,
+            useNativeDriver: true,
+        }).start();
+    };
+
     const navigateToProgramDay = () => {
         if (programId && dayId) {
             debounce(
                 router,
                 {
                     pathname: '/(app)/programs/program-day',
-                    params: {
-                        programId,
-                        dayId,
-                        source,
-                    },
+                    params: { programId, dayId, source },
                 },
                 1200,
             );
         }
     };
 
-    const day = currentDay;
-
     return (
-        <View style={[styles.shadowContainer, { backgroundColor: themeColors.background }]}>
-            <TouchableOpacity onPress={navigateToProgramDay} style={styles.cardContainer} activeOpacity={1}>
+        <AnimatedTouchable
+            onTouchStart={handlePressIn}
+            onTouchEnd={() => {
+                handlePressOut();
+                trigger('impactLight');
+                navigateToProgramDay();
+            }}
+            style={[styles.cardContainer, { transform: [{ scale: scaleAnim }] }]}
+        >
+            <View>
                 <ImageTextOverlay
                     image={getDisplayImage(currentDay, workouts)}
-                    title={day.DayTitle}
+                    title={currentDay.DayTitle}
                     gradientColors={['transparent', 'rgba(0,0,0,0.65)']}
                     containerStyle={{ height: '100%' }}
                     textContainerStyle={{ bottom: Spaces.LG }}
@@ -113,8 +134,8 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
                     titleStyle={{ marginRight: Spaces.LG, lineHeight: moderateScale(20) }}
                     subtitleStyle={{ marginTop: Spaces.XS }}
                 />
-            </TouchableOpacity>
-        </View>
+            </View>
+        </AnimatedTouchable>
     );
 };
 
@@ -125,7 +146,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 1,
         shadowRadius: 4,
         elevation: 5, // For Android
-        borderRadius: Spaces.SM, // Match the child border radius
+        borderRadius: Spaces.SM,
     },
     cardContainer: {
         width: '100%',

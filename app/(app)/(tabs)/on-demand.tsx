@@ -19,6 +19,7 @@ import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { debounce } from '@/utils/debounce';
 import { router } from 'expo-router';
 import { getAllWorkoutsAsync } from '@/store/workouts/thunks';
+import { trigger } from 'react-native-haptic-feedback';
 
 export default function WorkoutsScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -123,6 +124,8 @@ export default function WorkoutsScreen() {
         if (refreshing) return;
 
         setRefreshing(true);
+        trigger('impactHeavy');
+
         try {
             await Promise.all([dispatch(getSpotlightWorkoutsAsync({ forceRefresh: true })), dispatch(getAllWorkoutsAsync({ forceRefresh: true }))]);
         } catch (err) {

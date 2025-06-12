@@ -1,7 +1,7 @@
 // app/(app)/workouts/workout-details.tsx
 
 import React, { useEffect, useRef, useState } from 'react';
-import { RefreshControl, StyleSheet, View } from 'react-native';
+import { RefreshControl, StyleSheet, View, Vibration } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useSelector, useDispatch } from 'react-redux';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -25,6 +25,7 @@ import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { SlideUpActionButton } from '@/components/buttons/SlideUpActionButton';
 import { AVPlaybackStatus } from 'expo-av';
 import { usePostHog } from 'posthog-react-native';
+import { trigger } from 'react-native-haptic-feedback';
 
 export default function WorkoutDetailScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -92,6 +93,7 @@ export default function WorkoutDetailScreen() {
     const handleRefresh = async () => {
         try {
             setRefreshing(true);
+            trigger('impactHeavy');
             await dispatch(getWorkoutAsync({ workoutId, forceRefresh: true })).unwrap();
             setTimeout(() => {
                 setRefreshing(false);
@@ -279,7 +281,10 @@ export default function WorkoutDetailScreen() {
                     text='Start Workout'
                     textType='bodyMedium'
                     style={styles.startButton}
-                    onPress={handleStartWorkout}
+                    onPress={() => {
+                        handleStartWorkout();
+                        Vibration.vibrate(200);
+                    }}
                     size='LG'
                     loading={isVideoLoading}
                     disabled={isVideoLoading}

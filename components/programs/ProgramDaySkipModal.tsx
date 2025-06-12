@@ -45,6 +45,8 @@ export const ProgramDaySkipModal: React.FC<ProgramDaySkipModalProps> = ({ visibl
                         style={[styles.button, { backgroundColor: themeColors.background, borderWidth: 1, borderColor: themeColors.redTransparent }]}
                         textType='bodyXSmall'
                         textStyle={[styles.buttonTextStyle, { color: themeColors.red }]}
+                        haptic='notificationSuccess'
+                        //change to vibration
                     />
                     <PrimaryButton text='No, Go Back' onPress={onClose} style={styles.button} textType='bodyXSmall' textStyle={styles.buttonTextStyle} />
                 </View>

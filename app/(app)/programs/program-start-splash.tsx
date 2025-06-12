@@ -1,7 +1,7 @@
 // app/(app)/programs/program-start-splash.tsx
 
 import React, { useRef } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
+import { View, StyleSheet, Animated, Vibration } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
@@ -51,6 +51,8 @@ export default function ProgramStartSplashScreen() {
                     useNativeDriver: true,
                 }),
             ]).start();
+
+            Vibration.vibrate(400);
 
             // Set up navigation timer
             const timer = setTimeout(() => {

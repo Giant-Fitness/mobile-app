@@ -12,6 +12,7 @@ import { ProgramAbandonData } from '@/types/feedbackTypes';
 import { AppDispatch, RootState } from '@/store/store';
 import { sendProgramAbandonFeedbackAsync } from '@/store/feedback/thunks';
 import { BackHandler } from 'react-native';
+import { trigger } from 'react-native-haptic-feedback';
 
 export default function ProgramAbandonFeedbackScreen() {
     const router = useRouter();
@@ -51,6 +52,7 @@ export default function ProgramAbandonFeedbackScreen() {
     const handleSubmit = async ({ data }: FeedbackFormResult<ProgramAbandonData>) => {
         if (user?.UserId && programId) {
             try {
+                trigger('notificationSuccess');
                 await dispatch(
                     sendProgramAbandonFeedbackAsync({
                         userId: user.UserId,

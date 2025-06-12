@@ -23,6 +23,8 @@ import { useDispatch } from 'react-redux';
 import { getProgramAsync } from '@/store/programs/thunks';
 import { AppDispatch } from '@/store/store';
 import { usePostHog } from 'posthog-react-native';
+import { debounce } from '@/utils/debounce';
+import { trigger } from 'react-native-haptic-feedback';
 
 const ProgramOverviewScreen = () => {
     const router = useRouter();
@@ -54,6 +56,7 @@ const ProgramOverviewScreen = () => {
     const handleRefresh = async () => {
         try {
             setRefreshing(true);
+            trigger('impactHeavy');
             await dispatch(getProgramAsync({ programId, forceRefresh: true }));
             setTimeout(() => {
                 setRefreshing(false);
@@ -214,7 +217,7 @@ const ProgramOverviewScreen = () => {
                             {isOnAProgram && isOnThisProgram && (
                                 <TextButton
                                     text='View Progress'
-                                    onPress={() => router.push('/(app)/programs/active-program-progress')}
+                                    onPress={() => debounce(router, { pathname: '/(app)/programs/active-program-progress' })}
                                     textType='bodyMedium'
                                     size='LG'
                                     style={[styles.calendarButton, { marginTop: Spaces.MD }]}
@@ -227,7 +230,14 @@ const ProgramOverviewScreen = () => {
 
             {!isOnAProgram && (
                 <SlideUpActionButton scrollY={scrollY} slideUpThreshold={0}>
-                    <PrimaryButton text='Start Program' textType='bodyMedium' style={styles.startButton} onPress={handleStartProgram} size='LG' />
+                    <PrimaryButton
+                        text='Start Program'
+                        textType='bodyMedium'
+                        style={styles.startButton}
+                        onPress={handleStartProgram}
+                        size='LG'
+                        haptic='impactHeavy'
+                    />
                 </SlideUpActionButton>
             )}
             <OverwriteProgramModal

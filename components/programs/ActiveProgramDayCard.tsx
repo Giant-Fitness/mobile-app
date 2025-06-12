@@ -19,6 +19,7 @@ import { router } from 'expo-router';
 import { Workout } from '@/types';
 import { ProgramDay } from '@/types';
 import { debounce } from '@/utils/debounce';
+import { trigger } from 'react-native-haptic-feedback';
 
 type ActiveProgramDayCardProps = {
     source: 'active-program-home';
@@ -85,7 +86,10 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = ({ sour
                 image={getDisplayImage(currentDay, workouts)}
                 title={day.DayTitle}
                 subtitle={`Week ${currentWeek} Day ${dayOfWeek}`}
-                onPress={navigateToProgramDay}
+                onPress={() => {
+                    navigateToProgramDay();
+                    trigger('impactHeavy');
+                }}
                 extraContent={
                     day.RestDay ? (
                         <ThemedView style={[styles.attributeRow, { marginLeft: 0, marginTop: -Spaces.XXS }]}>

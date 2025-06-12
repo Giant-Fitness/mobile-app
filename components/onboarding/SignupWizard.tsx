@@ -96,16 +96,16 @@ export const SignupWizard: React.FC<SignupWizardProps> = ({ steps, onComplete, I
                 onValidityChange={setIsCurrentStepValid}
             />
             <View style={styles.navigation}>
-                <IconButton iconName='chevron-back' onPress={handleBack} style={styles.backButton} size='MD' iconSize={Spaces.MD} />
+                <IconButton iconName='chevron-back' onPress={handleBack} style={styles.backButton} iconSize={Spaces.MD} />
                 {!isLastStep ? (
                     <IconButton
                         iconName='chevron-forward'
                         onPress={() => formRef.current?.submitForm()}
                         style={[styles.nextButton, { backgroundColor: themeColors.buttonPrimary }, !isCurrentStepValid && styles.disabledButton]}
                         iconColor={themeColors.buttonPrimaryText}
-                        size='MD'
                         iconSize={Spaces.MD}
                         disabled={!isCurrentStepValid}
+                        haptic='soft'
                     />
                 ) : (
                     <View style={styles.submitButtonContainer}>
@@ -121,6 +121,7 @@ export const SignupWizard: React.FC<SignupWizardProps> = ({ steps, onComplete, I
                             iconColor={themeColors.buttonPrimaryText}
                             disabled={!isCurrentStepValid || isLoading}
                             loading={isLoading}
+                            haptic='notificationSuccess'
                         />
                     </View>
                 )}
@@ -149,12 +150,14 @@ const styles = StyleSheet.create({
         position: 'absolute',
         left: Spaces.LG,
         bottom: Spaces.XXL,
+        alignItems: 'center',
     },
     nextButton: {
         position: 'absolute',
         right: Spaces.LG,
         bottom: Spaces.XXL,
         opacity: 0.8,
+        alignItems: 'center',
     },
     submitButtonContainer: {
         flexDirection: 'row',

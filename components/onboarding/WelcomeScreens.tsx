@@ -173,6 +173,7 @@ const WelcomeScreens: React.FC = () => {
                         style={styles.button}
                         textStyle={{ color: themeColors.buttonPrimaryText }}
                         size='MD'
+                        haptic='impactHeavy'
                     />
                 </Animated.View>
             </View>

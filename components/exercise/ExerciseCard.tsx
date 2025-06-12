@@ -22,6 +22,7 @@ import { scale } from '@/utils/scaling';
 import { debounce } from '@/utils/debounce';
 import { ExerciseAlternativesBottomSheet } from '@/components/exercise/ExerciseAlternativesBottomSheet';
 import { isExerciseLoggable } from '@/types/exerciseProgressTypes';
+import { trigger } from 'react-native-haptic-feedback';
 
 type LogButtonState = {
     type: 'empty' | 'partial' | 'complete';
@@ -284,7 +285,11 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
         }
 
         return (
-            <TextButton onPress={handleLogPress} style={[styles.logButton, { backgroundColor: lightenColor(themeColors.buttonPrimary, 0.1) }]}>
+            <TextButton
+                onPress={handleLogPress}
+                style={[styles.logButton, { backgroundColor: lightenColor(themeColors.buttonPrimary, 0.1) }]}
+                haptic='impactLight'
+            >
                 {buttonContent}
             </TextButton>
         );
@@ -351,7 +356,14 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
 
                     {/* Swap Icon Button */}
                     {isEnrolled && (
-                        <TouchableOpacity onPress={handleSwapPress} style={styles.swapButton} hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}>
+                        <TouchableOpacity
+                            onPress={() => {
+                                handleSwapPress();
+                                trigger('impactLight');
+                            }}
+                            style={styles.swapButton}
+                            hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
+                        >
                             <Icon name='swap' size={24} color={substitution ? themeColors.tangerineSolid : themeColors.text} />
                         </TouchableOpacity>
                     )}

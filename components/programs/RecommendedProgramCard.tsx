@@ -1,7 +1,5 @@
-// components/programs/RecommendedProgramCard.tsx
-
-import React from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import React, { useRef } from 'react';
+import { StyleSheet, View, Animated, TouchableOpacity } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
@@ -9,6 +7,9 @@ import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { Program } from '@/types';
+
+// Wrap TouchableOpacity to support animated transforms
+const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
 type RecommendedProgramCardProps = {
     program: Program;
@@ -18,13 +19,36 @@ type RecommendedProgramCardProps = {
 export const RecommendedProgramCard: React.FC<RecommendedProgramCardProps> = ({ program, onPress }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
-
     const shadowColor = 'rgba(0,0,0,0.2)';
+
+    // Animation value for press feedback
+    const scaleAnim = useRef(new Animated.Value(1)).current;
+
+    const handlePressIn = () => {
+        Animated.spring(scaleAnim, {
+            toValue: 0.97,
+            friction: 3,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const handlePressOut = () => {
+        Animated.spring(scaleAnim, {
+            toValue: 1,
+            friction: 3,
+            useNativeDriver: true,
+        }).start();
+    };
+
     return (
-        <TouchableOpacity
-            onPress={onPress}
-            style={[styles.shadowContainer, { shadowColor: shadowColor, backgroundColor: themeColors.background }]}
+        <AnimatedTouchable
             activeOpacity={1}
+            onPressIn={handlePressIn}
+            onPressOut={() => {
+                handlePressOut();
+                onPress();
+            }}
+            style={[styles.shadowContainer, { shadowColor, backgroundColor: themeColors.background, transform: [{ scale: scaleAnim }] }]}
         >
             <View style={styles.cardContainer}>
                 <View style={styles.imageContainer}>
@@ -41,7 +65,7 @@ export const RecommendedProgramCard: React.FC<RecommendedProgramCardProps> = ({ 
                     />
                 </View>
             </View>
-        </TouchableOpacity>
+        </AnimatedTouchable>
     );
 };
 

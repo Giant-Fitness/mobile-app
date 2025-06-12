@@ -18,6 +18,7 @@ import { Sizes } from '@/constants/Sizes';
 import { RootState } from '@/store/store';
 import { useSelector } from 'react-redux';
 import { formatWeightForDisplay, parseWeightForStorage } from '@/utils/unitConversion';
+import { IconButton } from '../buttons/IconButton';
 
 interface WeightLoggingSheetProps {
     visible: boolean;
@@ -272,50 +273,66 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
                 ) : (
                     <>
                         <ThemedView style={[styles.header, { borderBottomColor: themeColors.systemBorderColor }]}>
-                            <TouchableOpacity onPress={handleClose} style={styles.headerButton} disabled={isSubmitting || isDeleting}>
-                                <Icon name='close' size={20} color={themeColors.text} />
-                            </TouchableOpacity>
+                            <IconButton
+                                onPress={handleClose}
+                                iconName='close'
+                                iconSize={20}
+                                size={21}
+                                style={styles.headerButton}
+                                addBorder={false}
+                                disabled={isSubmitting || isDeleting}
+                            />
 
                             <ThemedText type='title'>{isEditingMode ? 'Edit Weight' : 'Log Weight'}</ThemedText>
 
                             <View style={styles.headerRight}>
                                 {isEditingMode && onDelete && (
-                                    <TouchableOpacity onPress={handleDelete} style={styles.deleteButton} disabled={isSubmitting || isDeleting}>
+                                    <>
                                         {isDeleting ? (
-                                            <ActivityIndicator size='small' color={themeColors.subText} />
+                                            <ActivityIndicator size='small' style={styles.deleteButton} color={themeColors.subText} />
                                         ) : (
-                                            <Icon name='trash' color={isSubmitting ? themeColors.subText : themeColors.subText} size={18} />
+                                            <IconButton
+                                                onPress={handleDelete}
+                                                iconName='trash'
+                                                iconSize={18}
+                                                size={20}
+                                                style={styles.deleteButton}
+                                                addBorder={false}
+                                                haptic='impactLight'
+                                                disabled={isSubmitting || isDeleting}
+                                            />
                                         )}
-                                    </TouchableOpacity>
+                                    </>
                                 )}
-                                <TouchableOpacity
-                                    onPress={handleSubmit}
-                                    disabled={
-                                        isSubmitting ||
-                                        isDeleting ||
-                                        isNaN(parseFloat(weight)) ||
-                                        parseFloat(weight) === 0 ||
-                                        (isEditingMode && originalWeight === parseFloat(weight))
-                                    }
-                                >
-                                    {isSubmitting ? (
-                                        <ActivityIndicator size='small' color={themeColors.text} />
-                                    ) : (
-                                        <Icon
-                                            name='check'
-                                            size={24}
-                                            color={
-                                                !isSubmitting &&
-                                                !isDeleting &&
-                                                !isNaN(parseFloat(weight)) &&
-                                                parseFloat(weight) !== 0 &&
-                                                (!isEditingMode || originalWeight !== parseFloat(weight))
-                                                    ? themeColors.text
-                                                    : lightenColor(themeColors.subText, 0.8)
-                                            }
-                                        />
-                                    )}
-                                </TouchableOpacity>
+
+                                {isSubmitting ? (
+                                    <ActivityIndicator size='small' color={themeColors.subText} />
+                                ) : (
+                                    <IconButton
+                                        onPress={handleSubmit}
+                                        iconName='check'
+                                        iconSize={22}
+                                        size={25}
+                                        iconColor={
+                                            !isSubmitting &&
+                                            !isDeleting &&
+                                            !isNaN(parseFloat(weight)) &&
+                                            parseFloat(weight) !== 0 &&
+                                            (!isEditingMode || originalWeight !== parseFloat(weight))
+                                                ? themeColors.text
+                                                : lightenColor(themeColors.subText, 0.8)
+                                        }
+                                        addBorder={false}
+                                        haptic='notificationSuccess'
+                                        disabled={
+                                            isSubmitting ||
+                                            isDeleting ||
+                                            isNaN(parseFloat(weight)) ||
+                                            parseFloat(weight) === 0 ||
+                                            (isEditingMode && originalWeight === parseFloat(weight))
+                                        }
+                                    />
+                                )}
                             </View>
                         </ThemedView>
 

@@ -16,6 +16,7 @@ import { Icon } from '@/components/base/Icon';
 import { useInactiveProgramData } from '@/hooks/useInactiveProgramData';
 import { router } from 'expo-router';
 import { debounce } from '@/utils/debounce';
+import { trigger } from 'react-native-haptic-feedback';
 
 interface MenuItemProps {
     title: string;
@@ -98,7 +99,10 @@ export default function InactiveProgramHome() {
                 ? 'Let us recommend a plan tailored to your goals'
                 : 'Our structured training plans turn your goals into achievements',
             image: !isOnboardingComplete ? require('@/assets/images/wand.png') : require('@/assets/images/clipboard.png'),
-            onPress: () => navigateTo(!isOnboardingComplete ? 'programs/program-recommender-wizard' : 'programs/browse-programs'),
+            onPress: () => {
+                navigateTo(!isOnboardingComplete ? 'programs/program-recommender-wizard' : 'programs/browse-programs');
+                trigger('impactHeavy');
+            },
             backgroundColor: themeColors.containerHighlight,
             textColor: themeColors.highlightContainerText,
             descriptionColor: lightenColor(themeColors.subTextSecondary, 0.1),

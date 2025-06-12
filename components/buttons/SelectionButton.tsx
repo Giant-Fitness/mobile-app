@@ -7,6 +7,7 @@ import { Icon } from '@/components/base/Icon';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { trigger } from 'react-native-haptic-feedback';
 
 interface SelectionOption {
     key: string;
@@ -23,9 +24,19 @@ interface SelectionButtonProps {
     textStyle?: TextStyle;
     subTextStyle?: TextStyle;
     iconStyle?: ViewStyle;
+    haptic?: 'impactLight' | 'impactMedium' | 'impactHeavy' | 'rigid' | 'soft' | 'notificationError' | 'notificationSuccess' | 'notificationWarning' | 'none';
 }
 
-export const SelectionButton: React.FC<SelectionButtonProps> = ({ option, isSelected, onSelect, containerStyle, textStyle, subTextStyle, iconStyle }) => {
+export const SelectionButton: React.FC<SelectionButtonProps> = ({
+    option,
+    isSelected,
+    onSelect,
+    containerStyle,
+    textStyle,
+    subTextStyle,
+    iconStyle,
+    haptic = 'none',
+}) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
@@ -41,7 +52,16 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({ option, isSele
     const textColor = isSelected ? themeColors.buttonPrimaryText : themeColors.text;
 
     return (
-        <TouchableOpacity style={buttonStyle} onPress={() => onSelect(option.key)} activeOpacity={0.9}>
+        <TouchableOpacity
+            style={buttonStyle}
+            onPress={() => {
+                if (haptic !== 'none') {
+                    trigger(haptic);
+                }
+                onSelect(option.key);
+            }}
+            activeOpacity={0.9}
+        >
             {option.icon && (
                 <View style={[styles.iconContainer, iconStyle]}>
                     <Icon name={option.icon} size={Spaces.MD} color={textColor} />

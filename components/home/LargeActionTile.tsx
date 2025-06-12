@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View, Image, ImageSourcePropType, ViewStyle } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { ThemedText, ThemedTextProps } from '@/components/base/ThemedText';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
@@ -19,6 +20,9 @@ interface LargeActionTileProps {
     containerStyle?: ViewStyle;
 }
 
+// Create an animated version of TouchableOpacity using Reanimated
+const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
+
 export const LargeActionTile = ({
     title,
     description,
@@ -31,11 +35,33 @@ export const LargeActionTile = ({
     containerStyle,
     imageSize = Sizes.imageSM,
 }: LargeActionTileProps) => {
+    // Shared value for scale animation
+    const scale = useSharedValue(1);
+
+    // Animated style applying scale transform
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: scale.value }],
+    }));
+
+    // Shrink on press in to 95%
+    const handlePressIn = () => {
+        scale.value = withTiming(0.95, { duration: 100 });
+    };
+
+    // Return to normal on press out
+    const handlePressOut = () => {
+        scale.value = withTiming(1, { duration: 100 });
+    };
+
     return (
-        <TouchableOpacity
+        <AnimatedTouchable
             onPress={onPress}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+            activeOpacity={0.9}
             style={[
                 styles.container,
+                animatedStyle,
                 {
                     backgroundColor,
                     padding: Spaces.LG,
@@ -43,9 +69,8 @@ export const LargeActionTile = ({
                     marginHorizontal: Spaces.LG,
                     marginBottom: Spaces.XL,
                 },
-                containerStyle, // Applied last like in PrimaryButton
+                containerStyle,
             ]}
-            activeOpacity={0.9}
         >
             <View style={styles.contentContainer}>
                 <ThemedText type={titleSize} style={[styles.title, { color: textColor, textAlign: 'center' }]}>
@@ -55,18 +80,8 @@ export const LargeActionTile = ({
                     {description}
                 </ThemedText>
             </View>
-            <Image
-                source={image}
-                style={[
-                    styles.image,
-                    {
-                        width: imageSize,
-                        height: imageSize,
-                    },
-                ]}
-                resizeMode='contain'
-            />
-        </TouchableOpacity>
+            <Image source={image} style={[styles.image, { width: imageSize, height: imageSize }]} resizeMode='contain' />
+        </AnimatedTouchable>
     );
 };
 

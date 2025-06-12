@@ -1,7 +1,7 @@
 // app/(app)/programs/program-end-splash.tsx
 
 import React, { useRef } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
+import { View, StyleSheet, Animated, Vibration } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
@@ -36,19 +36,20 @@ export default function ProgramEndSplashScreen() {
             // Choose a new random text
             randomTextRef.current = motivationalTexts[Math.floor(Math.random() * motivationalTexts.length)];
 
-            // Start animation
-            Animated.parallel([
-                Animated.timing(slideAnim, {
-                    toValue: 0,
-                    duration: 1500,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(fadeAnim, {
-                    toValue: 1,
-                    duration: 1500,
-                    useNativeDriver: true,
-                }),
-            ]).start();
+            Vibration.vibrate(200),
+                // Start animation
+                Animated.parallel([
+                    Animated.timing(slideAnim, {
+                        toValue: 0,
+                        duration: 1500,
+                        useNativeDriver: true,
+                    }),
+                    Animated.timing(fadeAnim, {
+                        toValue: 1,
+                        duration: 1500,
+                        useNativeDriver: true,
+                    }),
+                ]).start();
 
             // Set up navigation timer
             const timer = setTimeout(() => {

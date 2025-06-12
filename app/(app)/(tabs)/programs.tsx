@@ -12,6 +12,7 @@ import { REQUEST_STATE } from '@/constants/requestStates';
 import { useProgramData, preloadProgramProgressData } from '@/hooks/useProgramData';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/store/store';
+import { trigger } from 'react-native-haptic-feedback';
 
 export default function ProgramsScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -38,6 +39,7 @@ export default function ProgramsScreen() {
         try {
             setRefreshing(true);
             // Set forceRefresh to true to trigger the hook to refresh data
+            trigger('impactHeavy');
             setForceRefresh(true);
             // Also perform explicit refresh operations
             if (userProgramProgress?.ProgramId) {

@@ -55,6 +55,7 @@ export const EndProgramModal: React.FC<EndProgramModalProps> = ({ visible, onClo
                         style={[styles.button, { backgroundColor: themeColors.background, borderWidth: 1, borderColor: themeColors.redTransparent }]}
                         textType='bodyXSmall'
                         textStyle={[styles.buttonTextStyle, { color: themeColors.red }]}
+                        haptic='notificationSuccess'
                     />
                     <PrimaryButton text='No, Go Back' onPress={onClose} style={styles.button} textType='bodyXSmall' textStyle={styles.buttonTextStyle} />
                 </View>

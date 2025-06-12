@@ -353,6 +353,7 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
                                 borderColor: themeColors.systemBorderColor,
                             },
                         ]}
+                        haptic='notificationSuccess'
                         textType='bodyXSmall'
                         textStyle={[styles.buttonTextStyle, { color: themeColors.text }]}
                     />
@@ -362,6 +363,7 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
                         style={styles.modalButton}
                         textType='bodyXSmall'
                         textStyle={styles.buttonTextStyle}
+                        haptic='notificationSuccess'
                     />
                 </View>
             </View>
@@ -426,6 +428,7 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
                                 style={[styles.swapButton, { backgroundColor: lightenColor(themeColors.buttonPrimary, 0.1) }]}
                                 disabled={!isSwapEnabled || isSwapLoading}
                                 loading={isSwapLoading}
+                                haptic='impactMedium'
                             />
                         </View>
                     )}

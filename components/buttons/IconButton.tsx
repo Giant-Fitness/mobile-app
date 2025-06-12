@@ -6,7 +6,7 @@ import { Icon } from '@/components/base/Icon';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { moderateScale } from '@/utils/scaling';
-import { Sizes } from '@/constants/Sizes';
+import { trigger } from 'react-native-haptic-feedback';
 
 type IconButtonProps = {
     onPress: () => void;
@@ -14,30 +14,30 @@ type IconButtonProps = {
     iconSize?: number; // Default size will be applied if not provided
     iconColor?: string; // Default color if not provided
     disabled?: boolean;
-    size?: 'SM' | 'MD' | 'LG'; // Variants for button size
+    size?: number; // Variants for button size
     style?: StyleProp<ViewStyle>;
+    addBorder?: boolean;
     accessibilityLabel?: string; // Accessibility label for screen readers
+    haptic?: 'impactLight' | 'impactMedium' | 'impactHeavy' | 'rigid' | 'soft' | 'notificationError' | 'notificationSuccess' | 'notificationWarning' | 'none';
 };
 
 export const IconButton: React.FC<IconButtonProps & AccessibilityProps> = ({
     onPress,
     iconName,
-    iconSize = Sizes.iconSizeDefault,
+    iconSize = 30,
     iconColor,
-    size = 'MD', // Default size
+    size = 30, // Default size
     style,
+    addBorder = true,
     disabled = false,
     accessibilityLabel = 'Icon button', // Default accessibility label
+    haptic = 'none',
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
     // Button size based on the `size` prop
-    const buttonDimensions = {
-        SM: Sizes.iconButtonSM,
-        MD: Sizes.iconButtonMD,
-        LG: Sizes.iconButtonLG,
-    }[size];
+    const buttonDimensions = size;
 
     return (
         <TouchableOpacity
@@ -48,11 +48,16 @@ export const IconButton: React.FC<IconButtonProps & AccessibilityProps> = ({
                     height: buttonDimensions,
                     borderRadius: buttonDimensions / 2,
                     backgroundColor: themeColors.background,
-                    borderColor: themeColors.systemBorderColor,
+                    borderColor: addBorder ? themeColors.systemBorderColor : 'transparent',
                 },
                 style,
             ]}
-            onPress={onPress}
+            onPress={() => {
+                if (haptic !== 'none') {
+                    trigger(haptic);
+                }
+                onPress();
+            }}
             accessibilityLabel={accessibilityLabel}
             activeOpacity={1}
             disabled={disabled}
@@ -65,7 +70,6 @@ export const IconButton: React.FC<IconButtonProps & AccessibilityProps> = ({
 const styles = StyleSheet.create({
     button: {
         justifyContent: 'center',
-        alignItems: 'center',
         borderWidth: StyleSheet.hairlineWidth,
     },
 });
