@@ -49,6 +49,7 @@ export const ProgramRecommenderIntro: React.FC<ProgramRecommenderIntroProps> = (
                 style={[styles.startButton, { backgroundColor: themeColors.buttonPrimary }]}
                 textStyle={{ color: themeColors.buttonPrimaryText }}
                 size='LG'
+                haptic='impactHeavy'
             />
         </View>
     );

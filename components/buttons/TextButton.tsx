@@ -11,6 +11,7 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { Opacities } from '@/constants/Opacities';
 import { ThemedTextProps } from '@/components/base/ThemedText';
+import { trigger } from 'react-native-haptic-feedback';
 
 type TextButtonProps = {
     onPress: () => void;
@@ -28,6 +29,7 @@ type TextButtonProps = {
     accessibilityLabel?: string;
     loading?: boolean;
     children?: React.ReactNode;
+    haptic?: 'impactLight' | 'impactMedium' | 'impactHeavy' | 'rigid' | 'soft' | 'notificationError' | 'notificationSuccess' | 'notificationWarning' | 'none';
 };
 
 export const TextButton: React.FC<TextButtonProps & AccessibilityProps> = ({
@@ -46,6 +48,7 @@ export const TextButton: React.FC<TextButtonProps & AccessibilityProps> = ({
     accessibilityLabel = text || 'Text button',
     loading = false,
     children,
+    haptic = 'none',
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -68,7 +71,16 @@ export const TextButton: React.FC<TextButtonProps & AccessibilityProps> = ({
                 },
                 style,
             ]}
-            onPress={disabled || loading ? undefined : onPress}
+            onPress={
+                disabled || loading
+                    ? undefined
+                    : () => {
+                          if (haptic !== 'none') {
+                              trigger(haptic);
+                          }
+                          onPress();
+                      }
+            }
             activeOpacity={Opacities.buttonActiveOpacity}
             accessibilityLabel={accessibilityLabel}
             disabled={disabled || loading}

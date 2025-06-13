@@ -13,6 +13,7 @@ import { DifficultyStep } from '@/components/feedback/programs/DifficultyStep';
 import { ProgramCompleteData } from '@/types/feedbackTypes';
 import { AppDispatch, RootState } from '@/store/store';
 import { sendProgramCompleteFeedbackAsync } from '@/store/feedback/thunks';
+import { trigger } from 'react-native-haptic-feedback';
 
 export default function ProgramCompleteFeedbackScreen() {
     const router = useRouter();
@@ -47,6 +48,7 @@ export default function ProgramCompleteFeedbackScreen() {
 
     const handleSubmit = async ({ data }: FeedbackFormResult<ProgramCompleteData>) => {
         if (user?.UserId && programId) {
+            trigger('notificationSuccess');
             await dispatch(
                 sendProgramCompleteFeedbackAsync({
                     userId: user.UserId,
@@ -55,6 +57,7 @@ export default function ProgramCompleteFeedbackScreen() {
                 }),
             ).unwrap();
         }
+        trigger('impactHeavy');
         router.replace('/(app)/programs/program-end-splash');
     };
 

@@ -11,6 +11,7 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { moderateScale } from '@/utils/scaling';
 import { debounce } from '@/utils/debounce';
+import { trigger } from 'react-native-haptic-feedback';
 
 export default function TabLayout() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -22,6 +23,9 @@ export default function TabLayout() {
 
     return (
         <Tabs
+            screenListeners={() => ({
+                tabPress: () => trigger('soft'),
+            })}
             screenOptions={{
                 headerTitleAllowFontScaling: false,
                 tabBarAllowFontScaling: false,

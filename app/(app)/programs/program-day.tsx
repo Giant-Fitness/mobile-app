@@ -1,7 +1,7 @@
 // app/(app)/programs/program-day.tsx
 
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, ActivityIndicator, View } from 'react-native';
+import { StyleSheet, ActivityIndicator, View, Vibration } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import LottieView from 'lottie-react-native';
@@ -160,6 +160,7 @@ const ProgramDayScreen = () => {
             await handleCompleteDay();
             setShowConfetti(true);
             confettiRef.current?.play();
+            Vibration.vibrate(200);
             setTimeout(() => {
                 setShowConfetti(false);
                 router.push('/(app)/(tabs)/home');
@@ -388,6 +389,7 @@ const ProgramDayScreen = () => {
                     size='LG'
                     disabled={isCompletingDay}
                     loading={isCompletingDay}
+                    haptic='notificationSuccess'
                 />
                 {programDay.RestDay && (
                     <TextButton
@@ -432,6 +434,7 @@ const ProgramDayScreen = () => {
                             size='LG'
                             disabled={isCompletingDay}
                             loading={isCompletingDay}
+                            haptic='notificationSuccess'
                         />
                     )}
                 </View>

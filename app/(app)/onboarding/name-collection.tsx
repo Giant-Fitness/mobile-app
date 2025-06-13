@@ -16,6 +16,7 @@ import { usePostHog } from 'posthog-react-native';
 import { Icon } from '@/components/base/Icon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { trigger } from 'react-native-haptic-feedback';
 
 const NameCollectionScreen = () => {
     const [firstName, setFirstName] = useState('');
@@ -85,7 +86,15 @@ const NameCollectionScreen = () => {
         <ThemedView style={styles.container}>
             {/* Simple Check Button in the top right */}
             <SafeAreaView style={styles.checkButtonContainer}>
-                <TouchableOpacity style={styles.checkButton} onPress={handleSubmit} disabled={isSubmitting || !firstName.trim()} activeOpacity={0.7}>
+                <TouchableOpacity
+                    style={styles.checkButton}
+                    onPress={() => {
+                        handleSubmit();
+                        trigger('notificationSuccess');
+                    }}
+                    disabled={isSubmitting || !firstName.trim()}
+                    activeOpacity={0.7}
+                >
                     {isSubmitting ? (
                         <ActivityIndicator color={themeColors.text} size='small' />
                     ) : (

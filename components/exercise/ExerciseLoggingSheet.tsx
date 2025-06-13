@@ -31,6 +31,7 @@ import { AppDispatch } from '@/store/store';
 import { Sizes } from '@/constants/Sizes';
 import { TextButton } from '@/components/buttons/TextButton';
 import { formatWeightForDisplay, parseWeightForStorage } from '@/utils/unitConversion';
+import { IconButton } from '@/components/buttons/IconButton';
 
 interface ExerciseLoggingSheetProps {
     visible: boolean;
@@ -654,20 +655,44 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                         <Icon name='chevron-back' size={20} color={themeColors.text} />
                     </TouchableOpacity>
                 ) : (
-                    <TouchableOpacity onPress={handleClose} style={styles.headerButton}>
-                        <Icon name='close' size={20} color={themeColors.text} />
-                    </TouchableOpacity>
+                    <IconButton
+                        onPress={handleClose}
+                        iconName='close'
+                        iconSize={20}
+                        size={21}
+                        style={styles.headerButton}
+                        addBorder={false}
+                        disabled={isSubmitting}
+                    />
                 )}
 
                 <ThemedText type='title'>{editingLog ? `Edit ${format(new Date(editingLog.Date), 'MMM d')} Log` : exercise.ExerciseName}</ThemedText>
 
-                <TouchableOpacity onPress={handleSave} disabled={!canSaveResult || isSubmitting} style={styles.headerButton}>
+                <>
+                    {isSubmitting ? (
+                        <ActivityIndicator size='small' style={styles.headerButton} color={themeColors.subText} />
+                    ) : (
+                        <IconButton
+                            onPress={handleSave}
+                            iconName='check'
+                            iconColor={canSaveResult ? themeColors.text : lightenColor(themeColors.subText, 0.8)}
+                            iconSize={22}
+                            size={25}
+                            style={styles.headerButton}
+                            addBorder={false}
+                            haptic='notificationSuccess'
+                            disabled={!canSaveResult || isSubmitting}
+                        />
+                    )}
+                </>
+
+                {/* <TouchableOpacity onPress={handleSave} disabled={!canSaveResult || isSubmitting} style={styles.headerButton}>
                     {isSubmitting ? (
                         <ActivityIndicator size='small' color={themeColors.text} />
                     ) : (
                         <Icon name='check' size={24} color={canSaveResult ? themeColors.text : lightenColor(themeColors.subText, 0.8)} />
                     )}
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </ThemedView>
         );
     };

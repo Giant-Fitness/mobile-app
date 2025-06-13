@@ -1,7 +1,7 @@
 // app/(app)/programs/program-complete.tsx
 
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
+import { View, StyleSheet, Animated, Vibration } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { Spaces } from '@/constants/Spaces';
@@ -52,6 +52,8 @@ export default function ProgramCompleteScreen() {
                 }).start();
             }, 3500);
 
+            Vibration.vibrate(400);
+
             return { journeyTimer, fabTimer };
         };
 
@@ -93,7 +95,7 @@ export default function ProgramCompleteScreen() {
                 </Animated.View>
             </View>
             <Animated.View style={[styles.fabContainer, { opacity: fabOpacity }]}>
-                <PrimaryButton text='Continue' onPress={handleContinue} size='LG' style={styles.fab} />
+                <PrimaryButton text='Continue' onPress={handleContinue} size='LG' style={styles.fab} haptic='impactLight' />
             </Animated.View>
         </View>
     );

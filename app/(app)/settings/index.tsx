@@ -164,7 +164,7 @@ const SettingsIndex = () => {
                     <SettingItem text='Whatsapp' onPress={handleWhatsAppPress} iconName='logo-whatsapp' endIcon='open-outline' />
                 </SettingsSection>
 
-                <TextButton text='Sign Out' onPress={handleSignOut} iconName='exit' size='MD' style={styles.signOutButton} />
+                <TextButton text='Sign Out' onPress={handleSignOut} iconName='exit' size='MD' style={styles.signOutButton} haptic='impactHeavy' />
 
                 <View style={styles.versionContainer}>
                     <ThemedText type='headline' style={styles.versionText}>

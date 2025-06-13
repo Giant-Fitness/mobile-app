@@ -45,6 +45,7 @@ import { getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/th
 import { ScrollView } from 'react-native';
 import { debounce } from '@/utils/debounce';
 import { ThemedView } from '@/components/base/ThemedView';
+import { trigger } from 'react-native-haptic-feedback';
 
 export default function HomeScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -179,6 +180,7 @@ export default function HomeScreen() {
         if (isRefreshing) return;
 
         setIsRefreshing(true);
+        trigger('impactHeavy');
 
         try {
             await dispatch(getUserAsync());
@@ -359,7 +361,10 @@ export default function HomeScreen() {
                     <LargeActionTile
                         title='Start Training'
                         description='Our structured training plans turn your goals into achievements'
-                        onPress={() => debounce(router, '/(app)/programs/browse-programs')}
+                        onPress={() => {
+                            debounce(router, '/(app)/programs/browse-programs');
+                            trigger('impactHeavy');
+                        }}
                         backgroundColor={themeColors.containerHighlight}
                         image={require('@/assets/images/fist.png')}
                         textColor={themeColors.highlightContainerText}
@@ -382,7 +387,10 @@ export default function HomeScreen() {
                 <LargeActionTile
                     title='Get Started'
                     description='Let us recommend a training plan tailored to your goals'
-                    onPress={() => debounce(router, '/(app)/programs/program-recommender-wizard')}
+                    onPress={() => {
+                        debounce(router, '/(app)/programs/program-recommender-wizard');
+                        trigger('impactHeavy');
+                    }}
                     backgroundColor={themeColors.containerHighlight}
                     image={require('@/assets/images/nutrition.png')}
                     textColor={themeColors.highlightContainerText}

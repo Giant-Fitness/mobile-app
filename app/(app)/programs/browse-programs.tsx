@@ -21,6 +21,7 @@ import { darkenColor } from '@/utils/colorUtils';
 import { useSharedValue } from 'react-native-reanimated';
 import { router } from 'expo-router';
 import { Program } from '@/types/programTypes';
+import { trigger } from 'react-native-haptic-feedback';
 
 const MemoizedProgramCard = React.memo(ProgramCard);
 
@@ -87,6 +88,7 @@ export default function BrowseProgramsScreen() {
     const handleRefresh = async () => {
         try {
             setRefreshing(true);
+            trigger('impactHeavy');
             await dispatch(getAllProgramsAsync({ forceRefresh: true }));
             setTimeout(() => {
                 setRefreshing(false);

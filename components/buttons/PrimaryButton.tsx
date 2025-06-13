@@ -10,6 +10,7 @@ import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { ThemedTextProps } from '@/components/base/ThemedText';
+import { trigger } from 'react-native-haptic-feedback';
 
 type PrimaryButtonProps = {
     onPress: () => void;
@@ -26,6 +27,7 @@ type PrimaryButtonProps = {
     disabled?: boolean;
     accessibilityLabel?: string;
     loading?: boolean;
+    haptic?: 'impactLight' | 'impactMedium' | 'impactHeavy' | 'rigid' | 'soft' | 'notificationError' | 'notificationSuccess' | 'notificationWarning' | 'none';
 };
 
 export const PrimaryButton: React.FC<PrimaryButtonProps & AccessibilityProps> = ({
@@ -43,6 +45,7 @@ export const PrimaryButton: React.FC<PrimaryButtonProps & AccessibilityProps> = 
     disabled = false,
     accessibilityLabel = text || 'Primary button',
     loading = false,
+    haptic = 'none',
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -64,7 +67,16 @@ export const PrimaryButton: React.FC<PrimaryButtonProps & AccessibilityProps> = 
                 },
                 style,
             ]}
-            onPress={disabled || loading ? undefined : onPress}
+            onPress={
+                disabled || loading
+                    ? undefined
+                    : () => {
+                          if (haptic !== 'none') {
+                              trigger(haptic);
+                          }
+                          onPress();
+                      }
+            }
             activeOpacity={1}
             accessibilityLabel={accessibilityLabel}
             disabled={disabled || loading}

@@ -15,6 +15,7 @@ import { addDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameDay, i
 import { lightenColor } from '@/utils/colorUtils';
 import { Sizes } from '@/constants/Sizes';
 import { SleepSubmissionData, UserSleepMeasurement } from '@/types';
+import { IconButton } from '@/components/buttons/IconButton';
 
 interface SleepLoggingSheetProps {
     visible: boolean;
@@ -573,31 +574,37 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
                 ) : (
                     <>
                         <ThemedView style={[styles.header, { borderBottomColor: themeColors.systemBorderColor }]}>
-                            <TouchableOpacity onPress={handleClose} style={styles.headerButton} disabled={isSubmitting || isDeleting}>
-                                <Icon name='close' size={20} color={themeColors.text} />
-                            </TouchableOpacity>
+                            <IconButton
+                                onPress={handleClose}
+                                iconName='close'
+                                iconSize={20}
+                                size={21}
+                                style={styles.headerButton}
+                                addBorder={false}
+                                disabled={isSubmitting || isDeleting}
+                            />
 
                             <ThemedText type='title'>{isEditingMode ? 'Edit Sleep Time' : 'Log Sleep'}</ThemedText>
 
                             <View style={styles.headerRight}>
-                                <TouchableOpacity
-                                    onPress={handleSubmit}
-                                    disabled={isSubmitting || isDeleting || !sleepHour || !wakeHour || (isEditingMode && !hasChanges())}
-                                >
-                                    {isSubmitting ? (
-                                        <ActivityIndicator size='small' color={themeColors.text} />
-                                    ) : (
-                                        <Icon
-                                            name='check'
-                                            size={24}
-                                            color={
-                                                !isSubmitting && !isDeleting && sleepHour && wakeHour && (!isEditingMode || hasChanges())
-                                                    ? themeColors.text
-                                                    : lightenColor(themeColors.subText, 0.8)
-                                            }
-                                        />
-                                    )}
-                                </TouchableOpacity>
+                                {isSubmitting ? (
+                                    <ActivityIndicator size='small' color={themeColors.subText} />
+                                ) : (
+                                    <IconButton
+                                        onPress={handleSubmit}
+                                        iconName='check'
+                                        iconSize={22}
+                                        size={25}
+                                        iconColor={
+                                            !isSubmitting && !isDeleting && sleepHour && wakeHour && (!isEditingMode || hasChanges())
+                                                ? themeColors.text
+                                                : lightenColor(themeColors.subText, 0.8)
+                                        }
+                                        addBorder={false}
+                                        haptic='notificationSuccess'
+                                        disabled={isSubmitting || isDeleting || !sleepHour || !wakeHour || (isEditingMode && !hasChanges)}
+                                    />
+                                )}
                             </View>
                         </ThemedView>
 
