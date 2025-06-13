@@ -1,3 +1,5 @@
+// components/programs/ActiveProgramDayCompressedCard.tsx
+
 import React, { useRef } from 'react';
 import { StyleSheet, View, Animated } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -19,10 +21,8 @@ import { ProgramDay } from '@/types';
 import { debounce } from '@/utils/debounce';
 import { trigger } from 'react-native-haptic-feedback';
 
-// Cast ShimmerPlaceHolder to the correct type
 const ShimmerPlaceholder = ShimmerPlaceHolder as unknown as React.ComponentType<any>;
 
-// Create an Animated Touchable
 const AnimatedTouchable = Animated.createAnimatedComponent(Animated.View as any);
 
 type ActiveProgramDayCompressedCardProps = {
@@ -56,7 +56,7 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
     // Loading and error states
     if (currentDayState === REQUEST_STATE.PENDING || !currentDay) {
         return (
-            <View style={[styles.shadowContainer, { backgroundColor: themeColors.background }]}>
+            <View style={styles.shadowContainer}>
                 <ShimmerPlaceholder
                     LinearGradient={LinearGradient}
                     style={styles.shimmerContainer}
@@ -77,9 +77,11 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
 
     if (currentDayState === REQUEST_STATE.REJECTED || !currentDay) {
         return (
-            <ThemedView style={[styles.cardContainer, { backgroundColor: themeColors.background }]}>
-                <ThemedText>Error loading the current day.</ThemedText>
-            </ThemedView>
+            <View style={styles.shadowContainer}>
+                <ThemedView style={[styles.cardContainer, { backgroundColor: themeColors.background }]}>
+                    <ThemedText>Error loading the current day.</ThemedText>
+                </ThemedView>
+            </View>
         );
     }
 
@@ -120,9 +122,9 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
                 trigger('impactLight');
                 navigateToProgramDay();
             }}
-            style={[styles.cardContainer, { transform: [{ scale: scaleAnim }] }]}
+            style={[styles.shadowContainer, { transform: [{ scale: scaleAnim }] }]}
         >
-            <View>
+            <View style={styles.cardContainer}>
                 <ImageTextOverlay
                     image={getDisplayImage(currentDay, workouts)}
                     title={currentDay.DayTitle}
@@ -145,8 +147,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 1,
         shadowRadius: 4,
-        elevation: 5, // For Android
-        borderRadius: Spaces.SM,
+        elevation: 5,
     },
     cardContainer: {
         width: '100%',

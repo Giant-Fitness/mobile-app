@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { TouchableOpacity, StyleSheet, StyleProp, ViewStyle, AccessibilityProps } from 'react-native';
+import { SharedValue } from 'react-native-reanimated';
 import { Icon } from '@/components/base/Icon';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
@@ -12,11 +13,12 @@ type IconButtonProps = {
     onPress: () => void;
     iconName: string;
     iconSize?: number; // Default size will be applied if not provided
-    iconColor?: string; // Default color if not provided
+    iconColor?: string | SharedValue<string>; // Now supports animated colors while maintaining backwards compatibility
     disabled?: boolean;
     size?: number; // Variants for button size
     style?: StyleProp<ViewStyle>;
     addBorder?: boolean;
+    backgroundColor?: string; // Control background color
     accessibilityLabel?: string; // Accessibility label for screen readers
     haptic?: 'impactLight' | 'impactMedium' | 'impactHeavy' | 'rigid' | 'soft' | 'notificationError' | 'notificationSuccess' | 'notificationWarning' | 'none';
 };
@@ -29,6 +31,7 @@ export const IconButton: React.FC<IconButtonProps & AccessibilityProps> = ({
     size = 30, // Default size
     style,
     addBorder = true,
+    backgroundColor,
     disabled = false,
     accessibilityLabel = 'Icon button', // Default accessibility label
     haptic = 'none',
@@ -47,7 +50,7 @@ export const IconButton: React.FC<IconButtonProps & AccessibilityProps> = ({
                     width: buttonDimensions,
                     height: buttonDimensions,
                     borderRadius: buttonDimensions / 2,
-                    backgroundColor: themeColors.background,
+                    backgroundColor: backgroundColor || (addBorder ? themeColors.background : 'transparent'),
                     borderColor: addBorder ? themeColors.systemBorderColor : 'transparent',
                 },
                 style,

@@ -1,7 +1,7 @@
 // components/navigation/AnimatedHeader.tsx
 
 import React from 'react';
-import { ActivityIndicator, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { ActivityIndicator, StyleSheet, TouchableOpacity, Platform, View } from 'react-native';
 import Animated, { useAnimatedStyle, interpolateColor, useDerivedValue } from 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
@@ -10,6 +10,7 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { ThemedText } from '@/components/base/ThemedText';
 import { Icon } from '@/components/base/Icon';
+import { IconButton } from '@/components/buttons/IconButton';
 
 type ActionButtonProps = {
     icon: string;
@@ -29,7 +30,7 @@ type AnimatedHeaderProps = {
     headerBackground?: string;
     menuIcon?: string;
     onMenuPress?: () => void;
-    disableBackButtonAnimation?: boolean; // New prop
+    disableBackButtonAnimation?: boolean;
     actionButton?: ActionButtonProps;
 };
 
@@ -92,9 +93,18 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
                 </TouchableOpacity>
             ) : (
                 onMenuPress && (
-                    <TouchableOpacity style={styles.menuButton} onPress={onMenuPress} activeOpacity={1}>
-                        <Icon name={menuIcon} size={22} color={animatedIconColor} />
-                    </TouchableOpacity>
+                    <View style={styles.menuButton}>
+                        <IconButton
+                            onPress={onMenuPress}
+                            iconName={menuIcon}
+                            iconSize={20}
+                            size={25}
+                            backgroundColor='transparent'
+                            iconColor={animatedIconColor}
+                            addBorder={false}
+                            haptic='impactMedium'
+                        />
+                    </View>
                 )
             )}
         </Animated.View>

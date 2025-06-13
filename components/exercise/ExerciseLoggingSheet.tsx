@@ -658,7 +658,7 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                     <IconButton
                         onPress={handleClose}
                         iconName='close'
-                        iconSize={20}
+                        iconSize={18}
                         size={21}
                         style={styles.headerButton}
                         addBorder={false}
@@ -676,7 +676,7 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                             onPress={handleSave}
                             iconName='check'
                             iconColor={canSaveResult ? themeColors.text : lightenColor(themeColors.subText, 0.8)}
-                            iconSize={22}
+                            iconSize={20}
                             size={25}
                             style={styles.headerButton}
                             addBorder={false}
