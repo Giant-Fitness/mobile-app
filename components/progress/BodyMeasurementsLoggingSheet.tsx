@@ -278,15 +278,6 @@ export const BodyMeasurementsLoggingSheet: React.FC<BodyMeasurementsLoggingSheet
                             <ThemedText type='title'>{isEditingMode ? 'Edit Waist Measurement' : 'Log Waist Measurement'}</ThemedText>
 
                             <View style={styles.headerRight}>
-                                {isEditingMode && onDelete && (
-                                    <TouchableOpacity onPress={handleDelete} style={styles.deleteButton} disabled={isSubmitting || isDeleting}>
-                                        {isDeleting ? (
-                                            <ActivityIndicator size='small' color={themeColors.subText} />
-                                        ) : (
-                                            <Icon name='trash' color={isSubmitting ? themeColors.subText : themeColors.subText} size={18} />
-                                        )}
-                                    </TouchableOpacity>
-                                )}
                                 <TouchableOpacity
                                     onPress={handleSubmit}
                                     disabled={
@@ -372,6 +363,24 @@ export const BodyMeasurementsLoggingSheet: React.FC<BodyMeasurementsLoggingSheet
                                             </View>
                                         </View>
                                     </ScrollView>
+
+                                    {/* Footer Delete Section */}
+                                    {isEditingMode && onDelete && (
+                                        <View style={[styles.footerActions, { borderTopColor: themeColors.systemBorderColor }]}>
+                                            <TouchableOpacity onPress={handleDelete} style={styles.deleteAction} disabled={isSubmitting || isDeleting}>
+                                                {isDeleting ? (
+                                                    <ActivityIndicator size='small' color={themeColors.red} />
+                                                ) : (
+                                                    <>
+                                                        <Icon name='trash' size={16} color={themeColors.red} />
+                                                        <ThemedText type='bodySmall' style={[styles.deleteText, { color: themeColors.red }]}>
+                                                            Delete Entry
+                                                        </ThemedText>
+                                                    </>
+                                                )}
+                                            </TouchableOpacity>
+                                        </View>
+                                    )}
                                 </>
                             ) : (
                                 <View style={styles.calendarContainer}>
@@ -501,9 +510,6 @@ const styles = StyleSheet.create({
         minWidth: 60,
         justifyContent: 'flex-end',
     },
-    deleteButton: {
-        marginRight: Spaces.SM + Spaces.XS,
-    },
     dateSelector: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -513,7 +519,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: Spaces.LG,
     },
     inputContainer: {
-        marginTop: Spaces.SM,
         paddingBottom: Spaces.MD,
     },
     inputLabel: {
@@ -524,7 +529,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderRadius: Spaces.SM,
         paddingHorizontal: Spaces.MD,
-        paddingVertical: Spaces.SM,
+        paddingTop: Spaces.SM,
         height: 48,
         borderWidth: StyleSheet.hairlineWidth,
     },
@@ -536,7 +541,23 @@ const styles = StyleSheet.create({
         opacity: 0.7,
     },
     measurementInputContainer: {
-        marginBottom: Spaces.MD,
+        marginBottom: Spaces.SM,
+    },
+    footerActions: {
+        paddingTop: Spaces.SM,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        alignItems: 'center',
+    },
+    deleteAction: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: Spaces.SM,
+        paddingHorizontal: Spaces.MD,
+    },
+    deleteText: {
+        marginLeft: Spaces.XS,
+        fontSize: 12,
+        opacity: 0.8,
     },
     calendarContainer: {
         marginTop: Spaces.MD,
