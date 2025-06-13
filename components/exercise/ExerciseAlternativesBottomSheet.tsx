@@ -262,7 +262,7 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
                 <TouchableOpacity onPress={() => handleSelectAlternative(item)} activeOpacity={0.7} style={styles.cardTouchable}>
                     <View style={styles.alternativeContent}>
                         <View style={styles.exerciseNameRow}>
-                            <ThemedText type='button' style={styles.exerciseName} numberOfLines={2}>
+                            <ThemedText type='buttonSmall' style={styles.exerciseName} numberOfLines={2}>
                                 {item.ExerciseName}
                             </ThemedText>
                             {isSelected && (
@@ -457,10 +457,9 @@ const styles = StyleSheet.create({
         fontSize: Sizes.fontSizeSmall,
     },
     closeButton: {
-        padding: Spaces.XS,
         position: 'absolute',
-        top: Spaces.MD,
-        left: Spaces.MD,
+        top: Spaces.LG,
+        left: Spaces.SM,
         zIndex: 10,
     },
     loadingContainer: {
@@ -483,7 +482,7 @@ const styles = StyleSheet.create({
         borderWidth: StyleSheet.hairlineWidth,
         overflow: 'hidden',
         flex: 1,
-        height: 100,
+        height: 80,
     },
     shadowIOS: {
         shadowColor: '#777',
@@ -627,7 +626,6 @@ const styles = StyleSheet.create({
     },
     modalButton: {
         flex: 1,
-        marginHorizontal: Spaces.XS,
         paddingVertical: Spaces.SM,
         borderRadius: Spaces.MD,
     },
