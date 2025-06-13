@@ -254,8 +254,8 @@ const ProgramDayScreen = () => {
                         </ThemedView>
                     </ThemedView>
                 </ThemedView>
-                <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.backgroundTertiary }]}>
-                    <ThemedView style={[styles.descriptionContainer, { backgroundColor: themeColors.background }, isEnrolled && { paddingBottom: Spaces.XXL }]}>
+                <ThemedView style={[styles.mainContainer, { backgroundColor: themeColors.background }]}>
+                    <ThemedView style={[styles.descriptionContainer, { backgroundColor: themeColors.background }]}>
                         <ThemedText type='button' style={{ color: themeColors.text, paddingBottom: Spaces.MD }}>
                             What to Expect
                         </ThemedText>
@@ -409,7 +409,7 @@ const ProgramDayScreen = () => {
         // For video days, keep the current absolute positioning
         if (programDay.Type === 'video') {
             return (
-                <View style={[styles.buttonContainer, { backgroundColor: themeColors.background, paddingBottom: Spaces.XXL }]}>
+                <View style={[styles.buttonContainer, { backgroundColor: themeColors.background, paddingBottom: Spaces.XL }]}>
                     {isDayCompleted ? (
                         <TextButton
                             text='Day Completed'
@@ -424,7 +424,7 @@ const ProgramDayScreen = () => {
                             loading={isUncompletingDay}
                         />
                     ) : (
-                        <TextButton
+                        <PrimaryButton
                             text='Complete Day'
                             textType='bodyMedium'
                             style={styles.completeButton}
@@ -555,7 +555,7 @@ const styles = StyleSheet.create({
     },
     mainContainer: {
         marginTop: Spaces.LG,
-        paddingBottom: Sizes.bottomSpaceLarge,
+        paddingBottom: Sizes.bottomSpaceLarge - Spaces.LG,
     },
     descriptionContainer: {
         paddingHorizontal: Spaces.LG,
@@ -566,7 +566,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: '10%',
         position: 'absolute',
-        bottom: Spaces.XL,
+        bottom: Spaces.XXL,
         left: 0,
         right: 0,
         backgroundColor: 'transparent',
