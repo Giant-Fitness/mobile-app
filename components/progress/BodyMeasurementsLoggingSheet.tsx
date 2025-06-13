@@ -275,7 +275,7 @@ export const BodyMeasurementsLoggingSheet: React.FC<BodyMeasurementsLoggingSheet
                             <IconButton
                                 onPress={handleClose}
                                 iconName='close'
-                                iconSize={20}
+                                iconSize={18}
                                 size={21}
                                 style={styles.headerButton}
                                 addBorder={false}
@@ -291,7 +291,7 @@ export const BodyMeasurementsLoggingSheet: React.FC<BodyMeasurementsLoggingSheet
                                     <IconButton
                                         onPress={handleSubmit}
                                         iconName='check'
-                                        iconSize={22}
+                                        iconSize={20}
                                         size={25}
                                         iconColor={
                                             !isSubmitting &&
@@ -374,18 +374,25 @@ export const BodyMeasurementsLoggingSheet: React.FC<BodyMeasurementsLoggingSheet
                                     {/* Footer Delete Section */}
                                     {isEditingMode && onDelete && (
                                         <View style={[styles.footerActions, { borderTopColor: themeColors.systemBorderColor }]}>
-                                            <TouchableOpacity onPress={handleDelete} style={styles.deleteAction} disabled={isSubmitting || isDeleting}>
-                                                {isDeleting ? (
-                                                    <ActivityIndicator size='small' color={themeColors.red} />
-                                                ) : (
-                                                    <>
-                                                        <Icon name='trash' size={16} color={themeColors.red} />
-                                                        <ThemedText type='bodySmall' style={[styles.deleteText, { color: themeColors.red }]}>
-                                                            Delete Entry
-                                                        </ThemedText>
-                                                    </>
-                                                )}
-                                            </TouchableOpacity>
+                                            {isDeleting ? (
+                                                <ActivityIndicator size='small' color={themeColors.red} />
+                                            ) : (
+                                                <>
+                                                    <TextButton
+                                                        iconName='trash'
+                                                        iconColor={themeColors.red}
+                                                        iconSize={12}
+                                                        iconStyle={{ marginRight: 0 }}
+                                                        text='Delete Entry'
+                                                        onPress={handleDelete}
+                                                        textStyle={[styles.deleteText, { color: themeColors.red }]}
+                                                        disabled={isSubmitting || isDeleting}
+                                                        style={[styles.deleteAction, { borderWidth: 0 }]}
+                                                        textType='bodySmall'
+                                                        haptic='notificationSuccess'
+                                                    />
+                                                </>
+                                            )}
                                         </View>
                                     )}
                                 </>
