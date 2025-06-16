@@ -108,7 +108,7 @@ export const getUserFitnessProfileAsync = createAsyncThunk<
 
         // Try cache first if enabled and not forcing refresh
         if (useCache && !forceRefresh) {
-            const cacheKey = `user_fitness_profile_${userId}`;
+            const cacheKey = `user_fitness_profile`;
             const cached = await cacheService.get<UserFitnessProfile>(cacheKey);
             const isExpired = await cacheService.isExpired(cacheKey);
 
@@ -124,7 +124,7 @@ export const getUserFitnessProfileAsync = createAsyncThunk<
 
         // Cache the result if useCache is enabled
         if (useCache) {
-            const cacheKey = `user_fitness_profile_${userId}`;
+            const cacheKey = `user_fitness_profile`;
             await cacheService.set(cacheKey, profile, CacheTTL.LONG);
         }
 
@@ -155,11 +155,7 @@ export const updateUserFitnessProfileAsync = createAsyncThunk<
         const result = await UserService.updateUserFitnessProfile(userId, userFitnessProfile);
 
         // Invalidate related caches after update
-        await Promise.all([
-            cacheService.remove(`user_fitness_profile_${userId}`),
-            cacheService.remove(`user_recommendations_${userId}`),
-            cacheService.remove('user_data'),
-        ]);
+        await Promise.all([cacheService.remove(`user_fitness_profile`), cacheService.remove(`user_recommendations`), cacheService.remove('user_data')]);
 
         return result;
     } catch (error) {
@@ -193,7 +189,7 @@ export const getUserRecommendationsAsync = createAsyncThunk<
 
         // Try cache first if enabled and not forcing refresh
         if (useCache && !forceRefresh) {
-            const cacheKey = `user_recommendations_${userId}`;
+            const cacheKey = `user_recommendations`;
             const cached = await cacheService.get<UserRecommendations>(cacheKey);
             const isExpired = await cacheService.isExpired(cacheKey);
 
@@ -209,7 +205,7 @@ export const getUserRecommendationsAsync = createAsyncThunk<
 
         // Cache the result if useCache is enabled
         if (useCache) {
-            const cacheKey = `user_recommendations_${userId}`;
+            const cacheKey = `user_recommendations`;
             await cacheService.set(cacheKey, userRecommendations, CacheTTL.LONG);
         }
 
@@ -221,21 +217,19 @@ export const getUserRecommendationsAsync = createAsyncThunk<
     }
 });
 
-// Program progress is always fresh - never cached
 export const getUserProgramProgressAsync = createAsyncThunk<
     UserProgramProgress,
-    { forceRefresh?: boolean } | void,
+    { forceRefresh?: boolean; useCache?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
 >('user/getUserProgramProgress', async (args = {}, { getState, rejectWithValue }) => {
     try {
-        const { forceRefresh = false } = typeof args === 'object' ? args : {};
+        const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
         const state = getState() as RootState;
         const userId = state.user.user?.UserId;
 
-        // Check if user ID exists
         if (!userId) {
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
@@ -245,9 +239,26 @@ export const getUserProgramProgressAsync = createAsyncThunk<
             return state.user.userProgramProgress;
         }
 
-        // Always fetch fresh program progress (too critical to cache)
-        console.log('Loading user program progress from API (always fresh)');
+        // Try cache first if enabled and not forcing refresh
+        if (useCache && !forceRefresh) {
+            const cached = await cacheService.get<UserProgramProgress>('user_program_progress');
+            const isExpired = await cacheService.isExpired('user_program_progress');
+
+            if (cached && !isExpired) {
+                console.log('Loaded user program progress from cache');
+                return cached;
+            }
+        }
+
+        // Load from API
+        console.log('Loading user program progress from API');
         const userProgramProgress = await UserService.getUserProgramProgress(userId);
+
+        // Cache the result if useCache is enabled
+        if (useCache) {
+            await cacheService.set('user_program_progress', userProgramProgress, CacheTTL.SHORT);
+        }
+
         return userProgramProgress;
     } catch (error) {
         return rejectWithValue({
@@ -256,68 +267,7 @@ export const getUserProgramProgressAsync = createAsyncThunk<
     }
 });
 
-export const completeDayAsync = createAsyncThunk<
-    UserProgramProgress,
-    { dayId: string; isAutoComplete?: boolean },
-    {
-        state: RootState;
-        rejectValue: { errorMessage: string };
-    }
->('user/completeDay', async ({ dayId, isAutoComplete = false }: { dayId: string; isAutoComplete?: boolean }, { getState, rejectWithValue }) => {
-    const state = getState() as RootState;
-    const userId = state.user.user?.UserId;
-    if (!userId) {
-        return rejectWithValue({ errorMessage: 'User ID not available' });
-    }
-    try {
-        const result = await UserService.completeDay(userId, dayId, isAutoComplete);
-        // No cache invalidation needed since program progress is never cached
-        return result;
-    } catch (error) {
-        console.log(error);
-        return rejectWithValue({ errorMessage: 'Failed to complete day' });
-    }
-});
-
-export const uncompleteDayAsync = createAsyncThunk<
-    UserProgramProgress,
-    { dayId: string },
-    {
-        state: RootState;
-        rejectValue: { errorMessage: string };
-    }
->('user/uncompleteDay', async ({ dayId }, { getState, rejectWithValue }) => {
-    const state = getState() as RootState;
-    const userId = state.user.user?.UserId;
-    if (!userId) {
-        return rejectWithValue({ errorMessage: 'User ID not available' });
-    }
-    try {
-        const result = await UserService.uncompleteDay(userId, dayId);
-        // No cache invalidation needed since program progress is never cached
-        return result;
-    } catch (error) {
-        console.log(error);
-        return rejectWithValue({ errorMessage: 'Failed to uncomplete day' });
-    }
-});
-
-export const endProgramAsync = createAsyncThunk<UserProgramProgress, void>('user/endProgram', async (_, { getState, rejectWithValue }) => {
-    const state = getState() as RootState;
-    const userId = state.user.user?.UserId;
-    if (!userId) {
-        return rejectWithValue({ errorMessage: 'User ID not available' });
-    }
-    try {
-        const result = await UserService.endProgram(userId);
-        // No cache invalidation needed since program progress is never cached
-        return result as UserProgramProgress;
-    } catch (error) {
-        console.log(error);
-        return rejectWithValue({ errorMessage: 'Failed to end program' });
-    }
-});
-
+// CREATE - Start program (invalidate cache)
 export const startProgramAsync = createAsyncThunk<
     UserProgramProgress,
     { programId: string },
@@ -333,7 +283,10 @@ export const startProgramAsync = createAsyncThunk<
     }
     try {
         const result = await UserService.startProgram(userId, programId);
-        // No cache invalidation needed since program progress is never cached
+
+        // Invalidate cache after starting program
+        await cacheService.remove('user_program_progress');
+
         return result;
     } catch (error) {
         console.log(error);
@@ -341,6 +294,81 @@ export const startProgramAsync = createAsyncThunk<
     }
 });
 
+// UPDATE - Complete day (invalidate cache)
+export const completeDayAsync = createAsyncThunk<
+    UserProgramProgress,
+    { dayId: string; isAutoComplete?: boolean },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/completeDay', async ({ dayId, isAutoComplete = false }, { getState, rejectWithValue }) => {
+    const state = getState() as RootState;
+    const userId = state.user.user?.UserId;
+    if (!userId) {
+        return rejectWithValue({ errorMessage: 'User ID not available' });
+    }
+    try {
+        const result = await UserService.completeDay(userId, dayId, isAutoComplete);
+
+        // Invalidate cache after completing day
+        await cacheService.remove('user_program_progress');
+
+        return result;
+    } catch (error) {
+        console.log(error);
+        return rejectWithValue({ errorMessage: 'Failed to complete day' });
+    }
+});
+
+// UPDATE - Uncomplete day (invalidate cache)
+export const uncompleteDayAsync = createAsyncThunk<
+    UserProgramProgress,
+    { dayId: string },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/uncompleteDay', async ({ dayId }, { getState, rejectWithValue }) => {
+    const state = getState() as RootState;
+    const userId = state.user.user?.UserId;
+    if (!userId) {
+        return rejectWithValue({ errorMessage: 'User ID not available' });
+    }
+    try {
+        const result = await UserService.uncompleteDay(userId, dayId);
+
+        // Invalidate cache after uncompleting day
+        await cacheService.remove('user_program_progress');
+
+        return result;
+    } catch (error) {
+        console.log(error);
+        return rejectWithValue({ errorMessage: 'Failed to uncomplete day' });
+    }
+});
+
+// DELETE - End program (invalidate cache)
+export const endProgramAsync = createAsyncThunk<UserProgramProgress, void>('user/endProgram', async (_, { getState, rejectWithValue }) => {
+    const state = getState() as RootState;
+    const userId = state.user.user?.UserId;
+    if (!userId) {
+        return rejectWithValue({ errorMessage: 'User ID not available' });
+    }
+    try {
+        const result = await UserService.endProgram(userId);
+
+        // Invalidate cache after ending program
+        await cacheService.remove('user_program_progress');
+
+        return result as UserProgramProgress;
+    } catch (error) {
+        console.log(error);
+        return rejectWithValue({ errorMessage: 'Failed to end program' });
+    }
+});
+
+// DELETE - Reset program (invalidate cache)
 export const resetProgramAsync = createAsyncThunk<UserProgramProgress, void>('user/resetProgram', async (_, { getState, rejectWithValue }) => {
     const state = getState() as RootState;
     const userId = state.user.user?.UserId;
@@ -349,7 +377,10 @@ export const resetProgramAsync = createAsyncThunk<UserProgramProgress, void>('us
     }
     try {
         const result = await UserService.resetProgram(userId);
-        // No cache invalidation needed since program progress is never cached
+
+        // Invalidate cache after resetting program
+        await cacheService.remove('user_program_progress');
+
         return result;
     } catch (error) {
         console.log(error);
@@ -382,7 +413,7 @@ export const getUserAppSettingsAsync = createAsyncThunk<
 
         // Try cache first if enabled and not forcing refresh
         if (useCache && !forceRefresh) {
-            const cacheKey = `user_app_settings_${userId}`;
+            const cacheKey = `user_app_settings`;
             const cached = await cacheService.get<UserAppSettings>(cacheKey);
             const isExpired = await cacheService.isExpired(cacheKey);
 
@@ -398,7 +429,7 @@ export const getUserAppSettingsAsync = createAsyncThunk<
 
         // Cache the result if useCache is enabled
         if (useCache) {
-            const cacheKey = `user_app_settings_${userId}`;
+            const cacheKey = `user_app_settings`;
             await cacheService.set(cacheKey, profile, CacheTTL.LONG);
         }
 
@@ -429,7 +460,7 @@ export const updateUserAppSettingsAsync = createAsyncThunk<
         const result = await UserService.updateUserAppSettings(userId, userAppSettings);
 
         // Invalidate app settings cache after update
-        const cacheKey = `user_app_settings_${userId}`;
+        const cacheKey = `user_app_settings`;
         await cacheService.remove(cacheKey);
 
         return { userAppSettings: result };
@@ -468,7 +499,7 @@ export const getUserExerciseSubstitutionsAsync = createAsyncThunk<
 
         // Try cache first if enabled and not forcing refresh and no params
         if (useCache && !forceRefresh && !params) {
-            const cacheKey = `exercise_substitutions_${userId}`;
+            const cacheKey = `exercise_substitutions`;
             const cached = await cacheService.get<UserExerciseSubstitution[]>(cacheKey);
             const isExpired = await cacheService.isExpired(cacheKey);
 
@@ -484,7 +515,7 @@ export const getUserExerciseSubstitutionsAsync = createAsyncThunk<
 
         // Cache the result if useCache is enabled and no params (full list)
         if (useCache && !params) {
-            const cacheKey = `exercise_substitutions_${userId}`;
+            const cacheKey = `exercise_substitutions`;
             await cacheService.set(cacheKey, substitutions, CacheTTL.VERY_LONG);
         }
 
@@ -522,7 +553,7 @@ export const createExerciseSubstitutionAsync = createAsyncThunk<
         await UserService.createExerciseSubstitution(userId, substitutionData);
 
         // Invalidate cache after creation
-        const cacheKey = `exercise_substitutions_${userId}`;
+        const cacheKey = `exercise_substitutions`;
         await cacheService.remove(cacheKey);
 
         // Refresh and return all substitutions
@@ -555,7 +586,7 @@ export const updateExerciseSubstitutionAsync = createAsyncThunk<
         await UserService.updateExerciseSubstitution(userId, substitutionId, updates);
 
         // Invalidate cache after update
-        const cacheKey = `exercise_substitutions_${userId}`;
+        const cacheKey = `exercise_substitutions`;
         await cacheService.remove(cacheKey);
 
         // Refresh and return all substitutions
@@ -600,24 +631,17 @@ export const deleteExerciseSubstitutionAsync = createAsyncThunk<
     }
 });
 
-// MEASUREMENT THUNKS - These are always fresh due to their real-time nature
-
-// Helper function to refresh weight measurements
-const refreshWeightMeasurements = async (userId: string) => {
-    return await UserService.getWeightMeasurements(userId);
-};
-
-// Get all weight measurements - Always fresh, no caching
+// READ - Get weight measurements (with caching)
 export const getWeightMeasurementsAsync = createAsyncThunk<
     UserWeightMeasurement[],
-    { forceRefresh?: boolean } | void,
+    { forceRefresh?: boolean; useCache?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
 >('user/getWeightMeasurements', async (args = {}, { getState, rejectWithValue }) => {
     try {
-        const { forceRefresh = false } = typeof args === 'object' ? args : {};
+        const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
         const state = getState();
         const userId = state.user.user?.UserId;
 
@@ -630,9 +654,26 @@ export const getWeightMeasurementsAsync = createAsyncThunk<
             return state.user.userWeightMeasurements;
         }
 
-        // Always fetch fresh measurements (too dynamic to cache effectively)
-        console.log('Loading weight measurements from API (always fresh)');
+        // Try cache first if enabled and not forcing refresh
+        if (useCache && !forceRefresh) {
+            const cached = await cacheService.get<UserWeightMeasurement[]>('weight_measurements');
+            const isExpired = await cacheService.isExpired('weight_measurements');
+
+            if (cached && !isExpired) {
+                console.log('Loaded weight measurements from cache');
+                return cached;
+            }
+        }
+
+        // Load from API
+        console.log('Loading weight measurements from API');
         const measurements = await UserService.getWeightMeasurements(userId);
+
+        // Cache the result if useCache is enabled
+        if (useCache) {
+            await cacheService.set('weight_measurements', measurements, CacheTTL.LONG);
+        }
+
         return measurements;
     } catch (error) {
         return rejectWithValue({
@@ -641,7 +682,7 @@ export const getWeightMeasurementsAsync = createAsyncThunk<
     }
 });
 
-// Log new weight measurement
+// CREATE - Log weight measurement (invalidate cache)
 export const logWeightMeasurementAsync = createAsyncThunk<
     UserWeightMeasurement[],
     { weight: number; measurementTimestamp?: string },
@@ -662,8 +703,11 @@ export const logWeightMeasurementAsync = createAsyncThunk<
         const timestamp = measurementTimestamp ?? new Date().toISOString();
         await UserService.logWeightMeasurement(userId, weight, timestamp);
 
+        // Invalidate cache after creating new measurement
+        await cacheService.remove('weight_measurements');
+
         // Refresh and return all measurements
-        return await refreshWeightMeasurements(userId);
+        return await UserService.getWeightMeasurements(userId);
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to log weight measurement',
@@ -671,7 +715,7 @@ export const logWeightMeasurementAsync = createAsyncThunk<
     }
 });
 
-// Update weight measurement
+// UPDATE - Update weight measurement (invalidate cache)
 export const updateWeightMeasurementAsync = createAsyncThunk<
     UserWeightMeasurement[],
     { timestamp: string; weight: number },
@@ -691,8 +735,11 @@ export const updateWeightMeasurementAsync = createAsyncThunk<
         // Update the measurement
         await UserService.updateWeightMeasurement(userId, timestamp, weight);
 
+        // Invalidate cache after updating measurement
+        await cacheService.remove('weight_measurements');
+
         // Refresh and return all measurements
-        return await refreshWeightMeasurements(userId);
+        return await UserService.getWeightMeasurements(userId);
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to update weight measurement',
@@ -700,7 +747,7 @@ export const updateWeightMeasurementAsync = createAsyncThunk<
     }
 });
 
-// Delete weight measurement
+// DELETE - Delete weight measurement (invalidate cache)
 export const deleteWeightMeasurementAsync = createAsyncThunk<
     UserWeightMeasurement[],
     { timestamp: string },
@@ -720,8 +767,11 @@ export const deleteWeightMeasurementAsync = createAsyncThunk<
         // Delete the measurement
         await UserService.deleteWeightMeasurement(userId, timestamp);
 
+        // Invalidate cache after deleting measurement
+        await cacheService.remove('weight_measurements');
+
         // Refresh and return all measurements
-        return await refreshWeightMeasurements(userId);
+        return await UserService.getWeightMeasurements(userId);
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to delete weight measurement',
@@ -729,21 +779,17 @@ export const deleteWeightMeasurementAsync = createAsyncThunk<
     }
 });
 
-// Helper function to refresh sleep measurements
-const refreshSleepMeasurements = async (userId: string) => {
-    return await UserService.getSleepMeasurements(userId);
-};
-
+// READ - Get sleep measurements (with caching)
 export const getSleepMeasurementsAsync = createAsyncThunk<
     UserSleepMeasurement[],
-    { forceRefresh?: boolean } | void,
+    { forceRefresh?: boolean; useCache?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
 >('user/getSleepMeasurements', async (args = {}, { getState, rejectWithValue }) => {
     try {
-        const { forceRefresh = false } = typeof args === 'object' ? args : {};
+        const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
         const state = getState();
         const userId = state.user.user?.UserId;
 
@@ -755,9 +801,26 @@ export const getSleepMeasurementsAsync = createAsyncThunk<
             return state.user.userSleepMeasurements;
         }
 
-        // Always fetch fresh sleep measurements (too dynamic to cache effectively)
-        console.log('Loading sleep measurements from API (always fresh)');
+        // Try cache first if enabled and not forcing refresh
+        if (useCache && !forceRefresh) {
+            const cached = await cacheService.get<UserSleepMeasurement[]>('sleep_measurements');
+            const isExpired = await cacheService.isExpired('sleep_measurements');
+
+            if (cached && !isExpired) {
+                console.log('Loaded sleep measurements from cache');
+                return cached;
+            }
+        }
+
+        // Load from API
+        console.log('Loading sleep measurements from API');
         const measurements = await UserService.getSleepMeasurements(userId);
+
+        // Cache the result if useCache is enabled
+        if (useCache) {
+            await cacheService.set('sleep_measurements', measurements, CacheTTL.LONG);
+        }
+
         return measurements;
     } catch (error) {
         return rejectWithValue({
@@ -766,6 +829,7 @@ export const getSleepMeasurementsAsync = createAsyncThunk<
     }
 });
 
+// CREATE - Log sleep measurement (invalidate cache)
 export const logSleepMeasurementAsync = createAsyncThunk<
     UserSleepMeasurement[],
     {
@@ -789,7 +853,11 @@ export const logSleepMeasurementAsync = createAsyncThunk<
         const { measurementTimestamp, ...sleepParams } = params;
         const timestamp = measurementTimestamp ?? new Date().toISOString();
         await UserService.logSleepMeasurement(userId, sleepParams, timestamp);
-        return await refreshSleepMeasurements(userId);
+
+        // Invalidate cache after creating new measurement
+        await cacheService.remove('sleep_measurements');
+
+        return await UserService.getSleepMeasurements(userId);
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to log sleep measurement',
@@ -797,6 +865,7 @@ export const logSleepMeasurementAsync = createAsyncThunk<
     }
 });
 
+// UPDATE - Update sleep measurement (invalidate cache)
 export const updateSleepMeasurementAsync = createAsyncThunk<
     UserSleepMeasurement[],
     {
@@ -818,14 +887,13 @@ export const updateSleepMeasurementAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Extract timestamp and sleep parameters
         const { timestamp, ...sleepParams } = params;
-
-        // Update the measurement with the new service method
         await UserService.updateSleepMeasurement(userId, timestamp, sleepParams);
 
-        // Refresh and return all measurements
-        return await refreshSleepMeasurements(userId);
+        // Invalidate cache after updating measurement
+        await cacheService.remove('sleep_measurements');
+
+        return await UserService.getSleepMeasurements(userId);
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to update sleep measurement',
@@ -833,6 +901,7 @@ export const updateSleepMeasurementAsync = createAsyncThunk<
     }
 });
 
+// DELETE - Delete sleep measurement (invalidate cache)
 export const deleteSleepMeasurementAsync = createAsyncThunk<
     UserSleepMeasurement[],
     { timestamp: string },
@@ -850,7 +919,11 @@ export const deleteSleepMeasurementAsync = createAsyncThunk<
         }
 
         await UserService.deleteSleepMeasurement(userId, timestamp);
-        return await refreshSleepMeasurements(userId);
+
+        // Invalidate cache after deleting measurement
+        await cacheService.remove('sleep_measurements');
+
+        return await UserService.getSleepMeasurements(userId);
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to delete sleep measurement',
@@ -858,21 +931,17 @@ export const deleteSleepMeasurementAsync = createAsyncThunk<
     }
 });
 
-const refreshBodyMeasurements = async (userId: string) => {
-    return await UserService.getBodyMeasurements(userId);
-};
-
-// Get all body measurements - Always fresh, no caching
+// READ - Get body measurements (with caching)
 export const getBodyMeasurementsAsync = createAsyncThunk<
     UserBodyMeasurement[],
-    { forceRefresh?: boolean } | void,
+    { forceRefresh?: boolean; useCache?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
 >('user/getBodyMeasurements', async (args = {}, { getState, rejectWithValue }) => {
     try {
-        const { forceRefresh = false } = typeof args === 'object' ? args : {};
+        const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
         const state = getState();
         const userId = state.user.user?.UserId;
 
@@ -885,9 +954,26 @@ export const getBodyMeasurementsAsync = createAsyncThunk<
             return state.user.userBodyMeasurements;
         }
 
-        // Always fetch fresh body measurements (too dynamic to cache effectively)
-        console.log('Loading body measurements from API (always fresh)');
+        // Try cache first if enabled and not forcing refresh
+        if (useCache && !forceRefresh) {
+            const cached = await cacheService.get<UserBodyMeasurement[]>('body_measurements');
+            const isExpired = await cacheService.isExpired('body_measurements');
+
+            if (cached && !isExpired) {
+                console.log('Loaded body measurements from cache');
+                return cached;
+            }
+        }
+
+        // Load from API
+        console.log('Loading body measurements from API');
         const measurements = await UserService.getBodyMeasurements(userId);
+
+        // Cache the result if useCache is enabled
+        if (useCache) {
+            await cacheService.set('body_measurements', measurements, CacheTTL.LONG);
+        }
+
         return measurements;
     } catch (error) {
         return rejectWithValue({
@@ -896,7 +982,7 @@ export const getBodyMeasurementsAsync = createAsyncThunk<
     }
 });
 
-// Log new body measurement
+// CREATE - Log body measurement (invalidate cache)
 export const logBodyMeasurementAsync = createAsyncThunk<
     UserBodyMeasurement[],
     { measurements: Record<string, number>; measurementTimestamp?: string },
@@ -917,8 +1003,11 @@ export const logBodyMeasurementAsync = createAsyncThunk<
         const timestamp = measurementTimestamp ?? new Date().toISOString();
         await UserService.logBodyMeasurement(userId, measurements, timestamp);
 
+        // Invalidate cache after creating new measurement
+        await cacheService.remove('body_measurements');
+
         // Refresh and return all measurements
-        return await refreshBodyMeasurements(userId);
+        return await UserService.getBodyMeasurements(userId);
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to log body measurement',
@@ -926,7 +1015,7 @@ export const logBodyMeasurementAsync = createAsyncThunk<
     }
 });
 
-// Update body measurement
+// UPDATE - Update body measurement (invalidate cache)
 export const updateBodyMeasurementAsync = createAsyncThunk<
     UserBodyMeasurement[],
     { timestamp: string; measurements: Record<string, number> },
@@ -946,8 +1035,11 @@ export const updateBodyMeasurementAsync = createAsyncThunk<
         // Update the measurement
         await UserService.updateBodyMeasurement(userId, timestamp, measurements);
 
+        // Invalidate cache after updating measurement
+        await cacheService.remove('body_measurements');
+
         // Refresh and return all measurements
-        return await refreshBodyMeasurements(userId);
+        return await UserService.getBodyMeasurements(userId);
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to update body measurement',
@@ -955,7 +1047,7 @@ export const updateBodyMeasurementAsync = createAsyncThunk<
     }
 });
 
-// Delete body measurement
+// DELETE - Delete body measurement (invalidate cache)
 export const deleteBodyMeasurementAsync = createAsyncThunk<
     UserBodyMeasurement[],
     { timestamp: string },
@@ -975,8 +1067,11 @@ export const deleteBodyMeasurementAsync = createAsyncThunk<
         // Delete the measurement
         await UserService.deleteBodyMeasurement(userId, timestamp);
 
+        // Invalidate cache after deleting measurement
+        await cacheService.remove('body_measurements');
+
         // Refresh and return all measurements
-        return await refreshBodyMeasurements(userId);
+        return await UserService.getBodyMeasurements(userId);
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to delete body measurement',
@@ -1013,7 +1108,7 @@ export const getUserExerciseSetModificationsAsync = createAsyncThunk<
 
         // Try cache first if enabled and not forcing refresh and no params
         if (useCache && !forceRefresh && !params) {
-            const cacheKey = `exercise_set_modifications_${userId}`;
+            const cacheKey = `exercise_set_modifications`;
             const cached = await cacheService.get<UserExerciseSetModification[]>(cacheKey);
             const isExpired = await cacheService.isExpired(cacheKey);
 
@@ -1029,7 +1124,7 @@ export const getUserExerciseSetModificationsAsync = createAsyncThunk<
 
         // Cache the result if useCache is enabled and no params (full list)
         if (useCache && !params) {
-            const cacheKey = `exercise_set_modifications_${userId}`;
+            const cacheKey = `exercise_set_modifications`;
             await cacheService.set(cacheKey, modifications, CacheTTL.LONG);
         }
 
@@ -1067,7 +1162,7 @@ export const createExerciseSetModificationAsync = createAsyncThunk<
         await UserService.createExerciseSetModification(userId, modificationData);
 
         // Invalidate cache after creation
-        const cacheKey = `exercise_set_modifications_${userId}`;
+        const cacheKey = `exercise_set_modifications`;
         await cacheService.remove(cacheKey);
 
         // Refresh and return all modifications
@@ -1100,7 +1195,7 @@ export const updateExerciseSetModificationAsync = createAsyncThunk<
         await UserService.updateExerciseSetModification(userId, modificationId, updates);
 
         // Invalidate cache after update
-        const cacheKey = `exercise_set_modifications_${userId}`;
+        const cacheKey = `exercise_set_modifications`;
         await cacheService.remove(cacheKey);
 
         // Refresh and return all modifications
@@ -1133,7 +1228,7 @@ export const deleteExerciseSetModificationAsync = createAsyncThunk<
         await UserService.deleteExerciseSetModification(userId, modificationId);
 
         // Invalidate cache after deletion
-        const cacheKey = `exercise_set_modifications_${userId}`;
+        const cacheKey = `exercise_set_modifications`;
         await cacheService.remove(cacheKey);
 
         // Refresh and return all modifications

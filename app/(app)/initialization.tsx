@@ -16,9 +16,7 @@ import { InitializationService } from '@/utils/initializationService';
 import { setInitialized, incrementRetryAttempt, resetRetryAttempt, reset as resetInitialization } from '@/store/initialization/initializationSlice';
 import { getUserProgramProgressAsync } from '@/store/user/thunks';
 import { getAllProgramDaysAsync } from '@/store/programs/thunks';
-import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
-import { getWeightMeasurementsAsync, getBodyMeasurementsAsync, getSleepMeasurementsAsync } from '@/store/user/thunks';
-import { initializeTrackedLiftsHistoryAsync } from '@/store/exerciseProgress/thunks';
+import { cacheService } from '@/utils/cache';
 
 const Initialization: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -30,80 +28,141 @@ const Initialization: React.FC = () => {
     const { userProgramProgress, userProgramProgressState } = useSelector((state: RootState) => state.user);
 
     // Local state
-    const [isRetrying, setIsRetrying] = useState(false);
+    const [showManualRetry, setShowManualRetry] = useState(false);
     const initServiceRef = useRef<InitializationService | null>(null);
+    const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Initialize service
     useEffect(() => {
         initServiceRef.current = new InitializationService(dispatch);
     }, [dispatch]);
 
-    // Main initialization flow
+    // Main initialization flow - Cache-First Strategy
     const initializeApp = useCallback(async () => {
         if (!initServiceRef.current) return;
 
         try {
-            setIsRetrying(false);
             dispatch(resetRetryAttempt());
+            setShowManualRetry(false);
 
             // Step 1: Check cache status
             await initServiceRef.current.checkCacheStatus();
 
-            // Step 2: Load critical data (with cache-first strategy)
-            const criticalSuccess = await initServiceRef.current.loadCriticalData();
-            if (!criticalSuccess) return; // Stop if critical data fails
+            // Step 2: Load critical data (cache-first)
+            await initServiceRef.current.loadCriticalData();
 
-            // Step 3: Load secondary data (with cache-first strategy)
-            const secondarySuccess = await initServiceRef.current.loadSecondaryData();
-            if (!secondarySuccess) return; // Stop if required secondary data fails
+            // Step 3: Load secondary data (cache-first)
+            await initServiceRef.current.loadSecondaryData();
 
-            // Step 4: Load real-time data that can't be cached
-            await loadRealTimeData();
+            // Step 4: Load essential real-time data
+            await loadEssentialRealTimeData();
 
-            // Step 5: Mark as initialized and navigate
+            // Step 5: Navigate to app
             dispatch(setInitialized(true));
             router.replace('/(app)/(tabs)/home');
 
-            // Step 6: Start background sync (non-blocking)
+            // Step 6: Start background processes
             setTimeout(() => {
                 initServiceRef.current?.startBackgroundSync();
+                loadBackgroundRealTimeData();
             }, 1000);
         } catch (error) {
-            console.error('Initialization failed:', error);
+            console.error('Initialization error:', error);
+            await handleInitializationError();
         }
     }, [dispatch]);
 
-    // Load data that must always be fresh (can't be cached)
-    const loadRealTimeData = async () => {
-        try {
-            // These are critical and must be current
-            await dispatch(getUserProgramProgressAsync());
+    // Handle initialization errors with automatic retries
+    const handleInitializationError = async () => {
+        const currentAttempt = initialization.retryAttempt;
 
-            // These are important for UX but not blocking
-            const nonBlockingPromises = [
-                dispatch(getWorkoutQuoteAsync()),
-                dispatch(getRestDayQuoteAsync()),
-                dispatch(getWeightMeasurementsAsync()),
-                dispatch(getBodyMeasurementsAsync()),
-                dispatch(getSleepMeasurementsAsync()),
-                dispatch(initializeTrackedLiftsHistoryAsync()),
-            ];
+        // Check if we have cached data to fall back on
+        const hasCachedData = await checkForCachedData();
 
-            // Don't wait for these to complete
-            Promise.allSettled(nonBlockingPromises).then((results) => {
-                results.forEach((result) => {
-                    if (result.status === 'rejected') {
-                        console.warn(`Non-blocking data load failed:`, result.reason);
-                    }
-                });
-            });
-        } catch (error) {
-            console.error('Real-time data loading failed:', error);
-            throw error;
+        if (hasCachedData) {
+            // Proceed with cached data, but still retry in background
+            console.log('Proceeding with cached data, retrying in background...');
+            dispatch(setInitialized(true));
+            router.replace('/(app)/(tabs)/home');
+
+            // Retry in background
+            setTimeout(() => {
+                if (currentAttempt < 3) {
+                    dispatch(incrementRetryAttempt());
+                    initializeApp();
+                }
+            }, 5000);
+            return;
+        }
+
+        // No cached data - need to retry
+        if (currentAttempt < 3) {
+            // Automatic retry with exponential backoff
+            const retryDelay = Math.min(2000 * Math.pow(2, currentAttempt), 10000);
+            console.log(`Auto-retrying in ${retryDelay}ms (attempt ${currentAttempt + 1}/3)`);
+
+            dispatch(incrementRetryAttempt());
+
+            retryTimeoutRef.current = setTimeout(() => {
+                initializeApp();
+            }, retryDelay);
+        } else {
+            // Max retries reached - show manual retry option
+            setShowManualRetry(true);
         }
     };
 
-    // Load program days when user program progress is available
+    // Load only essential real-time data
+    const loadEssentialRealTimeData = async () => {
+        try {
+            // Only load the most critical data
+            await dispatch(getUserProgramProgressAsync());
+        } catch (error) {
+            console.warn('Essential real-time data failed:', error);
+            // Don't throw - continue with cached data
+        }
+    };
+
+    // Load remaining data in background
+    const loadBackgroundRealTimeData = async () => {
+        try {
+            // Background data loading can happen after navigation
+            const backgroundPromises: Promise<unknown>[] = [
+                // Add any other background data loading here
+            ];
+
+            Promise.allSettled(backgroundPromises).then((results) => {
+                const failures = results.filter((r) => r.status === 'rejected').length;
+                if (failures > 0) {
+                    console.warn(`${failures} background data requests failed`);
+                }
+            });
+        } catch (error) {
+            console.warn('Background data loading failed:', error);
+        }
+    };
+
+    // Check for any cached data
+    const checkForCachedData = async (): Promise<boolean> => {
+        try {
+            const hasUser = await cacheService.get('user_data');
+            const hasPrograms = await cacheService.get('all_programs');
+
+            return !!(hasUser && hasPrograms);
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    };
+
+    // Manual retry handler (only shown as last resort)
+    const handleManualRetry = useCallback(() => {
+        setShowManualRetry(false);
+        dispatch(resetInitialization());
+        initializeApp();
+    }, [dispatch, initializeApp]);
+
+    // Load program days when available
     useEffect(() => {
         if (userProgramProgressState === REQUEST_STATE.FULFILLED && userProgramProgress?.ProgramId) {
             dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId }));
@@ -113,54 +172,43 @@ const Initialization: React.FC = () => {
     // Start initialization on mount
     useEffect(() => {
         initializeApp();
+
+        // Cleanup timeout on unmount
+        return () => {
+            if (retryTimeoutRef.current) {
+                clearTimeout(retryTimeoutRef.current);
+            }
+        };
     }, [initializeApp]);
 
-    // Retry handler
-    const handleRetry = useCallback(() => {
-        setIsRetrying(true);
-        dispatch(incrementRetryAttempt());
-        dispatch(resetInitialization());
-        initializeApp();
-    }, [dispatch, initializeApp]);
-
-    const getLoadingMessage = () => {
-        return 'Loading...';
-    };
-
-    // Show error state
-    if (initialization.criticalError && initialization.retryAttempt < 3) {
+    // Only show manual retry after all automatic attempts failed
+    if (showManualRetry) {
         return (
             <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
                 <View style={styles.errorContainer}>
                     <ThemedText type='titleXLarge' style={styles.errorTitle}>
-                        Connection Error
+                        Connection Issue
                     </ThemedText>
 
-                    <ThemedText style={styles.errorMessage}>
-                        We couldn&apos;t connect to our servers. Please check your internet connection and try again.
-                    </ThemedText>
+                    <ThemedText style={styles.errorMessage}>Please check your internet connection.</ThemedText>
 
                     <View style={styles.buttonContainer}>
-                        <PrimaryButton
-                            size='MD'
-                            text={`Retry (${initialization.retryAttempt}/3)`}
-                            onPress={handleRetry}
-                            loading={isRetrying}
-                            style={styles.retryButton}
-                        />
+                        <PrimaryButton size='MD' text='Try Again' onPress={handleManualRetry} style={styles.retryButton} />
                     </View>
 
-                    {__DEV__ && (
+                    {__DEV__ && initialization.criticalError && (
                         <View style={styles.devErrorDetails}>
                             <ThemedText type='caption' style={styles.devErrorTitle}>
-                                Error Details (Dev Only):
+                                Debug Info:
                             </ThemedText>
                             <ThemedText type='caption' style={styles.devErrorText}>
                                 {initialization.criticalError}
                             </ThemedText>
-                            <ThemedText type='caption' style={styles.devErrorText}>
-                                Failed items: {initialization.failedItems.join(', ')}
-                            </ThemedText>
+                            {initialization.failedItems.length > 0 && (
+                                <ThemedText type='caption' style={styles.devErrorText}>
+                                    Failed: {initialization.failedItems.join(', ')}
+                                </ThemedText>
+                            )}
                         </View>
                     )}
                 </View>
@@ -168,29 +216,8 @@ const Initialization: React.FC = () => {
         );
     }
 
-    // Show permanent failure state after 3 retries
-    if (initialization.criticalError && initialization.retryAttempt >= 3) {
-        return (
-            <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
-                <View style={styles.errorContainer}>
-                    <ThemedText type='titleXLarge' style={styles.errorTitle}>
-                        Unable to Connect
-                    </ThemedText>
-
-                    <ThemedText style={styles.errorMessage}>
-                        We&apos;re having trouble connecting to our servers. Please try again later or contact support if the problem persists.
-                    </ThemedText>
-
-                    <View style={styles.buttonContainer}>
-                        <PrimaryButton size='MD' text='Try Again' onPress={handleRetry} loading={isRetrying} style={styles.retryButton} />
-                    </View>
-                </View>
-            </SafeAreaView>
-        );
-    }
-
-    // Show loading state with DumbbellSplash and basic loading text
-    return <DumbbellSplash isDataLoaded={initialization.isInitialized} showLoadingText={true} loadingText={getLoadingMessage()} />;
+    // Simple loading state
+    return <DumbbellSplash isDataLoaded={initialization.isInitialized} showLoadingText={true} loadingText='Loading...' />;
 };
 
 const styles = StyleSheet.create({
@@ -200,7 +227,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     errorContainer: {
-        width: '80%',
+        width: '85%',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -211,6 +238,7 @@ const styles = StyleSheet.create({
     errorMessage: {
         textAlign: 'center',
         marginBottom: Spaces.LG,
+        opacity: 0.8,
     },
     buttonContainer: {
         width: '100%',
@@ -225,6 +253,7 @@ const styles = StyleSheet.create({
         padding: Spaces.MD,
         backgroundColor: 'rgba(255, 0, 0, 0.1)',
         borderRadius: 8,
+        width: '100%',
     },
     devErrorTitle: {
         fontWeight: 'bold',
@@ -232,6 +261,7 @@ const styles = StyleSheet.create({
     },
     devErrorText: {
         marginBottom: Spaces.XS,
+        fontSize: 12,
     },
 });
 

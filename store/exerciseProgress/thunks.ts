@@ -29,7 +29,7 @@ export const initializeTrackedLiftsHistoryAsync = createAsyncThunk<any, { forceR
 
             // Try cache first if enabled and not forcing refresh
             if (useCache && !forceRefresh) {
-                const cacheKey = `tracked_lifts_history_${userId}`;
+                const cacheKey = `tracked_lifts_history`;
                 const cached = await cacheService.get<any>(cacheKey);
                 const isExpired = await cacheService.isExpired(cacheKey);
 
@@ -58,7 +58,7 @@ export const initializeTrackedLiftsHistoryAsync = createAsyncThunk<any, { forceR
 
             // Cache the result if useCache is enabled
             if (useCache) {
-                const cacheKey = `tracked_lifts_history_${userId}`;
+                const cacheKey = `tracked_lifts_history`;
                 await cacheService.set(cacheKey, liftHistory, CacheTTL.LONG);
             }
 
@@ -120,7 +120,7 @@ export const fetchExercisesRecentHistoryAsync = createAsyncThunk(
 
             if (useCache && !forceRefresh) {
                 for (const exerciseId of uncachedExercises) {
-                    const cacheKey = `recent_logs_${userId}_${exerciseId}`;
+                    const cacheKey = `recent_logs_${exerciseId}`;
                     const cached = await cacheService.get<any>(cacheKey);
                     const isExpired = await cacheService.isExpired(cacheKey);
 
@@ -159,7 +159,7 @@ export const fetchExercisesRecentHistoryAsync = createAsyncThunk(
 
                     // Cache the result if useCache is enabled
                     if (useCache) {
-                        const cacheKey = `recent_logs_${userId}_${exerciseId}`;
+                        const cacheKey = `recent_logs_${exerciseId}`;
                         cacheService.set(cacheKey, exerciseLogs, CacheTTL.LONG);
                     }
 
@@ -237,12 +237,12 @@ export const saveExerciseProgressAsync = createAsyncThunk(
             const isTracked = isLongTermTrackedLift(exerciseId);
 
             // Clear cache for this exercise's recent logs
-            const recentLogsCacheKey = `recent_logs_${userId}_${exerciseId}`;
+            const recentLogsCacheKey = `recent_logs_${exerciseId}`;
             await cacheService.remove(recentLogsCacheKey);
 
             // If it's a tracked lift, also clear the tracked lifts history cache
             if (isTracked) {
-                const trackedHistoryCacheKey = `tracked_lifts_history_${userId}`;
+                const trackedHistoryCacheKey = `tracked_lifts_history`;
                 await cacheService.remove(trackedHistoryCacheKey);
             }
 
@@ -284,12 +284,12 @@ export const deleteExerciseLogAsync = createAsyncThunk(
             const isTracked = isLongTermTrackedLift(exerciseId);
 
             // Clear cache for this exercise's recent logs
-            const recentLogsCacheKey = `recent_logs_${userId}_${exerciseId}`;
+            const recentLogsCacheKey = `recent_logs_${exerciseId}`;
             await cacheService.remove(recentLogsCacheKey);
 
             // If it's a tracked lift, also clear the tracked lifts history cache
             if (isTracked) {
-                const trackedHistoryCacheKey = `tracked_lifts_history_${userId}`;
+                const trackedHistoryCacheKey = `tracked_lifts_history`;
                 await cacheService.remove(trackedHistoryCacheKey);
             }
 
