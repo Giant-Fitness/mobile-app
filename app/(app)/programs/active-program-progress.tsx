@@ -22,6 +22,7 @@ import { EndProgramModal } from '@/components/programs/EndProgramModal';
 import { ResetProgramModal } from '@/components/programs/ResetProgramModal';
 import { AutoDismissSuccessModal } from '@/components/overlays/AutoDismissSuccessModal';
 import { usePostHog } from 'posthog-react-native';
+import { debounce } from '@/utils/debounce';
 
 const ActiveProgramProgressScreen = () => {
     // 1. Hooks Section - All hooks must be called before any conditionals
@@ -49,13 +50,9 @@ const ActiveProgramProgressScreen = () => {
 
     const navigateToProgramDay = (dayId: string) => {
         if (dayId) {
-            router.push({
+            debounce(router, {
                 pathname: '/(app)/programs/program-day',
-                params: {
-                    programId: activeProgram?.ProgramId,
-                    dayId,
-                    source: 'active-program-progress',
-                },
+                params: { programId: activeProgram?.ProgramId, dayId, source: 'active-program-progress' },
             });
         }
     };
