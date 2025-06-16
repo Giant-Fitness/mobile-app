@@ -46,6 +46,7 @@
             "expo-font",
             "expo-secure-store",
             "expo-localization",
+            "expo-audio",
             [
                 "expo-splash-screen",
                 {
@@ -56,6 +57,13 @@
                         "image": "./assets/icons/splash-icon-light.png"
                     },
                     "imageWidth": 200
+                }
+            ],
+            [
+                "expo-video",
+                {
+                    "supportsBackgroundPlayback": true,
+                    "supportsPictureInPicture": true
                 }
             ]
         ],
