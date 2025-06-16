@@ -90,7 +90,7 @@ const NameCollectionScreen = () => {
                     style={styles.checkButton}
                     onPress={() => {
                         handleSubmit();
-                        trigger('notificationSuccess');
+                        trigger('effectClick');
                     }}
                     disabled={isSubmitting || !firstName.trim()}
                     activeOpacity={0.7}

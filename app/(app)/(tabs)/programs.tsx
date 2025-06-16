@@ -39,7 +39,7 @@ export default function ProgramsScreen() {
         try {
             setRefreshing(true);
             // Set forceRefresh to true to trigger the hook to refresh data
-            trigger('impactHeavy');
+            trigger('virtualKeyRelease');
             setForceRefresh(true);
             // Also perform explicit refresh operations
             if (userProgramProgress?.ProgramId) {

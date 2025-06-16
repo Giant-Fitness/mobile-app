@@ -9,12 +9,13 @@ import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { Opacities } from '@/constants/Opacities';
-import Animated, { useAnimatedProps } from 'react-native-reanimated';
+import Animated, { useAnimatedProps, SharedValue } from 'react-native-reanimated';
 import { router } from 'expo-router';
+import { trigger } from 'react-native-haptic-feedback';
 
 type BackButtonProps = {
     style?: ViewStyle;
-    animatedColor?: Animated.SharedValue<string>; // Optional animated color
+    animatedColor?: SharedValue<string>; // Optional animated color
     staticColor?: string; // Optional static color
     iconSize?: number; // Allows custom icon Sizes
     onBackPress?: () => void; // Custom onPress handler
@@ -32,6 +33,7 @@ export const BackButton: React.FC<BackButtonProps & AccessibilityProps> = ({
     const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
     const themeColors = Colors[colorScheme]; // Access theme-specific colors
     const defaultIconColor = staticColor || themeColors.iconSelected; // Use static color if provided
+
     const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 
     // Animated props to update the color dynamically if animatedColor is provided
@@ -41,10 +43,21 @@ export const BackButton: React.FC<BackButtonProps & AccessibilityProps> = ({
           }))
         : undefined; // No animated props if animatedColor is not provided
 
+    const handleBackPress = () => {
+        trigger('effectClick');
+
+        // Execute custom back handler or default router.back()
+        if (onBackPress) {
+            onBackPress();
+        } else {
+            router.back();
+        }
+    };
+
     return (
         <TouchableOpacity
             style={[styles.button, style]}
-            onPress={onBackPress || (() => router.back())}
+            onPress={handleBackPress}
             accessibilityLabel={accessibilityLabel}
             activeOpacity={Opacities.buttonActiveOpacity}
         >

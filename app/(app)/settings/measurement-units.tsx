@@ -17,6 +17,7 @@ import { router } from 'expo-router';
 import { RadioPill } from '@/components/inputs/RadioPill';
 import { AppDispatch } from '@/store/store';
 import { UserAppSettings } from '@/types';
+import { trigger } from 'react-native-haptic-feedback';
 
 const UnitsSelectionScreen = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -41,6 +42,7 @@ const UnitsSelectionScreen = () => {
     const themeColors = Colors[colorScheme];
 
     const toPressSave = async () => {
+        trigger('effectClick');
         setIsSubmitting(true);
         try {
             if (!userAppSettings) {

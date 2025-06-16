@@ -18,13 +18,14 @@ export default function TabLayout() {
     const themeColors = Colors[colorScheme];
 
     const handleSettingPress = () => {
+        trigger('effectClick');
         debounce(router, '/(app)/settings');
     };
 
     return (
         <Tabs
             screenListeners={() => ({
-                tabPress: () => trigger('soft'),
+                tabPress: () => trigger('virtualKey'),
             })}
             screenOptions={{
                 headerTitleAllowFontScaling: false,

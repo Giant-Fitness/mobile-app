@@ -11,7 +11,7 @@ import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { Opacities } from '@/constants/Opacities';
 import { ThemedTextProps } from '@/components/base/ThemedText';
-import { trigger } from 'react-native-haptic-feedback';
+import { trigger, HapticFeedbackTypes } from 'react-native-haptic-feedback';
 
 type TextButtonProps = {
     onPress: () => void;
@@ -29,7 +29,7 @@ type TextButtonProps = {
     accessibilityLabel?: string;
     loading?: boolean;
     children?: React.ReactNode;
-    haptic?: 'impactLight' | 'impactMedium' | 'impactHeavy' | 'rigid' | 'soft' | 'notificationError' | 'notificationSuccess' | 'notificationWarning' | 'none';
+    haptic?: HapticFeedbackTypes | keyof typeof HapticFeedbackTypes | 'none';
 };
 
 export const TextButton: React.FC<TextButtonProps & AccessibilityProps> = ({

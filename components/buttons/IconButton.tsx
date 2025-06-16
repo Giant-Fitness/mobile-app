@@ -7,7 +7,7 @@ import { Icon } from '@/components/base/Icon';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { moderateScale } from '@/utils/scaling';
-import { trigger } from 'react-native-haptic-feedback';
+import { HapticFeedbackTypes, trigger } from 'react-native-haptic-feedback';
 
 type IconButtonProps = {
     onPress: () => void;
@@ -20,7 +20,7 @@ type IconButtonProps = {
     addBorder?: boolean;
     backgroundColor?: string; // Control background color
     accessibilityLabel?: string; // Accessibility label for screen readers
-    haptic?: 'impactLight' | 'impactMedium' | 'impactHeavy' | 'rigid' | 'soft' | 'notificationError' | 'notificationSuccess' | 'notificationWarning' | 'none';
+    haptic?: HapticFeedbackTypes | keyof typeof HapticFeedbackTypes | 'none';
 };
 
 export const IconButton: React.FC<IconButtonProps & AccessibilityProps> = ({

@@ -180,7 +180,7 @@ export default function HomeScreen() {
         if (isRefreshing) return;
 
         setIsRefreshing(true);
-        trigger('impactHeavy');
+        trigger('virtualKeyRelease');
 
         try {
             await dispatch(getUserAsync());
@@ -363,7 +363,7 @@ export default function HomeScreen() {
                         description='Our structured training plans turn your goals into achievements'
                         onPress={() => {
                             debounce(router, '/(app)/programs/browse-programs');
-                            trigger('impactHeavy');
+                            trigger('soft');
                         }}
                         backgroundColor={themeColors.containerHighlight}
                         image={require('@/assets/images/fist.png')}
@@ -389,7 +389,7 @@ export default function HomeScreen() {
                     description='Let us recommend a training plan tailored to your goals'
                     onPress={() => {
                         debounce(router, '/(app)/programs/program-recommender-wizard');
-                        trigger('impactHeavy');
+                        trigger('soft');
                     }}
                     backgroundColor={themeColors.containerHighlight}
                     image={require('@/assets/images/nutrition.png')}

@@ -56,7 +56,7 @@ const ProgramOverviewScreen = () => {
     const handleRefresh = async () => {
         try {
             setRefreshing(true);
-            trigger('impactHeavy');
+            trigger('virtualKeyRelease');
             await dispatch(getProgramAsync({ programId, forceRefresh: true }));
             setTimeout(() => {
                 setRefreshing(false);
@@ -212,6 +212,7 @@ const ProgramOverviewScreen = () => {
                                     textType='bodyMedium'
                                     size='LG'
                                     style={[styles.calendarButton, { marginTop: Spaces.MD }]}
+                                    haptic='selection'
                                 />
                             )}
                             {isOnAProgram && isOnThisProgram && (

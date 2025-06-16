@@ -15,6 +15,7 @@ import { useSharedValue } from 'react-native-reanimated';
 import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { trigger } from 'react-native-haptic-feedback';
 
 const NameChangeScreen = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -28,6 +29,8 @@ const NameChangeScreen = () => {
     const themeColors = Colors[colorScheme];
 
     const handleChangeName = async () => {
+        trigger('effectClick');
+
         if (!newName?.trim()) {
             setError('Please enter your name'); // Made error message consistent
             return;

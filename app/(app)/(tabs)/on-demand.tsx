@@ -124,7 +124,7 @@ export default function WorkoutsScreen() {
         if (refreshing) return;
 
         setRefreshing(true);
-        trigger('impactHeavy');
+        trigger('virtualKeyRelease');
 
         try {
             await Promise.all([dispatch(getSpotlightWorkoutsAsync({ forceRefresh: true })), dispatch(getAllWorkoutsAsync({ forceRefresh: true }))]);

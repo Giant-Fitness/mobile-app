@@ -7,7 +7,7 @@ import { Icon } from '@/components/base/Icon';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { trigger } from 'react-native-haptic-feedback';
+import { HapticFeedbackTypes, trigger } from 'react-native-haptic-feedback';
 
 interface SelectionOption {
     key: string;
@@ -24,7 +24,7 @@ interface SelectionButtonProps {
     textStyle?: TextStyle;
     subTextStyle?: TextStyle;
     iconStyle?: ViewStyle;
-    haptic?: 'impactLight' | 'impactMedium' | 'impactHeavy' | 'rigid' | 'soft' | 'notificationError' | 'notificationSuccess' | 'notificationWarning' | 'none';
+    haptic?: HapticFeedbackTypes | keyof typeof HapticFeedbackTypes | 'none';
 }
 
 export const SelectionButton: React.FC<SelectionButtonProps> = ({

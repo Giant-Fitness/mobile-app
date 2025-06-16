@@ -10,7 +10,7 @@ import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { ThemedTextProps } from '@/components/base/ThemedText';
-import { trigger } from 'react-native-haptic-feedback';
+import { HapticFeedbackTypes, trigger } from 'react-native-haptic-feedback';
 
 type PrimaryButtonProps = {
     onPress: () => void;
@@ -27,7 +27,7 @@ type PrimaryButtonProps = {
     disabled?: boolean;
     accessibilityLabel?: string;
     loading?: boolean;
-    haptic?: 'impactLight' | 'impactMedium' | 'impactHeavy' | 'rigid' | 'soft' | 'notificationError' | 'notificationSuccess' | 'notificationWarning' | 'none';
+    haptic?: HapticFeedbackTypes | keyof typeof HapticFeedbackTypes | 'none';
 };
 
 export const PrimaryButton: React.FC<PrimaryButtonProps & AccessibilityProps> = ({

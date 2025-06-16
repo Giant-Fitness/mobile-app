@@ -1,7 +1,7 @@
 // app/(app)/workouts/workout-details.tsx
 
 import React, { useEffect, useRef, useState } from 'react';
-import { RefreshControl, StyleSheet, View, Vibration } from 'react-native';
+import { RefreshControl, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useSelector, useDispatch } from 'react-redux';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -93,7 +93,7 @@ export default function WorkoutDetailScreen() {
     const handleRefresh = async () => {
         try {
             setRefreshing(true);
-            trigger('impactHeavy');
+            trigger('virtualKeyRelease');
             await dispatch(getWorkoutAsync({ workoutId, forceRefresh: true })).unwrap();
             setTimeout(() => {
                 setRefreshing(false);
@@ -283,8 +283,8 @@ export default function WorkoutDetailScreen() {
                     style={styles.startButton}
                     onPress={() => {
                         handleStartWorkout();
-                        Vibration.vibrate(200);
                     }}
+                    haptic='impactHeavy'
                     size='LG'
                     loading={isVideoLoading}
                     disabled={isVideoLoading}

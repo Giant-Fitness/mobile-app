@@ -150,7 +150,7 @@ export default function AllWorkoutsScreen() {
     const handleRefresh = async () => {
         try {
             setRefreshing(true);
-            trigger('impactHeavy');
+            trigger('virtualKeyRelease');
             await dispatch(getAllWorkoutsAsync({ forceRefresh: true }));
             setTimeout(() => {
                 setRefreshing(false);

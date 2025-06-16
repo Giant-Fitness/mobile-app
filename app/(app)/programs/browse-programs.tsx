@@ -88,7 +88,7 @@ export default function BrowseProgramsScreen() {
     const handleRefresh = async () => {
         try {
             setRefreshing(true);
-            trigger('impactHeavy');
+            trigger('virtualKeyRelease');
             await dispatch(getAllProgramsAsync({ forceRefresh: true }));
             setTimeout(() => {
                 setRefreshing(false);
@@ -115,6 +115,7 @@ export default function BrowseProgramsScreen() {
     }, [fetchData]);
 
     const navigateToProgramOverview = useCallback((programId: string) => {
+        trigger('selection');
         router.push({
             pathname: '/programs/program-overview',
             params: { programId, source: 'library' },
