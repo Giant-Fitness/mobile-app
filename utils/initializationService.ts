@@ -26,7 +26,7 @@ import {
     getWeightMeasurementsAsync,
     getUserProgramProgressAsync,
 } from '@/store/user/thunks';
-import { getAllProgramsAsync } from '@/store/programs/thunks';
+import { getAllProgramsAsync, getAllProgramDaysAsync } from '@/store/programs/thunks';
 import { getAllWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
 import { fetchAllExercisesAsync } from '@/store/exercises/thunks';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
@@ -38,13 +38,17 @@ export interface DataCategory {
     cacheKey: string;
     ttl: CacheTTL;
     required: boolean;
-    refreshPriority: 'high' | 'medium' | 'low'; // Background refresh priority
+    refreshPriority: 'high' | 'medium' | 'low';
     args?: any;
+    conditional?: boolean;
+    dependsOn?: string[];
 }
 
 export class InitializationService {
     private dispatch: AppDispatch;
     private backgroundRefreshInProgress = false;
+    private loadedData: Set<string> = new Set(); // Track what's been loaded
+    private userProgramId: string | null = null; // Track current program ID
 
     constructor(dispatch: AppDispatch) {
         this.dispatch = dispatch;
@@ -97,7 +101,7 @@ export class InitializationService {
             cacheKey: 'all_programs',
             ttl: CacheTTL.VERY_LONG,
             required: true,
-            refreshPriority: 'low', // Static catalog data
+            refreshPriority: 'low',
             args: { useCache: true },
         },
         {
@@ -119,12 +123,23 @@ export class InitializationService {
             args: { useCache: true },
         },
         {
+            key: 'programDays',
+            thunk: getAllProgramDaysAsync,
+            cacheKey: 'program_days', // Will be dynamic based on program ID
+            ttl: CacheTTL.LONG,
+            required: true,
+            refreshPriority: 'high', // High priority since user needs this data
+            conditional: true,
+            dependsOn: ['userProgramProgress'],
+            args: { useCache: true },
+        },
+        {
             key: 'userRecommendations',
             thunk: getUserRecommendationsAsync,
             cacheKey: 'user_recommendations',
             ttl: CacheTTL.SHORT,
             required: false,
-            refreshPriority: 'high', // User-specific, changes frequently
+            refreshPriority: 'high',
             args: { useCache: true },
         },
         {
@@ -199,8 +214,8 @@ export class InitializationService {
             cacheKey: 'workout_quote',
             ttl: CacheTTL.SHORT,
             required: false,
-            refreshPriority: 'high', // Always get fresh quotes
-            args: { useCache: false }, // Quotes should always be fresh
+            refreshPriority: 'high',
+            args: { useCache: false },
         },
         {
             key: 'restDayQuote',
@@ -217,6 +232,9 @@ export class InitializationService {
         const allData = [...this.criticalData, ...this.secondaryData, ...this.backgroundData];
 
         for (const item of allData) {
+            // Skip conditional items during initial cache check
+            if (item.conditional) continue;
+
             const cached = await cacheService.get(item.cacheKey);
             const needsBackgroundRefresh = await cacheService.needsBackgroundRefresh(item.cacheKey);
 
@@ -224,7 +242,7 @@ export class InitializationService {
             if (!cached) {
                 status = 'missing';
             } else if (needsBackgroundRefresh) {
-                status = 'stale'; // Will be refreshed in background, but still usable
+                status = 'stale';
             } else {
                 status = 'fresh';
             }
@@ -312,29 +330,35 @@ export class InitializationService {
         let hasRequiredFailures = false;
 
         for (const item of dataItems) {
+            // Check if this is a conditional item and if dependencies are met
+            if (item.conditional && !(await this.canLoadConditionalItem(item))) {
+                console.log(`Skipping conditional item ${item.key} - dependencies not met`);
+                continue;
+            }
+
             try {
+                // Get dynamic cache key if needed
+                const cacheKey = await this.getDynamicCacheKey(item);
+
                 // First, try to get from cache
-                const cachedData = await cacheService.get(item.cacheKey);
+                const cachedData = await cacheService.get(cacheKey);
 
                 if (cachedData) {
-                    // Cache hit - use cached data immediately
                     console.log(`Using cached data for ${item.key}`);
                     this.dispatch(addLoadedItem(item.key));
+                    this.loadedData.add(item.key);
                     continue;
                 }
 
                 // Cache miss - fetch from API
                 console.log(`Cache miss for ${item.key}, fetching from API`);
-                const args = {
-                    ...item.args,
-                    useCache: true, // This will cache the result
-                    forceRefresh: false,
-                };
+                const args = await this.getArgsForItem(item);
 
                 const result = await this.dispatch(item.thunk(args));
 
                 if (item.thunk.fulfilled.match(result)) {
                     this.dispatch(addLoadedItem(item.key));
+                    this.loadedData.add(item.key);
                     console.log(`Loaded ${item.key} from API and cached`);
                 } else {
                     throw new Error(`Failed to load ${item.key} from API`);
@@ -353,6 +377,77 @@ export class InitializationService {
     }
 
     /**
+     * Check if a conditional item can be loaded based on its dependencies
+     */
+    private async canLoadConditionalItem(item: DataCategory): Promise<boolean> {
+        if (!item.conditional || !item.dependsOn) return true;
+
+        // Check if all dependencies are loaded
+        for (const dependency of item.dependsOn) {
+            if (!this.loadedData.has(dependency)) {
+                return false;
+            }
+        }
+
+        // Special handling for program days
+        if (item.key === 'programDays') {
+            const programId = await this.getProgramIdFromCache();
+            return programId !== null;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get dynamic cache key for items that depend on other data
+     */
+    private async getDynamicCacheKey(item: DataCategory): Promise<string> {
+        if (item.key === 'programDays') {
+            const programId = await this.getProgramIdFromCache();
+            return programId ? `program_days_${programId}` : item.cacheKey;
+        }
+        return item.cacheKey;
+    }
+
+    /**
+     * Get arguments for API call, including dynamic parameters
+     */
+    private async getArgsForItem(item: DataCategory): Promise<any> {
+        const baseArgs = {
+            ...item.args,
+            useCache: false,
+            forceRefresh: true,
+        };
+
+        if (item.key === 'programDays') {
+            const programId = await this.getProgramIdFromCache();
+            if (programId) {
+                return { ...baseArgs, programId };
+            }
+        }
+
+        return baseArgs;
+    }
+
+    /**
+     * Get program ID from cached user program progress
+     */
+    private async getProgramIdFromCache(): Promise<string | null> {
+        try {
+            // You might need to adjust this based on your cache structure
+            // This is a simplified version - you might need to get it from Redux state instead
+            const cachedProgress = (await cacheService.get('user_program_progress')) as any;
+            if (cachedProgress && cachedProgress.ProgramId) {
+                this.userProgramId = cachedProgress.ProgramId;
+                return cachedProgress.ProgramId;
+            }
+        } catch (error) {
+            console.warn('Failed to get program ID from cache:', error);
+        }
+        return this.userProgramId;
+    }
+
+    /**
      * Smart background refresh based on priority and TTL
      */
     private async performSmartBackgroundRefresh(): Promise<void> {
@@ -365,7 +460,7 @@ export class InitializationService {
 
         // Refresh high priority items that need background refresh
         console.log('Refreshing high priority items...');
-        await this.refreshItemsIfNeeded(highPriorityItems, true); // Always refresh high priority
+        await this.refreshItemsIfNeeded(highPriorityItems, true);
 
         // Refresh medium priority items if they need it
         console.log('Refreshing medium priority items...');
@@ -379,34 +474,35 @@ export class InitializationService {
     private async refreshItemsIfNeeded(items: DataCategory[], forceRefresh: boolean): Promise<void> {
         const refreshPromises = items.map(async (item) => {
             try {
-                const needsRefresh = forceRefresh || (await cacheService.needsBackgroundRefresh(item.cacheKey));
+                // Check conditional items
+                if (await this.canLoadConditionalItem(item)) {
+                    const cacheKey = await this.getDynamicCacheKey(item);
+                    const needsRefresh = forceRefresh || (await cacheService.needsBackgroundRefresh(cacheKey));
 
-                if (!needsRefresh) {
-                    console.log(`Skipping refresh for ${item.key} - still fresh`);
-                    return;
-                }
+                    if (!needsRefresh) {
+                        console.log(`Skipping refresh for ${item.key} - still fresh`);
+                        return;
+                    }
 
-                console.log(`Background refreshing ${item.key}...`);
+                    console.log(`Background refreshing ${item.key}...`);
 
-                const args = {
-                    ...item.args,
-                    useCache: true,
-                    forceRefresh: true, // Force API call to update cache
-                };
+                    const args = await this.getArgsForItem(item);
 
-                const result = await this.dispatch(item.thunk(args));
+                    const result = await this.dispatch(item.thunk(args));
 
-                if (item.thunk.fulfilled.match(result)) {
-                    console.log(`Successfully refreshed ${item.key} in background`);
+                    if (item.thunk.fulfilled.match(result)) {
+                        console.log(`Successfully refreshed ${item.key} in background`);
+                    } else {
+                        console.warn(`Failed to refresh ${item.key} in background`);
+                    }
                 } else {
-                    console.warn(`Failed to refresh ${item.key} in background`);
+                    console.log(`Skipping conditional refresh for ${item.key} - dependencies not met`);
                 }
             } catch (error) {
                 console.warn(`Error refreshing ${item.key} in background:`, error);
             }
         });
 
-        // Wait for all refreshes to complete (with timeout)
         await Promise.allSettled(refreshPromises);
     }
 }

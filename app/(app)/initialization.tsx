@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
-import { REQUEST_STATE } from '@/constants/requestStates';
 import { router } from 'expo-router';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -15,7 +14,6 @@ import { Spaces } from '@/constants/Spaces';
 import { InitializationService } from '@/utils/initializationService';
 import { setInitialized, incrementRetryAttempt, resetRetryAttempt, reset as resetInitialization } from '@/store/initialization/initializationSlice';
 import { getUserProgramProgressAsync } from '@/store/user/thunks';
-import { getAllProgramDaysAsync } from '@/store/programs/thunks';
 import { cacheService } from '@/utils/cache';
 
 const Initialization: React.FC = () => {
@@ -25,7 +23,6 @@ const Initialization: React.FC = () => {
 
     // Redux state
     const initialization = useSelector((state: RootState) => state.initialization);
-    const { userProgramProgress, userProgramProgressState } = useSelector((state: RootState) => state.user);
 
     // Local state
     const [showManualRetry, setShowManualRetry] = useState(false);
@@ -51,7 +48,7 @@ const Initialization: React.FC = () => {
             // Step 2: Load critical data (cache-first)
             await initServiceRef.current.loadCriticalData();
 
-            // Step 3: Load secondary data (cache-first)
+            // Step 3: Load secondary data (cache-first) - this now includes program days
             await initServiceRef.current.loadSecondaryData();
 
             // Step 4: Load essential real-time data
@@ -115,7 +112,7 @@ const Initialization: React.FC = () => {
     // Load only essential real-time data
     const loadEssentialRealTimeData = async () => {
         try {
-            // Only load the most critical data
+            // Only load the most critical data that must be fresh
             await dispatch(getUserProgramProgressAsync());
         } catch (error) {
             console.warn('Essential real-time data failed:', error);
@@ -161,13 +158,6 @@ const Initialization: React.FC = () => {
         dispatch(resetInitialization());
         initializeApp();
     }, [dispatch, initializeApp]);
-
-    // Load program days when available
-    useEffect(() => {
-        if (userProgramProgressState === REQUEST_STATE.FULFILLED && userProgramProgress?.ProgramId) {
-            dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId }));
-        }
-    }, [userProgramProgress, dispatch, userProgramProgressState]);
 
     // Start initialization on mount
     useEffect(() => {

@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export interface CacheItem<T> {
     data: T;
     timestamp: number;
-    ttl: number; // TTL in milliseconds
+    ttl: number; // TTL in milliseconds (kept for compatibility but ignored)
 }
 
 export enum CacheTTL {
@@ -55,17 +55,16 @@ export class CacheService {
     }
 
     /**
-     * Check if cache is expired (legacy method - kept for compatibility)
-     * Note: This should not be used for blocking user experience anymore
+     * Check if cache is expired (IGNORING TTL FOR NOW)
+     * Always returns false since we're ignoring TTLs
      */
     async isExpired(key: string): Promise<boolean> {
         try {
             const cached = await AsyncStorage.getItem(this.generateKey(key));
-            if (!cached) return true;
+            if (!cached) return true; // No cache = expired
 
-            const cacheItem: CacheItem<any> = JSON.parse(cached);
-            const age = Date.now() - cacheItem.timestamp;
-            return age > cacheItem.ttl;
+            // IGNORING TTL - cache is never considered "expired" for blocking purposes
+            return false;
         } catch (error) {
             console.warn(`Failed to check expiration for ${key}:`, error);
             return true;
@@ -73,14 +72,15 @@ export class CacheService {
     }
 
     /**
-     * Check if item needs background refresh based on TTL
-     * This is used for background refresh decisions, not blocking user experience
+     * Check if item needs background refresh (IGNORING TTL FOR NOW)
+     * Always returns true if cache exists - we'll refresh everything in background
      */
     async needsBackgroundRefresh(key: string): Promise<boolean> {
         try {
             const cached = await AsyncStorage.getItem(this.generateKey(key));
             if (!cached) return false; // No cache = no background refresh needed (will be fetched fresh)
 
+            // IGNORING TTL - always refresh in background if cache exists
             return true;
         } catch (error) {
             console.warn(`Failed to check background refresh need for ${key}:`, error);
@@ -136,45 +136,23 @@ export class CacheService {
     }
 
     /**
-     * Get keys that are expired (legacy method - use getBackgroundRefreshKeys instead)
+     * Get keys that are expired (IGNORING TTL - returns empty array)
      */
     async getExpiredKeys(): Promise<string[]> {
-        try {
-            const keys = await AsyncStorage.getAllKeys();
-            const cacheKeys = keys.filter((key) => key.startsWith('cache_'));
-            const expiredKeys: string[] = [];
-
-            for (const key of cacheKeys) {
-                const originalKey = key.replace('cache_', '');
-                if (await this.isExpired(originalKey)) {
-                    expiredKeys.push(originalKey);
-                }
-            }
-
-            return expiredKeys;
-        } catch (error) {
-            console.warn('Failed to get expired keys:', error);
-            return [];
-        }
+        // IGNORING TTL - no keys are considered "expired"
+        return [];
     }
 
     /**
-     * Get keys that need background refresh
+     * Get keys that need background refresh (ALL existing cache keys)
      */
     async getBackgroundRefreshKeys(): Promise<string[]> {
         try {
             const keys = await AsyncStorage.getAllKeys();
             const cacheKeys = keys.filter((key) => key.startsWith('cache_'));
-            const refreshKeys: string[] = [];
 
-            for (const key of cacheKeys) {
-                const originalKey = key.replace('cache_', '');
-                if (await this.needsBackgroundRefresh(originalKey)) {
-                    refreshKeys.push(originalKey);
-                }
-            }
-
-            return refreshKeys;
+            // Return all cache keys since we're refreshing everything in background
+            return cacheKeys.map((key) => key.replace('cache_', ''));
         } catch (error) {
             console.warn('Failed to get background refresh keys:', error);
             return [];
@@ -194,29 +172,16 @@ export class CacheService {
             const keys = await AsyncStorage.getAllKeys();
             const cacheKeys = keys.filter((key) => key.startsWith('cache_'));
 
-            let needsBackgroundRefresh = 0;
-            let expired = 0;
-            let fresh = 0;
-
-            for (const key of cacheKeys) {
-                const originalKey = key.replace('cache_', '');
-                const needsRefresh = await this.needsBackgroundRefresh(originalKey);
-                const isExpired = await this.isExpired(originalKey);
-
-                if (isExpired) {
-                    expired++;
-                } else if (needsRefresh) {
-                    needsBackgroundRefresh++;
-                } else {
-                    fresh++;
-                }
-            }
+            // Since we're ignoring TTL:
+            // - expired = 0 (nothing is considered expired)
+            // - needsBackgroundRefresh = totalItems (everything gets refreshed)
+            // - fresh = 0 (nothing is considered "fresh enough" to skip refresh)
 
             return {
                 totalItems: cacheKeys.length,
-                needsBackgroundRefresh,
-                expired,
-                fresh,
+                needsBackgroundRefresh: cacheKeys.length,
+                expired: 0,
+                fresh: 0,
             };
         } catch (error) {
             console.warn('Failed to get cache stats:', error);

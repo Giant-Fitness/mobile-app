@@ -11,6 +11,7 @@ export const getAllProgramsAsync = createAsyncThunk<Program[], { forceRefresh?: 
     'programs/getAllPrograms',
     async (args = {}, { getState }) => {
         const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
+
         const state = getState() as RootState;
 
         // If programs are already loaded and not forcing refresh, return them
