@@ -171,7 +171,7 @@ const SettingsIndex = () => {
                         kyn
                     </ThemedText>
                     <ThemedText type='caption' style={styles.versionText}>
-                        v0.0.1
+                        v0.0.2
                     </ThemedText>
                 </View>
             </ScrollView>
