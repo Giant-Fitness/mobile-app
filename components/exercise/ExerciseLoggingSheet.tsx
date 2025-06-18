@@ -96,9 +96,9 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                     setData.reps = set.Reps.toString();
                 }
 
-                // Handle time
+                // Handle time - just convert to string seconds
                 if (set.Time !== undefined) {
-                    setData.time = formatTimeDisplay(set.Time);
+                    setData.time = set.Time.toString();
                 }
 
                 // Handle weight
@@ -153,9 +153,9 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                     setData.reps = set.Reps.toString();
                 }
 
-                // Handle time
+                // Handle time - just convert to string seconds
                 if (set.Time !== undefined) {
-                    setData.time = formatTimeDisplay(set.Time);
+                    setData.time = set.Time.toString();
                 }
 
                 // Handle weight
@@ -438,21 +438,81 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
         return message;
     };
 
+    const getValidationError = (sets: SetInput[], extraSets: SetInput[], exercise: any, isTimeBasedLogging: boolean): string | null => {
+        const allSets = [...sets, ...extraSets];
+        const nonEmptySets = allSets.filter((set) => {
+            if (isTimeBasedLogging) {
+                return set.time && set.time.trim() !== '';
+            } else {
+                return set.reps && set.reps.trim() !== '';
+            }
+        });
+
+        if (nonEmptySets.length === 0) {
+            return isTimeBasedLogging ? 'Please enter time for at least one set' : 'Please enter reps for at least one set';
+        }
+
+        // Validate each non-empty set
+        for (let i = 0; i < nonEmptySets.length; i++) {
+            const set = nonEmptySets[i];
+
+            if (isTimeBasedLogging) {
+                const timeValue = parseInt(set.time || '');
+                if (timeValue <= 0 || isNaN(timeValue)) {
+                    return 'Please enter a valid time in seconds';
+                }
+            } else {
+                const repsValue = parseInt(set.reps || '');
+                if (repsValue <= 0 || isNaN(repsValue)) {
+                    return 'Please enter a valid number of reps';
+                }
+            }
+
+            // Validate weight if required
+            if (requiresWeight(getExerciseLoggingMode(exercise))) {
+                const weightValue = parseFloat(set.weight || '0');
+                if (weightValue < 0 || isNaN(weightValue)) {
+                    return 'Please enter a valid weight';
+                }
+            }
+
+            // Validate optional weight if provided
+            if (supportsWeight(getExerciseLoggingMode(exercise)) && set.weight && set.weight.trim() !== '') {
+                const weightValue = parseFloat(set.weight || '0');
+                if (weightValue < 0 || isNaN(weightValue)) {
+                    return 'Please enter a valid weight';
+                }
+            }
+        }
+
+        return null;
+    };
+
     const handleSave = async () => {
         try {
-            isSavingRef.current = true; // Prevent snapshot resets during save
+            isSavingRef.current = true;
             setIsSubmitting(true);
             setError('');
 
             const weightUnit: 'kgs' | 'lbs' = liftWeightPreference === 'lbs' ? 'lbs' : 'kgs';
             const allSets = [...sets, ...extraSets];
 
+            // Check for validation errors first
+            const validationError = getValidationError(sets, extraSets, exercise, isTimeBasedLogging);
+            if (validationError) {
+                setError(validationError);
+                isSavingRef.current = false;
+                return;
+            }
+
             const validSets = allSets
                 .filter((set) => {
                     if (isTimeBasedLogging) {
-                        return parseTimeInput(set.time || '') > 0;
+                        const timeValue = parseInt(set.time || '');
+                        return timeValue > 0;
                     } else {
-                        return parseInt(set.reps || '') > 0;
+                        const repsValue = parseInt(set.reps || '');
+                        return repsValue > 0;
                     }
                 })
                 .map((set, index) => {
@@ -466,20 +526,24 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                         exerciseSet.Reps = parseInt(set.reps);
                     }
 
-                    // Add time if it's a time-based exercise
+                    // Add time if it's a time-based exercise (just parse as integer)
                     if (isTimeBasedLogging && set.time) {
-                        exerciseSet.Time = parseTimeInput(set.time);
+                        exerciseSet.Time = parseInt(set.time);
                     }
 
-                    // Add weight if it's supported and provided
-                    if (showWeight && set.weight) {
-                        exerciseSet.Weight = parseWeightForStorage(set.weight, weightUnit);
+                    // Add weight handling - send 0 if weight is supported but not provided
+                    if (showWeight) {
+                        if (set.weight) {
+                            exerciseSet.Weight = parseWeightForStorage(set.weight, weightUnit);
+                        } else {
+                            exerciseSet.Weight = 0;
+                        }
                     }
 
                     return exerciseSet;
                 });
 
-            // Check if exercise data actually changed
+            // Rest of the save logic remains the same...
             const setsChanged = sets.some((set, index) => {
                 if (index >= initialSetsSnapshot.length) {
                     return false;
@@ -495,24 +559,19 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
             });
 
             const exerciseDataChanged = setsChanged || extraSetsDataChanged;
-
-            // Check if we have actual exercise data AND it changed
             const hasExerciseData = validSets.length > 0;
             const shouldSaveExerciseData = hasExerciseData && exerciseDataChanged;
 
-            // Check if we're only modifying set structure
             const initialExtraSetCount = initialExtraSetsSnapshot.length;
             const currentExtraSetCount = extraSets.length;
             const setStructureChanged = initialExtraSetCount !== currentExtraSetCount;
 
-            // If no exercise data changes and no set structure changes, show error
             if (!exerciseDataChanged && !setStructureChanged) {
-                setError('Please enter at least one valid set');
-                isSavingRef.current = false; // Reset flag before early return
+                setError('No changes to save');
+                isSavingRef.current = false;
                 return;
             }
 
-            // Save exercise progress only if exercise data actually changed
             if (shouldSaveExerciseData) {
                 await dispatch(
                     saveExerciseProgressAsync({
@@ -574,29 +633,35 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                 }
             }
 
-            // Show success and close
             const successMessage = getSuccessMessage();
-
             setShowSuccess({
                 message: successMessage,
                 visible: true,
             });
 
             setTimeout(() => {
-                isSavingRef.current = false; // Reset the saving flag after success animation
+                isSavingRef.current = false;
                 handleClose();
             }, 1500);
         } catch (err: any) {
             console.error('Error in handleSave:', err);
-            const serverErrorMessage = err?.errorMessage || 'Failed to save exercise progress';
-            setError(serverErrorMessage);
+            let errorMessage = 'Unable to save exercise. Please try again.';
+
+            if (err?.message?.includes('network') || err?.message?.includes('fetch')) {
+                errorMessage = 'Network error. Please check your connection.';
+            } else if (err?.message?.includes('validation')) {
+                errorMessage = 'Invalid exercise data. Please check your inputs.';
+            } else if (err?.errorMessage) {
+                errorMessage = err.errorMessage;
+            }
+
+            setError(errorMessage);
             setActiveTab('log');
-            isSavingRef.current = false; // Reset flag on error
+            isSavingRef.current = false;
         } finally {
             setIsSubmitting(false);
         }
     };
-
     const handleDeleteLog = async () => {
         if (!editingLog) return;
 
@@ -789,14 +854,14 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                         style={[styles.input, { color: themeColors.text }, isExtraSet && { borderColor: themeColors.text }]}
                         value={isTimeBasedLogging ? set.time || '' : set.reps || ''}
                         onChangeText={(value) => handleSetChange(index, isTimeBasedLogging ? 'time' : 'reps', value)}
-                        keyboardType={isTimeBasedLogging ? 'default' : 'numeric'}
-                        placeholder={isTimeBasedLogging ? '0:00' : '0'}
+                        keyboardType='numeric'
+                        placeholder={isTimeBasedLogging ? '0' : '0'}
                         placeholderTextColor={themeColors.subText}
                         onFocus={() => scrollToInput(index)}
                         showSoftInputOnFocus={true}
                     />
                     <ThemedText type='bodySmall' style={styles.inputLabel}>
-                        {isTimeBasedLogging ? 'mm:ss' : `${exercise.RepsLower}-${exercise.RepsUpper} reps`}
+                        {isTimeBasedLogging ? 'seconds' : `${exercise.RepsLower}-${exercise.RepsUpper} reps`}
                     </ThemedText>
                 </View>
 
@@ -909,7 +974,8 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                 }
 
                 if (set.Time !== undefined) {
-                    setStr += setStr ? ` × ${formatTimeDisplay(set.Time)}` : formatTimeDisplay(set.Time);
+                    // Simple seconds display
+                    setStr += setStr ? ` × ${set.Time}s` : `${set.Time}s`;
                 }
 
                 return setStr;

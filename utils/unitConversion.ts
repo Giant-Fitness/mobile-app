@@ -25,17 +25,34 @@ export function poundsToKg(weightLbs: number): number {
 }
 
 /**
+ * Helper function to format numbers without unnecessary decimal places
+ * @param num - Number to format
+ * @param maxDecimals - Maximum decimal places to show
+ * @returns Formatted string without trailing zeros
+ */
+function formatNumberClean(num: number, maxDecimals: number): string {
+    // Check if it's a whole number
+    if (num % 1 === 0) {
+        return num.toString();
+    }
+
+    // Format with max decimals and remove trailing zeros
+    const formatted = num.toFixed(maxDecimals);
+    return formatted.replace(/\.?0+$/, '');
+}
+
+/**
  * Formats weight for display based on user preference
  * @param weightKg - Weight in kilograms (as stored in backend)
  * @param unit - User's preferred unit ('kgs' or 'lbs')
- * @returns Formatted weight string with appropriate decimal places
+ * @returns Formatted weight string with appropriate decimal places (no unnecessary decimals)
  */
 export function formatWeightForDisplay(weightKg: number, unit: 'kgs' | 'lbs'): string {
     if (unit === 'lbs') {
         const lbs = kgToPounds(weightKg);
-        return `${lbs.toFixed(1)} lbs`;
+        return `${formatNumberClean(lbs, 1)} lbs`;
     }
-    return `${weightKg.toFixed(1)} kg`;
+    return `${formatNumberClean(weightKg, 1)} kg`;
 }
 
 /**
@@ -78,14 +95,14 @@ export function inchesToCm(lengthInches: number): number {
  * Formats body measurement for display based on user preference
  * @param measurementCm - Measurement in centimeters (as stored in backend)
  * @param unit - User's preferred unit ('cms' or 'inches')
- * @returns Formatted measurement string with appropriate decimal places
+ * @returns Formatted measurement string with appropriate decimal places (no unnecessary decimals)
  */
 export function formatMeasurementForDisplay(measurementCm: number, unit: 'cms' | 'inches'): string {
     if (unit === 'inches') {
         const inches = cmToInches(measurementCm);
-        return `${inches.toFixed(1)} in`;
+        return `${formatNumberClean(inches, 1)} in`;
     }
-    return `${measurementCm.toFixed(1)} cm`;
+    return `${formatNumberClean(measurementCm, 1)} cm`;
 }
 
 /**
