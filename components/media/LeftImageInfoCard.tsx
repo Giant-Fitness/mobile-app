@@ -28,7 +28,7 @@ type LeftImageInfoCardProps = {
     titleStyle?: StyleProp<TextStyle>;
     subtitleStyle?: StyleProp<TextStyle>;
     placeholder?: any;
-    gradientColors?: string[];
+    gradientColors?: [string, string, ...string[]];
 };
 
 export const LeftImageInfoCard: React.FC<LeftImageInfoCardProps> = ({

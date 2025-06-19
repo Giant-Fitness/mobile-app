@@ -20,9 +20,6 @@ interface LargeActionTileProps {
     containerStyle?: ViewStyle;
 }
 
-// Create an animated version of TouchableOpacity using Reanimated
-const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
-
 export const LargeActionTile = ({
     title,
     description,
@@ -54,11 +51,7 @@ export const LargeActionTile = ({
     };
 
     return (
-        <AnimatedTouchable
-            onPress={onPress}
-            onPressIn={handlePressIn}
-            onPressOut={handlePressOut}
-            activeOpacity={0.9}
+        <Animated.View
             style={[
                 styles.container,
                 animatedStyle,
@@ -72,25 +65,31 @@ export const LargeActionTile = ({
                 containerStyle,
             ]}
         >
-            <View style={styles.contentContainer}>
-                <ThemedText type={titleSize} style={[styles.title, { color: textColor, textAlign: 'center' }]}>
-                    {title}
-                </ThemedText>
-                <ThemedText type={bodySize} style={[{ color: textColor, textAlign: 'center' }]}>
-                    {description}
-                </ThemedText>
-            </View>
-            <Image source={image} style={[styles.image, { width: imageSize, height: imageSize }]} resizeMode='contain' />
-        </AnimatedTouchable>
+            <TouchableOpacity onPress={onPress} onPressIn={handlePressIn} onPressOut={handlePressOut} activeOpacity={1} style={styles.touchableContainer}>
+                <View style={styles.contentContainer}>
+                    <ThemedText type={titleSize} style={[styles.title, { color: textColor, textAlign: 'center' }]}>
+                        {title}
+                    </ThemedText>
+                    <ThemedText type={bodySize} style={[{ color: textColor, textAlign: 'center' }]}>
+                        {description}
+                    </ThemedText>
+                </View>
+                <Image source={image} style={[styles.image, { width: imageSize, height: imageSize }]} resizeMode='contain' />
+            </TouchableOpacity>
+        </Animated.View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         borderRadius: Spaces.MD,
-        alignItems: 'center',
         overflow: 'visible',
         minHeight: 200,
+        position: 'relative',
+    },
+    touchableContainer: {
+        flex: 1,
+        alignItems: 'center',
         position: 'relative',
     },
     title: {

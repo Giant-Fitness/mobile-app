@@ -1,7 +1,7 @@
 // components/programs/ActiveProgramDayCompressedCard.tsx
 
 import React, { useRef } from 'react';
-import { StyleSheet, View, Animated } from 'react-native';
+import { StyleSheet, View, Animated, TouchableOpacity } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -22,8 +22,6 @@ import { debounce } from '@/utils/debounce';
 import { trigger } from 'react-native-haptic-feedback';
 
 const ShimmerPlaceholder = ShimmerPlaceHolder as unknown as React.ComponentType<any>;
-
-const AnimatedTouchable = Animated.createAnimatedComponent(Animated.View as any);
 
 type ActiveProgramDayCompressedCardProps = {
     source: 'home';
@@ -114,17 +112,14 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
         }
     };
 
+    const handlePress = () => {
+        trigger('impactLight');
+        navigateToProgramDay();
+    };
+
     return (
-        <AnimatedTouchable
-            onTouchStart={handlePressIn}
-            onTouchEnd={() => {
-                handlePressOut();
-                trigger('impactLight');
-                navigateToProgramDay();
-            }}
-            style={[styles.shadowContainer, { transform: [{ scale: scaleAnim }] }]}
-        >
-            <View style={styles.cardContainer}>
+        <Animated.View style={[styles.shadowContainer, { transform: [{ scale: scaleAnim }] }]}>
+            <TouchableOpacity onPressIn={handlePressIn} onPressOut={handlePressOut} onPress={handlePress} activeOpacity={1} style={styles.cardContainer}>
                 <ImageTextOverlay
                     image={getDisplayImage(currentDay, workouts)}
                     title={currentDay.DayTitle}
@@ -136,8 +131,8 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
                     titleStyle={{ marginRight: Spaces.LG, lineHeight: moderateScale(20) }}
                     subtitleStyle={{ marginTop: Spaces.XS }}
                 />
-            </View>
-        </AnimatedTouchable>
+            </TouchableOpacity>
+        </Animated.View>
     );
 };
 

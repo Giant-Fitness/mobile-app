@@ -1,3 +1,5 @@
+// components/programs/RecommendedProgramCard.tsx
+
 import React, { useRef } from 'react';
 import { StyleSheet, View, Animated, TouchableOpacity } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -7,9 +9,6 @@ import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { Program } from '@/types';
-
-// Wrap TouchableOpacity to support animated transforms
-const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
 type RecommendedProgramCardProps = {
     program: Program;
@@ -40,17 +39,22 @@ export const RecommendedProgramCard: React.FC<RecommendedProgramCardProps> = ({ 
         }).start();
     };
 
+    const handlePress = () => {
+        onPress();
+    };
+
     return (
-        <AnimatedTouchable
-            activeOpacity={1}
-            onPressIn={handlePressIn}
-            onPressOut={() => {
-                handlePressOut();
-                onPress();
-            }}
-            style={[styles.shadowContainer, { shadowColor, backgroundColor: themeColors.background, transform: [{ scale: scaleAnim }] }]}
+        <Animated.View
+            style={[
+                styles.shadowContainer,
+                {
+                    shadowColor,
+                    backgroundColor: themeColors.background,
+                    transform: [{ scale: scaleAnim }],
+                },
+            ]}
         >
-            <View style={styles.cardContainer}>
+            <TouchableOpacity activeOpacity={1} onPressIn={handlePressIn} onPressOut={handlePressOut} onPress={handlePress} style={styles.cardContainer}>
                 <View style={styles.imageContainer}>
                     <ImageTextOverlay
                         image={{ uri: program.PhotoUrl }}
@@ -64,8 +68,8 @@ export const RecommendedProgramCard: React.FC<RecommendedProgramCardProps> = ({ 
                         subtitleStyle={{ marginTop: 0 }}
                     />
                 </View>
-            </View>
-        </AnimatedTouchable>
+            </TouchableOpacity>
+        </Animated.View>
     );
 };
 
