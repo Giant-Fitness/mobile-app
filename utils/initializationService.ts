@@ -66,6 +66,13 @@ export interface DataCategory {
     dependsOn?: string[];
 }
 
+interface LoadResult {
+    key: string;
+    success: boolean;
+    error?: Error;
+    required: boolean;
+}
+
 export class InitializationService {
     private dispatch: AppDispatch;
     private backgroundRefreshInProgress = false;
@@ -253,25 +260,32 @@ export class InitializationService {
     async checkCacheStatus(): Promise<void> {
         const allData = [...this.criticalData, ...this.secondaryData, ...this.backgroundData];
 
-        for (const item of allData) {
+        // Check cache status for all items in parallel
+        const cacheChecks = allData.map(async (item) => {
             // Skip conditional items during initial cache check
-            if (item.conditional) continue;
+            if (item.conditional) return;
 
-            const cacheKey = await this.getDynamicCacheKey(item);
-            const cached = await cacheService.get(cacheKey);
-            const needsBackgroundRefresh = await cacheService.needsBackgroundRefresh(cacheKey);
+            try {
+                const cacheKey = await this.getDynamicCacheKey(item);
+                const cached = await cacheService.get(cacheKey);
+                const needsBackgroundRefresh = await cacheService.needsBackgroundRefresh(cacheKey);
 
-            let status: 'fresh' | 'stale' | 'missing';
-            if (!cached) {
-                status = 'missing';
-            } else if (needsBackgroundRefresh) {
-                status = 'stale';
-            } else {
-                status = 'fresh';
+                let status: 'fresh' | 'stale' | 'missing';
+                if (!cached) {
+                    status = 'missing';
+                } else if (needsBackgroundRefresh) {
+                    status = 'stale';
+                } else {
+                    status = 'fresh';
+                }
+
+                this.dispatch(setCacheStatus({ key: item.key, status }));
+            } catch (error) {
+                console.warn(`Error checking cache status for ${item.key}:`, error);
             }
+        });
 
-            this.dispatch(setCacheStatus({ key: item.key, status }));
-        }
+        await Promise.allSettled(cacheChecks);
     }
 
     async loadCriticalData(): Promise<boolean> {
@@ -279,7 +293,7 @@ export class InitializationService {
         this.dispatch(setCriticalDataState(REQUEST_STATE.PENDING));
 
         try {
-            const results = await this.loadDataCategoryWithCacheFirst(this.criticalData);
+            const results = await this.loadDataCategoryWithParallelization(this.criticalData);
 
             if (results.hasRequiredFailures) {
                 this.dispatch(setCriticalDataState(REQUEST_STATE.REJECTED));
@@ -301,7 +315,7 @@ export class InitializationService {
         this.dispatch(setSecondaryDataState(REQUEST_STATE.PENDING));
 
         try {
-            const results = await this.loadDataCategoryWithCacheFirst(this.secondaryData);
+            const results = await this.loadDataCategoryWithParallelization(this.secondaryData);
 
             if (results.hasRequiredFailures) {
                 this.dispatch(setSecondaryDataState(REQUEST_STATE.REJECTED));
@@ -330,10 +344,10 @@ export class InitializationService {
         try {
             console.log('Starting background sync...');
 
-            // Load background data that wasn't loaded yet
-            await this.loadDataCategoryWithCacheFirst(this.backgroundData);
+            // Load background data that wasn't loaded yet (in parallel)
+            await this.loadDataCategoryWithParallelization(this.backgroundData);
 
-            // Refresh data based on priority and TTL
+            // Refresh data based on priority and TTL (in parallel)
             await this.performSmartBackgroundRefresh();
 
             this.dispatch(setBackgroundSyncState(REQUEST_STATE.FULFILLED));
@@ -347,68 +361,169 @@ export class InitializationService {
     }
 
     /**
-     * Cache-first loading: Always try cache first, fallback to API only if no cache exists
+     * NEW: Load data with parallelization, respecting dependencies
      */
-    private async loadDataCategoryWithCacheFirst(dataItems: DataCategory[]): Promise<{ hasRequiredFailures: boolean }> {
-        let hasRequiredFailures = false;
+    private async loadDataCategoryWithParallelization(dataItems: DataCategory[]): Promise<{ hasRequiredFailures: boolean }> {
+        const loadResults: LoadResult[] = [];
+        const processedItems = new Set<string>();
 
-        for (const item of dataItems) {
-            // Check if this is a conditional item and if dependencies are met
-            if (item.conditional && !(await this.canLoadConditionalItem(item))) {
-                console.log(`Skipping conditional item ${item.key} - dependencies not met`);
-                continue;
-            }
+        // Separate independent items from dependent items
+        const independentItems = dataItems.filter((item) => !item.conditional && !item.dependsOn);
+        const dependentItems = dataItems.filter((item) => item.conditional || item.dependsOn);
 
-            try {
-                // Get dynamic cache key if needed
-                const cacheKey = await this.getDynamicCacheKey(item);
+        console.log(`Loading ${independentItems.length} independent items in parallel, ${dependentItems.length} dependent items sequentially`);
 
-                // First, try to get from cache
-                const cachedData = await cacheService.get(cacheKey);
+        // Load all independent items in parallel
+        if (independentItems.length > 0) {
+            const independentPromises = independentItems.map((item) => this.loadSingleItem(item));
+            const independentResults = await Promise.allSettled(independentPromises);
 
-                if (cachedData) {
-                    console.log(`Using cached data for ${item.key}`);
-                    this.dispatch(addLoadedItem(item.key));
-                    this.loadedData.add(item.key);
-                    continue;
-                }
-
-                // Cache miss - fetch from API
-                console.log(`Cache miss for ${item.key}, fetching from API`);
-                const args = await this.getArgsForItem(item);
-
-                const result = await this.dispatch(item.thunk(args));
-
-                if (item.thunk.fulfilled.match(result)) {
-                    this.dispatch(addLoadedItem(item.key));
-                    this.loadedData.add(item.key);
-                    console.log(`Loaded ${item.key} from API and cached`);
+            independentResults.forEach((result, index) => {
+                const item = independentItems[index];
+                if (result.status === 'fulfilled') {
+                    loadResults.push(result.value);
+                    if (result.value.success) {
+                        processedItems.add(item.key);
+                    }
                 } else {
-                    throw new Error(`Failed to load ${item.key} from API`);
+                    loadResults.push({
+                        key: item.key,
+                        success: false,
+                        error: result.reason,
+                        required: item.required,
+                    });
                 }
-            } catch (error) {
-                console.warn(`Failed to load ${item.key}:`, error);
-                this.dispatch(addFailedItem(item.key));
+            });
+        }
 
-                if (item.required) {
-                    hasRequiredFailures = true;
+        // Process dependent items in waves (items that depend on newly loaded items)
+        let remainingDependentItems = [...dependentItems];
+        let maxIterations = 10; // Prevent infinite loops
+        let iteration = 0;
+
+        while (remainingDependentItems.length > 0 && iteration < maxIterations) {
+            iteration++;
+            const readyItems: DataCategory[] = [];
+            const stillWaitingItems: DataCategory[] = [];
+
+            // Check which dependent items are now ready to load
+            for (const item of remainingDependentItems) {
+                if (await this.canLoadConditionalItem(item)) {
+                    readyItems.push(item);
+                } else {
+                    stillWaitingItems.push(item);
                 }
             }
+
+            if (readyItems.length === 0) {
+                // No more items can be loaded - log what's still waiting
+                console.warn(
+                    'Remaining dependent items cannot be loaded:',
+                    stillWaitingItems.map((item) => `${item.key} (depends on: ${item.dependsOn?.join(', ')})`),
+                );
+                break;
+            }
+
+            // Load ready dependent items in parallel
+            console.log(`Loading ${readyItems.length} dependent items in parallel (iteration ${iteration})`);
+            const dependentPromises = readyItems.map((item) => this.loadSingleItem(item));
+            const dependentResults = await Promise.allSettled(dependentPromises);
+
+            dependentResults.forEach((result, index) => {
+                const item = readyItems[index];
+                if (result.status === 'fulfilled') {
+                    loadResults.push(result.value);
+                    if (result.value.success) {
+                        processedItems.add(item.key);
+                    }
+                } else {
+                    loadResults.push({
+                        key: item.key,
+                        success: false,
+                        error: result.reason,
+                        required: item.required,
+                    });
+                }
+            });
+
+            remainingDependentItems = stillWaitingItems;
+        }
+
+        // Check for required failures
+        const hasRequiredFailures = loadResults.some((result) => !result.success && result.required);
+
+        // Log summary
+        const successCount = loadResults.filter((r) => r.success).length;
+        const failureCount = loadResults.filter((r) => !r.success).length;
+        console.log(`Load summary: ${successCount} successful, ${failureCount} failed`);
+
+        if (failureCount > 0) {
+            const failedItems = loadResults.filter((r) => !r.success);
+            console.warn(
+                'Failed items:',
+                failedItems.map((r) => r.key),
+            );
         }
 
         return { hasRequiredFailures };
     }
 
     /**
+     * Load a single data item with proper error handling
+     */
+    private async loadSingleItem(item: DataCategory): Promise<LoadResult> {
+        try {
+            // Get dynamic cache key if needed
+            const cacheKey = await this.getDynamicCacheKey(item);
+
+            // First, try to get from cache
+            const cachedData = await cacheService.get(cacheKey);
+
+            if (cachedData) {
+                console.log(`Using cached data for ${item.key}`);
+                this.dispatch(addLoadedItem(item.key));
+                this.loadedData.add(item.key);
+                return { key: item.key, success: true, required: item.required };
+            }
+
+            // Cache miss - fetch from API
+            console.log(`Cache miss for ${item.key}, fetching from API`);
+            const args = await this.getArgsForItem(item);
+
+            const result = await this.dispatch(item.thunk(args));
+
+            if (item.thunk.fulfilled.match(result)) {
+                this.dispatch(addLoadedItem(item.key));
+                this.loadedData.add(item.key);
+                console.log(`Loaded ${item.key} from API and cached`);
+                return { key: item.key, success: true, required: item.required };
+            } else {
+                throw new Error(`Failed to load ${item.key} from API`);
+            }
+        } catch (error) {
+            console.warn(`Failed to load ${item.key}:`, error);
+            this.dispatch(addFailedItem(item.key));
+            return {
+                key: item.key,
+                success: false,
+                error: error instanceof Error ? error : new Error(String(error)),
+                required: item.required,
+            };
+        }
+    }
+
+    /**
      * Check if a conditional item can be loaded based on its dependencies
      */
     private async canLoadConditionalItem(item: DataCategory): Promise<boolean> {
-        if (!item.conditional || !item.dependsOn) return true;
+        if (!item.conditional && !item.dependsOn) return true;
 
         // Check if all dependencies are loaded
-        for (const dependency of item.dependsOn) {
-            if (!this.loadedData.has(dependency)) {
-                return false;
+        if (item.dependsOn) {
+            for (const dependency of item.dependsOn) {
+                if (!this.loadedData.has(dependency)) {
+                    return false;
+                }
             }
         }
 
@@ -433,13 +548,11 @@ export class InitializationService {
     }
 
     /**
-     * Get arguments for API call - Fixed to not override cache-first strategy
+     * Get arguments for API call
      */
     private async getArgsForItem(item: DataCategory): Promise<any> {
         const baseArgs = {
             ...item.args,
-            // Don't override the cache-first strategy here
-            // Let the individual thunks handle cache logic
         };
 
         if (item.key === 'programDays') {
@@ -469,7 +582,7 @@ export class InitializationService {
     }
 
     /**
-     * Smart background refresh based on priority and TTL
+     * Smart background refresh with parallelization
      */
     private async performSmartBackgroundRefresh(): Promise<void> {
         const allData = [...this.criticalData, ...this.secondaryData, ...this.backgroundData];
@@ -479,17 +592,13 @@ export class InitializationService {
         const mediumPriorityItems = allData.filter((item) => item.refreshPriority === 'medium');
         const lowPriorityItems = allData.filter((item) => item.refreshPriority === 'low');
 
-        // Refresh high priority items that need background refresh
-        console.log('Refreshing high priority items...');
-        await this.refreshItemsIfNeeded(highPriorityItems, true);
-
-        // Refresh medium priority items if they need it
-        console.log('Refreshing medium priority items...');
-        await this.refreshItemsIfNeeded(mediumPriorityItems, false);
-
-        // Refresh low priority items only if really stale
-        console.log('Refreshing low priority items...');
-        await this.refreshItemsIfNeeded(lowPriorityItems, false);
+        // Refresh all priority groups in parallel (within each group, items refresh in parallel too)
+        console.log('Starting parallel background refresh...');
+        await Promise.allSettled([
+            this.refreshItemsIfNeeded(highPriorityItems, true),
+            this.refreshItemsIfNeeded(mediumPriorityItems, false),
+            this.refreshItemsIfNeeded(lowPriorityItems, false),
+        ]);
     }
 
     private async refreshItemsIfNeeded(items: DataCategory[], forceRefresh: boolean): Promise<void> {
@@ -509,8 +618,8 @@ export class InitializationService {
 
                     const args = {
                         ...item.args,
-                        forceRefresh: true, // Force refresh during background sync
-                        useCache: true, // Still want to cache the result
+                        forceRefresh: true,
+                        useCache: true,
                     };
 
                     // Add dynamic args
