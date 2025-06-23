@@ -626,6 +626,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingBottom: Spaces.MD,
+        gap: Spaces.MD,
     },
     modalButton: {
         flex: 1,
