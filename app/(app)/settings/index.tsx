@@ -118,6 +118,34 @@ const SettingsIndex = () => {
         router.push('/(app)/settings/measurement-units');
     };
 
+    const handleDeleteAccount = async () => {
+        const deleteAccountUrl = 'https://forms.gle/ZyKC2JvEg3KfiuSr6';
+
+        try {
+            await Linking.openURL(deleteAccountUrl);
+            posthog.capture('delete_account_clicked');
+        } catch (error) {
+            console.error('Error opening Delete Account Form:', error);
+            Alert.alert('Error', 'Unable to open Delete Account Form');
+        }
+    };
+
+    const handlePrivacyPolicy = async () => {
+        const privacyPolicyUrl = 'https://docs.google.com/document/d/1bJ-Xw8wAiOQhmAfmjhniHx8rpnEeBCgmnA5Pwg_MUlY/edit?tab=t.0#heading=h.b0je0ulgfxxr';
+
+        try {
+            await Linking.openURL(privacyPolicyUrl);
+            posthog.capture('privacy_policy_clicked');
+        } catch (error) {
+            console.error('Error opening Privacy Policy:', error);
+            Alert.alert('Error', 'Unable to open Privacy Policy');
+        }
+    };
+
+    const handleTermsOfService = () => {
+        router.push('/(app)/settings/terms-of-service');
+    };
+
     const handleInstagramPress = async () => {
         const instagramUrl = 'https://instagram.com/kynfit.in';
 
@@ -162,6 +190,12 @@ const SettingsIndex = () => {
                 <SettingsSection title='Join our kyn'>
                     <SettingItem text='Instagram' onPress={handleInstagramPress} iconName='logo-instagram' endIcon='open-outline' />
                     <SettingItem text='Whatsapp' onPress={handleWhatsAppPress} iconName='logo-whatsapp' endIcon='open-outline' />
+                </SettingsSection>
+
+                <SettingsSection title='Legal'>
+                    <SettingItem text='Terms and Conditions' onPress={handleTermsOfService} iconName='file-text' />
+                    <SettingItem text='Privacy Policy' onPress={handlePrivacyPolicy} iconName='shield-checkmark' endIcon='open-outline' />
+                    <SettingItem text='Delete Account' onPress={handleDeleteAccount} iconName='trash' endIcon='open-outline' />
                 </SettingsSection>
 
                 <TextButton text='Sign Out' onPress={handleSignOut} iconName='exit' size='MD' style={styles.signOutButton} haptic='impactHeavy' />
