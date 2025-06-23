@@ -1,6 +1,6 @@
 // app/(app)/(tabs)/progress.tsx
 
-import { StyleSheet, Dimensions, View, Platform } from 'react-native';
+import { StyleSheet, Dimensions, View, Platform, SafeAreaView } from 'react-native';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ThemedView } from '@/components/base/ThemedView';
 import {
@@ -30,6 +30,7 @@ import { StrengthHistoryComingSoonCard } from '@/components/progress/StrengthHis
 import { ThemedText } from '@/components/base/ThemedText';
 import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
 import { BodyMeasurementsLoggingSheet } from '@/components/progress/BodyMeasurementsLoggingSheet';
+import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { debounce } from '@/utils/debounce';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
@@ -57,6 +58,10 @@ export default function ProgressScreen() {
     const [isBodyMeasurementsSheetVisible, setIsBodyMeasurementsSheetVisible] = useState(false);
     const [isLoggingBodyMeasurements, setIsLoggingBodyMeasurements] = useState(false);
 
+    // Add retry state
+    const [retryAttempt, setRetryAttempt] = useState(0);
+    const [isRetrying, setIsRetrying] = useState(false);
+
     const scrollHandler = useAnimatedScrollHandler({
         onScroll: (event) => {
             scrollY.value = event.contentOffset.y;
@@ -66,6 +71,13 @@ export default function ProgressScreen() {
     const { userWeightMeasurements, userWeightMeasurementsState } = useSelector((state: RootState) => state.user);
     const { userSleepMeasurements, userSleepMeasurementsState } = useSelector((state: RootState) => state.user);
     const { userBodyMeasurements, userBodyMeasurementsState } = useSelector((state: RootState) => state.user);
+
+    // Load all data
+    const loadAllData = async () => {
+        const promises = [dispatch(getWeightMeasurementsAsync()), dispatch(getSleepMeasurementsAsync()), dispatch(getBodyMeasurementsAsync())];
+
+        await Promise.allSettled(promises);
+    };
 
     useEffect(() => {
         if (userWeightMeasurementsState === REQUEST_STATE.IDLE) {
@@ -85,20 +97,44 @@ export default function ProgressScreen() {
         }
     }, [dispatch, userBodyMeasurementsState]);
 
+    // Updated data loaded state to handle REJECTED states
     const dataLoadedState = useMemo(() => {
-        if (
-            userWeightMeasurementsState !== REQUEST_STATE.FULFILLED ||
-            userSleepMeasurementsState !== REQUEST_STATE.FULFILLED ||
-            userBodyMeasurementsState !== REQUEST_STATE.FULFILLED
-        ) {
+        const allStates = [userWeightMeasurementsState, userSleepMeasurementsState, userBodyMeasurementsState];
+        // Check if any are still loading
+        if (allStates.some((state) => state === REQUEST_STATE.PENDING)) {
             return REQUEST_STATE.PENDING;
         }
-        return REQUEST_STATE.FULFILLED;
+
+        // Check if all failed
+        if (allStates.every((state) => state === REQUEST_STATE.REJECTED)) {
+            return REQUEST_STATE.REJECTED;
+        }
+
+        // Check if at least one succeeded (partial success is acceptable)
+        if (allStates.some((state) => state === REQUEST_STATE.FULFILLED)) {
+            return REQUEST_STATE.FULFILLED;
+        }
+
+        return REQUEST_STATE.PENDING;
     }, [userWeightMeasurementsState, userSleepMeasurementsState, userBodyMeasurementsState]);
 
     const { showSplash, handleSplashComplete } = useSplashScreen({
         dataLoadedState: dataLoadedState,
     });
+
+    // Handle retry with exponential backoff
+    const handleRetry = async () => {
+        setIsRetrying(true);
+        setRetryAttempt((prev) => prev + 1);
+
+        try {
+            await loadAllData();
+        } catch (error) {
+            console.error('Retry failed:', error);
+        } finally {
+            setIsRetrying(false);
+        }
+    };
 
     // Handle weight logging
     const handleLogWeight = async (weight: number, date: Date) => {
@@ -213,8 +249,53 @@ export default function ProgressScreen() {
     };
 
     const getExistingBodyMeasurementsData = (date: Date) => {
-        return userBodyMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
+        return userBodyMeasurements?.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
     };
+
+    // Show error screen if all data loading failed
+    if (dataLoadedState === REQUEST_STATE.REJECTED && !showSplash) {
+        return (
+            <SafeAreaView style={[styles.errorContainer, { backgroundColor: themeColors.background }]}>
+                <View style={styles.errorContent}>
+                    <ThemedText type='titleXLarge' style={styles.errorTitle}>
+                        Connection Issue
+                    </ThemedText>
+
+                    <ThemedText style={styles.errorMessage}>Unable to load your progress data. Please check your internet connection.</ThemedText>
+
+                    <View style={styles.buttonContainer}>
+                        <PrimaryButton
+                            size='MD'
+                            text={isRetrying ? 'Retrying...' : 'Try Again'}
+                            onPress={handleRetry}
+                            style={styles.retryButton}
+                            disabled={isRetrying}
+                        />
+                    </View>
+
+                    {__DEV__ && retryAttempt > 0 && (
+                        <View style={styles.devErrorDetails}>
+                            <ThemedText type='caption' style={styles.devErrorTitle}>
+                                Debug Info:
+                            </ThemedText>
+                            <ThemedText type='caption' style={styles.devErrorText}>
+                                Retry attempts: {retryAttempt}
+                            </ThemedText>
+                            <ThemedText type='caption' style={styles.devErrorText}>
+                                Weight: {userWeightMeasurementsState}
+                            </ThemedText>
+                            <ThemedText type='caption' style={styles.devErrorText}>
+                                Sleep: {userSleepMeasurementsState}
+                            </ThemedText>
+                            <ThemedText type='caption' style={styles.devErrorText}>
+                                Body: {userBodyMeasurementsState}
+                            </ThemedText>
+                        </View>
+                    )}
+                </View>
+            </SafeAreaView>
+        );
+    }
 
     if (showSplash) {
         return <DumbbellSplash isDataLoaded={false} onAnimationComplete={handleSplashComplete} />;
@@ -350,5 +431,48 @@ const styles = StyleSheet.create({
         width: 270,
         marginRight: Spaces.MD,
         transform: [{ scale: 1.01 }],
+    },
+    // Error handling styles
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    errorContent: {
+        width: '85%',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    errorTitle: {
+        marginBottom: Spaces.MD,
+        textAlign: 'center',
+    },
+    errorMessage: {
+        textAlign: 'center',
+        marginBottom: Spaces.LG,
+        opacity: 0.8,
+    },
+    buttonContainer: {
+        width: '100%',
+        marginBottom: Spaces.LG,
+    },
+    retryButton: {
+        width: '70%',
+        alignSelf: 'center',
+    },
+    devErrorDetails: {
+        marginTop: Spaces.LG,
+        padding: Spaces.MD,
+        backgroundColor: 'rgba(255, 0, 0, 0.1)',
+        borderRadius: 8,
+        width: '100%',
+    },
+    devErrorTitle: {
+        fontWeight: 'bold',
+        marginBottom: Spaces.SM,
+    },
+    devErrorText: {
+        marginBottom: Spaces.XS,
+        fontSize: 12,
     },
 });

@@ -32,6 +32,28 @@ import { fetchAllExercisesAsync } from '@/store/exercises/thunks';
 import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
 import { initializeTrackedLiftsHistoryAsync } from '@/store/exerciseProgress/thunks';
 
+// Standardized cache keys
+const CACHE_KEYS = {
+    USER_DATA: 'user_data',
+    USER_FITNESS_PROFILE: 'user_fitness_profile',
+    USER_PROGRAM_PROGRESS: 'user_program_progress',
+    USER_APP_SETTINGS: 'user_app_settings',
+    USER_RECOMMENDATIONS: 'user_recommendations',
+    EXERCISE_SUBSTITUTIONS: 'exercise_substitutions',
+    EXERCISE_SET_MODIFICATIONS: 'exercise_set_modifications',
+    WEIGHT_MEASUREMENTS: 'weight_measurements',
+    SLEEP_MEASUREMENTS: 'sleep_measurements',
+    BODY_MEASUREMENTS: 'body_measurements',
+    ALL_PROGRAMS: 'all_programs',
+    ALL_WORKOUTS: 'all_workouts',
+    ALL_EXERCISES: 'all_exercises',
+    PROGRAM_DAYS: (programId: string) => `program_days_${programId}`,
+    SPOTLIGHT_WORKOUTS: 'spotlight_workouts',
+    TRACKED_LIFTS_HISTORY: 'tracked_lifts_history',
+    WORKOUT_QUOTE: 'workout_quote',
+    REST_DAY_QUOTE: 'rest_day_quote',
+} as const;
+
 export interface DataCategory {
     key: string;
     thunk: any;
@@ -47,19 +69,19 @@ export interface DataCategory {
 export class InitializationService {
     private dispatch: AppDispatch;
     private backgroundRefreshInProgress = false;
-    private loadedData: Set<string> = new Set(); // Track what's been loaded
-    private userProgramId: string | null = null; // Track current program ID
+    private loadedData: Set<string> = new Set();
+    private userProgramId: string | null = null;
 
     constructor(dispatch: AppDispatch) {
         this.dispatch = dispatch;
     }
 
-    // Define data categories with refresh priorities
+    // Define data categories with consistent cache keys
     private criticalData: DataCategory[] = [
         {
             key: 'user',
             thunk: getUserAsync,
-            cacheKey: 'user_data',
+            cacheKey: CACHE_KEYS.USER_DATA,
             ttl: CacheTTL.LONG,
             required: true,
             refreshPriority: 'high',
@@ -68,7 +90,7 @@ export class InitializationService {
         {
             key: 'userFitnessProfile',
             thunk: getUserFitnessProfileAsync,
-            cacheKey: 'user_fitness_profile',
+            cacheKey: CACHE_KEYS.USER_FITNESS_PROFILE,
             ttl: CacheTTL.LONG,
             required: true,
             refreshPriority: 'high',
@@ -77,7 +99,7 @@ export class InitializationService {
         {
             key: 'userProgramProgress',
             thunk: getUserProgramProgressAsync,
-            cacheKey: 'user_program_progress',
+            cacheKey: CACHE_KEYS.USER_PROGRAM_PROGRESS,
             ttl: CacheTTL.LONG,
             required: true,
             refreshPriority: 'high',
@@ -89,7 +111,7 @@ export class InitializationService {
         {
             key: 'userAppSettings',
             thunk: getUserAppSettingsAsync,
-            cacheKey: 'user_app_settings',
+            cacheKey: CACHE_KEYS.USER_APP_SETTINGS,
             ttl: CacheTTL.LONG,
             required: false,
             refreshPriority: 'medium',
@@ -98,7 +120,7 @@ export class InitializationService {
         {
             key: 'programs',
             thunk: getAllProgramsAsync,
-            cacheKey: 'all_programs',
+            cacheKey: CACHE_KEYS.ALL_PROGRAMS,
             ttl: CacheTTL.VERY_LONG,
             required: true,
             refreshPriority: 'low',
@@ -107,7 +129,7 @@ export class InitializationService {
         {
             key: 'workouts',
             thunk: getAllWorkoutsAsync,
-            cacheKey: 'all_workouts',
+            cacheKey: CACHE_KEYS.ALL_WORKOUTS,
             ttl: CacheTTL.VERY_LONG,
             required: true,
             refreshPriority: 'low',
@@ -116,7 +138,7 @@ export class InitializationService {
         {
             key: 'exercises',
             thunk: fetchAllExercisesAsync,
-            cacheKey: 'all_exercises',
+            cacheKey: CACHE_KEYS.ALL_EXERCISES,
             ttl: CacheTTL.VERY_LONG,
             required: true,
             refreshPriority: 'low',
@@ -128,7 +150,7 @@ export class InitializationService {
             cacheKey: 'program_days', // Will be dynamic based on program ID
             ttl: CacheTTL.LONG,
             required: true,
-            refreshPriority: 'high', // High priority since user needs this data
+            refreshPriority: 'high',
             conditional: true,
             dependsOn: ['userProgramProgress'],
             args: { useCache: true },
@@ -136,7 +158,7 @@ export class InitializationService {
         {
             key: 'userRecommendations',
             thunk: getUserRecommendationsAsync,
-            cacheKey: 'user_recommendations',
+            cacheKey: CACHE_KEYS.USER_RECOMMENDATIONS,
             ttl: CacheTTL.SHORT,
             required: false,
             refreshPriority: 'high',
@@ -145,7 +167,7 @@ export class InitializationService {
         {
             key: 'exerciseSubstitutions',
             thunk: getUserExerciseSubstitutionsAsync,
-            cacheKey: 'exercise_substitutions',
+            cacheKey: CACHE_KEYS.EXERCISE_SUBSTITUTIONS,
             ttl: CacheTTL.VERY_LONG,
             required: false,
             refreshPriority: 'low',
@@ -154,7 +176,7 @@ export class InitializationService {
         {
             key: 'exerciseSetModifications',
             thunk: getUserExerciseSetModificationsAsync,
-            cacheKey: 'exercise_set_modifications',
+            cacheKey: CACHE_KEYS.EXERCISE_SET_MODIFICATIONS,
             ttl: CacheTTL.LONG,
             required: false,
             refreshPriority: 'medium',
@@ -163,7 +185,7 @@ export class InitializationService {
         {
             key: 'userWeightMeasurements',
             thunk: getWeightMeasurementsAsync,
-            cacheKey: 'weight_measurements',
+            cacheKey: CACHE_KEYS.WEIGHT_MEASUREMENTS,
             ttl: CacheTTL.LONG,
             required: false,
             refreshPriority: 'medium',
@@ -172,7 +194,7 @@ export class InitializationService {
         {
             key: 'userSleepMeasurements',
             thunk: getSleepMeasurementsAsync,
-            cacheKey: 'sleep_measurements',
+            cacheKey: CACHE_KEYS.SLEEP_MEASUREMENTS,
             ttl: CacheTTL.LONG,
             required: false,
             refreshPriority: 'medium',
@@ -181,7 +203,7 @@ export class InitializationService {
         {
             key: 'userBodyMeasurements',
             thunk: getBodyMeasurementsAsync,
-            cacheKey: 'body_measurements',
+            cacheKey: CACHE_KEYS.BODY_MEASUREMENTS,
             ttl: CacheTTL.LONG,
             required: false,
             refreshPriority: 'medium',
@@ -193,7 +215,7 @@ export class InitializationService {
         {
             key: 'spotlightWorkouts',
             thunk: getSpotlightWorkoutsAsync,
-            cacheKey: 'spotlight_workouts',
+            cacheKey: CACHE_KEYS.SPOTLIGHT_WORKOUTS,
             ttl: CacheTTL.SHORT,
             required: false,
             refreshPriority: 'medium',
@@ -202,7 +224,7 @@ export class InitializationService {
         {
             key: 'trackedLiftsHistory',
             thunk: initializeTrackedLiftsHistoryAsync,
-            cacheKey: 'tracked_lifts_history',
+            cacheKey: CACHE_KEYS.TRACKED_LIFTS_HISTORY,
             ttl: CacheTTL.SHORT,
             required: false,
             refreshPriority: 'high',
@@ -211,7 +233,7 @@ export class InitializationService {
         {
             key: 'workoutQuote',
             thunk: getWorkoutQuoteAsync,
-            cacheKey: 'workout_quote',
+            cacheKey: CACHE_KEYS.WORKOUT_QUOTE,
             ttl: CacheTTL.SHORT,
             required: false,
             refreshPriority: 'high',
@@ -220,7 +242,7 @@ export class InitializationService {
         {
             key: 'restDayQuote',
             thunk: getRestDayQuoteAsync,
-            cacheKey: 'rest_day_quote',
+            cacheKey: CACHE_KEYS.REST_DAY_QUOTE,
             ttl: CacheTTL.SHORT,
             required: false,
             refreshPriority: 'high',
@@ -235,8 +257,9 @@ export class InitializationService {
             // Skip conditional items during initial cache check
             if (item.conditional) continue;
 
-            const cached = await cacheService.get(item.cacheKey);
-            const needsBackgroundRefresh = await cacheService.needsBackgroundRefresh(item.cacheKey);
+            const cacheKey = await this.getDynamicCacheKey(item);
+            const cached = await cacheService.get(cacheKey);
+            const needsBackgroundRefresh = await cacheService.needsBackgroundRefresh(cacheKey);
 
             let status: 'fresh' | 'stale' | 'missing';
             if (!cached) {
@@ -404,19 +427,19 @@ export class InitializationService {
     private async getDynamicCacheKey(item: DataCategory): Promise<string> {
         if (item.key === 'programDays') {
             const programId = await this.getProgramIdFromCache();
-            return programId ? `program_days_${programId}` : item.cacheKey;
+            return programId ? CACHE_KEYS.PROGRAM_DAYS(programId) : item.cacheKey;
         }
         return item.cacheKey;
     }
 
     /**
-     * Get arguments for API call, including dynamic parameters
+     * Get arguments for API call - Fixed to not override cache-first strategy
      */
     private async getArgsForItem(item: DataCategory): Promise<any> {
         const baseArgs = {
             ...item.args,
-            useCache: false,
-            forceRefresh: true,
+            // Don't override the cache-first strategy here
+            // Let the individual thunks handle cache logic
         };
 
         if (item.key === 'programDays') {
@@ -434,9 +457,7 @@ export class InitializationService {
      */
     private async getProgramIdFromCache(): Promise<string | null> {
         try {
-            // You might need to adjust this based on your cache structure
-            // This is a simplified version - you might need to get it from Redux state instead
-            const cachedProgress = (await cacheService.get('user_program_progress')) as any;
+            const cachedProgress = (await cacheService.get(CACHE_KEYS.USER_PROGRAM_PROGRESS)) as any;
             if (cachedProgress && cachedProgress.ProgramId) {
                 this.userProgramId = cachedProgress.ProgramId;
                 return cachedProgress.ProgramId;
@@ -486,7 +507,19 @@ export class InitializationService {
 
                     console.log(`Background refreshing ${item.key}...`);
 
-                    const args = await this.getArgsForItem(item);
+                    const args = {
+                        ...item.args,
+                        forceRefresh: true, // Force refresh during background sync
+                        useCache: true, // Still want to cache the result
+                    };
+
+                    // Add dynamic args
+                    if (item.key === 'programDays') {
+                        const programId = await this.getProgramIdFromCache();
+                        if (programId) {
+                            args.programId = programId;
+                        }
+                    }
 
                     const result = await this.dispatch(item.thunk(args));
 

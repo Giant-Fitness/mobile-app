@@ -226,6 +226,7 @@ export const authService = {
 
     getUserId: async () => {
         const userId = await SecureStore.getItemAsync(STORAGE_KEYS.USER_ID);
+        // const userId = '01f33d7a-0041-70a4-4522-d6943bcc6aa7';
         if (!userId) {
             throw new Error('No user ID found');
         }

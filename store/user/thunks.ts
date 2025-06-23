@@ -24,6 +24,14 @@ import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { cacheService, CacheTTL } from '@/utils/cache';
 
+const TESTING = {
+    SIMULATE_WEIGHT_FAILURE: __DEV__ && false,
+    SIMULATE_SLEEP_FAILURE: __DEV__ && false,
+    SIMULATE_BODY_FAILURE: __DEV__ && false,
+    SIMULATE_DELAYS: __DEV__ && false,
+    DELAY_MS: 3000,
+};
+
 export const getUserAsync = createAsyncThunk<User, { forceRefresh?: boolean; useCache?: boolean } | void>('user/getUser', async (args = {}, { getState }) => {
     const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
     const state = getState() as RootState;
@@ -641,6 +649,14 @@ export const getWeightMeasurementsAsync = createAsyncThunk<
     }
 >('user/getWeightMeasurements', async (args = {}, { getState, rejectWithValue }) => {
     try {
+        // 🧪 TESTING: Add delays/failures
+        if (TESTING.SIMULATE_DELAYS) {
+            await new Promise((resolve) => setTimeout(resolve, TESTING.DELAY_MS));
+        }
+        if (TESTING.SIMULATE_WEIGHT_FAILURE) {
+            throw new Error('Simulated weight measurements failure');
+        }
+
         const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
         const state = getState();
         const userId = state.user.user?.UserId;
@@ -789,6 +805,13 @@ export const getSleepMeasurementsAsync = createAsyncThunk<
     }
 >('user/getSleepMeasurements', async (args = {}, { getState, rejectWithValue }) => {
     try {
+        // 🧪 TESTING: Add delays/failures
+        if (TESTING.SIMULATE_DELAYS) {
+            await new Promise((resolve) => setTimeout(resolve, TESTING.DELAY_MS));
+        }
+        if (TESTING.SIMULATE_SLEEP_FAILURE) {
+            throw new Error('Simulated sleep measurements failure');
+        }
         const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
         const state = getState();
         const userId = state.user.user?.UserId;
@@ -941,6 +964,13 @@ export const getBodyMeasurementsAsync = createAsyncThunk<
     }
 >('user/getBodyMeasurements', async (args = {}, { getState, rejectWithValue }) => {
     try {
+        // 🧪 TESTING: Add delays/failures
+        if (TESTING.SIMULATE_DELAYS) {
+            await new Promise((resolve) => setTimeout(resolve, TESTING.DELAY_MS));
+        }
+        if (TESTING.SIMULATE_BODY_FAILURE) {
+            throw new Error('Simulated body measurements failure');
+        }
         const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
         const state = getState();
         const userId = state.user.user?.UserId;
