@@ -20,7 +20,7 @@ export const configureAmplify = () => {
                     loginWith: {
                         oauth: {
                             domain: 'giant-fitness-prod.auth.ap-south-1.amazoncognito.com',
-                            scopes: ['openid', 'email', 'profile'],
+                            scopes: ['openid', 'email', 'profile', 'giant-fitness-api/user.read', 'giant-fitness-api/user.write'],
                             // Use platform-specific redirects only
                             redirectSignIn,
                             redirectSignOut,
