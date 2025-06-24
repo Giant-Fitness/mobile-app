@@ -18,7 +18,7 @@ import { Icon } from '@/components/base/Icon';
 import { OneRepMaxCalculator } from '@/components/programs/OneRepMaxCalculator';
 import { useLocalSearchParams } from 'expo-router';
 import { usePostHog } from 'posthog-react-native';
-import { AVPlaybackStatus } from 'expo-av';
+import { VideoPlaybackStatus } from '@/components/media/FullScreenVideoPlayer';
 import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
 
 const ExerciseDetailsScreen = () => {
@@ -55,7 +55,7 @@ const ExerciseDetailsScreen = () => {
     };
 
     // Handle video playback status updates
-    const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
+    const handlePlaybackStatusUpdate = (status: VideoPlaybackStatus) => {
         // Check if video is loaded and has started playing for the first time
         if (status.isLoaded && status.isPlaying && !hasVideoStarted) {
             // Track the event with PostHog

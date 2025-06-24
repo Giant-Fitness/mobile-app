@@ -2,12 +2,22 @@
 
 import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { View, StyleSheet, Alert, Animated, Dimensions } from 'react-native';
-import { Video, ResizeMode, Audio, AVPlaybackStatus } from 'expo-av';
+import { VideoView, useVideoPlayer } from 'expo-video';
+import { setAudioModeAsync } from 'expo-audio';
 import PropTypes from 'prop-types';
+
+export interface VideoPlaybackStatus {
+    isLoaded: boolean;
+    isPlaying: boolean;
+    isBuffering: boolean;
+    positionMillis: number;
+    durationMillis: number | null;
+    didJustFinish: boolean;
+}
 
 interface FullScreenVideoPlayerProps {
     source: { uri: string };
-    onPlaybackStatusUpdate?: (status: AVPlaybackStatus) => void;
+    onPlaybackStatusUpdate?: (status: VideoPlaybackStatus) => void;
     onDismiss?: () => void;
 }
 
@@ -17,19 +27,25 @@ export interface FullScreenVideoPlayerHandle {
 
 export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, FullScreenVideoPlayerProps>(
     ({ source, onPlaybackStatusUpdate, onDismiss }, ref) => {
-        const video = useRef<Video>(null);
         const [isVideoVisible, setIsVideoVisible] = useState(false);
         const [isFullscreenPresented, setIsFullscreenPresented] = useState(false);
         const fadeAnim = useRef(new Animated.Value(0)).current;
         const dismissTimer = useRef<NodeJS.Timeout | null>(null);
+        const videoRef = useRef<VideoView>(null);
+
+        // Create video player
+        const player = useVideoPlayer(source, (player) => {
+            player.loop = false;
+            player.allowsExternalPlayback = false;
+        });
 
         useEffect(() => {
             const configureAudio = async () => {
                 try {
-                    await Audio.setAudioModeAsync({
-                        playsInSilentModeIOS: true,
-                        shouldDuckAndroid: true,
-                        playThroughEarpieceAndroid: true,
+                    await setAudioModeAsync({
+                        playsInSilentMode: true,
+                        interruptionMode: 'duckOthers',
+                        shouldRouteThroughEarpiece: true,
                     });
                 } catch (error) {
                     console.error('Error setting audio mode:', error);
@@ -44,6 +60,103 @@ export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, Ful
             };
         }, []);
 
+        // Subscribe to player events
+        useEffect(() => {
+            const subscription = player.addListener('statusChange', (statusEvent) => {
+                const videoStatus: VideoPlaybackStatus = {
+                    isLoaded: statusEvent.status !== 'error' && statusEvent.status !== 'idle',
+                    isPlaying: player.playing,
+                    isBuffering: statusEvent.status === 'loading',
+                    positionMillis: player.currentTime * 1000,
+                    durationMillis: player.duration ? player.duration * 1000 : null,
+                    didJustFinish: false,
+                };
+
+                if (onPlaybackStatusUpdate) {
+                    onPlaybackStatusUpdate(videoStatus);
+                }
+            });
+
+            const playbackStatusSubscription = player.addListener('playingChange', (playingEvent) => {
+                const videoStatus: VideoPlaybackStatus = {
+                    isLoaded: true,
+                    isPlaying: playingEvent.isPlaying,
+                    isBuffering: false,
+                    positionMillis: player.currentTime * 1000,
+                    durationMillis: player.duration ? player.duration * 1000 : null,
+                    didJustFinish: false,
+                };
+
+                if (onPlaybackStatusUpdate) {
+                    onPlaybackStatusUpdate(videoStatus);
+                }
+            });
+
+            const playToEndSubscription = player.addListener('playToEnd', () => {
+                const videoStatus: VideoPlaybackStatus = {
+                    isLoaded: true,
+                    isPlaying: false,
+                    isBuffering: false,
+                    positionMillis: player.duration ? player.duration * 1000 : 0,
+                    durationMillis: player.duration ? player.duration * 1000 : null,
+                    didJustFinish: true,
+                };
+
+                if (onPlaybackStatusUpdate) {
+                    onPlaybackStatusUpdate(videoStatus);
+                }
+
+                // Start the 3-second timer when the video finishes
+                dismissTimer.current = setTimeout(() => {
+                    dismissVideo();
+                }, 3000);
+            });
+
+            // Add periodic status updates while playing
+            let intervalId: NodeJS.Timeout | null = null;
+
+            const startPeriodicUpdates = () => {
+                if (intervalId) clearInterval(intervalId);
+                intervalId = setInterval(() => {
+                    if (player.playing && onPlaybackStatusUpdate) {
+                        const videoStatus: VideoPlaybackStatus = {
+                            isLoaded: true,
+                            isPlaying: player.playing,
+                            isBuffering: false,
+                            positionMillis: player.currentTime * 1000,
+                            durationMillis: player.duration ? player.duration * 1000 : null,
+                            didJustFinish: false,
+                        };
+                        onPlaybackStatusUpdate(videoStatus);
+                    }
+                }, 500); // Update every 500ms
+            };
+
+            const stopPeriodicUpdates = () => {
+                if (intervalId) {
+                    clearInterval(intervalId);
+                    intervalId = null;
+                }
+            };
+
+            // Start/stop periodic updates based on playing state
+            const playingSubscription = player.addListener('playingChange', (playingEvent) => {
+                if (playingEvent.isPlaying) {
+                    startPeriodicUpdates();
+                } else {
+                    stopPeriodicUpdates();
+                }
+            });
+
+            return () => {
+                subscription?.remove();
+                playbackStatusSubscription?.remove();
+                playToEndSubscription?.remove();
+                playingSubscription?.remove();
+                stopPeriodicUpdates();
+            };
+        }, [player, onPlaybackStatusUpdate]);
+
         useImperativeHandle(ref, () => ({
             startPlayback: handleFullScreen,
         }));
@@ -53,38 +166,26 @@ export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, Ful
 
             setIsVideoVisible(true);
             setIsFullscreenPresented(true);
+
             Animated.timing(fadeAnim, {
                 toValue: 1,
                 duration: 500,
                 useNativeDriver: true,
             }).start(async () => {
-                if (video.current) {
-                    try {
-                        await video.current.presentFullscreenPlayer();
-                    } catch (error) {
-                        setIsFullscreenPresented(false);
-                        console.error('Error presenting fullscreen:', error);
+                try {
+                    if (videoRef.current) {
+                        await videoRef.current.enterFullscreen();
+                        player.play();
                     }
+                } catch (error) {
+                    setIsFullscreenPresented(false);
+                    console.error('Error presenting fullscreen:', error);
                 }
             });
         };
 
-        const handleVideoLoad = async () => {
-            if (video.current) {
-                try {
-                    await video.current.playAsync();
-                } catch (error) {
-                    console.log(error);
-                    Alert.alert('Error', 'An error occurred while playing the video.');
-                }
-            }
-        };
-
-        const handleFullscreenUpdate = async ({ fullscreenUpdate }: { fullscreenUpdate: number }) => {
-            if (fullscreenUpdate === 3) {
-                // FULLSCREEN_UPDATE_PLAYER_DID_DISMISS
-                await dismissVideo();
-            }
+        const handleFullscreenExit = async () => {
+            await dismissVideo();
         };
 
         const dismissVideo = async () => {
@@ -93,13 +194,18 @@ export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, Ful
                     clearTimeout(dismissTimer.current);
                     dismissTimer.current = null;
                 }
-                if (video.current) {
-                    await video.current.stopAsync();
-                    await video.current.setPositionAsync(0);
+
+                player.pause();
+                player.currentTime = 0;
+
+                if (videoRef.current) {
+                    await videoRef.current.exitFullscreen();
                 }
+
                 setIsFullscreenPresented(false);
                 setIsVideoVisible(false);
                 fadeAnim.setValue(0);
+
                 if (onDismiss) {
                     onDismiss();
                 }
@@ -109,31 +215,18 @@ export const FullScreenVideoPlayer = forwardRef<FullScreenVideoPlayerHandle, Ful
             }
         };
 
-        const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
-            if (status.isLoaded && status.didJustFinish) {
-                // Start the 3-second timer when the video finishes
-                dismissTimer.current = setTimeout(() => {
-                    dismissVideo();
-                }, 3000);
-            }
-            if (onPlaybackStatusUpdate) {
-                onPlaybackStatusUpdate(status);
-            }
-        };
-
         return (
             <View style={styles.container}>
                 {isVideoVisible && (
-                    <Video
-                        ref={video}
+                    <VideoView
+                        ref={videoRef}
                         style={isVideoVisible ? styles.video : { width: 0, height: 0 }}
-                        source={source}
-                        useNativeControls
-                        resizeMode={ResizeMode.CONTAIN}
-                        isLooping={false}
-                        onLoad={handleVideoLoad}
-                        onFullscreenUpdate={handleFullscreenUpdate}
-                        onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+                        player={player}
+                        allowsFullscreen={true}
+                        allowsPictureInPicture={false}
+                        onFullscreenExit={handleFullscreenExit}
+                        contentFit='contain'
+                        nativeControls={true}
                     />
                 )}
                 {isVideoVisible && <Animated.View style={[styles.overlay, { opacity: fadeAnim }]} />}

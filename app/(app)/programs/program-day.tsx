@@ -26,13 +26,12 @@ import { ProgramDayUnfinishModal } from '@/components/programs/ProgramDayUnfinis
 import { BottomMenuModal } from '@/components/overlays/BottomMenuModal';
 import { AutoDismissSuccessModal } from '@/components/overlays/AutoDismissSuccessModal';
 import { ExerciseLoggingSheet } from '@/components/exercise/ExerciseLoggingSheet';
-import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle } from '@/components/media/FullScreenVideoPlayer';
+import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle, VideoPlaybackStatus } from '@/components/media/FullScreenVideoPlayer';
 import { getDayOfWeek, getWeekNumber } from '@/utils/calendar';
 import { fetchExercisesRecentHistoryAsync } from '@/store/exerciseProgress/thunks';
 import { AppDispatch, RootState } from '@/store/store';
 import { Exercise, isExerciseLoggable } from '@/types';
 import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
-import { AVPlaybackStatus } from 'expo-av';
 import { ThumbnailVideoPlayer } from '@/components/media/ThumbnailVideoPlayer';
 import { usePostHog } from 'posthog-react-native';
 
@@ -90,7 +89,7 @@ const ProgramDayScreen = () => {
         }
     }, [programDay?.Type, programDay?.Exercises]);
 
-    const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
+    const handlePlaybackStatusUpdate = (status: VideoPlaybackStatus) => {
         if (status.isLoaded) {
             if (!status.isBuffering) {
             }
