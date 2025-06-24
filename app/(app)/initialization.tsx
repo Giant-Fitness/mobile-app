@@ -8,7 +8,6 @@ import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { incrementRetryAttempt, reset as resetInitialization, resetRetryAttempt, setInitialized } from '@/store/initialization/initializationSlice';
 import { AppDispatch, RootState } from '@/store/store';
-import { getUserProgramProgressAsync } from '@/store/user/thunks';
 import { cacheService } from '@/utils/cache';
 import { InitializationService } from '@/utils/initializationService';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -30,140 +29,160 @@ const Initialization: React.FC = () => {
     const [showManualRetry, setShowManualRetry] = useState(false);
     const initServiceRef = useRef<InitializationService | null>(null);
     const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const initializationStartTimeRef = useRef<number | null>(null);
+    const hasInitializedRef = useRef(false);
 
     // Initialize service
     useEffect(() => {
         initServiceRef.current = new InitializationService(dispatch);
     }, [dispatch]);
 
-    // Main initialization flow - Cache-First Strategy
+    // Main initialization flow - Enhanced with better parallelization
     const initializeApp = useCallback(async () => {
-        if (!initServiceRef.current) return;
+        if (!initServiceRef.current || hasInitializedRef.current) return;
 
         try {
+            hasInitializedRef.current = true; // Prevent multiple simultaneous calls
+            const startTime = Date.now();
+            initializationStartTimeRef.current = startTime;
+
+            console.log('🚀 Starting enhanced initialization...');
+
             dispatch(resetRetryAttempt());
             setShowManualRetry(false);
 
-            // Step 1: Check cache status
+            // Step 1: Check cache status to determine strategy
+            console.log('📊 Checking cache status...');
             await initServiceRef.current.checkCacheStatus();
 
-            // Step 2: Load critical data (cache-first)
-            await initServiceRef.current.loadCriticalData();
+            // Step 2: Initialize using optimal strategy (first-run vs cache-aware)
+            console.log('🔄 Starting main initialization...');
+            const success = await initServiceRef.current.initializeApp();
 
-            // Step 3: Load secondary data (cache-first) - this now includes program days
-            await initServiceRef.current.loadSecondaryData();
+            if (!success) {
+                throw new Error('Initialization failed');
+            }
 
-            // Step 4: Load essential real-time data
-            await loadEssentialRealTimeData();
+            // Step 3: Navigate to app
+            const endTime = Date.now();
+            const totalTime = endTime - startTime;
+            console.log(`✅ Initialization completed in ${totalTime}ms`);
 
-            // Step 5: Navigate to app
             dispatch(setInitialized(true));
             router.replace('/(app)/(tabs)/home');
 
-            // Step 6: Start background processes
+            // Step 4: Continue background processes after navigation
             setTimeout(() => {
+                console.log('🔄 Starting background sync...');
                 initServiceRef.current?.startBackgroundSync();
-                loadBackgroundRealTimeData();
-            }, 1000);
+            }, 500); // Reduced delay since most data is already loaded
         } catch (error) {
-            console.error('Initialization error:', error);
+            hasInitializedRef.current = false; // Allow retry on error
+            const endTime = Date.now();
+            const totalTime = initializationStartTimeRef.current ? endTime - initializationStartTimeRef.current : 0;
+            console.error(`❌ Initialization failed after ${totalTime}ms:`, error);
             await handleInitializationError();
         }
-    }, [dispatch]);
+    }, [dispatch]); // Remove all other dependencies to prevent recreation
 
-    // Handle initialization errors with automatic retries
-    const handleInitializationError = async () => {
+    // Enhanced error handling with cache fallback
+    const handleInitializationError = useCallback(async () => {
         const currentAttempt = initialization.retryAttempt;
 
-        // Check if we have cached data to fall back on
-        const hasCachedData = await checkForCachedData();
+        // Check if we have enough cached data to proceed
+        const canProceedWithCache = await checkMinimumCachedData();
 
-        if (hasCachedData) {
-            // Proceed with cached data, but still retry in background
-            console.log('Proceeding with cached data, retrying in background...');
+        if (canProceedWithCache && currentAttempt > 0) {
+            // On retry attempts, be more lenient with cached data
+            console.log('🔄 Proceeding with cached data after retry, continuing background sync...');
             dispatch(setInitialized(true));
             router.replace('/(app)/(tabs)/home');
 
-            // Retry in background
+            // Retry failed requests in background
             setTimeout(() => {
                 if (currentAttempt < 3) {
-                    dispatch(incrementRetryAttempt());
-                    initializeApp();
+                    console.log('🔄 Retrying failed requests in background...');
+                    initServiceRef.current?.startBackgroundSync();
                 }
-            }, 5000);
+            }, 2000);
             return;
         }
 
-        // No cached data - need to retry
+        // No sufficient cached data - need to retry
         if (currentAttempt < 3) {
-            // Automatic retry with exponential backoff
-            const retryDelay = Math.min(2000 * Math.pow(2, currentAttempt), 10000);
-            console.log(`Auto-retrying in ${retryDelay}ms (attempt ${currentAttempt + 1}/3)`);
+            // Exponential backoff with jitter
+            const baseDelay = 2000 * Math.pow(2, currentAttempt);
+            const jitter = Math.random() * 1000; // Add randomness to prevent thundering herd
+            const retryDelay = Math.min(baseDelay + jitter, 15000);
+
+            console.log(`🔄 Auto-retrying in ${Math.round(retryDelay)}ms (attempt ${currentAttempt + 1}/3)`);
 
             dispatch(incrementRetryAttempt());
 
             retryTimeoutRef.current = setTimeout(() => {
+                hasInitializedRef.current = false; // Allow retry
                 initializeApp();
             }, retryDelay);
         } else {
             // Max retries reached - show manual retry option
+            console.log('❌ Max retries reached, showing manual retry option');
             setShowManualRetry(true);
         }
-    };
+    }, [initialization.retryAttempt, dispatch, initializeApp]);
 
-    // Load only essential real-time data
-    const loadEssentialRealTimeData = async () => {
-        try {
-            // Only load the most critical data that must be fresh
-            await dispatch(getUserProgramProgressAsync());
-        } catch (error) {
-            console.warn('Essential real-time data failed:', error);
-            // Don't throw - continue with cached data
-        }
-    };
-
-    // Load remaining data in background
-    const loadBackgroundRealTimeData = async () => {
-        try {
-            // Background data loading can happen after navigation
-            const backgroundPromises: Promise<unknown>[] = [
-                // Add any other background data loading here
-            ];
-
-            Promise.allSettled(backgroundPromises).then((results) => {
-                const failures = results.filter((r) => r.status === 'rejected').length;
-                if (failures > 0) {
-                    console.warn(`${failures} background data requests failed`);
-                }
-            });
-        } catch (error) {
-            console.warn('Background data loading failed:', error);
-        }
-    };
-
-    // Check for any cached data
-    const checkForCachedData = async (): Promise<boolean> => {
+    // Check for minimum required cached data to run the app
+    const checkMinimumCachedData = async (): Promise<boolean> => {
         try {
             const hasUser = await cacheService.get('user_data');
             const hasPrograms = await cacheService.get('all_programs');
+            const hasWorkouts = await cacheService.get('all_workouts');
+            const hasExercises = await cacheService.get('all_exercises');
 
-            return !!(hasUser && hasPrograms);
+            const minimumDataAvailable = !!(hasUser && hasPrograms && hasWorkouts && hasExercises);
+
+            console.log(`📊 Minimum cache check: ${minimumDataAvailable ? 'PASS' : 'FAIL'}`);
+            console.log({
+                hasUser: !!hasUser,
+                hasPrograms: !!hasPrograms,
+                hasWorkouts: !!hasWorkouts,
+                hasExercises: !!hasExercises,
+            });
+
+            return minimumDataAvailable;
         } catch (error) {
-            console.log(error);
+            console.warn('Error checking minimum cached data:', error);
             return false;
         }
     };
 
-    // Manual retry handler (only shown as last resort)
-    const handleManualRetry = useCallback(() => {
+    // Manual retry handler with cache clearing option
+    const handleManualRetry = useCallback(async () => {
         setShowManualRetry(false);
         dispatch(resetInitialization());
+        hasInitializedRef.current = false; // Allow retry
+
+        // On manual retry, consider clearing stale cache if this is the second manual retry
+        if (initialization.retryAttempt >= 2) {
+            console.log('🧹 Clearing potentially stale cache before retry...');
+            try {
+                // Clear cache for items that might be causing issues
+                const problemCacheKeys = ['user_program_progress', 'user_recommendations', 'tracked_lifts_history'];
+
+                await Promise.all(problemCacheKeys.map((key) => cacheService.remove(key)));
+            } catch (error) {
+                console.warn('Failed to clear cache:', error);
+            }
+        }
+
         initializeApp();
-    }, [dispatch, initializeApp]);
+    }, [dispatch, initializeApp, initialization.retryAttempt]);
 
     // Start initialization on mount
     useEffect(() => {
-        initializeApp();
+        // Only initialize once
+        if (!hasInitializedRef.current) {
+            initializeApp();
+        }
 
         // Cleanup timeout on unmount
         return () => {
@@ -171,9 +190,9 @@ const Initialization: React.FC = () => {
                 clearTimeout(retryTimeoutRef.current);
             }
         };
-    }, [initializeApp]);
+    }, []); // Empty dependency array - only run once on mount
 
-    // Only show manual retry after all automatic attempts failed
+    // Enhanced error screen with more options
     if (showManualRetry) {
         return (
             <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
@@ -182,25 +201,71 @@ const Initialization: React.FC = () => {
                         Connection Issue
                     </ThemedText>
 
-                    <ThemedText style={styles.errorMessage}>Please check your internet connection.</ThemedText>
+                    <ThemedText style={styles.errorMessage}>
+                        {initialization.retryAttempt === 0
+                            ? 'Please check your internet connection and try again.'
+                            : "We're having trouble loading your data. This might be due to a poor connection or server issues."}
+                    </ThemedText>
 
                     <View style={styles.buttonContainer}>
-                        <PrimaryButton size='MD' text='Try Again' onPress={handleManualRetry} style={styles.retryButton} />
+                        <PrimaryButton
+                            size='MD'
+                            text={initialization.retryAttempt >= 2 ? 'Clear Cache & Retry' : 'Try Again'}
+                            onPress={handleManualRetry}
+                            style={styles.retryButton}
+                        />
                     </View>
 
-                    {__DEV__ && initialization.criticalError && (
+                    {/* Show progress information */}
+                    {initialization.loadedItems.length > 0 && (
+                        <View style={styles.progressContainer}>
+                            <ThemedText type='caption' style={styles.progressText}>
+                                Loaded {initialization.loadedItems.length} items successfully
+                            </ThemedText>
+                            {initialization.failedItems.length > 0 && (
+                                <ThemedText type='caption' style={styles.errorText}>
+                                    Failed to load: {initialization.failedItems.length} items
+                                </ThemedText>
+                            )}
+                        </View>
+                    )}
+
+                    {/* Enhanced debug info for development */}
+                    {__DEV__ && (
                         <View style={styles.devErrorDetails}>
                             <ThemedText type='caption' style={styles.devErrorTitle}>
                                 Debug Info:
                             </ThemedText>
+
                             <ThemedText type='caption' style={styles.devErrorText}>
-                                {initialization.criticalError}
+                                Phase: {initialization.currentPhase}
                             </ThemedText>
+
+                            <ThemedText type='caption' style={styles.devErrorText}>
+                                Retry Attempt: {initialization.retryAttempt}
+                            </ThemedText>
+
+                            {initialization.criticalError && (
+                                <ThemedText type='caption' style={styles.devErrorText}>
+                                    Error: {initialization.criticalError}
+                                </ThemedText>
+                            )}
+
+                            {initialization.loadedItems.length > 0 && (
+                                <ThemedText type='caption' style={styles.devErrorText}>
+                                    Loaded: {initialization.loadedItems.join(', ')}
+                                </ThemedText>
+                            )}
+
                             {initialization.failedItems.length > 0 && (
                                 <ThemedText type='caption' style={styles.devErrorText}>
                                     Failed: {initialization.failedItems.join(', ')}
                                 </ThemedText>
                             )}
+
+                            <ThemedText type='caption' style={styles.devErrorText}>
+                                Cache Status: {JSON.stringify(Object.keys(initialization.cacheStatus), null, 2)}
+                            </ThemedText>
                         </View>
                     )}
                 </View>
@@ -208,8 +273,7 @@ const Initialization: React.FC = () => {
         );
     }
 
-    // Simple loading state
-    return <DumbbellSplash isDataLoaded={initialization.isInitialized} showLoadingText={true} loadingText='Loading...' />;
+    return <DumbbellSplash isDataLoaded={initialization.isInitialized} showLoadingText={true} loadingText={'Loading...'} />;
 };
 
 const styles = StyleSheet.create({
@@ -231,6 +295,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginBottom: Spaces.LG,
         opacity: 0.8,
+        lineHeight: 22,
     },
     buttonContainer: {
         width: '100%',
@@ -239,6 +304,17 @@ const styles = StyleSheet.create({
     retryButton: {
         width: '70%',
         alignSelf: 'center',
+    },
+    progressContainer: {
+        marginBottom: Spaces.MD,
+        alignItems: 'center',
+    },
+    progressText: {
+        color: 'green',
+        marginBottom: Spaces.XS,
+    },
+    errorText: {
+        color: 'red',
     },
     devErrorDetails: {
         marginTop: Spaces.LG,
@@ -254,6 +330,7 @@ const styles = StyleSheet.create({
     devErrorText: {
         marginBottom: Spaces.XS,
         fontSize: 12,
+        fontFamily: 'monospace',
     },
 });
 
