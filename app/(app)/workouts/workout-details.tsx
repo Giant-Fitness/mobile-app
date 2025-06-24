@@ -11,7 +11,7 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
 import { Icon } from '@/components/base/Icon';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
-import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle } from '@/components/media/FullScreenVideoPlayer';
+import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle, VideoPlaybackStatus } from '@/components/media/FullScreenVideoPlayer';
 import { verticalScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
@@ -23,7 +23,6 @@ import { REQUEST_STATE } from '@/constants/requestStates';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { SlideUpActionButton } from '@/components/buttons/SlideUpActionButton';
-import { AVPlaybackStatus } from 'expo-av';
 import { usePostHog } from 'posthog-react-native';
 import { trigger } from 'react-native-haptic-feedback';
 
@@ -104,7 +103,7 @@ export default function WorkoutDetailScreen() {
     };
 
     // Function to handle playback status updates from the video player
-    const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
+    const handlePlaybackStatusUpdate = (status: VideoPlaybackStatus) => {
         if (status.isLoaded) {
             if (!status.isBuffering) {
                 setIsVideoLoading(false);
@@ -163,6 +162,15 @@ export default function WorkoutDetailScreen() {
                 }
                 // Update the last playback position
                 setLastPlaybackPosition(currentPosition);
+            }
+
+            // Handle video completion
+            if (status.didJustFinish) {
+                posthog.capture('workout_completed', {
+                    workout_id: workoutId,
+                    workout_name: workout.WorkoutName,
+                    screen: 'workout-details',
+                });
             }
 
             // Additional session tracking logic can be implemented here
