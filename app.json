@@ -47,6 +47,8 @@
             "expo-secure-store",
             "expo-localization",
             "expo-audio",
+            "expo-build-properties",
+            "expo-web-browser",
             [
                 "expo-splash-screen",
                 {

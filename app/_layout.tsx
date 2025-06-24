@@ -102,7 +102,7 @@ export default function RootLayout() {
                 apiKey={POSTHOG_CONFIG.apiKey}
                 autocapture={{
                     captureLifecycleEvents: true,
-                    captureScreens: false, // Disable default screen capture since we're using our hook
+                    captureScreens: true,
                     ignoreLabels: [],
                 }}
                 options={{
@@ -121,28 +121,28 @@ export default function RootLayout() {
                 <Provider store={store}>
                     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                         <AppStateHandler />
-                        <ScreenTrackingWrapper>
-                            <Stack
-                                screenOptions={{
+                        {/* <ScreenTrackingWrapper> */}
+                        <Stack
+                            screenOptions={{
+                                headerShown: false,
+                                gestureEnabled: false,
+                                navigationBarHidden: true,
+                                animation: 'default',
+                                presentation: 'card',
+                            }}
+                        >
+                            <Stack.Screen name='(app)' options={{ headerShown: false, gestureEnabled: false, animation: 'fade' }} />
+                            <Stack.Screen name='(auth)' options={{ headerShown: false, gestureEnabled: false }} />
+                            <Stack.Screen
+                                name='index'
+                                options={{
                                     headerShown: false,
+                                    animation: 'none',
                                     gestureEnabled: false,
-                                    navigationBarHidden: true,
-                                    animation: 'default',
-                                    presentation: 'card',
                                 }}
-                            >
-                                <Stack.Screen name='(app)' options={{ headerShown: false, gestureEnabled: false, animation: 'fade' }} />
-                                <Stack.Screen name='(auth)' options={{ headerShown: false, gestureEnabled: false }} />
-                                <Stack.Screen
-                                    name='index'
-                                    options={{
-                                        headerShown: false,
-                                        animation: 'none',
-                                        gestureEnabled: false,
-                                    }}
-                                />
-                            </Stack>
-                        </ScreenTrackingWrapper>
+                            />
+                        </Stack>
+                        {/* </ScreenTrackingWrapper> */}
                     </ThemeProvider>
                 </Provider>
             </PostHogProvider>

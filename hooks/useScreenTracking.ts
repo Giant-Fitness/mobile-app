@@ -1,9 +1,7 @@
 // hooks/useScreenTracking.ts
 
-import { useEffect } from 'react';
-
+import { useEffect, useRef } from 'react';
 import { useGlobalSearchParams, useLocalSearchParams, usePathname } from 'expo-router';
-
 import { usePostHog } from 'posthog-react-native';
 
 type AllowedParams = {
@@ -23,6 +21,9 @@ export function useScreenTracking() {
     const localParams = useLocalSearchParams();
     const globalParams = useGlobalSearchParams();
     const posthog = usePostHog();
+    
+    // Use ref to track the last tracked state to prevent unnecessary re-tracking
+    const lastTracked = useRef<string>('');
 
     useEffect(() => {
         if (!posthog) return;
@@ -34,7 +35,6 @@ export function useScreenTracking() {
         };
 
         const allowedParams = ALLOWED_ROUTE_PARAMS[pathname] || [];
-
         const trackedParams = allowedParams.reduce(
             (acc, paramName) => {
                 const value = params[paramName];
@@ -50,9 +50,10 @@ export function useScreenTracking() {
             $screen_name: pathname,
             ...(Object.keys(trackedParams).length > 0 && { route_params: trackedParams }),
         });
+
         // Set screen name globally for all subsequent events
         posthog.register({
             $screen_name: pathname,
         });
-    }, [pathname, localParams, globalParams, posthog]);
+    }, [pathname]); // Only depend on pathname
 }

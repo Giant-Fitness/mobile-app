@@ -28,7 +28,7 @@ const Initialization: React.FC = () => {
     // Local state
     const [showManualRetry, setShowManualRetry] = useState(false);
     const initServiceRef = useRef<InitializationService | null>(null);
-    const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const retryTimeoutRef = useRef<number | null>(null);
     const initializationStartTimeRef = useRef<number | null>(null);
     const hasInitializedRef = useRef(false);
 
