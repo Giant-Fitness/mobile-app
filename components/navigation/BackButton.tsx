@@ -9,7 +9,7 @@ import { moderateScale } from '@/utils/scaling';
 import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
 import { Opacities } from '@/constants/Opacities';
-import Animated, { useAnimatedProps, SharedValue } from 'react-native-reanimated';
+import { SharedValue } from 'react-native-reanimated';
 import { router } from 'expo-router';
 import { trigger } from 'react-native-haptic-feedback';
 
@@ -32,16 +32,9 @@ export const BackButton: React.FC<BackButtonProps & AccessibilityProps> = ({
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
     const themeColors = Colors[colorScheme]; // Access theme-specific colors
-    const defaultIconColor = staticColor || themeColors.iconSelected; // Use static color if provided
 
-    const AnimatedIcon = Animated.createAnimatedComponent(Icon);
-
-    // Animated props to update the color dynamically if animatedColor is provided
-    const animatedProps = animatedColor
-        ? useAnimatedProps(() => ({
-              color: animatedColor.value,
-          }))
-        : undefined; // No animated props if animatedColor is not provided
+    // Determine the color to use - prioritize animatedColor, then staticColor, then default
+    const iconColor = animatedColor || staticColor || themeColors.iconSelected;
 
     const handleBackPress = () => {
         trigger('effectClick');
@@ -61,7 +54,7 @@ export const BackButton: React.FC<BackButtonProps & AccessibilityProps> = ({
             accessibilityLabel={accessibilityLabel}
             activeOpacity={Opacities.buttonActiveOpacity}
         >
-            <AnimatedIcon name='chevron-back' size={moderateScale(iconSize)} color={defaultIconColor} animatedProps={animatedProps} />
+            <Icon name='chevron-back' size={moderateScale(iconSize)} color={iconColor} />
         </TouchableOpacity>
     );
 };

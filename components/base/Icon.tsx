@@ -7,7 +7,7 @@ import { Colors } from '@/constants/Colors';
 import { StyleProp, TextStyle } from 'react-native';
 import { moderateScale } from '@/utils/scaling';
 import { Sizes } from '@/constants/Sizes';
-import Animated, { useAnimatedStyle, useDerivedValue } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useDerivedValue, SharedValue } from 'react-native-reanimated';
 
 const AnimatedIonicons = Animated.createAnimatedComponent(Ionicons);
 const AnimatedMaterialCommunityIcons = Animated.createAnimatedComponent(MaterialCommunityIcons);
@@ -15,12 +15,13 @@ const AnimatedMaterialIcons = Animated.createAnimatedComponent(MaterialIcons);
 const AnimatedEntypo = Animated.createAnimatedComponent(Entypo);
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 const AnimatedAnt = Animated.createAnimatedComponent(AntDesign);
-const AnimatedFontAwesome = Animated.createAnimatedComponent(FontAwesome6);
+// Note: FontAwesome6 doesn't work well with Animated.createAnimatedComponent
+// We'll handle it separately
 
 type IconProps = {
     name: string;
     size?: number;
-    color?: string | Animated.SharedValue<string>; // Accept a normal string or an animated color
+    color?: string | SharedValue<string>; // Accept a normal string or an animated color
     style?: StyleProp<TextStyle>;
 };
 
@@ -47,6 +48,9 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
         style: [animatedStyle, style],
         ref,
     };
+
+    // For FontAwesome6, we need to handle color differently since it doesn't work well with animated components
+    const finalColor = typeof color === 'string' ? color : color?.value ?? defaultColor;
 
     // Render the appropriate icon
     switch (name) {
@@ -77,9 +81,9 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
         case 'home-inactive':
             return <AnimatedMaterialCommunityIcons name='home-variant' {...commonProps} />;
         case 'nutrition-active':
-            return <AnimatedFontAwesome name='plate-wheat' {...commonProps} />;
+            return <FontAwesome6 name='plate-wheat' size={moderateScale(size)} color={finalColor} style={style} ref={ref} />;
         case 'nutrition-inactive':
-            return <AnimatedFontAwesome name='plate-wheat' {...commonProps} />;
+            return <FontAwesome6 name='plate-wheat' size={moderateScale(size)} color={finalColor} style={style} ref={ref} />;
         case 'plan-active':
             return <AnimatedMaterialCommunityIcons name='clipboard-check' {...commonProps} />;
         case 'plan-inactive':
@@ -161,13 +165,13 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
         case 'preview':
             return <AnimatedMaterialCommunityIcons name='view-dashboard-outline' {...commonProps} />;
         case 'magic-wand':
-            return <AnimatedFontAwesome name='wand-magic-sparkles' {...commonProps} />;
+            return <FontAwesome6 name='wand-magic-sparkles' size={moderateScale(size)} color={finalColor} style={style} ref={ref} />;
         case 'trash':
             return <AnimatedFeather name='trash-2' {...commonProps} />;
         case 'exit':
             return <AnimatedIonicons name='exit-outline' {...commonProps} />;
         case 'trending-up':
-            return <AnimatedFontAwesome name='arrow-trend-up' {...commonProps} />;
+            return <FontAwesome6 name='arrow-trend-up' size={moderateScale(size)} color={finalColor} style={style} ref={ref} />;
         case 'campaign':
             return <AnimatedMaterialIcons name='campaign' {...commonProps} />;
         case 'email':
