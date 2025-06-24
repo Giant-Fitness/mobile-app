@@ -1,13 +1,14 @@
 // components/buttons/IconButton.tsx
 
-import React from 'react';
-import { TouchableOpacity, StyleSheet, StyleProp, ViewStyle, AccessibilityProps } from 'react-native';
-import { SharedValue } from 'react-native-reanimated';
 import { Icon } from '@/components/base/Icon';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { moderateScale } from '@/utils/scaling';
+import React from 'react';
+import { AccessibilityProps, StyleProp, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
+
 import { HapticFeedbackTypes, trigger } from 'react-native-haptic-feedback';
+import { SharedValue } from 'react-native-reanimated';
 
 type IconButtonProps = {
     onPress: () => void;

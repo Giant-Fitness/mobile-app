@@ -1,10 +1,10 @@
 // components/programs/ProgramMonthView.tsx
 
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { ProgramDay, UserProgramProgress } from '@/types';
 import { ProgramWeekRow } from '@/components/programs/ProgramWeekRow';
 import { Spaces } from '@/constants/Spaces';
+import { ProgramDay, UserProgramProgress } from '@/types';
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
 
 interface ProgramMonthViewProps {
     weeks: ProgramDay[][];

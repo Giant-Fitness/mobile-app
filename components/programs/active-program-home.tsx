@@ -1,24 +1,26 @@
 // app/programs/active-program-home.tsx
 
-import React from 'react';
-import { ScrollView, StyleSheet, View, Image, TouchableOpacity } from 'react-native';
+import { DumbbellSplash } from '@/components/base/DumbbellSplash';
+import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ActiveProgramDayCard } from '@/components/programs/ActiveProgramDayCard';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
 import { ProgramDayDetailCard } from '@/components/programs/ProgramDayDetailCard';
 import { TrainingQuote } from '@/components/quotes/TrainingQuote';
-import { Spaces } from '@/constants/Spaces';
-import { DumbbellSplash } from '@/components/base/DumbbellSplash';
+import { Colors } from '@/constants/Colors';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { useSplashScreen } from '@/hooks/useSplashScreen';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { useProgramData } from '@/hooks/useProgramData';
+import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
-import { Icon } from '@/components/base/Icon';
-import { WorkoutCompletedSection } from './WorkoutCompletedSection';
-import { router } from 'expo-router';
 import { debounce } from '@/utils/debounce';
+import React from 'react';
+import { Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { router } from 'expo-router';
+
+import { WorkoutCompletedSection } from './WorkoutCompletedSection';
 
 export default function ActiveProgramHome() {
     const colorScheme = useColorScheme() as 'light' | 'dark';

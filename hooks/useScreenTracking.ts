@@ -1,7 +1,9 @@
 // hooks/useScreenTracking.ts
 
 import { useEffect } from 'react';
-import { useLocalSearchParams, usePathname, useGlobalSearchParams } from 'expo-router';
+
+import { useGlobalSearchParams, useLocalSearchParams, usePathname } from 'expo-router';
+
 import { usePostHog } from 'posthog-react-native';
 
 type AllowedParams = {
@@ -33,13 +35,16 @@ export function useScreenTracking() {
 
         const allowedParams = ALLOWED_ROUTE_PARAMS[pathname] || [];
 
-        const trackedParams = allowedParams.reduce((acc, paramName) => {
-            const value = params[paramName];
-            if (value !== undefined && value !== '') {
-                acc[paramName] = value;
-            }
-            return acc;
-        }, {} as Record<string, unknown>);
+        const trackedParams = allowedParams.reduce(
+            (acc, paramName) => {
+                const value = params[paramName];
+                if (value !== undefined && value !== '') {
+                    acc[paramName] = value;
+                }
+                return acc;
+            },
+            {} as Record<string, unknown>,
+        );
 
         posthog.capture('$screen', {
             $screen_name: pathname,

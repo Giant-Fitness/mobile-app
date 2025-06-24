@@ -1,9 +1,10 @@
 // store/quotes/quotesSlice.ts
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
+import { getRestDayQuoteAsync, getWorkoutQuoteAsync } from '@/store/quotes/thunks';
 import { Quote } from '@/types';
+
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface QuoteState {
     workoutQuote: Quote | null;

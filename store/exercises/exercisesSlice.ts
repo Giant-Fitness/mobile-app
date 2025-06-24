@@ -1,10 +1,11 @@
 // store/exercises/exercisesSlice.ts
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { REQUEST_STATE } from '@/constants/requestStates';
 import { initialState } from '@/store/exercises/exercisesState';
 import { fetchAllExercisesAsync, fetchExerciseByIdAsync } from '@/store/exercises/thunks';
-import { REQUEST_STATE } from '@/constants/requestStates';
 import { Exercise } from '@/types';
+
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 const exercisesSlice = createSlice({
     name: 'exercises',

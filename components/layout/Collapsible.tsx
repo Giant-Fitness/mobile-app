@@ -1,14 +1,14 @@
 // components/layout/Collapsible.tsx
 
-import React, { PropsWithChildren, useState } from 'react';
 import { Icon } from '@/components/base/Icon';
-import { StyleSheet, TouchableOpacity, TextStyle, ViewStyle, StyleProp } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import React, { PropsWithChildren, useState } from 'react';
+import { StyleProp, StyleSheet, TextStyle, TouchableOpacity, ViewStyle } from 'react-native';
 
 interface CollapsibleProps extends PropsWithChildren {
     title: string;

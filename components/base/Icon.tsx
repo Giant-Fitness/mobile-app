@@ -1,13 +1,15 @@
 // components/base/Icon.tsx
 
-import React from 'react';
-import { Ionicons, MaterialCommunityIcons, MaterialIcons, Entypo, Feather, AntDesign, FontAwesome6 } from '@expo/vector-icons';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { StyleProp, TextStyle } from 'react-native';
-import { moderateScale } from '@/utils/scaling';
 import { Sizes } from '@/constants/Sizes';
-import Animated, { useAnimatedStyle, useDerivedValue, SharedValue } from 'react-native-reanimated';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { moderateScale } from '@/utils/scaling';
+import React from 'react';
+import { StyleProp, TextStyle } from 'react-native';
+
+import { AntDesign, Entypo, Feather, FontAwesome6, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+
+import Animated, { SharedValue, useAnimatedStyle, useDerivedValue } from 'react-native-reanimated';
 
 const AnimatedIonicons = Animated.createAnimatedComponent(Ionicons);
 const AnimatedMaterialCommunityIcons = Animated.createAnimatedComponent(MaterialCommunityIcons);
@@ -32,7 +34,7 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
 
     // Derived value for color if it's animated
     const derivedColor = useDerivedValue(() => {
-        const finalColor = typeof color === 'string' ? color : color?.value ?? defaultColor;
+        const finalColor = typeof color === 'string' ? color : (color?.value ?? defaultColor);
         return finalColor;
     });
 
@@ -50,7 +52,7 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
     };
 
     // For FontAwesome6, we need to handle color differently since it doesn't work well with animated components
-    const finalColor = typeof color === 'string' ? color : color?.value ?? defaultColor;
+    const finalColor = typeof color === 'string' ? color : (color?.value ?? defaultColor);
 
     // Render the appropriate icon
     switch (name) {

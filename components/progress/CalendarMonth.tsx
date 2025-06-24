@@ -1,14 +1,14 @@
 // components/progress/CalendarMonth.tsx
 
-import React from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
+import React from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
-type ThemeColorKey = keyof typeof Colors['light'];
+type ThemeColorKey = keyof (typeof Colors)['light'];
 
 interface CalendarMonthProps {
     date: Date;

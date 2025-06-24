@@ -1,12 +1,14 @@
 // components/progress/WeightChart.tsx
 
-import React, { useMemo } from 'react';
-import { useSelector } from 'react-redux';
-import { BaseChart } from '../charts/BaseChart';
-import { AggregatedData, TimeRange, TimeRangeOption } from '@/utils/charts';
-import { UserWeightMeasurement } from '@/types';
 import { RootState } from '@/store/store';
+import { UserWeightMeasurement } from '@/types';
+import { AggregatedData, TimeRange, TimeRangeOption } from '@/utils/charts';
 import { kgToPounds } from '@/utils/unitConversion';
+import React, { useMemo } from 'react';
+
+import { useSelector } from 'react-redux';
+
+import { BaseChart } from '../charts/BaseChart';
 
 type WeightChartProps = {
     data: AggregatedData[];

@@ -1,26 +1,28 @@
 // app/(app)/progress/weight-tracking.tsx
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity, SectionList } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { ThemedView } from '@/components/base/ThemedView';
+import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import { useSharedValue } from 'react-native-reanimated';
+import { ThemedView } from '@/components/base/ThemedView';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { WeightChart } from '@/components/progress/WeightChart';
-import { AppDispatch, RootState } from '@/store/store';
-import { TimeRange, aggregateData, calculateMovingAverage, getTimeRangeLabel, getAvailableTimeRanges, getInitialTimeRange } from '@/utils/charts';
-import { UserWeightMeasurement } from '@/types';
-import { darkenColor, lightenColor } from '@/utils/colorUtils';
-import { Icon } from '@/components/base/Icon';
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
-import { updateWeightMeasurementAsync, deleteWeightMeasurementAsync, logWeightMeasurementAsync } from '@/store/user/thunks';
-import { router } from 'expo-router';
+import { Colors } from '@/constants/Colors';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { AppDispatch, RootState } from '@/store/store';
+import { deleteWeightMeasurementAsync, logWeightMeasurementAsync, updateWeightMeasurementAsync } from '@/store/user/thunks';
+import { UserWeightMeasurement } from '@/types';
+import { aggregateData, calculateMovingAverage, getAvailableTimeRanges, getInitialTimeRange, getTimeRangeLabel, TimeRange } from '@/utils/charts';
+import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { kgToPounds } from '@/utils/unitConversion';
+import React, { useEffect, useMemo, useState } from 'react';
+import { SectionList, StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { router } from 'expo-router';
+
+import { useSharedValue } from 'react-native-reanimated';
+import { useDispatch, useSelector } from 'react-redux';
 
 const getWeightChange = (currentWeight: number, previousWeight: number | null) => {
     if (previousWeight === null) return null;

@@ -1,7 +1,7 @@
 // store/quotes/service.ts
 
+import { mockRestDayQuote, mockWorkoutQuote } from '@/store/quotes/mockData';
 import { Quote } from '@/types';
-import { mockWorkoutQuote, mockRestDayQuote } from '@/store/quotes/mockData';
 
 const getWorkoutQuote = async (): Promise<Quote> => {
     console.log('service: getWorkoutQuote');

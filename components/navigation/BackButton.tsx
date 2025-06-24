@@ -1,17 +1,19 @@
 // components/navigation/BackButton.tsx
 
-import React from 'react';
-import { TouchableOpacity, StyleSheet, ViewStyle, AccessibilityProps } from 'react-native';
 import { Icon } from '@/components/base/Icon';
 import { Colors } from '@/constants/Colors';
+import { Opacities } from '@/constants/Opacities';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { moderateScale } from '@/utils/scaling';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import { Opacities } from '@/constants/Opacities';
-import { SharedValue } from 'react-native-reanimated';
+import React from 'react';
+import { AccessibilityProps, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
+
 import { router } from 'expo-router';
+
 import { trigger } from 'react-native-haptic-feedback';
+import { SharedValue } from 'react-native-reanimated';
 
 type BackButtonProps = {
     style?: ViewStyle;

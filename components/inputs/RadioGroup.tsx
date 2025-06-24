@@ -1,14 +1,14 @@
 // components/inputs/RadioGroup.tsx
 
-import React from 'react';
-import { StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
-import { ThemedView } from '@/components/base/ThemedView';
-import { ThemedText } from '@/components/base/ThemedText';
 import { Icon } from '@/components/base/Icon';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { moderateScale } from '@/utils/scaling';
+import React from 'react';
+import { StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 
 type Option = {
     id: string;

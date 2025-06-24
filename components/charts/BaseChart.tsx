@@ -1,16 +1,17 @@
 // components/charts/BaseChart.tsx
 
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Dimensions, TouchableWithoutFeedback, TouchableOpacity } from 'react-native';
-import { Path, Svg, Circle, Line, Text as SvgText, G, Defs, LinearGradient, Stop } from 'react-native-svg';
-import { format } from 'date-fns';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Spaces } from '@/constants/Spaces';
-import { TimeRange, TimeRangeOption } from '@/utils/charts';
 import { ThemedText } from '@/components/base/ThemedText';
-import { lightenColor } from '@/utils/colorUtils';
 import { ThemedView } from '@/components/base/ThemedView';
+import { Colors } from '@/constants/Colors';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { TimeRange, TimeRangeOption } from '@/utils/charts';
+import { lightenColor } from '@/utils/colorUtils';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+
+import { format } from 'date-fns';
+import { Circle, Defs, G, Line, LinearGradient, Path, Stop, Svg, Text as SvgText } from 'react-native-svg';
 
 const CHART_PADDING = {
     top: 48,
@@ -35,7 +36,7 @@ export type Point = {
     originalData: any;
 };
 
-type ThemeColorKey = keyof typeof Colors['light'];
+type ThemeColorKey = keyof (typeof Colors)['light'];
 
 type BaseChartProps = {
     data: any[];

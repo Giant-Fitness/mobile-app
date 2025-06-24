@@ -1,12 +1,12 @@
 // components/feedback/programs/DifficultyStep.tsx
 
-import React from 'react';
-import { StyleSheet } from 'react-native';
-import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
+import { FeedbackStep } from '@/components/feedback/FeedbackForm';
 import { RadioGroup } from '@/components/inputs/RadioGroup';
 import { Spaces } from '@/constants/Spaces';
-import { FeedbackStep } from '@/components/feedback/FeedbackForm';
+import React from 'react';
+import { StyleSheet } from 'react-native';
 
 export const DifficultyStep: FeedbackStep<any> = ({ data, onChange }) => {
     const options = [

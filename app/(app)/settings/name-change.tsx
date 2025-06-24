@@ -1,21 +1,23 @@
 // app/(app)/settings/name-change.tsx
 
-import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { router } from 'expo-router';
-import { AppDispatch, RootState } from '@/store/store';
-import { updateUserAsync } from '@/store/user/thunks';
-import { ThemedView } from '@/components/base/ThemedView';
-import { Spaces } from '@/constants/Spaces';
 import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
 import { TextInput } from '@/components/inputs/TextInput';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
-import { useSharedValue } from 'react-native-reanimated';
 import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { AppDispatch, RootState } from '@/store/store';
+import { updateUserAsync } from '@/store/user/thunks';
+import React, { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+
+import { router } from 'expo-router';
+
 import { trigger } from 'react-native-haptic-feedback';
+import { useSharedValue } from 'react-native-reanimated';
+import { useDispatch, useSelector } from 'react-redux';
 
 const NameChangeScreen = () => {
     const dispatch = useDispatch<AppDispatch>();

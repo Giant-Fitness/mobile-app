@@ -1,23 +1,23 @@
 // app/(app)/progress/all-sleep-data.tsx
 
-import React, { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import { useSelector, useDispatch } from 'react-redux';
-import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import { RootState } from '@/store/store';
-import { UserSleepMeasurement, SleepSubmissionData } from '@/types';
-import { darkenColor, lightenColor } from '@/utils/colorUtils';
-import { useSharedValue } from 'react-native-reanimated';
+import { ThemedView } from '@/components/base/ThemedView';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { MeasurementCalendar } from '@/components/progress/MeasurementCalendar';
-import { AppDispatch } from '@/store/store';
 import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
-import { logSleepMeasurementAsync, updateSleepMeasurementAsync, deleteSleepMeasurementAsync } from '@/store/user/thunks';
+import { Colors } from '@/constants/Colors';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { AppDispatch, RootState } from '@/store/store';
+import { deleteSleepMeasurementAsync, logSleepMeasurementAsync, updateSleepMeasurementAsync } from '@/store/user/thunks';
+import { SleepSubmissionData, UserSleepMeasurement } from '@/types';
+import { darkenColor, lightenColor } from '@/utils/colorUtils';
+import React, { useState } from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { useSharedValue } from 'react-native-reanimated';
+import { useDispatch, useSelector } from 'react-redux';
 
 type CalendarData = {
     timestamp: string;

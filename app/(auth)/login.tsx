@@ -1,20 +1,20 @@
 // app/(auth)/login.tsx
 
-import React, { useEffect, useState } from 'react';
-import { Dimensions, Pressable, StyleSheet, View, ActivityIndicator } from 'react-native';
-import { Authenticator } from '@aws-amplify/ui-react-native';
-import { ThemeProvider } from '@aws-amplify/ui-react-native';
-import { Hub } from 'aws-amplify/utils';
-import { authService } from '@/utils/auth';
-import { useAuthTheme } from '@/components/auth/AuthTheme';
 import { CustomHeader } from '@/components/auth/AuthComponents';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Spaces } from '@/constants/Spaces';
+import { useAuthTheme } from '@/components/auth/AuthTheme';
 import { ThemedText } from '@/components/base/ThemedText';
+import { Colors } from '@/constants/Colors';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { authService } from '@/utils/auth';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Dimensions, Platform, Pressable, StyleSheet, View } from 'react-native';
+
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { Platform } from 'react-native';
+
+import { Authenticator, ThemeProvider } from '@aws-amplify/ui-react-native';
+import { Hub } from 'aws-amplify/utils';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('screen');
 const { height: SCREEN_HEIGHT } = Dimensions.get('screen');

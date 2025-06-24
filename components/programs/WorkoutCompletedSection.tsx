@@ -1,13 +1,14 @@
 // components/programs/WorkoutCompletedSection.tsx
 
-import React, { useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { LargeActionTile } from '@/components/home/LargeActionTile';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import React, { useMemo } from 'react';
+import { StyleSheet, View } from 'react-native';
+
 import { trigger } from 'react-native-haptic-feedback';
 
 interface WorkoutCompletedSectionProps {

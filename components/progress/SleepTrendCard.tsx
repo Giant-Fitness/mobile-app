@@ -1,9 +1,11 @@
 // components/progress/SleepTrendCard.tsx
 
-import React from 'react';
-import { format } from 'date-fns';
-import { TrendCard } from './TrendCard';
 import { UserSleepMeasurement } from '@/types';
+import React from 'react';
+
+import { format } from 'date-fns';
+
+import { TrendCard } from './TrendCard';
 
 type SleepTrendCardProps = {
     values: UserSleepMeasurement[];

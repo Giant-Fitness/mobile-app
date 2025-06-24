@@ -1,10 +1,12 @@
 // store/quotes/thunks.ts
 
-import { createAsyncThunk } from '@reduxjs/toolkit';
-import QuoteService from './service';
-import { Quote } from '@/types';
 import { RootState } from '@/store/store';
+import { Quote } from '@/types';
 import { cacheService, CacheTTL } from '@/utils/cache';
+
+import { createAsyncThunk } from '@reduxjs/toolkit';
+
+import QuoteService from './service';
 
 export const getWorkoutQuoteAsync = createAsyncThunk<Quote, { forceRefresh?: boolean; useCache?: boolean } | void>(
     'quotes/getWorkoutQuote',

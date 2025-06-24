@@ -1,14 +1,16 @@
 // app/index.tsx
 
-import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import WelcomeScreens from '@/components/onboarding/WelcomeScreens';
-import { authService } from '@/utils/auth';
-import { useDispatch } from 'react-redux';
+import { configureAmplify } from '@/config/amplify';
 import { AppDispatch } from '@/store/store';
 import { getUserAsync } from '@/store/user/thunks';
-import { configureAmplify } from '@/config/amplify';
-import { DumbbellSplash } from '@/components/base/DumbbellSplash';
+import { authService } from '@/utils/auth';
+import React, { useEffect, useState } from 'react';
+
+import { router } from 'expo-router';
+
+import { useDispatch } from 'react-redux';
 
 export default function Index() {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);

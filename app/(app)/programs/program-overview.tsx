@@ -1,30 +1,32 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, RefreshControl } from 'react-native';
-import { ThemedView } from '@/components/base/ThemedView';
+import { DumbbellSplash } from '@/components/base/DumbbellSplash';
+import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { ThemedView } from '@/components/base/ThemedView';
+import { PrimaryButton } from '@/components/buttons/PrimaryButton';
+import { SlideUpActionButton } from '@/components/buttons/SlideUpActionButton';
+import { TextButton } from '@/components/buttons/TextButton';
+import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
+import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
+import { OverwriteProgramModal } from '@/components/programs/OverwriteProgramModal';
 import { Colors } from '@/constants/Colors';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { Spaces } from '@/constants/Spaces';
-import { Icon } from '@/components/base/Icon';
-import { PrimaryButton } from '@/components/buttons/PrimaryButton';
-import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
-import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { Sizes } from '@/constants/Sizes';
-import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
-import { DumbbellSplash } from '@/components/base/DumbbellSplash';
-import { TextButton } from '@/components/buttons/TextButton';
-import { useSplashScreen } from '@/hooks/useSplashScreen';
-import { SlideUpActionButton } from '@/components/buttons/SlideUpActionButton';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { useProgramData } from '@/hooks/useProgramData';
-import { OverwriteProgramModal } from '@/components/programs/OverwriteProgramModal';
-import { useDispatch } from 'react-redux';
+import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { getProgramAsync } from '@/store/programs/thunks';
 import { AppDispatch } from '@/store/store';
-import { usePostHog } from 'posthog-react-native';
 import { debounce } from '@/utils/debounce';
+import React, { useState } from 'react';
+import { RefreshControl, StyleSheet, View } from 'react-native';
+
+import { useLocalSearchParams, useRouter } from 'expo-router';
+
+import { usePostHog } from 'posthog-react-native';
 import { trigger } from 'react-native-haptic-feedback';
+import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
+import { useDispatch } from 'react-redux';
 
 const ProgramOverviewScreen = () => {
     const router = useRouter();

@@ -1,11 +1,11 @@
 // components/programs/ProgramProgressPillBar.tsx
 
-import React from 'react';
-import { StyleSheet } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import React from 'react';
+import { StyleSheet } from 'react-native';
 
 type ProgramProgressPillBarProps = {
     parts: number; // Total number of parts/weeks

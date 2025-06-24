@@ -1,11 +1,11 @@
 // components/programs/ProgramWeekRow.tsx
 
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { ProgramDay, UserProgramProgress } from '@/types';
 import { ProgramDayOverviewCard } from '@/components/programs/ProgramDayOverviewCard';
-import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { ProgramDay, UserProgramProgress } from '@/types';
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
 
 interface ProgramWeekRowProps {
     week: (ProgramDay | null)[];

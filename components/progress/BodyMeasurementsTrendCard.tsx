@@ -1,12 +1,14 @@
 // components/progress/BodyMeasurementsTrendCard.tsx
 
-import React from 'react';
-import { format } from 'date-fns';
-import { TrendCard } from './TrendCard';
-import { UserBodyMeasurement } from '@/types';
 import { RootState } from '@/store/store';
-import { useSelector } from 'react-redux';
+import { UserBodyMeasurement } from '@/types';
 import { formatMeasurementForDisplay } from '@/utils/unitConversion';
+import React from 'react';
+
+import { format } from 'date-fns';
+import { useSelector } from 'react-redux';
+
+import { TrendCard } from './TrendCard';
 
 type BodyMeasurementsTrendCardProps = {
     values: UserBodyMeasurement[];

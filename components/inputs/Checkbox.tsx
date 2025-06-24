@@ -1,13 +1,13 @@
 // components/inputs/Checkbox.tsx
 
-import React from 'react';
-import { TouchableOpacity, View, StyleSheet, ViewStyle } from 'react-native';
-import { ThemedText } from '@/components/base/ThemedText';
 import { Icon } from '@/components/base/Icon';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { ThemedText } from '@/components/base/ThemedText';
 import { Colors } from '@/constants/Colors';
-import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import React from 'react';
+import { StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 
 interface CheckboxProps {
     label: string;

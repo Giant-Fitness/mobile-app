@@ -1,16 +1,18 @@
 // components/media/ThumbnailVideoPlayer.tsx
 
-import React, { useRef, useState, useEffect } from 'react';
-import { StyleSheet, TouchableOpacity, View, Animated, Modal } from 'react-native';
-import { Image } from 'expo-image';
-import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle } from '@/components/media/FullScreenVideoPlayer';
-import { Spaces } from '@/constants/Spaces';
 import { Icon } from '@/components/base/Icon';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle } from '@/components/media/FullScreenVideoPlayer';
 import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
-import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Modal, StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+
+import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
 
 // Cast ShimmerPlaceHolder to the correct type for TypeScript compatibility
 const ShimmerPlaceholder = ShimmerPlaceHolder as unknown as React.ComponentType<any>;

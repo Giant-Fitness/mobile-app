@@ -1,12 +1,13 @@
 // components/buttons/SelectionButton.tsx
 
-import React from 'react';
-import { TouchableOpacity, View, StyleSheet, ViewStyle, TextStyle } from 'react-native';
-import { ThemedText } from '@/components/base/ThemedText';
 import { Icon } from '@/components/base/Icon';
+import { ThemedText } from '@/components/base/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import React from 'react';
+import { StyleSheet, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native';
+
 import { HapticFeedbackTypes, trigger } from 'react-native-haptic-feedback';
 
 interface SelectionOption {

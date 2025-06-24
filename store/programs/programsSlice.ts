@@ -1,10 +1,11 @@
 // store/programs/programsSlice.ts
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { initialState } from '@/store/programs/programsState';
-import { getAllProgramsAsync, getProgramAsync, getProgramDayAsync, getAllProgramDaysAsync, getMultipleProgramDaysAsync } from '@/store/programs/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
+import { initialState } from '@/store/programs/programsState';
+import { getAllProgramDaysAsync, getAllProgramsAsync, getMultipleProgramDaysAsync, getProgramAsync, getProgramDayAsync } from '@/store/programs/thunks';
 import { Program, ProgramDay } from '@/types';
+
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 const programSlice = createSlice({
     name: 'programs',

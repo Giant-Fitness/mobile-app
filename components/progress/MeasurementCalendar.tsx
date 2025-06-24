@@ -1,17 +1,17 @@
 // components/progress/MeasurementCalendar.tsx
 
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import { ThemedView } from '@/components/base/ThemedView';
+import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { ThemedView } from '@/components/base/ThemedView';
+import { CalendarMonth } from '@/components/progress/CalendarMonth';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
-import { Icon } from '@/components/base/Icon';
-import { CalendarMonth } from '@/components/progress/CalendarMonth';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { lightenColor } from '@/utils/colorUtils';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
-type ThemeColorKey = keyof typeof Colors['light'];
+type ThemeColorKey = keyof (typeof Colors)['light'];
 
 interface CalendarData {
     timestamp: string;

@@ -1,14 +1,14 @@
 // components/programs/RecommendedProgramCard.tsx
 
-import React, { useRef } from 'react';
-import { StyleSheet, View, Animated, TouchableOpacity } from 'react-native';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
 import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
-import { moderateScale } from '@/utils/scaling';
-import { Spaces } from '@/constants/Spaces';
+import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { Program } from '@/types';
+import { moderateScale } from '@/utils/scaling';
+import React, { useRef } from 'react';
+import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 type RecommendedProgramCardProps = {
     program: Program;

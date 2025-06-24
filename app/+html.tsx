@@ -1,8 +1,8 @@
 // app/+html.tsx
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
+
 import { ScrollViewStyleReset } from 'expo-router/html';
-import { PropsWithChildren } from 'react';
 
 /**
  * This file is web-only and used to configure the root HTML for every web page during static rendering.

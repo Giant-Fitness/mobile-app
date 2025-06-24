@@ -1,21 +1,23 @@
 // app/programs/inactive-program-home.tsx
 
-import React from 'react';
-import { ScrollView, StyleSheet, View, TouchableOpacity, Dimensions, Image } from 'react-native';
-import { ThemedText } from '@/components/base/ThemedText';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
-import { REQUEST_STATE } from '@/constants/requestStates';
-import { RecommendedProgramCard } from '@/components/programs/RecommendedProgramCard';
-import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
-import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { Icon } from '@/components/base/Icon';
+import { ThemedText } from '@/components/base/ThemedText';
+import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
+import { RecommendedProgramCard } from '@/components/programs/RecommendedProgramCard';
+import { Colors } from '@/constants/Colors';
+import { REQUEST_STATE } from '@/constants/requestStates';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { useInactiveProgramData } from '@/hooks/useInactiveProgramData';
-import { router } from 'expo-router';
+import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { debounce } from '@/utils/debounce';
+import React from 'react';
+import { Dimensions, Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { router } from 'expo-router';
+
 import { trigger } from 'react-native-haptic-feedback';
 
 interface MenuItemProps {

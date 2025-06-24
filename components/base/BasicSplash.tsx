@@ -1,11 +1,11 @@
 // components/base/BasicSplash.tsx
 
-import React, { useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet, Animated, Image } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import React, { useEffect } from 'react';
+import { ActivityIndicator, Animated, Image, StyleSheet, View } from 'react-native';
 
 type BasicSplashProps = {
     isDataLoaded?: boolean;

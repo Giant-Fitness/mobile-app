@@ -1,26 +1,27 @@
 // components/exercise/ExerciseAlternativesBottomSheet.tsx
 
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity, ActivityIndicator, FlatList, Platform } from 'react-native';
-import LottieView from 'lottie-react-native';
-import { BottomSheet } from '@/components/overlays/BottomSheet';
+import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { TextButton } from '@/components/buttons/TextButton';
-import { Icon } from '@/components/base/Icon';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import { Exercise, ExerciseAlternative } from '@/types';
-import ExercisesService from '@/store/exercises/service';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch } from '@/store/store';
-import { createExerciseSubstitutionAsync, deleteExerciseSubstitutionAsync, getUserExerciseSubstitutionsAsync } from '@/store/user/thunks';
-import { REQUEST_STATE } from '@/constants/requestStates';
-import { format } from 'date-fns';
+import { BottomSheet } from '@/components/overlays/BottomSheet';
 import { CenteredModal } from '@/components/overlays/CenteredModal';
+import { Colors } from '@/constants/Colors';
+import { REQUEST_STATE } from '@/constants/requestStates';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import ExercisesService from '@/store/exercises/service';
+import { AppDispatch, RootState } from '@/store/store';
+import { createExerciseSubstitutionAsync, deleteExerciseSubstitutionAsync, getUserExerciseSubstitutionsAsync } from '@/store/user/thunks';
+import { Exercise, ExerciseAlternative } from '@/types';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { format } from 'date-fns';
+import LottieView from 'lottie-react-native';
+import { useDispatch, useSelector } from 'react-redux';
 
 interface ExerciseAlternativesBottomSheetProps {
     visible: boolean;

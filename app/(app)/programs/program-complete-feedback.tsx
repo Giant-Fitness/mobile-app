@@ -1,19 +1,20 @@
 // app/(app)/programs/program-complete-feedback.tsx
 
-import React from 'react';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useSelector, useDispatch } from 'react-redux';
-
 import FeedbackForm, { FeedbackFormResult } from '@/components/feedback/FeedbackForm';
-import { OverallRatingStep } from '@/components/feedback/programs/OverallRatingStep';
-import { GoalsStep } from '@/components/feedback/programs/GoalsStep';
-import { RecommendStep } from '@/components/feedback/programs/RecommendStep';
-import { FavoriteAspectsStep } from '@/components/feedback/programs/FavoriteAspectsStep';
 import { DifficultyStep } from '@/components/feedback/programs/DifficultyStep';
-import { ProgramCompleteData } from '@/types/feedbackTypes';
-import { AppDispatch, RootState } from '@/store/store';
+import { FavoriteAspectsStep } from '@/components/feedback/programs/FavoriteAspectsStep';
+import { GoalsStep } from '@/components/feedback/programs/GoalsStep';
+import { OverallRatingStep } from '@/components/feedback/programs/OverallRatingStep';
+import { RecommendStep } from '@/components/feedback/programs/RecommendStep';
 import { sendProgramCompleteFeedbackAsync } from '@/store/feedback/thunks';
+import { AppDispatch, RootState } from '@/store/store';
+import { ProgramCompleteData } from '@/types/feedbackTypes';
+import React from 'react';
+
+import { useLocalSearchParams, useRouter } from 'expo-router';
+
 import { trigger } from 'react-native-haptic-feedback';
+import { useDispatch, useSelector } from 'react-redux';
 
 export default function ProgramCompleteFeedbackScreen() {
     const router = useRouter();

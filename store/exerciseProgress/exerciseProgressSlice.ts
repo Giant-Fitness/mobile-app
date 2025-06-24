@@ -1,16 +1,18 @@
 // store/exerciseProgress/exerciseProgressSlice.ts
 
-import { createSlice } from '@reduxjs/toolkit';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { initialState } from './exerciseProgressState';
 import {
-    initializeTrackedLiftsHistoryAsync,
-    saveExerciseProgressAsync,
     deleteExerciseLogAsync,
     fetchExercisesRecentHistoryAsync,
+    initializeTrackedLiftsHistoryAsync,
+    saveExerciseProgressAsync,
 } from '@/store/exerciseProgress/thunks';
 import { generateExerciseLogId, isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
 import { ExerciseLog } from '@/types/exerciseProgressTypes';
+
+import { createSlice } from '@reduxjs/toolkit';
+
+import { initialState } from './exerciseProgressState';
 
 const exerciseProgressSlice = createSlice({
     name: 'exerciseProgress',

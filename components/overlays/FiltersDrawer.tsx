@@ -1,17 +1,17 @@
 // components/overlays/FiltersDrawer.tsx
 
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { BottomSheet } from '@/components/overlays/BottomSheet';
 import { FilterChip } from '@/components/base/FilterChip';
+import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
 import { TextButton } from '@/components/buttons/TextButton';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { BottomSheet } from '@/components/overlays/BottomSheet';
 import { Colors } from '@/constants/Colors';
-import { Icon } from '@/components/base/Icon';
-import { scale, moderateScale } from '@/utils/scaling';
-import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { moderateScale, scale } from '@/utils/scaling';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 interface FiltersDrawerProps {
     visible: boolean;

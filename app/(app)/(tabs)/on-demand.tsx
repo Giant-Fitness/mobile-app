@@ -1,25 +1,26 @@
 // app/(app)/(tabs)/on-demand.tsx
 
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import { Dimensions, StyleSheet, View, Platform, RefreshControl, ScrollView } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { WorkoutOverviewCard } from '@/components/workouts/WorkoutOverviewCard';
-import { Spaces } from '@/constants/Spaces';
-import { AppDispatch, RootState } from '@/store/store';
-import { getSpotlightWorkoutsAsync, getMultipleWorkoutsAsync } from '@/store/workouts/thunks';
-import { REQUEST_STATE } from '@/constants/requestStates';
-import { DumbbellSplash } from '@/components/base/DumbbellSplash';
-import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { ActionTile } from '@/components/home/ActionTile';
+import { WorkoutOverviewCard } from '@/components/workouts/WorkoutOverviewCard';
+import { Colors } from '@/constants/Colors';
+import { REQUEST_STATE } from '@/constants/requestStates';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { useSplashScreen } from '@/hooks/useSplashScreen';
+import { AppDispatch, RootState } from '@/store/store';
+import { getAllWorkoutsAsync, getMultipleWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { debounce } from '@/utils/debounce';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Dimensions, Platform, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+
 import { router } from 'expo-router';
-import { getAllWorkoutsAsync } from '@/store/workouts/thunks';
+
 import { trigger } from 'react-native-haptic-feedback';
+import { useDispatch, useSelector } from 'react-redux';
 
 export default function WorkoutsScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';

@@ -1,15 +1,14 @@
 // components/alerts/HighlightedTip.tsx
 
+import { Icon } from '@/components/base/Icon';
+import { ThemedText, ThemedTextProps } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
+import { Colors } from '@/constants/Colors';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import React from 'react';
 import { StyleSheet, ViewStyle } from 'react-native';
-import { ThemedView } from '@/components/base/ThemedView';
-import { ThemedText } from '@/components/base/ThemedText';
-import { Icon } from '@/components/base/Icon';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import { ThemedTextProps } from '@/components/base/ThemedText';
 
 type HighlightedTipProps = {
     iconName?: string;

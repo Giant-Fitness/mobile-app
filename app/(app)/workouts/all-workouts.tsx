@@ -1,28 +1,30 @@
 // app/(app)/workouts/all-workouts.tsx
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { FlatList, StyleSheet, ListRenderItemInfo, RefreshControl } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { useLocalSearchParams } from 'expo-router';
-import { WorkoutDetailedCard } from '@/components/workouts/WorkoutDetailedCard';
-import { ThemedView } from '@/components/base/ThemedView';
+import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { ThemedText } from '@/components/base/ThemedText';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
+import { ThemedView } from '@/components/base/ThemedView';
+import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
+import { WorkoutDetailedCard } from '@/components/workouts/WorkoutDetailedCard';
 import { WorkoutsBottomBar } from '@/components/workouts/WorkoutsBottomBar';
 import { WorkoutsFilterDrawer } from '@/components/workouts/WorkoutsFilterDrawer';
 import { WorkoutsSortDrawer } from '@/components/workouts/WorkoutsSortDrawer';
-import { Spaces } from '@/constants/Spaces';
+import { Colors } from '@/constants/Colors';
+import { REQUEST_STATE } from '@/constants/requestStates';
 import { Sizes } from '@/constants/Sizes';
-import { useSharedValue } from 'react-native-reanimated';
-import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { AppDispatch, RootState } from '@/store/store';
 import { getAllWorkoutsAsync } from '@/store/workouts/thunks';
-import { REQUEST_STATE } from '@/constants/requestStates';
-import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { Workout } from '@/types';
-import { useSplashScreen } from '@/hooks/useSplashScreen';
+import React, { useCallback, useEffect, useState } from 'react';
+import { FlatList, ListRenderItemInfo, RefreshControl, StyleSheet } from 'react-native';
+
+import { useLocalSearchParams } from 'expo-router';
+
 import { trigger } from 'react-native-haptic-feedback';
+import { useSharedValue } from 'react-native-reanimated';
+import { useDispatch, useSelector } from 'react-redux';
 
 const MemoizedWorkoutDetailedCard = React.memo(WorkoutDetailedCard);
 

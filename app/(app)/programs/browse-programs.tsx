@@ -1,27 +1,29 @@
 // app/(app)/programs/browse-programs.tsx
 
-import React, { useEffect, useCallback, useMemo, useState } from 'react';
-import { FlatList, StyleSheet, View, Image, RefreshControl } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
+import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import { AppDispatch, RootState } from '@/store/store';
-import { getAllProgramsAsync } from '@/store/programs/thunks';
-import { REQUEST_STATE } from '@/constants/requestStates';
-import { DumbbellSplash } from '@/components/base/DumbbellSplash';
+import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { ProgramCard } from '@/components/programs/ProgramCard';
-import { useSplashScreen } from '@/hooks/useSplashScreen';
+import { Colors } from '@/constants/Colors';
+import { REQUEST_STATE } from '@/constants/requestStates';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { useProgramData } from '@/hooks/useProgramData';
-import { darkenColor } from '@/utils/colorUtils';
-import { useSharedValue } from 'react-native-reanimated';
-import { router } from 'expo-router';
+import { useSplashScreen } from '@/hooks/useSplashScreen';
+import { getAllProgramsAsync } from '@/store/programs/thunks';
+import { AppDispatch, RootState } from '@/store/store';
 import { Program } from '@/types/programTypes';
+import { darkenColor } from '@/utils/colorUtils';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { FlatList, Image, RefreshControl, StyleSheet, View } from 'react-native';
+
+import { router } from 'expo-router';
+
 import { trigger } from 'react-native-haptic-feedback';
+import { useSharedValue } from 'react-native-reanimated';
+import { useDispatch, useSelector } from 'react-redux';
 
 const MemoizedProgramCard = React.memo(ProgramCard);
 

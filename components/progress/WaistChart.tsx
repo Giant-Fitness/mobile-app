@@ -1,9 +1,11 @@
-import React, { useMemo } from 'react';
-import { useSelector } from 'react-redux';
-import { BaseChart } from '../charts/BaseChart';
-import { AggregatedData, TimeRange, TimeRangeOption } from '@/utils/charts';
 import { RootState } from '@/store/store';
+import { AggregatedData, TimeRange, TimeRangeOption } from '@/utils/charts';
 import { cmToInches } from '@/utils/unitConversion';
+import React, { useMemo } from 'react';
+
+import { useSelector } from 'react-redux';
+
+import { BaseChart } from '../charts/BaseChart';
 
 type WaistChartProps = {
     data: AggregatedData[];

@@ -1,36 +1,36 @@
 // utils/initializationService.ts
 
-import { AppDispatch } from '@/store/store';
-import { cacheService, CacheTTL } from './cache';
-import {
-    setPhase,
-    setCriticalDataState,
-    setSecondaryDataState,
-    setBackgroundSyncState,
-    addLoadedItem,
-    addFailedItem,
-    setCacheStatus,
-    setCriticalError,
-} from '@/store/initialization/initializationSlice';
 import { REQUEST_STATE } from '@/constants/requestStates';
-
+import { initializeTrackedLiftsHistoryAsync } from '@/store/exerciseProgress/thunks';
+import { fetchAllExercisesAsync } from '@/store/exercises/thunks';
 import {
-    getUserAsync,
-    getUserFitnessProfileAsync,
-    getUserAppSettingsAsync,
-    getUserRecommendationsAsync,
-    getUserExerciseSubstitutionsAsync,
-    getUserExerciseSetModificationsAsync,
+    addFailedItem,
+    addLoadedItem,
+    setBackgroundSyncState,
+    setCacheStatus,
+    setCriticalDataState,
+    setCriticalError,
+    setPhase,
+    setSecondaryDataState,
+} from '@/store/initialization/initializationSlice';
+import { getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/thunks';
+import { getRestDayQuoteAsync, getWorkoutQuoteAsync } from '@/store/quotes/thunks';
+import { AppDispatch } from '@/store/store';
+import {
     getBodyMeasurementsAsync,
     getSleepMeasurementsAsync,
-    getWeightMeasurementsAsync,
+    getUserAppSettingsAsync,
+    getUserAsync,
+    getUserExerciseSetModificationsAsync,
+    getUserExerciseSubstitutionsAsync,
+    getUserFitnessProfileAsync,
     getUserProgramProgressAsync,
+    getUserRecommendationsAsync,
+    getWeightMeasurementsAsync,
 } from '@/store/user/thunks';
-import { getAllProgramsAsync, getAllProgramDaysAsync } from '@/store/programs/thunks';
 import { getAllWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
-import { fetchAllExercisesAsync } from '@/store/exercises/thunks';
-import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
-import { initializeTrackedLiftsHistoryAsync } from '@/store/exerciseProgress/thunks';
+
+import { cacheService, CacheTTL } from './cache';
 
 // Standardized cache keys
 const CACHE_KEYS = {

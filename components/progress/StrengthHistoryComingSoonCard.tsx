@@ -1,13 +1,14 @@
 // components/progress/StrengthHistoryComingSoonCard.tsx
 
-import React from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
-import { Spaces } from '@/constants/Spaces';
 import { Colors } from '@/constants/Colors';
+import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Path, Svg, Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import { lightenColor } from '@/utils/colorUtils';
+import React from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { Defs, LinearGradient, Path, Rect, Stop, Svg } from 'react-native-svg';
 
 interface StrengthHistoryComingSoonCardProps {
     onPress?: () => void;

@@ -1,11 +1,12 @@
 // store/programs/thunks.ts
 
-import { createAsyncThunk } from '@reduxjs/toolkit';
-import ProgramService from '@/store/programs/service';
-import { Program, ProgramDay } from '@/types';
-import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
+import ProgramService from '@/store/programs/service';
+import { RootState } from '@/store/store';
+import { Program, ProgramDay } from '@/types';
 import { cacheService, CacheTTL } from '@/utils/cache';
+
+import { createAsyncThunk } from '@reduxjs/toolkit';
 
 export const getAllProgramsAsync = createAsyncThunk<Program[], { forceRefresh?: boolean; useCache?: boolean } | void>(
     'programs/getAllPrograms',

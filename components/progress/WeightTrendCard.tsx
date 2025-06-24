@@ -1,12 +1,14 @@
 // components/progress/WeightTrendCard.tsx
 
-import React from 'react';
-import { format } from 'date-fns';
-import { TrendCard } from './TrendCard';
+import { RootState } from '@/store/store';
 import { UserWeightMeasurement } from '@/types';
 import { formatWeightForDisplay } from '@/utils/unitConversion';
-import { RootState } from '@/store/store';
+import React from 'react';
+
+import { format } from 'date-fns';
 import { useSelector } from 'react-redux';
+
+import { TrendCard } from './TrendCard';
 
 type WeightTrendCardProps = {
     values: UserWeightMeasurement[];

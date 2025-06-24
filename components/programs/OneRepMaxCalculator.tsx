@@ -1,16 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, TextInput, View, TouchableOpacity, Platform, KeyboardAvoidingView } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { BottomSheet } from '@/components/overlays/BottomSheet';
+import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { Spaces } from '@/constants/Spaces';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Icon } from '@/components/base/Icon';
-import { scale, moderateScale } from '@/utils/scaling';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { TextButton } from '@/components/buttons/TextButton';
+import { BottomSheet } from '@/components/overlays/BottomSheet';
+import { Colors } from '@/constants/Colors';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { moderateScale, scale } from '@/utils/scaling';
+import React, { useEffect, useRef, useState } from 'react';
+import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 let MathView: React.ComponentType<any> | undefined;
 if (Platform.OS === 'ios') {

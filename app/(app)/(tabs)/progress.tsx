@@ -1,39 +1,41 @@
 // app/(app)/(tabs)/progress.tsx
 
-import { StyleSheet, Dimensions, View, Platform, SafeAreaView } from 'react-native';
-import React, { useEffect, useMemo, useState } from 'react';
+import { DumbbellSplash } from '@/components/base/DumbbellSplash';
+import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
+import { PrimaryButton } from '@/components/buttons/PrimaryButton';
+import { BodyMeasurementsLoggingSheet } from '@/components/progress/BodyMeasurementsLoggingSheet';
+import { BodyMeasurementsTrendCard } from '@/components/progress/BodyMeasurementsTrendCard';
+import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
+import { SleepTrendCard } from '@/components/progress/SleepTrendCard';
+import { StrengthHistoryComingSoonCard } from '@/components/progress/StrengthHistoryComingSoonCard';
+import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
+import { WeightTrendCard } from '@/components/progress/WeightTrendCard';
+import { Colors } from '@/constants/Colors';
+import { REQUEST_STATE } from '@/constants/requestStates';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { useSplashScreen } from '@/hooks/useSplashScreen';
+import { AppDispatch, RootState } from '@/store/store';
 import {
-    getWeightMeasurementsAsync,
-    logWeightMeasurementAsync,
-    getSleepMeasurementsAsync,
-    logSleepMeasurementAsync,
+    deleteBodyMeasurementAsync,
     deleteSleepMeasurementAsync,
     deleteWeightMeasurementAsync,
     getBodyMeasurementsAsync,
+    getSleepMeasurementsAsync,
+    getWeightMeasurementsAsync,
     logBodyMeasurementAsync,
-    deleteBodyMeasurementAsync,
+    logSleepMeasurementAsync,
+    logWeightMeasurementAsync,
 } from '@/store/user/thunks';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '@/store/store';
-import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
-import { router } from 'expo-router';
-import { DumbbellSplash } from '@/components/base/DumbbellSplash';
-import { REQUEST_STATE } from '@/constants/requestStates';
-import { useSplashScreen } from '@/hooks/useSplashScreen';
-import { WeightTrendCard } from '@/components/progress/WeightTrendCard';
-import { SleepTrendCard } from '@/components/progress/SleepTrendCard';
-import { BodyMeasurementsTrendCard } from '@/components/progress/BodyMeasurementsTrendCard';
-import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
-import { Spaces } from '@/constants/Spaces';
-import { StrengthHistoryComingSoonCard } from '@/components/progress/StrengthHistoryComingSoonCard';
-import { ThemedText } from '@/components/base/ThemedText';
-import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
-import { BodyMeasurementsLoggingSheet } from '@/components/progress/BodyMeasurementsLoggingSheet';
-import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { debounce } from '@/utils/debounce';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Dimensions, Platform, SafeAreaView, StyleSheet, View } from 'react-native';
+
+import { router } from 'expo-router';
+
+import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
+import { useDispatch, useSelector } from 'react-redux';
 
 // Calculate card widths based on screen width (2 cards per row with gap)
 const { width } = Dimensions.get('window');

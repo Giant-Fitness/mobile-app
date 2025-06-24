@@ -1,16 +1,17 @@
 // app/(app)/(tabs)/_layout.tsx
 
-import React from 'react';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { TouchableOpacity } from 'react-native';
-import { router, Tabs } from 'expo-router';
 import { Icon } from '@/components/base/Icon';
-import { Platform } from 'react-native';
-import { Spaces } from '@/constants/Spaces';
+import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
-import { moderateScale } from '@/utils/scaling';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { debounce } from '@/utils/debounce';
+import { moderateScale } from '@/utils/scaling';
+import React from 'react';
+import { Platform, TouchableOpacity } from 'react-native';
+
+import { router, Tabs } from 'expo-router';
+
 import { trigger } from 'react-native-haptic-feedback';
 
 export default function TabLayout() {

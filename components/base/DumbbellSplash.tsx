@@ -1,12 +1,13 @@
 // components/base/DumbbellSplash.tsx
 
-import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Animated, ActivityIndicator } from 'react-native';
-import LottieView from 'lottie-react-native';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
 import { ThemedText } from '@/components/base/ThemedText';
+import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, StyleSheet, View } from 'react-native';
+
+import LottieView from 'lottie-react-native';
 
 interface SplashScreenProps {
     onAnimationComplete?: () => void;

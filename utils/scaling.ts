@@ -1,6 +1,6 @@
 // utils/scaling.ts
 
-import { scale as s, verticalScale as vs, moderateScale as ms } from 'react-native-size-matters';
+import { moderateScale as ms, scale as s, verticalScale as vs } from 'react-native-size-matters';
 
 // Define a consistent moderate scaling factor
 const DEFAULT_MODERATE_FACTOR = 0.55;

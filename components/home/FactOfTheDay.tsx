@@ -1,13 +1,13 @@
 // components/home/FactOfTheDay.tsx
 
-import React from 'react';
-import { StyleSheet, View, Image } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { Spaces } from '@/constants/Spaces';
 import { Colors } from '@/constants/Colors';
+import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { darkenColor } from '@/utils/colorUtils';
+import React from 'react';
+import { Image, StyleSheet, View } from 'react-native';
 
 interface FactOfTheDayProps {}
 

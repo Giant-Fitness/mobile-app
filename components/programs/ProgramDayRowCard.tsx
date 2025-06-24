@@ -1,12 +1,12 @@
 // components/programs/ProgramDayRowCard.tsx
 
-import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { ProgramDay } from '@/types';
+import React from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 interface ProgramDayRowCardProps {
     day: ProgramDay;

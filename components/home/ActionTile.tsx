@@ -1,10 +1,10 @@
 // components/home/ActionTile.tsx
 
-import React from 'react';
-import { StyleSheet, TouchableOpacity, View, Image, ImageSourcePropType, ViewStyle } from 'react-native';
+import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
 import { Spaces } from '@/constants/Spaces';
-import { Icon } from '@/components/base/Icon';
+import React from 'react';
+import { Image, ImageSourcePropType, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 
 interface ActionTileProps {
     image: ImageSourcePropType;

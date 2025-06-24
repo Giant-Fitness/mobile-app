@@ -1,26 +1,28 @@
 // app/(app)/progress/body-measurements-tracking.tsx
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity, SectionList } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { ThemedView } from '@/components/base/ThemedView';
-import { ThemedText } from '@/components/base/ThemedText';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import { useSharedValue } from 'react-native-reanimated';
-import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
-import { WaistChart } from '@/components/progress/WaistChart';
-import { AppDispatch, RootState } from '@/store/store';
-import { TimeRange, aggregateData, calculateMovingAverage, getTimeRangeLabel, getAvailableTimeRanges, getInitialTimeRange } from '@/utils/charts';
-import { UserBodyMeasurement } from '@/types';
-import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { Icon } from '@/components/base/Icon';
+import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
+import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { BodyMeasurementsLoggingSheet } from '@/components/progress/BodyMeasurementsLoggingSheet';
-import { updateBodyMeasurementAsync, deleteBodyMeasurementAsync, logBodyMeasurementAsync } from '@/store/user/thunks';
+import { WaistChart } from '@/components/progress/WaistChart';
+import { Colors } from '@/constants/Colors';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { AppDispatch, RootState } from '@/store/store';
+import { deleteBodyMeasurementAsync, logBodyMeasurementAsync, updateBodyMeasurementAsync } from '@/store/user/thunks';
+import { UserBodyMeasurement } from '@/types';
+import { aggregateData, calculateMovingAverage, getAvailableTimeRanges, getInitialTimeRange, getTimeRangeLabel, TimeRange } from '@/utils/charts';
+import { darkenColor, lightenColor } from '@/utils/colorUtils';
+import { cmToInches, formatMeasurementForDisplay } from '@/utils/unitConversion';
+import React, { useEffect, useMemo, useState } from 'react';
+import { SectionList, StyleSheet, TouchableOpacity, View } from 'react-native';
+
 import { router } from 'expo-router';
-import { formatMeasurementForDisplay, cmToInches } from '@/utils/unitConversion';
+
+import { useSharedValue } from 'react-native-reanimated';
+import { useDispatch, useSelector } from 'react-redux';
 
 const getWaistChange = (currentWaist: number, previousWaist: number | null) => {
     if (previousWaist === null) return null;

@@ -1,30 +1,32 @@
 // app/(app)/workouts/workout-details.tsx
 
-import React, { useEffect, useRef, useState } from 'react';
-import { RefreshControl, StyleSheet, View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
-import { useSelector, useDispatch } from 'react-redux';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-import { ThemedView } from '@/components/base/ThemedView';
-import { ThemedText } from '@/components/base/ThemedText';
-import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
+import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { Icon } from '@/components/base/Icon';
+import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
+import { SlideUpActionButton } from '@/components/buttons/SlideUpActionButton';
 import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle, VideoPlaybackStatus } from '@/components/media/FullScreenVideoPlayer';
-import { verticalScale } from '@/utils/scaling';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
+import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
+import { Colors } from '@/constants/Colors';
+import { REQUEST_STATE } from '@/constants/requestStates';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { AppDispatch, RootState } from '@/store/store';
 import { getWorkoutAsync } from '@/store/workouts/thunks';
-import { REQUEST_STATE } from '@/constants/requestStates';
-import { useSplashScreen } from '@/hooks/useSplashScreen';
-import { DumbbellSplash } from '@/components/base/DumbbellSplash';
-import { SlideUpActionButton } from '@/components/buttons/SlideUpActionButton';
+import { verticalScale } from '@/utils/scaling';
+import React, { useEffect, useRef, useState } from 'react';
+import { RefreshControl, StyleSheet, View } from 'react-native';
+
+import { useLocalSearchParams } from 'expo-router';
+
 import { usePostHog } from 'posthog-react-native';
 import { trigger } from 'react-native-haptic-feedback';
+import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
+import { useDispatch, useSelector } from 'react-redux';
 
 export default function WorkoutDetailScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';

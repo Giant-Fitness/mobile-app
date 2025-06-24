@@ -1,25 +1,27 @@
 // app/(app)/progress/sleep-tracking.tsx
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity, SectionList } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { ThemedView } from '@/components/base/ThemedView';
+import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import { useSharedValue } from 'react-native-reanimated';
+import { ThemedView } from '@/components/base/ThemedView';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { SleepChart } from '@/components/progress/SleepChart';
-import { AppDispatch, RootState } from '@/store/store';
-import { TimeRange, aggregateData, calculateMovingAverage, getTimeRangeLabel, getAvailableTimeRanges, getInitialTimeRange } from '@/utils/charts';
-import { UserSleepMeasurement, SleepSubmissionData } from '@/types';
-import { darkenColor, lightenColor } from '@/utils/colorUtils';
-import { Icon } from '@/components/base/Icon';
 import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
-import { updateSleepMeasurementAsync, deleteSleepMeasurementAsync, logSleepMeasurementAsync } from '@/store/user/thunks';
+import { Colors } from '@/constants/Colors';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { AppDispatch, RootState } from '@/store/store';
+import { deleteSleepMeasurementAsync, logSleepMeasurementAsync, updateSleepMeasurementAsync } from '@/store/user/thunks';
+import { SleepSubmissionData, UserSleepMeasurement } from '@/types';
+import { aggregateData, calculateMovingAverage, getAvailableTimeRanges, getInitialTimeRange, getTimeRangeLabel, TimeRange } from '@/utils/charts';
+import { darkenColor, lightenColor } from '@/utils/colorUtils';
+import React, { useEffect, useMemo, useState } from 'react';
+import { SectionList, StyleSheet, TouchableOpacity, View } from 'react-native';
+
 import { router } from 'expo-router';
+
+import { useSharedValue } from 'react-native-reanimated';
+import { useDispatch, useSelector } from 'react-redux';
 
 const getSleepChange = (currentSleep: number, previousSleep: number | null) => {
     if (previousSleep === null) return null;

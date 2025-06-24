@@ -1,16 +1,17 @@
 // components/media/TopImageInfoCard.tsx
 
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, StyleProp, ViewStyle, TextStyle, ImageSourcePropType, ImageStyle, TouchableOpacity, View } from 'react-native';
-import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedText, ThemedTextProps } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { Image } from 'expo-image';
-import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
-import { ThemedTextProps } from '@/components/base/ThemedText';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import React, { useEffect, useState } from 'react';
+import { ImageSourcePropType, ImageStyle, StyleProp, StyleSheet, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native';
+
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+
 import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
 
 const ShimmerPlaceholder = ShimmerPlaceHolder as unknown as React.ComponentType<any>;

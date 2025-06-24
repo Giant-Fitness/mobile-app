@@ -1,6 +1,6 @@
 // store/exerciseProgress/service.ts
 
-import { ExerciseSet, ExerciseLog } from '@/types/exerciseProgressTypes';
+import { ExerciseLog, ExerciseSet } from '@/types/exerciseProgressTypes';
 import { authUsersApiClient } from '@/utils/api/apiConfig';
 import { handleApiError } from '@/utils/api/errorUtils';
 

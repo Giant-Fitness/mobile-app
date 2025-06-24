@@ -1,20 +1,22 @@
 // app/(app)/initialization.tsx
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { SafeAreaView, StyleSheet, View } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '@/store/store';
-import { router } from 'expo-router';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { ThemedText } from '@/components/base/ThemedText';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
-import { InitializationService } from '@/utils/initializationService';
-import { setInitialized, incrementRetryAttempt, resetRetryAttempt, reset as resetInitialization } from '@/store/initialization/initializationSlice';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { incrementRetryAttempt, reset as resetInitialization, resetRetryAttempt, setInitialized } from '@/store/initialization/initializationSlice';
+import { AppDispatch, RootState } from '@/store/store';
 import { getUserProgramProgressAsync } from '@/store/user/thunks';
 import { cacheService } from '@/utils/cache';
+import { InitializationService } from '@/utils/initializationService';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { SafeAreaView, StyleSheet, View } from 'react-native';
+
+import { router } from 'expo-router';
+
+import { useDispatch, useSelector } from 'react-redux';
 
 const Initialization: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();

@@ -1,12 +1,12 @@
 // components/auth/AuthComponents.tsx
 
-import React from 'react';
-import { View, Image, StyleSheet, ImageStyle, TextStyle, ViewStyle } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
 import { Colors } from '@/constants/Colors';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import React from 'react';
+import { Image, ImageStyle, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
 
 import * as WebBrowser from 'expo-web-browser';
 

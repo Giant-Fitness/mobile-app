@@ -1,15 +1,16 @@
 // components/onboarding/fitness/ProgramRecommenderIntro.tsx
 
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import motivationalImage from '@/assets/images/stretching.svg';
 import { ThemedText } from '@/components/base/ThemedText';
 import { TextButton } from '@/components/buttons/TextButton';
+import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
+import AnimatedHeader from '@/components/navigation/AnimatedHeader';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
-import motivationalImage from '@/assets/images/stretching.svg';
-import AnimatedHeader from '@/components/navigation/AnimatedHeader';
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
+
 import { useSharedValue } from 'react-native-reanimated';
 
 type ProgramRecommenderIntroProps = {

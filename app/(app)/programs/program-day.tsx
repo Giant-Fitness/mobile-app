@@ -1,39 +1,41 @@
 // app/(app)/programs/program-day.tsx
 
-import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, ActivityIndicator, View, Vibration } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
-import { useDispatch, useSelector } from 'react-redux';
-import LottieView from 'lottie-react-native';
-import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
-import { ThemedView } from '@/components/base/ThemedView';
-import { ThemedText } from '@/components/base/ThemedText';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-import { ExerciseCard } from '@/components/exercise/ExerciseCard';
 import { Icon } from '@/components/base/Icon';
-import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
-import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import { TextButton } from '@/components/buttons/TextButton';
+import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { SlideUpActionButton } from '@/components/buttons/SlideUpActionButton';
-import { REQUEST_STATE } from '@/constants/requestStates';
-import { useProgramData } from '@/hooks/useProgramData';
-import { ProgramDaySkipModal } from '@/components/programs/ProgramDaySkipModal';
-import { ProgramDayUnfinishModal } from '@/components/programs/ProgramDayUnfinishModal';
-import { BottomMenuModal } from '@/components/overlays/BottomMenuModal';
-import { AutoDismissSuccessModal } from '@/components/overlays/AutoDismissSuccessModal';
+import { TextButton } from '@/components/buttons/TextButton';
+import { ExerciseCard } from '@/components/exercise/ExerciseCard';
 import { ExerciseLoggingSheet } from '@/components/exercise/ExerciseLoggingSheet';
 import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle, VideoPlaybackStatus } from '@/components/media/FullScreenVideoPlayer';
-import { getDayOfWeek, getWeekNumber } from '@/utils/calendar';
+import { ThumbnailVideoPlayer } from '@/components/media/ThumbnailVideoPlayer';
+import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
+import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
+import { AutoDismissSuccessModal } from '@/components/overlays/AutoDismissSuccessModal';
+import { BottomMenuModal } from '@/components/overlays/BottomMenuModal';
+import { ProgramDaySkipModal } from '@/components/programs/ProgramDaySkipModal';
+import { ProgramDayUnfinishModal } from '@/components/programs/ProgramDayUnfinishModal';
+import { Colors } from '@/constants/Colors';
+import { REQUEST_STATE } from '@/constants/requestStates';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { useProgramData } from '@/hooks/useProgramData';
 import { fetchExercisesRecentHistoryAsync } from '@/store/exerciseProgress/thunks';
+import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
 import { AppDispatch, RootState } from '@/store/store';
 import { Exercise, isExerciseLoggable } from '@/types';
-import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
-import { ThumbnailVideoPlayer } from '@/components/media/ThumbnailVideoPlayer';
+import { getDayOfWeek, getWeekNumber } from '@/utils/calendar';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Vibration, View } from 'react-native';
+
+import { router, useLocalSearchParams } from 'expo-router';
+
+import LottieView from 'lottie-react-native';
 import { usePostHog } from 'posthog-react-native';
+import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
+import { useDispatch, useSelector } from 'react-redux';
 
 const ProgramDayScreen = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';

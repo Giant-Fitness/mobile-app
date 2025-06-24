@@ -1,18 +1,19 @@
 // app/(app)/blog/why-kyn.tsx
 
-import React from 'react';
-import { StyleSheet, View, Image, Platform } from 'react-native';
-import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
-import { ThemedView } from '@/components/base/ThemedView';
-import { ThemedText } from '@/components/base/ThemedText';
-import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
-import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
 import { Icon } from '@/components/base/Icon';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
+import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
+import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { Colors } from '@/constants/Colors';
-import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { darkenColor } from '@/utils/colorUtils';
+import React from 'react';
+import { Image, Platform, StyleSheet, View } from 'react-native';
+
+import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 
 const WhyKynScreen = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -85,7 +86,7 @@ const WhyKynScreen = () => {
         // },
     ];
 
-    const renderFeatureSection = (feature: typeof features[0], index: number) => (
+    const renderFeatureSection = (feature: (typeof features)[0], index: number) => (
         <ThemedView key={index} style={[styles.featureContainer, { backgroundColor: feature.backgroundColor }]}>
             <View style={styles.contentWrapper}>
                 <View style={styles.content}>

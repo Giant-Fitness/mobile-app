@@ -1,9 +1,10 @@
 // hooks/useBaseProgramData.ts
 
-import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
+import { RootState } from '@/store/store';
+import { useMemo } from 'react';
+
+import { useSelector } from 'react-redux';
 
 // Base hook for shared program data logic
 export const useBaseProgramData = () => {

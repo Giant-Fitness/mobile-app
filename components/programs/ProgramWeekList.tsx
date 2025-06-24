@@ -1,15 +1,15 @@
 // components/programs/ProgramWeekList.tsx
 
-import React from 'react';
-import { StyleSheet } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { Collapsible } from '@/components/layout/Collapsible';
-import { ProgramDay } from '@/types';
 import { ProgramDayRowCard } from '@/components/programs/ProgramDayRowCard';
-import { getWeekNumber } from '@/utils/calendar';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { ProgramDay } from '@/types';
+import { getWeekNumber } from '@/utils/calendar';
+import React from 'react';
+import { StyleSheet } from 'react-native';
 
 interface ProgramWeekListProps {
     currentMonthWeeks: ProgramDay[][];

@@ -1,15 +1,16 @@
 // components/overlays/AutoDismissSuccessModal.tsx
 
-import React, { useEffect, useCallback } from 'react';
-import { StyleSheet } from 'react-native';
-import { CenteredModal } from '@/components/overlays/CenteredModal';
-import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
-import LottieView from 'lottie-react-native';
+import { ThemedView } from '@/components/base/ThemedView';
+import { CenteredModal } from '@/components/overlays/CenteredModal';
 import { Colors } from '@/constants/Colors';
-import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import React, { useCallback, useEffect } from 'react';
+import { StyleSheet } from 'react-native';
+
+import LottieView from 'lottie-react-native';
 
 interface AutoDismissSuccessModalProps {
     visible: boolean;

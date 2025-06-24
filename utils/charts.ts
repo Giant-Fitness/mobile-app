@@ -1,7 +1,8 @@
 // utils/charts.ts
 
-import { startOfWeek, startOfMonth, subDays, subMonths, subYears, isSameDay, lastDayOfWeek, lastDayOfMonth, format } from 'date-fns';
-import { UserSleepMeasurement, UserWeightMeasurement, UserBodyMeasurement } from '@/types';
+import { UserBodyMeasurement, UserSleepMeasurement, UserWeightMeasurement } from '@/types';
+
+import { format, isSameDay, lastDayOfMonth, lastDayOfWeek, startOfMonth, startOfWeek, subDays, subMonths, subYears } from 'date-fns';
 
 export type TimeRange = '1W' | '1M' | '3M' | '6M' | '1Y' | 'All';
 

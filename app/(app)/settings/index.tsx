@@ -1,23 +1,25 @@
 // app/(app)/settings/index.tsx
 
-import React from 'react';
-import { StyleSheet, Alert, View, ScrollView, TouchableOpacity, Linking } from 'react-native';
-import { router } from 'expo-router';
+import { Icon } from '@/components/base/Icon';
+import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { authService } from '@/utils/auth';
-import { resetStore } from '@/store/actions';
-import { useDispatch } from 'react-redux';
+import { TextButton } from '@/components/buttons/TextButton';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { Colors } from '@/constants/Colors';
-import { useSharedValue } from 'react-native-reanimated';
+import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Sizes } from '@/constants/Sizes';
-import { TextButton } from '@/components/buttons/TextButton';
-import { ThemedText } from '@/components/base/ThemedText';
-import { Icon } from '@/components/base/Icon';
+import { resetStore } from '@/store/actions';
+import { authService } from '@/utils/auth';
 import { lightenColor } from '@/utils/colorUtils';
+import React from 'react';
+import { Alert, Linking, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { router } from 'expo-router';
+
 import { usePostHog } from 'posthog-react-native';
+import { useSharedValue } from 'react-native-reanimated';
+import { useDispatch } from 'react-redux';
 
 const SettingsSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <View style={styles.section}>
@@ -102,8 +104,8 @@ const SettingsIndex = () => {
                         ? error.message
                             ? error.message
                             : cleanupError instanceof Error
-                            ? cleanupError.message
-                            : 'An unexpected error occurred'
+                              ? cleanupError.message
+                              : 'An unexpected error occurred'
                         : 'An unexpected error occurred';
                 Alert.alert('Sign out Error', errorMessage);
             }

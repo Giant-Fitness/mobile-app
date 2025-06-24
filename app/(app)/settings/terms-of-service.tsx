@@ -1,13 +1,14 @@
-import React from 'react';
-import { StyleSheet, ScrollView, View } from 'react-native';
+import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { Colors } from '@/constants/Colors';
-import { useSharedValue } from 'react-native-reanimated';
+import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Sizes } from '@/constants/Sizes';
-import { ThemedText } from '@/components/base/ThemedText';
+import React from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+
+import { useSharedValue } from 'react-native-reanimated';
 
 const TermsOfService = () => {
     const scrollY = useSharedValue(0);

@@ -1,19 +1,21 @@
 // app/(app)/programs/program-recommender-wizard.tsx
 
+import { ThemedView } from '@/components/base/ThemedView';
+import { EquipmentForm, ExperienceForm, ScheduleForm, WorkoutGoalsForm } from '@/components/onboarding/fitness/FitnessWizardForms';
+import { ProgramRecommenderIntro } from '@/components/onboarding/fitness/ProgramRecommenderIntro';
+import { SignupWizard } from '@/components/onboarding/SignupWizard';
+import { AutoDismissSuccessModal } from '@/components/overlays/AutoDismissSuccessModal';
+import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { AppDispatch, RootState } from '@/store/store';
+import { updateUserFitnessProfileAsync } from '@/store/user/thunks';
 import React, { useState } from 'react';
 import { StyleSheet } from 'react-native';
+
 import { router } from 'expo-router';
-import { useDispatch, useSelector } from 'react-redux';
-import { ThemedView } from '@/components/base/ThemedView';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-import { SignupWizard } from '@/components/onboarding/SignupWizard';
-import { WorkoutGoalsForm, ExperienceForm, EquipmentForm, ScheduleForm } from '@/components/onboarding/fitness/FitnessWizardForms';
-import { ProgramRecommenderIntro } from '@/components/onboarding/fitness/ProgramRecommenderIntro';
-import { updateUserFitnessProfileAsync } from '@/store/user/thunks';
-import { AutoDismissSuccessModal } from '@/components/overlays/AutoDismissSuccessModal';
-import { AppDispatch, RootState } from '@/store/store';
+
 import { usePostHog } from 'posthog-react-native';
+import { useDispatch, useSelector } from 'react-redux';
 
 const ProgramRecommenderWizardScreen = () => {
     const dispatch = useDispatch<AppDispatch>();

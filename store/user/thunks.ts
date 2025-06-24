@@ -1,28 +1,29 @@
 // store/user/thunks.ts
 
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import { REQUEST_STATE } from '@/constants/requestStates';
+import { RootState } from '@/store/store';
 import UserService from '@/store/user/service';
 import {
-    UserProgramProgress,
+    CreateSetModificationParams,
+    CreateSubstitutionParams,
+    GetSetModificationsParams,
+    GetSubstitutionsParams,
+    UpdateSetModificationParams,
+    UpdateSubstitutionParams,
     User,
-    UserRecommendations,
-    UserFitnessProfile,
-    UserWeightMeasurement,
-    UserSleepMeasurement,
     UserAppSettings,
     UserBodyMeasurement,
-    UserExerciseSubstitution,
-    CreateSubstitutionParams,
-    UpdateSubstitutionParams,
-    GetSubstitutionsParams,
     UserExerciseSetModification,
-    CreateSetModificationParams,
-    UpdateSetModificationParams,
-    GetSetModificationsParams,
+    UserExerciseSubstitution,
+    UserFitnessProfile,
+    UserProgramProgress,
+    UserRecommendations,
+    UserSleepMeasurement,
+    UserWeightMeasurement,
 } from '@/types';
-import { RootState } from '@/store/store';
-import { REQUEST_STATE } from '@/constants/requestStates';
 import { cacheService, CacheTTL } from '@/utils/cache';
+
+import { createAsyncThunk } from '@reduxjs/toolkit';
 
 const TESTING = {
     SIMULATE_WEIGHT_FAILURE: __DEV__ && false,

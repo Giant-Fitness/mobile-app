@@ -2,16 +2,16 @@
 
 import { REQUEST_STATE } from '@/constants/requestStates';
 import {
-    UserProgramProgress,
     User,
-    UserRecommendations,
-    UserFitnessProfile,
-    UserWeightMeasurement,
-    UserSleepMeasurement,
     UserAppSettings,
     UserBodyMeasurement,
-    UserExerciseSubstitution,
     UserExerciseSetModification,
+    UserExerciseSubstitution,
+    UserFitnessProfile,
+    UserProgramProgress,
+    UserRecommendations,
+    UserSleepMeasurement,
+    UserWeightMeasurement,
 } from '@/types';
 
 export interface UserState {

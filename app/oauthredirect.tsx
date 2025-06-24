@@ -1,10 +1,12 @@
 // app/oauthredirect.tsx
 
-import React, { useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import React, { useEffect } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+
 import { router } from 'expo-router';
+
 import { Hub } from 'aws-amplify/utils';
 
 export default function OAuthRedirect() {

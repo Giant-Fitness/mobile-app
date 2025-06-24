@@ -1,10 +1,10 @@
 // components/base/ThemedText.tsx
 
-import React from 'react';
-import { Text, TextProps, StyleSheet } from 'react-native';
+import { Sizes } from '@/constants/Sizes';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { moderateScale } from '@/utils/scaling'; // Use the customized moderateScale
-import { Sizes } from '@/constants/Sizes';
+import React from 'react';
+import { StyleSheet, Text, TextProps } from 'react-native';
 
 export type ThemedTextProps = TextProps & {
     lightColor?: string;

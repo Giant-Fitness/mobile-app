@@ -1,9 +1,10 @@
 // components/inputs/StarRating.tsx
 
-import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import React from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+
 import { Star } from 'lucide-react-native';
 
 interface StarRatingProps {

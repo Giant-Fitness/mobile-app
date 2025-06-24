@@ -1,7 +1,9 @@
 // config/amplify.ts
 
-import { Amplify } from 'aws-amplify';
 import { Platform } from 'react-native';
+
+import { Amplify } from 'aws-amplify';
+
 import outputs from '../amplify_outputs.json';
 
 export const configureAmplify = () => {

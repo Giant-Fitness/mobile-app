@@ -1,13 +1,14 @@
 // hooks/useInactiveProgramData.ts
 
-import { useEffect, useMemo } from 'react';
-import { useBaseProgramData } from './useBaseProgramData';
-import { getUserRecommendationsAsync } from '@/store/user/thunks';
-import { getProgramAsync } from '@/store/programs/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
+import { getProgramAsync } from '@/store/programs/thunks';
 import { AppDispatch, RootState } from '@/store/store';
-import { useSelector } from 'react-redux';
-import { useDispatch } from 'react-redux';
+import { getUserRecommendationsAsync } from '@/store/user/thunks';
+import { useEffect, useMemo } from 'react';
+
+import { useDispatch, useSelector } from 'react-redux';
+
+import { useBaseProgramData } from './useBaseProgramData';
 
 export const useInactiveProgramData = () => {
     const dispatch = useDispatch<AppDispatch>();

@@ -1,9 +1,10 @@
 // store/feedback/feedbackSlice.ts
 
-import { createSlice } from '@reduxjs/toolkit';
+import { REQUEST_STATE } from '@/constants/requestStates';
 import { initialState } from '@/store/feedback/feedbackState';
 import { sendProgramAbandonFeedbackAsync } from '@/store/feedback/thunks';
-import { REQUEST_STATE } from '@/constants/requestStates';
+
+import { createSlice } from '@reduxjs/toolkit';
 
 const feedbackSlice = createSlice({
     name: 'feedback',

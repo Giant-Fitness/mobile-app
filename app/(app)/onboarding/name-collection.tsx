@@ -1,22 +1,24 @@
 // app/(app)/onboarding/name-collection.tsx
 
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Icon } from '@/components/base/Icon';
+import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
+import { PrimaryButton } from '@/components/buttons/PrimaryButton';
+import { TextInput } from '@/components/inputs/TextInput';
+import { Colors } from '@/constants/Colors';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { AppDispatch, RootState } from '@/store/store';
+import { getUserAsync, updateUserAsync } from '@/store/user/thunks';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { router } from 'expo-router';
+
+import { usePostHog } from 'posthog-react-native';
+import { trigger } from 'react-native-haptic-feedback';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
-import { router } from 'expo-router';
-import { AppDispatch, RootState } from '@/store/store';
-import { updateUserAsync, getUserAsync } from '@/store/user/thunks';
-import { ThemedView } from '@/components/base/ThemedView';
-import { Spaces } from '@/constants/Spaces';
-import { PrimaryButton } from '@/components/buttons/PrimaryButton';
-import { ThemedText } from '@/components/base/ThemedText';
-import { TextInput } from '@/components/inputs/TextInput';
-import { usePostHog } from 'posthog-react-native';
-import { Icon } from '@/components/base/Icon';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { trigger } from 'react-native-haptic-feedback';
 
 const NameCollectionScreen = () => {
     const [firstName, setFirstName] = useState('');

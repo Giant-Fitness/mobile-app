@@ -1,25 +1,26 @@
 // components/programs/ActiveProgramDayCard.tsx
 
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-import React from 'react';
-import { StyleSheet, View, ActivityIndicator } from 'react-native';
+import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
-import { Icon } from '@/components/base/Icon';
-import { moderateScale } from '@/utils/scaling';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
+import { Colors } from '@/constants/Colors';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { getWeekNumber, getDayOfWeek } from '@/utils/calendar';
-import { router } from 'expo-router';
-import { Workout } from '@/types';
-import { ProgramDay } from '@/types';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { RootState } from '@/store/store';
+import { ProgramDay, Workout } from '@/types';
+import { getDayOfWeek, getWeekNumber } from '@/utils/calendar';
 import { debounce } from '@/utils/debounce';
+import { moderateScale } from '@/utils/scaling';
+import React from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+
+import { router } from 'expo-router';
+
 import { trigger } from 'react-native-haptic-feedback';
+import { useSelector } from 'react-redux';
 
 type ActiveProgramDayCardProps = {
     source: 'active-program-home';

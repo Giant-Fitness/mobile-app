@@ -1,37 +1,37 @@
 // components/exercise/ExerciseLoggingSheet.tsx
 
-import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, TouchableOpacity, ScrollView, TextInput, Platform, ActivityIndicator, KeyboardAvoidingView, Keyboard } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { format } from 'date-fns';
-import LottieView from 'lottie-react-native';
-import { BottomSheet } from '@/components/overlays/BottomSheet';
+import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { Icon } from '@/components/base/Icon';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { IconButton } from '@/components/buttons/IconButton';
+import { TextButton } from '@/components/buttons/TextButton';
+import { BottomSheet } from '@/components/overlays/BottomSheet';
 import { Colors } from '@/constants/Colors';
+import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { deleteExerciseLogAsync, saveExerciseProgressAsync } from '@/store/exerciseProgress/thunks';
-import { createExerciseSetModificationAsync, updateExerciseSetModificationAsync, deleteExerciseSetModificationAsync } from '@/store/user/thunks';
-import { RootState } from '@/store/store';
-import { Exercise } from '@/types/programTypes';
 import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
-import { lightenColor } from '@/utils/colorUtils';
+import { AppDispatch, RootState } from '@/store/store';
+import { createExerciseSetModificationAsync, deleteExerciseSetModificationAsync, updateExerciseSetModificationAsync } from '@/store/user/thunks';
 import {
     ExerciseLog,
-    SetInput,
-    getExerciseLoggingMode,
-    supportsWeight,
-    requiresWeight,
     formatTimeDisplay,
+    getExerciseLoggingMode,
     parseTimeInput,
+    requiresWeight,
+    SetInput,
+    supportsWeight,
 } from '@/types/exerciseProgressTypes';
-import { AppDispatch } from '@/store/store';
-import { Sizes } from '@/constants/Sizes';
-import { TextButton } from '@/components/buttons/TextButton';
+import { Exercise } from '@/types/programTypes';
+import { lightenColor } from '@/utils/colorUtils';
 import { formatWeightForDisplay, parseWeightForStorage } from '@/utils/unitConversion';
-import { IconButton } from '@/components/buttons/IconButton';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+
+import { format } from 'date-fns';
+import LottieView from 'lottie-react-native';
+import { useDispatch, useSelector } from 'react-redux';
 
 interface ExerciseLoggingSheetProps {
     visible: boolean;

@@ -1,25 +1,27 @@
 // components/programs/ActiveProgramDayCompressedCard.tsx
 
-import React, { useRef } from 'react';
-import { StyleSheet, View, Animated, TouchableOpacity } from 'react-native';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { moderateScale } from '@/utils/scaling';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
+import { Colors } from '@/constants/Colors';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { ImageTextOverlay } from '../media/ImageTextOverlay';
-import { router } from 'expo-router';
-import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Workout } from '@/types';
-import { ProgramDay } from '@/types';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { RootState } from '@/store/store';
+import { ProgramDay, Workout } from '@/types';
 import { debounce } from '@/utils/debounce';
+import { moderateScale } from '@/utils/scaling';
+import React, { useRef } from 'react';
+import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+
 import { trigger } from 'react-native-haptic-feedback';
+import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
+import { useSelector } from 'react-redux';
+
+import { ImageTextOverlay } from '../media/ImageTextOverlay';
 
 const ShimmerPlaceholder = ShimmerPlaceHolder as unknown as React.ComponentType<any>;
 

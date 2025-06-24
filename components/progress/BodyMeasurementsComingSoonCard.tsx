@@ -1,13 +1,14 @@
 // components/progress/BodyMeasurementsComingSoonCard.tsx
 
-import React from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
-import { Spaces } from '@/constants/Spaces';
 import { Colors } from '@/constants/Colors';
+import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Path, Svg, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { lightenColor } from '@/utils/colorUtils';
+import React from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { Defs, LinearGradient, Path, Stop, Svg } from 'react-native-svg';
 
 interface BodyMeasurementsComingSoonCardProps {
     onPress?: () => void;

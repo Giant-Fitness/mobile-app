@@ -1,12 +1,12 @@
 // components/base/FilterChip.tsx
 
-import React from 'react';
-import { TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { Colors } from '@/constants/Colors';
+import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { moderateScale } from '@/utils/scaling';
-import { Spaces } from '@/constants/Spaces';
+import React from 'react';
+import { StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 
 interface FilterChipProps {
     label: string;

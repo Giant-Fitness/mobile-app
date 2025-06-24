@@ -1,15 +1,15 @@
 // components/programs/ProgramDayOverviewCard.tsx
 
+import { Icon } from '@/components/base/Icon';
+import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
+import { Colors } from '@/constants/Colors';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { ProgramDay, UserProgramProgress } from '@/types';
 import React from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
-import { ThemedView } from '@/components/base/ThemedView';
-import { ThemedText } from '@/components/base/ThemedText';
-import { ProgramDay, UserProgramProgress } from '@/types';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Icon } from '@/components/base/Icon';
 
 interface ProgramDayOverviewCardProps {
     day: ProgramDay;

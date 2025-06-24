@@ -1,24 +1,25 @@
 // components/progress/BodyMeasurementsLoggingSheet.tsx
 
-import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, TextInput, View, TouchableOpacity, Platform, ActivityIndicator, Keyboard, ScrollView } from 'react-native';
-import LottieView from 'lottie-react-native';
-import { BottomSheet } from '@/components/overlays/BottomSheet';
+import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { Spaces } from '@/constants/Spaces';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Icon } from '@/components/base/Icon';
-import { TextButton } from '@/components/buttons/TextButton';
-import { addDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameDay, isSameMonth, format } from 'date-fns';
-import { lightenColor } from '@/utils/colorUtils';
-import { UserBodyMeasurement } from '@/types';
-import { Sizes } from '@/constants/Sizes';
-import { RootState } from '@/store/store';
-import { useSelector } from 'react-redux';
-import { formatMeasurementForDisplay, parseMeasurementForStorage } from '@/utils/unitConversion';
 import { IconButton } from '@/components/buttons/IconButton';
+import { TextButton } from '@/components/buttons/TextButton';
+import { BottomSheet } from '@/components/overlays/BottomSheet';
+import { Colors } from '@/constants/Colors';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { RootState } from '@/store/store';
+import { UserBodyMeasurement } from '@/types';
+import { lightenColor } from '@/utils/colorUtils';
+import { formatMeasurementForDisplay, parseMeasurementForStorage } from '@/utils/unitConversion';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Keyboard, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+
+import { addDays, endOfMonth, endOfWeek, format, isSameDay, isSameMonth, startOfMonth, startOfWeek } from 'date-fns';
+import LottieView from 'lottie-react-native';
+import { useSelector } from 'react-redux';
 
 interface BodyMeasurementsLoggingSheetProps {
     visible: boolean;

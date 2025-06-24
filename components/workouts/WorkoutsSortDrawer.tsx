@@ -1,7 +1,7 @@
 // components/workouts/WorkoutsSortDrawer.tsx
 
-import React from 'react';
 import { SortDrawer } from '@/components/overlays/SortDrawer';
+import React from 'react';
 
 interface WorkoutsSortDrawerProps {
     visible: boolean;

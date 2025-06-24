@@ -1,20 +1,25 @@
 // app/_layout.tsx
 
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { useEffect, useRef } from 'react';
+
 import { useFonts } from 'expo-font';
 import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useRef } from 'react';
+
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+
 import 'react-native-reanimated';
-import React from 'react';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Provider, useDispatch } from 'react-redux';
-import { store } from '@/store/store';
-import { AppState, StatusBar } from 'react-native';
-import { resetStore } from '@/store/actions';
+
 import { POSTHOG_CONFIG } from '@/config/posthog';
-import { PostHogProvider } from 'posthog-react-native';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { useScreenTracking } from '@/hooks/useScreenTracking';
+import { resetStore } from '@/store/actions';
+import { store } from '@/store/store';
+import React from 'react';
+import { AppState, StatusBar } from 'react-native';
+
+import { PostHogProvider } from 'posthog-react-native';
+import { Provider, useDispatch } from 'react-redux';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();

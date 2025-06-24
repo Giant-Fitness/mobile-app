@@ -1,6 +1,6 @@
 // constants/Sizes.ts
 
-import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { moderateScale, scale, verticalScale } from '@/utils/scaling';
 
 export const Sizes = {
     imageXSWidth: scale(70), // XSmall image size

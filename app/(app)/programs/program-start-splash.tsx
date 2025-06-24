@@ -1,14 +1,16 @@
 // app/(app)/programs/program-start-splash.tsx
 
-import React, { useRef } from 'react';
-import { View, StyleSheet, Animated, Vibration } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import { useFocusEffect } from '@react-navigation/native';
-import { useRouter } from 'expo-router';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import React, { useRef } from 'react';
+import { Animated, StyleSheet, Vibration, View } from 'react-native';
+
+import { useRouter } from 'expo-router';
+
+import { useFocusEffect } from '@react-navigation/native';
 
 const motivationalTexts = [
     'Your journey begins',

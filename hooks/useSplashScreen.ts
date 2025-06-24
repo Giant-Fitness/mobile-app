@@ -1,8 +1,8 @@
 // hooks/useSplashScreen.ts
 
 // hooks/useSplashScreen.ts
-import { useState, useEffect, useRef } from 'react';
 import { REQUEST_STATE } from '@/constants/requestStates';
+import { useEffect, useRef, useState } from 'react';
 
 interface UseSplashScreenProps {
     dataLoadedState: REQUEST_STATE;

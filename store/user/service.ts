@@ -1,25 +1,24 @@
 // store/user/service.ts
 
 import {
-    UserProgramProgress,
+    CreateSetModificationParams,
+    CreateSubstitutionParams,
+    GetSetModificationsParams,
+    GetSubstitutionsParams,
+    UpdateSetModificationParams,
+    UpdateSubstitutionParams,
     User,
-    UserRecommendations,
-    UserFitnessProfile,
-    UserWeightMeasurement,
-    UserSleepMeasurement,
     UserAppSettings,
     UserBodyMeasurement,
-    UserExerciseSubstitution,
-    CreateSubstitutionParams,
-    UpdateSubstitutionParams,
-    GetSubstitutionsParams,
     UserExerciseSetModification,
-    CreateSetModificationParams,
-    UpdateSetModificationParams,
-    GetSetModificationsParams,
+    UserExerciseSubstitution,
+    UserFitnessProfile,
+    UserProgramProgress,
+    UserRecommendations,
+    UserSleepMeasurement,
+    UserWeightMeasurement,
 } from '@/types';
-
-import { authUsersApiClient, authRecommendationsApiClient } from '@/utils/api/apiConfig';
+import { authRecommendationsApiClient, authUsersApiClient } from '@/utils/api/apiConfig';
 import { handleApiError } from '@/utils/api/errorUtils';
 import { authService } from '@/utils/auth';
 

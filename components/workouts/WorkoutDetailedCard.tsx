@@ -1,19 +1,20 @@
 // components/workouts/WorkoutDetailedCard.tsx
 
+import { Icon } from '@/components/base/Icon';
+import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
+import { LeftImageInfoCard } from '@/components/media/LeftImageInfoCard';
+import { Colors } from '@/constants/Colors';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Workout } from '@/types';
+import { debounce } from '@/utils/debounce';
+import { moderateScale } from '@/utils/scaling';
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-import { ThemedView } from '@/components/base/ThemedView';
-import { ThemedText } from '@/components/base/ThemedText';
-import { LeftImageInfoCard } from '@/components/media/LeftImageInfoCard';
-import { Icon } from '@/components/base/Icon';
-import { moderateScale } from '@/utils/scaling';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import { Workout } from '@/types';
+
 import { router } from 'expo-router';
-import { debounce } from '@/utils/debounce';
 
 type WorkoutDetailedCardProps = {
     workout: Workout;

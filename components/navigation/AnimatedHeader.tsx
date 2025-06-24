@@ -1,16 +1,17 @@
 // components/navigation/AnimatedHeader.tsx
 
-import React from 'react';
-import { ActivityIndicator, StyleSheet, TouchableOpacity, Platform, View } from 'react-native';
-import Animated, { useAnimatedStyle, interpolateColor, useDerivedValue } from 'react-native-reanimated';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-import { BackButton } from '@/components/navigation/BackButton';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import { ThemedText } from '@/components/base/ThemedText';
 import { Icon } from '@/components/base/Icon';
+import { ThemedText } from '@/components/base/ThemedText';
 import { IconButton } from '@/components/buttons/IconButton';
+import { BackButton } from '@/components/navigation/BackButton';
+import { Colors } from '@/constants/Colors';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import React from 'react';
+import { ActivityIndicator, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import Animated, { interpolateColor, useAnimatedStyle, useDerivedValue } from 'react-native-reanimated';
 
 type ActionButtonProps = {
     icon: string;

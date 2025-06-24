@@ -1,7 +1,8 @@
 // store/initialization/initializationSlice.ts
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { REQUEST_STATE } from '@/constants/requestStates';
+
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface InitializationState {
     // Overall states

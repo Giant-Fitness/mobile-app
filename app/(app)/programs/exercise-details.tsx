@@ -1,25 +1,27 @@
 // app/(app)/programs/exercise-details.tsx
 
-import React, { useState } from 'react';
+import { Icon } from '@/components/base/Icon';
+import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-import { View, StyleSheet, Linking, Alert } from 'react-native';
-import { Exercise } from '@/types';
+import { TextButton } from '@/components/buttons/TextButton';
+import { BulletedList } from '@/components/layout/BulletedList';
+import { VideoPlaybackStatus } from '@/components/media/FullScreenVideoPlayer';
+import { ThumbnailVideoPlayer } from '@/components/media/ThumbnailVideoPlayer';
+import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
-import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
+import { OneRepMaxCalculator } from '@/components/programs/OneRepMaxCalculator';
+import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
-import { TextButton } from '@/components/buttons/TextButton';
-import { ThemedText } from '@/components/base/ThemedText';
-import { ThumbnailVideoPlayer } from '@/components/media/ThumbnailVideoPlayer';
-import { BulletedList } from '@/components/layout/BulletedList';
-import { Icon } from '@/components/base/Icon';
-import { OneRepMaxCalculator } from '@/components/programs/OneRepMaxCalculator';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Exercise } from '@/types';
+import React, { useState } from 'react';
+import { Alert, Linking, StyleSheet, View } from 'react-native';
+
 import { useLocalSearchParams } from 'expo-router';
+
 import { usePostHog } from 'posthog-react-native';
-import { VideoPlaybackStatus } from '@/components/media/FullScreenVideoPlayer';
-import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
+import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 
 const ExerciseDetailsScreen = () => {
     const colorScheme = useColorScheme() as 'light' | 'dark';

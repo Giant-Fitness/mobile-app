@@ -1,9 +1,10 @@
 // components/progress/SleepChart.tsx
 
-import React from 'react';
-import { BaseChart } from '../charts/BaseChart';
-import { AggregatedData, TimeRange, TimeRangeOption } from '@/utils/charts';
 import { UserSleepMeasurement } from '@/types';
+import { AggregatedData, TimeRange, TimeRangeOption } from '@/utils/charts';
+import React from 'react';
+
+import { BaseChart } from '../charts/BaseChart';
 
 type SleepChartProps = {
     data: AggregatedData[];

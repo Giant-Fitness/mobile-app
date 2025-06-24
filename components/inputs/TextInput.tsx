@@ -1,11 +1,11 @@
 // components/inputs/TextInput.tsx
 
-import React from 'react';
-import { StyleSheet, TextInput as RNTextInput, ViewStyle, TextInputProps as RNTextInputProps, TextStyle } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import React from 'react';
+import { TextInput as RNTextInput, TextInputProps as RNTextInputProps, StyleSheet, TextStyle, ViewStyle } from 'react-native';
 
 interface TextInputProps extends RNTextInputProps {
     style?: ViewStyle;

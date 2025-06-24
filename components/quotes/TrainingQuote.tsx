@@ -1,14 +1,14 @@
 // components/quotes/TrainingQuote.tsx
 
-import React from 'react';
-import { StyleSheet, View, Platform } from 'react-native';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-import { ThemedText } from '@/components/base/ThemedText';
-import { Spaces } from '@/constants/Spaces';
 import { HighlightedTip } from '@/components/alerts/HighlightedTip';
+import { ThemedText } from '@/components/base/ThemedText';
+import { Colors } from '@/constants/Colors';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { Quote } from '@/types';
 import { darkenColor } from '@/utils/colorUtils';
+import React from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
 
 type TrainingQuoteProps = {
     quote: Quote;

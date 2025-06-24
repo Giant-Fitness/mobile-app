@@ -1,11 +1,10 @@
 // components/layout/ParallaxScrollView.tsx
 
-import React from 'react';
-import type { PropsWithChildren, ReactElement } from 'react';
-import { StyleSheet, useColorScheme } from 'react-native';
-import Animated, { interpolate, useAnimatedRef, useAnimatedStyle, useScrollViewOffset } from 'react-native-reanimated';
-
 import { ThemedView } from '@/components/base/ThemedView';
+import React, { type PropsWithChildren, type ReactElement } from 'react';
+import { StyleSheet, useColorScheme } from 'react-native';
+
+import Animated, { interpolate, useAnimatedRef, useAnimatedStyle, useScrollViewOffset } from 'react-native-reanimated';
 
 const HEADER_HEIGHT = 250;
 

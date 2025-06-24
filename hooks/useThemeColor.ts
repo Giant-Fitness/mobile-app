@@ -1,7 +1,7 @@
 // hooks/useThemeColor.ts
 
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 // Define type for the props object
 interface ThemeProps {

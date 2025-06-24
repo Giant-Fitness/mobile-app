@@ -1,12 +1,12 @@
 // components/inputs/RadioPill.tsx
 
-import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
+import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
 import { lightenColor } from '@/utils/colorUtils';
+import React from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 type RadioPillProps = {
     selected: boolean;

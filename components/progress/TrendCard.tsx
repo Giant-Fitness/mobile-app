@@ -1,18 +1,20 @@
 // components/cards/TrendCard.tsx
 
-import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
 import { Icon } from '@/components/base/Icon';
+import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
-import { SparkLine, EmptySparkLine, SinglePointSparkLine } from '../charts/SparkLine';
-import { ThemedText } from '../base/ThemedText';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { lightenColor } from '@/utils/colorUtils';
-import { format } from 'date-fns';
-import Animated, { useAnimatedStyle, withRepeat, withTiming, withSequence, useSharedValue } from 'react-native-reanimated';
+import React from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
-type ThemeColorKey = keyof typeof Colors['light'];
+import { format } from 'date-fns';
+import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
+
+import { ThemedText } from '../base/ThemedText';
+import { EmptySparkLine, SinglePointSparkLine, SparkLine } from '../charts/SparkLine';
+
+type ThemeColorKey = keyof (typeof Colors)['light'];
 
 type TrendCardProps = {
     title: string;

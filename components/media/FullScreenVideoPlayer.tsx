@@ -1,9 +1,11 @@
 // components/media/FullScreenVideoPlayer.tsx
 
-import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
-import { View, StyleSheet, Alert, Animated, Dimensions } from 'react-native';
-import { VideoView, useVideoPlayer } from 'expo-video';
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { Alert, Animated, Dimensions, StyleSheet, View } from 'react-native';
+
 import { setAudioModeAsync } from 'expo-audio';
+import { useVideoPlayer, VideoView } from 'expo-video';
+
 import PropTypes from 'prop-types';
 
 export interface VideoPlaybackStatus {

@@ -1,14 +1,14 @@
 // components/overlays/BottomMenuModal.tsx
 
-import React from 'react';
-import { StyleSheet, TouchableOpacity, ViewStyle, View } from 'react-native';
-import { ThemedText } from '@/components/base/ThemedText';
 import { Icon } from '@/components/base/Icon';
+import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
+import { BottomSheet } from '@/components/overlays/BottomSheet';
+import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-import { BottomSheet } from '@/components/overlays/BottomSheet';
-import { ThemedView } from '@/components/base/ThemedView';
+import React from 'react';
+import { StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 
 type MenuOption = {
     label: string;

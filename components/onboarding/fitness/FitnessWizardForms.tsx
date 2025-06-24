@@ -1,10 +1,10 @@
 // components/onboarding/fitness/FitnessWizardForms.tsx
 
-import React, { useState, forwardRef, useImperativeHandle, useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { SelectionGroup } from '@/components/buttons/SelectionButton';
 import { Spaces } from '@/constants/Spaces';
+import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 interface WorkoutGoalsFormProps {
     formData: {

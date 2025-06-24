@@ -1,28 +1,30 @@
 // components/exercise/ExerciseCard.tsx
 
-import React, { useState, useMemo } from 'react';
-import { StyleSheet, View, Platform, TouchableOpacity } from 'react-native';
-import Svg, { Circle } from 'react-native-svg';
+import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import { Exercise } from '@/types';
-import { Icon } from '@/components/base/Icon';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
 import { TextButton } from '@/components/buttons/TextButton';
-import { router } from 'expo-router';
-import { lightenColor } from '@/utils/colorUtils';
-import { RootState } from '@/store/store';
-import { useSelector } from 'react-redux';
-import { format } from 'date-fns';
-import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
-import { scale } from '@/utils/scaling';
-import { debounce } from '@/utils/debounce';
 import { ExerciseAlternativesBottomSheet } from '@/components/exercise/ExerciseAlternativesBottomSheet';
+import { Colors } from '@/constants/Colors';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
+import { RootState } from '@/store/store';
+import { Exercise } from '@/types';
 import { isExerciseLoggable } from '@/types/exerciseProgressTypes';
+import { lightenColor } from '@/utils/colorUtils';
+import { debounce } from '@/utils/debounce';
+import { scale } from '@/utils/scaling';
+import React, { useMemo, useState } from 'react';
+import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { router } from 'expo-router';
+
+import { format } from 'date-fns';
 import { trigger } from 'react-native-haptic-feedback';
+import Svg, { Circle } from 'react-native-svg';
+import { useSelector } from 'react-redux';
 
 type LogButtonState = {
     type: 'empty' | 'partial' | 'complete';

@@ -1,13 +1,13 @@
 // components/feedback/programs/GoalsStep.tsx
 
-import React from 'react';
-import { StyleSheet } from 'react-native';
-import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
+import { FeedbackStep } from '@/components/feedback/FeedbackForm';
 import { RadioGroup } from '@/components/inputs/RadioGroup';
 import { Spaces } from '@/constants/Spaces';
-import { FeedbackStep } from '@/components/feedback/FeedbackForm';
 import { ProgramCompleteData } from '@/types/feedbackTypes';
+import React from 'react';
+import { StyleSheet } from 'react-native';
 
 export const GoalsStep: FeedbackStep<ProgramCompleteData> = ({ data, onChange }) => {
     const options = [

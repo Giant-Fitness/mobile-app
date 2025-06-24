@@ -1,16 +1,17 @@
 // components/workouts/WorkoutOverviewCard.tsx
 
-import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
-import { moderateScale } from '@/utils/scaling';
+import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
-import { Workout } from '@/types';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-import { router } from 'expo-router';
+import { Workout } from '@/types';
 import { debounce } from '@/utils/debounce';
+import { moderateScale } from '@/utils/scaling';
+import React from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { router } from 'expo-router';
 
 type WorkoutOverviewCardProps = {
     workout: Workout;

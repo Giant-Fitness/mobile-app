@@ -1,15 +1,17 @@
 // components/onboarding/SignupWizard.tsx
 
-import React, { useState, useRef } from 'react';
-import { View, StyleSheet } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
 import { IconButton } from '@/components/buttons/IconButton';
 import { ProgressDots } from '@/components/onboarding/ProgressDots';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import React, { useRef, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+
 import { router } from 'expo-router';
+
 import { PrimaryButton } from '../buttons/PrimaryButton';
 
 interface WizardStep {

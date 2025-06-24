@@ -1,15 +1,17 @@
 // app/(app)/programs/program-complete.tsx
 
-import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated, Vibration } from 'react-native';
-import LottieView from 'lottie-react-native';
 import { ThemedText } from '@/components/base/ThemedText';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
+import { Colors } from '@/constants/Colors';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import React, { useEffect, useRef } from 'react';
+import { Animated, StyleSheet, Vibration, View } from 'react-native';
+
 import { router, useLocalSearchParams } from 'expo-router';
+
+import LottieView from 'lottie-react-native';
 
 export default function ProgramCompleteScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';

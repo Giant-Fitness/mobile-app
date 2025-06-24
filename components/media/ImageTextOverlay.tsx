@@ -1,15 +1,17 @@
 // components/media/ImageTextOverlay.tsx
 
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { ThemedText, ThemedTextProps } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { Image, ImageContentFit } from 'expo-image';
-import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import React, { useEffect, useState } from 'react';
+import { StyleProp, StyleSheet, TextStyle, ViewStyle } from 'react-native';
+
+import { Image, ImageContentFit } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
+
 import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
 
 const ShimmerPlaceholderComponent = ShimmerPlaceHolder as unknown as React.ComponentType<any>;

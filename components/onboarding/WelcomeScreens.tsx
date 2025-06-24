@@ -1,24 +1,26 @@
 // components/onboarding/WelcomeScreens.tsx
 
+import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
+import { Colors } from '@/constants/Colors';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import * as React from 'react';
-import { View, Dimensions, StyleSheet, Image, ImageSourcePropType } from 'react-native';
+import { Dimensions, Image, ImageSourcePropType, StyleSheet, View } from 'react-native';
+
+import { router } from 'expo-router';
+
 import Animated, {
-    useAnimatedScrollHandler,
-    useSharedValue,
-    useAnimatedStyle,
     interpolate,
     runOnJS,
+    useAnimatedScrollHandler,
+    useAnimatedStyle,
+    useSharedValue,
     withTiming,
     WithTimingConfig,
 } from 'react-native-reanimated';
-import { router } from 'expo-router';
 
-import { ThemedView } from '@/components/base/ThemedView';
-import { ThemedText } from '@/components/base/ThemedText';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
 import { PrimaryButton } from '../buttons/PrimaryButton';
 
 interface WelcomeItem {

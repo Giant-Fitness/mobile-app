@@ -1,10 +1,10 @@
 // components/onboarding/ProgressDots.tsx
 
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
 
 interface ProgressDotsProps {
     total: number;

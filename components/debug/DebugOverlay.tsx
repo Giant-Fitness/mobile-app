@@ -1,7 +1,7 @@
 // components/debug/DebugOverlay.tsx
-import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
+import React, { useState } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 interface DebugItem {
     label: string;

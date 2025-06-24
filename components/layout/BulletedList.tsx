@@ -1,14 +1,14 @@
 // components/layout/BulletedList.tsx
 
+import { Icon } from '@/components/base/Icon';
+import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
+import { Colors } from '@/constants/Colors';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { moderateScale } from '@/utils/scaling';
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import { ThemedText } from '@/components/base/ThemedText';
-import { Spaces } from '@/constants/Spaces';
-import { ThemedView } from '@/components/base/ThemedView';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-import { Icon } from '@/components/base/Icon';
-import { moderateScale } from '@/utils/scaling';
 
 type BulletedListProps = {
     items: string[];

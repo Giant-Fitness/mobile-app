@@ -1,51 +1,53 @@
 // app/(app)/(tabs)/home.tsx
 
-import React, { useState, useRef, useCallback } from 'react';
-import { StyleSheet, View, Platform, RefreshControl } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { useFocusEffect } from '@react-navigation/native';
 import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
+import { ActionTile } from '@/components/home/ActionTile';
+import { FactOfTheDay } from '@/components/home/FactOfTheDay';
+import { LargeActionTile } from '@/components/home/LargeActionTile';
 import { ActiveProgramDayCompressedCard } from '@/components/programs/ActiveProgramDayCompressedCard';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { WorkoutCompletedSection } from '@/components/programs/WorkoutCompletedSection';
+import { BodyMeasurementsLoggingSheet } from '@/components/progress/BodyMeasurementsLoggingSheet';
+import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
+import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { useProgramData } from '@/hooks/useProgramData';
-import { ActionTile } from '@/components/home/ActionTile';
-import { LargeActionTile } from '@/components/home/LargeActionTile';
-import { FactOfTheDay } from '@/components/home/FactOfTheDay';
-import { darkenColor, lightenColor } from '@/utils/colorUtils';
-import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
-import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
-import { BodyMeasurementsLoggingSheet } from '@/components/progress/BodyMeasurementsLoggingSheet';
+import { initializeTrackedLiftsHistoryAsync } from '@/store/exerciseProgress/thunks';
+import { getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/thunks';
+import { getRestDayQuoteAsync, getWorkoutQuoteAsync } from '@/store/quotes/thunks';
+import { AppDispatch, RootState } from '@/store/store';
 import {
-    logWeightMeasurementAsync,
-    getWeightMeasurementsAsync,
-    getSleepMeasurementsAsync,
-    logSleepMeasurementAsync,
-    getUserAsync,
-    getUserFitnessProfileAsync,
-    getUserProgramProgressAsync,
-    getUserRecommendationsAsync,
+    deleteBodyMeasurementAsync,
     deleteSleepMeasurementAsync,
     deleteWeightMeasurementAsync,
     getBodyMeasurementsAsync,
-    logBodyMeasurementAsync,
-    deleteBodyMeasurementAsync,
+    getSleepMeasurementsAsync,
+    getUserAppSettingsAsync,
+    getUserAsync,
     getUserExerciseSetModificationsAsync,
     getUserExerciseSubstitutionsAsync,
+    getUserFitnessProfileAsync,
+    getUserProgramProgressAsync,
+    getUserRecommendationsAsync,
+    getWeightMeasurementsAsync,
+    logBodyMeasurementAsync,
+    logSleepMeasurementAsync,
+    logWeightMeasurementAsync,
 } from '@/store/user/thunks';
-import { AppDispatch, RootState } from '@/store/store';
-import { WorkoutCompletedSection } from '@/components/programs/WorkoutCompletedSection';
-import { router } from 'expo-router';
-import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
-import { getSpotlightWorkoutsAsync, getAllWorkoutsAsync } from '@/store/workouts/thunks';
-import { initializeTrackedLiftsHistoryAsync } from '@/store/exerciseProgress/thunks';
-import { getUserAppSettingsAsync } from '@/store/user/thunks';
-import { getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/thunks';
-import { ScrollView } from 'react-native';
+import { getAllWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
+import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { debounce } from '@/utils/debounce';
-import { ThemedView } from '@/components/base/ThemedView';
+import React, { useCallback, useRef, useState } from 'react';
+import { Platform, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+
+import { router } from 'expo-router';
+
+import { useFocusEffect } from '@react-navigation/native';
+
 import { trigger } from 'react-native-haptic-feedback';
+import { useDispatch, useSelector } from 'react-redux';
 
 export default function HomeScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';

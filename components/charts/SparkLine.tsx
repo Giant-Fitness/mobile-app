@@ -1,10 +1,11 @@
 // components/charts/SparkLine.tsx
 
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Path, Svg, Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
+
+import { Circle, Defs, LinearGradient, Path, Stop, Svg } from 'react-native-svg';
 
 type Point = {
     x: number;

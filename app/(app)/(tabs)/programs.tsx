@@ -1,18 +1,19 @@
 // app/(app)/(tabs)/programs.tsx
 
-import React, { useEffect, useState } from 'react';
-import { ScrollView, RefreshControl } from 'react-native';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import ActiveProgramHome from '@/components/programs/active-program-home';
 import InactiveProgramHome from '@/components/programs/inactive-program-home';
-import { useSplashScreen } from '@/hooks/useSplashScreen';
+import { Colors } from '@/constants/Colors';
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { useProgramData, preloadProgramProgressData } from '@/hooks/useProgramData';
-import { useDispatch } from 'react-redux';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { preloadProgramProgressData, useProgramData } from '@/hooks/useProgramData';
+import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { AppDispatch } from '@/store/store';
+import React, { useEffect, useState } from 'react';
+import { RefreshControl, ScrollView } from 'react-native';
+
 import { trigger } from 'react-native-haptic-feedback';
+import { useDispatch } from 'react-redux';
 
 export default function ProgramsScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';

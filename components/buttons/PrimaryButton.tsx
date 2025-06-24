@@ -1,15 +1,15 @@
 // components/buttons/PrimaryButton.tsx
 
-import React from 'react';
-import { TouchableOpacity, StyleSheet, StyleProp, ViewStyle, TextStyle, AccessibilityProps, ActivityIndicator } from 'react-native';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-import { ThemedText } from '@/components/base/ThemedText';
 import { Icon } from '@/components/base/Icon';
-import { moderateScale } from '@/utils/scaling';
-import { Spaces } from '@/constants/Spaces';
+import { ThemedText, ThemedTextProps } from '@/components/base/ThemedText';
+import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
-import { ThemedTextProps } from '@/components/base/ThemedText';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { moderateScale } from '@/utils/scaling';
+import React from 'react';
+import { AccessibilityProps, ActivityIndicator, StyleProp, StyleSheet, TextStyle, TouchableOpacity, ViewStyle } from 'react-native';
+
 import { HapticFeedbackTypes, trigger } from 'react-native-haptic-feedback';
 
 type PrimaryButtonProps = {

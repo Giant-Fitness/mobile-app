@@ -1,10 +1,10 @@
 // components/overlays/Modal.tsx
 
-import React from 'react';
-import { Modal as RNModal, View, StyleSheet, StyleProp, ViewStyle, TouchableWithoutFeedback, AccessibilityProps } from 'react-native';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import React from 'react';
+import { AccessibilityProps, Modal as RNModal, StyleProp, StyleSheet, TouchableWithoutFeedback, View, ViewStyle } from 'react-native';
 
 type ModalProps = {
     visible: boolean;

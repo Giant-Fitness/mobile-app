@@ -3,7 +3,12 @@
 import axios from 'axios';
 
 export class ApiError extends Error {
-    constructor(message: string, public statusCode?: number, public code?: string, public originalError?: any) {
+    constructor(
+        message: string,
+        public statusCode?: number,
+        public code?: string,
+        public originalError?: any,
+    ) {
         super(message);
         this.name = 'ApiError';
     }

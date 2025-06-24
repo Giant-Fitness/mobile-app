@@ -1,23 +1,24 @@
 // hooks/useProgramData.ts
 
-import { useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { REQUEST_STATE } from '@/constants/requestStates';
+import { getAllProgramDaysAsync, getProgramAsync, getProgramDayAsync } from '@/store/programs/thunks';
+import { selectQuoteError, selectRestDayQuote, selectRestDayQuoteState, selectWorkoutQuote, selectWorkoutQuoteState } from '@/store/quotes/selectors';
+import { getRestDayQuoteAsync, getWorkoutQuoteAsync } from '@/store/quotes/thunks';
 import { AppDispatch, RootState } from '@/store/store';
 import {
+    completeDayAsync,
+    endProgramAsync,
     getUserAsync,
     getUserProgramProgressAsync,
     getUserRecommendationsAsync,
-    completeDayAsync,
-    uncompleteDayAsync,
-    endProgramAsync,
-    startProgramAsync,
     resetProgramAsync,
+    startProgramAsync,
+    uncompleteDayAsync,
 } from '@/store/user/thunks';
-import { getProgramAsync, getAllProgramDaysAsync, getProgramDayAsync } from '@/store/programs/thunks';
-import { getWorkoutQuoteAsync, getRestDayQuoteAsync } from '@/store/quotes/thunks';
-import { selectWorkoutQuote, selectWorkoutQuoteState, selectRestDayQuote, selectRestDayQuoteState, selectQuoteError } from '@/store/quotes/selectors';
-import { REQUEST_STATE } from '@/constants/requestStates';
-import { getWeekNumber, getNextDayIds, getDayOfWeek, groupWeeksIntoMonths, groupProgramDaysIntoWeeks } from '@/utils/calendar';
+import { getDayOfWeek, getNextDayIds, getWeekNumber, groupProgramDaysIntoWeeks, groupWeeksIntoMonths } from '@/utils/calendar';
+import { useEffect, useMemo, useState } from 'react';
+
+import { useDispatch, useSelector } from 'react-redux';
 
 interface PreloadedData {
     months: any[][][];

@@ -1,8 +1,10 @@
 // utils/api/apiConfig.ts
 
-import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
-import { handleApiError } from './errorUtils';
 import { authService } from '@/utils/auth';
+
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
+
+import { handleApiError } from './errorUtils';
 
 declare module 'axios' {
     export interface InternalAxiosRequestConfig {
@@ -44,7 +46,10 @@ export const API_CONFIG = {
 } as const;
 
 export class RetryError extends Error {
-    constructor(public originalError: AxiosError, public attempts: number) {
+    constructor(
+        public originalError: AxiosError,
+        public attempts: number,
+    ) {
         super(`Request failed after ${attempts} attempts`);
         this.name = 'RetryError';
     }

@@ -1,17 +1,17 @@
 // components/programs/ProgramCard.tsx
 
-import React from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
+import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
-import { Icon } from '@/components/base/Icon';
-import { moderateScale } from '@/utils/scaling';
-import { Spaces } from '@/constants/Spaces';
+import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { Program } from '@/types';
+import { moderateScale } from '@/utils/scaling';
+import React from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 type ProgramCardProps = {
     program: Program;

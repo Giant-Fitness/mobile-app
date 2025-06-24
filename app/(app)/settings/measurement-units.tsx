@@ -1,23 +1,24 @@
 // app/(app)/settings/measurement-units.tsx
 
+import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
+import { RadioPill } from '@/components/inputs/RadioPill';
+import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
+import { Colors } from '@/constants/Colors';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { AppDispatch, RootState } from '@/store/store';
+import { updateUserAppSettingsAsync } from '@/store/user/thunks';
+import { UserAppSettings } from '@/types';
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { useSharedValue } from 'react-native-reanimated';
-import { ThemedView } from '@/components/base/ThemedView';
-import { ThemedText } from '@/components/base/ThemedText';
-import { Colors } from '@/constants/Colors';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import { RootState } from '@/store/store';
-import { updateUserAppSettingsAsync } from '@/store/user/thunks';
-import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
-import { useColorScheme } from '@/hooks/useColorScheme';
+
 import { router } from 'expo-router';
-import { RadioPill } from '@/components/inputs/RadioPill';
-import { AppDispatch } from '@/store/store';
-import { UserAppSettings } from '@/types';
+
 import { trigger } from 'react-native-haptic-feedback';
+import { useSharedValue } from 'react-native-reanimated';
+import { useDispatch, useSelector } from 'react-redux';
 
 const UnitsSelectionScreen = () => {
     const dispatch = useDispatch<AppDispatch>();

@@ -1,13 +1,13 @@
 // components/feedback/FeedbackForm.tsx
 
-import React, { useState } from 'react';
-import { StyleSheet } from 'react-native';
-import { ThemedView } from '@/components/base/ThemedView';
 import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { TextButton } from '@/components/buttons/TextButton';
-import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import React, { useState } from 'react';
+import { StyleSheet } from 'react-native';
 
 export type Option = {
     id: string;

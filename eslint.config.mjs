@@ -1,8 +1,8 @@
-import react from 'eslint-plugin-react';
 import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
-import globals from 'globals';
+import react from 'eslint-plugin-react';
 import reactRecommended from 'eslint-plugin-react/configs/recommended.js';
+import globals from 'globals';
 
 export default [
     {

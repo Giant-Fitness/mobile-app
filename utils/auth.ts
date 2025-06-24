@@ -1,9 +1,12 @@
 // utils/auth.ts
 
-import * as SecureStore from 'expo-secure-store';
-import { fetchAuthSession, signOut as amplifySignOut } from 'aws-amplify/auth';
-import * as WebBrowser from 'expo-web-browser';
 import { Platform } from 'react-native';
+
+import * as SecureStore from 'expo-secure-store';
+import * as WebBrowser from 'expo-web-browser';
+
+import { signOut as amplifySignOut, fetchAuthSession } from 'aws-amplify/auth';
+
 import { cacheService } from './cache'; // Import your cache service
 
 const STORAGE_KEYS = {

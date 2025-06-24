@@ -1,10 +1,12 @@
 // components/base/PullToRefresh.tsx
 
-import React, { useState, useRef, useCallback } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, ViewStyle, View, FlatList } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import React, { useCallback, useRef, useState } from 'react';
+import { FlatList, RefreshControl, ScrollView, StyleSheet, View, ViewStyle } from 'react-native';
+
 import { useFocusEffect } from '@react-navigation/native';
+
 import Animated from 'react-native-reanimated';
 
 interface PullToRefreshProps {

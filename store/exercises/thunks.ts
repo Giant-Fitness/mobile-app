@@ -1,11 +1,12 @@
 // store/exercises/thunks.ts
 
-import { createAsyncThunk } from '@reduxjs/toolkit';
-import ExercisesService from '@/store/exercises/service';
-import { Exercise } from '@/types';
-import { RootState } from '@/store/store';
 import { REQUEST_STATE } from '@/constants/requestStates';
+import ExercisesService from '@/store/exercises/service';
+import { RootState } from '@/store/store';
+import { Exercise } from '@/types';
 import { cacheService, CacheTTL } from '@/utils/cache';
+
+import { createAsyncThunk } from '@reduxjs/toolkit';
 
 /**
  * Fetch all exercises

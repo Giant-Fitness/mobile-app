@@ -1,14 +1,14 @@
 // components/workouts/WorkoutsBottomBar.tsx
 
-import React from 'react';
-import { StyleSheet, View, TouchableOpacity, Platform } from 'react-native';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { ThemedView } from '@/components/base/ThemedView';
-import { ThemedText } from '@/components/base/ThemedText';
 import { Icon } from '@/components/base/Icon';
-import { scale, moderateScale, verticalScale } from '@/utils/scaling';
+import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
+import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { moderateScale, scale, verticalScale } from '@/utils/scaling';
+import React from 'react';
+import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 type WorkoutsBottomBarProps = {
     onSortPress: () => void;

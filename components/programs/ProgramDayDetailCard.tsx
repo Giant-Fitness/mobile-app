@@ -1,21 +1,23 @@
 // components/programs/ProgramDayDetailCard.tsx
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
+import { LeftImageInfoCard } from '@/components/media/LeftImageInfoCard';
 import { Colors } from '@/constants/Colors';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { RootState } from '@/store/store';
+import { ProgramDay, Workout } from '@/types';
+import { getDayOfWeek, getWeekNumber } from '@/utils/calendar';
+import { debounce } from '@/utils/debounce';
+import { moderateScale } from '@/utils/scaling';
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import { ThemedText } from '@/components/base/ThemedText';
-import { LeftImageInfoCard } from '@/components/media/LeftImageInfoCard';
-import { ThemedView } from '@/components/base/ThemedView';
-import { moderateScale } from '@/utils/scaling';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
-import { ProgramDay, Workout } from '@/types';
-import { getWeekNumber, getDayOfWeek } from '@/utils/calendar';
+
 import { router } from 'expo-router';
-import { RootState } from '@/store/store';
+
 import { useSelector } from 'react-redux';
-import { debounce } from '@/utils/debounce';
 
 type ProgramDayDetailCardProps = {
     day: ProgramDay;

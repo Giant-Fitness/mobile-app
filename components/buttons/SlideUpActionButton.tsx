@@ -1,10 +1,12 @@
 // components/buttons/SlideUpActionButton.tsx
 
+import { Spaces } from '@/constants/Spaces';
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, useDerivedValue, withTiming, SharedValue } from 'react-native-reanimated';
+
 import { LinearGradient } from 'expo-linear-gradient';
-import { Spaces } from '@/constants/Spaces';
+
+import Animated, { SharedValue, useAnimatedStyle, useDerivedValue, useSharedValue, withTiming } from 'react-native-reanimated';
 
 type SlideUpActionButtonProps = {
     children: React.ReactNode;

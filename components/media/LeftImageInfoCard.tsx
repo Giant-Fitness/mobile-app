@@ -1,15 +1,17 @@
 // components/media/LeftImageInfoCard.tsx
 
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, TouchableOpacity, View, StyleProp, ViewStyle, ImageSourcePropType, TextStyle, ImageStyle } from 'react-native';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import React, { useEffect, useState } from 'react';
+import { ImageSourcePropType, ImageStyle, StyleProp, StyleSheet, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native';
+
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Spaces } from '@/constants/Spaces';
-import { Sizes } from '@/constants/Sizes';
+
 import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
 
 // Cast ShimmerPlaceHolder to the correct type for TypeScript compatibility

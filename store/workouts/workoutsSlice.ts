@@ -1,10 +1,11 @@
 // store/workouts/workoutsSlice.ts
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { initialState } from '@/store/workouts/workoutsState';
-import { getAllWorkoutsAsync, getMultipleWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
 import { REQUEST_STATE } from '@/constants/requestStates';
+import { getAllWorkoutsAsync, getMultipleWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
+import { initialState } from '@/store/workouts/workoutsState';
 import { Workout, WorkoutRecommendations } from '@/types';
+
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 const workoutSlice = createSlice({
     name: 'workouts',

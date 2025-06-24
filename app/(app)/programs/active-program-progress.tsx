@@ -1,28 +1,30 @@
 // app/(app)/programs/ActiveProgramProgressScreen.tsx
 
-import React, { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, Dimensions } from 'react-native';
-import { ThemedView } from '@/components/base/ThemedView';
-import { ThemedText } from '@/components/base/ThemedText';
-import { router } from 'expo-router';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-import { ProgramMonthView } from '@/components/programs/ProgramMonthView';
-import { Spaces } from '@/constants/Spaces';
 import { Icon } from '@/components/base/Icon';
-import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
-import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
-import { Sizes } from '@/constants/Sizes';
+import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
 import { TopImageInfoCard } from '@/components/media/TopImageInfoCard';
+import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
+import { AutoDismissSuccessModal } from '@/components/overlays/AutoDismissSuccessModal';
+import { BottomMenuModal } from '@/components/overlays/BottomMenuModal';
+import { EndProgramModal } from '@/components/programs/EndProgramModal';
+import { ProgramMonthView } from '@/components/programs/ProgramMonthView';
 import { ProgramProgressPillBar } from '@/components/programs/ProgramProgressPillBar';
 import { ProgramWeekList } from '@/components/programs/ProgramWeekList';
-import { BottomMenuModal } from '@/components/overlays/BottomMenuModal';
-import { useProgramData } from '@/hooks/useProgramData';
-import { EndProgramModal } from '@/components/programs/EndProgramModal';
 import { ResetProgramModal } from '@/components/programs/ResetProgramModal';
-import { AutoDismissSuccessModal } from '@/components/overlays/AutoDismissSuccessModal';
-import { usePostHog } from 'posthog-react-native';
+import { Colors } from '@/constants/Colors';
+import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { useProgramData } from '@/hooks/useProgramData';
 import { debounce } from '@/utils/debounce';
+import React, { useState } from 'react';
+import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { router } from 'expo-router';
+
+import { usePostHog } from 'posthog-react-native';
+import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 
 const ActiveProgramProgressScreen = () => {
     // 1. Hooks Section - All hooks must be called before any conditionals

@@ -1,12 +1,13 @@
 // store/exerciseProgress/thunks.ts
 
-import { createAsyncThunk } from '@reduxjs/toolkit';
-import { RootState } from '@/store/store';
-import ExerciseProgressService from '@/store/exerciseProgress/service';
-import { ExerciseSet } from '@/types/exerciseProgressTypes';
-import { isLongTermTrackedLift, LONG_TERM_TRACKED_LIFT_IDS } from '@/store/exerciseProgress/utils';
 import { REQUEST_STATE } from '@/constants/requestStates';
+import ExerciseProgressService from '@/store/exerciseProgress/service';
+import { isLongTermTrackedLift, LONG_TERM_TRACKED_LIFT_IDS } from '@/store/exerciseProgress/utils';
+import { RootState } from '@/store/store';
+import { ExerciseSet } from '@/types/exerciseProgressTypes';
 import { cacheService, CacheTTL } from '@/utils/cache';
+
+import { createAsyncThunk } from '@reduxjs/toolkit';
 
 // Load only full history for tracked/compound lifts during initialization
 export const initializeTrackedLiftsHistoryAsync = createAsyncThunk<any, { forceRefresh?: boolean; useCache?: boolean } | void>(

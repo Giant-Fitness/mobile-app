@@ -1,11 +1,12 @@
 // components/home/LargeActionTile.tsx
 
-import React from 'react';
-import { StyleSheet, TouchableOpacity, View, Image, ImageSourcePropType, ViewStyle } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { ThemedText, ThemedTextProps } from '@/components/base/ThemedText';
-import { Spaces } from '@/constants/Spaces';
 import { Sizes } from '@/constants/Sizes';
+import { Spaces } from '@/constants/Spaces';
+import React from 'react';
+import { Image, ImageSourcePropType, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
+
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 interface LargeActionTileProps {
     title: string;

@@ -1,12 +1,13 @@
 // components/overlays/BottomSheet.tsx
 
-import React from 'react';
-import { Modal, StyleProp, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { ThemedView } from '@/components/base/ThemedView';
-import { BlurView } from 'expo-blur';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import React from 'react';
+import { Modal, StyleProp, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
+
+import { BlurView } from 'expo-blur';
 
 interface BottomSheetProps {
     visible: boolean;

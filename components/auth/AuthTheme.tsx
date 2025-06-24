@@ -1,10 +1,11 @@
 // components/auth/AuthTheme.tsx
 
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { Theme } from '@aws-amplify/ui-react-native';
-import { StyleSheet } from 'react-native';
 import { Spaces } from '@/constants/Spaces';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { StyleSheet } from 'react-native';
+
+import { Theme } from '@aws-amplify/ui-react-native';
 
 export const useAuthTheme = (): Theme => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
