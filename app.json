@@ -12,6 +12,9 @@
             "supportsTablet": false,
             "userInterfaceStyle": "automatic",
             "bundleIdentifier": "com.giantfitness.kyn",
+            "entitlements": {
+                "com.apple.developer.applesignin": ["Default"]
+            },
             "infoPlist": {
                 "UIRequiresFullScreen": true,
                 "UIStatusBarStyle": "auto",

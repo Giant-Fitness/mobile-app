@@ -27,7 +27,7 @@ export const configureAmplify = () => {
                             redirectSignIn,
                             redirectSignOut,
                             responseType: 'code',
-                            providers: ['Google'],
+                            providers: ['Google', 'Apple'],
                         },
                     },
                 },

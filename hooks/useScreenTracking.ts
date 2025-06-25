@@ -1,7 +1,9 @@
 // hooks/useScreenTracking.ts
 
 import { useEffect, useRef } from 'react';
+
 import { useGlobalSearchParams, useLocalSearchParams, usePathname } from 'expo-router';
+
 import { usePostHog } from 'posthog-react-native';
 
 type AllowedParams = {
@@ -21,7 +23,7 @@ export function useScreenTracking() {
     const localParams = useLocalSearchParams();
     const globalParams = useGlobalSearchParams();
     const posthog = usePostHog();
-    
+
     // Use ref to track the last tracked state to prevent unnecessary re-tracking
     const lastTracked = useRef<string>('');
 

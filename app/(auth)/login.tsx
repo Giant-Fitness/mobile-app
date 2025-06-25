@@ -188,7 +188,7 @@ const LoginPage = () => {
                         }}
                         loginMechanisms={['email']}
                         signUpAttributes={['email']}
-                        socialProviders={['google']}
+                        socialProviders={['google', 'apple']}
                     ></Authenticator>
                 </Authenticator.Provider>
             </ThemeProvider>
