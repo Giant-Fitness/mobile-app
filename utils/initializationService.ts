@@ -15,7 +15,7 @@ import {
 } from '@/store/initialization/initializationSlice';
 import { getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/thunks';
 import { getRestDayQuoteAsync, getWorkoutQuoteAsync } from '@/store/quotes/thunks';
-import { AppDispatch } from '@/store/store';
+import { AppDispatch, RootState } from '@/store/store';
 import {
     getBodyMeasurementsAsync,
     getSleepMeasurementsAsync,
@@ -74,13 +74,22 @@ interface LoadResult {
 
 export class InitializationService {
     private dispatch: AppDispatch;
+    private getState?: () => RootState; // Make optional
     private backgroundRefreshInProgress = false;
     private loadedData: Set<string> = new Set();
+    private loadedResults: Map<string, any> = new Map(); // Store loaded results
     private userProgramId: string | null = null;
     private isFirstRun = false;
 
     constructor(dispatch: AppDispatch) {
         this.dispatch = dispatch;
+    }
+
+    /**
+     * Set the state getter function after instantiation
+     */
+    setStateGetter(getState: () => RootState): void {
+        this.getState = getState;
     }
 
     // Flattened data categories with dependency-only sequencing
@@ -147,7 +156,7 @@ export class InitializationService {
             thunk: getAllProgramDaysAsync,
             cacheKey: 'program_days', // Will be dynamic
             ttl: CacheTTL.LONG,
-            required: true,
+            required: false, // Changed to false since it depends on having an active program
             priority: 'high',
             dependsOn: ['userProgramProgress'], // Only real dependency
             args: { useCache: true },
@@ -415,7 +424,7 @@ export class InitializationService {
             const stillWaitingItems: DataCategory[] = [];
 
             for (const item of remainingDependentItems) {
-                const canLoad = item.dependsOn?.every((dep) => processedItems.has(dep)) ?? true;
+                const canLoad = await this.canLoadItem(item, processedItems);
                 if (canLoad) {
                     readyItems.push(item);
                 } else {
@@ -423,7 +432,17 @@ export class InitializationService {
                 }
             }
 
-            if (readyItems.length === 0) break;
+            if (readyItems.length === 0) {
+                // Log remaining items that couldn't be loaded
+                console.log(`Cannot load remaining items due to missing dependencies:`, 
+                    stillWaitingItems.map(item => ({
+                        key: item.key,
+                        dependsOn: item.dependsOn,
+                        reason: this.getCannotLoadReason(item)
+                    }))
+                );
+                break;
+            }
 
             console.log(`First run: Loading ${readyItems.length} dependent items in parallel (iteration ${iteration})`);
 
@@ -461,7 +480,68 @@ export class InitializationService {
     }
 
     /**
-     * Existing method - kept for cache-aware strategy
+     * Enhanced dependency checking that considers actual data availability
+     */
+    private async canLoadItem(item: DataCategory, processedItems: Set<string>): Promise<boolean> {
+        // Check basic dependencies
+        const basicDepsOk = item.dependsOn?.every((dep) => processedItems.has(dep)) ?? true;
+        if (!basicDepsOk) {
+            return false;
+        }
+
+        // Special handling for programDays - check if user actually has an active program
+        if (item.key === 'programDays') {
+            const programId = await this.getCurrentProgramId();
+            if (!programId) {
+                console.log(`Cannot load programDays - no active program found`);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Get reason why an item cannot be loaded (for debugging)
+     */
+    private getCannotLoadReason(item: DataCategory): string {
+        if (item.key === 'programDays') {
+            return 'No active program found';
+        }
+        return `Missing dependencies: ${item.dependsOn?.join(', ')}`;
+    }
+
+    /**
+     * Get current program ID from state or cache
+     */
+    private async getCurrentProgramId(): Promise<string | null> {
+        try {
+            // First try to get from Redux state if available
+            if (this.getState) {
+                const state = this.getState();
+                const programProgress = state.user?.userProgramProgress;
+                if (programProgress?.ProgramId) {
+                    this.userProgramId = programProgress.ProgramId;
+                    return programProgress.ProgramId;
+                }
+            }
+
+            // Fallback to cache
+            const cachedProgress = (await cacheService.get(CACHE_KEYS.USER_PROGRAM_PROGRESS)) as any;
+            if (cachedProgress?.ProgramId) {
+                this.userProgramId = cachedProgress.ProgramId;
+                return cachedProgress.ProgramId;
+            }
+
+            return null;
+        } catch (error) {
+            console.warn('Failed to get current program ID:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Existing method - updated to use new canLoadItem logic
      */
     private async loadDataCategoryWithParallelization(dataItems: DataCategory[]): Promise<{ hasRequiredFailures: boolean }> {
         const loadResults: LoadResult[] = [];
@@ -505,7 +585,7 @@ export class InitializationService {
             const stillWaitingItems: DataCategory[] = [];
 
             for (const item of remainingDependentItems) {
-                const canLoad = item.dependsOn?.every((dep) => processedItems.has(dep)) ?? true;
+                const canLoad = await this.canLoadItem(item, processedItems);
                 if (canLoad) {
                     readyItems.push(item);
                 } else {
@@ -599,8 +679,6 @@ export class InitializationService {
         }
     }
 
-    // ... (keep existing helper methods like loadSingleItem, getDynamicCacheKey, etc.)
-
     private async loadSingleItem(item: DataCategory): Promise<LoadResult> {
         try {
             const cacheKey = await this.getDynamicCacheKey(item);
@@ -615,6 +693,13 @@ export class InitializationService {
 
             console.log(`Cache miss for ${item.key}, fetching from API`);
             const args = await this.getArgsForItem(item);
+            
+            // Skip loading if args indicate this item shouldn't be loaded
+            if (args === null) {
+                console.log(`Skipping ${item.key} - conditions not met`);
+                return { key: item.key, success: false, required: item.required };
+            }
+
             const result = await this.dispatch(item.thunk(args));
 
             if (item.thunk.fulfilled.match(result)) {
@@ -639,7 +724,7 @@ export class InitializationService {
 
     private async getDynamicCacheKey(item: DataCategory): Promise<string> {
         if (item.key === 'programDays') {
-            const programId = await this.getProgramIdFromCache();
+            const programId = await this.getCurrentProgramId();
             return programId ? CACHE_KEYS.PROGRAM_DAYS(programId) : item.cacheKey;
         }
         return item.cacheKey;
@@ -649,30 +734,94 @@ export class InitializationService {
         const baseArgs = { ...item.args };
 
         if (item.key === 'programDays') {
-            const programId = await this.getProgramIdFromCache();
-            if (programId) {
-                return { ...baseArgs, programId };
+            const programId = await this.getCurrentProgramId();
+            if (!programId) {
+                return null; // Signal that this item shouldn't be loaded
             }
+            return { ...baseArgs, programId };
         }
 
         return baseArgs;
     }
 
-    private async getProgramIdFromCache(): Promise<string | null> {
-        try {
-            const cachedProgress = (await cacheService.get(CACHE_KEYS.USER_PROGRAM_PROGRESS)) as any;
-            if (cachedProgress && cachedProgress.ProgramId) {
-                this.userProgramId = cachedProgress.ProgramId;
-                return cachedProgress.ProgramId;
-            }
-        } catch (error) {
-            console.warn('Failed to get program ID from cache:', error);
-        }
-        return this.userProgramId;
-    }
-
     private async performSmartBackgroundRefresh(): Promise<void> {
-        // Existing implementation...
-        console.log('Smart background refresh completed');
+        const allData = this.allDataCategories;
+        
+        // Group items by refresh priority
+        const highPriorityItems = allData.filter((item) => item.priority === 'high');
+        const mediumPriorityItems = allData.filter((item) => item.priority === 'medium');
+        const lowPriorityItems = allData.filter((item) => item.priority === 'low');
+        
+        // Refresh all priority groups in parallel (within each group, items refresh in parallel too)
+        console.log('🔄 Starting parallel background refresh...');
+        await Promise.allSettled([
+            this.refreshItemsIfNeeded(highPriorityItems, true),
+            this.refreshItemsIfNeeded(mediumPriorityItems, false),
+            this.refreshItemsIfNeeded(lowPriorityItems, false),
+        ]);
+        console.log('✅ Smart background refresh completed');
+    }
+    
+    private async refreshItemsIfNeeded(items: DataCategory[], forceRefresh: boolean): Promise<void> {
+        const refreshPromises = items.map(async (item) => {
+            try {
+                // Check conditional items
+                if (await this.canLoadConditionalItem(item)) {
+                    const cacheKey = await this.getDynamicCacheKey(item);
+                    const needsRefresh = forceRefresh || (await cacheService.needsBackgroundRefresh(cacheKey));
+                    
+                    if (!needsRefresh) {
+                        console.log(`⏭️  Skipping refresh for ${item.key} - still fresh`);
+                        return;
+                    }
+                    
+                    console.log(`🔄 Background refreshing ${item.key}...`);
+                    const args = {
+                        ...item.args,
+                        forceRefresh: true,
+                        useCache: true,
+                    };
+                    
+                    // Add dynamic args
+                    if (item.key === 'programDays') {
+                        const programId = await this.getCurrentProgramId();
+                        if (programId) {
+                            args.programId = programId;
+                        } else {
+                            console.log(`⏭️  Skipping refresh for ${item.key} - no active program`);
+                            return;
+                        }
+                    }
+                    
+                    const result = await this.dispatch(item.thunk(args));
+                    
+                    if (item.thunk.fulfilled.match(result)) {
+                        console.log(`✅ Successfully refreshed ${item.key} in background`);
+                    } else {
+                        console.warn(`⚠️  Failed to refresh ${item.key} in background`);
+                    }
+                } else {
+                    console.log(`⏭️  Skipping conditional refresh for ${item.key} - dependencies not met`);
+                }
+            } catch (error) {
+                console.warn(`❌ Error refreshing ${item.key} in background:`, error);
+            }
+        });
+        
+        await Promise.allSettled(refreshPromises);
+    }
+    
+    private async canLoadConditionalItem(item: DataCategory): Promise<boolean> {
+        // Handle conditional loading logic
+        if (item.key === 'programDays') {
+            const programId = await this.getCurrentProgramId();
+            return !!programId;
+        }
+        
+        // Add other conditional checks as needed
+        // For example, you might want to check if user has certain features enabled
+        // or if specific data exists before trying to load dependent data
+        
+        return true; // Default to true for non-conditional items
     }
 }
