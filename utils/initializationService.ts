@@ -434,12 +434,13 @@ export class InitializationService {
 
             if (readyItems.length === 0) {
                 // Log remaining items that couldn't be loaded
-                console.log(`Cannot load remaining items due to missing dependencies:`, 
-                    stillWaitingItems.map(item => ({
+                console.log(
+                    `Cannot load remaining items due to missing dependencies:`,
+                    stillWaitingItems.map((item) => ({
                         key: item.key,
                         dependsOn: item.dependsOn,
-                        reason: this.getCannotLoadReason(item)
-                    }))
+                        reason: this.getCannotLoadReason(item),
+                    })),
                 );
                 break;
             }
@@ -693,7 +694,7 @@ export class InitializationService {
 
             console.log(`Cache miss for ${item.key}, fetching from API`);
             const args = await this.getArgsForItem(item);
-            
+
             // Skip loading if args indicate this item shouldn't be loaded
             if (args === null) {
                 console.log(`Skipping ${item.key} - conditions not met`);
@@ -746,22 +747,24 @@ export class InitializationService {
 
     private async performSmartBackgroundRefresh(): Promise<void> {
         const allData = this.allDataCategories;
-        
+
         // Group items by refresh priority
+        const criticalItems = allData.filter((item) => item.priority === 'critical');
         const highPriorityItems = allData.filter((item) => item.priority === 'high');
         const mediumPriorityItems = allData.filter((item) => item.priority === 'medium');
         const lowPriorityItems = allData.filter((item) => item.priority === 'low');
-        
+
         // Refresh all priority groups in parallel (within each group, items refresh in parallel too)
         console.log('🔄 Starting parallel background refresh...');
         await Promise.allSettled([
+            this.refreshItemsIfNeeded(criticalItems, true),
             this.refreshItemsIfNeeded(highPriorityItems, true),
             this.refreshItemsIfNeeded(mediumPriorityItems, false),
             this.refreshItemsIfNeeded(lowPriorityItems, false),
         ]);
         console.log('✅ Smart background refresh completed');
     }
-    
+
     private async refreshItemsIfNeeded(items: DataCategory[], forceRefresh: boolean): Promise<void> {
         const refreshPromises = items.map(async (item) => {
             try {
@@ -769,19 +772,19 @@ export class InitializationService {
                 if (await this.canLoadConditionalItem(item)) {
                     const cacheKey = await this.getDynamicCacheKey(item);
                     const needsRefresh = forceRefresh || (await cacheService.needsBackgroundRefresh(cacheKey));
-                    
+
                     if (!needsRefresh) {
                         console.log(`⏭️  Skipping refresh for ${item.key} - still fresh`);
                         return;
                     }
-                    
+
                     console.log(`🔄 Background refreshing ${item.key}...`);
                     const args = {
                         ...item.args,
                         forceRefresh: true,
                         useCache: true,
                     };
-                    
+
                     // Add dynamic args
                     if (item.key === 'programDays') {
                         const programId = await this.getCurrentProgramId();
@@ -792,9 +795,9 @@ export class InitializationService {
                             return;
                         }
                     }
-                    
+
                     const result = await this.dispatch(item.thunk(args));
-                    
+
                     if (item.thunk.fulfilled.match(result)) {
                         console.log(`✅ Successfully refreshed ${item.key} in background`);
                     } else {
@@ -807,21 +810,21 @@ export class InitializationService {
                 console.warn(`❌ Error refreshing ${item.key} in background:`, error);
             }
         });
-        
+
         await Promise.allSettled(refreshPromises);
     }
-    
+
     private async canLoadConditionalItem(item: DataCategory): Promise<boolean> {
         // Handle conditional loading logic
         if (item.key === 'programDays') {
             const programId = await this.getCurrentProgramId();
             return !!programId;
         }
-        
+
         // Add other conditional checks as needed
         // For example, you might want to check if user has certain features enabled
         // or if specific data exists before trying to load dependent data
-        
+
         return true; // Default to true for non-conditional items
     }
 }

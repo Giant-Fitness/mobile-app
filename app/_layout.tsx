@@ -12,13 +12,14 @@ import 'react-native-reanimated';
 
 import { POSTHOG_CONFIG } from '@/config/posthog';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { useScreenTracking } from '@/hooks/useScreenTracking';
 import { resetStore } from '@/store/actions';
 import { store } from '@/store/store';
 import React from 'react';
 import { AppState, StatusBar } from 'react-native';
 
-import { PostHogProvider } from 'posthog-react-native';
+import { useGlobalSearchParams, useLocalSearchParams, usePathname } from 'expo-router';
+
+import { PostHogProvider, usePostHog } from 'posthog-react-native';
 import { Provider, useDispatch } from 'react-redux';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -29,6 +30,15 @@ SplashScreen.setOptions({
     duration: 200, // Reduced from 400ms
     fade: true,
 });
+
+// Define allowed route parameters for tracking
+const ALLOWED_ROUTE_PARAMS: { [key: string]: string[] } = {
+    '/workouts/workout-details': ['workoutId', 'source'],
+    '/workouts/all-workouts': ['source'],
+    '/programs/program-day': ['programId', 'dayId', 'source'],
+    '/programs/program-overview': ['programId', 'source'],
+    '/programs/exercise-details': ['exerciseId'],
+};
 
 function AppStateHandler() {
     const dispatch = useDispatch();
@@ -61,13 +71,46 @@ function AppStateHandler() {
     return null;
 }
 
+// Simple screen tracker for Expo Router
+function ScreenTracker() {
+    const pathname = usePathname();
+    const localParams = useLocalSearchParams();
+    const globalParams = useGlobalSearchParams();
+    const posthog = usePostHog();
+
+    useEffect(() => {
+        if (posthog && pathname) {
+            // Combine both local and global params
+            const params = {
+                ...globalParams,
+                ...localParams,
+            };
+
+            const allowedParams = ALLOWED_ROUTE_PARAMS[pathname] || [];
+
+            const trackedParams = allowedParams.reduce(
+                (acc, paramName) => {
+                    const value = params[paramName];
+                    if (typeof value === 'string' && value !== '') {
+                        acc[paramName] = value;
+                    }
+                    return acc;
+                },
+                {} as Record<string, string>,
+            );
+
+            posthog.capture('$screen', {
+                $screen_name: pathname,
+                ...(Object.keys(trackedParams).length > 0 && { route_params: trackedParams }),
+            });
+        }
+    }, [pathname, localParams, globalParams, posthog]);
+
+    return null;
+}
+
 export default function RootLayout() {
     const colorScheme = useColorScheme();
-
-    function ScreenTrackingWrapper({ children }: { children: React.ReactNode }) {
-        useScreenTracking();
-        return <>{children}</>;
-    }
 
     const [loaded] = useFonts({
         InterBold: require('../assets/fonts/Inter/Inter_18pt-Bold.ttf'),
@@ -98,30 +141,31 @@ export default function RootLayout() {
     return (
         <>
             <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} backgroundColor='transparent' translucent={true} />
-            <PostHogProvider
-                apiKey={POSTHOG_CONFIG.apiKey}
-                autocapture={{
-                    captureLifecycleEvents: true,
-                    captureScreens: true,
-                    ignoreLabels: [],
-                }}
-                options={{
-                    host: POSTHOG_CONFIG.host,
-                    enableSessionReplay: true,
-                    sessionReplayConfig: {
-                        maskAllTextInputs: false,
-                        maskAllImages: false,
-                        captureLog: true,
-                        captureNetworkTelemetry: true,
-                        androidDebouncerDelayMs: 500,
-                        iOSdebouncerDelayMs: 1000,
-                    },
-                }}
-            >
-                <Provider store={store}>
-                    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                        <AppStateHandler />
-                        {/* <ScreenTrackingWrapper> */}
+
+            <Provider store={store}>
+                <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                    <AppStateHandler />
+                    <PostHogProvider
+                        apiKey={POSTHOG_CONFIG.apiKey}
+                        autocapture={{
+                            captureTouches: false,
+                            captureScreens: false,
+                            ignoreLabels: [],
+                        }}
+                        options={{
+                            host: POSTHOG_CONFIG.host,
+                            enableSessionReplay: true,
+                            sessionReplayConfig: {
+                                maskAllTextInputs: false,
+                                maskAllImages: false,
+                                captureLog: true,
+                                captureNetworkTelemetry: true,
+                                androidDebouncerDelayMs: 500,
+                                iOSdebouncerDelayMs: 1000,
+                            },
+                        }}
+                    >
+                        <ScreenTracker />
                         <Stack
                             screenOptions={{
                                 headerShown: false,
@@ -142,10 +186,9 @@ export default function RootLayout() {
                                 }}
                             />
                         </Stack>
-                        {/* </ScreenTrackingWrapper> */}
-                    </ThemeProvider>
-                </Provider>
-            </PostHogProvider>
+                    </PostHogProvider>
+                </ThemeProvider>
+            </Provider>
         </>
     );
 }

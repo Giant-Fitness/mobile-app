@@ -62,7 +62,7 @@ export default function HomeScreen() {
 
     // Ref to track if component is mounted and focused
     const isMountedAndFocused = useRef(true);
-    const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const refreshTimeoutRef = useRef<number | null>(null);
 
     const { user, userProgramProgress, hasCompletedWorkoutToday } = useProgramData();
     const { userWeightMeasurements } = useSelector((state: RootState) => state.user);
@@ -361,8 +361,8 @@ export default function HomeScreen() {
                     </View>
 
                     <LargeActionTile
-                        title='Start Training'
-                        description='Our structured training plans turn your goals into achievements'
+                        title='Begin Training'
+                        description='Your recommended plan is ready to turn your goals into achievements'
                         onPress={() => {
                             debounce(router, '/(app)/programs/browse-programs');
                             trigger('soft');

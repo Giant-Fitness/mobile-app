@@ -17,8 +17,7 @@ interface WorkoutCompletedSectionProps {
 
 const COMPLETION_MESSAGES = [
     'Keep Crushing It! 💥',
-    'Strong Finish! 💪',
-    'Well Done, You! 🏋️',
+    'Absolutely Nailed It! 🏋️',
     'Workout Complete! 🏆',
     'Another Day, Another Victory! 🎉',
     'Great Work Today! 🥇',
@@ -52,7 +51,7 @@ export const WorkoutCompletedSection = ({ onBrowseSolos }: WorkoutCompletedSecti
 
             <LargeActionTile
                 title={actionTitle}
-                description='Explore solo workouts to supplement your training'
+                description='Browse solo workouts for some extra movement'
                 onPress={() => {
                     onBrowseSolos();
                     trigger('impactMedium');

@@ -31,7 +31,7 @@ export const LargeActionTile = ({
     titleSize = 'titleXLarge',
     bodySize = 'body',
     containerStyle,
-    imageSize = Sizes.imageSM,
+    imageSize = Sizes.imageXSWidth,
 }: LargeActionTileProps) => {
     // Shared value for scale animation
     const scale = useSharedValue(1);
@@ -102,6 +102,6 @@ const styles = StyleSheet.create({
     image: {
         position: 'absolute',
         bottom: -Spaces.XL,
-        right: Spaces.SM,
+        right: -Spaces.MD,
     },
 });
