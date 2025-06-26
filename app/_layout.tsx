@@ -170,7 +170,7 @@ export default function RootLayout() {
                             screenOptions={{
                                 headerShown: false,
                                 gestureEnabled: false,
-                                navigationBarHidden: true,
+                                navigationBarColor: '#fcfcfc',
                                 animation: 'default',
                                 presentation: 'card',
                             }}

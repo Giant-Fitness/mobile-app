@@ -544,7 +544,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderRadius: Spaces.SM,
         paddingHorizontal: Spaces.MD,
-        paddingVertical: Spaces.SM,
         height: 48,
         borderWidth: StyleSheet.hairlineWidth,
     },

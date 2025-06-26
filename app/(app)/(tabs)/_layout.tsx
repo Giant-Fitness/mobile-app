@@ -8,7 +8,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { debounce } from '@/utils/debounce';
 import { moderateScale } from '@/utils/scaling';
 import React from 'react';
-import { Platform, TouchableOpacity } from 'react-native';
+import { Platform, Pressable, TouchableOpacity } from 'react-native';
 
 import { router, Tabs } from 'expo-router';
 
@@ -41,12 +41,17 @@ export default function TabLayout() {
                     },
                     android: {
                         backgroundColor: themeColors.background,
-                        height: Sizes.footerHeightAndroid,
-                        paddingTop: Spaces.SM,
-                        paddingBottom: Spaces.XS,
                         level: 100,
                     },
                 }),
+                tabBarButton:
+                    Platform.OS === 'android'
+                        ? (props) => (
+                              <Pressable onPress={props.onPress} style={props.style} android_ripple={{ color: 'transparent' }}>
+                                  {props.children}
+                              </Pressable>
+                          )
+                        : undefined,
                 lazy: true, // This helps with performance
                 tabBarItemStyle: {
                     flexDirection: 'column', // Applied to both platforms

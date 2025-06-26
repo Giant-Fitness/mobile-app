@@ -31,5 +31,5 @@ export const Sizes = {
     headerHeight: moderateScale(100),
     headerHeightAndroid: moderateScale(70),
     footerHeightIOS: moderateScale(90),
-    footerHeightAndroid: moderateScale(70),
+    footerHeightAndroid: moderateScale(50),
 };

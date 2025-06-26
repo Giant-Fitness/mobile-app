@@ -31,6 +31,9 @@
             "userInterfaceStyle": "automatic",
             "package": "com.giantfitness.kyn",
             "permissions": ["NOTIFICATIONS", "RECEIVE_BOOT_COMPLETED", "VIBRATE", "CAMERA", "READ_MEDIA_IMAGES"],
+            "navigationBar": {
+                "visible": "sticky-immersive"
+            },
             "intentFilters": [
                 {
                     "action": "VIEW",

@@ -2,7 +2,7 @@
 
 import { Spaces } from '@/constants/Spaces';
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -85,9 +85,15 @@ export const SlideUpActionButton: React.FC<SlideUpActionButtonProps> = ({
 
     return (
         <Animated.View style={[styles.container, animatedStyle]}>
-            <LinearGradient colors={['rgba(255,255,255,0)', 'rgba(0,0,0,0.5)']} style={styles.gradient}>
-                <Animated.View style={styles.buttonContainer}>{children}</Animated.View>
-            </LinearGradient>
+            {Platform.OS === 'ios' ? (
+                <LinearGradient colors={['rgba(255,255,255,0)', 'rgba(0,0,0,0.5)']} style={styles.wrapper}>
+                    <Animated.View style={styles.buttonContainer}>{children}</Animated.View>
+                </LinearGradient>
+            ) : (
+                <View style={styles.wrapper}>
+                    <Animated.View style={styles.buttonContainer}>{children}</Animated.View>
+                </View>
+            )}
         </Animated.View>
     );
 };
@@ -99,7 +105,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
     },
-    gradient: {
+    wrapper: {
         width: '100%',
         paddingVertical: Spaces.LG,
         paddingHorizontal: Spaces.SM,

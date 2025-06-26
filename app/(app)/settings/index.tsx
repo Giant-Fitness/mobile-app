@@ -240,7 +240,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: Spaces.MD,
     },
     versionContainer: {
-        padding: Spaces.MD,
+        paddingTop: Spaces.MD,
+        paddingBottom: Spaces.XL,
         alignItems: 'center',
     },
     versionText: {
