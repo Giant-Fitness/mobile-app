@@ -16,8 +16,8 @@ import { isExerciseLoggable } from '@/types/exerciseProgressTypes';
 import { lightenColor } from '@/utils/colorUtils';
 import { debounce } from '@/utils/debounce';
 import { scale } from '@/utils/scaling';
-import React, { useMemo, useState } from 'react';
-import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useMemo, useRef, useState } from 'react';
+import { Alert, Animated, Linking, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { router } from 'expo-router';
 
@@ -54,6 +54,9 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
     const themeColors = Colors[colorScheme as 'light' | 'dark'];
     const [showAlternativesSheet, setShowAlternativesSheet] = useState(false);
     const [forceUpdate, setForceUpdate] = useState(0);
+
+    // Animation value
+    const scaleAnim = useRef(new Animated.Value(1)).current;
 
     const { recentLogs, liftHistory } = useSelector((state: RootState) => state.exerciseProgress);
     const { userExerciseSubstitutions, userExerciseSetModifications } = useSelector((state: RootState) => state.user);
@@ -105,6 +108,14 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
         return (exercise.Sets ?? 0) + (setModification?.AdditionalSets || 0);
     }, [exercise.Sets, setModification]);
 
+    // Check if demo video is available - fixed logic
+    const hasDemoVideo = useMemo(() => {
+        if (substituteExercise) {
+            return !!substituteExercise.YTDemoUrl;
+        }
+        return !!exercise.YTDemoUrl;
+    }, [substituteExercise, exercise.YTDemoUrl]);
+
     // Calculate log button state based on today's progress
     const logButtonState = useMemo<LogButtonState>(() => {
         if (!canLog) return { type: 'empty' };
@@ -135,6 +146,22 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
             progress: loggedSets / requiredSets,
         };
     }, [exercise.ExerciseId, effectiveSets, substituteExercise, recentLogs, liftHistory, canLog]);
+
+    const handlePressIn = () => {
+        Animated.spring(scaleAnim, {
+            toValue: 0.97,
+            friction: 3,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const handlePressOut = () => {
+        Animated.spring(scaleAnim, {
+            toValue: 1,
+            friction: 3,
+            useNativeDriver: true,
+        }).start();
+    };
 
     const navigateToExerciseDetail = () => {
         // When navigating to a substituted exercise, we want to keep the workout parameters
@@ -219,6 +246,19 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
         }
     };
 
+    const handleDemoPress = async () => {
+        const demoUrl = substituteExercise?.YTDemoUrl || exercise.YTDemoUrl;
+        if (!demoUrl) return;
+
+        try {
+            await Linking.openURL(demoUrl);
+            trigger('impactLight');
+        } catch (error) {
+            console.error('Error opening demo:', error);
+            Alert.alert('Error', 'Unable to open demo video');
+        }
+    };
+
     const renderLogButton = () => {
         if (!showLoggingButton || !canLog) return null;
 
@@ -289,8 +329,14 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
         return (
             <TextButton
                 onPress={handleLogPress}
-                style={[styles.logButton, { backgroundColor: lightenColor(themeColors.buttonPrimary, 0.1) }]}
+                style={[
+                    styles.logButton,
+                    { backgroundColor: lightenColor(themeColors.buttonPrimary, 0.1) },
+                    // Apply 50-50 width when both buttons are present
+                    hasDemoVideo ? styles.halfWidthButton : styles.fullWidthButton,
+                ]}
                 haptic='impactLight'
+                hitSlop={{ top: 12, right: 12, bottom: 12, left: 12 }}
             >
                 {buttonContent}
             </TextButton>
@@ -314,123 +360,139 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
     };
 
     return (
-        <ThemedView
-            style={[
-                styles.card,
-                {
-                    backgroundColor: themeColors.background,
-                    borderColor: themeColors.systemBorderColor,
-                },
-                Platform.OS === 'ios' ? styles.shadowIOS : styles.shadowAndroid,
-            ]}
-        >
-            <ThemedView style={[styles.titleContainer, { backgroundColor: themeColors.background }]}>
-                <View style={styles.titleRow}>
-                    <View style={styles.exerciseNameContainer}>
-                        <ThemedText type='titleLarge' style={[{ color: themeColors.text }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>
-                            {exerciseNumber ? (
-                                <ThemedText type='titleLarge' style={[{ color: lightenColor(themeColors.text, 0.7), fontSize: scale(16) }]}>
-                                    #{exerciseNumber}{' '}
-                                </ThemedText>
-                            ) : null}
-                            {substituteExercise ? substituteExercise.ExerciseName : exercise.ExerciseName}
-                        </ThemedText>
+        <Animated.View style={[{ transform: [{ scale: scaleAnim }] }]}>
+            <TouchableOpacity
+                activeOpacity={1}
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
+                onPress={navigateToExerciseDetail}
+                style={[
+                    styles.card,
+                    {
+                        backgroundColor: themeColors.background,
+                        borderColor: themeColors.systemBorderColor,
+                    },
+                    Platform.OS === 'ios' ? styles.shadowIOS : styles.shadowAndroid,
+                ]}
+            >
+                <ThemedView style={[styles.titleContainer, { backgroundColor: 'transparent' }]}>
+                    <View style={styles.titleRow}>
+                        <View style={styles.exerciseNameContainer}>
+                            <ThemedText type='titleLarge' style={[{ color: themeColors.text }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>
+                                {exerciseNumber ? (
+                                    <ThemedText type='titleLarge' style={[{ color: lightenColor(themeColors.text, 0.7), fontSize: scale(16) }]}>
+                                        #{exerciseNumber}{' '}
+                                    </ThemedText>
+                                ) : null}
+                                {substituteExercise ? substituteExercise.ExerciseName : exercise.ExerciseName}
+                            </ThemedText>
 
-                        {/* Substitution Tag */}
-                        {substitution && (
-                            <View style={styles.substitutionTag}>
-                                <Icon name='swap' size={14} color={themeColors.tangerineSolid} />
-                                <ThemedText type='caption' style={[styles.substitutionText, { color: themeColors.tangerineSolid }]}>
-                                    {substitution.IsTemporary ? 'Today only' : 'Substituted'}
-                                </ThemedText>
-                            </View>
-                        )}
+                            {/* Substitution and modification tags */}
+                            {substitution && (
+                                <View style={styles.substitutionTag}>
+                                    <Icon name='swap' size={14} color={themeColors.tangerineSolid} />
+                                    <ThemedText type='caption' style={[styles.substitutionText, { color: themeColors.tangerineSolid }]}>
+                                        {substitution.IsTemporary ? 'Today only' : 'Substituted'}
+                                    </ThemedText>
+                                </View>
+                            )}
 
-                        {/* Set Modification Tag */}
-                        {setModification && (
-                            <View style={styles.modificationTag}>
-                                <ThemedText type='caption' style={[styles.modificationText, { color: themeColors.tangerineSolid }]}>
-                                    {setModification.IsTemporary ? `+${setModification.AdditionalSets} sets today` : `+${setModification.AdditionalSets} sets`}
-                                </ThemedText>
-                            </View>
+                            {setModification && (
+                                <View style={styles.modificationTag}>
+                                    <ThemedText type='caption' style={[styles.modificationText, { color: themeColors.tangerineSolid }]}>
+                                        {setModification.IsTemporary
+                                            ? `+${setModification.AdditionalSets} sets today`
+                                            : `+${setModification.AdditionalSets} sets`}
+                                    </ThemedText>
+                                </View>
+                            )}
+                        </View>
+
+                        {/* Swap Icon Button */}
+                        {isEnrolled && (
+                            <TouchableOpacity
+                                onPress={(e) => {
+                                    e.stopPropagation();
+                                    handleSwapPress();
+                                    trigger('impactLight');
+                                }}
+                                style={styles.swapButton}
+                                hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
+                            >
+                                <Icon name='swap' size={24} color={substitution ? themeColors.tangerineSolid : lightenColor(themeColors.iconSelected, 0.15)} />
+                            </TouchableOpacity>
                         )}
                     </View>
+                </ThemedView>
 
-                    {/* Swap Icon Button */}
-                    {isEnrolled && (
-                        <TouchableOpacity
-                            onPress={() => {
-                                handleSwapPress();
-                                trigger('impactLight');
-                            }}
-                            style={styles.swapButton}
-                            hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
-                        >
-                            <Icon name='swap' size={24} color={substitution ? themeColors.tangerineSolid : themeColors.text} />
-                        </TouchableOpacity>
-                    )}
-                </View>
-            </ThemedView>
-            <ThemedView style={styles.infoContainer}>
-                <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.tipBackground }]}>
-                    <View style={styles.setsContainer}>
+                {/* Info containers and tip remain the same */}
+                <ThemedView style={styles.infoContainer}>
+                    <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.tipBackground }]}>
+                        <View style={styles.setsContainer}>
+                            <ThemedText type='bodyMedium' style={[{ color: themeColors.tipText }]}>
+                                {effectiveSets}
+                            </ThemedText>
+                        </View>
+                        <ThemedText type='bodySmall' style={[{ color: themeColors.tipText }]}>
+                            Sets
+                        </ThemedText>
+                    </ThemedView>
+                    <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.tipBackground }]}>
                         <ThemedText type='bodyMedium' style={[{ color: themeColors.tipText }]}>
-                            {effectiveSets}
+                            {getMetricRange()}
                         </ThemedText>
-                    </View>
-                    <ThemedText type='bodySmall' style={[{ color: themeColors.tipText }]}>
-                        Sets
-                    </ThemedText>
+                        <ThemedText type='bodySmall' style={[{ color: themeColors.tipText }]}>
+                            {getMetricLabel()}
+                        </ThemedText>
+                    </ThemedView>
+                    <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.tipBackground }]}>
+                        <ThemedText type='bodyMedium' style={[{ color: themeColors.tipText }]}>
+                            {exercise.Rest}s
+                        </ThemedText>
+                        <ThemedText type='bodySmall' style={[{ color: themeColors.tipText }]}>
+                            Rest
+                        </ThemedText>
+                    </ThemedView>
                 </ThemedView>
-                <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.tipBackground }]}>
-                    <ThemedText type='bodyMedium' style={[{ color: themeColors.tipText }]}>
-                        {getMetricRange()}
-                    </ThemedText>
-                    <ThemedText type='bodySmall' style={[{ color: themeColors.tipText }]}>
-                        {getMetricLabel()}
-                    </ThemedText>
-                </ThemedView>
-                <ThemedView style={[styles.infoBox, { backgroundColor: themeColors.tipBackground }]}>
-                    <ThemedText type='bodyMedium' style={[{ color: themeColors.tipText }]}>
-                        {exercise.Rest}s
-                    </ThemedText>
-                    <ThemedText type='bodySmall' style={[{ color: themeColors.tipText }]}>
-                        Rest
-                    </ThemedText>
-                </ThemedView>
-            </ThemedView>
-            {(substituteExercise?.QuickTip || exercise.QuickTip) && (
-                <ThemedView style={styles.tipContainer}>
-                    <Icon name='bulb' size={Sizes.fontSizeDefault} color={themeColors.text} style={{ marginTop: Spaces.XS }} />
-                    <ThemedText type='italic' style={styles.quickTip}>
-                        {substituteExercise?.QuickTip || exercise.QuickTip}
-                    </ThemedText>
-                </ThemedView>
-            )}
-            <View style={styles.buttonContainer}>
-                <TextButton
-                    text='View Guide'
-                    onPress={navigateToExerciseDetail}
-                    textStyle={[{ color: themeColors.text }]}
-                    textType='bodyMedium'
-                    style={[
-                        {
-                            flex: 1,
-                            borderRadius: Spaces.SM,
-                        },
-                    ]}
-                />
-                {isEnrolled && showLoggingButton && renderLogButton()}
-            </View>
+
+                {(substituteExercise?.QuickTip || exercise.QuickTip) && (
+                    <ThemedView style={styles.tipContainer}>
+                        <Icon name='bulb' size={Sizes.fontSizeDefault} color={themeColors.text} style={{ marginTop: Spaces.XS }} />
+                        <ThemedText type='italic' style={styles.quickTip}>
+                            {substituteExercise?.QuickTip || exercise.QuickTip}
+                        </ThemedText>
+                    </ThemedView>
+                )}
+
+                {/* Button container - updated for 50-50 layout */}
+                <View style={styles.buttonContainer}>
+                    {/* Demo button - only show if demo exists */}
+                    {hasDemoVideo && (
+                        <TextButton
+                            text='Demo'
+                            iconName='play'
+                            iconSize={14}
+                            iconColor={lightenColor(themeColors.text, 0.15)}
+                            onPress={handleDemoPress}
+                            textType='bodyMedium'
+                            style={[
+                                {
+                                    borderRadius: Spaces.SM,
+                                },
+                                // Apply 50-50 width when both buttons are present
+                                isEnrolled && showLoggingButton && canLog ? styles.halfWidthButton : styles.fullWidthButton,
+                            ]}
+                        />
+                    )}
+
+                    {/* Log button */}
+                    {isEnrolled && showLoggingButton && renderLogButton()}
+                </View>
+            </TouchableOpacity>
 
             {/* Exercise Alternatives Bottom Sheet */}
-            <ExerciseAlternativesBottomSheet
-                visible={showAlternativesSheet}
-                onClose={handleSheetClose}
-                exercise={exercise} // Pass the original exercise for substitution logic
-                programId={programId}
-            />
-        </ThemedView>
+            <ExerciseAlternativesBottomSheet visible={showAlternativesSheet} onClose={handleSheetClose} exercise={exercise} programId={programId} />
+        </Animated.View>
     );
 };
 
@@ -517,6 +579,7 @@ const styles = StyleSheet.create({
         marginHorizontal: Spaces.SM,
         paddingHorizontal: Spaces.MD,
         paddingBottom: Spaces.SM,
+        gap: Spaces.MD, // Add gap between buttons for better spacing
     },
     infoBox: {
         padding: Spaces.LG,
@@ -525,12 +588,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     logButton: {
-        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: Spaces.SM,
-        marginLeft: Spaces.LG,
+    },
+    halfWidthButton: {
+        flex: 1,
+    },
+    fullWidthButton: {
+        flex: 1,
     },
     buttonIcon: {
         marginRight: Spaces.XS,

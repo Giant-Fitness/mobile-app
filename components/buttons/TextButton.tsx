@@ -30,6 +30,7 @@ type TextButtonProps = {
     loading?: boolean;
     children?: React.ReactNode;
     haptic?: HapticFeedbackTypes | keyof typeof HapticFeedbackTypes | 'none';
+    hitSlop?: { top: number; right: number; bottom: number; left: number };
 };
 
 export const TextButton: React.FC<TextButtonProps & AccessibilityProps> = ({
@@ -49,6 +50,7 @@ export const TextButton: React.FC<TextButtonProps & AccessibilityProps> = ({
     loading = false,
     children,
     haptic = 'none',
+    hitSlop,
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -84,6 +86,7 @@ export const TextButton: React.FC<TextButtonProps & AccessibilityProps> = ({
             activeOpacity={Opacities.buttonActiveOpacity}
             accessibilityLabel={accessibilityLabel}
             disabled={disabled || loading}
+            hitSlop={hitSlop}
         >
             {loading ? (
                 <ActivityIndicator size='small' color={themeColors.text} />
