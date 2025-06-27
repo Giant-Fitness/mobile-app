@@ -55,6 +55,7 @@
             "expo-audio",
             "expo-build-properties",
             "expo-web-browser",
+            "expo-video",
             [
                 "expo-splash-screen",
                 {
@@ -65,13 +66,6 @@
                         "image": "./assets/icons/splash-icon-light.png"
                     },
                     "imageWidth": 200
-                }
-            ],
-            [
-                "expo-video",
-                {
-                    "supportsBackgroundPlayback": true,
-                    "supportsPictureInPicture": true
                 }
             ]
         ],
