@@ -102,7 +102,7 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
 
             setAlternatives(sortedAlternatives);
         } catch (err) {
-            setError('Failed to load exercise alternatives. Please try again.');
+            setError(`We couldn't find any alternatives for this exercise right now. Please try again.`);
             console.error('Error fetching alternatives:', err);
         } finally {
             setLoadingAlternatives(false);
@@ -155,7 +155,10 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
 
             // Show success animation
             setShowSuccess({
-                message: `Exercise swapped ${type === 'temporary' ? 'for today' : 'for entire program'}`,
+                message:
+                    type === 'temporary'
+                        ? `Great! Using ${selectedAlternative.ExerciseName} for today`
+                        : `Perfect! Switched to ${selectedAlternative.ExerciseName} for this program`,
                 visible: true,
             });
 
@@ -184,7 +187,7 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
 
             // Show success animation
             setShowSuccess({
-                message: 'Exercise reverted to original',
+                message: 'All set! Back to the original exercise',
                 visible: true,
             });
 
@@ -195,7 +198,7 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
                 onClose();
             }, 1500);
         } catch (error) {
-            setError('Failed to revert exercise. Please try again.');
+            setError('Failed to reset exercise. Please try again.');
             console.error('Error reverting substitution:', error);
         }
     };
@@ -254,7 +257,7 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
                 style={[
                     styles.alternativeCard,
                     {
-                        backgroundColor: isSelected ? themeColors.tangerineTransparent : themeColors.background,
+                        backgroundColor: isSelected ? lightenColor(themeColors.tangerineTransparent, 0.7) : themeColors.background,
                         borderColor: isSelected ? themeColors.tangerineSolid : themeColors.systemBorderColor,
                     },
                     Platform.OS === 'ios' ? styles.shadowIOS : styles.shadowAndroid,
@@ -400,7 +403,7 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
                             ListEmptyComponent={
                                 <View style={styles.emptyContainer}>
                                     <ThemedText type='body' style={styles.emptyText}>
-                                        No alternatives available for this exercise.
+                                        We couldn&apos;t find any alternatives for this exercise right now.
                                     </ThemedText>
                                 </View>
                             }
@@ -455,7 +458,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     headerSubtitle: {
-        marginTop: Spaces.XS,
+        marginTop: Spaces.MD,
         textAlign: 'center',
         opacity: 0.7,
         fontSize: Sizes.fontSizeSmall,
@@ -486,7 +489,7 @@ const styles = StyleSheet.create({
         borderWidth: StyleSheet.hairlineWidth,
         overflow: 'hidden',
         flex: 1,
-        height: 80,
+        minHeight: 90,
     },
     shadowIOS: {
         shadowColor: '#777',
@@ -511,6 +514,7 @@ const styles = StyleSheet.create({
         padding: Spaces.SM,
         flex: 1,
         justifyContent: 'space-between',
+        minHeight: 64,
     },
     exerciseNameRow: {
         flexDirection: 'row',
@@ -521,6 +525,7 @@ const styles = StyleSheet.create({
     exerciseName: {
         flex: 1,
         marginRight: Spaces.XS,
+        maxWidth: '75%',
     },
     selectedIndicator: {
         alignItems: 'center',
@@ -587,7 +592,8 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: Spaces.XXL,
+        paddingTop: Spaces.XL,
+        paddingBottom: Spaces.XXL,
     },
     animationContainer: {
         alignItems: 'center',
@@ -632,7 +638,7 @@ const styles = StyleSheet.create({
     modalButton: {
         flex: 1,
         paddingVertical: Spaces.SM,
-        borderRadius: Spaces.MD,
+        borderRadius: Spaces.SM,
     },
     buttonTextStyle: {
         fontSize: Sizes.fontSizeSmall,
