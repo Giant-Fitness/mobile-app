@@ -89,8 +89,8 @@ export const TrendCard: React.FC<TrendCardProps> = ({
     const cardStyle = [
         styles.card,
         {
-            backgroundColor: lightenBackground ? lightenColor(themeColors[themeTransparentColor], 0.5) : themeColors[themeTransparentColor],
-            borderColor: lightenColor(themeColors[themeColor], 0.7),
+            backgroundColor: lightenBackground ? lightenColor(themeColors[themeTransparentColor], 0.5) : lightenColor(themeColors[themeColor], 0.9),
+            borderColor: lightenBackground ? lightenColor(themeColors[themeColor], 0.7) : lightenColor(themeColors[themeColor], 0.45),
         },
         style,
     ];
@@ -169,38 +169,36 @@ export const TrendCard: React.FC<TrendCardProps> = ({
                     </ThemedText>
                 </View>
 
-                <View style={styles.singlePointContainer}>
-                    {isToday ? (
-                        <>
-                            <View style={styles.singlePointMessage}>
-                                <ThemedText type='bodySmall' style={[styles.singlePointHelperText, { color: themeColors.subText }]}>
-                                    Great start! Add another tomorrow to start tracking your trend.
+                {isToday ? (
+                    <View style={styles.singlePointContainer}>
+                        <View style={styles.singlePointMessage}>
+                            <ThemedText type='bodySmall' style={[styles.singlePointHelperText, { color: themeColors.subText }]}>
+                                Great start! Add another tomorrow to start tracking your trend.
+                            </ThemedText>
+                        </View>
+                    </View>
+                ) : (
+                    <>
+                        <View style={styles.textContainer}>
+                            <ThemedText type='bodySmall' style={[styles.subtitle, { color: themeColors.subText }]}>
+                                {formattedDate}
+                            </ThemedText>
+                        </View>
+                        <View style={[styles.chartContainer, style.chartContainer]}>
+                            <SinglePointSparkLine value={value} color={lightenColor(themeColors[themeColor], 0.5)} />
+                        </View>
+                        <View style={dividerStyle} />
+                        <View style={styles.footerContainer}>
+                            <TouchableOpacity style={styles.addButtonSmall} onPress={handlePress} activeOpacity={0.8}>
+                                <Icon name='plus' size={14} color={themeColors[themeColor]} style={styles.addIconSmall} />
+                                <ThemedText type='button' style={[styles.buttonText, { color: themeColors[themeColor] }]}>
+                                    Add next
                                 </ThemedText>
-                            </View>
-                        </>
-                    ) : (
-                        <>
-                            <View style={styles.textContainer}>
-                                <ThemedText type='bodySmall' style={[styles.subtitle, { color: themeColors.subText }]}>
-                                    {formattedDate}
-                                </ThemedText>
-                            </View>
-                            <View style={[styles.chartContainer, style.chartContainer]}>
-                                <SinglePointSparkLine value={value} color={lightenColor(themeColors[themeColor], 0.5)} />
-                            </View>
-                            <View style={dividerStyle} />
-                            <View style={styles.footerContainer}>
-                                <TouchableOpacity style={styles.addButtonSmall} onPress={handlePress} activeOpacity={0.8}>
-                                    <Icon name='plus' size={14} color={themeColors[themeColor]} style={styles.addIconSmall} />
-                                    <ThemedText type='button' style={[styles.buttonText, { color: themeColors[themeColor] }]}>
-                                        Add next
-                                    </ThemedText>
-                                </TouchableOpacity>
-                                <Icon name='chevron-forward' size={14} color={themeColors.subText} style={{ marginTop: Spaces.XXS }} />
-                            </View>
-                        </>
-                    )}
-                </View>
+                            </TouchableOpacity>
+                            <Icon name='chevron-forward' size={14} color={themeColors.subText} style={{ marginTop: Spaces.XXS }} />
+                        </View>
+                    </>
+                )}
             </TouchableOpacity>
         );
     }
@@ -239,6 +237,7 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         width: '100%',
         borderWidth: StyleSheet.hairlineWidth,
+        minHeight: 140,
     },
     chartContainer: {
         width: '90%',
@@ -246,10 +245,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         alignSelf: 'center',
-        marginVertical: Spaces.XXS,
         position: 'relative',
+        flex: 1,
     },
     textContainer: {
+        marginTop: Spaces.XS,
         width: '100%',
     },
     title: {
@@ -262,6 +262,8 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
         justifyContent: 'space-between',
+        marginTop: 'auto',
+        marginBottom: Spaces.SM,
     },
     shimmerContainer: {
         backgroundColor: '#E0E0E0',
@@ -273,7 +275,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#F5F5F5',
     },
     divider: {
-        marginBottom: Spaces.MD,
+        marginBottom: Spaces.SM,
         width: '100%',
         alignSelf: 'center',
     },
@@ -285,16 +287,18 @@ const styles = StyleSheet.create({
         marginRight: Spaces.XXS,
     },
     buttonText: {},
-    // Single data point styles
     singlePointContainer: {
         width: '100%',
         alignItems: 'center',
+        flex: 1,
+        justifyContent: 'center',
     },
     singlePointMessage: {
         width: '100%',
         paddingHorizontal: Spaces.SM,
         justifyContent: 'center',
-        minHeight: 120,
+        flex: 1,
+        minHeight: 80,
     },
     singlePointHelperText: {
         textAlign: 'center',
