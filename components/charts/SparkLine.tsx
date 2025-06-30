@@ -78,8 +78,8 @@ export const SparkLine: React.FC<SparkLineProps> = ({
     color,
     width = '100%',
     height = '100%',
-    strokeWidth = 0.9,
-    dotRadius = 1.5,
+    strokeWidth = 1.3,
+    dotRadius = 2.5,
     dotFillColor,
     style,
 }) => {

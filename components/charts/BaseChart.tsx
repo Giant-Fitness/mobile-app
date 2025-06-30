@@ -1,7 +1,6 @@
 // components/charts/BaseChart.tsx
 
 import { ThemedText } from '@/components/base/ThemedText';
-import { ThemedView } from '@/components/base/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -56,11 +55,6 @@ type BaseChartProps = {
     getGridLineValues?: (min: number, max: number) => number[];
 };
 
-type TimeRangeOptionType = {
-    range: TimeRange;
-    disabled?: boolean;
-};
-
 const RangeSelector = ({
     selectedRange,
     onRangeChange,
@@ -74,33 +68,58 @@ const RangeSelector = ({
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const [showTooltip, setShowTooltip] = useState<string | null>(null);
 
     return (
         <View style={[styles.rangeSelector, style]}>
-            {availableRanges.map(({ range, disabled }: TimeRangeOptionType) => (
-                <ThemedView
+            {availableRanges.map(({ range, disabled, disabledReason }) => (
+                <TouchableOpacity
                     key={range}
                     style={[
                         styles.rangePill,
                         disabled && styles.disabledRangePill,
                         {
                             backgroundColor: range === selectedRange ? themeColors.containerHighlight : themeColors.background,
+                            borderWidth: disabled ? 1 : 0,
+                            borderColor: disabled ? lightenColor(themeColors.subText, 0.8) : 'transparent',
                         },
                     ]}
-                    onTouchEnd={() => !disabled && onRangeChange(range)}
+                    onPress={() => {
+                        if (disabled) {
+                            // Show tooltip for disabled state
+                            setShowTooltip(range);
+                            setTimeout(() => setShowTooltip(null), 2000);
+                        } else {
+                            onRangeChange(range);
+                        }
+                    }}
+                    disabled={false} // Always allow press for better feedback
                 >
                     <ThemedText
                         type='body'
                         style={[
                             styles.rangeText,
                             {
-                                color: range === selectedRange ? themeColors.highlightContainerText : themeColors.subText,
+                                color: disabled
+                                    ? lightenColor(themeColors.subText, 0.6)
+                                    : range === selectedRange
+                                      ? themeColors.highlightContainerText
+                                      : themeColors.subText,
                             },
                         ]}
                     >
                         {range}
                     </ThemedText>
-                </ThemedView>
+
+                    {/* Show tooltip for disabled ranges */}
+                    {showTooltip === range && disabled && (
+                        <View style={styles.disabledTooltip}>
+                            <ThemedText type='caption' style={styles.tooltipText}>
+                                {disabledReason}
+                            </ThemedText>
+                        </View>
+                    )}
+                </TouchableOpacity>
             ))}
         </View>
     );
@@ -112,57 +131,82 @@ const EmptyStateChart = ({
     height,
     padding,
     themeColor,
+    dataCount,
 }: {
     themeColors: any;
     width: number;
     height: number;
     padding: { top: number; right: number; bottom: number; left: number };
     themeColor: string;
-}) => (
-    <Svg width={width} height={height} preserveAspectRatio='xMidYMid meet'>
-        <Defs>
-            <LinearGradient id='emptyGradient' x1='0' y1='0' x2='0' y2='1'>
-                <Stop offset='0' stopColor={themeColors[themeColor]} stopOpacity='0.2' />
-                <Stop offset='1' stopColor={themeColors[themeColor]} stopOpacity='0.05' />
-            </LinearGradient>
-        </Defs>
+    dataCount: number;
+}) => {
+    const getMessage = () => {
+        if (dataCount === 0) {
+            return {
+                title: 'Start Tracking',
+                subtitle: 'Add your first measurement to begin tracking progress',
+            };
+        } else if (dataCount === 1) {
+            return {
+                title: 'Add More Data',
+                subtitle: 'Add another measurement to see trends and patterns',
+            };
+        } else {
+            return {
+                title: 'Need More Data',
+                subtitle: 'Add more measurements for this time period',
+            };
+        }
+    };
 
-        {/* Grid lines */}
-        {Array.from({ length: 5 }).map((_, i) => {
-            const y = ((i + 1) * (height - padding.top - padding.bottom)) / 5 + padding.top;
-            return (
-                <Line
-                    key={i}
-                    x1={padding.left}
-                    y1={y}
-                    x2={width}
-                    y2={y}
-                    stroke={lightenColor(themeColors.subText, 0.8)}
-                    strokeWidth={0.5}
-                    strokeDasharray='4,4'
-                />
-            );
-        })}
+    const { title, subtitle } = getMessage();
 
-        {/* Stylized trend line */}
-        <Path
-            d={`M ${padding.left} ${height / 2} 
+    return (
+        <View style={styles.emptyStateContainer}>
+            <Svg width={width} height={height} preserveAspectRatio='xMidYMid meet'>
+                <Defs>
+                    <LinearGradient id='emptyGradient' x1='0' y1='0' x2='0' y2='1'>
+                        <Stop offset='0' stopColor={themeColors[themeColor]} stopOpacity='0.2' />
+                        <Stop offset='1' stopColor={themeColors[themeColor]} stopOpacity='0.05' />
+                    </LinearGradient>
+                </Defs>
+
+                {/* Grid lines */}
+                {Array.from({ length: 5 }).map((_, i) => {
+                    const y = ((i + 1) * (height - padding.top - padding.bottom)) / 5 + padding.top;
+                    return (
+                        <Line
+                            key={i}
+                            x1={padding.left}
+                            y1={y}
+                            x2={width}
+                            y2={y}
+                            stroke={lightenColor(themeColors.subText, 0.8)}
+                            strokeWidth={0.5}
+                            strokeDasharray='4,4'
+                        />
+                    );
+                })}
+
+                {/* Stylized trend line */}
+                <Path
+                    d={`M ${padding.left} ${height / 2} 
                 C ${width * 0.25} ${height / 2}, 
                   ${width * 0.25} ${height * 0.3}, 
                   ${width * 0.5} ${height * 0.3} 
                 C ${width * 0.75} ${height * 0.3}, 
                   ${width * 0.75} ${height / 2}, 
                   ${width} ${height / 2}`}
-            stroke={themeColors[themeColor]}
-            strokeWidth='1'
-            strokeDasharray='2,2'
-            fill='none'
-            opacity='0.5'
-        />
+                    stroke={themeColors[themeColor]}
+                    strokeWidth='1'
+                    strokeDasharray='2,2'
+                    fill='none'
+                    opacity='0.5'
+                />
 
-        {/* Gradient area */}
-        <Path
-            d={`M ${padding.left} ${height / 2} 
+                {/* Gradient area */}
+                <Path
+                    d={`M ${padding.left} ${height / 2} 
                 C ${width * 0.25} ${height / 2}, 
                   ${width * 0.25} ${height * 0.3}, 
                   ${width * 0.5} ${height * 0.3} 
@@ -171,10 +215,21 @@ const EmptyStateChart = ({
                   ${width} ${height / 2}
                 L ${width} ${height - padding.bottom}
                 L ${padding.left} ${height - padding.bottom} Z`}
-            fill='url(#emptyGradient)'
-        />
-    </Svg>
-);
+                    fill='url(#emptyGradient)'
+                />
+            </Svg>
+
+            <View style={[styles.emptyMessageContainer, { top: dataCount === 1 ? '40%' : '60%' }]}>
+                <ThemedText type='bodyMedium' style={styles.emptyTitle}>
+                    {title}
+                </ThemedText>
+                <ThemedText type='bodySmall' style={[styles.emptyMessage, { color: lightenColor(themeColors[themeColor], 0.3) }]}>
+                    {subtitle}
+                </ThemedText>
+            </View>
+        </View>
+    );
+};
 
 export const BaseChart: React.FC<BaseChartProps> = ({
     data,
@@ -287,24 +342,14 @@ export const BaseChart: React.FC<BaseChartProps> = ({
         return (
             <View style={[styles.container, style]}>
                 <View style={styles.chartContainer}>
-                    <EmptyStateChart themeColors={themeColors} width={chartWidth} height={CHART_HEIGHT} padding={CHART_PADDING} themeColor={themeColor} />
-
-                    <View style={styles.emptyMessageContainer}>
-                        {data.length === 0 ? (
-                            <>
-                                <ThemedText type='title' style={styles.emptyTitle}>
-                                    Track Your Progress
-                                </ThemedText>
-                                <ThemedText type='bodySmall' style={[styles.emptyMessage, { color: lightenColor(themeColors[themeColor], 0.3) }]}>
-                                    Add measurements to see your progress over time
-                                </ThemedText>
-                            </>
-                        ) : (
-                            <ThemedText type='bodyMedium' style={[styles.emptyMessage, { color: lightenColor(themeColors[themeColor], 0.3) }]}>
-                                Add more measurements to see trends
-                            </ThemedText>
-                        )}
-                    </View>
+                    <EmptyStateChart
+                        themeColors={themeColors}
+                        width={chartWidth}
+                        height={CHART_HEIGHT}
+                        padding={CHART_PADDING}
+                        themeColor={themeColor}
+                        dataCount={data.length}
+                    />
 
                     {data.length === 1 && points.length === 1 && (
                         <Circle cx={points[0].x} cy={points[0].y} r={3} stroke={themeColors[themeColor]} strokeWidth={1.5} fill={themeColors.background} />
@@ -472,11 +517,11 @@ const styles = StyleSheet.create({
     },
     emptyTitle: {
         textAlign: 'center',
+        marginTop: Spaces.LG,
         marginBottom: Spaces.SM,
     },
     emptyMessage: {
         textAlign: 'center',
-        fontSize: 16,
         paddingHorizontal: Spaces.XL,
     },
     rangeSelector: {
@@ -504,6 +549,27 @@ const styles = StyleSheet.create({
     timeRangeLabel: {
         textAlign: 'left',
         paddingLeft: Spaces.LG,
+    },
+    disabledTooltip: {
+        position: 'absolute',
+        top: -30,
+        left: '50%',
+        transform: [{ translateX: -50 }],
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 4,
+        minWidth: 100,
+    },
+    tooltipText: {
+        color: 'white',
+        fontSize: 10,
+        textAlign: 'center',
+    },
+    emptyStateContainer: {
+        position: 'relative',
+        width: '100%',
+        height: '100%',
     },
 });
 

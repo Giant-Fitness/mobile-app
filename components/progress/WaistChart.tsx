@@ -1,3 +1,5 @@
+// components/progress/WaistChart.tsx
+
 import { RootState } from '@/store/store';
 import { AggregatedData, TimeRange, TimeRangeOption } from '@/utils/charts';
 import { cmToInches } from '@/utils/unitConversion';

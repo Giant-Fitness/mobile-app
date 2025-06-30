@@ -26,6 +26,7 @@ export interface TimeRangeOption {
     range: TimeRange;
     label: string;
     disabled: boolean;
+    disabledReason?: string;
 }
 
 export const getAvailableTimeRanges = (data: UserWeightMeasurement[] | UserSleepMeasurement[] | UserBodyMeasurement[]): TimeRangeOption[] => {
@@ -34,15 +35,16 @@ export const getAvailableTimeRanges = (data: UserWeightMeasurement[] | UserSleep
             range: range as TimeRange,
             label,
             disabled: true,
+            disabledReason: 'No data available',
         }));
     }
 
     const now = new Date();
     const sortedData = [...data].sort((a, b) => new Date(a.MeasurementTimestamp).getTime() - new Date(b.MeasurementTimestamp).getTime());
     const firstDate = new Date(sortedData[0].MeasurementTimestamp);
-    const totalDays = Math.ceil((now.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24));
+    const dataSpanDays = Math.ceil((now.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24));
 
-    return Object.entries(TIME_RANGES).map(([range, { label, days }]) => {
+    return Object.entries(TIME_RANGES).map(([range, { label }]) => {
         const timeRange = range as TimeRange;
         const { start, end } = getTimeWindow(timeRange, now);
 
@@ -52,29 +54,56 @@ export const getAvailableTimeRanges = (data: UserWeightMeasurement[] | UserSleep
             return date >= start && date <= end;
         }).length;
 
-        // Determine if range should be disabled based on data requirements
         let disabled = false;
+        let disabledReason = '';
 
-        if (timeRange === '1W' || timeRange === '1M') {
-            // For short ranges, enable if we have at least one point
-            disabled = dataPointsInRange < 1;
-        } else if (timeRange === 'All') {
-            // For All time, enable if we have at least two points total
-            disabled = data.length < 2;
-        } else {
-            // For other ranges (3M, 6M, 1Y)
-            // 1. Check if we have enough historical data
-            const hasEnoughHistory = totalDays >= days * 0.5; // At least half the range period
-            // 2. Check if we have enough data points
-            const hasEnoughPoints = dataPointsInRange >= 2;
-
-            disabled = !hasEnoughHistory || !hasEnoughPoints;
+        switch (timeRange) {
+            case '1W':
+                disabled = dataPointsInRange < 1;
+                disabledReason = 'No data this week';
+                break;
+            case '1M':
+                disabled = dataPointsInRange < 1;
+                disabledReason = 'No data this month';
+                break;
+            case '3M':
+                if (dataSpanDays < 30) {
+                    disabled = true;
+                    disabledReason = 'Need 1+ months of history';
+                } else if (dataPointsInRange < 1) {
+                    disabled = true;
+                    disabledReason = 'No data in 3 months';
+                }
+                break;
+            case '6M':
+                if (dataSpanDays < 60) {
+                    disabled = true;
+                    disabledReason = 'Need 2+ months of history';
+                } else if (dataPointsInRange < 1) {
+                    disabled = true;
+                    disabledReason = 'No data in 6 months';
+                }
+                break;
+            case '1Y':
+                if (dataSpanDays < 120) {
+                    disabled = true;
+                    disabledReason = 'Need 4+ months of history';
+                } else if (dataPointsInRange < 1) {
+                    disabled = true;
+                    disabledReason = 'No data in past year';
+                }
+                break;
+            case 'All':
+                disabled = data.length < 1;
+                disabledReason = 'No data available';
+                break;
         }
 
         return {
             range: timeRange,
             label,
             disabled,
+            disabledReason,
         };
     });
 };
