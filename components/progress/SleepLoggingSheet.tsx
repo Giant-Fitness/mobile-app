@@ -479,7 +479,7 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
         setMinute: (value: string) => void,
         ampm: 'AM' | 'PM',
         setAmPm: (value: 'AM' | 'PM') => void,
-        hourRef?: React.RefObject<TextInput>,
+        hourRef?: React.RefObject<TextInput | null>,
     ) => (
         <View style={styles.timeInputSection}>
             <View style={styles.timeInputRow}>
@@ -497,7 +497,6 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
                         }
                     }}
                     placeholder='12'
-                    placeholderTextColor={themeColors.subText}
                     keyboardType='numeric'
                     maxLength={2}
                     editable={!isSubmitting && !isDeleting}
@@ -512,12 +511,18 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
                     value={minute}
                     onChangeText={(text) => {
                         const num = parseInt(text);
-                        if (text === '' || (num >= 0 && num <= 59)) {
-                            setMinute(text.padStart(2, '0'));
+                        // Allow empty string or valid numbers without immediate padding
+                        if (text === '' || (num >= 0 && num <= 59 && text.length <= 2)) {
+                            setMinute(text);
+                        }
+                    }}
+                    onBlur={() => {
+                        // Only pad with leading zero when user finishes editing
+                        if (minute && minute.length === 1) {
+                            setMinute(minute.padStart(2, '0'));
                         }
                     }}
                     placeholder='00'
-                    placeholderTextColor={themeColors.subText}
                     keyboardType='numeric'
                     maxLength={2}
                     editable={!isSubmitting && !isDeleting}
