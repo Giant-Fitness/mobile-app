@@ -24,10 +24,19 @@ const workoutSlice = createSlice({
             })
             .addCase(getAllWorkoutsAsync.fulfilled, (state, action: PayloadAction<Workout[]>) => {
                 state.allWorkoutsState = REQUEST_STATE.FULFILLED;
+
+                // Replace the entire workouts collection instead of merging
+                const newWorkouts: Record<string, Workout> = {};
+                const newWorkoutStates: Record<string, REQUEST_STATE> = {};
+
                 action.payload.forEach((workout) => {
-                    state.workouts[workout.WorkoutId] = workout;
-                    state.workoutStates[workout.WorkoutId] = REQUEST_STATE.FULFILLED;
+                    newWorkouts[workout.WorkoutId] = workout;
+                    newWorkoutStates[workout.WorkoutId] = REQUEST_STATE.FULFILLED;
                 });
+
+                // Replace the collections entirely
+                state.workouts = newWorkouts;
+                state.workoutStates = newWorkoutStates;
             })
             .addCase(getAllWorkoutsAsync.rejected, (state, action) => {
                 state.allWorkoutsState = REQUEST_STATE.REJECTED;
@@ -43,6 +52,8 @@ const workoutSlice = createSlice({
                 state.error = null;
             })
             .addCase(getMultipleWorkoutsAsync.fulfilled, (state, action: PayloadAction<Workout[]>) => {
+                // For multiple workouts, we still ADD/UPDATE (don't replace everything)
+                // because this is fetching a subset, not the complete collection
                 action.payload.forEach((workout) => {
                     state.workouts[workout.WorkoutId] = workout;
                     state.workoutStates[workout.WorkoutId] = REQUEST_STATE.FULFILLED;
@@ -56,7 +67,7 @@ const workoutSlice = createSlice({
                 state.error = action.error.message || 'Failed to fetch multiple workouts';
             })
 
-            // All Workouts
+            // Spotlight Workouts
             .addCase(getSpotlightWorkoutsAsync.pending, (state) => {
                 state.spotlightWorkoutsState = REQUEST_STATE.PENDING;
                 state.error = null;

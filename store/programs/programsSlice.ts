@@ -24,9 +24,26 @@ const programSlice = createSlice({
             })
             .addCase(getAllProgramsAsync.fulfilled, (state, action: PayloadAction<Program[]>) => {
                 state.allProgramsState = REQUEST_STATE.FULFILLED;
+
+                const newPrograms: Record<string, Program> = {};
+                const newProgramsState: Record<string, REQUEST_STATE> = {};
+
                 action.payload.forEach((program) => {
-                    state.programs[program.ProgramId] = program;
-                    state.programsState[program.ProgramId] = REQUEST_STATE.FULFILLED;
+                    newPrograms[program.ProgramId] = program;
+                    newProgramsState[program.ProgramId] = REQUEST_STATE.FULFILLED;
+                });
+
+                // Replace the collections entirely
+                state.programs = newPrograms;
+                state.programsState = newProgramsState;
+
+                // Optional: Clean up orphaned program days for removed programs
+                const validProgramIds = new Set(action.payload.map((p) => p.ProgramId));
+                Object.keys(state.programDays).forEach((programId) => {
+                    if (!validProgramIds.has(programId)) {
+                        delete state.programDays[programId];
+                        delete state.programDaysState[programId];
+                    }
                 });
             })
             .addCase(getAllProgramsAsync.rejected, (state, action) => {
