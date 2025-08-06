@@ -18,6 +18,8 @@ import {
     getUserExerciseSetModificationsAsync,
     getUserExerciseSubstitutionsAsync,
     getUserFitnessProfileAsync,
+    getUserNutritionPreferencesAsync,
+    getUserNutritionProfileAsync,
     getUserProgramProgressAsync,
     getUserRecommendationsAsync,
     getWeightMeasurementsAsync,
@@ -34,6 +36,8 @@ import {
     updateUserAppSettingsAsync,
     updateUserAsync,
     updateUserFitnessProfileAsync,
+    updateUserNutritionPreferencesAsync,
+    updateUserNutritionProfileAsync,
     updateWeightMeasurementAsync,
 } from '@/store/user/thunks';
 import { initialState } from '@/store/user/userState';
@@ -44,6 +48,8 @@ import {
     UserExerciseSetModification,
     UserExerciseSubstitution,
     UserFitnessProfile,
+    UserNutritionPreferences,
+    UserNutritionProfile,
     UserProgramProgress,
     UserRecommendations,
     UserSleepMeasurement,
@@ -522,6 +528,69 @@ const userSlice = createSlice({
             .addCase(deleteExerciseSetModificationAsync.rejected, (state, action) => {
                 state.userExerciseSetModificationsState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'Failed to delete exercise set modification';
+            })
+            // Get User Nutrition Profile
+            .addCase(getUserNutritionProfileAsync.pending, (state) => {
+                state.userNutritionProfileState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(getUserNutritionProfileAsync.fulfilled, (state, action: PayloadAction<UserNutritionProfile>) => {
+                state.userNutritionProfileState = REQUEST_STATE.FULFILLED;
+                state.userNutritionProfile = action.payload;
+            })
+            .addCase(getUserNutritionProfileAsync.rejected, (state, action) => {
+                state.userNutritionProfileState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to get user nutrition profile';
+            })
+
+            // Update User Nutrition Profile
+            .addCase(updateUserNutritionProfileAsync.pending, (state) => {
+                state.userState = REQUEST_STATE.PENDING;
+                state.userNutritionProfileState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(updateUserNutritionProfileAsync.fulfilled, (state, action) => {
+                state.userState = REQUEST_STATE.FULFILLED;
+                state.userNutritionProfileState = REQUEST_STATE.FULFILLED;
+                state.user = action.payload.user;
+                state.userNutritionProfile = action.payload.userNutritionProfile;
+            })
+            .addCase(updateUserNutritionProfileAsync.rejected, (state, action) => {
+                state.userState = REQUEST_STATE.REJECTED;
+                state.userNutritionProfileState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to update user nutrition profile';
+            })
+
+            // Get User Nutrition Preferences
+            .addCase(getUserNutritionPreferencesAsync.pending, (state) => {
+                state.userNutritionPreferencesState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(getUserNutritionPreferencesAsync.fulfilled, (state, action: PayloadAction<UserNutritionPreferences>) => {
+                state.userNutritionPreferencesState = REQUEST_STATE.FULFILLED;
+                state.userNutritionPreferences = action.payload;
+            })
+            .addCase(getUserNutritionPreferencesAsync.rejected, (state, action) => {
+                state.userNutritionPreferencesState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to get user nutrition preferences';
+            })
+
+            // Update User Nutrition Preferences
+            .addCase(updateUserNutritionPreferencesAsync.pending, (state) => {
+                state.userState = REQUEST_STATE.PENDING;
+                state.userNutritionPreferencesState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(updateUserNutritionPreferencesAsync.fulfilled, (state, action) => {
+                state.userState = REQUEST_STATE.FULFILLED;
+                state.userNutritionPreferencesState = REQUEST_STATE.FULFILLED;
+                state.user = action.payload.user;
+                state.userNutritionPreferences = action.payload.userNutritionPreferences;
+            })
+            .addCase(updateUserNutritionPreferencesAsync.rejected, (state, action) => {
+                state.userState = REQUEST_STATE.REJECTED;
+                state.userNutritionPreferencesState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to update user nutrition preferences';
             });
     },
 });

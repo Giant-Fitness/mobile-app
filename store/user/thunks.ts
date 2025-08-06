@@ -16,6 +16,8 @@ import {
     UserExerciseSetModification,
     UserExerciseSubstitution,
     UserFitnessProfile,
+    UserNutritionPreferences,
+    UserNutritionProfile,
     UserProgramProgress,
     UserRecommendations,
     UserSleepMeasurement,
@@ -1268,5 +1270,169 @@ export const deleteExerciseSetModificationAsync = createAsyncThunk<
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to delete exercise set modification',
         });
+    }
+});
+
+// Nutrition Profile Thunks
+export const getUserNutritionProfileAsync = createAsyncThunk<
+    UserNutritionProfile,
+    { forceRefresh?: boolean; useCache?: boolean } | void,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/getUserNutritionProfile', async (args = {}, { getState, rejectWithValue }) => {
+    try {
+        const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        // Check if user ID exists
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Return cached nutrition profile if available and not forcing refresh
+        if (state.user.userNutritionProfile && !forceRefresh) {
+            return state.user.userNutritionProfile;
+        }
+
+        // Try cache first if enabled and not forcing refresh
+        if (useCache && !forceRefresh) {
+            const cacheKey = `user_nutrition_profile`;
+            const cached = await cacheService.get<UserNutritionProfile>(cacheKey);
+            const isExpired = await cacheService.isExpired(cacheKey);
+
+            if (cached && !isExpired) {
+                console.log('Loaded user nutrition profile from cache');
+                return cached;
+            }
+        }
+
+        // Load from API
+        console.log('Loading user nutrition profile from API');
+        const profile = await UserService.getUserNutritionProfile(userId);
+
+        // Cache the result if useCache is enabled
+        if (useCache) {
+            const cacheKey = `user_nutrition_profile`;
+            await cacheService.set(cacheKey, profile, CacheTTL.LONG);
+        }
+
+        return profile;
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch nutrition profile',
+        });
+    }
+});
+
+export const updateUserNutritionProfileAsync = createAsyncThunk<
+    { user: User; userNutritionProfile: UserNutritionProfile },
+    { userNutritionProfile: UserNutritionProfile },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/updateNutritionProfile', async ({ userNutritionProfile }, { getState, rejectWithValue }) => {
+    const state = getState();
+    const userId = state.user.user?.UserId;
+
+    if (!userId) {
+        return rejectWithValue({ errorMessage: 'User ID not available' });
+    }
+
+    try {
+        const result = await UserService.updateUserNutritionProfile(userId, userNutritionProfile);
+
+        // Invalidate related caches after update
+        await Promise.all([cacheService.remove(`user_nutrition_profile`), cacheService.remove('user_data')]);
+
+        return result;
+    } catch (error) {
+        console.log(error);
+        return rejectWithValue({ errorMessage: 'Failed to update nutrition profile' });
+    }
+});
+
+// Nutrition Preferences Thunks
+export const getUserNutritionPreferencesAsync = createAsyncThunk<
+    UserNutritionPreferences,
+    { forceRefresh?: boolean; useCache?: boolean } | void,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/getUserNutritionPreferences', async (args = {}, { getState, rejectWithValue }) => {
+    try {
+        const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        // Check if user ID exists
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Return cached nutrition preferences if available and not forcing refresh
+        if (state.user.userNutritionPreferences && !forceRefresh) {
+            return state.user.userNutritionPreferences;
+        }
+
+        // Try cache first if enabled and not forcing refresh
+        if (useCache && !forceRefresh) {
+            const cacheKey = `user_nutrition_preferences`;
+            const cached = await cacheService.get<UserNutritionPreferences>(cacheKey);
+            const isExpired = await cacheService.isExpired(cacheKey);
+
+            if (cached && !isExpired) {
+                console.log('Loaded user nutrition preferences from cache');
+                return cached;
+            }
+        }
+
+        // Load from API
+        console.log('Loading user nutrition preferences from API');
+        const preferences = await UserService.getUserNutritionPreferences(userId);
+
+        // Cache the result if useCache is enabled
+        if (useCache) {
+            const cacheKey = `user_nutrition_preferences`;
+            await cacheService.set(cacheKey, preferences, CacheTTL.LONG);
+        }
+
+        return preferences;
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch nutrition preferences',
+        });
+    }
+});
+
+export const updateUserNutritionPreferencesAsync = createAsyncThunk<
+    { user: User; userNutritionPreferences: UserNutritionPreferences },
+    { userNutritionPreferences: UserNutritionPreferences },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/updateNutritionPreferences', async ({ userNutritionPreferences }, { getState, rejectWithValue }) => {
+    const state = getState();
+    const userId = state.user.user?.UserId;
+
+    if (!userId) {
+        return rejectWithValue({ errorMessage: 'User ID not available' });
+    }
+
+    try {
+        const result = await UserService.updateUserNutritionPreferences(userId, userNutritionPreferences);
+
+        // Invalidate related caches after update
+        await Promise.all([cacheService.remove(`user_nutrition_preferences`), cacheService.remove('user_data')]);
+
+        return result;
+    } catch (error) {
+        console.log(error);
+        return rejectWithValue({ errorMessage: 'Failed to update nutrition preferences' });
     }
 });

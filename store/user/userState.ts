@@ -8,6 +8,8 @@ import {
     UserExerciseSetModification,
     UserExerciseSubstitution,
     UserFitnessProfile,
+    UserNutritionPreferences,
+    UserNutritionProfile,
     UserProgramProgress,
     UserRecommendations,
     UserSleepMeasurement,
@@ -19,6 +21,10 @@ export interface UserState {
     userState: REQUEST_STATE;
     userFitnessProfile: UserFitnessProfile | null;
     userFitnessProfileState: REQUEST_STATE;
+    userNutritionProfile: UserNutritionProfile | null;
+    userNutritionProfileState: REQUEST_STATE;
+    userNutritionPreferences: UserNutritionPreferences | null;
+    userNutritionPreferencesState: REQUEST_STATE;
     userRecommendations: UserRecommendations | null;
     userRecommendationsState: REQUEST_STATE;
     userProgramProgress: UserProgramProgress | null;
@@ -43,6 +49,10 @@ export const initialState: UserState = {
     userState: REQUEST_STATE.IDLE,
     userFitnessProfile: null,
     userFitnessProfileState: REQUEST_STATE.IDLE,
+    userNutritionProfile: null,
+    userNutritionProfileState: REQUEST_STATE.IDLE,
+    userNutritionPreferences: null,
+    userNutritionPreferencesState: REQUEST_STATE.IDLE,
     userRecommendations: null,
     userRecommendationsState: REQUEST_STATE.IDLE,
     userProgramProgress: null,

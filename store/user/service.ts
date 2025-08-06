@@ -13,6 +13,8 @@ import {
     UserExerciseSetModification,
     UserExerciseSubstitution,
     UserFitnessProfile,
+    UserNutritionPreferences,
+    UserNutritionProfile,
     UserProgramProgress,
     UserRecommendations,
     UserSleepMeasurement,
@@ -464,6 +466,86 @@ const deleteExerciseSetModification = async (userId: string, modificationId: str
     }
 };
 
+// Nutrition Profile Methods
+const getUserNutritionProfile = async (userId: string): Promise<UserNutritionProfile> => {
+    console.log('service: getUserNutritionProfile');
+    try {
+        if (!userId) throw new Error('No user ID found');
+
+        const { data } = await authUsersApiClient.get(`/users/${userId}/nutrition-profile`);
+        if (!data.userNutritionProfile) {
+            throw new Error('Invalid response format');
+        }
+        return data.userNutritionProfile;
+    } catch (error) {
+        throw handleApiError(error, 'GetUserNutritionProfile');
+    }
+};
+
+const updateUserNutritionProfile = async (
+    userId: string,
+    userNutritionProfile: UserNutritionProfile,
+): Promise<{
+    user: User;
+    userNutritionProfile: UserNutritionProfile;
+}> => {
+    console.log('service: updateUserNutritionProfile');
+    try {
+        const { data } = await authUsersApiClient.put(`/users/${userId}/nutrition-profile`, userNutritionProfile);
+
+        if (!data.user || !data.userNutritionProfile) {
+            throw new Error('Invalid response format');
+        }
+
+        return {
+            user: data.user,
+            userNutritionProfile: data.userNutritionProfile,
+        };
+    } catch (error) {
+        throw handleApiError(error, 'UpdateUserNutritionProfile');
+    }
+};
+
+// Nutrition Preferences Methods
+const getUserNutritionPreferences = async (userId: string): Promise<UserNutritionPreferences> => {
+    console.log('service: getUserNutritionPreferences');
+    try {
+        if (!userId) throw new Error('No user ID found');
+
+        const { data } = await authUsersApiClient.get(`/users/${userId}/nutrition-preferences`);
+        if (!data.userNutritionPreferences) {
+            throw new Error('Invalid response format');
+        }
+        return data.userNutritionPreferences;
+    } catch (error) {
+        throw handleApiError(error, 'GetUserNutritionPreferences');
+    }
+};
+
+const updateUserNutritionPreferences = async (
+    userId: string,
+    userNutritionPreferences: UserNutritionPreferences,
+): Promise<{
+    user: User;
+    userNutritionPreferences: UserNutritionPreferences;
+}> => {
+    console.log('service: updateUserNutritionPreferences');
+    try {
+        const { data } = await authUsersApiClient.put(`/users/${userId}/nutrition-preferences`, userNutritionPreferences);
+
+        if (!data.user || !data.userNutritionPreferences) {
+            throw new Error('Invalid response format');
+        }
+
+        return {
+            user: data.user,
+            userNutritionPreferences: data.userNutritionPreferences,
+        };
+    } catch (error) {
+        throw handleApiError(error, 'UpdateUserNutritionPreferences');
+    }
+};
+
 export default {
     // User Profile
     getUser,
@@ -508,4 +590,10 @@ export default {
     createExerciseSetModification,
     updateExerciseSetModification,
     deleteExerciseSetModification,
+    // Nutrition Profile
+    getUserNutritionProfile,
+    updateUserNutritionProfile,
+    // Nutrition Preferences
+    getUserNutritionPreferences,
+    updateUserNutritionPreferences,
 };

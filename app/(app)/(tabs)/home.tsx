@@ -29,6 +29,8 @@ import {
     getUserExerciseSetModificationsAsync,
     getUserExerciseSubstitutionsAsync,
     getUserFitnessProfileAsync,
+    getUserNutritionPreferencesAsync,
+    getUserNutritionProfileAsync,
     getUserProgramProgressAsync,
     getUserRecommendationsAsync,
     getWeightMeasurementsAsync,
@@ -190,6 +192,8 @@ export default function HomeScreen() {
                 await Promise.all([
                     dispatch(getUserAsync({ forceRefresh: true })),
                     dispatch(getUserFitnessProfileAsync({ forceRefresh: true })),
+                    dispatch(getUserNutritionProfileAsync({ forceRefresh: true })),
+                    dispatch(getUserNutritionPreferencesAsync({ forceRefresh: true })),
                     dispatch(getUserProgramProgressAsync({ forceRefresh: true })),
                     dispatch(getUserRecommendationsAsync({ forceRefresh: true })),
                     dispatch(getWorkoutQuoteAsync({ forceRefresh: true })),

@@ -88,3 +88,31 @@ export type SleepSubmissionData = {
     sleepTime?: string;
     wakeTime?: string;
 };
+
+export interface UserNutritionProfile {
+    UserID: string;
+    WeightGoal: number;
+    WeightGoalTimeline: string;
+    PrimaryNutritionGoal: string;
+    TDEE: number;
+    GoalCalories: number;
+    GoalMacros: {
+        Protein: number;
+        Carbs: number;
+        Fats: number;
+    };
+    ActivityLevel: string;
+    WorkActivityLevel?: string;
+    AdaptiveEnabled: boolean;
+    LastAdaptiveAdjustment?: string;
+    CreatedAt: string;
+    UpdatedAt: string;
+}
+
+export interface UserNutritionPreferences {
+    UserID: string;
+    DietaryType: string;
+    DietaryRestrictions: string[];
+    BudgetPreference: string;
+    UpdatedAt: string;
+}
