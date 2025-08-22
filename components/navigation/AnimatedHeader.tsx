@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         ...Platform.select({
             ios: {
-                top: Spaces.XXL + Spaces.SM, // iOS-specific top positioning
+                top: Spaces.XXL + Spaces.SM + Spaces.XS, // iOS-specific top positioning
             },
             android: {
                 top: Spaces.XXL, // android-specific top positioning

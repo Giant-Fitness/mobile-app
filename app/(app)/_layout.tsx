@@ -26,7 +26,7 @@ export default function AppLayout() {
             <Stack.Screen
                 name='onboarding'
                 options={{
-                    gestureEnabled: false,
+                    animation: 'default',
                 }}
             />
             <Stack.Screen

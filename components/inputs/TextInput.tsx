@@ -7,7 +7,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import React from 'react';
 import { TextInput as RNTextInput, TextInputProps as RNTextInputProps, StyleSheet, TextStyle, ViewStyle } from 'react-native';
 
-interface TextInputProps extends RNTextInputProps {
+interface TextInputProps extends Omit<RNTextInputProps, 'style'> {
     style?: ViewStyle;
     textStyle?: TextStyle;
 }

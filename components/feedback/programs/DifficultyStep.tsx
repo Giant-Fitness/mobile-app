@@ -1,32 +1,46 @@
-// components/feedback/programs/DifficultyStep.tsx
+// components/feedback/programs/FavoriteAspectsStep.tsx
 
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
+import { SelectionGroup } from '@/components/buttons/SelectionButton';
 import { FeedbackStep } from '@/components/feedback/FeedbackForm';
-import { RadioGroup } from '@/components/inputs/RadioGroup';
 import { Spaces } from '@/constants/Spaces';
+import { ProgramCompleteData } from '@/types/feedbackTypes';
 import React from 'react';
 import { StyleSheet } from 'react-native';
 
-export const DifficultyStep: FeedbackStep<any> = ({ data, onChange }) => {
+export const FavoriteAspectsStep: FeedbackStep<ProgramCompleteData> = ({ data, onChange }) => {
     const options = [
-        { id: '1', label: 'Too Easy' },
-        { id: '2', label: 'Slightly Easy' },
-        { id: '3', label: 'Just Right' },
-        { id: '4', label: 'Slightly Hard' },
-        { id: '5', label: 'Too Hard' },
+        { key: 'workout_variety', text: 'Workout variety' },
+        { key: 'intensity_level', text: 'Intensity level' },
+        { key: 'progress_tracking', text: 'Progress tracking' },
+        { key: 'program_structure', text: 'Program structure' },
+        { key: 'schedule_flexibility', text: 'Schedule flexibility' },
+        { key: 'results', text: 'Results achieved' },
+        { key: 'form_guidance', text: 'Form guidance' },
+        { key: 'instruction_clarity', text: 'Clear instructions' },
     ];
+
+    const handleSelect = (key: string) => {
+        const newFavorites = data.FavoriteAspects.includes(key) ? data.FavoriteAspects.filter((id) => id !== key) : [...data.FavoriteAspects, key];
+        onChange({ FavoriteAspects: newFavorites });
+    };
 
     return (
         <ThemedView>
             <ThemedText type='subtitle' style={styles.stepTitle}>
-                How would you rate the difficulty of the workouts?
+                What aspects of the program did you enjoy the most?
             </ThemedText>
-            <RadioGroup
+            <ThemedText type='bodySmall' style={styles.subtitle}>
+                Select all that apply
+            </ThemedText>
+            <SelectionGroup
                 options={options}
-                selected={data.DifficultyRating?.toString()}
-                onSelect={(value) => onChange({ DifficultyRating: parseInt(value) })}
-                style={styles.radioGroup}
+                selectedKeys={data.FavoriteAspects}
+                onSelect={handleSelect}
+                multiSelect={true}
+                variant='radio'
+                containerStyle={styles.radioGroup}
             />
         </ThemedView>
     );
@@ -44,12 +58,5 @@ const styles = StyleSheet.create({
     },
     checkbox: {
         marginVertical: Spaces.SM,
-    },
-    textInput: {
-        marginTop: Spaces.SM,
-    },
-    textAreaInput: {
-        height: Spaces.XXXL,
-        marginTop: Spaces.LG,
     },
 });

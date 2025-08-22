@@ -6,7 +6,6 @@ import { Opacities } from '@/constants/Opacities';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { moderateScale } from '@/utils/scaling';
 import React from 'react';
 import { AccessibilityProps, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 
@@ -56,7 +55,7 @@ export const BackButton: React.FC<BackButtonProps & AccessibilityProps> = ({
             accessibilityLabel={accessibilityLabel}
             activeOpacity={Opacities.buttonActiveOpacity}
         >
-            <Icon name='chevron-back' size={moderateScale(iconSize)} color={iconColor} />
+            <Icon name='chevron-back' size={iconSize} color={iconColor} />
         </TouchableOpacity>
     );
 };

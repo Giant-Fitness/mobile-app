@@ -1,6 +1,8 @@
 // store/user/service.ts
 
 import {
+    CompleteProfileParams,
+    CompleteProfileResponse,
     CreateSetModificationParams,
     CreateSubstitutionParams,
     GetSetModificationsParams,
@@ -112,7 +114,7 @@ const getUserProgramProgress = async (userId: string): Promise<UserProgramProgre
     }
 };
 
-const completeDay = async (userId: string, dayId: string, isAutoComplete: boolean): Promise<UserProgramProgress> => {
+const completeDay = async (userId: string, dayId: string, isAutoComplete: boolean): Promise<UserProgramProgress | null> => {
     console.log('service: completeDay');
     try {
         const { data } = await authUsersApiClient.put(`/users/${userId}/program-progress/complete-day`, {
@@ -124,7 +126,7 @@ const completeDay = async (userId: string, dayId: string, isAutoComplete: boolea
             throw new Error('Program progress not found in response');
         }
 
-        return data.programCompleted ? {} : data.programProgress;
+        return data.programCompleted ? null : data.programProgress;
     } catch (error) {
         throw handleApiError(error, 'CompleteDay');
     }
@@ -546,10 +548,37 @@ const updateUserNutritionPreferences = async (
     }
 };
 
+const completeUserProfile = async (profileData: CompleteProfileParams): Promise<CompleteProfileResponse> => {
+    console.log('service: completeUserProfile');
+    try {
+        const userId = await authService.getUserId();
+        if (!userId) throw new Error('No user ID found');
+
+        const { data } = await authUsersApiClient.put(`/users/${userId}/complete-profile`, profileData);
+
+        if (!data.user || !data.userFitnessProfile || !data.userRecommendations) {
+            throw new Error('Invalid response format - missing required data');
+        }
+
+        return {
+            user: data.user,
+            userFitnessProfile: data.userFitnessProfile,
+            userNutritionProfile: data.userNutritionProfile || null,
+            userNutritionPreferences: data.userNutritionPreferences || null,
+            userRecommendations: data.userRecommendations,
+            calculated: data.calculated,
+        };
+    } catch (error) {
+        throw handleApiError(error, 'CompleteUserProfile');
+    }
+};
+
 export default {
     // User Profile
     getUser,
     updateUser,
+    // onboarding
+    completeUserProfile,
     // Fitness Profile
     getUserFitnessProfile,
     updateUserFitnessProfile,

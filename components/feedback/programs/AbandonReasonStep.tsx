@@ -2,8 +2,8 @@
 
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
+import { SelectionGroup } from '@/components/buttons/SelectionButton';
 import { FeedbackStep } from '@/components/feedback/FeedbackForm';
-import { RadioGroup } from '@/components/inputs/RadioGroup';
 import { Spaces } from '@/constants/Spaces';
 import { ProgramAbandonData } from '@/types/feedbackTypes';
 import React from 'react';
@@ -11,12 +11,12 @@ import { StyleSheet } from 'react-native';
 
 export const ReasonStep: FeedbackStep<ProgramAbandonData> = ({ data, onChange }) => {
     const options = [
-        { id: 'schedule_conflict', label: 'Schedule conflict' },
-        { id: 'time_consuming', label: 'Too time consuming' },
-        { id: 'not_challenging', label: 'Not challenging enough' },
-        { id: 'too_difficult', label: 'Workouts were too difficult' },
-        { id: 'hard_to_follow', label: 'Workouts were hard to follow' },
-        { id: 'boring', label: 'Workouts were boring or unengaging' },
+        { key: 'schedule_conflict', text: 'Schedule conflict' },
+        { key: 'time_consuming', text: 'Too time consuming' },
+        { key: 'not_challenging', text: 'Not challenging enough' },
+        { key: 'too_difficult', text: 'Workouts were too difficult' },
+        { key: 'hard_to_follow', text: 'Workouts were hard to follow' },
+        { key: 'boring', text: 'Workouts were boring or unengaging' },
     ];
 
     return (
@@ -24,11 +24,13 @@ export const ReasonStep: FeedbackStep<ProgramAbandonData> = ({ data, onChange })
             <ThemedText type='subtitle' style={styles.stepTitle}>
                 Why did you end the program?
             </ThemedText>
-            <RadioGroup
+            <SelectionGroup
                 options={options}
-                selected={data.TerminationReason}
+                selectedKeys={data.TerminationReason ? [data.TerminationReason] : []}
                 onSelect={(value) => onChange({ TerminationReason: value })}
-                style={styles.radioGroup}
+                multiSelect={false}
+                variant='radio'
+                containerStyle={styles.radioGroup}
             />
         </ThemedView>
     );

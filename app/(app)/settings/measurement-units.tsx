@@ -2,7 +2,7 @@
 
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { RadioPill } from '@/components/inputs/RadioPill';
+import { SelectionGroup } from '@/components/buttons/SelectionButton';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
@@ -41,6 +41,22 @@ const UnitsSelectionScreen = () => {
     const scrollY = useSharedValue(0);
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+
+    // Define options for each section
+    const bodyWeightOptions = [
+        { key: 'kgs', text: 'Kilograms' },
+        { key: 'lbs', text: 'Pounds' },
+    ];
+
+    const liftWeightOptions = [
+        { key: 'kgs', text: 'Kilograms' },
+        { key: 'lbs', text: 'Pounds' },
+    ];
+
+    const bodyMeasurementOptions = [
+        { key: 'cms', text: 'Centimeters' },
+        { key: 'inches', text: 'Inches' },
+    ];
 
     const toPressSave = async () => {
         trigger('effectClick');
@@ -87,36 +103,48 @@ const UnitsSelectionScreen = () => {
                     <ThemedText type='overlineTransformed' style={styles.sectionTitle}>
                         Body Weight
                     </ThemedText>
-                    <View style={[styles.options, { backgroundColor: themeColors.backgroundSecondary }]}>
-                        <RadioPill selected={tempBodyWeightPreference === 'kgs'} onPress={() => setTempBodyWeightPreference('kgs')} text='Kilograms' />
-                        <RadioPill selected={tempBodyWeightPreference === 'lbs'} onPress={() => setTempBodyWeightPreference('lbs')} text='Pounds' />
-                    </View>
+                    <SelectionGroup
+                        options={bodyWeightOptions}
+                        selectedKeys={[tempBodyWeightPreference]}
+                        onSelect={setTempBodyWeightPreference}
+                        variant='radio'
+                        layout='row'
+                        size='SM'
+                        containerStyle={styles.selectionContainer}
+                        buttonStyle={styles.chipButton}
+                    />
                 </View>
+
                 <View style={styles.section}>
                     <ThemedText type='overlineTransformed' style={styles.sectionTitle}>
                         Exercise Weights
                     </ThemedText>
-                    <View style={[styles.options, { backgroundColor: themeColors.backgroundSecondary }]}>
-                        <RadioPill selected={tempLiftWeightPreference === 'kgs'} onPress={() => setTempLiftWeightPreference('kgs')} text='Kilograms' />
-                        <RadioPill selected={tempLiftWeightPreference === 'lbs'} onPress={() => setTempLiftWeightPreference('lbs')} text='Pounds' />
-                    </View>
+                    <SelectionGroup
+                        options={liftWeightOptions}
+                        selectedKeys={[tempLiftWeightPreference]}
+                        onSelect={setTempLiftWeightPreference}
+                        variant='radio'
+                        layout='row'
+                        size='SM'
+                        containerStyle={styles.selectionContainer}
+                        buttonStyle={styles.chipButton}
+                    />
                 </View>
+
                 <View style={styles.section}>
                     <ThemedText type='overlineTransformed' style={styles.sectionTitle}>
                         Body Measurements
                     </ThemedText>
-                    <View style={[styles.options, { backgroundColor: themeColors.backgroundSecondary }]}>
-                        <RadioPill
-                            selected={tempBodyMeasurementPreference === 'cms'}
-                            onPress={() => setTempBodyMeasurementPreference('cms')}
-                            text='Centimeters'
-                        />
-                        <RadioPill
-                            selected={tempBodyMeasurementPreference === 'inches'}
-                            onPress={() => setTempBodyMeasurementPreference('inches')}
-                            text='Inches'
-                        />
-                    </View>
+                    <SelectionGroup
+                        options={bodyMeasurementOptions}
+                        selectedKeys={[tempBodyMeasurementPreference]}
+                        onSelect={setTempBodyMeasurementPreference}
+                        variant='radio'
+                        layout='row'
+                        size='SM'
+                        containerStyle={styles.selectionContainer}
+                        buttonStyle={styles.chipButton}
+                    />
                 </View>
             </ThemedView>
         </ThemedView>
@@ -141,12 +169,13 @@ const styles = StyleSheet.create({
         paddingHorizontal: Spaces.SM,
         opacity: 0.7,
     },
-    options: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        paddingVertical: Spaces.SM,
-        paddingHorizontal: Spaces.SM,
-        borderRadius: Spaces.SM,
+    selectionContainer: {
+        margin: 0,
+        gap: Spaces.SM,
+    },
+    chipButton: {
+        paddingVertical: Spaces.MD,
+        paddingHorizontal: Spaces.LG,
     },
 });
 

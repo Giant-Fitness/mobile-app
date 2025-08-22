@@ -4,6 +4,8 @@ import { REQUEST_STATE } from '@/constants/requestStates';
 import { RootState } from '@/store/store';
 import UserService from '@/store/user/service';
 import {
+    CompleteProfileParams,
+    CompleteProfileResponse,
     CreateSetModificationParams,
     CreateSubstitutionParams,
     GetSetModificationsParams,
@@ -307,7 +309,7 @@ export const startProgramAsync = createAsyncThunk<
 
 // UPDATE - Complete day (invalidate cache)
 export const completeDayAsync = createAsyncThunk<
-    UserProgramProgress,
+    UserProgramProgress | null,
     { dayId: string; isAutoComplete?: boolean },
     {
         state: RootState;
@@ -1434,5 +1436,35 @@ export const updateUserNutritionPreferencesAsync = createAsyncThunk<
     } catch (error) {
         console.log(error);
         return rejectWithValue({ errorMessage: 'Failed to update nutrition preferences' });
+    }
+});
+
+export const completeUserProfileAsync = createAsyncThunk<
+    CompleteProfileResponse,
+    CompleteProfileParams,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/completeProfile', async (profileData, { rejectWithValue }) => {
+    try {
+        const result = await UserService.completeUserProfile(profileData);
+
+        // Clear all related caches since we're setting up the profile for the first time
+        await Promise.all([
+            cacheService.remove('user_data'),
+            cacheService.remove('user_fitness_profile'),
+            cacheService.remove('user_nutrition_profile'),
+            cacheService.remove('user_nutrition_preferences'),
+            cacheService.remove('user_recommendations'),
+            cacheService.remove('user_app_settings'),
+            cacheService.remove('weight_measurements'), // Initial weight was logged
+        ]);
+
+        return result;
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to complete user profile',
+        });
     }
 });

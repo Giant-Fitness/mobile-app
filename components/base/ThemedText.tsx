@@ -28,6 +28,8 @@ export type ThemedTextProps = TextProps & {
         | 'bodySmall'
         | 'overlineTransformed'
         | 'greeting';
+    adjustsFontSizeToFit?: boolean;
+    numberOfLines?: number;
 };
 
 // Styles for different text types using specific Inter fonts with adjusted scaling
@@ -127,12 +129,14 @@ const styles = StyleSheet.create({
 });
 
 // ThemedText component definition remains the same, leveraging these styles
-export function ThemedText({ style, lightColor, darkColor, type = 'body', ...rest }: ThemedTextProps) {
+export function ThemedText({ style, lightColor, darkColor, type = 'body', adjustsFontSizeToFit, numberOfLines, ...rest }: ThemedTextProps) {
     const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
 
     return (
         <Text
             allowFontScaling={false}
+            adjustsFontSizeToFit={adjustsFontSizeToFit}
+            numberOfLines={numberOfLines}
             style={[
                 styles.body, // Default style
                 styles[type] || {}, // Apply type-specific styles if any

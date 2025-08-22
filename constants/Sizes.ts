@@ -23,7 +23,7 @@ export const Sizes = {
     bottomSpaceMedium: verticalScale(90),
     iconSizeDefault: moderateScale(18),
     iconSizeSM: moderateScale(16),
-    iconSizeMD: moderateScale(22),
+    iconSizeMD: moderateScale(20),
     iconSizeLG: moderateScale(30),
     iconSizeXL: moderateScale(40),
     fontSizeDefault: moderateScale(14),
@@ -32,4 +32,5 @@ export const Sizes = {
     headerHeightAndroid: moderateScale(70),
     footerHeightIOS: moderateScale(90),
     footerHeightAndroid: moderateScale(50),
+    bottomInputSheet: 660,
 };

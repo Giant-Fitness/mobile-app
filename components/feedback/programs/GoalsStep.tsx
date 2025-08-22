@@ -2,8 +2,8 @@
 
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
+import { SelectionGroup } from '@/components/buttons/SelectionButton';
 import { FeedbackStep } from '@/components/feedback/FeedbackForm';
-import { RadioGroup } from '@/components/inputs/RadioGroup';
 import { Spaces } from '@/constants/Spaces';
 import { ProgramCompleteData } from '@/types/feedbackTypes';
 import React from 'react';
@@ -11,8 +11,8 @@ import { StyleSheet } from 'react-native';
 
 export const GoalsStep: FeedbackStep<ProgramCompleteData> = ({ data, onChange }) => {
     const options = [
-        { id: 'true', label: 'Yes, I achieved my goals' },
-        { id: 'false', label: 'No, I did not achieve my goals' },
+        { key: 'true', text: 'Yes, I achieved my goals' },
+        { key: 'false', text: 'No, I did not achieve my goals' },
     ];
 
     return (
@@ -20,11 +20,13 @@ export const GoalsStep: FeedbackStep<ProgramCompleteData> = ({ data, onChange })
             <ThemedText type='subtitle' style={styles.stepTitle}>
                 Did you achieve your fitness goals with this program?
             </ThemedText>
-            <RadioGroup
+            <SelectionGroup
                 options={options}
-                selected={data.AchievedGoals.toString()}
+                selectedKeys={[data.AchievedGoals.toString()]}
                 onSelect={(value) => onChange({ AchievedGoals: value === 'true' })}
-                style={styles.radioGroup}
+                multiSelect={false}
+                variant='radio'
+                containerStyle={styles.radioGroup}
             />
         </ThemedView>
     );

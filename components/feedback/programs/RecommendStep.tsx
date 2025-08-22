@@ -2,8 +2,8 @@
 
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
+import { SelectionGroup } from '@/components/buttons/SelectionButton';
 import { FeedbackStep } from '@/components/feedback/FeedbackForm';
-import { RadioGroup } from '@/components/inputs/RadioGroup';
 import { Spaces } from '@/constants/Spaces';
 import { ProgramCompleteData } from '@/types/feedbackTypes';
 import React from 'react';
@@ -11,8 +11,8 @@ import { StyleSheet } from 'react-native';
 
 export const RecommendStep: FeedbackStep<ProgramCompleteData> = ({ data, onChange }) => {
     const options = [
-        { id: 'true', label: 'Yes, I would recommend this program' },
-        { id: 'false', label: 'No, I would not recommend this program' },
+        { key: 'true', text: 'Yes, I would recommend this program' },
+        { key: 'false', text: 'No, I would not recommend this program' },
     ];
 
     return (
@@ -20,11 +20,13 @@ export const RecommendStep: FeedbackStep<ProgramCompleteData> = ({ data, onChang
             <ThemedText type='subtitle' style={styles.stepTitle}>
                 Would you recommend this program to others?
             </ThemedText>
-            <RadioGroup
+            <SelectionGroup
                 options={options}
-                selected={data.WouldRecommend.toString()}
+                selectedKeys={[data.WouldRecommend.toString()]}
                 onSelect={(value) => onChange({ WouldRecommend: value === 'true' })}
-                style={styles.radioGroup}
+                multiSelect={false}
+                variant='radio'
+                containerStyle={styles.radioGroup}
             />
         </ThemedView>
     );

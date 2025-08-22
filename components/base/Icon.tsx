@@ -94,6 +94,8 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
             return <AnimatedEntypo name='bar-graph' {...commonProps} />;
         case 'progress-inactive':
             return <AnimatedEntypo name='bar-graph' {...commonProps} />;
+        case 'edit':
+            return <AnimatedMaterialIcons name='edit' {...commonProps} />;
         case 'lightning-active':
             return <AnimatedMaterialCommunityIcons name='lightning-bolt' {...commonProps} />;
         case 'lightning-inactive':
@@ -160,6 +162,12 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
             return <AnimatedMaterialIcons name='auto-graph' {...commonProps} />;
         case 'power-sleep':
             return <AnimatedMaterialCommunityIcons name='power-sleep' {...commonProps} />;
+        case 'calendar-week-begin':
+            return <AnimatedMaterialCommunityIcons name='calendar-week-begin' {...commonProps} />;
+        case 'calendar-weekend':
+            return <AnimatedMaterialCommunityIcons name='calendar-weekend' {...commonProps} />;
+        case 'calendar-month':
+            return <AnimatedMaterialCommunityIcons name='calendar-month' {...commonProps} />;
         case 'library':
             return <AnimatedMaterialIcons name='local-library' {...commonProps} />;
         case 'more-horizontal':
@@ -173,7 +181,13 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
         case 'exit':
             return <AnimatedIonicons name='exit-outline' {...commonProps} />;
         case 'trending-up':
-            return <FontAwesome6 name='arrow-trend-up' size={moderateScale(size)} color={finalColor} style={style} ref={ref} />;
+            return <AnimatedIonicons name='trending-up' {...commonProps} />;
+        case 'trending-down':
+            return <AnimatedIonicons name='trending-down' {...commonProps} />;
+        case 'trending-flat':
+            return <AnimatedMaterialCommunityIcons name='approximately-equal' {...commonProps} />;
+        case 'heart-plus-outline':
+            return <AnimatedMaterialCommunityIcons name='heart-plus-outline' {...commonProps} />;
         case 'campaign':
             return <AnimatedMaterialIcons name='campaign' {...commonProps} />;
         case 'email':
@@ -200,6 +214,18 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
             return <AnimatedMaterialIcons name='privacy-tip' {...commonProps} />;
         case 'file-text':
             return <AnimatedIonicons name='document-text-outline' {...commonProps} />;
+        case 'male':
+            return <AnimatedIonicons name='male' {...commonProps} />;
+        case 'female':
+            return <AnimatedIonicons name='female' {...commonProps} />;
+        case 'bicycle-electric':
+            return <AnimatedMaterialCommunityIcons name='bicycle-electric' {...commonProps} />;
+        case 'run-fast':
+            return <AnimatedMaterialCommunityIcons name='run-fast' {...commonProps} />;
+        case 'walk':
+            return <AnimatedMaterialCommunityIcons name='walk' {...commonProps} />;
+        case 'laptop':
+            return <AnimatedMaterialCommunityIcons name='laptop' {...commonProps} />;
         default:
             return <AnimatedIonicons name='alert-circle-outline' {...commonProps} />;
     }

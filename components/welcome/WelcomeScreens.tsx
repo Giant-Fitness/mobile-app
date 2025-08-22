@@ -1,4 +1,4 @@
-// components/onboarding/WelcomeScreens.tsx
+// components/welcome/WelcomeScreens.tsx
 
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';

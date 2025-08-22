@@ -1,7 +1,7 @@
 // app/index.tsx
 
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
-import WelcomeScreens from '@/components/onboarding/WelcomeScreens';
+import WelcomeScreens from '@/components/welcome/WelcomeScreens';
 import { configureAmplify } from '@/config/amplify';
 import { AppDispatch } from '@/store/store';
 import { getUserAsync } from '@/store/user/thunks';

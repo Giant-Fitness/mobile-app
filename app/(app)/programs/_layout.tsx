@@ -58,15 +58,6 @@ export default function ProgramsLayout() {
                     fullScreenGestureEnabled: false,
                 }}
             />
-            <Stack.Screen
-                name='program-recommender-wizard'
-                options={{
-                    gestureEnabled: false,
-                    headerShown: false,
-                    animation: 'none',
-                    fullScreenGestureEnabled: false,
-                }}
-            />
         </Stack>
     );
 }

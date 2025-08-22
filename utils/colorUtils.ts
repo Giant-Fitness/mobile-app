@@ -39,3 +39,20 @@ export const lightenColor = (color: string, amount: number = 0.2): string => {
 
     return lightHex;
 };
+
+export const addAlpha = (color: string, alpha: number = 0.9): string => {
+    // Clamp alpha between 0 and 1
+    alpha = Math.max(0, Math.min(1, alpha));
+
+    // Remove the '#' if present
+    const hex = color.replace('#', '');
+
+    // Convert alpha to hex (0-255 range)
+    const alphaHex = Math.round(alpha * 255)
+        .toString(16)
+        .padStart(2, '0')
+        .toUpperCase();
+
+    // Return hex color with alpha
+    return `#${hex}${alphaHex}`;
+};

@@ -19,6 +19,7 @@ interface LargeActionTileProps {
     image: ImageSourcePropType;
     imageSize?: number;
     containerStyle?: ViewStyle;
+    height?: number; // Optional height override
 }
 
 export const LargeActionTile = ({
@@ -32,6 +33,7 @@ export const LargeActionTile = ({
     bodySize = 'body',
     containerStyle,
     imageSize = Sizes.imageXSWidth,
+    height, // Destructure the new prop
 }: LargeActionTileProps) => {
     // Shared value for scale animation
     const scale = useSharedValue(1);
@@ -62,6 +64,7 @@ export const LargeActionTile = ({
                     paddingTop: Spaces.LG + Spaces.MD,
                     marginHorizontal: Spaces.LG,
                     marginBottom: Spaces.XL,
+                    minHeight: height ?? 200,
                 },
                 containerStyle,
             ]}
@@ -85,7 +88,6 @@ const styles = StyleSheet.create({
     container: {
         borderRadius: Spaces.MD,
         overflow: 'visible',
-        minHeight: 200,
         position: 'relative',
     },
     touchableContainer: {

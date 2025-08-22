@@ -2,8 +2,13 @@
 
 export interface User {
     UserId: string;
+    Height?: number;
+    Weight?: number;
+    DOB?: string;
+    Gender?: string;
     OnboardingStatus: UserOnboardingStatus;
     FirstName: string;
+    OnboardingComplete?: boolean;
 }
 
 export interface UserOnboardingStatus {
@@ -90,9 +95,10 @@ export type SleepSubmissionData = {
 };
 
 export interface UserNutritionProfile {
-    UserID: string;
+    UserId: string;
     WeightGoal: number;
-    WeightGoalTimeline: string;
+    WeightChangeRate: number;
+    WeightGoalTimeline?: string;
     PrimaryNutritionGoal: string;
     TDEE: number;
     GoalCalories: number;
@@ -105,14 +111,54 @@ export interface UserNutritionProfile {
     WorkActivityLevel?: string;
     AdaptiveEnabled: boolean;
     LastAdaptiveAdjustment?: string;
-    CreatedAt: string;
-    UpdatedAt: string;
+    CreatedAt?: string;
+    UpdatedAt?: string;
 }
 
 export interface UserNutritionPreferences {
-    UserID: string;
+    UserId: string;
     DietaryType: string;
     DietaryRestrictions: string[];
     BudgetPreference: string;
     UpdatedAt: string;
+}
+
+export interface CompleteProfileParams {
+    // Biodata
+    Height: number;
+    Gender: string;
+    DOB: string;
+    Weight: number;
+    ActivityLevel?: string;
+
+    PrimaryFitnessGoal: string;
+
+    // Fitness
+    GymExperienceLevel: string;
+    DaysPerWeekDesired: string;
+    AccessToEquipment: string;
+
+    // Nutrition
+    TargetWeight?: number;
+    WeightChangeRate?: number;
+    OverrideTDEE?: number;
+    IsCaloriesOverridden?: string;
+
+    // Unit preferences
+    BodyWeightUnits?: string;
+    BodyMeasurementUnits?: string;
+}
+
+export interface CompleteProfileResponse {
+    user: User;
+    userFitnessProfile: UserFitnessProfile;
+    userNutritionProfile?: UserNutritionProfile;
+    userNutritionPreferences?: UserNutritionPreferences;
+    userRecommendations: UserRecommendations;
+    calculated: {
+        TDEE: number;
+        timeline?: string;
+        initialWeight: number;
+    };
+    userAppSettings?: UserAppSettings;
 }

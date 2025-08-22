@@ -21,7 +21,7 @@ type PrimaryButtonProps = {
     iconColor?: string;
     style?: StyleProp<ViewStyle>;
     textStyle?: StyleProp<TextStyle>;
-    iconStyle?: StyleProp<ViewStyle>;
+    iconStyle?: StyleProp<TextStyle>;
     textType?: ThemedTextProps['type'];
     size?: 'SM' | 'MD' | 'LG';
     disabled?: boolean;

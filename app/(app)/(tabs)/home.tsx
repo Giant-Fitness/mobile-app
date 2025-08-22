@@ -5,6 +5,7 @@ import { ThemedView } from '@/components/base/ThemedView';
 import { ActionTile } from '@/components/home/ActionTile';
 import { FactOfTheDay } from '@/components/home/FactOfTheDay';
 import { LargeActionTile } from '@/components/home/LargeActionTile';
+import { OnboardingTiles } from '@/components/onboarding/OnboardingTiles';
 import { ActiveProgramDayCompressedCard } from '@/components/programs/ActiveProgramDayCompressedCard';
 import { WorkoutCompletedSection } from '@/components/programs/WorkoutCompletedSection';
 import { BodyMeasurementsLoggingSheet } from '@/components/progress/BodyMeasurementsLoggingSheet';
@@ -51,6 +52,11 @@ import { useFocusEffect } from '@react-navigation/native';
 import { trigger } from 'react-native-haptic-feedback';
 import { useDispatch, useSelector } from 'react-redux';
 
+const useOnboardingStatus = () => {
+    const user = useSelector((state: RootState) => state.user.user);
+    return Boolean(user?.OnboardingComplete);
+};
+
 export default function HomeScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -71,8 +77,6 @@ export default function HomeScreen() {
     const { userSleepMeasurements } = useSelector((state: RootState) => state.user);
     const { userBodyMeasurements } = useSelector((state: RootState) => state.user);
 
-    const isFitnessOnboardingComplete = user?.OnboardingStatus?.fitness === true;
-
     // Handle focus/blur events to manage refresh state
     useFocusEffect(
         useCallback(() => {
@@ -92,6 +96,8 @@ export default function HomeScreen() {
             };
         }, [isRefreshing]),
     );
+
+    const isOnboardingComplete = useOnboardingStatus();
 
     const handleLogWeight = async (weight: number, date: Date) => {
         setIsLoading(true);
@@ -277,7 +283,7 @@ export default function HomeScreen() {
         },
     ];
 
-    const renderForYouSection = (reorderTiles = false) => {
+    const renderQuickAddSection = (reorderTiles = false) => {
         let tiles = [...actionTiles];
 
         if (reorderTiles) {
@@ -328,6 +334,8 @@ export default function HomeScreen() {
                         <ThemedText type='greeting'>{greeting}</ThemedText>
                     </View>
 
+                    <OnboardingTiles isOnboardingComplete={isOnboardingComplete} />
+
                     {hasCompletedWorkoutToday ? (
                         <WorkoutCompletedSection
                             onBrowseSolos={() =>
@@ -350,14 +358,14 @@ export default function HomeScreen() {
                         </>
                     )}
 
-                    {renderForYouSection()}
+                    {renderQuickAddSection()}
                     <FactOfTheDay />
                 </>
             );
         }
 
         // State 2: No active program but completed onboarding
-        if (isFitnessOnboardingComplete) {
+        if (isOnboardingComplete) {
             return (
                 <>
                     <View style={styles.greeting}>
@@ -376,7 +384,7 @@ export default function HomeScreen() {
                         textColor={themeColors.highlightContainerText}
                     />
 
-                    {renderForYouSection()}
+                    {renderQuickAddSection()}
 
                     <FactOfTheDay />
                 </>
@@ -390,19 +398,9 @@ export default function HomeScreen() {
                     <ThemedText type='greeting'>{greeting}</ThemedText>
                 </View>
 
-                <LargeActionTile
-                    title='Get Started'
-                    description='Let us recommend a training plan tailored to your goals'
-                    onPress={() => {
-                        debounce(router, '/(app)/programs/program-recommender-wizard');
-                        trigger('soft');
-                    }}
-                    backgroundColor={themeColors.containerHighlight}
-                    image={require('@/assets/images/nutrition.png')}
-                    textColor={themeColors.highlightContainerText}
-                />
+                <OnboardingTiles isOnboardingComplete={isOnboardingComplete} />
 
-                {renderForYouSection(true)}
+                {renderQuickAddSection(true)}
 
                 <FactOfTheDay />
             </>

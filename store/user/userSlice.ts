@@ -3,6 +3,7 @@
 import { REQUEST_STATE } from '@/constants/requestStates';
 import {
     completeDayAsync,
+    completeUserProfileAsync,
     createExerciseSetModificationAsync,
     createExerciseSubstitutionAsync,
     deleteBodyMeasurementAsync,
@@ -42,6 +43,7 @@ import {
 } from '@/store/user/thunks';
 import { initialState } from '@/store/user/userState';
 import {
+    CompleteProfileResponse,
     User,
     UserAppSettings,
     UserBodyMeasurement,
@@ -93,6 +95,59 @@ const userSlice = createSlice({
             .addCase(updateUserAsync.rejected, (state, action) => {
                 state.userState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'Failed to update user';
+            })
+
+            // Complete User Profile (onboarding)
+            .addCase(completeUserProfileAsync.pending, (state) => {
+                // Set multiple states to pending since we're updating several entities
+                state.userState = REQUEST_STATE.PENDING;
+                state.userFitnessProfileState = REQUEST_STATE.PENDING;
+                state.userRecommendationsState = REQUEST_STATE.PENDING;
+                state.userAppSettingsState = REQUEST_STATE.PENDING; // Add this line
+                // Only set nutrition states to pending if they will be created
+                // (we'll handle this in fulfilled based on response)
+                state.error = null;
+            })
+            .addCase(completeUserProfileAsync.fulfilled, (state, action: PayloadAction<CompleteProfileResponse>) => {
+                // Update all related state
+                state.userState = REQUEST_STATE.FULFILLED;
+                state.userFitnessProfileState = REQUEST_STATE.FULFILLED;
+                state.userRecommendationsState = REQUEST_STATE.FULFILLED;
+                state.userAppSettingsState = REQUEST_STATE.FULFILLED; // Add this line
+
+                // Set the data
+                state.user = action.payload.user;
+                state.userFitnessProfile = action.payload.userFitnessProfile;
+                state.userRecommendations = action.payload.userRecommendations;
+
+                // Handle userAppSettings
+                if (action.payload.userAppSettings) {
+                    state.userAppSettings = action.payload.userAppSettings;
+                }
+
+                // Handle optional nutrition data
+                if (action.payload.userNutritionProfile) {
+                    state.userNutritionProfileState = REQUEST_STATE.FULFILLED;
+                    state.userNutritionProfile = action.payload.userNutritionProfile;
+                }
+
+                if (action.payload.userNutritionPreferences) {
+                    state.userNutritionPreferencesState = REQUEST_STATE.FULFILLED;
+                    state.userNutritionPreferences = action.payload.userNutritionPreferences;
+                }
+
+                // Clear error
+                state.error = null;
+            })
+            .addCase(completeUserProfileAsync.rejected, (state, action) => {
+                // Set all attempted states to rejected
+                state.userState = REQUEST_STATE.REJECTED;
+                state.userFitnessProfileState = REQUEST_STATE.REJECTED;
+                state.userRecommendationsState = REQUEST_STATE.REJECTED;
+                state.userNutritionProfileState = REQUEST_STATE.REJECTED;
+                state.userNutritionPreferencesState = REQUEST_STATE.REJECTED;
+                state.userAppSettingsState = REQUEST_STATE.REJECTED; // Add this line
+                state.error = action.error.message || 'Failed to complete user profile';
             })
 
             // Get User Fitness Profile
@@ -163,7 +218,7 @@ const userSlice = createSlice({
                 state.userProgramProgressState = REQUEST_STATE.PENDING;
                 state.error = null;
             })
-            .addCase(completeDayAsync.fulfilled, (state, action: PayloadAction<UserProgramProgress>) => {
+            .addCase(completeDayAsync.fulfilled, (state, action: PayloadAction<UserProgramProgress | null>) => {
                 state.userProgramProgressState = REQUEST_STATE.FULFILLED;
                 state.userProgramProgress = action.payload;
             })
