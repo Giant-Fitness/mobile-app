@@ -7,18 +7,15 @@ import { moderateScale } from '@/utils/scaling';
 import React from 'react';
 import { StyleProp, TextStyle } from 'react-native';
 
-import { AntDesign, Entypo, Feather, FontAwesome6, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { AntDesign, Feather, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 
 import Animated, { SharedValue, useAnimatedStyle, useDerivedValue } from 'react-native-reanimated';
 
 const AnimatedIonicons = Animated.createAnimatedComponent(Ionicons);
 const AnimatedMaterialCommunityIcons = Animated.createAnimatedComponent(MaterialCommunityIcons);
 const AnimatedMaterialIcons = Animated.createAnimatedComponent(MaterialIcons);
-const AnimatedEntypo = Animated.createAnimatedComponent(Entypo);
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 const AnimatedAnt = Animated.createAnimatedComponent(AntDesign);
-// Note: FontAwesome6 doesn't work well with Animated.createAnimatedComponent
-// We'll handle it separately
 
 type IconProps = {
     name: string;
@@ -51,9 +48,6 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
         ref,
     };
 
-    // For FontAwesome6, we need to handle color differently since it doesn't work well with animated components
-    const finalColor = typeof color === 'string' ? color : (color?.value ?? defaultColor);
-
     // Render the appropriate icon
     switch (name) {
         case 'stopwatch':
@@ -76,33 +70,33 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
             return <AnimatedIonicons name='chevron-up' {...commonProps} />;
         case 'chevron-down':
             return <AnimatedIonicons name='chevron-down' {...commonProps} />;
-        case 'person':
+        case 'profile-active':
             return <AnimatedIonicons name='person-circle' {...commonProps} />;
+        case 'profile-inactive':
+            return <AnimatedIonicons name='person-circle-outline' {...commonProps} />;
+        case 'settings':
+            return <AnimatedIonicons name='settings-sharp' {...commonProps} />;
         case 'home-active':
             return <AnimatedMaterialCommunityIcons name='home-variant' {...commonProps} />;
         case 'home-inactive':
-            return <AnimatedMaterialCommunityIcons name='home-variant' {...commonProps} />;
-        case 'nutrition-active':
-            return <FontAwesome6 name='plate-wheat' size={moderateScale(size)} color={finalColor} style={style} ref={ref} />;
-        case 'nutrition-inactive':
-            return <FontAwesome6 name='plate-wheat' size={moderateScale(size)} color={finalColor} style={style} ref={ref} />;
+            return <AnimatedMaterialCommunityIcons name='home-variant-outline' {...commonProps} />;
         case 'plan-active':
             return <AnimatedMaterialCommunityIcons name='clipboard-check' {...commonProps} />;
         case 'plan-inactive':
-            return <AnimatedMaterialCommunityIcons name='clipboard-check' {...commonProps} />;
-        case 'progress-active':
-            return <AnimatedEntypo name='bar-graph' {...commonProps} />;
-        case 'progress-inactive':
-            return <AnimatedEntypo name='bar-graph' {...commonProps} />;
+            return <AnimatedMaterialCommunityIcons name='clipboard-check-outline' {...commonProps} />;
         case 'edit':
             return <AnimatedMaterialIcons name='edit' {...commonProps} />;
         case 'lightning-active':
             return <AnimatedMaterialCommunityIcons name='lightning-bolt' {...commonProps} />;
         case 'lightning-inactive':
-            return <AnimatedMaterialCommunityIcons name='lightning-bolt' {...commonProps} />;
-        case 'exercise-active':
+            return <AnimatedMaterialCommunityIcons name='lightning-bolt-outline' {...commonProps} />;
+        case 'food-log-active':
+            return <AnimatedIonicons name='book' {...commonProps} />;
+        case 'food-log-inactive':
+            return <AnimatedIonicons name='book-outline' {...commonProps} />;
+        case 'training-active':
             return <AnimatedMaterialIcons name='sports-martial-arts' {...commonProps} />;
-        case 'exercise-inactive':
+        case 'training-inactive':
             return <AnimatedMaterialIcons name='directions-run' {...commonProps} />;
         case 'filter':
             return <AnimatedIonicons name='options' {...commonProps} />;
@@ -175,7 +169,7 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
         case 'preview':
             return <AnimatedMaterialCommunityIcons name='view-dashboard-outline' {...commonProps} />;
         case 'magic-wand':
-            return <FontAwesome6 name='wand-magic-sparkles' size={moderateScale(size)} color={finalColor} style={style} ref={ref} />;
+            return <AnimatedMaterialCommunityIcons name='magic-staff' {...commonProps} />;
         case 'trash':
             return <AnimatedFeather name='trash-2' {...commonProps} />;
         case 'exit':

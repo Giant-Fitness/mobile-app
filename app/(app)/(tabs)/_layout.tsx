@@ -23,6 +23,20 @@ export default function TabLayout() {
         debounce(router, '/(app)/settings');
     };
 
+    // Function to conditionally show profile header
+    const getHeaderRight = (routeName: string) => {
+        if (routeName === 'profile') {
+            const ProfileHeaderLeft = () => (
+                <TouchableOpacity activeOpacity={1} onPress={handleSettingPress}>
+                    <Icon name='settings' size={Sizes.iconSizeDefault} color={themeColors.iconDefault} style={{ marginRight: Spaces.LG }} />
+                </TouchableOpacity>
+            );
+            ProfileHeaderLeft.displayName = 'ProfileHeaderLeft';
+            return ProfileHeaderLeft;
+        }
+        return undefined;
+    };
+
     return (
         <Tabs
             screenListeners={() => ({
@@ -52,24 +66,23 @@ export default function TabLayout() {
                               </Pressable>
                           )
                         : undefined,
-                lazy: true, // This helps with performance
+                lazy: true,
                 tabBarItemStyle: {
-                    flexDirection: 'column', // Applied to both platforms
-                    alignItems: 'center', // Applied to both platforms
-                    justifyContent: 'flex-start', // Applied to both platforms
-                    // iOS-specific padding
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'flex-start',
                     ...Platform.select({
                         ios: {
                             paddingVertical: Spaces.SM,
                         },
-                        android: {}, // No additional padding for Android
+                        android: {},
                     }),
                 },
                 tabBarLabelStyle: Platform.select({
                     ios: {
                         marginTop: Spaces.XS,
                     },
-                    android: {}, // Default margin for Android
+                    android: {},
                 }),
                 headerTitleContainerStyle: {
                     paddingLeft: 0,
@@ -78,11 +91,6 @@ export default function TabLayout() {
                 headerTitleAlign: 'center',
                 headerShown: true,
                 tabBarShowLabel: true,
-                headerLeft: () => (
-                    <TouchableOpacity activeOpacity={1} onPress={handleSettingPress}>
-                        <Icon name='person' size={28} color={themeColors.subText} style={{ marginLeft: Spaces.LG }} />
-                    </TouchableOpacity>
-                ),
             }}
         >
             <Tabs.Screen
@@ -97,7 +105,6 @@ export default function TabLayout() {
                         android: {
                             backgroundColor: themeColors.background,
                             elevation: 0,
-                            // No height specified for Android - will use default height
                         },
                     }),
                     headerTitleStyle: { color: themeColors.text, fontSize: moderateScale(16) },
@@ -106,47 +113,35 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name='programs'
+                name='(training-tabs)'
                 options={{
                     headerStyle: Platform.select({
                         ios: {
                             backgroundColor: themeColors.background,
                             height: Sizes.headerHeight,
                             shadowColor: 'transparent',
+                            borderBottomWidth: 0,
                         },
                         android: {
                             backgroundColor: themeColors.background,
                             elevation: 0,
-                            // No height specified for Android - will use default height
                         },
                     }),
                     headerTitleStyle: { color: themeColors.text, fontSize: moderateScale(16) },
-                    title: 'Plans',
-                    tabBarIcon: ({ color, focused }) => <Icon name={focused ? 'plan-active' : 'plan-inactive'} size={22} color={color} />,
+                    title: 'Training',
+                    tabBarIcon: ({ color, focused }) => <Icon name={focused ? 'training-active' : 'training-inactive'} size={22} color={color} />,
                 }}
             />
             <Tabs.Screen
-                name='on-demand'
+                name='food-log'
                 options={{
-                    headerStyle: Platform.select({
-                        ios: {
-                            backgroundColor: themeColors.background,
-                            height: Sizes.headerHeight,
-                            shadowColor: 'transparent',
-                        },
-                        android: {
-                            backgroundColor: themeColors.background,
-                            elevation: 0,
-                            // No height specified for Android - will use default height
-                        },
-                    }),
-                    headerTitleStyle: { color: themeColors.text, fontSize: moderateScale(16) },
-                    title: 'Solos',
-                    tabBarIcon: ({ color, focused }) => <Icon name={focused ? 'lightning-active' : 'lightning-inactive'} size={23} color={color} />,
+                    headerShown: false,
+                    title: 'Food Log',
+                    tabBarIcon: ({ color, focused }) => <Icon name={focused ? 'food-log-active' : 'food-log-inactive'} size={20} color={color} />,
                 }}
             />
             <Tabs.Screen
-                name='progress'
+                name='profile'
                 options={{
                     headerStyle: Platform.select({
                         ios: {
@@ -157,12 +152,11 @@ export default function TabLayout() {
                         android: {
                             backgroundColor: themeColors.background,
                             elevation: 0,
-                            // No height specified for Android - will use default height
                         },
                     }),
-                    headerTitleStyle: { color: themeColors.text, fontSize: moderateScale(16) },
-                    title: 'Progress',
-                    tabBarIcon: ({ color, focused }) => <Icon name={focused ? 'progress-active' : 'progress-inactive'} size={21} color={color} />,
+                    title: 'Profile',
+                    tabBarIcon: ({ color, focused }) => <Icon name={focused ? 'profile-active' : 'profile-inactive'} size={24} color={color} />,
+                    headerRight: getHeaderRight('profile'),
                 }}
             />
         </Tabs>

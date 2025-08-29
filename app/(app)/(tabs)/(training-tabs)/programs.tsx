@@ -1,4 +1,4 @@
-// app/(app)/(tabs)/programs.tsx
+// app/(app)/(tabs)/(training-tabs)/programs.tsx
 
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import ActiveProgramHome from '@/components/programs/active-program-home';

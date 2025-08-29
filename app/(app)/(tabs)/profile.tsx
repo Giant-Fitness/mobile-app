@@ -1,4 +1,4 @@
-// app/(app)/(tabs)/progress.tsx
+// app/(app)/(tabs)/profile.tsx
 
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -43,7 +43,7 @@ const CARD_GAP = Spaces.SM + Spaces.XXS;
 const HORIZONTAL_PADDING = Spaces.LG * 2; // Left and right padding
 const CARD_WIDTH = (width - HORIZONTAL_PADDING - CARD_GAP) / 2;
 
-export default function ProgressScreen() {
+export default function ProdileScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const dispatch = useDispatch<AppDispatch>();

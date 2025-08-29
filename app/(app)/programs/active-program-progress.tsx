@@ -102,7 +102,7 @@ const ActiveProgramProgressScreen = () => {
 
     const handleResetSuccessDismiss = () => {
         setShowResetSuccess(false);
-        router.push('/(app)/(tabs)/programs');
+        router.push('/(app)/(tabs)/(training-tabs)/programs');
     };
 
     const handleMenuPress = () => {

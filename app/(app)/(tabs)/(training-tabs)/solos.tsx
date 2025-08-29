@@ -1,4 +1,4 @@
-// app/(app)/(tabs)/on-demand.tsx
+// app/(app)/(tabs)/(training-tabs)/solos.tsx
 
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -22,7 +22,7 @@ import { router } from 'expo-router';
 import { trigger } from 'react-native-haptic-feedback';
 import { useDispatch, useSelector } from 'react-redux';
 
-export default function WorkoutsScreen() {
+export default function SolosScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const dispatch = useDispatch<AppDispatch>();

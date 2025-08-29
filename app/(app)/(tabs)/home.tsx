@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
     greeting: {
         ...Platform.select({
             ios: {
-                marginTop: Spaces.LG,
+                marginTop: Spaces.SM,
             },
             android: {
                 marginTop: Spaces.SM,
