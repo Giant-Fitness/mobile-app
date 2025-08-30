@@ -1,5 +1,7 @@
 // components/programs/RecommendedProgramCard.tsx
 
+import { Icon } from '@/components/base/Icon';
+import { ThemedText } from '@/components/base/ThemedText';
 import { ImageTextOverlay } from '@/components/media/ImageTextOverlay';
 import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
@@ -10,37 +12,81 @@ import { moderateScale } from '@/utils/scaling';
 import React, { useRef } from 'react';
 import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
 
+import { trigger } from 'react-native-haptic-feedback';
+
 type RecommendedProgramCardProps = {
     program: Program;
     onPress: () => void;
+    compressed?: boolean;
 };
 
-export const RecommendedProgramCard: React.FC<RecommendedProgramCardProps> = ({ program, onPress }) => {
+export const RecommendedProgramCard: React.FC<RecommendedProgramCardProps> = ({ program, onPress, compressed = false }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const shadowColor = 'rgba(0,0,0,0.2)';
 
     // Animation value for press feedback
     const scaleAnim = useRef(new Animated.Value(1)).current;
+    const badgeScaleAnim = useRef(new Animated.Value(1)).current;
+
+    const imageHeight = compressed ? Sizes.imageLGHeight : Sizes.imageXLHeight;
 
     const handlePressIn = () => {
-        Animated.spring(scaleAnim, {
-            toValue: 0.97,
-            friction: 3,
-            useNativeDriver: true,
-        }).start();
+        Animated.parallel([
+            Animated.spring(scaleAnim, {
+                toValue: 0.97,
+                friction: 3,
+                useNativeDriver: true,
+            }),
+            Animated.spring(badgeScaleAnim, {
+                toValue: 0.95,
+                friction: 3,
+                useNativeDriver: true,
+            }),
+        ]).start();
     };
 
     const handlePressOut = () => {
-        Animated.spring(scaleAnim, {
-            toValue: 1,
-            friction: 3,
-            useNativeDriver: true,
-        }).start();
+        Animated.parallel([
+            Animated.spring(scaleAnim, {
+                toValue: 1,
+                friction: 3,
+                useNativeDriver: true,
+            }),
+            Animated.spring(badgeScaleAnim, {
+                toValue: 1,
+                friction: 3,
+                useNativeDriver: true,
+            }),
+        ]).start();
     };
 
     const handlePress = () => {
+        trigger('impactLight');
         onPress();
+    };
+
+    const renderBadge = () => {
+        const badgeColor = themeColors.tangerineSolid;
+        const badgeTextColor = themeColors.white;
+
+        return (
+            <Animated.View
+                style={[
+                    styles.floatingBadge,
+                    {
+                        backgroundColor: badgeColor,
+                        shadowColor: shadowColor,
+                        transform: [{ scale: badgeScaleAnim }],
+                    },
+                ]}
+            >
+                <Icon name='play' color={badgeTextColor} size={12} style={{ marginRight: 4 }} />
+                <ThemedText type='buttonSmall' style={[styles.badgeText, { color: badgeTextColor }]}>
+                    Start
+                </ThemedText>
+            </Animated.View>
+        );
     };
 
     return (
@@ -59,7 +105,7 @@ export const RecommendedProgramCard: React.FC<RecommendedProgramCardProps> = ({ 
                     <ImageTextOverlay
                         image={{ uri: program.PhotoUrl }}
                         title={program.ProgramName}
-                        containerStyle={styles.imageOverlayContainer}
+                        containerStyle={{ height: imageHeight }}
                         titleType='titleLarge'
                         gradientColors={['transparent', 'rgba(0,0,0,0.7)']}
                         subtitle={`${program.Goal}, ${program.Weeks} Weeks`}
@@ -67,6 +113,7 @@ export const RecommendedProgramCard: React.FC<RecommendedProgramCardProps> = ({ 
                         titleStyle={{ marginRight: Spaces.LG, lineHeight: moderateScale(20), marginBottom: 0 }}
                         subtitleStyle={{ marginTop: 0 }}
                     />
+                    {renderBadge()}
                 </View>
             </TouchableOpacity>
         </Animated.View>
@@ -80,7 +127,6 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 4, // For Android
         borderRadius: Spaces.SM,
-        marginBottom: Spaces.XL,
     },
     cardContainer: {
         borderRadius: Spaces.SM,
@@ -89,8 +135,25 @@ const styles = StyleSheet.create({
     imageContainer: {
         position: 'relative',
     },
-    imageOverlayContainer: {
-        height: Sizes.imageXLHeight,
+
+    // Floating badge styles
+    floatingBadge: {
+        position: 'absolute',
+        bottom: Spaces.MD,
+        right: Spaces.MD,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: Spaces.SM,
+        paddingVertical: Spaces.XS,
+        borderRadius: Spaces.MD,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+        elevation: 3,
+        zIndex: 10,
+    },
+    badgeText: {
+        fontSize: 11,
     },
 });
 

@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
         marginHorizontal: Spaces.LG,
         marginTop: Spaces.LG,
         marginBottom: Spaces.XL,
-        borderRadius: Spaces.MD,
+        borderRadius: Spaces.SM,
         overflow: 'hidden',
     },
     contentWrapper: {

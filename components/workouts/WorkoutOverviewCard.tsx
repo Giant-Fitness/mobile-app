@@ -43,11 +43,9 @@ export const WorkoutOverviewCard: React.FC<WorkoutOverviewCardProps> = ({ workou
                         subtitle={`${workout.Time} mins, ${workout.Level}`}
                         gradientColors={['transparent', 'rgba(0,0,0,0.65)']}
                         containerStyle={styles.imageContainer}
-                        textContainerStyle={styles.textContainer}
                         subtitleType='bodySmall'
                         titleType='title'
                         titleStyle={styles.titleStyle}
-                        subtitleStyle={styles.subtitleStyle}
                     />
                 </View>
             </View>
@@ -76,15 +74,8 @@ const styles = StyleSheet.create({
     imageContainer: {
         height: '100%',
     },
-    textContainer: {
-        bottom: Spaces.LG,
-    },
     titleStyle: {
-        marginRight: Spaces.LG,
         lineHeight: moderateScale(20),
-    },
-    subtitleStyle: {
-        marginTop: Spaces.XS,
     },
 });
 

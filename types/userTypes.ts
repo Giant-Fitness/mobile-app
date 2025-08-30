@@ -6,15 +6,8 @@ export interface User {
     Weight?: number;
     DOB?: string;
     Gender?: string;
-    OnboardingStatus: UserOnboardingStatus;
     FirstName: string;
     OnboardingComplete?: boolean;
-}
-
-export interface UserOnboardingStatus {
-    biodata: boolean;
-    fitness: boolean;
-    nutrition: boolean;
 }
 
 export interface UserProgramProgress {

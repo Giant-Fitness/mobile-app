@@ -18,7 +18,7 @@ export const useInactiveProgramData = () => {
     const { programs } = useSelector((state: RootState) => state.programs);
 
     // Only fetch recommendations if user has completed onboarding
-    const isOnboardingComplete = user?.OnboardingStatus?.fitness === true;
+    const isOnboardingComplete = user?.OnboardingComplete === true;
 
     useEffect(() => {
         const loadRecommendations = async () => {

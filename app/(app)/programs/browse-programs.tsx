@@ -45,7 +45,7 @@ const ProgramInfo = () => {
                             },
                         ]}
                     >
-                        Training Plans
+                        Programs
                     </ThemedText>
                     <ThemedText
                         type='overline'
@@ -58,7 +58,7 @@ const ProgramInfo = () => {
                             },
                         ]}
                     >
-                        Follow these structured, multi-week adventures to unlock your full potential!
+                        Structured programs designed to help you reach your goals
                     </ThemedText>
                 </View>
                 <Image
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     infoContainer: {
         marginHorizontal: Spaces.XS,
         marginBottom: Spaces.XL,
-        borderRadius: Spaces.MD,
+        borderRadius: Spaces.SM,
         overflow: 'hidden',
     },
     infoContentWrapper: {

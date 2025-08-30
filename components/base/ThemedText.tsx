@@ -6,28 +6,29 @@ import { moderateScale } from '@/utils/scaling'; // Use the customized moderateS
 import React from 'react';
 import { StyleSheet, Text, TextProps } from 'react-native';
 
+export type ThemedTextTypes =
+    | 'title'
+    | 'titleLarge'
+    | 'titleXLarge'
+    | 'greeting'
+    | 'body'
+    | 'bodyXSmall'
+    | 'bodySmall'
+    | 'bodyMedium'
+    | 'caption'
+    | 'subtitle'
+    | 'headline'
+    | 'overline'
+    | 'button'
+    | 'link'
+    | 'italic'
+    | 'buttonSmall'
+    | 'headlineLarge';
+
 export type ThemedTextProps = TextProps & {
     lightColor?: string;
     darkColor?: string;
-    type?:
-        | 'body'
-        | 'titleLarge'
-        | 'title'
-        | 'subtitle'
-        | 'caption'
-        | 'link'
-        | 'button'
-        | 'overline'
-        | 'italic'
-        | 'buttonSmall'
-        | 'titleXLarge'
-        | 'headline'
-        | 'headlineLarge'
-        | 'bodyXSmall'
-        | 'bodyMedium'
-        | 'bodySmall'
-        | 'overlineTransformed'
-        | 'greeting';
+    type?: ThemedTextTypes;
     adjustsFontSizeToFit?: boolean;
     numberOfLines?: number;
 };

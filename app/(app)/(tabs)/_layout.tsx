@@ -8,12 +8,10 @@ import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { addAlpha } from '@/utils/colorUtils';
-import { debounce } from '@/utils/debounce';
-import { moderateScale } from '@/utils/scaling';
 import React, { useState } from 'react';
 import { Platform, Pressable, TouchableOpacity, View } from 'react-native';
 
-import { router, Tabs } from 'expo-router';
+import { Tabs } from 'expo-router';
 
 import { trigger } from 'react-native-haptic-feedback';
 
@@ -25,25 +23,6 @@ export default function TabLayout() {
     const handleQuickActionPress = () => {
         trigger('effectClick');
         setQuickActionModalVisible(true);
-    };
-
-    const handleSettingPress = () => {
-        trigger('effectClick');
-        debounce(router, '/(app)/settings');
-    };
-
-    // Function to conditionally show profile header
-    const getHeaderRight = (routeName: string) => {
-        if (routeName === 'profile') {
-            const ProfileHeaderLeft = () => (
-                <TouchableOpacity activeOpacity={1} onPress={handleSettingPress}>
-                    <Icon name='settings' size={Sizes.iconSizeDefault} color={themeColors.iconDefault} style={{ marginRight: Spaces.LG }} />
-                </TouchableOpacity>
-            );
-            ProfileHeaderLeft.displayName = 'ProfileHeaderLeft';
-            return ProfileHeaderLeft;
-        }
-        return undefined;
     };
 
     return (
@@ -106,18 +85,8 @@ export default function TabLayout() {
                 <Tabs.Screen
                     name='home'
                     options={{
-                        headerStyle: Platform.select({
-                            ios: {
-                                backgroundColor: themeColors.background,
-                                height: Sizes.headerHeight,
-                                shadowColor: 'transparent',
-                            },
-                            android: {
-                                backgroundColor: themeColors.background,
-                                elevation: 0,
-                            },
-                        }),
-                        headerTitleStyle: { color: themeColors.text, fontSize: moderateScale(16) },
+                        // Remove the default header for home screen
+                        headerShown: false,
                         title: 'Home',
                         tabBarIcon: ({ color, focused }) => <Icon name={focused ? 'home-active' : 'home-inactive'} size={22} color={color} />,
                     }}
@@ -125,19 +94,7 @@ export default function TabLayout() {
                 <Tabs.Screen
                     name='(training-tabs)'
                     options={{
-                        headerStyle: Platform.select({
-                            ios: {
-                                backgroundColor: themeColors.background,
-                                height: Sizes.headerHeight,
-                                shadowColor: 'transparent',
-                                borderBottomWidth: 0,
-                            },
-                            android: {
-                                backgroundColor: themeColors.background,
-                                elevation: 0,
-                            },
-                        }),
-                        headerTitleStyle: { color: themeColors.text, fontSize: moderateScale(16) },
+                        headerShown: false,
                         title: 'Training',
                         tabBarIcon: ({ color, focused }) => <Icon name={focused ? 'training-active' : 'training-inactive'} size={22} color={color} />,
                     }}
@@ -190,25 +147,14 @@ export default function TabLayout() {
                 <Tabs.Screen
                     name='profile'
                     options={{
-                        headerStyle: Platform.select({
-                            ios: {
-                                backgroundColor: themeColors.background,
-                                height: Sizes.headerHeight,
-                                shadowColor: 'transparent',
-                            },
-                            android: {
-                                backgroundColor: themeColors.background,
-                                elevation: 0,
-                            },
-                        }),
+                        headerShown: false,
                         title: 'Profile',
                         tabBarIcon: ({ color, focused }) => <Icon name={focused ? 'profile-active' : 'profile-inactive'} size={24} color={color} />,
-                        headerRight: getHeaderRight('profile'),
                     }}
                 />
             </Tabs>
 
-            {/* Quick Action Bottom Sheet - MOVED OUTSIDE of <Tabs> */}
+            {/* Quick Action Bottom Sheet */}
             <BottomSheet visible={quickActionModalVisible} onClose={() => setQuickActionModalVisible(false)}>
                 <View
                     style={{

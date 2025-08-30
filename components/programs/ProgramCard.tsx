@@ -9,6 +9,7 @@ import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Program } from '@/types';
+import { addAlpha } from '@/utils/colorUtils';
 import { moderateScale } from '@/utils/scaling';
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
@@ -72,11 +73,14 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({ program, isActive, act
                             </View>
                         )}
                         {!activeProgramUser && recommendedProgram && (
-                            <View style={[styles.recommendedOverlay, { backgroundColor: 'rgba(255,255,255,0.9)' }]}>
-                                <Icon name='star' size={Sizes.fontSizeDefault} color={'rgba(0,0,0,0.95)'} />
-                                <ThemedText type='buttonSmall' style={[{ marginLeft: Spaces.XS }]}>
-                                    Recommended
-                                </ThemedText>
+                            <View style={styles.ribbonContainer}>
+                                <View style={[styles.ribbon, { backgroundColor: addAlpha(themeColors.white, 0.8) }]}>
+                                    <Icon name='star' size={11} color={themeColors.black} style={{ marginTop: -Spaces.XXS }} />
+                                    <ThemedText type='caption' style={[styles.ribbonText, { color: themeColors.black }]}>
+                                        RECOMMENDED
+                                    </ThemedText>
+                                </View>
+                                <View style={[styles.ribbonTail, { borderTopColor: themeColors.tangerineSolid }]} />
                             </View>
                         )}
                     </View>
@@ -149,16 +153,35 @@ const styles = StyleSheet.create({
         borderTopRightRadius: Spaces.SM,
         borderBottomRightRadius: Spaces.SM,
     },
-    recommendedOverlay: {
+    // Ribbon badge styles
+    ribbonContainer: {
+        position: 'absolute',
+        top: Spaces.MD,
+        left: -Spaces.XS,
+        zIndex: 10,
+    },
+    ribbon: {
         flexDirection: 'row',
         alignItems: 'center',
-        position: 'absolute',
-        top: Spaces.LG,
-        left: 0,
-        paddingVertical: Spaces.XS,
         paddingHorizontal: Spaces.MD,
-        borderTopRightRadius: Spaces.SM,
-        borderBottomRightRadius: Spaces.SM,
+        paddingVertical: Spaces.XS,
+        borderTopRightRadius: Spaces.XS,
+        borderBottomRightRadius: Spaces.XS,
+    },
+    ribbonText: {
+        paddingLeft: Spaces.XS,
+        letterSpacing: 0.5,
+        fontSize: 11,
+    },
+    ribbonTail: {
+        width: 0,
+        height: 0,
+        borderLeftWidth: Spaces.XS,
+        borderRightWidth: 0,
+        borderBottomWidth: Spaces.XS,
+        borderLeftColor: 'transparent',
+        borderRightColor: 'transparent',
+        marginTop: -1,
     },
     contentContainer: {
         paddingHorizontal: Spaces.MD,

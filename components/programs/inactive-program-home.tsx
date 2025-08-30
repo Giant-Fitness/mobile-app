@@ -14,7 +14,7 @@ import { useInactiveProgramData } from '@/hooks/useInactiveProgramData';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { debounce } from '@/utils/debounce';
 import React from 'react';
-import { Dimensions, Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { router } from 'expo-router';
 
@@ -27,24 +27,10 @@ interface MenuItemProps {
     backgroundColor: string;
     textColor: string;
     image: any;
-    isGrid?: boolean;
     descriptionColor: string;
 }
 
-const MenuItem: React.FC<MenuItemProps> = ({ title, description, onPress, backgroundColor, textColor, image, isGrid = false, descriptionColor }) => {
-    if (isGrid) {
-        return (
-            <TouchableOpacity onPress={onPress} style={[styles.gridMenuItem, { backgroundColor }]} activeOpacity={0.7}>
-                <View style={styles.gridContentWrapper}>
-                    <Image source={image} style={[styles.gridImage, { tintColor: textColor }]} resizeMode='contain' />
-                    <ThemedText type='overline' style={[styles.gridTitle, { color: textColor }]} numberOfLines={2}>
-                        {title}
-                    </ThemedText>
-                </View>
-            </TouchableOpacity>
-        );
-    }
-
+const MenuItem: React.FC<MenuItemProps> = ({ title, description, onPress, backgroundColor, textColor, image, descriptionColor }) => {
     return (
         <TouchableOpacity
             onPress={onPress}
@@ -90,38 +76,41 @@ export default function InactiveProgramHome() {
         return <DumbbellSplash isDataLoaded={false} />;
     }
 
-    const navigateTo = (route: 'programs/program-recommender-wizard' | 'programs/browse-programs' | 'programs/program-overview', params = {}) => {
+    const navigateTo = (route: 'onboarding/biodata/step-1-gender' | 'programs/browse-programs' | 'programs/program-overview', params = {}) => {
         debounce(router, { pathname: `/(app)/${route}` as const, params });
     };
 
     const menuItems = [
         {
-            title: !isOnboardingComplete ? 'Find Your Perfect Plan' : 'Browse Library',
+            title: !isOnboardingComplete ? 'Find Your Perfect Program' : 'Browse Programs',
             description: !isOnboardingComplete
-                ? 'Let us recommend a plan tailored to your goals'
-                : 'Our structured training plans turn your goals into achievements',
+                ? 'Let us recommend a Program tailored to your goals'
+                : "Want options? We've got tons of other programs to explore",
             image: !isOnboardingComplete ? require('@/assets/images/wand.png') : require('@/assets/images/clipboard.png'),
             onPress: () => {
-                navigateTo(!isOnboardingComplete ? 'programs/program-recommender-wizard' : 'programs/browse-programs');
-                trigger('impactHeavy');
+                navigateTo(!isOnboardingComplete ? 'onboarding/biodata/step-1-gender' : 'programs/browse-programs');
+                trigger('selection');
             },
-            backgroundColor: themeColors.containerHighlight,
-            textColor: themeColors.highlightContainerText,
-            descriptionColor: lightenColor(themeColors.subTextSecondary, 0.1),
+            backgroundColor: !isOnboardingComplete ? themeColors.containerHighlight : lightenColor(themeColors.tangerineTransparent, 0.7),
+            textColor: !isOnboardingComplete ? themeColors.highlightContainerText : darkenColor(themeColors.tangerineSolid, 0),
+            descriptionColor: !isOnboardingComplete ? lightenColor(themeColors.subTextSecondary, 0.1) : darkenColor(themeColors.subText, 0.2),
             show: true,
         },
-        {
-            title: !isOnboardingComplete ? 'Browse Library' : 'Retake Quiz',
-            description: !isOnboardingComplete
-                ? 'Our structured training plans turn your goals into achievements'
-                : 'Retake the quiz to get an updated training plan recommendation',
-            image: !isOnboardingComplete ? require('@/assets/images/clipboard.png') : require('@/assets/images/wand.png'),
-            onPress: () => navigateTo(!isOnboardingComplete ? 'programs/browse-programs' : 'programs/program-recommender-wizard'),
-            backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.7),
-            textColor: darkenColor(themeColors.tangerineSolid, 0),
-            descriptionColor: darkenColor(themeColors.subText, 0.2),
-            show: true,
-        },
+        // Only show the second menu item (Browse Library/Retake Quiz) if onboarding is NOT complete
+        ...(!isOnboardingComplete
+            ? [
+                  {
+                      title: 'Browse Programs',
+                      description: 'Our training programs turn your goals into achievements',
+                      image: require('@/assets/images/clipboard.png'),
+                      onPress: () => navigateTo('programs/browse-programs'),
+                      backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.7),
+                      textColor: darkenColor(themeColors.tangerineSolid, 0),
+                      descriptionColor: darkenColor(themeColors.subText, 0.2),
+                      show: true,
+                  },
+              ]
+            : []),
     ].filter((item) => item.show);
 
     return (
@@ -133,7 +122,7 @@ export default function InactiveProgramHome() {
             {isOnboardingComplete && recommendedProgram ? (
                 <View style={styles.recommendedProgramContainer}>
                     <ThemedText type='titleLarge' style={[styles.recommendedHeader, { color: themeColors.text }]}>
-                        {'Your Journey Starts Here'}
+                        Recommended Program
                     </ThemedText>
                     <RecommendedProgramCard
                         program={recommendedProgram}
@@ -151,23 +140,10 @@ export default function InactiveProgramHome() {
                 </View>
             )}
 
-            <View style={menuItems.length > 2 ? styles.gridContainer : styles.menuContainer}>
-                {menuItems.length > 2
-                    ? // Grid layout for multiple items
-                      menuItems.map((item, index) => {
-                          const screenWidth = Dimensions.get('window').width;
-                          const padding = Spaces.LG * 2;
-                          const gap = Spaces.MD;
-                          const tileWidth = (screenWidth - 1.01 * padding - gap) / 2;
-
-                          return (
-                              <View key={index} style={[{ width: tileWidth }, index % 2 === 0 ? { marginRight: gap / 2 } : { marginLeft: gap / 2 }]}>
-                                  <MenuItem {...item} isGrid={true} />
-                              </View>
-                          );
-                      })
-                    : // Full-width layout for single item
-                      menuItems.map((item, index) => <MenuItem key={index} {...item} isGrid={false} />)}
+            <View style={styles.menuContainer}>
+                {menuItems.map((item, index) => (
+                    <MenuItem key={index} {...item} />
+                ))}
             </View>
         </ScrollView>
     );
@@ -178,7 +154,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     menuItem: {
-        borderRadius: Spaces.MD,
+        borderRadius: Spaces.SM,
         overflow: 'hidden',
         marginBottom: Spaces.LG,
         marginHorizontal: Spaces.LG,
@@ -223,32 +199,6 @@ const styles = StyleSheet.create({
     menuContainer: {
         marginTop: Spaces.MD,
         paddingBottom: Spaces.LG,
-    },
-    gridContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        paddingTop: Spaces.XL,
-        paddingHorizontal: Spaces.LG,
-        paddingBottom: Spaces.XL,
-    },
-    gridMenuItem: {
-        borderRadius: Spaces.MD,
-        padding: Spaces.SM + Spaces.XS,
-        height: 120,
-        justifyContent: 'space-between',
-    },
-    gridContentWrapper: {
-        flex: 1,
-        justifyContent: 'space-between',
-    },
-    gridImage: {
-        width: 42,
-        height: 42,
-        marginBottom: Spaces.XXS,
-    },
-    gridTitle: {
-        fontSize: 15,
-        lineHeight: 18,
     },
     titleContainer: {
         flexDirection: 'row',

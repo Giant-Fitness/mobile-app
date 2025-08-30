@@ -1,5 +1,6 @@
 // components/programs/ActiveProgramDayCompressedCard.tsx
 
+import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { Colors } from '@/constants/Colors';
@@ -27,11 +28,20 @@ const ShimmerPlaceholder = ShimmerPlaceHolder as unknown as React.ComponentType<
 
 type ActiveProgramDayCompressedCardProps = {
     source: 'home';
+    showBadge?: boolean;
+    badgeText?: string;
+    badgeIcon?: string;
 };
 
-export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressedCardProps> = ({ source }) => {
+export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressedCardProps> = ({
+    source,
+    showBadge = true,
+    badgeText = 'Start',
+    badgeIcon = 'play',
+}) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const shadowColor = 'rgba(0,0,0,0.2)';
     const { workouts } = useSelector((state: RootState) => state.workouts);
 
     const { userProgramProgress } = useSelector((state: RootState) => state.user);
@@ -43,8 +53,9 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
     const currentDay = programId && dayId ? programDays[programId]?.[dayId] : null;
     const currentDayState = programId && dayId ? programDaysState[programId]?.[dayId] : REQUEST_STATE.IDLE;
 
-    // Animation value
+    // Animation values
     const scaleAnim = useRef(new Animated.Value(1)).current;
+    const badgeScaleAnim = useRef(new Animated.Value(1)).current;
 
     const getDisplayImage = (day: ProgramDay, workouts: Record<string, Workout>) => {
         if (day.Type === 'video' && day.WorkoutId && workouts[day.WorkoutId]) {
@@ -86,19 +97,33 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
     }
 
     const handlePressIn = () => {
-        Animated.spring(scaleAnim, {
-            toValue: 0.97,
-            friction: 3,
-            useNativeDriver: true,
-        }).start();
+        Animated.parallel([
+            Animated.spring(scaleAnim, {
+                toValue: 0.97,
+                friction: 3,
+                useNativeDriver: true,
+            }),
+            Animated.spring(badgeScaleAnim, {
+                toValue: 0.95,
+                friction: 3,
+                useNativeDriver: true,
+            }),
+        ]).start();
     };
 
     const handlePressOut = () => {
-        Animated.spring(scaleAnim, {
-            toValue: 1,
-            friction: 3,
-            useNativeDriver: true,
-        }).start();
+        Animated.parallel([
+            Animated.spring(scaleAnim, {
+                toValue: 1,
+                friction: 3,
+                useNativeDriver: true,
+            }),
+            Animated.spring(badgeScaleAnim, {
+                toValue: 1,
+                friction: 3,
+                useNativeDriver: true,
+            }),
+        ]).start();
     };
 
     const navigateToProgramDay = () => {
@@ -119,20 +144,45 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
         navigateToProgramDay();
     };
 
+    const renderBadge = () => {
+        if (!showBadge) return null;
+
+        const badgeColor = themeColors.tangerineSolid;
+        const badgeTextColor = themeColors.white;
+
+        return (
+            <Animated.View
+                style={[
+                    styles.floatingBadge,
+                    {
+                        backgroundColor: badgeColor,
+                        shadowColor: shadowColor,
+                        transform: [{ scale: badgeScaleAnim }],
+                    },
+                ]}
+            >
+                <Icon name={badgeIcon} color={badgeTextColor} size={12} style={{ marginRight: Spaces.XS }} />
+                <ThemedText type='buttonSmall' style={[styles.badgeText, { color: badgeTextColor }]}>
+                    {badgeText}
+                </ThemedText>
+            </Animated.View>
+        );
+    };
+
     return (
         <Animated.View style={[styles.shadowContainer, { transform: [{ scale: scaleAnim }] }]}>
             <TouchableOpacity onPressIn={handlePressIn} onPressOut={handlePressOut} onPress={handlePress} activeOpacity={1} style={styles.cardContainer}>
-                <ImageTextOverlay
-                    image={getDisplayImage(currentDay, workouts)}
-                    title={currentDay.DayTitle}
-                    gradientColors={['transparent', 'rgba(0,0,0,0.65)']}
-                    containerStyle={{ height: '100%' }}
-                    textContainerStyle={{ bottom: Spaces.LG }}
-                    subtitleType='bodySmall'
-                    titleType='title'
-                    titleStyle={{ marginRight: Spaces.LG, lineHeight: moderateScale(20) }}
-                    subtitleStyle={{ marginTop: Spaces.XS }}
-                />
+                <View style={styles.imageContainer}>
+                    <ImageTextOverlay
+                        image={getDisplayImage(currentDay, workouts)}
+                        title={currentDay.DayTitle}
+                        gradientColors={['transparent', 'rgba(0,0,0,0.65)']}
+                        containerStyle={{ height: '100%' }}
+                        titleType='title'
+                        titleStyle={{ marginRight: 2 * Spaces.XXL, lineHeight: moderateScale(20), marginBottom: 0 }}
+                    />
+                    {renderBadge()}
+                </View>
             </TouchableOpacity>
         </Animated.View>
     );
@@ -140,7 +190,7 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
 
 const styles = StyleSheet.create({
     shadowContainer: {
-        shadowColor: 'rgba(0,80,0,0.3)',
+        shadowColor: 'rgba(2, 3, 2, 0.3)',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 1,
         shadowRadius: 4,
@@ -151,6 +201,10 @@ const styles = StyleSheet.create({
         height: Sizes.imageLGHeight,
         overflow: 'hidden',
         borderRadius: Spaces.SM,
+    },
+    imageContainer: {
+        position: 'relative',
+        height: '100%',
     },
     shimmerContainer: {
         width: '100%',
@@ -183,5 +237,24 @@ const styles = StyleSheet.create({
         width: '40%',
         height: 14,
         borderRadius: 4,
+    },
+    // Floating badge styles
+    floatingBadge: {
+        position: 'absolute',
+        bottom: Spaces.MD,
+        right: Spaces.MD,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: Spaces.SM,
+        paddingVertical: Spaces.XS,
+        borderRadius: Spaces.MD,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: Spaces.SM,
+        elevation: 3,
+        zIndex: 10,
+    },
+    badgeText: {
+        fontSize: 11,
     },
 });

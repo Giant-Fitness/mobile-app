@@ -704,17 +704,7 @@ export class InitializationService {
 
     private async loadSingleItem(item: DataCategory): Promise<LoadResult> {
         try {
-            const cacheKey = await this.getDynamicCacheKey(item);
-            const cachedData = await cacheService.get(cacheKey);
-
-            if (cachedData) {
-                console.log(`Using cached data for ${item.key}`);
-                this.dispatch(addLoadedItem(item.key));
-                this.loadedData.add(item.key);
-                return { key: item.key, success: true, required: item.required };
-            }
-
-            console.log(`Cache miss for ${item.key}, fetching from API`);
+            console.log(`Loading ${item.key}...`);
             const args = await this.getArgsForItem(item);
 
             // Skip loading if args indicate this item shouldn't be loaded
@@ -723,15 +713,16 @@ export class InitializationService {
                 return { key: item.key, success: false, required: item.required };
             }
 
+            // Always dispatch the thunk - it will handle cache checking internally
             const result = await this.dispatch(item.thunk(args));
 
             if (item.thunk.fulfilled.match(result)) {
                 this.dispatch(addLoadedItem(item.key));
                 this.loadedData.add(item.key);
-                console.log(`Loaded ${item.key} from API and cached`);
+                console.log(`Successfully loaded ${item.key}`);
                 return { key: item.key, success: true, required: item.required };
             } else {
-                throw new Error(`Failed to load ${item.key} from API`);
+                throw new Error(`Failed to load ${item.key}`);
             }
         } catch (error) {
             console.warn(`Failed to load ${item.key}:`, error);

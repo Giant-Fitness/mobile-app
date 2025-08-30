@@ -145,9 +145,8 @@ const styles = StyleSheet.create({
     },
     textContainer: {
         position: 'absolute',
-        left: Spaces.LG,
-        right: Spaces.LG,
-        bottom: Spaces.LG,
+        left: Spaces.MD,
+        bottom: Spaces.MD,
         zIndex: 3,
         backgroundColor: 'transparent',
     },
@@ -158,6 +157,6 @@ const styles = StyleSheet.create({
         lineHeight: Spaces.XXL,
     },
     subtitle: {
-        marginTop: 8,
+        marginTop: 0,
     },
 });

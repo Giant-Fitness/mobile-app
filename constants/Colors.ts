@@ -6,8 +6,8 @@ export const Colors = {
         subText: '#5f5e5b', // Secondary text
         subTextSecondary: '#C6C6C6', // Tertiary text
         background: '#fcfcfc', // Main background
-        backgroundSecondary: 'rgba(244, 247, 244, 1)', // Slightly adjusted for better contrast
-        backgroundTertiary: '#EDEEEE',
+        backgroundSecondary: 'rgba(240, 240, 240, 1)', // Slightly adjusted for better contrast
+        backgroundTertiary: 'rgba(245, 245, 245, 1)',
         primary: '#204D24', // Primary color (Green)
         secondary: '#EAEAEA', // Secondary elements
         accent: '#45A949', // Accent color 81F499
@@ -27,8 +27,10 @@ export const Colors = {
         blueSolid: '#5DADE2',
         purpleTransparent: '#F3E8FF',
         purpleSolid: '#7B3EE8',
-        tangerineTransparent: '#FFEDD9',
-        tangerineSolid: '#E65100',
+        tangerineTransparent: 'rgba(237, 98, 17, 0.2)',
+        tangerineSolid: 'rgb(237, 98, 17)',
+        slateBlueTransparent: 'rgba(104, 91, 197, 0.2)',
+        slateBlueSolid: 'rgb(104, 91, 197)',
         tealTransparent: '#ECFDF5',
         coralSolid: '#C82A19',
         coralTransparent: '#FEF7F6',
@@ -45,6 +47,11 @@ export const Colors = {
         tipText: '#408E44', // standard green
         inputBackground: 'rgba(244, 255, 244, 0.95)',
         splashBackgroud: '#34BE82',
+        calories: '',
+        protein: '#ED6211',
+        carbs: '#34BE82',
+        fats: '#FFB703',
+        black: '#000000',
     },
     dark: {
         text: '#F6F8F6', // Main text color
@@ -72,8 +79,10 @@ export const Colors = {
         blueSolid: '#5DADE2',
         purpleTransparent: '#F3E8FF',
         purpleSolid: '#7B3EE8',
-        tangerineTransparent: '#FFE5C7',
-        tangerineSolid: '#FF6D00',
+        tangerineTransparent: 'rgba(237, 98, 17, 0.2)',
+        tangerineSolid: 'rgb(237, 98, 17)',
+        slateBlueTransparent: 'rgba(104, 91, 197, 0.2)',
+        slateBlueSolid: 'rgb(104, 91, 197)',
         tealTransparent: '#ECFDF5',
         tealSolid: '#059669',
         coralSolid: '#C82A19',
@@ -90,5 +99,10 @@ export const Colors = {
         tipText: '#279E2C', // Accent green
         inputBackground: 'rgba(244, 255, 244, 0.95)',
         splashBackgroud: '#34BE82',
+        calories: '#685BC5',
+        protein: '#ED6211',
+        carbs: '#34BE82',
+        fats: '#FFB703',
+        black: '#000000',
     },
 };

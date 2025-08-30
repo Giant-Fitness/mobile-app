@@ -4,14 +4,17 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ActionTile } from '@/components/home/ActionTile';
 import { FactOfTheDay } from '@/components/home/FactOfTheDay';
-import { LargeActionTile } from '@/components/home/LargeActionTile';
+import { HomeExpandableHeader } from '@/components/navigation/HomeExpandableHeader';
+import { DailyMacrosCard } from '@/components/nutrition/DailyMacrosCard';
 import { OnboardingTiles } from '@/components/onboarding/OnboardingTiles';
 import { ActiveProgramDayCompressedCard } from '@/components/programs/ActiveProgramDayCompressedCard';
+import { RecommendedProgramCard } from '@/components/programs/RecommendedProgramCard';
 import { WorkoutCompletedSection } from '@/components/programs/WorkoutCompletedSection';
 import { BodyMeasurementsLoggingSheet } from '@/components/progress/BodyMeasurementsLoggingSheet';
 import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
 import { Colors } from '@/constants/Colors';
+import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useProgramData } from '@/hooks/useProgramData';
@@ -43,13 +46,14 @@ import { getAllWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { debounce } from '@/utils/debounce';
 import React, { useCallback, useRef, useState } from 'react';
-import { Platform, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { router } from 'expo-router';
 
 import { useFocusEffect } from '@react-navigation/native';
 
 import { trigger } from 'react-native-haptic-feedback';
+import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useDispatch, useSelector } from 'react-redux';
 
 const useOnboardingStatus = () => {
@@ -68,14 +72,24 @@ export default function HomeScreen() {
     const [isLoading, setIsLoading] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
+    // Header configuration
+    const EXPANDED_HEADER_HEIGHT = Sizes.headerHeight + 40;
+
+    // Animated values for header
+    const scrollY = useSharedValue(0);
+
     // Ref to track if component is mounted and focused
     const isMountedAndFocused = useRef(true);
     const refreshTimeoutRef = useRef<number | null>(null);
 
     const { user, userProgramProgress, hasCompletedWorkoutToday } = useProgramData();
-    const { userWeightMeasurements } = useSelector((state: RootState) => state.user);
-    const { userSleepMeasurements } = useSelector((state: RootState) => state.user);
-    const { userBodyMeasurements } = useSelector((state: RootState) => state.user);
+    const { userWeightMeasurements, userSleepMeasurements, userBodyMeasurements, userNutritionProfile, userRecommendations } = useSelector(
+        (state: RootState) => state.user,
+    );
+    const { programs } = useSelector((state: RootState) => state.programs);
+
+    // Get recommended program
+    const recommendedProgram = userRecommendations?.RecommendedProgramID ? programs[userRecommendations.RecommendedProgramID] : null;
 
     // Handle focus/blur events to manage refresh state
     useFocusEffect(
@@ -84,12 +98,10 @@ export default function HomeScreen() {
 
             return () => {
                 isMountedAndFocused.current = false;
-                // Clear any pending refresh timeout
                 if (refreshTimeoutRef.current) {
                     clearTimeout(refreshTimeoutRef.current);
                     refreshTimeoutRef.current = null;
                 }
-                // Reset refresh state when leaving screen
                 if (isRefreshing) {
                     setIsRefreshing(false);
                 }
@@ -98,6 +110,13 @@ export default function HomeScreen() {
     );
 
     const isOnboardingComplete = useOnboardingStatus();
+
+    // Scroll handler
+    const scrollHandler = useAnimatedScrollHandler({
+        onScroll: (event) => {
+            scrollY.value = event.contentOffset.y;
+        },
+    });
 
     const handleLogWeight = async (weight: number, date: Date) => {
         setIsLoading(true);
@@ -109,7 +128,6 @@ export default function HomeScreen() {
                 }),
             ).unwrap();
 
-            // Refresh measurements after logging
             await dispatch(getWeightMeasurementsAsync()).unwrap();
         } catch (error) {
             console.error('Failed to log weight:', error);
@@ -125,7 +143,7 @@ export default function HomeScreen() {
         try {
             await dispatch(
                 logSleepMeasurementAsync({
-                    ...sleepData, // This will contain either {durationInMinutes} or {sleepTime, wakeTime}
+                    ...sleepData,
                     measurementTimestamp: date.toISOString(),
                 }),
             ).unwrap();
@@ -150,7 +168,6 @@ export default function HomeScreen() {
                 }),
             ).unwrap();
 
-            // Refresh measurements after logging
             await dispatch(getBodyMeasurementsAsync()).unwrap();
         } catch (error) {
             console.error('Failed to log body measurements:', error);
@@ -186,7 +203,6 @@ export default function HomeScreen() {
     };
 
     const handleRefresh = async () => {
-        // Prevent multiple simultaneous refreshes
         if (isRefreshing) return;
 
         setIsRefreshing(true);
@@ -222,7 +238,6 @@ export default function HomeScreen() {
         } catch (error) {
             console.error('Refresh failed:', error);
         } finally {
-            // Add a small delay to ensure smooth animation completion
             refreshTimeoutRef.current = setTimeout(() => {
                 if (isMountedAndFocused.current) {
                     setIsRefreshing(false);
@@ -283,20 +298,7 @@ export default function HomeScreen() {
         },
     ];
 
-    const renderQuickAddSection = (reorderTiles = false) => {
-        let tiles = [...actionTiles];
-
-        if (reorderTiles) {
-            // Find the app info tile index
-            const appInfoIndex = tiles.findIndex((tile) => tile.title === 'Is Kyn for you?');
-            if (appInfoIndex !== -1) {
-                // Remove and store the app info tile
-                const [appInfoTile] = tiles.splice(appInfoIndex, 1);
-                // Add it to the beginning
-                tiles.unshift(appInfoTile);
-            }
-        }
-
+    const renderQuickAddSection = () => {
         return (
             <>
                 <View style={styles.header}>
@@ -305,7 +307,7 @@ export default function HomeScreen() {
 
                 <View style={styles.actionTilesContainer}>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.actionTilesScrollContainer}>
-                        {tiles.map((tile, index) => (
+                        {actionTiles.map((tile, index) => (
                             <ActionTile
                                 key={index}
                                 image={tile.image}
@@ -324,17 +326,29 @@ export default function HomeScreen() {
     };
 
     const renderContent = () => {
-        const greeting = user?.FirstName ? `Hi, ${user.FirstName}!` : 'Hi!';
+        if (!isOnboardingComplete) {
+            return (
+                <>
+                    <OnboardingTiles isOnboardingComplete={isOnboardingComplete} />
+                    {renderQuickAddSection()}
+                    <FactOfTheDay />
+                </>
+            );
+        }
 
-        // State 1: Has active program (highest priority)
         if (userProgramProgress?.ProgramId) {
             return (
                 <>
-                    <View style={styles.greeting}>
-                        <ThemedText type='greeting'>{greeting}</ThemedText>
-                    </View>
-
-                    <OnboardingTiles isOnboardingComplete={isOnboardingComplete} />
+                    {userNutritionProfile && (
+                        <View style={[styles.nutritionSection, { backgroundColor: themeColors.background }]}>
+                            <View style={styles.header}>
+                                <ThemedText type='titleLarge'>Nutrition Overview</ThemedText>
+                            </View>
+                            <View style={styles.nutritionCard}>
+                                <DailyMacrosCard userNutritionProfile={userNutritionProfile} />
+                            </View>
+                        </View>
+                    )}
 
                     {hasCompletedWorkoutToday ? (
                         <WorkoutCompletedSection
@@ -348,14 +362,14 @@ export default function HomeScreen() {
                             }
                         />
                     ) : (
-                        <>
+                        <View style={styles.todaysWorkoutSection}>
                             <View style={styles.header}>
                                 <ThemedText type='titleLarge'>Today&apos;s Workout</ThemedText>
                             </View>
                             <View style={styles.workoutDayCard}>
                                 <ActiveProgramDayCompressedCard source={'home'} />
                             </View>
-                        </>
+                        </View>
                     )}
 
                     {renderQuickAddSection()}
@@ -364,88 +378,121 @@ export default function HomeScreen() {
             );
         }
 
-        // State 2: No active program but completed onboarding
-        if (isOnboardingComplete) {
-            return (
-                <>
-                    <View style={styles.greeting}>
-                        <ThemedText type='greeting'>{greeting}</ThemedText>
-                    </View>
-
-                    <LargeActionTile
-                        title='Begin Training'
-                        description='Your recommended plan is ready to turn your goals into achievements'
-                        onPress={() => {
-                            debounce(router, '/(app)/programs/browse-programs');
-                            trigger('soft');
-                        }}
-                        backgroundColor={themeColors.containerHighlight}
-                        image={require('@/assets/images/fist.png')}
-                        textColor={themeColors.highlightContainerText}
-                    />
-
-                    {renderQuickAddSection()}
-
-                    <FactOfTheDay />
-                </>
-            );
-        }
-
-        // State 3: No active program and no onboarding (lowest priority)
+        // User is onboarded but has no active program
         return (
             <>
-                <View style={styles.greeting}>
-                    <ThemedText type='greeting'>{greeting}</ThemedText>
-                </View>
+                {userNutritionProfile && (
+                    <View style={[styles.nutritionSection, { backgroundColor: themeColors.backgroundSecondary }]}>
+                        <View style={styles.header}>
+                            <ThemedText type='titleLarge'>Nutrition Overview</ThemedText>
+                        </View>
+                        <View style={styles.nutritionCard}>
+                            <DailyMacrosCard userNutritionProfile={userNutritionProfile} />
+                        </View>
+                    </View>
+                )}
+                {recommendedProgram && (
+                    <View style={[styles.recommendedProgramSection, { backgroundColor: themeColors.backgroundSecondary }]}>
+                        <View style={styles.headerWithAction}>
+                            <ThemedText type='titleLarge'>Training Program</ThemedText>
+                            <TouchableOpacity
+                                activeOpacity={1}
+                                onPress={() => {
+                                    debounce(router, '/(app)/programs/browse-programs');
+                                    trigger('soft');
+                                }}
+                                style={styles.seeAllButton}
+                            >
+                                <ThemedText type='body' style={[styles.seeAllText, { color: themeColors.iconSelected }]}>
+                                    See All
+                                </ThemedText>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.workoutDayCard}>
+                            <RecommendedProgramCard
+                                program={recommendedProgram}
+                                compressed={true}
+                                onPress={() => {
+                                    debounce(router, {
+                                        pathname: '/(app)/programs/program-overview',
+                                        params: {
+                                            programId: recommendedProgram.ProgramId,
+                                            source: 'home-recommended-program',
+                                        },
+                                    });
+                                    trigger('impactLight');
+                                }}
+                            />
+                        </View>
+                    </View>
+                )}
 
-                <OnboardingTiles isOnboardingComplete={isOnboardingComplete} />
-
-                {renderQuickAddSection(true)}
+                {renderQuickAddSection()}
 
                 <FactOfTheDay />
             </>
         );
     };
 
+    // Generate greeting text
+    const greeting = user?.FirstName ? `Hi, ${user.FirstName}!` : 'Hi!';
+
     return (
-        <ScrollView
-            showsVerticalScrollIndicator={false}
-            overScrollMode='never'
-            refreshControl={
-                <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[themeColors.iconSelected]} tintColor={themeColors.iconSelected} />
-            }
-            style={[styles.container, { backgroundColor: themeColors.background }]}
-        >
-            <ThemedView style={{ paddingBottom: Spaces.SM }}>
-                {renderContent()}
+        <View style={styles.container}>
+            {/* Home-specific expandable header */}
+            <HomeExpandableHeader scrollY={scrollY} greeting={greeting} expandedHeight={EXPANDED_HEADER_HEIGHT} />
 
-                <WeightLoggingSheet
-                    visible={isWeightSheetVisible}
-                    onClose={() => setIsWeightSheetVisible(false)}
-                    onSubmit={handleLogWeight}
-                    onDelete={handleWeightDelete}
-                    isLoading={isLoading}
-                    getExistingData={getExistingWeightData}
-                />
+            {/* Scrollable Content */}
+            <Animated.ScrollView
+                showsVerticalScrollIndicator={false}
+                overScrollMode='never'
+                onScroll={scrollHandler}
+                scrollEventThrottle={16}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={isRefreshing}
+                        onRefresh={handleRefresh}
+                        colors={[themeColors.iconSelected]}
+                        tintColor={themeColors.iconSelected}
+                        progressViewOffset={EXPANDED_HEADER_HEIGHT} // Position refresh control properly
+                    />
+                }
+                style={[styles.scrollView, { backgroundColor: themeColors.backgroundSecondary }]}
+                contentContainerStyle={{
+                    paddingTop: EXPANDED_HEADER_HEIGHT, // Match expanded height
+                }}
+            >
+                <ThemedView style={{ backgroundColor: themeColors.backgroundSecondary }}>
+                    {renderContent()}
 
-                <SleepLoggingSheet
-                    visible={isSleepSheetVisible}
-                    onClose={() => setIsSleepSheetVisible(false)}
-                    onSubmit={handleLogSleep}
-                    onDelete={handleSleepDelete}
-                    getExistingData={getExistingSleepData}
-                />
+                    <WeightLoggingSheet
+                        visible={isWeightSheetVisible}
+                        onClose={() => setIsWeightSheetVisible(false)}
+                        onSubmit={handleLogWeight}
+                        onDelete={handleWeightDelete}
+                        isLoading={isLoading}
+                        getExistingData={getExistingWeightData}
+                    />
 
-                <BodyMeasurementsLoggingSheet
-                    visible={isBodyMeasurementsSheetVisible}
-                    onClose={() => setIsBodyMeasurementsSheetVisible(false)}
-                    onSubmit={handleLogBodyMeasurements}
-                    onDelete={handleBodyMeasurementsDelete}
-                    isLoading={isLoading}
-                    getExistingData={getExistingBodyMeasurementsData}
-                />
-            </ThemedView>
-        </ScrollView>
+                    <SleepLoggingSheet
+                        visible={isSleepSheetVisible}
+                        onClose={() => setIsSleepSheetVisible(false)}
+                        onSubmit={handleLogSleep}
+                        onDelete={handleSleepDelete}
+                        getExistingData={getExistingSleepData}
+                    />
+
+                    <BodyMeasurementsLoggingSheet
+                        visible={isBodyMeasurementsSheetVisible}
+                        onClose={() => setIsBodyMeasurementsSheetVisible(false)}
+                        onSubmit={handleLogBodyMeasurements}
+                        onDelete={handleBodyMeasurementsDelete}
+                        isLoading={isLoading}
+                        getExistingData={getExistingBodyMeasurementsData}
+                    />
+                </ThemedView>
+            </Animated.ScrollView>
+        </View>
     );
 }
 
@@ -453,29 +500,32 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    greeting: {
-        ...Platform.select({
-            ios: {
-                marginTop: Spaces.SM,
-            },
-            android: {
-                marginTop: Spaces.SM,
-            },
-        }),
-        paddingHorizontal: Spaces.LG,
-        marginBottom: Spaces.LG,
+    scrollView: {
+        flex: 1,
     },
     header: {
         paddingHorizontal: Spaces.LG,
         marginBottom: Spaces.SM,
     },
+    headerWithAction: {
+        paddingHorizontal: Spaces.LG,
+        marginBottom: Spaces.SM,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    seeAllButton: {
+        paddingVertical: Spaces.XS,
+        paddingHorizontal: Spaces.XS,
+    },
+    seeAllText: {
+        textDecorationLine: 'underline',
+    },
     workoutDayCard: {
         paddingHorizontal: Spaces.LG,
-        paddingBottom: Spaces.XL,
     },
-    divider: {
-        width: '90%',
-        alignSelf: 'center',
+    nutritionCard: {
+        paddingHorizontal: Spaces.LG,
     },
     actionTilesContainer: {
         paddingVertical: Spaces.XS,
@@ -487,7 +537,16 @@ const styles = StyleSheet.create({
         paddingVertical: Spaces.XS,
         flexDirection: 'row',
     },
-    actionTile: {
-        marginRight: Spaces.MD,
+    recommendedProgramSection: {
+        paddingTop: Spaces.LG,
+        paddingBottom: Spaces.XL,
+    },
+    todaysWorkoutSection: {
+        paddingTop: Spaces.LG,
+        paddingBottom: Spaces.XL,
+    },
+    nutritionSection: {
+        paddingTop: Spaces.MD,
+        paddingBottom: Spaces.LG,
     },
 });

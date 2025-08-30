@@ -214,6 +214,8 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
             return <AnimatedIonicons name='male' {...commonProps} />;
         case 'female':
             return <AnimatedIonicons name='female' {...commonProps} />;
+        case 'flame':
+            return <AnimatedIonicons name='flame' {...commonProps} />;
         case 'bicycle-electric':
             return <AnimatedMaterialCommunityIcons name='bicycle-electric' {...commonProps} />;
         case 'run-fast':

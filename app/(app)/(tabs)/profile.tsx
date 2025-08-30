@@ -4,6 +4,7 @@ import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
+import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { BodyMeasurementsLoggingSheet } from '@/components/progress/BodyMeasurementsLoggingSheet';
 import { BodyMeasurementsTrendCard } from '@/components/progress/BodyMeasurementsTrendCard';
 import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
@@ -13,6 +14,7 @@ import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
 import { WeightTrendCard } from '@/components/progress/WeightTrendCard';
 import { Colors } from '@/constants/Colors';
 import { REQUEST_STATE } from '@/constants/requestStates';
+import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
@@ -34,6 +36,7 @@ import { Dimensions, Platform, SafeAreaView, StyleSheet, View } from 'react-nati
 
 import { router } from 'expo-router';
 
+import { trigger } from 'react-native-haptic-feedback';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -43,7 +46,7 @@ const CARD_GAP = Spaces.SM + Spaces.XXS;
 const HORIZONTAL_PADDING = Spaces.LG * 2; // Left and right padding
 const CARD_WIDTH = (width - HORIZONTAL_PADDING - CARD_GAP) / 2;
 
-export default function ProdileScreen() {
+export default function ProfileScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const dispatch = useDispatch<AppDispatch>();
@@ -136,6 +139,12 @@ export default function ProdileScreen() {
         } finally {
             setIsRetrying(false);
         }
+    };
+
+    // Handle settings button press
+    const handleSettingPress = () => {
+        trigger('effectClick');
+        debounce(router, '/(app)/settings');
     };
 
     // Handle weight logging
@@ -305,6 +314,21 @@ export default function ProdileScreen() {
 
     return (
         <>
+            {/* Animated Header */}
+            <AnimatedHeader
+                scrollY={scrollY}
+                disableColorChange={true}
+                headerBackground={themeColors.background}
+                title='Profile'
+                disableBackButton={true}
+                backButtonColor={themeColors.iconDefault}
+                actionButton={{
+                    iconSize: 20,
+                    icon: 'settings',
+                    onPress: handleSettingPress,
+                }}
+            />
+
             <Animated.ScrollView
                 onScroll={scrollHandler}
                 scrollEventThrottle={16}
@@ -312,7 +336,17 @@ export default function ProdileScreen() {
                 contentContainerStyle={{ flexGrow: 1 }}
                 style={[{ backgroundColor: themeColors.background }]}
             >
-                <ThemedView style={styles.container}>
+                <ThemedView
+                    style={[
+                        styles.container,
+                        {
+                            marginTop: Platform.select({
+                                ios: Sizes.headerHeight,
+                                android: Sizes.headerHeight,
+                            }),
+                        },
+                    ]}
+                >
                     <ThemedView
                         style={{
                             ...Platform.select({
