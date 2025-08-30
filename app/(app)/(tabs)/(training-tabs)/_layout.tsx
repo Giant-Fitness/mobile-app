@@ -1,14 +1,10 @@
 // app/(app)/(tabs)/(training-tabs)/_layout.tsx
 
 import { Colors } from '@/constants/Colors';
-import { Sizes } from '@/constants/Sizes';
-import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { moderateScale } from '@/utils/scaling';
 import React from 'react';
-import { Platform } from 'react-native';
 
-import { router, withLayoutContext } from 'expo-router';
+import { withLayoutContext } from 'expo-router';
 
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 
