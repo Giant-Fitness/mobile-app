@@ -3,7 +3,6 @@
 export interface User {
     UserId: string;
     Height?: number;
-    Weight?: number;
     DOB?: string;
     Gender?: string;
     FirstName: string;

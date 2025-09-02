@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
         bottom: 0, // Always stick to bottom
         left: 0,
         right: 0,
-        paddingHorizontal: Spaces.LG,
+        paddingHorizontal: Spaces.MD,
         paddingBottom: Spaces.XS,
         overflow: 'hidden', // Clips content as container shrinks
         justifyContent: 'flex-end', // Keep text at bottom of container

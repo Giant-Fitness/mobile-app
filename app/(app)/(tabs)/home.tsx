@@ -12,7 +12,9 @@ import { RecommendedProgramCard } from '@/components/programs/RecommendedProgram
 import { WorkoutCompletedSection } from '@/components/programs/WorkoutCompletedSection';
 import { BodyMeasurementsLoggingSheet } from '@/components/progress/BodyMeasurementsLoggingSheet';
 import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
+import { TrainingProgressCard } from '@/components/progress/TrainingProgressCard';
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
+import { WeightProgressCard } from '@/components/progress/WeightProgressCard';
 import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
@@ -83,7 +85,7 @@ export default function HomeScreen() {
     const refreshTimeoutRef = useRef<number | null>(null);
 
     const { user, userProgramProgress, hasCompletedWorkoutToday } = useProgramData();
-    const { userWeightMeasurements, userSleepMeasurements, userBodyMeasurements, userNutritionProfile, userRecommendations } = useSelector(
+    const { userWeightMeasurements, userSleepMeasurements, userBodyMeasurements, userNutritionProfile, userRecommendations, userAppSettings } = useSelector(
         (state: RootState) => state.user,
     );
     const { programs } = useSelector((state: RootState) => state.programs);
@@ -325,12 +327,58 @@ export default function HomeScreen() {
         );
     };
 
+    const renderGoalProgressSection = () => {
+        if (!isOnboardingComplete) return null;
+
+        // Check if we have weight goal data
+        const weightGoal = userNutritionProfile?.WeightGoal;
+
+        // Check if we have active program data
+        const hasActiveProgram = userProgramProgress?.ProgramId && programs[userProgramProgress.ProgramId];
+        const activeProgram = hasActiveProgram ? programs[userProgramProgress.ProgramId] : null;
+
+        // Don't show section if no progress data is available
+        if (!weightGoal && !hasActiveProgram) return null;
+
+        return (
+            <View style={[styles.goalProgressSection, { backgroundColor: themeColors.backgroundSecondary }]}>
+                <View style={styles.header}>
+                    <ThemedText type='titleLarge'>Progress</ThemedText>
+                </View>
+                <View style={styles.goalProgressCards}>
+                    {weightGoal && (
+                        <WeightProgressCard
+                            userNutritionProfile={userNutritionProfile}
+                            userWeightMeasurements={userWeightMeasurements}
+                            weightUnit={userAppSettings?.UnitsOfMeasurement?.BodyWeightUnits || 'lbs'}
+                            onPress={() => {
+                                // Navigate to weight tracking screen or show weight trend
+                                console.log('Navigate to weight progress details');
+                            }}
+                        />
+                    )}
+
+                    {hasActiveProgram && (
+                        <TrainingProgressCard
+                            activeProgram={activeProgram}
+                            userProgramProgress={userProgramProgress}
+                            onPress={() => {
+                                // Navigate to active program progress screen
+                                debounce(router, '/(app)/programs/active-program-progress');
+                            }}
+                        />
+                    )}
+                </View>
+            </View>
+        );
+    };
+
     const renderContent = () => {
         if (!isOnboardingComplete) {
             return (
                 <>
                     <OnboardingTiles isOnboardingComplete={isOnboardingComplete} />
-                    {renderQuickAddSection()}
+                    {/* {renderQuickAddSection()} */}
                     <FactOfTheDay />
                 </>
             );
@@ -371,8 +419,8 @@ export default function HomeScreen() {
                             </View>
                         </View>
                     )}
-
-                    {renderQuickAddSection()}
+                    {renderGoalProgressSection()}
+                    {/* {renderQuickAddSection()} */}
                     <FactOfTheDay />
                 </>
             );
@@ -426,8 +474,8 @@ export default function HomeScreen() {
                         </View>
                     </View>
                 )}
-
-                {renderQuickAddSection()}
+                {renderGoalProgressSection()}
+                {/* {renderQuickAddSection()} */}
 
                 <FactOfTheDay />
             </>
@@ -504,11 +552,11 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     header: {
-        paddingHorizontal: Spaces.LG,
+        paddingHorizontal: Spaces.MD,
         marginBottom: Spaces.SM,
     },
     headerWithAction: {
-        paddingHorizontal: Spaces.LG,
+        paddingHorizontal: Spaces.MD,
         marginBottom: Spaces.SM,
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -522,17 +570,17 @@ const styles = StyleSheet.create({
         textDecorationLine: 'underline',
     },
     workoutDayCard: {
-        paddingHorizontal: Spaces.LG,
+        paddingHorizontal: Spaces.MD,
     },
     nutritionCard: {
-        paddingHorizontal: Spaces.LG,
+        paddingHorizontal: Spaces.MD,
     },
     actionTilesContainer: {
         paddingVertical: Spaces.XS,
         flexDirection: 'row',
     },
     actionTilesScrollContainer: {
-        paddingLeft: Spaces.LG,
+        paddingLeft: Spaces.MD,
         paddingRight: Spaces.MD,
         paddingVertical: Spaces.XS,
         flexDirection: 'row',
@@ -543,10 +591,18 @@ const styles = StyleSheet.create({
     },
     todaysWorkoutSection: {
         paddingTop: Spaces.LG,
-        paddingBottom: Spaces.XL,
     },
     nutritionSection: {
         paddingTop: Spaces.MD,
         paddingBottom: Spaces.LG,
+    },
+    goalProgressSection: {
+        marginTop: Spaces.XL,
+        paddingBottom: Spaces.XL,
+    },
+    goalProgressCards: {
+        paddingHorizontal: Spaces.MD,
+        gap: Spaces.SM,
+        flexDirection: 'row',
     },
 });

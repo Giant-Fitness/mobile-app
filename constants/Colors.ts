@@ -6,8 +6,8 @@ export const Colors = {
         subText: '#5f5e5b', // Secondary text
         subTextSecondary: '#C6C6C6', // Tertiary text
         background: '#fcfcfc', // Main background
-        backgroundSecondary: 'rgba(240, 240, 240, 1)', // Slightly adjusted for better contrast
-        backgroundTertiary: 'rgba(245, 245, 245, 1)',
+        backgroundSecondary: 'rgba(243, 243, 243, 1)', // Slightly adjusted for better contrast
+        backgroundTertiary: 'rgba(246, 248, 248, 1)',
         primary: '#204D24', // Primary color (Green)
         secondary: '#EAEAEA', // Secondary elements
         accent: '#45A949', // Accent color 81F499
@@ -27,10 +27,13 @@ export const Colors = {
         blueSolid: '#5DADE2',
         purpleTransparent: '#F3E8FF',
         purpleSolid: '#7B3EE8',
-        tangerineTransparent: 'rgba(237, 98, 17, 0.2)',
-        tangerineSolid: 'rgb(237, 98, 17)',
+        tangerineSolid: 'rgb(235, 93, 40)',
+        tangerineTransparent: 'rgba(235, 93, 40, 0.15)',
         slateBlueTransparent: 'rgba(104, 91, 197, 0.2)',
-        slateBlueSolid: 'rgb(104, 91, 197)',
+        slateBlueLight: 'rgb(171, 165, 223)',
+        slateBlue: 'rgb(104, 91, 197)',
+        pear: 'rgb(201, 236, 0)',
+        pearTransparent: 'rgba(201, 236, 0, 0.1)',
         tealTransparent: '#ECFDF5',
         coralSolid: '#C82A19',
         coralTransparent: '#FEF7F6',
@@ -79,10 +82,13 @@ export const Colors = {
         blueSolid: '#5DADE2',
         purpleTransparent: '#F3E8FF',
         purpleSolid: '#7B3EE8',
-        tangerineTransparent: 'rgba(237, 98, 17, 0.2)',
-        tangerineSolid: 'rgb(237, 98, 17)',
+        tangerineSolid: 'rgb(235, 93, 40)',
+        tangerineTransparent: 'rgba(235, 93, 40, 0.15)',
         slateBlueTransparent: 'rgba(104, 91, 197, 0.2)',
-        slateBlueSolid: 'rgb(104, 91, 197)',
+        slateBlueLight: 'rgb(171, 165, 223)',
+        slateBlue: 'rgb(104, 91, 197)',
+        pear: 'rgb(201, 236, 0)',
+        pearTransparent: 'rgba(201, 236, 0, 0.1)',
         tealTransparent: '#ECFDF5',
         tealSolid: '#059669',
         coralSolid: '#C82A19',

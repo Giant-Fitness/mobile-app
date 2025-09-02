@@ -84,7 +84,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionP
                     <CircularProgress
                         current={consumedCalories}
                         goal={userNutritionProfile.GoalCalories}
-                        color={themeColors.slateBlueSolid}
+                        color={themeColors.slateBlue}
                         size={180}
                         strokeWidth={8}
                         arcAngle={270}

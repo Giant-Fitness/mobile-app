@@ -5,7 +5,6 @@ import { ThemedView } from '@/components/base/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { darkenColor } from '@/utils/colorUtils';
 import React from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 
@@ -87,15 +86,15 @@ export const FactOfTheDay = ({}: FactOfTheDayProps) => {
     const themeColors = Colors[colorScheme];
 
     return (
-        <ThemedView style={[styles.container, { backgroundColor: themeColors.tealTransparent }]}>
-            <View style={styles.contentWrapper}>
+        <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
+            <View style={[styles.contentWrapper, { backgroundColor: themeColors.tangerineTransparent }]}>
                 <View style={styles.content}>
                     <ThemedText
-                        type='title'
+                        type='overline'
                         style={[
                             styles.text,
                             {
-                                color: darkenColor(themeColors.tealSolid, 0.3),
+                                color: themeColors.text,
                                 marginBottom: Spaces.XS,
                             },
                         ]}
@@ -103,13 +102,11 @@ export const FactOfTheDay = ({}: FactOfTheDayProps) => {
                         Fact of the Day
                     </ThemedText>
                     <ThemedText
-                        type='overline'
+                        type='bodySmall'
                         style={[
                             styles.text,
                             {
-                                color: darkenColor(themeColors.subText, 0.1),
-                                lineHeight: 21,
-                                fontSize: 13,
+                                color: themeColors.subText,
                             },
                         ]}
                     >
@@ -121,8 +118,8 @@ export const FactOfTheDay = ({}: FactOfTheDayProps) => {
                     style={[
                         styles.backgroundImage,
                         {
-                            opacity: colorScheme === 'light' ? 0.1 : 0.15,
-                            tintColor: themeColors.tealSolid,
+                            opacity: 0.5,
+                            tintColor: themeColors.tangerineSolid,
                         },
                     ]}
                     resizeMode='contain'
@@ -134,8 +131,8 @@ export const FactOfTheDay = ({}: FactOfTheDayProps) => {
 
 const styles = StyleSheet.create({
     container: {
-        marginHorizontal: Spaces.LG,
-        marginTop: Spaces.LG,
+        marginHorizontal: Spaces.MD,
+        marginTop: Spaces.MD,
         marginBottom: Spaces.XL,
         borderRadius: Spaces.SM,
         overflow: 'hidden',
@@ -156,7 +153,7 @@ const styles = StyleSheet.create({
     },
     backgroundImage: {
         position: 'absolute',
-        right: -Spaces.XL - Spaces.SM,
+        right: -Spaces.XL - Spaces.MD,
         width: 200,
         height: '60%',
     },
