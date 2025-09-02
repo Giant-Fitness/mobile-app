@@ -22,6 +22,7 @@ export const Sizes = {
     bottomSpaceLarge: verticalScale(120),
     bottomSpaceMedium: verticalScale(90),
     iconSizeDefault: moderateScale(18),
+    iconSizeXS: moderateScale(12),
     iconSizeSM: moderateScale(16),
     iconSizeMD: moderateScale(20),
     iconSizeLG: moderateScale(30),

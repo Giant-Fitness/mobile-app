@@ -595,6 +595,11 @@ const styles = StyleSheet.create({
     nutritionSection: {
         paddingTop: Spaces.MD,
         paddingBottom: Spaces.LG,
+        shadowColor: 'rgba(100, 100, 100, 0.1)',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.8,
+        shadowRadius: 2,
+        elevation: 2,
     },
     goalProgressSection: {
         marginTop: Spaces.XL,

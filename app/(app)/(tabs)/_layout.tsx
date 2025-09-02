@@ -1,15 +1,14 @@
 // app/(app)/(tabs)/_layout.tsx
 
 import { Icon } from '@/components/base/Icon';
-import { ThemedText } from '@/components/base/ThemedText';
-import { BottomSheet } from '@/components/overlays/BottomSheet';
+import { QuickAddModal } from '@/components/overlays/QuickAddModal';
 import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { addAlpha } from '@/utils/colorUtils';
 import React, { useState } from 'react';
-import { Platform, Pressable, TouchableOpacity, View } from 'react-native';
+import { Platform, Pressable, TouchableOpacity } from 'react-native';
 
 import { Tabs } from 'expo-router';
 
@@ -85,7 +84,6 @@ export default function TabLayout() {
                 <Tabs.Screen
                     name='home'
                     options={{
-                        // Remove the default header for home screen
                         headerShown: false,
                         title: 'Home',
                         tabBarIcon: ({ color, focused }) => <Icon name={focused ? 'home-active' : 'home-inactive'} size={22} color={color} />,
@@ -154,29 +152,8 @@ export default function TabLayout() {
                 />
             </Tabs>
 
-            {/* Quick Action Bottom Sheet */}
-            <BottomSheet visible={quickActionModalVisible} onClose={() => setQuickActionModalVisible(false)}>
-                <View
-                    style={{
-                        paddingVertical: Spaces.LG,
-                        alignItems: 'center',
-                    }}
-                >
-                    <ThemedText>Quick action coming soon!</ThemedText>
-                    <TouchableOpacity
-                        onPress={() => setQuickActionModalVisible(false)}
-                        style={{
-                            marginTop: Spaces.LG,
-                            padding: Spaces.MD,
-                            backgroundColor: themeColors.iconSelected,
-                            borderRadius: 8,
-                            alignItems: 'center',
-                        }}
-                    >
-                        <ThemedText style={{ color: 'white' }}>Close</ThemedText>
-                    </TouchableOpacity>
-                </View>
-            </BottomSheet>
+            {/* Quick Action Modal */}
+            <QuickAddModal visible={quickActionModalVisible} onClose={() => setQuickActionModalVisible(false)} />
         </>
     );
 }

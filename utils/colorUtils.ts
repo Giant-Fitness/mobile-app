@@ -1,58 +1,121 @@
 // utils/colorUtils.ts
 
 export const darkenColor = (color: string, amount: number = 0.2): string => {
-    // Remove the '#' if present
-    const hex = color.replace('#', '');
+    const rgba = parseColor(color);
+    if (!rgba) return color;
 
-    // Convert hex to RGB
-    let r = parseInt(hex.substring(0, 2), 16);
-    let g = parseInt(hex.substring(2, 4), 16);
-    let b = parseInt(hex.substring(4, 6), 16);
+    const [r, g, b, a] = rgba;
 
     // Darken each component
-    r = Math.floor(r * (1 - amount));
-    g = Math.floor(g * (1 - amount));
-    b = Math.floor(b * (1 - amount));
+    const newR = Math.floor(r * (1 - amount));
+    const newG = Math.floor(g * (1 - amount));
+    const newB = Math.floor(b * (1 - amount));
 
-    // Convert back to hex
-    const darkHex = '#' + (r < 16 ? '0' : '') + r.toString(16) + (g < 16 ? '0' : '') + g.toString(16) + (b < 16 ? '0' : '') + b.toString(16);
-
-    return darkHex;
+    return `rgba(${newR}, ${newG}, ${newB}, ${a})`;
 };
 
 export const lightenColor = (color: string, amount: number = 0.2): string => {
-    // Remove the '#' if present
-    const hex = color.replace('#', '');
+    const rgba = parseColor(color);
+    if (!rgba) return color;
 
-    // Convert hex to RGB
-    let r = parseInt(hex.substring(0, 2), 16);
-    let g = parseInt(hex.substring(2, 4), 16);
-    let b = parseInt(hex.substring(4, 6), 16);
+    const [r, g, b, a] = rgba;
 
     // Lighten each component
-    r = Math.min(255, Math.floor(r + (255 - r) * amount));
-    g = Math.min(255, Math.floor(g + (255 - g) * amount));
-    b = Math.min(255, Math.floor(b + (255 - b) * amount));
+    const newR = Math.min(255, Math.floor(r + (255 - r) * amount));
+    const newG = Math.min(255, Math.floor(g + (255 - g) * amount));
+    const newB = Math.min(255, Math.floor(b + (255 - b) * amount));
 
-    // Convert back to hex
-    const lightHex = '#' + (r < 16 ? '0' : '') + r.toString(16) + (g < 16 ? '0' : '') + g.toString(16) + (b < 16 ? '0' : '') + b.toString(16);
-
-    return lightHex;
+    return `rgba(${newR}, ${newG}, ${newB}, ${a})`;
 };
 
 export const addAlpha = (color: string, alpha: number = 0.9): string => {
     // Clamp alpha between 0 and 1
     alpha = Math.max(0, Math.min(1, alpha));
 
-    // Remove the '#' if present
-    const hex = color.replace('#', '');
+    const rgba = parseColor(color);
+    if (!rgba) return color;
 
-    // Convert alpha to hex (0-255 range)
-    const alphaHex = Math.round(alpha * 255)
-        .toString(16)
-        .padStart(2, '0')
-        .toUpperCase();
+    const [r, g, b] = rgba;
 
-    // Return hex color with alpha
-    return `#${hex}${alphaHex}`;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
+// Helper function to parse different color formats into RGBA values
+const parseColor = (color: string): [number, number, number, number] | null => {
+    color = color.trim();
+
+    // Handle hex colors (#RGB, #RRGGBB, #RRGGBBAA)
+    if (color.startsWith('#')) {
+        const hex = color.slice(1);
+
+        if (hex.length === 3) {
+            // #RGB -> #RRGGBB
+            const r = parseInt(hex[0] + hex[0], 16);
+            const g = parseInt(hex[1] + hex[1], 16);
+            const b = parseInt(hex[2] + hex[2], 16);
+            return [r, g, b, 1];
+        } else if (hex.length === 6) {
+            // #RRGGBB
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            return [r, g, b, 1];
+        } else if (hex.length === 8) {
+            // #RRGGBBAA
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            const a = parseInt(hex.substring(6, 8), 16) / 255;
+            return [r, g, b, a];
+        }
+    }
+
+    // Handle rgb() and rgba() colors
+    const rgbaMatch = color.match(/rgba?\(\s*([^)]+)\)/);
+    if (rgbaMatch) {
+        const values = rgbaMatch[1].split(',').map((v) => parseFloat(v.trim()));
+
+        if (values.length >= 3) {
+            const r = values[0];
+            const g = values[1];
+            const b = values[2];
+            const a = values.length >= 4 ? values[3] : 1;
+
+            return [r, g, b, a];
+        }
+    }
+
+    return null;
+};
+
+// Utility function to convert any color format to hex (useful for backwards compatibility)
+export const toHex = (color: string): string => {
+    const rgba = parseColor(color);
+    if (!rgba) return color;
+
+    const [r, g, b, a] = rgba;
+
+    const toHexComponent = (value: number) => {
+        const hex = Math.round(value).toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+    };
+
+    if (a < 1) {
+        // Include alpha in hex
+        const alphaHex = toHexComponent(a * 255);
+        return `#${toHexComponent(r)}${toHexComponent(g)}${toHexComponent(b)}${alphaHex}`;
+    } else {
+        return `#${toHexComponent(r)}${toHexComponent(g)}${toHexComponent(b)}`;
+    }
+};
+
+// Utility function to convert any color format to rgba
+export const toRgba = (color: string, alpha?: number): string => {
+    const rgba = parseColor(color);
+    if (!rgba) return color;
+
+    const [r, g, b, a] = rgba;
+    const finalAlpha = alpha !== undefined ? alpha : a;
+
+    return `rgba(${r}, ${g}, ${b}, ${finalAlpha})`;
 };

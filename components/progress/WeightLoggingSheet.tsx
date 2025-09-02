@@ -268,7 +268,7 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
     };
 
     return (
-        <BottomSheet visible={visible} onClose={handleClose} style={Platform.OS === 'ios' ? { height: '66%' } : undefined}>
+        <BottomSheet keyboardAvoidingBehavior='position' visible={visible} onClose={handleClose}>
             <View style={styles.container}>
                 {isSuccess ? (
                     renderSuccessAnimation()

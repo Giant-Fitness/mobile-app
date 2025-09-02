@@ -190,11 +190,11 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
 
 const styles = StyleSheet.create({
     shadowContainer: {
-        shadowColor: 'rgba(2, 3, 2, 0.3)',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 1,
-        shadowRadius: 4,
-        elevation: 5,
+        shadowColor: 'rgba(100, 100, 100, 0.3)',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.8,
+        shadowRadius: 2,
+        elevation: 2,
     },
     cardContainer: {
         width: '100%',

@@ -84,6 +84,16 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
             return <AnimatedMaterialCommunityIcons name='clipboard-check' {...commonProps} />;
         case 'plan-inactive':
             return <AnimatedMaterialCommunityIcons name='clipboard-check-outline' {...commonProps} />;
+        case 'barcode':
+            return <AnimatedMaterialCommunityIcons name='barcode-scan' {...commonProps} />;
+        case 'add-chart':
+            return <AnimatedMaterialIcons name='add-chart' {...commonProps} />;
+        case 'saved-search':
+            return <AnimatedMaterialIcons name='saved-search' {...commonProps} />;
+        case 'scale':
+            return <AnimatedMaterialCommunityIcons name='scale-bathroom' {...commonProps} />;
+        case 'tape-measure':
+            return <AnimatedMaterialCommunityIcons name='tape-measure' {...commonProps} />;
         case 'edit':
             return <AnimatedMaterialIcons name='edit' {...commonProps} />;
         case 'lightning-active':

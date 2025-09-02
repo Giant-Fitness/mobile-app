@@ -573,7 +573,7 @@ export const SleepLoggingSheet: React.FC<SleepLoggingSheetProps> = ({
     };
 
     return (
-        <BottomSheet visible={visible} onClose={handleClose} style={Platform.OS === 'ios' ? { height: '75%' } : undefined}>
+        <BottomSheet keyboardAvoidingBehavior='position' visible={visible} onClose={handleClose}>
             <View style={styles.container}>
                 {isSuccess ? (
                     renderSuccessAnimation()

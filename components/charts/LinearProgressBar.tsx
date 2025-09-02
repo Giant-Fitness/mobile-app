@@ -12,8 +12,10 @@ interface LinearProgressBarProps {
     height?: number;
 }
 
-export const LinearProgressBar: React.FC<LinearProgressBarProps> = ({ current, goal, color, backgroundColor, height = 8 }) => {
+export const LinearProgressBar: React.FC<LinearProgressBarProps> = ({ current, goal, color, backgroundColor, height = 16 }) => {
     const progress = goal > 0 ? Math.min(current / goal, 1) : 0;
+    const fillHeight = height * 0.3; // smaller than the container height
+    const topOffset = (height - fillHeight) / 2; // Center vertically
 
     return (
         <View style={[styles.progressBarContainer, { height, backgroundColor }]}>
@@ -23,7 +25,8 @@ export const LinearProgressBar: React.FC<LinearProgressBarProps> = ({ current, g
                     {
                         width: `${progress * 100}%`,
                         backgroundColor: color,
-                        height: '100%',
+                        height: fillHeight,
+                        top: topOffset,
                     },
                 ]}
             />
@@ -41,6 +44,5 @@ const styles = StyleSheet.create({
         borderRadius: Spaces.XXS,
         position: 'absolute',
         left: 0,
-        top: 0,
     },
 });

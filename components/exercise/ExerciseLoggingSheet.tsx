@@ -1091,7 +1091,8 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
         <BottomSheet
             visible={visible}
             onClose={handleClose}
-            style={{ height: '100%', maxHeight: '90%', paddingRight: 0 }}
+            keyboardAvoidingBehavior='position'
+            style={{ height: '50%', paddingRight: 0 }}
             disableBackdropPress={activeTab === 'log'}
         >
             {renderHeader()}
