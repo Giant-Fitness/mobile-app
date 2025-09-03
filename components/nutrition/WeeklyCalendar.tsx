@@ -53,6 +53,7 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({ selectedDate, on
     const weekScrollRef = useRef<ScrollView>(null);
     const isScrollingToWeek = useRef(false);
     const hasInitialScrolled = useRef(false);
+    const lastExternalSelectedDate = useRef<Date>(selectedDate); // Track external changes
 
     // Generate all weeks (6 months back and forwards = ~52 weeks total)
     const allWeeks = useMemo(() => {
@@ -101,15 +102,22 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({ selectedDate, on
         }
     }, [currentWeekIndex]);
 
-    // Update week index when selected date changes (external control)
+    // Only respond to external selectedDate changes (not from calendar interactions)
     useEffect(() => {
-        const selectedWeekStart = getStartOfWeek(selectedDate);
-        const newWeekIndex = allWeeks.findIndex((week) => week.startDate.getTime() === selectedWeekStart.getTime());
+        // Check if this is an external change (not from our calendar)
+        const isExternalChange = selectedDate.getTime() !== lastExternalSelectedDate.current.getTime();
 
-        if (newWeekIndex !== -1 && newWeekIndex !== currentWeekIndex) {
-            setCurrentWeekIndex(newWeekIndex);
-            scrollToWeek(newWeekIndex);
+        if (isExternalChange) {
+            const selectedWeekStart = getStartOfWeek(selectedDate);
+            const newWeekIndex = allWeeks.findIndex((week) => week.startDate.getTime() === selectedWeekStart.getTime());
+
+            if (newWeekIndex !== -1 && newWeekIndex !== currentWeekIndex) {
+                setCurrentWeekIndex(newWeekIndex);
+                scrollToWeek(newWeekIndex);
+            }
         }
+
+        lastExternalSelectedDate.current = selectedDate;
     }, [selectedDate, allWeeks, currentWeekIndex]);
 
     const scrollToWeek = (weekIndex: number) => {
@@ -127,6 +135,8 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({ selectedDate, on
     };
 
     const handleWeekDayPress = (date: Date) => {
+        // Update our tracking ref before calling onDateSelect to prevent the useEffect from triggering
+        lastExternalSelectedDate.current = date;
         onDateSelect(date);
         trigger('effectClick');
     };
@@ -160,21 +170,23 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({ selectedDate, on
                                 style={[
                                     styles.dayCard,
                                     {
-                                        backgroundColor: themeColors.backgroundSecondary,
-                                        borderColor: isSelected ? themeColors.subText : 'transparent',
+                                        backgroundColor: isSelected ? themeColors.slateBlueTransparent : 'transparent',
+                                        borderColor: isSelected ? themeColors.slateBlue : 'transparent',
                                         borderWidth: 1,
                                         width: DAY_CARD_WIDTH,
                                     },
                                 ]}
                                 activeOpacity={1}
                             >
-                                <ThemedText type='caption' style={[styles.dayName, { color: themeColors.subText }]}>
+                                <ThemedText type='caption' style={[styles.dayName, { color: isSelected ? themeColors.slateBlue : themeColors.subText }]}>
                                     {dayName}
                                 </ThemedText>
-                                <ThemedText type='buttonSmall' style={[styles.dayNumber, { color: themeColors.text }]}>
+                                <ThemedText type='buttonSmall' style={[styles.dayNumber, { color: isSelected ? themeColors.slateBlue : themeColors.text }]}>
                                     {dayNumber}
                                 </ThemedText>
-                                {isTodayDate && <View style={[styles.todayDot, { backgroundColor: themeColors.iconSelected }]} />}
+                                {isTodayDate && (
+                                    <View style={[styles.todayDot, { backgroundColor: isSelected ? themeColors.slateBlue : themeColors.iconSelected }]} />
+                                )}
                             </TouchableOpacity>
                         );
                     })}
@@ -205,10 +217,10 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({ selectedDate, on
 
 const styles = StyleSheet.create({
     weeklyCard: {
-        marginHorizontal: Spaces.MD,
+        marginHorizontal: Spaces.SM,
         borderRadius: Spaces.SM,
         padding: 0,
-        marginBottom: Spaces.LG,
+        marginBottom: Spaces.SM,
         elevation: 2,
         shadowColor: '#000',
         shadowOffset: {
@@ -222,18 +234,17 @@ const styles = StyleSheet.create({
         // Container for all weeks
     },
     weekPage: {
-        paddingHorizontal: Spaces.MD,
-        paddingVertical: Spaces.MD,
+        paddingHorizontal: Spaces.SM,
+        paddingVertical: Spaces.XS,
         justifyContent: 'center',
     },
     weekContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        gap: Spaces.XS,
     },
     dayCard: {
         borderRadius: Spaces.SM,
-        paddingVertical: Spaces.SM,
+        paddingVertical: Spaces.XS,
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
@@ -243,11 +254,11 @@ const styles = StyleSheet.create({
     },
     dayNumber: {
         fontSize: 12,
+        marginTop: -Spaces.XS,
     },
     todayDot: {
         width: Spaces.XS,
         height: Spaces.XS,
         borderRadius: Spaces.XS,
-        marginTop: Spaces.XXS,
     },
 });

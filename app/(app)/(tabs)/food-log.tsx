@@ -2,13 +2,14 @@
 
 import { ThemedView } from '@/components/base/ThemedView';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
+import { DailyMacrosCardCompressed } from '@/components/nutrition/DailyMacrosCardCompressed';
 import { WeeklyCalendar } from '@/components/nutrition/WeeklyCalendar';
 import { DatePickerBottomSheet } from '@/components/overlays/DatePickerBottomSheet';
 import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { AppDispatch } from '@/store/store';
+import { AppDispatch, RootState } from '@/store/store';
 import { getUserAsync } from '@/store/user/thunks';
 import React, { useCallback, useRef, useState } from 'react';
 import { RefreshControl, StyleSheet } from 'react-native';
@@ -17,18 +18,7 @@ import { useFocusEffect } from '@react-navigation/native';
 
 import { trigger } from 'react-native-haptic-feedback';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
-import { useDispatch } from 'react-redux';
-
-// Mock data for nutrition logs
-const mockNutritionData = {
-    '2025-09-01': { calories: 1850, goal: 2200 },
-    '2025-09-02': { calories: 2100, goal: 2200 },
-    '2025-09-03': { calories: 1650, goal: 2200 }, // Today
-    '2025-09-04': { calories: 0, goal: 2200 },
-    '2025-09-05': { calories: 0, goal: 2200 },
-    '2025-09-06': { calories: 0, goal: 2200 },
-    '2025-09-07': { calories: 0, goal: 2200 },
-};
+import { useDispatch, useSelector } from 'react-redux';
 
 export default function FoodLogScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -40,6 +30,8 @@ export default function FoodLogScreen() {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
 
+    const { userNutritionProfile } = useSelector((state: RootState) => state.user);
+
     // Ref to track if component is mounted and focused
     const isMountedAndFocused = useRef(true);
     const refreshTimeoutRef = useRef<number | null>(null);
@@ -49,6 +41,13 @@ export default function FoodLogScreen() {
             scrollY.value = event.contentOffset.y;
         },
     });
+
+    const mockConsumedData = {
+        calories: 1500,
+        protein: 155,
+        carbs: 180,
+        fats: 45,
+    };
 
     // Handle focus/blur events to manage refresh state
     useFocusEffect(
@@ -121,17 +120,6 @@ export default function FoodLogScreen() {
         setShowDatePicker(false);
     };
 
-    const handleWeekChange = (weekDates: Date[]) => {
-        // Handle week change if needed
-        console.log('Week changed:', weekDates);
-    };
-
-    const getCalorieProgress = (date: Date) => {
-        const dateKey = date.toISOString().split('T')[0];
-        const data = mockNutritionData[dateKey as keyof typeof mockNutritionData];
-        return data ? data.calories / data.goal : 0;
-    };
-
     return (
         <>
             {/* Animated Header with Date Navigation */}
@@ -168,7 +156,10 @@ export default function FoodLogScreen() {
                 }}
             >
                 {/* Weekly Calendar Component */}
-                <WeeklyCalendar selectedDate={selectedDate} onDateSelect={handleDateSelect} onWeekChange={handleWeekChange} />
+                <WeeklyCalendar selectedDate={selectedDate} onDateSelect={handleDateSelect} />
+
+                {/* Compressed Nutrition Card */}
+                {userNutritionProfile && <DailyMacrosCardCompressed userNutritionProfile={userNutritionProfile} consumedData={mockConsumedData} />}
 
                 {/* Rest of your food log content goes here */}
                 <ThemedView style={styles.contentArea}>{/* Add your food diary content here */}</ThemedView>
