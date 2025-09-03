@@ -3,6 +3,7 @@
 import { ThemedView } from '@/components/base/ThemedView';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { WeeklyCalendar } from '@/components/nutrition/WeeklyCalendar';
+import { DatePickerBottomSheet } from '@/components/overlays/DatePickerBottomSheet';
 import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
@@ -37,6 +38,7 @@ export default function FoodLogScreen() {
 
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [showDatePicker, setShowDatePicker] = useState(false);
 
     // Ref to track if component is mounted and focused
     const isMountedAndFocused = useRef(true);
@@ -92,7 +94,7 @@ export default function FoodLogScreen() {
     };
 
     const handleDatePress = () => {
-        console.log('Date picker should open for:', selectedDate);
+        setShowDatePicker(true);
         trigger('effectClick');
     };
 
@@ -112,6 +114,11 @@ export default function FoodLogScreen() {
 
     const handleDateSelect = (date: Date) => {
         setSelectedDate(date);
+        setShowDatePicker(false);
+    };
+
+    const handleDatePickerClose = () => {
+        setShowDatePicker(false);
     };
 
     const handleWeekChange = (weekDates: Date[]) => {
@@ -166,6 +173,15 @@ export default function FoodLogScreen() {
                 {/* Rest of your food log content goes here */}
                 <ThemedView style={styles.contentArea}>{/* Add your food diary content here */}</ThemedView>
             </Animated.ScrollView>
+
+            {/* Date Picker Bottom Sheet */}
+            <DatePickerBottomSheet
+                visible={showDatePicker}
+                onClose={handleDatePickerClose}
+                selectedDate={selectedDate}
+                onDateSelect={handleDateSelect}
+                title='Select Date'
+            />
         </>
     );
 }
