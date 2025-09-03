@@ -70,6 +70,8 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
             return <AnimatedIonicons name='chevron-up' {...commonProps} />;
         case 'chevron-down':
             return <AnimatedIonicons name='chevron-down' {...commonProps} />;
+        case 'caret-down':
+            return <AnimatedIonicons name='caret-down' {...commonProps} />;
         case 'profile-active':
             return <AnimatedIonicons name='person-circle' {...commonProps} />;
         case 'profile-inactive':

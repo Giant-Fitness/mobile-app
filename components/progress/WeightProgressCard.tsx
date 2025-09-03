@@ -223,11 +223,14 @@ export const WeightProgressCard: React.FC<WeightProgressCardProps> = ({
 
 const styles = StyleSheet.create({
     shadowContainer: {
-        shadowColor: 'rgba(100, 100, 100, 0.1)',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.8,
-        shadowRadius: 2,
         elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
     },
     card: {
         borderRadius: Spaces.SM,
