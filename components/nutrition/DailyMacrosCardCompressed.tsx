@@ -8,7 +8,7 @@ import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { UserNutritionProfile } from '@/types';
-import { addAlpha } from '@/utils/colorUtils';
+import { addAlpha, darkenColor } from '@/utils/colorUtils';
 import { moderateScale } from '@/utils/scaling';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -31,9 +31,10 @@ interface MacroItemProps {
     goal: number;
     color: string;
     backgroundColor: string;
+    overageColor: string;
 }
 
-const MacroItem: React.FC<MacroItemProps> = ({ label, iconName, current, goal, color, backgroundColor }) => {
+const MacroItem: React.FC<MacroItemProps> = ({ label, iconName, current, goal, color, backgroundColor, overageColor }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
@@ -65,7 +66,15 @@ const MacroItem: React.FC<MacroItemProps> = ({ label, iconName, current, goal, c
                 )}
             </ThemedText>
 
-            <LinearProgressBar current={current} goal={goal} color={color} backgroundColor={backgroundColor} height={4} fullHeight={true} />
+            <LinearProgressBar
+                current={current}
+                goal={goal}
+                color={color}
+                backgroundColor={backgroundColor}
+                height={4}
+                fullHeight={true}
+                overageColor={overageColor}
+            />
         </View>
     );
 };
@@ -81,6 +90,7 @@ export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps>
             goal: userNutritionProfile.GoalCalories,
             color: themeColors.slateBlue,
             backgroundColor: themeColors.slateBlueTransparent,
+            overageColor: darkenColor(themeColors.slateBlue, 0.4),
         },
         {
             label: 'P',
@@ -88,6 +98,7 @@ export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps>
             goal: userNutritionProfile.GoalMacros.Protein,
             color: themeColors.protein,
             backgroundColor: addAlpha(themeColors.protein, 0.1),
+            overageColor: darkenColor(themeColors.protein, 0.4),
         },
         {
             label: 'C',
@@ -95,6 +106,7 @@ export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps>
             goal: userNutritionProfile.GoalMacros.Carbs,
             color: themeColors.carbs,
             backgroundColor: addAlpha(themeColors.carbs, 0.1),
+            overageColor: darkenColor(themeColors.carbs, 0.4),
         },
         {
             label: 'F',
@@ -102,6 +114,7 @@ export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps>
             goal: userNutritionProfile.GoalMacros.Fats,
             color: themeColors.fats,
             backgroundColor: addAlpha(themeColors.fats, 0.1),
+            overageColor: darkenColor(themeColors.fats, 0.4),
         },
     ];
 
@@ -116,7 +129,8 @@ export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps>
                         current={item.current}
                         goal={item.goal}
                         color={item.color}
-                        backgroundColor={themeColors.backgroundSecondary}
+                        backgroundColor={item.backgroundColor}
+                        overageColor={item.overageColor}
                     />
                 ))}
             </View>

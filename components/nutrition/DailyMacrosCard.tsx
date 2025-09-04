@@ -7,13 +7,15 @@ import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { UserNutritionProfile } from '@/types';
-import { addAlpha } from '@/utils/colorUtils';
+import { addAlpha, darkenColor } from '@/utils/colorUtils';
 import { moderateScale } from '@/utils/scaling';
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Icon } from '../base/Icon';
 import { CircularProgress } from '../charts/CircularProgress';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 interface DailyMacrosCardProps {
     userNutritionProfile: UserNutritionProfile;
@@ -26,36 +28,69 @@ interface MacroMeterProps {
     goal: number;
     unit: string;
     color: string;
+    backgroundColor: string;
+    overageColor: string;
 }
 
-const MacroMeter: React.FC<MacroMeterProps> = ({ label, current, goal, unit, color }) => {
+const MacroMeter: React.FC<MacroMeterProps> = ({ label, current, goal, unit, color, backgroundColor, overageColor }) => {
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
+
+    const remaining = goal - current;
+    const isOverGoal = current > goal;
+
     return (
         <View style={styles.macroMeter}>
-            <View style={styles.macroColumn}>
-                <CircularProgress current={current} goal={goal} color={color} size={32} strokeWidth={4} arcAngle={360} />
-                <View style={styles.macroInfo}>
-                    <ThemedText type='buttonSmall' style={styles.macroLabel}>
-                        {label}
-                    </ThemedText>
-                    <ThemedText type='caption' style={styles.macroValues}>
-                        <ThemedText type='bodyMedium' style={styles.consumedValue}>
-                            {Math.round(current)}
-                        </ThemedText>
-                        <ThemedText type='caption'>
-                            {' / '}
-                            {goal}
-                            {unit}
-                        </ThemedText>
-                    </ThemedText>
-                </View>
+            <ThemedText type='buttonSmall' style={styles.macroLabel}>
+                {label}
+            </ThemedText>
+            <CircularProgress
+                current={current}
+                goal={goal}
+                color={color}
+                size={110}
+                strokeWidth={8}
+                arcAngle={360}
+                showContent={true}
+                backgroundColor={backgroundColor}
+                overageColor={overageColor}
+            >
+                <ThemedText type='bodyMedium' style={[{ color: themeColors.text }]}>
+                    {Math.round(current)}
+                </ThemedText>
+                <ThemedText type='bodySmall' style={styles.macroGoalValue}>
+                    /{goal}
+                    {unit}
+                </ThemedText>
+            </CircularProgress>
+            <View style={styles.macroInfo}>
+                <ThemedText type='bodySmall' style={styles.macroRemainingValue}>
+                    {isOverGoal ? Math.abs(remaining) : remaining}
+                    {unit} {isOverGoal ? 'over' : 'left'}
+                </ThemedText>
             </View>
         </View>
+    );
+};
+
+const DotIndicator: React.FC<{ isActive: boolean; color: string; backgroundColor: string }> = ({ isActive, color, backgroundColor }) => {
+    return (
+        <View
+            style={[
+                styles.dot,
+                {
+                    backgroundColor: isActive ? color : backgroundColor,
+                },
+            ]}
+        />
     );
 };
 
 export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionProfile, style }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const scrollViewRef = useRef<ScrollView>(null);
+    const [currentPage, setCurrentPage] = useState(0);
 
     // Placeholder consumed values - replace with actual data later
     const consumedCalories = 150;
@@ -66,8 +101,14 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionP
     const remaining = userNutritionProfile.GoalCalories - consumedCalories;
     const isOverGoal = consumedCalories > userNutritionProfile.GoalCalories;
 
-    return (
-        <ThemedView style={[styles.outerContainer, { backgroundColor: themeColors.background }, style]}>
+    const handleScroll = (event: any) => {
+        const contentOffsetX = event.nativeEvent.contentOffset.x;
+        const pageIndex = Math.round(contentOffsetX / screenWidth);
+        setCurrentPage(pageIndex);
+    };
+
+    const CaloriesView = () => (
+        <View style={[styles.pageContainer, { width: screenWidth }]}>
             <View style={styles.caloriesSection}>
                 {/* Left: Remaining/Over */}
                 <View style={styles.caloriesLeftSection}>
@@ -85,6 +126,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionP
                         current={consumedCalories}
                         goal={userNutritionProfile.GoalCalories}
                         color={themeColors.slateBlue}
+                        backgroundColor={themeColors.slateBlueTransparent}
                         size={180}
                         strokeWidth={8}
                         arcAngle={270}
@@ -110,11 +152,63 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionP
                     </ThemedText>
                 </View>
             </View>
-            {/* Bottom: Macros Row */}
+        </View>
+    );
+
+    const MacrosView = () => (
+        <View style={[styles.pageContainer, { width: screenWidth }]}>
             <View style={styles.macrosSection}>
-                <MacroMeter label='Protein' current={consumedProtein} goal={userNutritionProfile.GoalMacros.Protein} unit='g' color={themeColors.protein} />
-                <MacroMeter label='Carbs' current={consumedCarbs} goal={userNutritionProfile.GoalMacros.Carbs} unit='g' color={themeColors.carbs} />
-                <MacroMeter label='Fats' current={consumedFats} goal={userNutritionProfile.GoalMacros.Fats} unit='g' color={themeColors.fats} />
+                <MacroMeter
+                    label='Protein'
+                    current={consumedProtein}
+                    goal={userNutritionProfile.GoalMacros.Protein}
+                    unit='g'
+                    color={themeColors.protein}
+                    backgroundColor={addAlpha(themeColors.protein, 0.1)}
+                    overageColor={darkenColor(themeColors.protein, 0.4)}
+                />
+                <MacroMeter
+                    label='Carbs'
+                    current={consumedCarbs}
+                    goal={userNutritionProfile.GoalMacros.Carbs}
+                    unit='g'
+                    color={themeColors.carbs}
+                    backgroundColor={addAlpha(themeColors.carbs, 0.1)}
+                    overageColor={darkenColor(themeColors.carbs, 0.4)}
+                />
+                <MacroMeter
+                    label='Fats'
+                    current={consumedFats}
+                    goal={userNutritionProfile.GoalMacros.Fats}
+                    unit='g'
+                    color={themeColors.fats}
+                    backgroundColor={addAlpha(themeColors.fats, 0.1)}
+                    overageColor={darkenColor(themeColors.fats, 0.4)}
+                />
+            </View>
+        </View>
+    );
+
+    return (
+        <ThemedView style={[styles.outerContainer, { backgroundColor: themeColors.background }, style]}>
+            <ScrollView
+                ref={scrollViewRef}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
+                style={styles.scrollView}
+                contentContainerStyle={styles.scrollContent}
+            >
+                <CaloriesView />
+                <MacrosView />
+            </ScrollView>
+
+            {/* Dot Indicators */}
+            <View style={styles.dotContainer}>
+                <DotIndicator isActive={currentPage === 0} color={themeColors.text} backgroundColor={themeColors.subTextSecondary} />
+                <DotIndicator isActive={currentPage === 1} color={themeColors.text} backgroundColor={themeColors.subTextSecondary} />
             </View>
         </ThemedView>
     );
@@ -122,18 +216,28 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionP
 
 const styles = StyleSheet.create({
     outerContainer: {
-        // padding: Spaces.MD,
-        // paddingBottom: Spaces.SM,
-        // borderRadius: Spaces.SM,
+        paddingBottom: Spaces.MD,
+    },
+    scrollView: {
+        flex: 1,
+    },
+    scrollContent: {
+        flexDirection: 'row',
+    },
+    pageContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: Spaces.MD,
     },
 
     // Calories Section
     caloriesSection: {
         flexDirection: 'row',
         alignItems: 'center',
+        width: '100%',
+        justifyContent: 'space-between',
     },
     caloriesLeftSection: {
-        marginTop: Spaces.SM,
         flex: 1,
         alignItems: 'center',
     },
@@ -145,7 +249,6 @@ const styles = StyleSheet.create({
     caloriesRightSection: {
         flex: 1,
         alignItems: 'center',
-        marginTop: Spaces.SM,
     },
     remainingNumber: {
         opacity: 0.8,
@@ -174,39 +277,46 @@ const styles = StyleSheet.create({
 
     // Macros Section
     macrosSection: {
-        marginTop: -Spaces.SM,
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        gap: Spaces.MD,
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        width: '100%',
+        marginTop: -Spaces.MD,
     },
     macroMeter: {
-        flex: 1,
         alignItems: 'center',
+        flex: 1,
+    },
+    macroInfo: {
+        alignItems: 'center',
+        marginTop: Spaces.XS,
     },
     macroLabel: {
         textAlign: 'center',
         opacity: 0.7,
     },
-    macroValues: {
+    macroGoalValue: {
         textAlign: 'center',
+        opacity: 0.7,
+        marginTop: -Spaces.XS,
+    },
+    macroRemainingValue: {
+        textAlign: 'center',
+        opacity: 0.7,
         marginTop: -Spaces.XS,
     },
 
-    macrosRow: {
-        width: '100%',
+    // Dot Indicators
+    dotContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-around',
+        justifyContent: 'center',
         alignItems: 'center',
-    },
-    macroColumn: {
-        alignItems: 'center',
-        flexDirection: 'row',
+        marginTop: Spaces.XS,
         gap: Spaces.XS,
     },
-    macroInfo: {
-        alignItems: 'flex-start',
-    },
-    consumedValue: {
-        fontSize: 14, // Increased size for consumed number
+    dot: {
+        width: 6,
+        height: 6,
+        borderRadius: 4,
     },
 });

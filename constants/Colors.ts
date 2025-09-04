@@ -5,8 +5,8 @@ export const Colors = {
         text: '#0f0706', // Main text color
         subText: '#5f5e5b', // Secondary text
         subTextSecondary: '#C6C6C6', // Tertiary text
-        background: '#fcfcfc', // Main background
-        backgroundSecondary: 'rgba(243, 243, 243, 1)', // Slightly adjusted for better contrast
+        background: '#fdfdfd', // Main background
+        backgroundSecondary: 'rgba(242, 242, 242, 1)', // Slightly adjusted for better contrast
         backgroundTertiary: 'rgba(246, 248, 248, 1)',
         primary: '#204D24', // Primary color (Green)
         secondary: '#EAEAEA', // Secondary elements

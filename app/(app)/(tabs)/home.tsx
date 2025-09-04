@@ -573,7 +573,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: Spaces.MD,
     },
     nutritionCard: {
-        paddingHorizontal: Spaces.MD,
+        // paddingHorizontal: Spaces.MD,
     },
     actionTilesContainer: {
         paddingVertical: Spaces.XS,
@@ -594,7 +594,7 @@ const styles = StyleSheet.create({
     },
     nutritionSection: {
         paddingTop: Spaces.MD,
-        paddingBottom: Spaces.LG,
+        marginBottom: Spaces.SM,
         shadowColor: 'rgba(100, 100, 100, 0.1)',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.8,

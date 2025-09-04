@@ -17,6 +17,8 @@ interface CircularProgressProps {
     arcAngle?: number; // 360 for full circle, less for arc (e.g., 270)
     showContent?: boolean;
     children?: React.ReactNode;
+    overageColor?: string; // Optional custom overage color
+    backgroundColor?: string; // Optional custom background color
 }
 
 export const CircularProgress: React.FC<CircularProgressProps> = ({
@@ -28,6 +30,8 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
     arcAngle = 360,
     showContent = false,
     children,
+    overageColor,
+    backgroundColor,
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -35,6 +39,10 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
     const radius = (size - Math.max(strokeWidth * 2, 6)) / 2;
     const isFullCircle = arcAngle >= 360;
     const isOverGoal = current > goal;
+
+    // Use custom colors or fall back to defaults
+    const bgColor = backgroundColor || themeColors.backgroundSecondary;
+    const overColor = overageColor || color; // Default to main color if no overage color specified
 
     let circumference, rotateAngle;
 
@@ -59,7 +67,7 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
         if (totalPercentage >= 200) {
             goalProgress = {
                 strokeDashoffset: 0, // Full circle
-                strokeColor: color,
+                strokeColor: overageColor ? overColor : color, // Use overage color if specified
             };
             overageProgress = null;
             goalRotateAngle = rotateAngle;
@@ -69,11 +77,11 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
             const cappedOveragePercentage = Math.min(overagePercentage, 100);
             const remainingGoalPercentage = 100 - cappedOveragePercentage;
 
-            // Overage progress: show overage starting from 0° (12 o'clock)
+            // Overage progress: use overage color if specified, otherwise use main color with opacity
             overageProgress = {
                 strokeDashoffset: circumference - (circumference * cappedOveragePercentage) / 100,
-                strokeColor: color,
-                opacity: 0.4,
+                strokeColor: overColor,
+                opacity: overageColor ? 1 : 0.5, // Full opacity if custom overage color, otherwise transparent
             };
 
             // Main progress: show remaining goal percentage, rotated to start after overage
@@ -104,7 +112,7 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
                     cx={size / 2}
                     cy={size / 2}
                     r={radius}
-                    stroke={themeColors.backgroundSecondary}
+                    stroke={bgColor}
                     strokeWidth={strokeWidth}
                     fill='transparent'
                     strokeDasharray={dashArray}
@@ -143,7 +151,7 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
                     transform={`rotate(${goalRotateAngle} ${size / 2} ${size / 2})`}
                 />
             </Svg>
-            {showContent && <View style={styles.circularContent}>{children}</View>}
+            {showContent && <View style={[styles.circularContent, { marginTop: isFullCircle ? 0 : -Spaces.MD }]}>{children}</View>}
         </View>
     );
 };
@@ -160,6 +168,5 @@ const styles = StyleSheet.create({
     },
     circularContent: {
         alignItems: 'center',
-        marginTop: -Spaces.MD,
     },
 });
