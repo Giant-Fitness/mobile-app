@@ -171,14 +171,14 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({ selectedDate, on
                                     styles.dayCard,
                                     {
                                         backgroundColor: isSelected ? themeColors.slateBlueTransparent : 'transparent',
-                                        borderColor: isSelected ? themeColors.slateBlue : 'transparent',
+                                        borderColor: themeColors.slateBlue,
                                         borderWidth: 1,
                                         width: DAY_CARD_WIDTH,
                                     },
                                 ]}
                                 activeOpacity={1}
                             >
-                                <ThemedText type='caption' style={[styles.dayName, { color: isSelected ? themeColors.slateBlue : themeColors.subText }]}>
+                                <ThemedText type='bodySmall' style={[styles.dayName, { color: isSelected ? themeColors.slateBlue : themeColors.subText }]}>
                                     {dayName}
                                 </ThemedText>
                                 <ThemedText type='buttonSmall' style={[styles.dayNumber, { color: isSelected ? themeColors.slateBlue : themeColors.text }]}>
@@ -217,25 +217,12 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({ selectedDate, on
 
 const styles = StyleSheet.create({
     weeklyCard: {
-        marginHorizontal: Spaces.SM,
-        borderRadius: Spaces.SM,
-        padding: 0,
-        marginBottom: Spaces.SM,
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
+        height: 60,
     },
     weekScrollContainer: {
         // Container for all weeks
     },
     weekPage: {
-        paddingHorizontal: Spaces.SM,
-        paddingVertical: Spaces.XS,
         justifyContent: 'center',
     },
     weekContainer: {

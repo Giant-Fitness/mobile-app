@@ -1,18 +1,15 @@
 // app/(app)/(tabs)/food-log.tsx
 
 import { ThemedView } from '@/components/base/ThemedView';
-import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
-import { DailyMacrosCardCompressed } from '@/components/nutrition/DailyMacrosCardCompressed';
-import { WeeklyCalendar } from '@/components/nutrition/WeeklyCalendar';
+import { FoodLogHeader } from '@/components/nutrition/FoodLogHeader';
 import { DatePickerBottomSheet } from '@/components/overlays/DatePickerBottomSheet';
 import { Colors } from '@/constants/Colors';
-import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AppDispatch, RootState } from '@/store/store';
 import { getUserAsync } from '@/store/user/thunks';
 import React, { useCallback, useRef, useState } from 'react';
-import { RefreshControl, StyleSheet } from 'react-native';
+import { Platform, RefreshControl, StyleSheet } from 'react-native';
 
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -36,11 +33,16 @@ export default function FoodLogScreen() {
     const isMountedAndFocused = useRef(true);
     const refreshTimeoutRef = useRef<number | null>(null);
 
-    const scrollHandler = useAnimatedScrollHandler({
-        onScroll: (event) => {
-            scrollY.value = event.contentOffset.y;
+    // Optimized scroll handler for smooth performance
+    const scrollHandler = useAnimatedScrollHandler(
+        {
+            onScroll: (event) => {
+                'worklet';
+                scrollY.value = event.contentOffset.y;
+            },
         },
-    });
+        [], // Empty dependency array for better performance
+    );
 
     const mockConsumedData = {
         calories: 1500,
@@ -48,6 +50,24 @@ export default function FoodLogScreen() {
         carbs: 180,
         fats: 45,
     };
+
+    // Calculate initial header height (when calendar is visible) - FIXED VALUES
+    const calculateExpandedHeaderHeight = () => {
+        // Calculate header heights
+        const baseHeaderHeight =
+            Platform.select({
+                ios: 44,
+                android: 24,
+            }) || 44;
+
+        const dateNavigationHeight = 60;
+        const macrosHeight = 60;
+        const CALENDAR_HEIGHT = 60;
+
+        return baseHeaderHeight + dateNavigationHeight + CALENDAR_HEIGHT + macrosHeight;
+    };
+
+    const expandedHeaderHeight = calculateExpandedHeaderHeight();
 
     // Handle focus/blur events to manage refresh state
     useFocusEffect(
@@ -122,47 +142,44 @@ export default function FoodLogScreen() {
 
     return (
         <>
-            {/* Animated Header with Date Navigation */}
-            <AnimatedHeader
+            {/* Food Log Header with date navigation, calendar, and macros */}
+            <FoodLogHeader
                 scrollY={scrollY}
-                disableColorChange={true}
-                headerBackground={themeColors.background}
-                disableBackButton={true}
                 dateNavigation={{
                     selectedDate,
                     onDatePress: handleDatePress,
                     onPreviousDay: handlePreviousDay,
                     onNextDay: handleNextDay,
                 }}
+                userNutritionProfile={userNutritionProfile ?? undefined}
+                consumedData={mockConsumedData}
+                headerInterpolationStart={60}
             />
 
             <Animated.ScrollView
                 onScroll={scrollHandler}
-                scrollEventThrottle={16}
                 showsVerticalScrollIndicator={false}
                 overScrollMode='never'
+                bounces={false} // Disable iOS bounce for more predictable behavior
                 refreshControl={
                     <RefreshControl
                         refreshing={isRefreshing}
                         onRefresh={handleRefresh}
                         colors={[themeColors.iconSelected]}
                         tintColor={themeColors.iconSelected}
-                        progressViewOffset={Sizes.headerHeight}
+                        progressViewOffset={expandedHeaderHeight} // Use expanded height for refresh control
                     />
                 }
                 style={[styles.container, { backgroundColor: themeColors.backgroundSecondary }]}
                 contentContainerStyle={{
-                    paddingTop: Sizes.headerHeight + Spaces.MD,
+                    paddingTop: expandedHeaderHeight + Spaces.MD, // Use expanded height so content starts below full header
                 }}
             >
-                {/* Weekly Calendar Component */}
-                <WeeklyCalendar selectedDate={selectedDate} onDateSelect={handleDateSelect} />
-
-                {/* Compressed Nutrition Card */}
-                {userNutritionProfile && <DailyMacrosCardCompressed userNutritionProfile={userNutritionProfile} consumedData={mockConsumedData} />}
-
-                {/* Rest of your food log content goes here */}
-                <ThemedView style={styles.contentArea}>{/* Add your food diary content here */}</ThemedView>
+                {/* food log content goes here */}
+                <ThemedView style={styles.contentArea}>
+                    {/* This content will scroll under the animated header */}
+                    {/* As the header collapses, more content will be revealed naturally */}
+                </ThemedView>
             </Animated.ScrollView>
 
             {/* Date Picker Bottom Sheet */}
@@ -184,5 +201,7 @@ const styles = StyleSheet.create({
     contentArea: {
         paddingHorizontal: Spaces.LG,
         paddingBottom: Spaces.XXXL,
+        minHeight: 800, // Ensure there's enough content to scroll and test the header animations
+        backgroundColor: 'white',
     },
 });

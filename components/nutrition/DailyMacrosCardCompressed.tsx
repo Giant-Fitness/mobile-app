@@ -58,7 +58,7 @@ const MacroItem: React.FC<MacroItemProps> = ({ label, iconName, current, goal, c
                         <ThemedText type='button' style={[styles.values, { color: themeColors.text }]}>
                             {label}
                         </ThemedText>
-                        <ThemedText type='caption' style={[styles.values, { color: themeColors.text }]}>
+                        <ThemedText type='buttonSmall' style={[styles.values, { color: themeColors.subText }]}>
                             {' '}
                             {formatValue(current)} / {formatValue(goal)}
                         </ThemedText>
@@ -139,22 +139,7 @@ export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps>
 };
 
 const styles = StyleSheet.create({
-    container: {
-        borderRadius: Spaces.SM,
-        paddingHorizontal: Spaces.MD,
-        paddingTop: Spaces.SM,
-        paddingBottom: Spaces.MD,
-        marginHorizontal: Spaces.SM,
-        marginBottom: Spaces.LG,
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-    },
+    container: {},
     macrosRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -169,8 +154,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     values: {
-        fontSize: 11,
-        fontWeight: '400',
+        fontSize: 12,
         textAlign: 'left',
     },
 });
