@@ -30,7 +30,7 @@ export const Colors = {
         tangerineSolid: 'rgb(235, 93, 40)',
         tangerineLight: 'rgb(240, 127, 86)',
         tangerineTransparent: 'rgba(235, 93, 40, 0.15)',
-        slateBlueTransparent: 'rgba(104, 91, 197, 0.2)',
+        slateBlueTransparent: 'rgba(104, 91, 197, 0.1)',
         slateBlueLight: 'rgb(171, 165, 223)',
         slateBlue: 'rgb(104, 91, 197)',
         pear: 'rgb(201, 236, 0)',

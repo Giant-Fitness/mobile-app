@@ -6,6 +6,7 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { ActiveProgramDayCard } from '@/components/programs/ActiveProgramDayCard';
 import { ProgramDayDetailCard } from '@/components/programs/ProgramDayDetailCard';
+import { WorkoutCompletedCard } from '@/components/programs/WorkoutCompletedCard';
 import { TrainingQuote } from '@/components/quotes/TrainingQuote';
 import { Colors } from '@/constants/Colors';
 import { REQUEST_STATE } from '@/constants/requestStates';
@@ -20,14 +21,11 @@ import { Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-nat
 
 import { router } from 'expo-router';
 
-import { WorkoutCompletedSection } from './WorkoutCompletedSection';
-
 export default function ActiveProgramHome() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
     const {
-        userProgramProgress,
         activeProgram,
         activeProgramNextDays,
         activeProgramCurrentDay,
@@ -56,6 +54,7 @@ export default function ActiveProgramHome() {
             </ThemedView>
         );
     }
+
     const navigateTo = (route: 'programs/active-program-progress' | 'programs/browse-programs', params = {}) => {
         debounce(router, { pathname: `/(app)/${route}` as const, params }, 1500);
     };
@@ -81,6 +80,62 @@ export default function ActiveProgramHome() {
         },
     ];
 
+    const renderTodaysWorkoutSection = () => {
+        return (
+            <View style={styles.todaysWorkoutSection}>
+                <View style={styles.header}>
+                    <ThemedText type='titleLarge'>{activeProgram?.ProgramName}</ThemedText>
+                    <ThemedText style={[{ color: themeColors.subText }]}>
+                        Week {currentWeek} of {activeProgram?.Weeks}
+                    </ThemedText>
+                </View>
+
+                <View style={styles.workoutDayCard}>
+                    {hasCompletedWorkoutToday ? (
+                        <WorkoutCompletedCard
+                            onBrowseSolos={() =>
+                                debounce(router, {
+                                    pathname: '/(app)/workouts/all-workouts',
+                                    params: {
+                                        source: 'active-program-home-day-completed-tile',
+                                    },
+                                })
+                            }
+                        />
+                    ) : (
+                        <>
+                            <ActiveProgramDayCard source={'active-program-home'} />
+                        </>
+                    )}
+                </View>
+            </View>
+        );
+    };
+
+    const renderUpNextSection = () => {
+        // Show up next section in both cases, but with different content
+        const upNextDays = hasCompletedWorkoutToday
+            ? [activeProgramCurrentDay] // Tomorrow's workout when completed
+            : activeProgramNextDays; // Upcoming workouts when not completed
+
+        const sectionTitle = hasCompletedWorkoutToday ? "Tomorrow's Workout" : 'Up Next';
+
+        if (!upNextDays.length || !upNextDays[0]) return null;
+
+        return (
+            <ThemedView style={[styles.upNextContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
+                <ThemedText type='title' style={styles.subHeader}>
+                    {sectionTitle}
+                </ThemedText>
+                {upNextDays
+                    .filter((d): d is NonNullable<typeof d> => d != null)
+                    .map((day) => (
+                        <ProgramDayDetailCard key={day.DayId} day={day} source={'active-program-home'} />
+                    ))}
+            </ThemedView>
+        );
+    };
+
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
             <ScrollView
@@ -90,50 +145,15 @@ export default function ActiveProgramHome() {
                 }}
                 showsVerticalScrollIndicator={false}
             >
-                {displayQuote && <TrainingQuote quote={displayQuote} isLastDay={isLastDay} />}
-
-                {hasCompletedWorkoutToday ? (
-                    <>
-                        <WorkoutCompletedSection
-                            onBrowseSolos={() =>
-                                debounce(router, { pathname: '/(app)/workouts/all-workouts', params: { source: 'program-home-day-completed-tile' } })
-                            }
-                        />
-                        <ThemedView style={[styles.upNextContainer, { backgroundColor: themeColors.backgroundSecondary, marginTop: Spaces.MD }]}>
-                            <ThemedText type='title' style={styles.subHeader}>
-                                Tomorrow&apos;s Workout
-                            </ThemedText>
-                            {activeProgramCurrentDay && (
-                                <ProgramDayDetailCard key={userProgramProgress?.CurrentDay} day={activeProgramCurrentDay} source={'active-program-home'} />
-                            )}
-                        </ThemedView>
-                    </>
-                ) : (
-                    <>
-                        <View style={styles.planHeader}>
-                            <ThemedText type='titleLarge'>{activeProgram?.ProgramName}</ThemedText>
-                        </View>
-                        <View style={styles.weekProgress}>
-                            <ThemedText style={[{ color: themeColors.subText }]}>
-                                Week {currentWeek} of {activeProgram?.Weeks}
-                            </ThemedText>
-                        </View>
-                        <View style={styles.activeCardContainer}>
-                            <ActiveProgramDayCard source={'active-program-home'} />
-                        </View>
-
-                        {activeProgramNextDays.length > 0 && (
-                            <ThemedView style={[styles.upNextContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
-                                <ThemedText type='title' style={styles.subHeader}>
-                                    Up Next
-                                </ThemedText>
-                                {activeProgramNextDays.map((day) => (
-                                    <ProgramDayDetailCard key={day.DayId} day={day} source={'active-program-home'} />
-                                ))}
-                            </ThemedView>
-                        )}
-                    </>
+                {displayQuote && (
+                    <View style={styles.trainingQuoteWrapper}>
+                        <TrainingQuote quote={displayQuote} isLastDay={isLastDay} isRestDay={activeProgramCurrentDay?.RestDay || false} />
+                    </View>
                 )}
+
+                {renderTodaysWorkoutSection()}
+
+                {renderUpNextSection()}
 
                 <View style={styles.menuWrapper}>
                     {menuItems.map((item, index) => (
@@ -148,7 +168,7 @@ export default function ActiveProgramHome() {
                                     borderWidth: StyleSheet.hairlineWidth,
                                 },
                             ]}
-                            activeOpacity={0.7}
+                            activeOpacity={1}
                         >
                             <View style={styles.menuContentWrapper}>
                                 <View style={styles.menuContent}>
@@ -189,6 +209,21 @@ const styles = StyleSheet.create({
     scrollContainer: {
         width: '100%',
     },
+    trainingQuoteWrapper: {
+        marginHorizontal: Spaces.MD,
+        marginTop: Spaces.MD,
+        marginBottom: Spaces.MD,
+    },
+    header: {
+        paddingHorizontal: Spaces.MD,
+        marginBottom: Spaces.SM,
+    },
+    todaysWorkoutSection: {
+        paddingBottom: Spaces.MD,
+    },
+    workoutDayCard: {
+        paddingHorizontal: Spaces.MD,
+    },
     subHeader: {
         marginBottom: Spaces.MD,
     },
@@ -196,13 +231,7 @@ const styles = StyleSheet.create({
         paddingVertical: Spaces.MD,
         paddingHorizontal: Spaces.XL,
         marginBottom: Spaces.XXL,
-    },
-    planHeader: {
-        paddingHorizontal: Spaces.LG,
-    },
-    weekProgress: {
-        marginBottom: Spaces.SM,
-        paddingHorizontal: Spaces.LG,
+        marginTop: Spaces.MD,
     },
     activeCardContainer: {
         paddingHorizontal: Spaces.LG,

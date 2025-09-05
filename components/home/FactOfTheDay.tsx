@@ -86,7 +86,7 @@ export const FactOfTheDay = ({}: FactOfTheDayProps) => {
     const themeColors = Colors[colorScheme];
 
     return (
-        <ThemedView style={[styles.container, { backgroundColor: themeColors.background }]}>
+        <ThemedView style={{ backgroundColor: themeColors.background, borderRadius: Spaces.SM }}>
             <View style={[styles.contentWrapper, { backgroundColor: themeColors.tangerineTransparent }]}>
                 <View style={styles.content}>
                     <ThemedText
@@ -130,18 +130,12 @@ export const FactOfTheDay = ({}: FactOfTheDayProps) => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        marginHorizontal: Spaces.MD,
-        marginTop: Spaces.MD,
-        marginBottom: Spaces.XL,
-        borderRadius: Spaces.SM,
-        overflow: 'hidden',
-    },
     contentWrapper: {
         position: 'relative',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        borderRadius: Spaces.SM,
     },
     content: {
         padding: Spaces.LG,

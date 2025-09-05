@@ -119,7 +119,7 @@ export const TopImageInfoCard = ({
     };
 
     return (
-        <TouchableOpacity onPress={onPress} style={[styles.container, containerStyle]} activeOpacity={onPress ? 0.7 : 1}>
+        <TouchableOpacity onPress={onPress} style={[styles.container, containerStyle]} activeOpacity={1}>
             {renderImage()}
             <ThemedView style={[styles.contentContainer, { backgroundColor: themeColors.containerHighlight }, contentContainerStyle]}>
                 {titleFirst ? (

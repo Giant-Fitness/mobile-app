@@ -2,14 +2,13 @@
 
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { ActionTile } from '@/components/home/ActionTile';
 import { FactOfTheDay } from '@/components/home/FactOfTheDay';
 import { HomeExpandableHeader } from '@/components/navigation/HomeExpandableHeader';
 import { DailyMacrosCard } from '@/components/nutrition/DailyMacrosCard';
-import { OnboardingTiles } from '@/components/onboarding/OnboardingTiles';
+import { OnboardingCard } from '@/components/onboarding/OnboardingCard';
 import { ActiveProgramDayCompressedCard } from '@/components/programs/ActiveProgramDayCompressedCard';
 import { RecommendedProgramCard } from '@/components/programs/RecommendedProgramCard';
-import { WorkoutCompletedSection } from '@/components/programs/WorkoutCompletedSection';
+import { WorkoutCompletedCard } from '@/components/programs/WorkoutCompletedCard';
 import { BodyMeasurementsLoggingSheet } from '@/components/progress/BodyMeasurementsLoggingSheet';
 import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
 import { TrainingProgressCard } from '@/components/progress/TrainingProgressCard';
@@ -45,10 +44,9 @@ import {
     logWeightMeasurementAsync,
 } from '@/store/user/thunks';
 import { getAllWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
-import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { debounce } from '@/utils/debounce';
-import React, { useCallback, useRef, useState } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { RefreshControl, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { router } from 'expo-router';
 
@@ -64,149 +62,178 @@ const useOnboardingStatus = () => {
 };
 
 export default function HomeScreen() {
+    // Theme
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
-    const dispatch = useDispatch<AppDispatch>();
 
+    // State / refs
+    const dispatch = useDispatch<AppDispatch>();
     const [isWeightSheetVisible, setIsWeightSheetVisible] = useState(false);
     const [isSleepSheetVisible, setIsSleepSheetVisible] = useState(false);
     const [isBodyMeasurementsSheetVisible, setIsBodyMeasurementsSheetVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
-    // Header configuration
     const EXPANDED_HEADER_HEIGHT = Sizes.headerHeight + 40;
-
-    // Animated values for header
     const scrollY = useSharedValue(0);
-
-    // Ref to track if component is mounted and focused
     const isMountedAndFocused = useRef(true);
     const refreshTimeoutRef = useRef<number | null>(null);
 
-    const { user, userProgramProgress, hasCompletedWorkoutToday } = useProgramData();
-    const { userWeightMeasurements, userSleepMeasurements, userBodyMeasurements, userNutritionProfile, userRecommendations, userAppSettings } = useSelector(
-        (state: RootState) => state.user,
-    );
+    // Store slices
+    const { user, userWeightMeasurements, userSleepMeasurements, userBodyMeasurements, userNutritionProfile, userRecommendations, userAppSettings } =
+        useSelector((state: RootState) => state.user);
     const { programs } = useSelector((state: RootState) => state.programs);
 
-    // Get recommended program
-    const recommendedProgram = userRecommendations?.RecommendedProgramID ? programs[userRecommendations.RecommendedProgramID] : null;
+    const { user: programUser, userProgramProgress, hasCompletedWorkoutToday } = useProgramData();
 
-    // Handle focus/blur events to manage refresh state
-    useFocusEffect(
-        useCallback(() => {
-            isMountedAndFocused.current = true;
-
-            return () => {
-                isMountedAndFocused.current = false;
-                if (refreshTimeoutRef.current) {
-                    clearTimeout(refreshTimeoutRef.current);
-                    refreshTimeoutRef.current = null;
-                }
-                if (isRefreshing) {
-                    setIsRefreshing(false);
-                }
-            };
-        }, [isRefreshing]),
-    );
-
+    // ----- Derived HomeState --------------------------------------------------
     const isOnboardingComplete = useOnboardingStatus();
 
-    // Scroll handler
+    const { activeProgram, hasActiveProgram, recommendedProgram, weightGoal } = useMemo(() => {
+        const rec = userRecommendations?.RecommendedProgramID ? programs[userRecommendations.RecommendedProgramID] : null;
+
+        const activeId = userProgramProgress?.ProgramId;
+        const active = activeId ? programs[activeId] : null;
+
+        return {
+            activeProgram: active,
+            hasActiveProgram: Boolean(activeId && active),
+            recommendedProgram: rec,
+            weightGoal: userNutritionProfile?.WeightGoal ?? null,
+        };
+    }, [userRecommendations, programs, userProgramProgress, userNutritionProfile]);
+
+    // Greeting
+    const greeting = programUser?.FirstName ? `Hi, ${programUser.FirstName}!` : 'Hi!';
+
+    // ----- Scroll handler -----------------------------------------------------
     const scrollHandler = useAnimatedScrollHandler({
         onScroll: (event) => {
             scrollY.value = event.contentOffset.y;
         },
     });
 
-    const handleLogWeight = async (weight: number, date: Date) => {
-        setIsLoading(true);
-        try {
-            await dispatch(
-                logWeightMeasurementAsync({
-                    weight: weight,
-                    measurementTimestamp: date.toISOString(),
-                }),
-            ).unwrap();
+    // ----- Lifecycle: focus cleanup for refresh control ----------------------
+    useFocusEffect(
+        useCallback(() => {
+            isMountedAndFocused.current = true;
+            return () => {
+                isMountedAndFocused.current = false;
+                if (refreshTimeoutRef.current) {
+                    clearTimeout(refreshTimeoutRef.current);
+                    refreshTimeoutRef.current = null;
+                }
+                if (isRefreshing) setIsRefreshing(false);
+            };
+        }, [isRefreshing]),
+    );
 
-            await dispatch(getWeightMeasurementsAsync()).unwrap();
-        } catch (error) {
-            console.error('Failed to log weight:', error);
-        } finally {
-            if (isMountedAndFocused.current) {
-                setIsLoading(false);
+    // ----- Handlers: Log & Delete -------------------------------------------
+    const handleLogWeight = useCallback(
+        async (weight: number, date: Date) => {
+            setIsLoading(true);
+            try {
+                await dispatch(logWeightMeasurementAsync({ weight, measurementTimestamp: date.toISOString() })).unwrap();
+                await dispatch(getWeightMeasurementsAsync()).unwrap();
+            } catch (e) {
+                console.error('Failed to log weight:', e);
+            } finally {
+                if (isMountedAndFocused.current) setIsLoading(false);
             }
-        }
-    };
+        },
+        [dispatch],
+    );
 
-    const handleLogSleep = async (sleepData: any, date: Date) => {
-        setIsLoading(true);
-        try {
-            await dispatch(
-                logSleepMeasurementAsync({
-                    ...sleepData,
-                    measurementTimestamp: date.toISOString(),
-                }),
-            ).unwrap();
-
-            await dispatch(getSleepMeasurementsAsync()).unwrap();
-        } catch (error) {
-            console.error('Failed to log sleep:', error);
-        } finally {
-            if (isMountedAndFocused.current) {
-                setIsLoading(false);
+    const handleLogSleep = useCallback(
+        async (sleepData: any, date: Date) => {
+            setIsLoading(true);
+            try {
+                await dispatch(logSleepMeasurementAsync({ ...sleepData, measurementTimestamp: date.toISOString() })).unwrap();
+                await dispatch(getSleepMeasurementsAsync()).unwrap();
+            } catch (e) {
+                console.error('Failed to log sleep:', e);
+            } finally {
+                if (isMountedAndFocused.current) setIsLoading(false);
             }
-        }
-    };
+        },
+        [dispatch],
+    );
 
-    const handleLogBodyMeasurements = async (measurements: Record<string, number>, date: Date) => {
-        setIsLoading(true);
-        try {
-            await dispatch(
-                logBodyMeasurementAsync({
-                    measurements,
-                    measurementTimestamp: date.toISOString(),
-                }),
-            ).unwrap();
-
-            await dispatch(getBodyMeasurementsAsync()).unwrap();
-        } catch (error) {
-            console.error('Failed to log body measurements:', error);
-        } finally {
-            if (isMountedAndFocused.current) {
-                setIsLoading(false);
+    const handleLogBodyMeasurements = useCallback(
+        async (measurements: Record<string, number>, date: Date) => {
+            setIsLoading(true);
+            try {
+                await dispatch(logBodyMeasurementAsync({ measurements, measurementTimestamp: date.toISOString() })).unwrap();
+                await dispatch(getBodyMeasurementsAsync()).unwrap();
+            } catch (e) {
+                console.error('Failed to log body measurements:', e);
+            } finally {
+                if (isMountedAndFocused.current) setIsLoading(false);
             }
-        }
-    };
+        },
+        [dispatch],
+    );
 
-    const handleWeightTilePress = () => {
-        setIsWeightSheetVisible(true);
-    };
+    const handleWeightDelete = useCallback(
+        async (timestamp: string) => {
+            try {
+                await dispatch(deleteWeightMeasurementAsync({ timestamp })).unwrap();
+                setIsWeightSheetVisible(false);
+            } catch (e) {
+                console.error('Failed to delete weight:', e);
+            }
+        },
+        [dispatch],
+    );
 
-    const handleSleepTilePress = () => {
-        setIsSleepSheetVisible(true);
-    };
+    const handleSleepDelete = useCallback(
+        async (timestamp: string) => {
+            try {
+                await dispatch(deleteSleepMeasurementAsync({ timestamp })).unwrap();
+                setIsSleepSheetVisible(false);
+            } catch (e) {
+                console.error('Failed to delete sleep:', e);
+            }
+        },
+        [dispatch],
+    );
 
-    const handleBodyMeasurementsTilePress = () => {
-        setIsBodyMeasurementsSheetVisible(true);
-    };
+    const handleBodyMeasurementsDelete = useCallback(
+        async (timestamp: string) => {
+            try {
+                await dispatch(deleteBodyMeasurementAsync({ timestamp })).unwrap();
+                setIsBodyMeasurementsSheetVisible(false);
+            } catch (e) {
+                console.error('Failed to delete body measurements:', e);
+            }
+        },
+        [dispatch],
+    );
 
-    const getExistingWeightData = (date: Date) => {
-        return userWeightMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
-    };
+    // ----- Utilities ----------------------------------------------------------
+    const getExistingWeightData = useCallback(
+        (date: Date) => {
+            return userWeightMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
+        },
+        [userWeightMeasurements],
+    );
 
-    const getExistingSleepData = (date: Date) => {
-        return userSleepMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
-    };
+    const getExistingSleepData = useCallback(
+        (date: Date) => {
+            return userSleepMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
+        },
+        [userSleepMeasurements],
+    );
 
-    const getExistingBodyMeasurementsData = (date: Date) => {
-        return userBodyMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
-    };
+    const getExistingBodyMeasurementsData = useCallback(
+        (date: Date) => {
+            return userBodyMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
+        },
+        [userBodyMeasurements],
+    );
 
-    const handleRefresh = async () => {
+    const handleRefresh = useCallback(async () => {
         if (isRefreshing) return;
-
         setIsRefreshing(true);
         trigger('virtualKeyRelease');
 
@@ -237,108 +264,102 @@ export default function HomeScreen() {
                     await dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId, forceRefresh: true }));
                 }
             }
-        } catch (error) {
-            console.error('Refresh failed:', error);
+        } catch (e) {
+            console.error('Refresh failed:', e);
         } finally {
             refreshTimeoutRef.current = setTimeout(() => {
-                if (isMountedAndFocused.current) {
-                    setIsRefreshing(false);
-                }
+                if (isMountedAndFocused.current) setIsRefreshing(false);
                 refreshTimeoutRef.current = null;
             }, 200);
         }
-    };
+    }, [dispatch, isRefreshing, user?.UserId, userProgramProgress?.ProgramId]);
 
-    const handleWeightDelete = async (timestamp: string) => {
-        try {
-            await dispatch(deleteWeightMeasurementAsync({ timestamp })).unwrap();
-            setIsWeightSheetVisible(false);
-        } catch (error) {
-            console.error('Failed to delete weight:', error);
-        }
-    };
+    // ----- Section Components -------------------------------------------------
+    const SectionHeader: React.FC<{ title: string; right?: React.ReactNode }> = ({ title, right }) => (
+        <View style={styles.headerWithAction}>
+            <ThemedText type='titleLarge'>{title}</ThemedText>
+            {right ? right : null}
+        </View>
+    );
 
-    const handleSleepDelete = async (timestamp: string) => {
-        try {
-            await dispatch(deleteSleepMeasurementAsync({ timestamp })).unwrap();
-            setIsSleepSheetVisible(false);
-        } catch (err) {
-            console.error('Failed to delete sleep:', err);
-        }
-    };
+    const NutritionOverview: React.FC = () => (
+        <View style={[styles.nutritionSection, { backgroundColor: themeColors.background }]}>
+            <View style={styles.header}>
+                <ThemedText type='titleLarge'>Nutrition Overview</ThemedText>
+            </View>
+            <View style={styles.nutritionCard}>{userNutritionProfile ? <DailyMacrosCard userNutritionProfile={userNutritionProfile} /> : null}</View>
+        </View>
+    );
 
-    const handleBodyMeasurementsDelete = async (timestamp: string) => {
-        try {
-            await dispatch(deleteBodyMeasurementAsync({ timestamp })).unwrap();
-            setIsBodyMeasurementsSheetVisible(false);
-        } catch (error) {
-            console.error('Failed to delete body measurements:', error);
-        }
-    };
+    const TodaysWorkout: React.FC = () => (
+        <View style={styles.todaysWorkoutSection}>
+            <View style={styles.header}>
+                <ThemedText type='titleLarge'>Today&apos;s Workout</ThemedText>
+            </View>
+            <View style={styles.workoutDayCard}>
+                {hasCompletedWorkoutToday ? (
+                    <WorkoutCompletedCard
+                        onBrowseSolos={() =>
+                            debounce(router, {
+                                pathname: '/(app)/workouts/all-workouts',
+                                params: { source: 'home-program-day-completed-tile' },
+                            })
+                        }
+                    />
+                ) : (
+                    <ActiveProgramDayCompressedCard source={'home'} />
+                )}
+            </View>
+        </View>
+    );
 
-    const actionTiles = [
-        {
-            title: 'Track Weight',
-            image: require('@/assets/images/weight.png'),
-            onPress: handleWeightTilePress,
-            backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.7),
-            textColor: darkenColor(themeColors.tangerineSolid, 0.2),
-        },
-        {
-            title: 'Track Waist',
-            image: require('@/assets/images/measure.png'),
-            onPress: handleBodyMeasurementsTilePress,
-            backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.7),
-            textColor: darkenColor(themeColors.tangerineSolid, 0.2),
-        },
-        {
-            title: 'Track Sleep',
-            image: require('@/assets/images/sleep_clock.png'),
-            onPress: handleSleepTilePress,
-            backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.7),
-            textColor: darkenColor(themeColors.tangerineSolid, 0.2),
-        },
-    ];
+    const FactSection: React.FC = () => (
+        <View style={styles.factSection}>
+            <FactOfTheDay key='fact' />
+        </View>
+    );
 
-    const renderQuickAddSection = () => {
-        return (
-            <>
-                <View style={styles.header}>
-                    <ThemedText type='titleLarge'>Quick Add</ThemedText>
-                </View>
+    const TrainingProgram: React.FC = () => (
+        <View style={[styles.recommendedProgramSection, { backgroundColor: themeColors.backgroundSecondary }]}>
+            <SectionHeader
+                title='Training Program'
+                right={
+                    <TouchableOpacity
+                        activeOpacity={1}
+                        onPress={() => {
+                            debounce(router, '/(app)/programs/browse-programs');
+                            trigger('soft');
+                        }}
+                        style={styles.seeAllButton}
+                    >
+                        <ThemedText type='body' style={[styles.seeAllText, { color: themeColors.iconSelected }]}>
+                            See All
+                        </ThemedText>
+                    </TouchableOpacity>
+                }
+            />
+            <View style={styles.workoutDayCard}>
+                {recommendedProgram ? (
+                    <RecommendedProgramCard
+                        program={recommendedProgram}
+                        compressed
+                        onPress={() => {
+                            debounce(router, {
+                                pathname: '/(app)/programs/program-overview',
+                                params: { programId: recommendedProgram.ProgramId, source: 'home-recommended-program' },
+                            });
+                            trigger('impactLight');
+                        }}
+                    />
+                ) : null}
+            </View>
+        </View>
+    );
 
-                <View style={styles.actionTilesContainer}>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.actionTilesScrollContainer}>
-                        {actionTiles.map((tile, index) => (
-                            <ActionTile
-                                key={index}
-                                image={tile.image}
-                                title={tile.title}
-                                onPress={tile.onPress}
-                                backgroundColor={tile.backgroundColor}
-                                textColor={tile.textColor}
-                                style={{ borderWidth: StyleSheet.hairlineWidth, borderColor: tile.textColor }}
-                                showChevron={true}
-                            />
-                        ))}
-                    </ScrollView>
-                </View>
-            </>
-        );
-    };
-
-    const renderGoalProgressSection = () => {
-        if (!isOnboardingComplete) return null;
-
-        // Check if we have weight goal data
-        const weightGoal = userNutritionProfile?.WeightGoal;
-
-        // Check if we have active program data
-        const hasActiveProgram = userProgramProgress?.ProgramId && programs[userProgramProgress.ProgramId];
-        const activeProgram = hasActiveProgram ? programs[userProgramProgress.ProgramId] : null;
-
-        // Don't show section if no progress data is available
-        if (!weightGoal && !hasActiveProgram) return null;
+    const ProgressSection: React.FC = () => {
+        const showWeight = Boolean(weightGoal);
+        const showTraining = hasActiveProgram && activeProgram;
+        if (!showWeight && !showTraining) return null;
 
         return (
             <View style={[styles.goalProgressSection, { backgroundColor: themeColors.backgroundSecondary }]}>
@@ -346,26 +367,19 @@ export default function HomeScreen() {
                     <ThemedText type='titleLarge'>Progress</ThemedText>
                 </View>
                 <View style={styles.goalProgressCards}>
-                    {weightGoal && (
+                    {showWeight && (
                         <WeightProgressCard
-                            userNutritionProfile={userNutritionProfile}
+                            userNutritionProfile={userNutritionProfile!}
                             userWeightMeasurements={userWeightMeasurements}
                             weightUnit={userAppSettings?.UnitsOfMeasurement?.BodyWeightUnits || 'lbs'}
-                            onPress={() => {
-                                // Navigate to weight tracking screen or show weight trend
-                                console.log('Navigate to weight progress details');
-                            }}
+                            onPress={() => debounce(router, '/(app)/progress/weight')}
                         />
                     )}
-
-                    {hasActiveProgram && (
+                    {showTraining && (
                         <TrainingProgressCard
-                            activeProgram={activeProgram}
-                            userProgramProgress={userProgramProgress}
-                            onPress={() => {
-                                // Navigate to active program progress screen
-                                debounce(router, '/(app)/programs/active-program-progress');
-                            }}
+                            activeProgram={activeProgram!}
+                            userProgramProgress={userProgramProgress!}
+                            onPress={() => debounce(router, '/(app)/programs/active-program-progress')}
                         />
                     )}
                 </View>
@@ -373,124 +387,37 @@ export default function HomeScreen() {
         );
     };
 
-    const renderContent = () => {
+    // ----- Scenario-driven section list --------------------------------------
+    const sections = useMemo(() => {
+        // Always show FactOfTheDay at the end
+        // Scenarios
         if (!isOnboardingComplete) {
-            return (
-                <>
-                    <OnboardingTiles isOnboardingComplete={isOnboardingComplete} />
-                    {/* {renderQuickAddSection()} */}
-                    <FactOfTheDay />
-                </>
-            );
+            return [<OnboardingCard key='onboarding' isOnboardingComplete={isOnboardingComplete} />, <FactSection key='fact' />];
         }
 
-        if (userProgramProgress?.ProgramId) {
-            return (
-                <>
-                    {userNutritionProfile && (
-                        <View style={[styles.nutritionSection, { backgroundColor: themeColors.background }]}>
-                            <View style={styles.header}>
-                                <ThemedText type='titleLarge'>Nutrition Overview</ThemedText>
-                            </View>
-                            <View style={styles.nutritionCard}>
-                                <DailyMacrosCard userNutritionProfile={userNutritionProfile} />
-                            </View>
-                        </View>
-                    )}
-
-                    {hasCompletedWorkoutToday ? (
-                        <WorkoutCompletedSection
-                            onBrowseSolos={() =>
-                                debounce(router, {
-                                    pathname: '/(app)/workouts/all-workouts',
-                                    params: {
-                                        source: 'home-program-day-completed-tile',
-                                    },
-                                })
-                            }
-                        />
-                    ) : (
-                        <View style={styles.todaysWorkoutSection}>
-                            <View style={styles.header}>
-                                <ThemedText type='titleLarge'>Today&apos;s Workout</ThemedText>
-                            </View>
-                            <View style={styles.workoutDayCard}>
-                                <ActiveProgramDayCompressedCard source={'home'} />
-                            </View>
-                        </View>
-                    )}
-                    {renderGoalProgressSection()}
-                    {/* {renderQuickAddSection()} */}
-                    <FactOfTheDay />
-                </>
-            );
+        // Onboarded + Active program
+        if (hasActiveProgram) {
+            return [
+                userNutritionProfile ? <NutritionOverview key='nutrition' /> : null,
+                <TodaysWorkout key='today' />,
+                <ProgressSection key='progress' />,
+                <FactSection key='fact' />,
+            ].filter(Boolean) as React.ReactElement[];
         }
 
-        // User is onboarded but has no active program
-        return (
-            <>
-                {userNutritionProfile && (
-                    <View style={[styles.nutritionSection, { backgroundColor: themeColors.backgroundSecondary }]}>
-                        <View style={styles.header}>
-                            <ThemedText type='titleLarge'>Nutrition Overview</ThemedText>
-                        </View>
-                        <View style={styles.nutritionCard}>
-                            <DailyMacrosCard userNutritionProfile={userNutritionProfile} />
-                        </View>
-                    </View>
-                )}
-                {recommendedProgram && (
-                    <View style={[styles.recommendedProgramSection, { backgroundColor: themeColors.backgroundSecondary }]}>
-                        <View style={styles.headerWithAction}>
-                            <ThemedText type='titleLarge'>Training Program</ThemedText>
-                            <TouchableOpacity
-                                activeOpacity={1}
-                                onPress={() => {
-                                    debounce(router, '/(app)/programs/browse-programs');
-                                    trigger('soft');
-                                }}
-                                style={styles.seeAllButton}
-                            >
-                                <ThemedText type='body' style={[styles.seeAllText, { color: themeColors.iconSelected }]}>
-                                    See All
-                                </ThemedText>
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.workoutDayCard}>
-                            <RecommendedProgramCard
-                                program={recommendedProgram}
-                                compressed={true}
-                                onPress={() => {
-                                    debounce(router, {
-                                        pathname: '/(app)/programs/program-overview',
-                                        params: {
-                                            programId: recommendedProgram.ProgramId,
-                                            source: 'home-recommended-program',
-                                        },
-                                    });
-                                    trigger('impactLight');
-                                }}
-                            />
-                        </View>
-                    </View>
-                )}
-                {renderGoalProgressSection()}
-                {/* {renderQuickAddSection()} */}
-
-                <FactOfTheDay />
-            </>
-        );
-    };
-
-    // Generate greeting text
-    const greeting = user?.FirstName ? `Hi, ${user.FirstName}!` : 'Hi!';
+        // Onboarded, no active program
+        return [
+            userNutritionProfile ? <NutritionOverview key='nutrition' /> : null,
+            recommendedProgram ? <TrainingProgram key='program' /> : null,
+            <ProgressSection key='progress' />,
+            <FactSection key='fact' />,
+        ].filter(Boolean) as React.ReactElement[];
+    }, [isOnboardingComplete, hasActiveProgram, userNutritionProfile, recommendedProgram, weightGoal, activeProgram]);
 
     return (
         <View style={styles.container}>
-            {/* Home-specific expandable header */}
             <HomeExpandableHeader scrollY={scrollY} greeting={greeting} expandedHeight={EXPANDED_HEADER_HEIGHT} />
 
-            {/* Scrollable Content */}
             <Animated.ScrollView
                 showsVerticalScrollIndicator={false}
                 overScrollMode='never'
@@ -502,17 +429,16 @@ export default function HomeScreen() {
                         onRefresh={handleRefresh}
                         colors={[themeColors.iconSelected]}
                         tintColor={themeColors.iconSelected}
-                        progressViewOffset={EXPANDED_HEADER_HEIGHT} // Position refresh control properly
+                        progressViewOffset={EXPANDED_HEADER_HEIGHT}
                     />
                 }
                 style={[styles.scrollView, { backgroundColor: themeColors.backgroundSecondary }]}
-                contentContainerStyle={{
-                    paddingTop: EXPANDED_HEADER_HEIGHT, // Match expanded height
-                }}
+                contentContainerStyle={{ paddingTop: EXPANDED_HEADER_HEIGHT }}
             >
                 <ThemedView style={{ backgroundColor: themeColors.backgroundSecondary }}>
-                    {renderContent()}
+                    {sections}
 
+                    {/* Sheets */}
                     <WeightLoggingSheet
                         visible={isWeightSheetVisible}
                         onClose={() => setIsWeightSheetVisible(false)}
@@ -545,16 +471,9 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    scrollView: {
-        flex: 1,
-    },
-    header: {
-        paddingHorizontal: Spaces.MD,
-        marginBottom: Spaces.SM,
-    },
+    container: { flex: 1 },
+    scrollView: { flex: 1 },
+    header: { paddingHorizontal: Spaces.MD, marginBottom: Spaces.SM },
     headerWithAction: {
         paddingHorizontal: Spaces.MD,
         marginBottom: Spaces.SM,
@@ -562,52 +481,32 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
     },
-    seeAllButton: {
-        paddingVertical: Spaces.XS,
-        paddingHorizontal: Spaces.XS,
-    },
-    seeAllText: {
-        textDecorationLine: 'underline',
-    },
-    workoutDayCard: {
-        paddingHorizontal: Spaces.MD,
-    },
-    nutritionCard: {
-        // paddingHorizontal: Spaces.MD,
-    },
-    actionTilesContainer: {
-        paddingVertical: Spaces.XS,
-        flexDirection: 'row',
-    },
+    seeAllButton: { paddingVertical: Spaces.XS, paddingHorizontal: Spaces.XS },
+    seeAllText: { textDecorationLine: 'underline' },
+    workoutDayCard: { paddingHorizontal: Spaces.MD },
+    nutritionCard: {},
+    actionTilesContainer: { paddingVertical: Spaces.XS, flexDirection: 'row' },
     actionTilesScrollContainer: {
         paddingLeft: Spaces.MD,
         paddingRight: Spaces.MD,
         paddingVertical: Spaces.XS,
         flexDirection: 'row',
     },
-    recommendedProgramSection: {
-        paddingTop: Spaces.LG,
-        paddingBottom: Spaces.XL,
-    },
-    todaysWorkoutSection: {
-        paddingTop: Spaces.LG,
-    },
+    recommendedProgramSection: { paddingTop: Spaces.LG, paddingBottom: Spaces.XL },
+    todaysWorkoutSection: { paddingTop: Spaces.LG, paddingBottom: Spaces.XL },
     nutritionSection: {
         paddingTop: Spaces.MD,
-        marginBottom: Spaces.SM,
         shadowColor: 'rgba(100, 100, 100, 0.1)',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.8,
         shadowRadius: 2,
         elevation: 2,
     },
-    goalProgressSection: {
-        marginTop: Spaces.XL,
-        paddingBottom: Spaces.XL,
+    factSection: {
+        marginHorizontal: Spaces.MD,
+        marginBottom: Spaces.XL,
+        marginTop: Spaces.LG,
     },
-    goalProgressCards: {
-        paddingHorizontal: Spaces.MD,
-        gap: Spaces.SM,
-        flexDirection: 'row',
-    },
+    goalProgressSection: { paddingBottom: Spaces.MD },
+    goalProgressCards: { paddingHorizontal: Spaces.MD, gap: Spaces.SM, flexDirection: 'row' },
 });

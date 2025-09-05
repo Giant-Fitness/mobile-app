@@ -5,7 +5,7 @@ import { Quote } from '@/types';
 const mockWorkoutQuote: Quote = {
     QuoteType: 'Motivation',
     QuoteId: 'quote001',
-    QuoteText: '"The only bad workout is the one that didn\'t happen"',
+    QuoteText: "The only bad workout is the one that didn't happen",
     Author: '',
     Context: 'Workout',
     Active: true,

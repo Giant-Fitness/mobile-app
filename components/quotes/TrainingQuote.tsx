@@ -1,76 +1,125 @@
 // components/quotes/TrainingQuote.tsx
 
-import { HighlightedTip } from '@/components/alerts/HighlightedTip';
 import { ThemedText } from '@/components/base/ThemedText';
+import { ThemedView } from '@/components/base/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Quote } from '@/types';
 import { darkenColor } from '@/utils/colorUtils';
 import React from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 
 type TrainingQuoteProps = {
     quote: Quote;
     isLastDay: boolean;
+    isRestDay?: boolean;
 };
 
-export const TrainingQuote: React.FC<TrainingQuoteProps> = ({ quote, isLastDay }) => {
-    const colorScheme = useColorScheme() as 'light' | 'dark'; // Explicitly type colorScheme
-    const themeColors = Colors[colorScheme]; // Access theme-specific colors
+export const TrainingQuote: React.FC<TrainingQuoteProps> = ({ quote, isLastDay, isRestDay = false }) => {
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
+
+    const getQuoteText = () => {
+        if (isLastDay) {
+            return 'The finish line is here, one last push!';
+        }
+        return quote.QuoteText;
+    };
+
+    const getBackgroundColor = () => {
+        if (isLastDay) {
+            return themeColors.tangerineTransparent;
+        }
+        if (isRestDay) {
+            return themeColors.slateBlueTransparent;
+        }
+        return themeColors.tangerineTransparent;
+    };
+
+    const getTextColor = () => {
+        if (isLastDay) {
+            return darkenColor(themeColors.tangerineSolid, 0.2);
+        }
+        if (isRestDay) {
+            return darkenColor(themeColors.slateBlue, 0.2);
+        }
+        return darkenColor(themeColors.tangerineSolid, 0.2);
+    };
+
+    const getTintColor = () => {
+        if (isLastDay) {
+            return themeColors.tangerineSolid;
+        }
+        if (isRestDay) {
+            return themeColors.slateBlue;
+        }
+        return themeColors.tangerineSolid;
+    };
+
+    const getBackgroundImage = () => {
+        if (isLastDay) {
+            return require('@/assets/images/flag.png');
+        }
+        if (isRestDay) {
+            return require('@/assets/images/night.png');
+        }
+        return require('@/assets/images/bolt.png');
+    };
 
     return (
-        <>
-            {isLastDay ? (
-                <View style={styles.tipContainer}>
-                    <HighlightedTip
-                        containerStyle={{ backgroundColor: themeColors.tealTransparent }}
-                        textColor={darkenColor(themeColors.tealSolid, 0.3)}
-                        iconName='star'
-                        tipText='The finish line is here, one last push!'
-                    />
-                </View>
-            ) : (
-                <View style={[styles.quoteContainer, { backgroundColor: themeColors.tealTransparent }]}>
-                    <ThemedText type='bodySmall' style={[styles.quoteText, { color: darkenColor(themeColors.tealSolid, 0.3) }]}>
-                        {quote.QuoteText}
+        <ThemedView style={[{ backgroundColor: themeColors.background }]}>
+            <View style={[styles.contentWrapper, { backgroundColor: getBackgroundColor() }]}>
+                <View style={styles.content}>
+                    <ThemedText
+                        type='bodySmall'
+                        style={[
+                            styles.text,
+                            {
+                                color: getTextColor(),
+                            },
+                        ]}
+                    >
+                        {getQuoteText()}
                     </ThemedText>
                 </View>
-            )}
-        </>
+                <Image
+                    source={getBackgroundImage()}
+                    style={[
+                        styles.backgroundImage,
+                        {
+                            opacity: 0.5,
+                            tintColor: getTintColor(),
+                        },
+                    ]}
+                    resizeMode='contain'
+                />
+            </View>
+        </ThemedView>
     );
 };
 
 const styles = StyleSheet.create({
-    quoteContainer: {
-        ...Platform.select({
-            ios: {
-                marginTop: Spaces.LG,
-            },
-            android: {
-                marginTop: Spaces.SM,
-            },
-        }),
-        paddingTop: Spaces.MD,
-        paddingBottom: Spaces.MD,
-        paddingHorizontal: Spaces.XL,
-        marginHorizontal: Spaces.LG,
-        borderRadius: Spaces.MD,
-        marginBottom: Spaces.MD,
+    contentWrapper: {
+        position: 'relative',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderRadius: Spaces.SM,
     },
-    quoteText: {
-        textAlign: 'center',
+    content: {
+        padding: Spaces.LG,
+        paddingRight: Spaces.XL,
+        flex: 1,
+        zIndex: 1,
     },
-    tipContainer: {
-        marginHorizontal: Spaces.SM,
-        ...Platform.select({
-            ios: {
-                marginTop: Spaces.LG,
-            },
-            android: {
-                marginTop: Spaces.SM,
-            },
-        }),
-        marginBottom: Spaces.LG,
+    text: {
+        maxWidth: '90%',
+    },
+    backgroundImage: {
+        position: 'absolute',
+        right: -Spaces.XL - Spaces.MD,
+        width: 200,
+        height: '50%',
     },
 });
