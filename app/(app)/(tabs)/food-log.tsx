@@ -1,6 +1,6 @@
 // app/(app)/(tabs)/food-log.tsx
 
-import { ThemedView } from '@/components/base/ThemedView';
+import { FoodLogContent } from '@/components/nutrition/FoodLogContent';
 import { FoodLogHeader } from '@/components/nutrition/FoodLogHeader';
 import { DatePickerBottomSheet } from '@/components/overlays/DatePickerBottomSheet';
 import { Colors } from '@/constants/Colors';
@@ -175,11 +175,8 @@ export default function FoodLogScreen() {
                     paddingTop: expandedHeaderHeight + Spaces.MD, // Use expanded height so content starts below full header
                 }}
             >
-                {/* food log content goes here */}
-                <ThemedView style={styles.contentArea}>
-                    {/* This content will scroll under the animated header */}
-                    {/* As the header collapses, more content will be revealed naturally */}
-                </ThemedView>
+                {/* Food Log Content */}
+                <FoodLogContent selectedDate={selectedDate} />
             </Animated.ScrollView>
 
             {/* Date Picker Bottom Sheet */}
@@ -197,11 +194,5 @@ export default function FoodLogScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-    },
-    contentArea: {
-        paddingHorizontal: Spaces.LG,
-        paddingBottom: Spaces.XXXL,
-        minHeight: 800, // Ensure there's enough content to scroll and test the header animations
-        backgroundColor: 'white',
     },
 });

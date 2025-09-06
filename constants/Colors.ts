@@ -8,6 +8,7 @@ export const Colors = {
         background: '#fdfdfd', // Main background
         backgroundSecondary: 'rgba(242, 242, 242, 1)', // Slightly adjusted for better contrast
         backgroundTertiary: 'rgba(246, 248, 248, 1)',
+        surfaceDark: 'rgba(214, 214, 214, 1)',
         primary: '#204D24', // Primary color (Green)
         secondary: '#EAEAEA', // Secondary elements
         accent: '#45A949', // Accent color 81F499
@@ -65,6 +66,7 @@ export const Colors = {
         background: '#191a19', // Main background
         backgroundSecondary: '#202220', // Secondary background
         backgroundTertiary: '#313531',
+        surfaceDark: 'rgba(85, 85, 85, 1)',
         primary: '#204D24', // Primary color (Green)
         secondary: '#23312a', // Secondary elements
         accent: '#279E2C', // Accent color
