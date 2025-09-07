@@ -18,7 +18,7 @@ import { getRestDayQuoteAsync, getWorkoutQuoteAsync } from '@/store/quotes/thunk
 import { AppDispatch, RootState } from '@/store/store';
 import {
     getBodyMeasurementsAsync,
-    getSleepMeasurementsAsync,
+    // getSleepMeasurementsAsync,
     getUserAppSettingsAsync,
     getUserAsync,
     getUserExerciseSetModificationsAsync,
@@ -46,7 +46,7 @@ const CACHE_KEYS = {
     EXERCISE_SUBSTITUTIONS: 'exercise_substitutions',
     EXERCISE_SET_MODIFICATIONS: 'exercise_set_modifications',
     WEIGHT_MEASUREMENTS: 'weight_measurements',
-    SLEEP_MEASUREMENTS: 'sleep_measurements',
+    // SLEEP_MEASUREMENTS: 'sleep_measurements',
     BODY_MEASUREMENTS: 'body_measurements',
     ALL_PROGRAMS: 'all_programs',
     ALL_WORKOUTS: 'all_workouts',
@@ -221,15 +221,15 @@ export class InitializationService {
             priority: 'medium',
             args: { useCache: true },
         },
-        {
-            key: 'userSleepMeasurements',
-            thunk: getSleepMeasurementsAsync,
-            cacheKey: CACHE_KEYS.SLEEP_MEASUREMENTS,
-            ttl: CacheTTL.LONG,
-            required: false,
-            priority: 'medium',
-            args: { useCache: true },
-        },
+        // {
+        //     key: 'userSleepMeasurements',
+        //     thunk: getSleepMeasurementsAsync,
+        //     cacheKey: CACHE_KEYS.SLEEP_MEASUREMENTS,
+        //     ttl: CacheTTL.LONG,
+        //     required: false,
+        //     priority: 'medium',
+        //     args: { useCache: true },
+        // },
         {
             key: 'userBodyMeasurements',
             thunk: getBodyMeasurementsAsync,

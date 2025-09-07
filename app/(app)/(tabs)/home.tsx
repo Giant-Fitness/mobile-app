@@ -10,7 +10,7 @@ import { ActiveProgramDayCompressedCard } from '@/components/programs/ActiveProg
 import { RecommendedProgramCard } from '@/components/programs/RecommendedProgramCard';
 import { WorkoutCompletedCard } from '@/components/programs/WorkoutCompletedCard';
 import { BodyMeasurementsLoggingSheet } from '@/components/progress/BodyMeasurementsLoggingSheet';
-import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
+// import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
 import { TrainingProgressCard } from '@/components/progress/TrainingProgressCard';
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
 import { WeightProgressCard } from '@/components/progress/WeightProgressCard';
@@ -25,10 +25,10 @@ import { getRestDayQuoteAsync, getWorkoutQuoteAsync } from '@/store/quotes/thunk
 import { AppDispatch, RootState } from '@/store/store';
 import {
     deleteBodyMeasurementAsync,
-    deleteSleepMeasurementAsync,
+    // deleteSleepMeasurementAsync,
     deleteWeightMeasurementAsync,
     getBodyMeasurementsAsync,
-    getSleepMeasurementsAsync,
+    // getSleepMeasurementsAsync,
     getUserAppSettingsAsync,
     getUserAsync,
     getUserExerciseSetModificationsAsync,
@@ -40,7 +40,7 @@ import {
     getUserRecommendationsAsync,
     getWeightMeasurementsAsync,
     logBodyMeasurementAsync,
-    logSleepMeasurementAsync,
+    // logSleepMeasurementAsync,
     logWeightMeasurementAsync,
 } from '@/store/user/thunks';
 import { getAllWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
@@ -69,7 +69,7 @@ export default function HomeScreen() {
     // State / refs
     const dispatch = useDispatch<AppDispatch>();
     const [isWeightSheetVisible, setIsWeightSheetVisible] = useState(false);
-    const [isSleepSheetVisible, setIsSleepSheetVisible] = useState(false);
+    // const [isSleepSheetVisible, setIsSleepSheetVisible] = useState(false);
     const [isBodyMeasurementsSheetVisible, setIsBodyMeasurementsSheetVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -80,8 +80,10 @@ export default function HomeScreen() {
     const refreshTimeoutRef = useRef<number | null>(null);
 
     // Store slices
-    const { user, userWeightMeasurements, userSleepMeasurements, userBodyMeasurements, userNutritionProfile, userRecommendations, userAppSettings } =
-        useSelector((state: RootState) => state.user);
+    // const { user, userWeightMeasurements, userSleepMeasurements, userBodyMeasurements, userNutritionProfile, userRecommendations, userAppSettings } =
+    const { user, userWeightMeasurements, userBodyMeasurements, userNutritionProfile, userRecommendations, userAppSettings } = useSelector(
+        (state: RootState) => state.user,
+    );
     const { programs } = useSelector((state: RootState) => state.programs);
 
     const { user: programUser, userProgramProgress, hasCompletedWorkoutToday } = useProgramData();
@@ -144,20 +146,20 @@ export default function HomeScreen() {
         [dispatch],
     );
 
-    const handleLogSleep = useCallback(
-        async (sleepData: any, date: Date) => {
-            setIsLoading(true);
-            try {
-                await dispatch(logSleepMeasurementAsync({ ...sleepData, measurementTimestamp: date.toISOString() })).unwrap();
-                await dispatch(getSleepMeasurementsAsync()).unwrap();
-            } catch (e) {
-                console.error('Failed to log sleep:', e);
-            } finally {
-                if (isMountedAndFocused.current) setIsLoading(false);
-            }
-        },
-        [dispatch],
-    );
+    // const handleLogSleep = useCallback(
+    //     async (sleepData: any, date: Date) => {
+    //         setIsLoading(true);
+    //         try {
+    //             await dispatch(logSleepMeasurementAsync({ ...sleepData, measurementTimestamp: date.toISOString() })).unwrap();
+    //             await dispatch(getSleepMeasurementsAsync()).unwrap();
+    //         } catch (e) {
+    //             console.error('Failed to log sleep:', e);
+    //         } finally {
+    //             if (isMountedAndFocused.current) setIsLoading(false);
+    //         }
+    //     },
+    //     [dispatch],
+    // );
 
     const handleLogBodyMeasurements = useCallback(
         async (measurements: Record<string, number>, date: Date) => {
@@ -186,17 +188,17 @@ export default function HomeScreen() {
         [dispatch],
     );
 
-    const handleSleepDelete = useCallback(
-        async (timestamp: string) => {
-            try {
-                await dispatch(deleteSleepMeasurementAsync({ timestamp })).unwrap();
-                setIsSleepSheetVisible(false);
-            } catch (e) {
-                console.error('Failed to delete sleep:', e);
-            }
-        },
-        [dispatch],
-    );
+    // const handleSleepDelete = useCallback(
+    //     async (timestamp: string) => {
+    //         try {
+    //             await dispatch(deleteSleepMeasurementAsync({ timestamp })).unwrap();
+    //             setIsSleepSheetVisible(false);
+    //         } catch (e) {
+    //             console.error('Failed to delete sleep:', e);
+    //         }
+    //     },
+    //     [dispatch],
+    // );
 
     const handleBodyMeasurementsDelete = useCallback(
         async (timestamp: string) => {
@@ -218,12 +220,12 @@ export default function HomeScreen() {
         [userWeightMeasurements],
     );
 
-    const getExistingSleepData = useCallback(
-        (date: Date) => {
-            return userSleepMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
-        },
-        [userSleepMeasurements],
-    );
+    // const getExistingSleepData = useCallback(
+    //     (date: Date) => {
+    //         return userSleepMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
+    //     },
+    //     [userSleepMeasurements],
+    // );
 
     const getExistingBodyMeasurementsData = useCallback(
         (date: Date) => {
@@ -252,7 +254,7 @@ export default function HomeScreen() {
                     dispatch(getSpotlightWorkoutsAsync({ forceRefresh: true })),
                     dispatch(getAllProgramsAsync({ forceRefresh: true })),
                     dispatch(getWeightMeasurementsAsync({ forceRefresh: true })),
-                    dispatch(getSleepMeasurementsAsync({ forceRefresh: true })),
+                    // dispatch(getSleepMeasurementsAsync({ forceRefresh: true })),
                     dispatch(initializeTrackedLiftsHistoryAsync({ forceRefresh: true })),
                     dispatch(getUserAppSettingsAsync({ forceRefresh: true })),
                     dispatch(getAllWorkoutsAsync({ forceRefresh: true })),
@@ -448,13 +450,13 @@ export default function HomeScreen() {
                         getExistingData={getExistingWeightData}
                     />
 
-                    <SleepLoggingSheet
+                    {/* <SleepLoggingSheet
                         visible={isSleepSheetVisible}
                         onClose={() => setIsSleepSheetVisible(false)}
                         onSubmit={handleLogSleep}
                         onDelete={handleSleepDelete}
                         getExistingData={getExistingSleepData}
-                    />
+                    /> */}
 
                     <BodyMeasurementsLoggingSheet
                         visible={isBodyMeasurementsSheetVisible}

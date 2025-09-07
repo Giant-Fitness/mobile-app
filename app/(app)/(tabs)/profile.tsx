@@ -7,8 +7,8 @@ import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { AnimatedHeader } from '@/components/navigation/AnimatedHeader';
 import { BodyMeasurementsLoggingSheet } from '@/components/progress/BodyMeasurementsLoggingSheet';
 import { BodyMeasurementsTrendCard } from '@/components/progress/BodyMeasurementsTrendCard';
-import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
-import { SleepTrendCard } from '@/components/progress/SleepTrendCard';
+// import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
+// import { SleepTrendCard } from '@/components/progress/SleepTrendCard';
 import { StrengthHistoryComingSoonCard } from '@/components/progress/StrengthHistoryComingSoonCard';
 import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
 import { WeightTrendCard } from '@/components/progress/WeightTrendCard';
@@ -21,13 +21,13 @@ import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { AppDispatch, RootState } from '@/store/store';
 import {
     deleteBodyMeasurementAsync,
-    deleteSleepMeasurementAsync,
+    // deleteSleepMeasurementAsync,
     deleteWeightMeasurementAsync,
     getBodyMeasurementsAsync,
-    getSleepMeasurementsAsync,
+    // getSleepMeasurementsAsync,
     getWeightMeasurementsAsync,
     logBodyMeasurementAsync,
-    logSleepMeasurementAsync,
+    // logSleepMeasurementAsync,
     logWeightMeasurementAsync,
 } from '@/store/user/thunks';
 import { debounce } from '@/utils/debounce';
@@ -56,15 +56,14 @@ export default function ProfileScreen() {
     const [isWeightSheetVisible, setIsWeightSheetVisible] = useState(false);
     const [isLoggingWeight, setIsLoggingWeight] = useState(false);
 
-    const [isSleepSheetVisible, setIsSleepSheetVisible] = useState(false);
-    const [isLoggingSleep, setIsLoggingSleep] = useState(false);
+    // const [isSleepSheetVisible, setIsSleepSheetVisible] = useState(false);
+    // const [isLoggingSleep, setIsLoggingSleep] = useState(false);
 
     // Add state for body measurements sheet
     const [isBodyMeasurementsSheetVisible, setIsBodyMeasurementsSheetVisible] = useState(false);
     const [isLoggingBodyMeasurements, setIsLoggingBodyMeasurements] = useState(false);
 
     // Add retry state
-    const [retryAttempt, setRetryAttempt] = useState(0);
     const [isRetrying, setIsRetrying] = useState(false);
 
     const scrollHandler = useAnimatedScrollHandler({
@@ -74,12 +73,13 @@ export default function ProfileScreen() {
     });
 
     const { userWeightMeasurements, userWeightMeasurementsState } = useSelector((state: RootState) => state.user);
-    const { userSleepMeasurements, userSleepMeasurementsState } = useSelector((state: RootState) => state.user);
+    // const { userSleepMeasurements, userSleepMeasurementsState } = useSelector((state: RootState) => state.user);
     const { userBodyMeasurements, userBodyMeasurementsState } = useSelector((state: RootState) => state.user);
 
     // Load all data
     const loadAllData = async () => {
-        const promises = [dispatch(getWeightMeasurementsAsync()), dispatch(getSleepMeasurementsAsync()), dispatch(getBodyMeasurementsAsync())];
+        // const promises = [dispatch(getWeightMeasurementsAsync()), dispatch(getSleepMeasurementsAsync()), dispatch(getBodyMeasurementsAsync())];
+        const promises = [dispatch(getWeightMeasurementsAsync()), dispatch(getBodyMeasurementsAsync())];
 
         await Promise.allSettled(promises);
     };
@@ -90,11 +90,11 @@ export default function ProfileScreen() {
         }
     }, [dispatch, userWeightMeasurementsState]);
 
-    useEffect(() => {
-        if (userSleepMeasurementsState === REQUEST_STATE.IDLE) {
-            dispatch(getSleepMeasurementsAsync());
-        }
-    }, [dispatch, userSleepMeasurementsState]);
+    // useEffect(() => {
+    //     if (userSleepMeasurementsState === REQUEST_STATE.IDLE) {
+    //         dispatch(getSleepMeasurementsAsync());
+    //     }
+    // }, [dispatch, userSleepMeasurementsState]);
 
     useEffect(() => {
         if (userBodyMeasurementsState === REQUEST_STATE.IDLE) {
@@ -104,7 +104,9 @@ export default function ProfileScreen() {
 
     // Updated data loaded state to handle REJECTED states
     const dataLoadedState = useMemo(() => {
-        const allStates = [userWeightMeasurementsState, userSleepMeasurementsState, userBodyMeasurementsState];
+        const allStates = [userWeightMeasurementsState, userBodyMeasurementsState];
+        // const allStates = [userWeightMeasurementsState, userSleepMeasurementsState, userBodyMeasurementsState];
+
         // Check if any are still loading
         if (allStates.some((state) => state === REQUEST_STATE.PENDING)) {
             return REQUEST_STATE.PENDING;
@@ -121,7 +123,8 @@ export default function ProfileScreen() {
         }
 
         return REQUEST_STATE.PENDING;
-    }, [userWeightMeasurementsState, userSleepMeasurementsState, userBodyMeasurementsState]);
+        // }, [userWeightMeasurementsState, userSleepMeasurementsState, userBodyMeasurementsState]);
+    }, [userWeightMeasurementsState, userBodyMeasurementsState]);
 
     const { showSplash, handleSplashComplete } = useSplashScreen({
         dataLoadedState: dataLoadedState,
@@ -130,7 +133,6 @@ export default function ProfileScreen() {
     // Handle retry with exponential backoff
     const handleRetry = async () => {
         setIsRetrying(true);
-        setRetryAttempt((prev) => prev + 1);
 
         try {
             await loadAllData();
@@ -168,23 +170,23 @@ export default function ProfileScreen() {
         }
     };
 
-    const handleLogSleep = async (sleepData: any, date: Date) => {
-        setIsLoggingSleep(true);
-        try {
-            await dispatch(
-                logSleepMeasurementAsync({
-                    ...sleepData, // This will contain either {durationInMinutes} or {sleepTime, wakeTime}
-                    measurementTimestamp: date.toISOString(),
-                }),
-            ).unwrap();
+    // const handleLogSleep = async (sleepData: any, date: Date) => {
+    //     setIsLoggingSleep(true);
+    //     try {
+    //         await dispatch(
+    //             logSleepMeasurementAsync({
+    //                 ...sleepData, // This will contain either {durationInMinutes} or {sleepTime, wakeTime}
+    //                 measurementTimestamp: date.toISOString(),
+    //             }),
+    //         ).unwrap();
 
-            await dispatch(getSleepMeasurementsAsync()).unwrap();
-        } catch (error) {
-            console.error('Failed to log sleep:', error);
-        } finally {
-            setIsLoggingSleep(false);
-        }
-    };
+    //         await dispatch(getSleepMeasurementsAsync()).unwrap();
+    //     } catch (error) {
+    //         console.error('Failed to log sleep:', error);
+    //     } finally {
+    //         setIsLoggingSleep(false);
+    //     }
+    // };
 
     // Handle body measurement logging
     const handleLogBodyMeasurements = async (measurements: Record<string, number>, date: Date) => {
@@ -216,13 +218,13 @@ export default function ProfileScreen() {
         }
     };
 
-    const handleSleepChartPress = () => {
-        if (userSleepMeasurements?.length >= 2) {
-            debounce(router, '/(app)/progress/sleep-tracking');
-        } else {
-            setIsSleepSheetVisible(true);
-        }
-    };
+    // const handleSleepChartPress = () => {
+    //     if (userSleepMeasurements?.length >= 2) {
+    //         debounce(router, '/(app)/progress/sleep-tracking');
+    //     } else {
+    //         setIsSleepSheetVisible(true);
+    //     }
+    // };
 
     const handleBodyMeasurementsChartPress = () => {
         if (userBodyMeasurements?.length >= 2) {
@@ -241,14 +243,14 @@ export default function ProfileScreen() {
         }
     };
 
-    const handleSleepDelete = async (timestamp: string) => {
-        try {
-            await dispatch(deleteSleepMeasurementAsync({ timestamp })).unwrap();
-            setIsSleepSheetVisible(false);
-        } catch (err) {
-            console.error('Failed to delete sleep:', err);
-        }
-    };
+    // const handleSleepDelete = async (timestamp: string) => {
+    //     try {
+    //         await dispatch(deleteSleepMeasurementAsync({ timestamp })).unwrap();
+    //         setIsSleepSheetVisible(false);
+    //     } catch (err) {
+    //         console.error('Failed to delete sleep:', err);
+    //     }
+    // };
 
     const handleBodyMeasurementsDelete = async (timestamp: string) => {
         try {
@@ -283,26 +285,6 @@ export default function ProfileScreen() {
                             disabled={isRetrying}
                         />
                     </View>
-
-                    {__DEV__ && retryAttempt > 0 && (
-                        <View style={styles.devErrorDetails}>
-                            <ThemedText type='caption' style={styles.devErrorTitle}>
-                                Debug Info:
-                            </ThemedText>
-                            <ThemedText type='caption' style={styles.devErrorText}>
-                                Retry attempts: {retryAttempt}
-                            </ThemedText>
-                            <ThemedText type='caption' style={styles.devErrorText}>
-                                Weight: {userWeightMeasurementsState}
-                            </ThemedText>
-                            <ThemedText type='caption' style={styles.devErrorText}>
-                                Sleep: {userSleepMeasurementsState}
-                            </ThemedText>
-                            <ThemedText type='caption' style={styles.devErrorText}>
-                                Body: {userBodyMeasurementsState}
-                            </ThemedText>
-                        </View>
-                    )}
                 </View>
             </SafeAreaView>
         );
@@ -387,7 +369,7 @@ export default function ProfileScreen() {
                             }}
                         />
                     </View>
-                    <View style={[styles.gridRow, { marginTop: Spaces.SM + Spaces.XXS }]}>
+                    {/* <View style={[styles.gridRow, { marginTop: Spaces.SM + Spaces.XXS }]}>
                         <SleepTrendCard
                             values={userSleepMeasurements}
                             isLoading={userSleepMeasurementsState === REQUEST_STATE.PENDING}
@@ -398,7 +380,7 @@ export default function ProfileScreen() {
                                 height: CARD_WIDTH,
                             }}
                         />
-                    </View>
+                    </View> */}
                     <ThemedView style={styles.sectionTitleContainer}>
                         <ThemedView style={[styles.sectionBadge]}>
                             <ThemedText type='titleLarge' style={styles.sectionTitle}>
@@ -421,13 +403,13 @@ export default function ProfileScreen() {
                 isLoading={isLoggingWeight}
             />
 
-            <SleepLoggingSheet
+            {/* <SleepLoggingSheet
                 visible={isSleepSheetVisible}
                 onClose={() => setIsSleepSheetVisible(false)}
                 onSubmit={handleLogSleep}
                 onDelete={handleSleepDelete}
                 isLoading={isLoggingSleep}
-            />
+            /> */}
             <BodyMeasurementsLoggingSheet
                 visible={isBodyMeasurementsSheetVisible}
                 onClose={() => setIsBodyMeasurementsSheetVisible(false)}
