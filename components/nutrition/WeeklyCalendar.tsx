@@ -19,7 +19,10 @@ const WEEK_WIDTH = width - Spaces.MD * 2; // Account for card margins
 const getStartOfWeek = (date: Date) => {
     const startOfWeek = new Date(date);
     const dayOfWeek = startOfWeek.getDay();
-    const diff = startOfWeek.getDate() - dayOfWeek;
+    // Convert Sunday (0) to 7, so Monday becomes 1, Tuesday becomes 2, etc.
+    const adjustedDayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek;
+    // Calculate days to subtract to get to Monday (1)
+    const diff = startOfWeek.getDate() - (adjustedDayOfWeek - 1);
     startOfWeek.setDate(diff);
     startOfWeek.setHours(0, 0, 0, 0);
     return startOfWeek;

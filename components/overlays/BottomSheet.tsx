@@ -93,13 +93,13 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
         if (visible) {
             Animated.timing(blurOpacity, {
                 toValue: 1,
-                duration: 250,
+                duration: 50,
                 useNativeDriver: true,
             }).start();
         } else {
             Animated.timing(blurOpacity, {
                 toValue: 0,
-                duration: 200,
+                duration: 50,
                 useNativeDriver: true,
             }).start();
 

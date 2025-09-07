@@ -7,7 +7,7 @@ import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import React from 'react';
-import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Animated, PanResponder, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { trigger } from 'react-native-haptic-feedback';
 
@@ -32,35 +32,36 @@ interface FoodEntryProps {
 export const FoodEntry: React.FC<FoodEntryProps> = ({ food, onEdit, onDelete, style }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
-    const [isDeleteVisible, setIsDeleteVisible] = React.useState(false);
     const slideAnim = React.useRef(new Animated.Value(0)).current;
 
-    const handleSwipeLeft = () => {
-        if (isDeleteVisible) {
-            hideDelete();
-        } else {
-            showDelete();
-        }
-    };
+    const SWIPE_THRESHOLD = -20; // How far to swipe before snapping to delete
+    const DELETE_WIDTH = 40; // Width of delete area
+    const MAX_SWIPE = -DELETE_WIDTH; // Maximum swipe distance
 
-    const showDelete = () => {
-        setIsDeleteVisible(true);
-        Animated.timing(slideAnim, {
-            toValue: -40,
-            duration: 200,
-            useNativeDriver: true,
-        }).start();
-    };
+    const panResponder = PanResponder.create({
+        onStartShouldSetPanResponder: (evt, gestureState) => {
+            return Math.abs(gestureState.dx) > Math.abs(gestureState.dy) && Math.abs(gestureState.dx) > 5;
+        },
+        onMoveShouldSetPanResponder: (evt, gestureState) => {
+            return Math.abs(gestureState.dx) > 5;
+        },
+        onPanResponderMove: (evt, gestureState) => {
+            // Only allow swiping left (negative dx), clamp between 0 and MAX_SWIPE
+            const newValue = Math.max(MAX_SWIPE, Math.min(0, gestureState.dx));
+            slideAnim.setValue(newValue);
+        },
+        onPanResponderRelease: (evt, gestureState) => {
+            // Snap to delete position or back to start based on distance and velocity
+            const shouldShowDelete = gestureState.dx < SWIPE_THRESHOLD || gestureState.vx < -0.5;
 
-    const hideDelete = () => {
-        Animated.timing(slideAnim, {
-            toValue: 0,
-            duration: 200,
-            useNativeDriver: true,
-        }).start(() => {
-            setIsDeleteVisible(false);
-        });
-    };
+            Animated.spring(slideAnim, {
+                toValue: shouldShowDelete ? MAX_SWIPE : 0,
+                useNativeDriver: true,
+                tension: 300,
+                friction: 30,
+            }).start();
+        },
+    });
 
     const handleEdit = () => {
         trigger('impactLight');
@@ -72,21 +73,28 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({ food, onEdit, onDelete, st
         trigger('impactMedium');
         onDelete(food.id);
         console.log('Delete food entry:', food.name);
-        hideDelete();
+
+        // Animate back to start position
+        Animated.spring(slideAnim, {
+            toValue: 0,
+            useNativeDriver: true,
+            tension: 150,
+            friction: 30,
+        }).start();
     };
 
     return (
         <View style={[styles.container, style]}>
-            {/* Delete button (behind the main content) */}
-            {isDeleteVisible && (
-                <View style={[styles.deleteButton, { backgroundColor: themeColors.surfaceDark }]}>
-                    <TouchableOpacity style={styles.deleteButtonTouchable} onPress={handleDelete} activeOpacity={1}>
-                        <Icon name='trash' size={Sizes.iconSizeSM} color={themeColors.subText} />
-                    </TouchableOpacity>
-                </View>
-            )}
+            {/* Delete button - always rendered, positioned off-screen */}
+            <View style={[styles.deleteButton, { backgroundColor: themeColors.backgroundSecondary }]}>
+                <TouchableOpacity style={styles.deleteButtonTouchable} onPress={handleDelete} activeOpacity={1}>
+                    <View style={[styles.deleteButtonTouchable, { backgroundColor: themeColors.iconDefault }]}>
+                        <Icon name='delete' size={Sizes.iconSizeXS} color={themeColors.background} />
+                    </View>
+                </TouchableOpacity>
+            </View>
 
-            {/* Main content */}
+            {/* Main content with pan responder */}
             <Animated.View
                 style={[
                     styles.content,
@@ -95,73 +103,67 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({ food, onEdit, onDelete, st
                         transform: [{ translateX: slideAnim }],
                     },
                 ]}
+                {...panResponder.panHandlers}
             >
-                <TouchableOpacity style={styles.swipeArea} onPress={handleSwipeLeft} activeOpacity={1}>
-                    <View style={styles.mainContent}>
-                        <View style={styles.foodInfo}>
-                            <ThemedText type='body' style={styles.foodName}>
-                                {food.name}
-                            </ThemedText>
+                <TouchableOpacity style={styles.mainContent} onPress={handleEdit} activeOpacity={0.95}>
+                    <View style={styles.foodInfo}>
+                        <ThemedText type='body' style={styles.foodName}>
+                            {food.name}
+                        </ThemedText>
 
-                            {/* Nutrition line with icons (like MealSection) + portion size */}
-                            <View style={styles.nutritionRow}>
-                                {/* Calories */}
-                                <View style={styles.nutritionItem}>
-                                    <Icon name='flame' size={11} color={themeColors.iconDefault} />
-                                    <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
-                                        {Math.round(food.calories)}
-                                    </ThemedText>
-                                </View>
+                        {/* Nutrition line with icons (like MealSection) + portion size */}
+                        <View style={styles.nutritionRow}>
+                            {/* Calories */}
+                            <View style={styles.nutritionItem}>
+                                <Icon name='flame' size={11} color={themeColors.iconDefault} />
+                                <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
+                                    {Math.round(food.calories)}
+                                </ThemedText>
+                            </View>
 
-                                {/* Protein */}
+                            {/* Protein */}
+                            <View style={styles.nutritionItem}>
+                                <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
+                                    {Math.round(food.protein)}P
+                                </ThemedText>
+                            </View>
 
-                                <View style={styles.nutritionItem}>
-                                    <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
-                                        {Math.round(food.protein)}P
-                                    </ThemedText>
-                                </View>
+                            {/* Carbs */}
+                            <View style={styles.nutritionItem}>
+                                <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
+                                    {Math.round(food.carbs)}C
+                                </ThemedText>
+                            </View>
 
-                                {/* Carbs */}
-                                <View style={styles.nutritionItem}>
-                                    <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
-                                        {Math.round(food.carbs)}C
-                                    </ThemedText>
-                                </View>
+                            {/* Fats */}
+                            <View style={styles.nutritionItem}>
+                                <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
+                                    {Math.round(food.fats)}F
+                                </ThemedText>
+                            </View>
 
-                                {/* Fats */}
-                                <View style={styles.nutritionItem}>
-                                    <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
-                                        {Math.round(food.fats)}F
-                                    </ThemedText>
-                                </View>
+                            {/* Dot separator */}
+                            <View style={styles.dotSeparator}>
+                                <ThemedText style={[styles.dot, { color: themeColors.subText }]}>•</ThemedText>
+                            </View>
 
-                                {/* Dot separator */}
-                                <View style={styles.dotSeparator}>
-                                    <ThemedText style={[styles.dot, { color: themeColors.subText }]}>•</ThemedText>
-                                </View>
-
-                                {/* Portion size with ellipsis */}
-                                <View style={styles.portionContainer}>
-                                    <ThemedText
-                                        type='bodySmall'
-                                        style={[styles.portionSize, { color: themeColors.subText }]}
-                                        numberOfLines={1}
-                                        ellipsizeMode='tail'
-                                    >
-                                        {food.portionSize}
-                                    </ThemedText>
-                                </View>
+                            {/* Portion size with ellipsis */}
+                            <View style={styles.portionContainer}>
+                                <ThemedText
+                                    type='bodySmall'
+                                    style={[styles.portionSize, { color: themeColors.subText }]}
+                                    numberOfLines={1}
+                                    ellipsizeMode='tail'
+                                >
+                                    {food.portionSize}
+                                </ThemedText>
                             </View>
                         </View>
+                    </View>
 
-                        <View style={styles.rightSection}>
-                            <TouchableOpacity
-                                style={[styles.editButton, { backgroundColor: themeColors.backgroundSecondary }]}
-                                onPress={handleEdit}
-                                activeOpacity={1}
-                            >
-                                <Icon name='edit' size={Sizes.iconSizeXS} color={themeColors.iconDefault} />
-                            </TouchableOpacity>
+                    <View style={styles.rightSection}>
+                        <View style={[styles.editButton, { backgroundColor: themeColors.backgroundSecondary }]}>
+                            <Icon name='edit' size={Sizes.iconSizeXS} color={themeColors.iconDefault} />
                         </View>
                     </View>
                 </TouchableOpacity>
@@ -173,28 +175,29 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({ food, onEdit, onDelete, st
 const styles = StyleSheet.create({
     container: {
         position: 'relative',
+        marginVertical: Spaces.XXS,
     },
     deleteButton: {
         position: 'absolute',
         right: 0,
         top: 0,
         bottom: 0,
+        width: 40,
         justifyContent: 'center',
         alignItems: 'center',
         borderTopRightRadius: Spaces.SM,
-        width: 40,
+        borderBottomRightRadius: Spaces.SM,
+        marginRight: Spaces.XXS,
     },
     deleteButtonTouchable: {
-        flex: 1,
+        height: 28,
+        width: 28,
+        borderRadius: 14,
         justifyContent: 'center',
         alignItems: 'center',
-        width: '100%',
     },
     content: {
         borderRadius: Spaces.SM,
-        overflow: 'hidden',
-    },
-    swipeArea: {
         width: '100%',
     },
     mainContent: {
@@ -202,11 +205,11 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: Spaces.MD,
-        paddingVertical: Spaces.SM,
+        paddingVertical: Spaces.XXS,
     },
     foodInfo: {
         flex: 1,
-        marginRight: Spaces.SM, // Add margin to prevent overlap
+        marginRight: Spaces.SM,
     },
     foodName: {},
     nutritionRow: {
@@ -220,11 +223,6 @@ const styles = StyleSheet.create({
         height: 20,
         gap: Spaces.XS,
     },
-    macroLetter: {
-        fontSize: 10,
-        lineHeight: 16,
-        fontWeight: '600',
-    },
     nutritionText: {
         fontSize: 13,
     },
@@ -236,8 +234,8 @@ const styles = StyleSheet.create({
         fontSize: 12,
     },
     portionContainer: {
-        flex: 1, // This allows the portion size to take remaining space
-        minWidth: 0, // Important for text truncation to work
+        flex: 1,
+        minWidth: 0,
     },
     portionSize: {
         fontSize: 13,
