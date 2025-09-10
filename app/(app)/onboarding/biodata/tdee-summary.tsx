@@ -112,7 +112,7 @@ export default function TDEESummaryScreen() {
                 </ThemedText>
 
                 {/* TDEE Result */}
-                <ThemedView style={[styles.tdeeCard, { backgroundColor: addAlpha(themeColors.text, 0.8) }]}>
+                <ThemedView style={[styles.tdeeCard, { backgroundColor: addAlpha(themeColors.text, 0.9) }]}>
                     <View style={styles.calorieContent}>
                         <View style={styles.calorieInfo}>
                             <ThemedText type='titleXLarge' style={[styles.tdeeValue, { color: themeColors.background }]}>

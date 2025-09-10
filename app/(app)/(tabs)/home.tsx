@@ -289,7 +289,9 @@ export default function HomeScreen() {
             <View style={styles.header}>
                 <ThemedText type='titleLarge'>Nutrition Overview</ThemedText>
             </View>
-            <View style={styles.nutritionCard}>{userNutritionProfile ? <DailyMacrosCard userNutritionProfile={userNutritionProfile} /> : null}</View>
+            <View style={styles.nutritionCard}>
+                <DailyMacrosCard userNutritionProfile={userNutritionProfile} isOnboardingComplete={isOnboardingComplete} />
+            </View>
         </View>
     );
 
@@ -389,12 +391,20 @@ export default function HomeScreen() {
         );
     };
 
+    const OnboardingSection: React.FC = () => {
+        return (
+            <View style={styles.onboardingSection}>
+                <OnboardingCard key='onboarding' isOnboardingComplete={isOnboardingComplete} />
+            </View>
+        );
+    };
+
     // ----- Scenario-driven section list --------------------------------------
     const sections = useMemo(() => {
         // Always show FactOfTheDay at the end
         // Scenarios
         if (!isOnboardingComplete) {
-            return [<OnboardingCard key='onboarding' isOnboardingComplete={isOnboardingComplete} />, <FactSection key='fact' />];
+            return [<NutritionOverview key='nutrition' />, <OnboardingSection key='onboarding' />, <FactSection key='fact' />];
         }
 
         // Onboarded + Active program
@@ -496,6 +506,10 @@ const styles = StyleSheet.create({
     },
     recommendedProgramSection: { paddingTop: Spaces.LG, paddingBottom: Spaces.XL },
     todaysWorkoutSection: { paddingTop: Spaces.LG, paddingBottom: Spaces.XL },
+    onboardingSection: {
+        marginHorizontal: Spaces.MD,
+        marginTop: Spaces.XL,
+    },
     nutritionSection: {
         paddingTop: Spaces.MD,
         shadowColor: 'rgba(100, 100, 100, 0.1)',
@@ -505,8 +519,8 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     factSection: {
-        marginHorizontal: Spaces.MD,
         marginBottom: Spaces.XL,
+        marginHorizontal: Spaces.MD,
         marginTop: Spaces.LG,
     },
     goalProgressSection: { paddingBottom: Spaces.MD },

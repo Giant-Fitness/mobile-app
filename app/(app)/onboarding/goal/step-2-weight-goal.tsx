@@ -227,7 +227,7 @@ export default function WeightGoalStepScreen() {
 
                 {/* Goal Summary Cards */}
                 <View style={styles.goalSummaryContainer}>
-                    <ThemedView style={[styles.goalCard, { backgroundColor: addAlpha(themeColors.text, 0.8) }]}>
+                    <ThemedView style={[styles.goalCard, { backgroundColor: addAlpha(themeColors.text, 0.9) }]}>
                         <ThemedText type='titleLarge' style={[styles.goalCardValue, { color: themeColors.background }]}>
                             {goalCalories} cals
                         </ThemedText>

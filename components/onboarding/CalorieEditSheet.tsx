@@ -6,12 +6,11 @@ import { IconButton } from '@/components/buttons/IconButton';
 import { TextButton } from '@/components/buttons/TextButton';
 import { BottomSheet } from '@/components/overlays/BottomSheet';
 import { Colors } from '@/constants/Colors';
-import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { addAlpha } from '@/utils/colorUtils';
 import React, { useEffect, useRef, useState } from 'react';
-import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { Keyboard, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 interface CalorieEditSheetProps {
     visible: boolean;
@@ -172,21 +171,11 @@ export const CalorieEditSheet: React.FC<CalorieEditSheetProps> = ({ visible, onC
     };
 
     return (
-        <BottomSheet visible={visible} onClose={handleClose} style={styles.bottomSheetStyle} disableBackdropPress={true}>
-            <KeyboardAvoidingView
-                style={styles.keyboardContainer}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-            >
+        <BottomSheet keyboardAvoidingBehavior='position' visible={visible} onClose={handleClose} disableBackdropPress={true}>
+            <View style={styles.container}>
                 {renderHeader()}
 
-                <ScrollView
-                    style={styles.scrollContainer}
-                    contentContainerStyle={styles.content}
-                    keyboardShouldPersistTaps='always'
-                    showsVerticalScrollIndicator={false}
-                    scrollEnabled={false}
-                >
+                <View style={styles.content}>
                     <ThemedText type='bodySmall' style={styles.description}>
                         Adjust your daily calorie needs if you have more specific knowledge about your metabolism.
                     </ThemedText>
@@ -234,20 +223,14 @@ export const CalorieEditSheet: React.FC<CalorieEditSheetProps> = ({ visible, onC
                     <View style={styles.quickActions}>
                         <TextButton text='Update Calories' onPress={handleSave} disabled={!canSave()} size='LG' style={styles.updateButton} />
                     </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
+                </View>
+            </View>
         </BottomSheet>
     );
 };
 
 const styles = StyleSheet.create({
-    bottomSheetStyle: {
-        paddingHorizontal: 0,
-        height: Sizes.bottomInputSheet, // Fixed height that leaves room for keyboard
-    },
-    keyboardContainer: {
-        flex: 1,
-    },
+    container: {},
     header: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -273,13 +256,9 @@ const styles = StyleSheet.create({
         fontSize: 13,
         fontWeight: '600',
     },
-    scrollContainer: {
-        flex: 1,
-    },
     content: {
-        flexGrow: 1,
         paddingHorizontal: Spaces.LG,
-        paddingTop: Spaces.LG,
+        paddingVertical: Spaces.LG,
     },
     description: {
         marginBottom: Spaces.MD,

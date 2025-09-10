@@ -35,6 +35,7 @@ interface FoodLogHeaderProps {
     };
     headerInterpolationStart?: number;
     headerInterpolationEnd?: number;
+    isOnboardingComplete?: boolean;
 }
 
 export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({
@@ -44,6 +45,7 @@ export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({
     consumedData,
     headerInterpolationStart = 100,
     headerInterpolationEnd = 200,
+    isOnboardingComplete = false,
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -180,7 +182,11 @@ export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({
             {/* Daily Macros Card - Moves up as calendar disappears */}
             {userNutritionProfile && (
                 <Animated.View style={[styles.macrosContainer, animatedMacrosStyle]}>
-                    <DailyMacrosCardCompressed userNutritionProfile={userNutritionProfile} consumedData={consumedData} />
+                    <DailyMacrosCardCompressed
+                        userNutritionProfile={userNutritionProfile}
+                        consumedData={consumedData}
+                        isOnboardingComplete={isOnboardingComplete}
+                    />
                 </Animated.View>
             )}
         </Animated.View>

@@ -38,7 +38,7 @@ export default function TrainingLayout() {
             <View
                 style={{
                     flex: 1,
-                    marginTop: Sizes.headerHeight - Spaces.MD,
+                    marginTop: Sizes.headerHeight - Spaces.SM,
                 }}
             >
                 <TopTabs
@@ -49,17 +49,29 @@ export default function TrainingLayout() {
                         tabBarActiveTintColor: themeColors.text,
                         tabBarInactiveTintColor: themeColors.subText,
                         tabBarIndicatorStyle: {
-                            backgroundColor: themeColors.subTextSecondary,
-                            height: 1.5,
+                            backgroundColor: themeColors.text,
+                            height: 1,
                         },
                         tabBarStyle: {
                             backgroundColor: themeColors.background,
                             elevation: 0,
                             shadowOpacity: 0,
+                            borderBottomWidth: 0.2,
+                            borderBottomColor: themeColors.subTextSecondary, // or any border color you prefer
+                        },
+                        tabBarItemStyle: {
+                            paddingHorizontal: Spaces.MD,
+                            // width: 'auto', // Let tabs size themselves
+                            alignItems: 'center',
                         },
                         tabBarLabelStyle: {
                             fontWeight: '500',
+                            textAlign: 'left',
                         },
+                        tabBarContentContainerStyle: {
+                            justifyContent: 'center', // Left align the entire tab bar content
+                        },
+                        swipeEnabled: false,
                     }}
                 >
                     <TopTabs.Screen

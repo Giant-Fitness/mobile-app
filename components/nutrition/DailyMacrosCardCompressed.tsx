@@ -13,14 +13,33 @@ import { moderateScale } from '@/utils/scaling';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
+// Preview data for when user hasn't completed onboarding
+const PREVIEW_NUTRITION_PROFILE: UserNutritionProfile = {
+    GoalCalories: 2200,
+    GoalMacros: {
+        Protein: 150,
+        Carbs: 220,
+        Fats: 75,
+    },
+    WeightGoal: 'maintain', // or whatever your type expects
+} as any;
+
+const PREVIEW_CONSUMED = {
+    calories: 1850,
+    protein: 110,
+    carbs: 180,
+    fats: 65,
+};
+
 interface DailyMacrosCardCompressedProps {
-    userNutritionProfile: UserNutritionProfile;
-    consumedData: {
+    userNutritionProfile?: any | null;
+    consumedData?: {
         calories: number;
         protein: number;
         carbs: number;
         fats: number;
-    };
+    } | null;
+    isOnboardingComplete?: boolean;
     style?: any;
 }
 
@@ -79,39 +98,53 @@ const MacroItem: React.FC<MacroItemProps> = ({ label, iconName, current, goal, c
     );
 };
 
-export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps> = ({ userNutritionProfile, consumedData, style }) => {
+export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps> = ({
+    userNutritionProfile,
+    consumedData,
+    isOnboardingComplete = true,
+    style,
+}) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+
+    // Use preview data if not onboarded or no profile
+    const nutritionProfile = isOnboardingComplete ? userNutritionProfile : PREVIEW_NUTRITION_PROFILE;
+    const consumed = isOnboardingComplete ? consumedData : PREVIEW_CONSUMED;
+
+    // Don't render if no profile data available
+    if (!nutritionProfile || !consumed) {
+        return null;
+    }
 
     const macroItems = [
         {
             iconName: 'flame',
-            current: consumedData.calories,
-            goal: userNutritionProfile.GoalCalories,
+            current: consumed.calories,
+            goal: nutritionProfile.GoalCalories,
             color: themeColors.slateBlue,
             backgroundColor: themeColors.slateBlueTransparent,
             overageColor: darkenColor(themeColors.slateBlue, 0.4),
         },
         {
             label: 'P',
-            current: consumedData.protein,
-            goal: userNutritionProfile.GoalMacros.Protein,
+            current: consumed.protein,
+            goal: nutritionProfile.GoalMacros.Protein,
             color: themeColors.protein,
             backgroundColor: addAlpha(themeColors.protein, 0.1),
             overageColor: darkenColor(themeColors.protein, 0.4),
         },
         {
             label: 'C',
-            current: consumedData.carbs,
-            goal: userNutritionProfile.GoalMacros.Carbs,
+            current: consumed.carbs,
+            goal: nutritionProfile.GoalMacros.Carbs,
             color: themeColors.carbs,
             backgroundColor: addAlpha(themeColors.carbs, 0.1),
             overageColor: darkenColor(themeColors.carbs, 0.4),
         },
         {
             label: 'F',
-            current: consumedData.fats,
-            goal: userNutritionProfile.GoalMacros.Fats,
+            current: consumed.fats,
+            goal: nutritionProfile.GoalMacros.Fats,
             color: themeColors.fats,
             backgroundColor: addAlpha(themeColors.fats, 0.1),
             overageColor: darkenColor(themeColors.fats, 0.4),

@@ -4,7 +4,6 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { addAlpha } from '@/utils/colorUtils';
 import React from 'react';
 import { StyleSheet, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native';
 
@@ -45,7 +44,7 @@ export const ToggleButtonGroup: React.FC<ToggleButtonGroupProps> = ({
         return [
             baseStyle,
             {
-                backgroundColor: isSelected ? addAlpha(themeColors.buttonPrimary, 0.8) : 'transparent',
+                backgroundColor: isSelected ? themeColors.buttonPrimary : themeColors.backgroundSecondary,
             },
             buttonStyle,
         ];
@@ -63,8 +62,7 @@ export const ToggleButtonGroup: React.FC<ToggleButtonGroupProps> = ({
         return [
             styles.outerContainer,
             {
-                backgroundColor: themeColors.background,
-                borderColor: themeColors.systemBorderColor,
+                backgroundColor: themeColors.backgroundSecondary,
             },
             containerStyle,
         ];
@@ -101,9 +99,8 @@ export const ToggleButtonGroup: React.FC<ToggleButtonGroupProps> = ({
 
 const styles = StyleSheet.create({
     outerContainer: {
-        borderRadius: Spaces.MD,
-        borderWidth: 1,
-        padding: Spaces.XS,
+        borderRadius: Spaces.SM,
+        padding: Spaces.XXS,
     },
     innerContainer: {
         flexDirection: 'row',
@@ -111,19 +108,19 @@ const styles = StyleSheet.create({
     },
     buttonMD: {
         flex: 1,
-        paddingVertical: Spaces.SM,
-        paddingHorizontal: Spaces.MD,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    buttonSM: {
-        flex: 1,
         paddingVertical: Spaces.XS,
         paddingHorizontal: Spaces.SM,
         alignItems: 'center',
         justifyContent: 'center',
     },
+    buttonSM: {
+        flex: 1,
+        paddingVertical: Spaces.XXS,
+        paddingHorizontal: Spaces.SM,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     button: {
-        borderRadius: Spaces.SM + Spaces.XS,
+        borderRadius: Spaces.SM,
     },
 });

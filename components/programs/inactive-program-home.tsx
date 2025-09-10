@@ -31,11 +31,16 @@ interface MenuItemProps {
 }
 
 const MenuItem: React.FC<MenuItemProps> = ({ title, description, onPress, backgroundColor, textColor, image, descriptionColor }) => {
+    const handlePress = () => {
+        onPress();
+        trigger('selection');
+    };
+
     return (
         <TouchableOpacity
-            onPress={onPress}
+            onPress={handlePress}
             style={[styles.menuItem, { backgroundColor, borderColor: textColor, borderWidth: StyleSheet.hairlineWidth }]}
-            activeOpacity={0.7}
+            activeOpacity={1}
         >
             <View style={styles.menuContentWrapper}>
                 <View style={styles.menuContent}>
@@ -84,7 +89,7 @@ export default function InactiveProgramHome() {
         {
             title: !isOnboardingComplete ? 'Find Your Perfect Program' : 'Browse Programs',
             description: !isOnboardingComplete
-                ? 'Let us recommend a Program tailored to your goals'
+                ? 'Let us recommend a program tailored to your goals'
                 : "Want options? We've got tons of other programs to explore",
             image: !isOnboardingComplete ? require('@/assets/images/wand.png') : require('@/assets/images/clipboard.png'),
             onPress: () => {
@@ -104,8 +109,8 @@ export default function InactiveProgramHome() {
                       description: 'Our training programs turn your goals into achievements',
                       image: require('@/assets/images/clipboard.png'),
                       onPress: () => navigateTo('programs/browse-programs'),
-                      backgroundColor: lightenColor(themeColors.tangerineTransparent, 0.7),
-                      textColor: darkenColor(themeColors.tangerineSolid, 0),
+                      backgroundColor: themeColors.slateBlueTransparent,
+                      textColor: darkenColor(themeColors.slateBlue, 0),
                       descriptionColor: darkenColor(themeColors.subText, 0.2),
                       show: true,
                   },
@@ -157,7 +162,7 @@ const styles = StyleSheet.create({
         borderRadius: Spaces.SM,
         overflow: 'hidden',
         marginBottom: Spaces.LG,
-        marginHorizontal: Spaces.LG,
+        marginHorizontal: Spaces.MD,
     },
     menuContentWrapper: {
         position: 'relative',
@@ -182,7 +187,7 @@ const styles = StyleSheet.create({
         height: '60%',
     },
     recommendedProgramContainer: {
-        marginHorizontal: Spaces.LG,
+        marginHorizontal: Spaces.MD,
     },
     recommendedHeader: {
         marginTop: Spaces.XL,

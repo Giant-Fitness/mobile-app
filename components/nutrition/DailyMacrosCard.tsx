@@ -1,4 +1,4 @@
-// components/nutrition/DailyMacrosCard.tsx
+// Modified DailyMacrosCard.tsx
 
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -6,11 +6,15 @@ import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { UserNutritionProfile } from '@/types';
 import { addAlpha, darkenColor } from '@/utils/colorUtils';
 import { moderateScale } from '@/utils/scaling';
-import React, { useRef, useState } from 'react';
-import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Dimensions, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { BlurView } from 'expo-blur';
+import { router } from 'expo-router';
+
+import { trigger } from 'react-native-haptic-feedback';
 
 import { Icon } from '../base/Icon';
 import { CircularProgress } from '../charts/CircularProgress';
@@ -18,9 +22,27 @@ import { CircularProgress } from '../charts/CircularProgress';
 const { width: screenWidth } = Dimensions.get('window');
 
 interface DailyMacrosCardProps {
-    userNutritionProfile: UserNutritionProfile;
+    userNutritionProfile?: any | null;
     style?: any;
+    isOnboardingComplete?: boolean;
 }
+
+// Fake data for preview mode
+const PREVIEW_NUTRITION_PROFILE: any = {
+    GoalCalories: 2200,
+    GoalMacros: {
+        Protein: 150,
+        Carbs: 220,
+        Fats: 75,
+    },
+};
+
+const PREVIEW_CONSUMED = {
+    calories: 1850,
+    protein: 110,
+    carbs: 80,
+    fats: 40,
+};
 
 interface MacroMeterProps {
     label: string;
@@ -86,20 +108,38 @@ const DotIndicator: React.FC<{ isActive: boolean; color: string; backgroundColor
     );
 };
 
-export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionProfile, style }) => {
+export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionProfile, style, isOnboardingComplete = true }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const scrollViewRef = useRef<ScrollView>(null);
-    const [currentPage, setCurrentPage] = useState(0);
 
-    // Placeholder consumed values - replace with actual data later
-    const consumedCalories = 150;
-    const consumedProtein = 155;
-    const consumedCarbs = 180;
-    const consumedFats = 45;
+    // Set initial page based on onboarding status: show macros (page 1) first during onboarding
+    const [currentPage, setCurrentPage] = useState(isOnboardingComplete ? 0 : 1);
 
-    const remaining = userNutritionProfile.GoalCalories - consumedCalories;
-    const isOverGoal = consumedCalories > userNutritionProfile.GoalCalories;
+    // Use preview data if not onboarded or no profile
+    const nutritionProfile = isOnboardingComplete ? userNutritionProfile : PREVIEW_NUTRITION_PROFILE;
+
+    // Scroll to initial page when component mounts or onboarding status changes
+    useEffect(() => {
+        if (scrollViewRef.current) {
+            const initialPage = isOnboardingComplete ? 0 : 1;
+            scrollViewRef.current.scrollTo({ x: initialPage * screenWidth, animated: false });
+            setCurrentPage(initialPage);
+        }
+    }, [isOnboardingComplete]);
+
+    if (!nutritionProfile) {
+        return null;
+    }
+
+    // Use preview consumed values if not onboarded, otherwise use actual data
+    const consumedCalories = isOnboardingComplete ? 150 : PREVIEW_CONSUMED.calories; // Replace with actual consumed data
+    const consumedProtein = isOnboardingComplete ? 155 : PREVIEW_CONSUMED.protein;
+    const consumedCarbs = isOnboardingComplete ? 180 : PREVIEW_CONSUMED.carbs;
+    const consumedFats = isOnboardingComplete ? 45 : PREVIEW_CONSUMED.fats;
+
+    const remaining = nutritionProfile.GoalCalories - consumedCalories;
+    const isOverGoal = consumedCalories > nutritionProfile.GoalCalories;
 
     const handleScroll = (event: any) => {
         const contentOffsetX = event.nativeEvent.contentOffset.x;
@@ -124,7 +164,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionP
                 <View style={styles.caloriesCenterSection}>
                     <CircularProgress
                         current={consumedCalories}
-                        goal={userNutritionProfile.GoalCalories}
+                        goal={nutritionProfile.GoalCalories}
                         color={themeColors.slateBlue}
                         backgroundColor={themeColors.slateBlueTransparent}
                         size={180}
@@ -145,7 +185,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionP
                 {/* Right: Goal */}
                 <View style={styles.caloriesRightSection}>
                     <ThemedText type='titleLarge' style={styles.goalNumber}>
-                        {userNutritionProfile.GoalCalories.toString()}
+                        {nutritionProfile.GoalCalories.toString()}
                     </ThemedText>
                     <ThemedText type='caption' style={styles.goalLabel}>
                         Goal
@@ -161,7 +201,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionP
                 <MacroMeter
                     label='Protein'
                     current={consumedProtein}
-                    goal={userNutritionProfile.GoalMacros.Protein}
+                    goal={nutritionProfile.GoalMacros.Protein}
                     unit='g'
                     color={themeColors.protein}
                     backgroundColor={addAlpha(themeColors.protein, 0.1)}
@@ -170,7 +210,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionP
                 <MacroMeter
                     label='Carbs'
                     current={consumedCarbs}
-                    goal={userNutritionProfile.GoalMacros.Carbs}
+                    goal={nutritionProfile.GoalMacros.Carbs}
                     unit='g'
                     color={themeColors.carbs}
                     backgroundColor={addAlpha(themeColors.carbs, 0.1)}
@@ -179,7 +219,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionP
                 <MacroMeter
                     label='Fats'
                     current={consumedFats}
-                    goal={userNutritionProfile.GoalMacros.Fats}
+                    goal={nutritionProfile.GoalMacros.Fats}
                     unit='g'
                     color={themeColors.fats}
                     backgroundColor={addAlpha(themeColors.fats, 0.1)}
@@ -187,6 +227,32 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionP
                 />
             </View>
         </View>
+    );
+
+    const OnboardingOverlay = () => (
+        <BlurView intensity={12} tint={colorScheme} style={styles.onboardingOverlay}>
+            {/* Semi-transparent overlay to mute the background colors */}
+            <View style={[styles.overlayBackground, { backgroundColor: addAlpha(themeColors.background, 0.6) }]} />
+
+            <TouchableOpacity
+                style={[
+                    styles.overlayButton,
+                    {
+                        backgroundColor: themeColors.slateBlue,
+                    },
+                ]}
+                onPress={() => {
+                    router.push('/(app)/onboarding/biodata/step-1-gender' as any);
+                    trigger('impactLight');
+                }}
+                activeOpacity={0.8}
+            >
+                <Icon name={'play'} color={themeColors.white} size={12} style={{ marginRight: Spaces.XS }} />
+                <ThemedText type='buttonSmall' style={[{ color: themeColors.white }]}>
+                    Get Started
+                </ThemedText>
+            </TouchableOpacity>
+        </BlurView>
     );
 
     return (
@@ -210,6 +276,9 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionP
                 <DotIndicator isActive={currentPage === 0} color={themeColors.text} backgroundColor={themeColors.subTextSecondary} />
                 <DotIndicator isActive={currentPage === 1} color={themeColors.text} backgroundColor={themeColors.subTextSecondary} />
             </View>
+
+            {/* Onboarding Overlay */}
+            {!isOnboardingComplete && <OnboardingOverlay />}
         </ThemedView>
     );
 };
@@ -217,6 +286,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionP
 const styles = StyleSheet.create({
     outerContainer: {
         paddingBottom: Spaces.MD,
+        position: 'relative',
     },
     scrollView: {
         flex: 1,
@@ -318,5 +388,37 @@ const styles = StyleSheet.create({
         width: 6,
         height: 6,
         borderRadius: 4,
+    },
+
+    // Onboarding Overlay
+    onboardingOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: -Spaces.SM,
+        zIndex: 10,
+    },
+    overlayBackground: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+    },
+    overlayButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: Spaces.MD,
+        paddingVertical: Spaces.SM,
+        borderRadius: Spaces.LG,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: Spaces.SM,
+        elevation: 3,
+        zIndex: 10,
     },
 });

@@ -69,7 +69,7 @@ export default function MacroSummaryScreen() {
                 </ThemedText>
 
                 {/* Calorie Banner */}
-                <ThemedView style={[styles.calorieCard, { backgroundColor: addAlpha(themeColors.text, 0.8) }]}>
+                <ThemedView style={[styles.calorieCard, { backgroundColor: addAlpha(themeColors.text, 0.9) }]}>
                     <View style={styles.calorieContent}>
                         <View style={styles.calorieInfo}>
                             <ThemedText type='titleXLarge' style={[styles.calorieValue, { color: themeColors.background }]}>
