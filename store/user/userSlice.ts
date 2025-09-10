@@ -6,6 +6,7 @@ import {
     completeUserProfileAsync,
     createExerciseSetModificationAsync,
     createExerciseSubstitutionAsync,
+    createNutritionGoalEntryAsync,
     deleteBodyMeasurementAsync,
     deleteExerciseSetModificationAsync,
     deleteExerciseSubstitutionAsync,
@@ -19,6 +20,7 @@ import {
     getUserExerciseSetModificationsAsync,
     getUserExerciseSubstitutionsAsync,
     getUserFitnessProfileAsync,
+    getUserNutritionGoalHistoryAsync,
     getUserNutritionPreferencesAsync,
     getUserNutritionProfileAsync,
     getUserProgramProgressAsync,
@@ -50,6 +52,7 @@ import {
     UserExerciseSetModification,
     UserExerciseSubstitution,
     UserFitnessProfile,
+    UserNutritionGoal,
     UserNutritionPreferences,
     UserNutritionProfile,
     UserProgramProgress,
@@ -103,7 +106,8 @@ const userSlice = createSlice({
                 state.userState = REQUEST_STATE.PENDING;
                 state.userFitnessProfileState = REQUEST_STATE.PENDING;
                 state.userRecommendationsState = REQUEST_STATE.PENDING;
-                state.userAppSettingsState = REQUEST_STATE.PENDING; // Add this line
+                state.userAppSettingsState = REQUEST_STATE.PENDING;
+                state.userNutritionGoalHistoryState = REQUEST_STATE.PENDING;
                 // Only set nutrition states to pending if they will be created
                 // (we'll handle this in fulfilled based on response)
                 state.error = null;
@@ -113,12 +117,15 @@ const userSlice = createSlice({
                 state.userState = REQUEST_STATE.FULFILLED;
                 state.userFitnessProfileState = REQUEST_STATE.FULFILLED;
                 state.userRecommendationsState = REQUEST_STATE.FULFILLED;
-                state.userAppSettingsState = REQUEST_STATE.FULFILLED; // Add this line
+                state.userAppSettingsState = REQUEST_STATE.FULFILLED;
+                state.userNutritionGoalHistoryState = REQUEST_STATE.FULFILLED;
 
                 // Set the data
                 state.user = action.payload.user;
                 state.userFitnessProfile = action.payload.userFitnessProfile;
                 state.userRecommendations = action.payload.userRecommendations;
+
+                state.userNutritionGoalHistory = [action.payload.userNutritionGoal];
 
                 // Handle userAppSettings
                 if (action.payload.userAppSettings) {
@@ -146,7 +153,8 @@ const userSlice = createSlice({
                 state.userRecommendationsState = REQUEST_STATE.REJECTED;
                 state.userNutritionProfileState = REQUEST_STATE.REJECTED;
                 state.userNutritionPreferencesState = REQUEST_STATE.REJECTED;
-                state.userAppSettingsState = REQUEST_STATE.REJECTED; // Add this line
+                state.userAppSettingsState = REQUEST_STATE.REJECTED;
+                state.userNutritionGoalHistoryState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'Failed to complete user profile';
             })
 
@@ -646,6 +654,34 @@ const userSlice = createSlice({
                 state.userState = REQUEST_STATE.REJECTED;
                 state.userNutritionPreferencesState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'Failed to update user nutrition preferences';
+            })
+
+            // Get User Nutrition Goal History
+            .addCase(getUserNutritionGoalHistoryAsync.pending, (state) => {
+                state.userNutritionGoalHistoryState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(getUserNutritionGoalHistoryAsync.fulfilled, (state, action: PayloadAction<UserNutritionGoal[]>) => {
+                state.userNutritionGoalHistoryState = REQUEST_STATE.FULFILLED;
+                state.userNutritionGoalHistory = action.payload;
+            })
+            .addCase(getUserNutritionGoalHistoryAsync.rejected, (state, action) => {
+                state.userNutritionGoalHistoryState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to get nutrition goal history';
+            })
+
+            // Create Nutrition Goal Entry
+            .addCase(createNutritionGoalEntryAsync.pending, (state) => {
+                state.userNutritionGoalHistoryState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(createNutritionGoalEntryAsync.fulfilled, (state, action: PayloadAction<UserNutritionGoal[]>) => {
+                state.userNutritionGoalHistoryState = REQUEST_STATE.FULFILLED;
+                state.userNutritionGoalHistory = action.payload;
+            })
+            .addCase(createNutritionGoalEntryAsync.rejected, (state, action) => {
+                state.userNutritionGoalHistoryState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to create nutrition goal entry';
             });
     },
 });

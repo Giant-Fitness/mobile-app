@@ -5,7 +5,7 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { UserNutritionProfile, UserWeightMeasurement } from '@/types';
+import { UserNutritionGoal, UserWeightMeasurement } from '@/types';
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
@@ -14,20 +14,14 @@ import { trigger } from 'react-native-haptic-feedback';
 import { LinearProgressBar } from '../charts/LinearProgressBar';
 
 interface WeightProgressCardProps {
-    userNutritionProfile: UserNutritionProfile;
+    nutritionGoal: UserNutritionGoal | null;
     userWeightMeasurements: UserWeightMeasurement[];
     onPress: () => void;
     style?: any;
     weightUnit?: string;
 }
 
-export const WeightProgressCard: React.FC<WeightProgressCardProps> = ({
-    userNutritionProfile,
-    userWeightMeasurements,
-    onPress,
-    style = {},
-    weightUnit = 'kgs',
-}) => {
+export const WeightProgressCard: React.FC<WeightProgressCardProps> = ({ nutritionGoal, userWeightMeasurements, onPress, style = {}, weightUnit = 'kgs' }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
@@ -37,18 +31,23 @@ export const WeightProgressCard: React.FC<WeightProgressCardProps> = ({
         onPress();
     };
 
+    if (!nutritionGoal) {
+        return null;
+    }
+
     // Calculate weight progress data
     const getCurrentWeight = () => {
         return userWeightMeasurements[userWeightMeasurements.length - 1].Weight;
     };
 
     const getStartingWeight = () => {
-        return userWeightMeasurements[0].Weight;
+        return nutritionGoal.StartingWeight;
     };
 
     const currentWeight = getCurrentWeight();
     const startingWeight = getStartingWeight();
-    const goalWeight = userNutritionProfile.WeightGoal;
+
+    const goalWeight = nutritionGoal.WeightGoal;
 
     const isWeightLoss = startingWeight > goalWeight;
     const isWeightGain = startingWeight < goalWeight;

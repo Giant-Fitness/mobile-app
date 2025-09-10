@@ -8,18 +8,21 @@ import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { UserNutritionProfile } from '@/types';
-import React from 'react';
+import { RootState } from '@/store/store';
+import { UserNutritionGoal, UserNutritionProfile } from '@/types';
+import React, { useMemo } from 'react';
 import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { trigger } from 'react-native-haptic-feedback';
 import Animated, { Extrapolation, interpolate, useAnimatedStyle, useDerivedValue } from 'react-native-reanimated';
+import { useSelector } from 'react-redux';
 
 interface DateNavigationProps {
     selectedDate: Date;
     onDatePress: () => void;
     onPreviousDay: () => void;
     onNextDay: () => void;
+    onDateSelect: (date: Date) => void;
     formatDate?: (date: Date) => string;
 }
 
@@ -35,20 +38,74 @@ interface FoodLogHeaderProps {
     };
     headerInterpolationStart?: number;
     headerInterpolationEnd?: number;
-    isOnboardingComplete?: boolean;
 }
+
+const useOnboardingStatus = () => {
+    const user = useSelector((state: RootState) => state.user.user);
+    return Boolean(user?.OnboardingComplete);
+};
+
+/**
+ * Finds the appropriate nutrition goal for a given date
+ * @param goals - Array of nutrition goals sorted by EffectiveDate
+ * @param targetDate - The date to find the goal for
+ * @returns The nutrition goal that applies to the target date
+ */
+const getGoalForDate = (goals: UserNutritionGoal[], targetDate: Date): UserNutritionGoal | null => {
+    if (!goals || goals.length === 0) return null;
+
+    // Convert target date to YYYY-MM-DD format for comparison
+    // Use local timezone to avoid timezone issues
+    const year = targetDate.getFullYear();
+    const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+    const day = String(targetDate.getDate()).padStart(2, '0');
+    const targetDateString = `${year}-${month}-${day}`;
+
+    // Sort goals by EffectiveDate in ascending order (earliest first)
+    const sortedGoals = [...goals].sort((a, b) => a.EffectiveDate.localeCompare(b.EffectiveDate));
+
+    // Find the most recent goal that is effective on or before the target date
+    let applicableGoal: UserNutritionGoal | null = null;
+
+    for (const goal of sortedGoals) {
+        if (goal.EffectiveDate <= targetDateString) {
+            applicableGoal = goal;
+        } else {
+            // Since goals are sorted, we can break when we find the first future goal
+            break;
+        }
+    }
+
+    // If no goal is found (target date is before all goals), return the earliest goal
+    if (!applicableGoal && sortedGoals.length > 0) {
+        applicableGoal = sortedGoals[0];
+    }
+
+    return applicableGoal;
+};
 
 export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({
     scrollY,
     dateNavigation,
-    userNutritionProfile,
     consumedData,
     headerInterpolationStart = 100,
     headerInterpolationEnd = 200,
-    isOnboardingComplete = false,
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+
+    const isOnboardingComplete = useOnboardingStatus();
+
+    const { userNutritionGoalHistory } = useSelector((state: RootState) => state.user);
+
+    // Get the nutrition goal that applies to the selected date
+    const selectedDateNutritionGoal = useMemo(() => {
+        if (!userNutritionGoalHistory || userNutritionGoalHistory.length === 0) {
+            return null;
+        }
+
+        return getGoalForDate(userNutritionGoalHistory, dateNavigation.selectedDate);
+    }, [userNutritionGoalHistory, dateNavigation.selectedDate]);
 
     const CALENDAR_HEIGHT = 60;
 
@@ -147,6 +204,11 @@ export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({
         trigger('effectClick');
     };
 
+    const handleDateSelect = (date: Date) => {
+        dateNavigation.onDateSelect(date);
+        trigger('effectClick');
+    };
+
     return (
         <Animated.View style={[styles.headerContainer, animatedHeaderStyle]}>
             {/* Date Navigation - Always visible, no animation */}
@@ -171,21 +233,16 @@ export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({
 
             {/* Weekly Calendar - Transform animation */}
             <Animated.View style={[styles.calendarContainer, animatedCalendarStyle]}>
-                <WeeklyCalendar
-                    selectedDate={dateNavigation.selectedDate}
-                    onDateSelect={() => {
-                        dateNavigation.onDatePress();
-                    }}
-                />
+                <WeeklyCalendar selectedDate={dateNavigation.selectedDate} onDateSelect={handleDateSelect} />
             </Animated.View>
 
             {/* Daily Macros Card - Moves up as calendar disappears */}
-            {userNutritionProfile && (
+            {selectedDateNutritionGoal && (
                 <Animated.View style={[styles.macrosContainer, animatedMacrosStyle]}>
                     <DailyMacrosCardCompressed
-                        userNutritionProfile={userNutritionProfile}
                         consumedData={consumedData}
                         isOnboardingComplete={isOnboardingComplete}
+                        nutritionGoal={selectedDateNutritionGoal}
                     />
                 </Animated.View>
             )}

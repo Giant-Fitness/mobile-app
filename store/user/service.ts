@@ -15,6 +15,7 @@ import {
     UserExerciseSetModification,
     UserExerciseSubstitution,
     UserFitnessProfile,
+    UserNutritionGoal,
     UserNutritionPreferences,
     UserNutritionProfile,
     UserProgramProgress,
@@ -566,10 +567,53 @@ const completeUserProfile = async (profileData: CompleteProfileParams): Promise<
             userNutritionProfile: data.userNutritionProfile || null,
             userNutritionPreferences: data.userNutritionPreferences || null,
             userRecommendations: data.userRecommendations,
+            userNutritionGoal: data.userNutritionGoal,
             calculated: data.calculated,
         };
     } catch (error) {
         throw handleApiError(error, 'CompleteUserProfile');
+    }
+};
+
+const getUserNutritionGoalHistory = async (userId: string): Promise<UserNutritionGoal[]> => {
+    console.log('service: getUserNutritionGoalHistory');
+    try {
+        if (!userId) throw new Error('No user ID found');
+
+        const { data } = await authUsersApiClient.get(`/users/${userId}/nutrition-goal-history`);
+
+        return data.goals || [];
+    } catch (error) {
+        throw handleApiError(error, 'GetUserNutritionGoalHistory');
+    }
+};
+
+const createNutritionGoalEntry = async (
+    userId: string,
+    goalData: {
+        goalCalories: number;
+        goalMacros: { Protein: number; Carbs: number; Fat: number };
+        tdee: number;
+        weightGoal: number;
+    },
+    adjustmentReason?: string,
+    adjustmentNotes?: string,
+): Promise<UserNutritionGoal> => {
+    console.log('service: createNutritionGoalEntry');
+    try {
+        const { data } = await authUsersApiClient.post(`/users/${userId}/nutrition-goal-history`, {
+            ...goalData,
+            adjustmentReason: adjustmentReason || 'MANUAL_UPDATE',
+            adjustmentNotes,
+        });
+
+        if (!data.goalEntry) {
+            throw new Error('Invalid response format');
+        }
+
+        return data.goalEntry;
+    } catch (error) {
+        throw handleApiError(error, 'CreateNutritionGoalEntry');
     }
 };
 
@@ -625,4 +669,7 @@ export default {
     // Nutrition Preferences
     getUserNutritionPreferences,
     updateUserNutritionPreferences,
+    // Nutrition Goal History
+    getUserNutritionGoalHistory,
+    createNutritionGoalEntry,
 };

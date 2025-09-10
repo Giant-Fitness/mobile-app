@@ -36,7 +36,6 @@ export default function FoodLogScreen() {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
 
-    const { userNutritionProfile } = useSelector((state: RootState) => state.user);
     const isOnboardingComplete = useOnboardingStatus();
 
     // Ref to track if component is mounted and focused
@@ -181,11 +180,10 @@ export default function FoodLogScreen() {
                     onDatePress: handleDatePress,
                     onPreviousDay: handlePreviousDay,
                     onNextDay: handleNextDay,
+                    onDateSelect: handleDateSelect,
                 }}
-                userNutritionProfile={userNutritionProfile ?? undefined}
                 consumedData={consumedData}
                 headerInterpolationStart={60}
-                isOnboardingComplete={isOnboardingComplete}
             />
 
             <Animated.ScrollView

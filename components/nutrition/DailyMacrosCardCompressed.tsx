@@ -7,14 +7,14 @@ import { LinearProgressBar } from '@/components/charts/LinearProgressBar';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { UserNutritionProfile } from '@/types';
+import { UserNutritionGoal } from '@/types';
 import { addAlpha, darkenColor } from '@/utils/colorUtils';
 import { moderateScale } from '@/utils/scaling';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
 // Preview data for when user hasn't completed onboarding
-const PREVIEW_NUTRITION_PROFILE: UserNutritionProfile = {
+const PREVIEW_NUTRITION_PROFILE: any = {
     GoalCalories: 2200,
     GoalMacros: {
         Protein: 150,
@@ -32,7 +32,6 @@ const PREVIEW_CONSUMED = {
 };
 
 interface DailyMacrosCardCompressedProps {
-    userNutritionProfile?: any | null;
     consumedData?: {
         calories: number;
         protein: number;
@@ -41,6 +40,7 @@ interface DailyMacrosCardCompressedProps {
     } | null;
     isOnboardingComplete?: boolean;
     style?: any;
+    nutritionGoal: UserNutritionGoal | null;
 }
 
 interface MacroItemProps {
@@ -98,21 +98,16 @@ const MacroItem: React.FC<MacroItemProps> = ({ label, iconName, current, goal, c
     );
 };
 
-export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps> = ({
-    userNutritionProfile,
-    consumedData,
-    isOnboardingComplete = true,
-    style,
-}) => {
+export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps> = ({ nutritionGoal, consumedData, isOnboardingComplete = true, style }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
-    // Use preview data if not onboarded or no profile
-    const nutritionProfile = isOnboardingComplete ? userNutritionProfile : PREVIEW_NUTRITION_PROFILE;
+    // Use preview data if not onboarded or no goal
+    const goal = isOnboardingComplete ? nutritionGoal : PREVIEW_NUTRITION_PROFILE;
     const consumed = isOnboardingComplete ? consumedData : PREVIEW_CONSUMED;
 
-    // Don't render if no profile data available
-    if (!nutritionProfile || !consumed) {
+    // Don't render if no goal available
+    if (!goal || !consumed) {
         return null;
     }
 
@@ -120,7 +115,7 @@ export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps>
         {
             iconName: 'flame',
             current: consumed.calories,
-            goal: nutritionProfile.GoalCalories,
+            goal: goal.GoalCalories,
             color: themeColors.slateBlue,
             backgroundColor: themeColors.slateBlueTransparent,
             overageColor: darkenColor(themeColors.slateBlue, 0.4),
@@ -128,7 +123,7 @@ export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps>
         {
             label: 'P',
             current: consumed.protein,
-            goal: nutritionProfile.GoalMacros.Protein,
+            goal: goal.GoalMacros.Protein,
             color: themeColors.protein,
             backgroundColor: addAlpha(themeColors.protein, 0.1),
             overageColor: darkenColor(themeColors.protein, 0.4),
@@ -136,7 +131,7 @@ export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps>
         {
             label: 'C',
             current: consumed.carbs,
-            goal: nutritionProfile.GoalMacros.Carbs,
+            goal: goal.GoalMacros.Carbs,
             color: themeColors.carbs,
             backgroundColor: addAlpha(themeColors.carbs, 0.1),
             overageColor: darkenColor(themeColors.carbs, 0.4),
@@ -144,7 +139,7 @@ export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps>
         {
             label: 'F',
             current: consumed.fats,
-            goal: nutritionProfile.GoalMacros.Fats,
+            goal: goal.GoalMacros.Fats,
             color: themeColors.fats,
             backgroundColor: addAlpha(themeColors.fats, 0.1),
             overageColor: darkenColor(themeColors.fats, 0.4),

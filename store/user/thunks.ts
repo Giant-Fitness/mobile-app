@@ -18,6 +18,7 @@ import {
     UserExerciseSetModification,
     UserExerciseSubstitution,
     UserFitnessProfile,
+    UserNutritionGoal,
     UserNutritionPreferences,
     UserNutritionProfile,
     UserProgramProgress,
@@ -1465,6 +1466,99 @@ export const completeUserProfileAsync = createAsyncThunk<
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to complete user profile',
+        });
+    }
+});
+
+export const getUserNutritionGoalHistoryAsync = createAsyncThunk<
+    UserNutritionGoal[],
+    { forceRefresh?: boolean; useCache?: boolean } | void,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/getUserNutritionGoalHistory', async (args = {}, { getState, rejectWithValue }) => {
+    try {
+        const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Return cached goal history if available and not forcing refresh
+        if (state.user.userNutritionGoalHistory.length > 0 && state.user.userNutritionGoalHistoryState === REQUEST_STATE.FULFILLED && !forceRefresh) {
+            return state.user.userNutritionGoalHistory;
+        }
+
+        // Try cache first if enabled and not forcing refresh
+        if (useCache && !forceRefresh) {
+            const cacheKey = `user_nutrition_goal_history`;
+            const cached = await cacheService.get<UserNutritionGoal[]>(cacheKey);
+            const isExpired = await cacheService.isExpired(cacheKey);
+
+            if (cached && !isExpired) {
+                console.log('Loaded nutrition goal history from cache');
+                return cached;
+            }
+        }
+
+        // Load from API
+        console.log('Loading nutrition goal history from API');
+        const goalHistory = await UserService.getUserNutritionGoalHistory(userId);
+
+        // Cache the result if useCache is enabled
+        if (useCache) {
+            const cacheKey = `user_nutrition_goal_history`;
+            await cacheService.set(cacheKey, goalHistory, CacheTTL.LONG);
+        }
+
+        return goalHistory;
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch nutrition goal history',
+        });
+    }
+});
+
+export const createNutritionGoalEntryAsync = createAsyncThunk<
+    UserNutritionGoal[],
+    {
+        goalData: {
+            goalCalories: number;
+            goalMacros: { Protein: number; Carbs: number; Fat: number };
+            tdee: number;
+            weightGoal: number;
+        };
+        adjustmentReason?: string;
+        adjustmentNotes?: string;
+    },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/createNutritionGoalEntry', async ({ goalData, adjustmentReason, adjustmentNotes }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Create the new goal entry
+        await UserService.createNutritionGoalEntry(userId, goalData, adjustmentReason, adjustmentNotes);
+
+        // Invalidate cache after creation
+        const cacheKey = `user_nutrition_goal_history`;
+        await cacheService.remove(cacheKey);
+
+        // Refresh and return all goal history
+        return await UserService.getUserNutritionGoalHistory(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to create nutrition goal entry',
         });
     }
 });

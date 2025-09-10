@@ -89,20 +89,8 @@ export type SleepSubmissionData = {
 export interface UserNutritionProfile {
     UserId: string;
     WeightGoal: number;
-    WeightChangeRate: number;
-    WeightGoalTimeline?: string;
     PrimaryNutritionGoal: string;
-    TDEE: number;
-    GoalCalories: number;
-    GoalMacros: {
-        Protein: number;
-        Carbs: number;
-        Fats: number;
-    };
     ActivityLevel: string;
-    WorkActivityLevel?: string;
-    AdaptiveEnabled: boolean;
-    LastAdaptiveAdjustment?: string;
     CreatedAt?: string;
     UpdatedAt?: string;
 }
@@ -113,6 +101,25 @@ export interface UserNutritionPreferences {
     DietaryRestrictions: string[];
     BudgetPreference: string;
     UpdatedAt: string;
+}
+
+export interface UserNutritionGoal {
+    UserId: string;
+    EffectiveDate: string; // YYYY-MM-DD format
+    GoalCalories: number;
+    GoalMacros: {
+        Protein: number;
+        Carbs: number;
+        Fat: number;
+    };
+    TDEE: number;
+    WeightGoal: number;
+    StartingWeight: number;
+    AdjustmentReason: 'INITIAL_CALCULATION' | 'ADAPTIVE_ADJUSTMENT' | 'MANUAL_UPDATE';
+    AdjustmentNotes?: string;
+    PreviousGoalDate?: string;
+    CreatedAt: string;
+    IsActive: boolean;
 }
 
 export interface CompleteProfileParams {
@@ -146,6 +153,7 @@ export interface CompleteProfileResponse {
     userFitnessProfile: UserFitnessProfile;
     userNutritionProfile?: UserNutritionProfile;
     userNutritionPreferences?: UserNutritionPreferences;
+    userNutritionGoal: UserNutritionGoal;
     userRecommendations: UserRecommendations;
     calculated: {
         TDEE: number;

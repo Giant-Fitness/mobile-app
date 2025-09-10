@@ -1,4 +1,4 @@
-// Modified DailyMacrosCard.tsx
+// components/nutrition/DailyMacrosCard.tsx
 
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -6,15 +6,17 @@ import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { RootState } from '@/store/store';
 import { addAlpha, darkenColor } from '@/utils/colorUtils';
 import { moderateScale } from '@/utils/scaling';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { BlurView } from 'expo-blur';
 import { router } from 'expo-router';
 
 import { trigger } from 'react-native-haptic-feedback';
+import { useSelector } from 'react-redux';
 
 import { Icon } from '../base/Icon';
 import { CircularProgress } from '../charts/CircularProgress';
@@ -22,13 +24,12 @@ import { CircularProgress } from '../charts/CircularProgress';
 const { width: screenWidth } = Dimensions.get('window');
 
 interface DailyMacrosCardProps {
-    userNutritionProfile?: any | null;
     style?: any;
     isOnboardingComplete?: boolean;
 }
 
 // Fake data for preview mode
-const PREVIEW_NUTRITION_PROFILE: any = {
+const PREVIEW_GOALS: any = {
     GoalCalories: 2200,
     GoalMacros: {
         Protein: 150,
@@ -108,16 +109,22 @@ const DotIndicator: React.FC<{ isActive: boolean; color: string; backgroundColor
     );
 };
 
-export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionProfile, style, isOnboardingComplete = true }) => {
+export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboardingComplete = true }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const scrollViewRef = useRef<ScrollView>(null);
+
+    const { userNutritionGoalHistory } = useSelector((state: RootState) => state.user);
+
+    const activeNutritionGoal = useMemo(() => {
+        return userNutritionGoalHistory?.find((goal) => goal.IsActive) || null;
+    }, [userNutritionGoalHistory]);
 
     // Set initial page based on onboarding status: show macros (page 1) first during onboarding
     const [currentPage, setCurrentPage] = useState(isOnboardingComplete ? 0 : 1);
 
     // Use preview data if not onboarded or no profile
-    const nutritionProfile = isOnboardingComplete ? userNutritionProfile : PREVIEW_NUTRITION_PROFILE;
+    const nutritionGoals = isOnboardingComplete ? activeNutritionGoal : PREVIEW_GOALS;
 
     // Scroll to initial page when component mounts or onboarding status changes
     useEffect(() => {
@@ -128,7 +135,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionP
         }
     }, [isOnboardingComplete]);
 
-    if (!nutritionProfile) {
+    if (!nutritionGoals) {
         return null;
     }
 
@@ -138,8 +145,8 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionP
     const consumedCarbs = isOnboardingComplete ? 180 : PREVIEW_CONSUMED.carbs;
     const consumedFats = isOnboardingComplete ? 45 : PREVIEW_CONSUMED.fats;
 
-    const remaining = nutritionProfile.GoalCalories - consumedCalories;
-    const isOverGoal = consumedCalories > nutritionProfile.GoalCalories;
+    const remaining = nutritionGoals.GoalCalories - consumedCalories;
+    const isOverGoal = consumedCalories > nutritionGoals.GoalCalories;
 
     const handleScroll = (event: any) => {
         const contentOffsetX = event.nativeEvent.contentOffset.x;
@@ -164,7 +171,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionP
                 <View style={styles.caloriesCenterSection}>
                     <CircularProgress
                         current={consumedCalories}
-                        goal={nutritionProfile.GoalCalories}
+                        goal={nutritionGoals.GoalCalories}
                         color={themeColors.slateBlue}
                         backgroundColor={themeColors.slateBlueTransparent}
                         size={180}
@@ -185,7 +192,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionP
                 {/* Right: Goal */}
                 <View style={styles.caloriesRightSection}>
                     <ThemedText type='titleLarge' style={styles.goalNumber}>
-                        {nutritionProfile.GoalCalories.toString()}
+                        {nutritionGoals.GoalCalories.toString()}
                     </ThemedText>
                     <ThemedText type='caption' style={styles.goalLabel}>
                         Goal
@@ -201,7 +208,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionP
                 <MacroMeter
                     label='Protein'
                     current={consumedProtein}
-                    goal={nutritionProfile.GoalMacros.Protein}
+                    goal={nutritionGoals.GoalMacros.Protein}
                     unit='g'
                     color={themeColors.protein}
                     backgroundColor={addAlpha(themeColors.protein, 0.1)}
@@ -210,7 +217,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionP
                 <MacroMeter
                     label='Carbs'
                     current={consumedCarbs}
-                    goal={nutritionProfile.GoalMacros.Carbs}
+                    goal={nutritionGoals.GoalMacros.Carbs}
                     unit='g'
                     color={themeColors.carbs}
                     backgroundColor={addAlpha(themeColors.carbs, 0.1)}
@@ -219,7 +226,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ userNutritionP
                 <MacroMeter
                     label='Fats'
                     current={consumedFats}
-                    goal={nutritionProfile.GoalMacros.Fats}
+                    goal={nutritionGoals.GoalMacros.Fats}
                     unit='g'
                     color={themeColors.fats}
                     backgroundColor={addAlpha(themeColors.fats, 0.1)}

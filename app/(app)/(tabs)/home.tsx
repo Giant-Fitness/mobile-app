@@ -34,6 +34,7 @@ import {
     getUserExerciseSetModificationsAsync,
     getUserExerciseSubstitutionsAsync,
     getUserFitnessProfileAsync,
+    getUserNutritionGoalHistoryAsync,
     getUserNutritionPreferencesAsync,
     getUserNutritionProfileAsync,
     getUserProgramProgressAsync,
@@ -81,7 +82,7 @@ export default function HomeScreen() {
 
     // Store slices
     // const { user, userWeightMeasurements, userSleepMeasurements, userBodyMeasurements, userNutritionProfile, userRecommendations, userAppSettings } =
-    const { user, userWeightMeasurements, userBodyMeasurements, userNutritionProfile, userRecommendations, userAppSettings } = useSelector(
+    const { user, userWeightMeasurements, userBodyMeasurements, userRecommendations, userAppSettings, userNutritionGoalHistory } = useSelector(
         (state: RootState) => state.user,
     );
     const { programs } = useSelector((state: RootState) => state.programs);
@@ -90,6 +91,10 @@ export default function HomeScreen() {
 
     // ----- Derived HomeState --------------------------------------------------
     const isOnboardingComplete = useOnboardingStatus();
+
+    const activeNutritionGoal = useMemo(() => {
+        return userNutritionGoalHistory?.find((goal) => goal.IsActive) || null;
+    }, [userNutritionGoalHistory]);
 
     const { activeProgram, hasActiveProgram, recommendedProgram, weightGoal } = useMemo(() => {
         const rec = userRecommendations?.RecommendedProgramID ? programs[userRecommendations.RecommendedProgramID] : null;
@@ -101,9 +106,9 @@ export default function HomeScreen() {
             activeProgram: active,
             hasActiveProgram: Boolean(activeId && active),
             recommendedProgram: rec,
-            weightGoal: userNutritionProfile?.WeightGoal ?? null,
+            weightGoal: activeNutritionGoal?.WeightGoal ?? null,
         };
-    }, [userRecommendations, programs, userProgramProgress, userNutritionProfile]);
+    }, [userRecommendations, programs, userProgramProgress, activeNutritionGoal]);
 
     // Greeting
     const greeting = programUser?.FirstName ? `Hi, ${programUser.FirstName}!` : 'Hi!';
@@ -255,6 +260,7 @@ export default function HomeScreen() {
                     dispatch(getAllProgramsAsync({ forceRefresh: true })),
                     dispatch(getWeightMeasurementsAsync({ forceRefresh: true })),
                     // dispatch(getSleepMeasurementsAsync({ forceRefresh: true })),
+                    dispatch(getUserNutritionGoalHistoryAsync({ forceRefresh: true })),
                     dispatch(initializeTrackedLiftsHistoryAsync({ forceRefresh: true })),
                     dispatch(getUserAppSettingsAsync({ forceRefresh: true })),
                     dispatch(getAllWorkoutsAsync({ forceRefresh: true })),
@@ -290,7 +296,7 @@ export default function HomeScreen() {
                 <ThemedText type='titleLarge'>Nutrition Overview</ThemedText>
             </View>
             <View style={styles.nutritionCard}>
-                <DailyMacrosCard userNutritionProfile={userNutritionProfile} isOnboardingComplete={isOnboardingComplete} />
+                <DailyMacrosCard isOnboardingComplete={isOnboardingComplete} />
             </View>
         </View>
     );
@@ -373,7 +379,7 @@ export default function HomeScreen() {
                 <View style={styles.goalProgressCards}>
                     {showWeight && (
                         <WeightProgressCard
-                            userNutritionProfile={userNutritionProfile!}
+                            nutritionGoal={activeNutritionGoal}
                             userWeightMeasurements={userWeightMeasurements}
                             weightUnit={userAppSettings?.UnitsOfMeasurement?.BodyWeightUnits || 'lbs'}
                             onPress={() => debounce(router, '/(app)/progress/weight')}
@@ -410,7 +416,7 @@ export default function HomeScreen() {
         // Onboarded + Active program
         if (hasActiveProgram) {
             return [
-                userNutritionProfile ? <NutritionOverview key='nutrition' /> : null,
+                activeNutritionGoal ? <NutritionOverview key='nutrition' /> : null,
                 <TodaysWorkout key='today' />,
                 <ProgressSection key='progress' />,
                 <FactSection key='fact' />,
@@ -419,12 +425,12 @@ export default function HomeScreen() {
 
         // Onboarded, no active program
         return [
-            userNutritionProfile ? <NutritionOverview key='nutrition' /> : null,
+            activeNutritionGoal ? <NutritionOverview key='nutrition' /> : null,
             recommendedProgram ? <TrainingProgram key='program' /> : null,
             <ProgressSection key='progress' />,
             <FactSection key='fact' />,
         ].filter(Boolean) as React.ReactElement[];
-    }, [isOnboardingComplete, hasActiveProgram, userNutritionProfile, recommendedProgram, weightGoal, activeProgram]);
+    }, [isOnboardingComplete, hasActiveProgram, activeNutritionGoal, recommendedProgram, weightGoal, activeProgram]);
 
     return (
         <View style={styles.container}>
