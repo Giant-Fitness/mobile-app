@@ -7,9 +7,11 @@ import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import React from 'react';
-import { Animated, PanResponder, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { trigger } from 'react-native-haptic-feedback';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
 export interface FoodEntryData {
     id: string;
@@ -32,56 +34,58 @@ interface FoodEntryProps {
 export const FoodEntry: React.FC<FoodEntryProps> = ({ food, onEdit, onDelete, style }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
-    const slideAnim = React.useRef(new Animated.Value(0)).current;
 
+    const translateX = useSharedValue(0);
     const SWIPE_THRESHOLD = -20; // How far to swipe before snapping to delete
     const DELETE_WIDTH = 40; // Width of delete area
     const MAX_SWIPE = -DELETE_WIDTH; // Maximum swipe distance
 
-    const panResponder = PanResponder.create({
-        onStartShouldSetPanResponder: (evt, gestureState) => {
-            return Math.abs(gestureState.dx) > Math.abs(gestureState.dy) && Math.abs(gestureState.dx) > 5;
-        },
-        onMoveShouldSetPanResponder: (evt, gestureState) => {
-            return Math.abs(gestureState.dx) > 5;
-        },
-        onPanResponderMove: (evt, gestureState) => {
-            // Only allow swiping left (negative dx), clamp between 0 and MAX_SWIPE
-            const newValue = Math.max(MAX_SWIPE, Math.min(0, gestureState.dx));
-            slideAnim.setValue(newValue);
-        },
-        onPanResponderRelease: (evt, gestureState) => {
-            // Snap to delete position or back to start based on distance and velocity
-            const shouldShowDelete = gestureState.dx < SWIPE_THRESHOLD || gestureState.vx < -0.5;
+    const resetPosition = () => {
+        'worklet';
+        translateX.value = withSpring(0);
+    };
 
-            Animated.spring(slideAnim, {
-                toValue: shouldShowDelete ? MAX_SWIPE : 0,
-                useNativeDriver: true,
-                tension: 300,
-                friction: 30,
-            }).start();
-        },
-    });
+    const showDeleteButton = () => {
+        'worklet';
+        translateX.value = withSpring(MAX_SWIPE);
+    };
 
     const handleEdit = () => {
         trigger('impactLight');
         onEdit(food);
-        console.log('Edit food entry:', food.name);
+        resetPosition();
     };
 
     const handleDelete = () => {
         trigger('impactMedium');
         onDelete(food.id);
-        console.log('Delete food entry:', food.name);
-
-        // Animate back to start position
-        Animated.spring(slideAnim, {
-            toValue: 0,
-            useNativeDriver: true,
-            tension: 150,
-            friction: 30,
-        }).start();
+        resetPosition();
     };
+
+    // Pan gesture for the food item swipe-to-delete
+    const panGesture = Gesture.Pan()
+        .onUpdate((event) => {
+            // Only allow swiping left (negative translation)
+            // Clamp between MAX_SWIPE and 0
+            const newValue = Math.max(MAX_SWIPE, Math.min(0, event.translationX));
+            translateX.value = newValue;
+        })
+        .onEnd((event) => {
+            const shouldShowDelete = event.translationX < SWIPE_THRESHOLD || event.velocityX < -300; // Lower velocity threshold for food items
+
+            if (shouldShowDelete) {
+                showDeleteButton();
+            } else {
+                resetPosition();
+            }
+        })
+        // This is key: make it fail if the gesture is more vertical than horizontal
+        // This allows the parent scroll to take precedence for vertical gestures
+        .failOffsetY([-15, 15]);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ translateX: translateX.value }],
+    }));
 
     return (
         <View style={[styles.container, style]}>
@@ -94,80 +98,81 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({ food, onEdit, onDelete, st
                 </TouchableOpacity>
             </View>
 
-            {/* Main content with pan responder */}
-            <Animated.View
-                style={[
-                    styles.content,
-                    {
-                        backgroundColor: themeColors.background,
-                        transform: [{ translateX: slideAnim }],
-                    },
-                ]}
-                {...panResponder.panHandlers}
-            >
-                <TouchableOpacity style={styles.mainContent} onPress={handleEdit} activeOpacity={0.95}>
-                    <View style={styles.foodInfo}>
-                        <ThemedText type='body' style={styles.foodName}>
-                            {food.name}
-                        </ThemedText>
+            {/* Main content with gesture detector */}
+            <GestureDetector gesture={panGesture}>
+                <Animated.View
+                    style={[
+                        styles.content,
+                        {
+                            backgroundColor: themeColors.background,
+                        },
+                        animatedStyle,
+                    ]}
+                >
+                    <TouchableOpacity style={styles.mainContent} onPress={handleEdit} activeOpacity={0.95}>
+                        <View style={styles.foodInfo}>
+                            <ThemedText type='body' style={styles.foodName}>
+                                {food.name}
+                            </ThemedText>
 
-                        {/* Nutrition line with icons (like MealSection) + portion size */}
-                        <View style={styles.nutritionRow}>
-                            {/* Calories */}
-                            <View style={styles.nutritionItem}>
-                                <Icon name='flame' size={11} color={themeColors.iconDefault} />
-                                <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
-                                    {Math.round(food.calories)}
-                                </ThemedText>
-                            </View>
+                            {/* Nutrition line with icons (like MealSection) + portion size */}
+                            <View style={styles.nutritionRow}>
+                                {/* Calories */}
+                                <View style={styles.nutritionItem}>
+                                    <Icon name='flame' size={11} color={themeColors.iconDefault} />
+                                    <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
+                                        {Math.round(food.calories)}
+                                    </ThemedText>
+                                </View>
 
-                            {/* Protein */}
-                            <View style={styles.nutritionItem}>
-                                <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
-                                    {Math.round(food.protein)}P
-                                </ThemedText>
-                            </View>
+                                {/* Protein */}
+                                <View style={styles.nutritionItem}>
+                                    <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
+                                        {Math.round(food.protein)}P
+                                    </ThemedText>
+                                </View>
 
-                            {/* Carbs */}
-                            <View style={styles.nutritionItem}>
-                                <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
-                                    {Math.round(food.carbs)}C
-                                </ThemedText>
-                            </View>
+                                {/* Carbs */}
+                                <View style={styles.nutritionItem}>
+                                    <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
+                                        {Math.round(food.carbs)}C
+                                    </ThemedText>
+                                </View>
 
-                            {/* Fats */}
-                            <View style={styles.nutritionItem}>
-                                <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
-                                    {Math.round(food.fats)}F
-                                </ThemedText>
-                            </View>
+                                {/* Fats */}
+                                <View style={styles.nutritionItem}>
+                                    <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
+                                        {Math.round(food.fats)}F
+                                    </ThemedText>
+                                </View>
 
-                            {/* Dot separator */}
-                            <View style={styles.dotSeparator}>
-                                <ThemedText style={[styles.dot, { color: themeColors.subText }]}>•</ThemedText>
-                            </View>
+                                {/* Dot separator */}
+                                <View style={styles.dotSeparator}>
+                                    <ThemedText style={[styles.dot, { color: themeColors.subText }]}>•</ThemedText>
+                                </View>
 
-                            {/* Portion size with ellipsis */}
-                            <View style={styles.portionContainer}>
-                                <ThemedText
-                                    type='bodySmall'
-                                    style={[styles.portionSize, { color: themeColors.subText }]}
-                                    numberOfLines={1}
-                                    ellipsizeMode='tail'
-                                >
-                                    {food.portionSize}
-                                </ThemedText>
+                                {/* Portion size with ellipsis */}
+                                <View style={styles.portionContainer}>
+                                    <ThemedText
+                                        type='bodySmall'
+                                        style={[styles.portionSize, { color: themeColors.subText }]}
+                                        numberOfLines={1}
+                                        ellipsizeMode='tail'
+                                    >
+                                        {food.portionSize}
+                                    </ThemedText>
+                                </View>
                             </View>
                         </View>
-                    </View>
 
-                    <View style={styles.rightSection}>
-                        <View style={[styles.editButton, { backgroundColor: themeColors.backgroundSecondary }]}>
-                            <Icon name='edit' size={Sizes.iconSizeXS} color={themeColors.iconDefault} />
+                        <View style={styles.rightSection}>
+                            <View style={[styles.editButton, { backgroundColor: themeColors.backgroundSecondary }]}>
+                                <Icon name='edit' size={Sizes.iconSizeXS} color={themeColors.iconDefault} />
+                            </View>
                         </View>
-                    </View>
-                </TouchableOpacity>
-            </Animated.View>
+                    </TouchableOpacity>
+                </Animated.View>
+            </GestureDetector>
         </View>
     );
 };

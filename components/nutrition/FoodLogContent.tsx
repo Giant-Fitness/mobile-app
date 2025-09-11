@@ -6,7 +6,7 @@ import { MealSection, MealType } from '@/components/nutrition/MealSection';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 
 // Mock data for demonstration
@@ -106,17 +106,24 @@ interface FoodLogContentProps {
     style?: any;
 }
 
+const defaultExpandedSections: Record<MealType, boolean> = {
+    breakfast: true,
+    lunch: true,
+    dinner: true,
+    snacks: true,
+};
+
 export const FoodLogContent: React.FC<FoodLogContentProps> = ({ selectedDate, style }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
     const [foodData, setFoodData] = useState<Record<MealType, FoodEntryData[]>>(mockFoodData);
-    const [expandedSections, setExpandedSections] = useState<Record<MealType, boolean>>({
-        breakfast: true,
-        lunch: true,
-        dinner: true,
-        snacks: true,
-    });
+    const [expandedSections, setExpandedSections] = useState<Record<MealType, boolean>>(defaultExpandedSections);
+
+    // Reset expanded sections to default when date changes
+    useEffect(() => {
+        setExpandedSections(defaultExpandedSections);
+    }, [selectedDate]);
 
     const handleQuickAdd = (mealType: MealType) => {
         console.log('Quick add clicked for meal:', mealType);
@@ -161,6 +168,7 @@ export const FoodLogContent: React.FC<FoodLogContentProps> = ({ selectedDate, st
                     onDeleteFood={handleDeleteFood}
                     isExpanded={expandedSections[mealType]}
                     onToggleExpand={handleToggleExpand}
+                    selectedDate={selectedDate} // Pass selectedDate for key generation
                 />
             ))}
         </ThemedView>

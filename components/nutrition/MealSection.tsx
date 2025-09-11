@@ -22,6 +22,7 @@ interface MealSectionProps {
     onDeleteFood: (foodId: string) => void;
     isExpanded?: boolean;
     onToggleExpand?: (mealType: MealType) => void;
+    selectedDate: Date; // Add selectedDate prop
     style?: any;
 }
 
@@ -48,6 +49,7 @@ export const MealSection: React.FC<MealSectionProps> = ({
     onDeleteFood,
     isExpanded = true,
     onToggleExpand,
+    selectedDate,
     style,
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -203,7 +205,12 @@ export const MealSection: React.FC<MealSectionProps> = ({
                             <View style={styles.foodList}>
                                 {foods.map((food, index) => (
                                     <React.Fragment key={food.id}>
-                                        <FoodEntry food={food} onEdit={onEditFood} onDelete={onDeleteFood} />
+                                        <FoodEntry
+                                            key={`${food.id}-${selectedDate.toISOString()}`} // Include date in key to reset state
+                                            food={food}
+                                            onEdit={onEditFood}
+                                            onDelete={onDeleteFood}
+                                        />
                                         {/* Add separator line between food items (not after the last one) */}
                                         {index < foods.length - 1 && (
                                             <View style={[styles.foodSeparator, { backgroundColor: themeColors.systemBorderColor }]} />
