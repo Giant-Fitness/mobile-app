@@ -1,16 +1,16 @@
 // app/(app)/(tabs)/food-log.tsx
 
+import { FoodLogContent } from '@/components/nutrition/FoodLogContent';
 import { FoodLogHeader } from '@/components/nutrition/FoodLogHeader';
-import { SwipeableFoodLogContent } from '@/components/nutrition/SwipeableFoodLogContent';
 import { OnboardingCard } from '@/components/onboarding/OnboardingCard';
 import { DatePickerBottomSheet } from '@/components/overlays/DatePickerBottomSheet';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AppDispatch, RootState } from '@/store/store';
-import { getUserAsync } from '@/store/user/thunks';
+import { getNutritionLogsAsync, getUserAsync } from '@/store/user/thunks';
 import { addAlpha } from '@/utils/colorUtils';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Dimensions, Platform, RefreshControl, StyleSheet, View } from 'react-native';
 
 import { BlurView } from 'expo-blur';
@@ -26,6 +26,11 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
 const VELOCITY_THRESHOLD = 500;
 const ACTIVATION_THRESHOLD = 20;
+
+// Feature flags
+const FEATURE_FLAGS = {
+    SWIPEABLE_DATE_NAVIGATION: true, // Set to true to enable swipe functionality
+};
 
 const useOnboardingStatus = () => {
     const user = useSelector((state: RootState) => state.user.user);
@@ -49,6 +54,14 @@ const isWithinAllowedRange = (date: Date): boolean => {
     return date >= oneYearAgo && date <= oneYearFromNow;
 };
 
+// Convert Date to YYYY-MM-DD string
+const formatDateForAPI = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
 export default function FoodLogScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -58,14 +71,14 @@ export default function FoodLogScreen() {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [isPanEnabled, setIsPanEnabled] = useState(true);
+    const [isPanEnabled, setIsPanEnabled] = useState(FEATURE_FLAGS.SWIPEABLE_DATE_NAVIGATION);
 
-    // Animation values for horizontal swiping
+    // Animation values for horizontal swiping (only used if feature flag is enabled)
     const translateX = useSharedValue(0);
-    const isAnimating = useSharedValue(false); // Changed from useRef to useSharedValue
+    const isAnimating = useSharedValue(false);
     const isSwipeActivated = useSharedValue(false);
 
-    // Dates for the sliding window (previous, current, next)
+    // Dates for the sliding window (only used if swipe feature is enabled)
     const [dates, setDates] = useState(() => ({
         previous: addDays(selectedDate, -1),
         current: selectedDate,
@@ -74,33 +87,126 @@ export default function FoodLogScreen() {
 
     const isOnboardingComplete = useOnboardingStatus();
 
+    // Redux state
+    const { user, userNutritionLogs } = useSelector((state: RootState) => state.user);
+
+    // Get nutrition log for selected date
+    const selectedDateString = useMemo(() => formatDateForAPI(selectedDate), [selectedDate]);
+    const selectedDateNutritionLog = useMemo(() => {
+        // Check if the date key exists (handles null values properly)
+        if (selectedDateString in userNutritionLogs) {
+            return userNutritionLogs[selectedDateString]; // This can be null or UserNutritionLog
+        }
+        return null; // Not loaded yet
+    }, [userNutritionLogs, selectedDateString]);
+
+    // Calculate consumed data from nutrition log
+    const consumedData = useMemo(() => {
+        if (!isOnboardingComplete) {
+            // Preview data for non-onboarded users
+            return {
+                calories: 1850,
+                protein: 110,
+                carbs: 180,
+                fats: 65,
+            };
+        }
+
+        if (!selectedDateNutritionLog || !selectedDateNutritionLog.DailyTotals) {
+            // No data logged for this date
+            return {
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fats: 0,
+            };
+        }
+
+        const { DailyTotals } = selectedDateNutritionLog;
+        return {
+            calories: Math.round(DailyTotals.Calories || 0),
+            protein: Math.round(DailyTotals.Protein || 0),
+            carbs: Math.round(DailyTotals.Carbs || 0),
+            fats: Math.round(DailyTotals.Fats || 0),
+        };
+    }, [selectedDateNutritionLog, isOnboardingComplete]);
+
     // Ref to track if component is mounted and focused
     const isMountedAndFocused = useRef(true);
     const refreshTimeoutRef = useRef<number | null>(null);
 
-    // Update dates when selectedDate changes externally
+    // Load nutrition logs for the selected date and surrounding dates
+    const loadNutritionLogsForDates = useCallback(
+        (centerDate: Date) => {
+            if (!user?.UserId || !isOnboardingComplete) return;
+
+            if (FEATURE_FLAGS.SWIPEABLE_DATE_NAVIGATION) {
+                const datesToLoad = [addDays(centerDate, -1), centerDate, addDays(centerDate, 1)];
+
+                datesToLoad.forEach((date) => {
+                    const dateString = formatDateForAPI(date);
+                    // Check if dateString exists as a key in userNutritionLogs (handles null values)
+                    if (!(dateString in userNutritionLogs)) {
+                        console.log(`Loading nutrition logs for ${dateString} (not in Redux state)`);
+                        dispatch(getNutritionLogsAsync({ date: dateString, useCache: true }));
+                    } else {
+                        console.log(`Skipping load for ${dateString} (already in Redux state)`);
+                    }
+                });
+            } else {
+                // Only load current date when swipe is disabled
+                const dateString = formatDateForAPI(centerDate);
+                // Check if dateString exists as a key in userNutritionLogs (handles null values)
+                if (!(dateString in userNutritionLogs)) {
+                    console.log(`Loading nutrition logs for ${dateString} (not in Redux state)`);
+                    dispatch(getNutritionLogsAsync({ date: dateString, useCache: true }));
+                } else {
+                    console.log(`Skipping load for ${dateString} (already in Redux state)`);
+                }
+            }
+        },
+        [dispatch, user?.UserId, isOnboardingComplete, userNutritionLogs],
+    );
+
+    // Load logs when component mounts or date changes
+    useFocusEffect(
+        useCallback(() => {
+            loadNutritionLogsForDates(selectedDate);
+        }, [loadNutritionLogsForDates, selectedDate]),
+    );
+
+    // Update dates when selectedDate changes externally (only if swipe feature is enabled)
     React.useEffect(() => {
-        if (!isAnimating.value) {
-            // Changed from isAnimating.current to isAnimating.value
+        if (FEATURE_FLAGS.SWIPEABLE_DATE_NAVIGATION) {
+            if (!isAnimating.value) {
+                setDates({
+                    previous: addDays(selectedDate, -1),
+                    current: selectedDate,
+                    next: addDays(selectedDate, 1),
+                });
+                translateX.value = 0;
+            }
+        } else {
             setDates({
                 previous: addDays(selectedDate, -1),
                 current: selectedDate,
                 next: addDays(selectedDate, 1),
             });
-            translateX.value = 0;
         }
     }, [selectedDate]);
 
-    // Animation completion callback
+    // Animation completion callback (only used if swipe feature is enabled)
     const onSwipeComplete = useCallback(
         (direction: 'left' | 'right') => {
-            isAnimating.value = false; // Changed from isAnimating.current to isAnimating.value
+            if (!FEATURE_FLAGS.SWIPEABLE_DATE_NAVIGATION) return;
+
+            isAnimating.value = false;
             isSwipeActivated.value = false;
 
             if (direction === 'left') {
                 // Swiped left - go to next day
                 const nextDate = dates.next;
-                if (isWithinAllowedRange(nextDate)) {
+                if (nextDate && isWithinAllowedRange(nextDate)) {
                     setSelectedDate(nextDate);
                     trigger('virtualKey');
                 } else {
@@ -109,7 +215,7 @@ export default function FoodLogScreen() {
             } else {
                 // Swiped right - go to previous day
                 const prevDate = dates.previous;
-                if (isWithinAllowedRange(prevDate)) {
+                if (prevDate && isWithinAllowedRange(prevDate)) {
                     setSelectedDate(prevDate);
                     trigger('virtualKey');
                 } else {
@@ -120,20 +226,23 @@ export default function FoodLogScreen() {
         [dates],
     );
 
-    // Reset animation callback
+    // Reset animation callback (only used if swipe feature is enabled)
     const onSwipeReset = useCallback(() => {
-        isAnimating.value = false; // Changed from isAnimating.current to isAnimating.value
+        if (!FEATURE_FLAGS.SWIPEABLE_DATE_NAVIGATION) return;
+        isAnimating.value = false;
         isSwipeActivated.value = false;
     }, []);
 
-    // Pan gesture for horizontal swiping
+    // Pan gesture for horizontal swiping (only active if feature flag is enabled)
     const panGesture = Gesture.Pan()
-        .enabled(isPanEnabled)
+        .enabled(isPanEnabled && FEATURE_FLAGS.SWIPEABLE_DATE_NAVIGATION)
         .onStart(() => {
-            isAnimating.value = true; // Changed from isAnimating.current to isAnimating.value
+            if (!FEATURE_FLAGS.SWIPEABLE_DATE_NAVIGATION) return;
+            isAnimating.value = true;
             isSwipeActivated.value = false;
         })
         .onUpdate((event) => {
+            if (!FEATURE_FLAGS.SWIPEABLE_DATE_NAVIGATION) return;
             const absTranslationX = Math.abs(event.translationX);
             const absTranslationY = Math.abs(event.translationY);
             // Only activate if horizontal movement is dominant
@@ -143,6 +252,8 @@ export default function FoodLogScreen() {
             }
         })
         .onEnd((event) => {
+            if (!FEATURE_FLAGS.SWIPEABLE_DATE_NAVIGATION) return;
+
             const { translationX, velocityX } = event;
 
             if (!isSwipeActivated.value) {
@@ -173,8 +284,8 @@ export default function FoodLogScreen() {
     // Native gesture for the ScrollView
     const nativeGesture = Gesture.Native();
 
-    // Compose gestures to work simultaneously
-    const composedGesture = Gesture.Simultaneous(panGesture, nativeGesture);
+    // Compose gestures to work simultaneously (only if swipe feature is enabled)
+    const composedGesture = FEATURE_FLAGS.SWIPEABLE_DATE_NAVIGATION ? Gesture.Simultaneous(panGesture, nativeGesture) : nativeGesture;
 
     // Optimized scroll handler for smooth performance
     const scrollHandler = useAnimatedScrollHandler({
@@ -182,29 +293,12 @@ export default function FoodLogScreen() {
             scrollY.value = event.contentOffset.y;
         },
         onEndDrag: () => {
-            runOnJS(setIsPanEnabled)(true);
+            runOnJS(setIsPanEnabled)(FEATURE_FLAGS.SWIPEABLE_DATE_NAVIGATION);
         },
         onMomentumEnd: () => {
-            runOnJS(setIsPanEnabled)(true);
+            runOnJS(setIsPanEnabled)(FEATURE_FLAGS.SWIPEABLE_DATE_NAVIGATION);
         },
     });
-
-    const mockConsumedData = {
-        calories: 1500,
-        protein: 155,
-        carbs: 180,
-        fats: 45,
-    };
-
-    // Use preview data when not onboarded
-    const previewConsumedData = {
-        calories: 1850,
-        protein: 110,
-        carbs: 180,
-        fats: 65,
-    };
-
-    const consumedData = isOnboardingComplete ? mockConsumedData : previewConsumedData;
 
     // Calculate initial header height (when calendar is visible) - FIXED VALUES
     const calculateExpandedHeaderHeight = () => {
@@ -242,6 +336,31 @@ export default function FoodLogScreen() {
 
         try {
             await dispatch(getUserAsync({ forceRefresh: true }));
+
+            // Refresh nutrition logs for current dates
+            if (user?.UserId && isOnboardingComplete) {
+                if (FEATURE_FLAGS.SWIPEABLE_DATE_NAVIGATION) {
+                    const datesToRefresh = [dates.previous, dates.current, dates.next];
+                    await Promise.all(
+                        datesToRefresh.filter(Boolean).map((date) =>
+                            dispatch(
+                                getNutritionLogsAsync({
+                                    date: formatDateForAPI(date),
+                                    forceRefresh: true, // Force refresh to bypass cache and Redux state
+                                }),
+                            ),
+                        ),
+                    );
+                } else {
+                    // Only refresh current date when swipe is disabled
+                    await dispatch(
+                        getNutritionLogsAsync({
+                            date: formatDateForAPI(selectedDate),
+                            forceRefresh: true, // Force refresh to bypass cache and Redux state
+                        }),
+                    );
+                }
+            }
         } catch (error) {
             console.error('Refresh failed:', error);
         } finally {
@@ -282,9 +401,9 @@ export default function FoodLogScreen() {
         setShowDatePicker(false);
     };
 
-    // Animated container style for horizontal swiping
+    // Animated container style for horizontal swiping (only applied if feature flag is enabled)
     const animatedContainerStyle = useAnimatedStyle(() => ({
-        transform: [{ translateX: translateX.value }],
+        transform: FEATURE_FLAGS.SWIPEABLE_DATE_NAVIGATION ? [{ translateX: translateX.value }] : [],
     }));
 
     const OnboardingOverlay = () => (
@@ -309,6 +428,7 @@ export default function FoodLogScreen() {
                     onDateSelect: handleDateSelect,
                 }}
                 consumedData={consumedData}
+                nutritionLog={selectedDateNutritionLog}
                 headerInterpolationStart={60}
             />
 
@@ -319,7 +439,7 @@ export default function FoodLogScreen() {
                         onScroll={scrollHandler}
                         showsVerticalScrollIndicator={false}
                         overScrollMode='never'
-                        bounces={false}
+                        bounces={true}
                         refreshControl={
                             <RefreshControl
                                 refreshing={isRefreshing}
@@ -335,23 +455,31 @@ export default function FoodLogScreen() {
                         }}
                         scrollEventThrottle={16}
                     >
-                        {/* Horizontal sliding container */}
-                        <Animated.View style={[styles.slidingContainer, animatedContainerStyle]}>
-                            {/* Previous Day */}
-                            <View style={[styles.dayContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
-                                <SwipeableFoodLogContent selectedDate={dates.previous} />
-                            </View>
+                        {/* Conditional rendering based on feature flag */}
+                        {FEATURE_FLAGS.SWIPEABLE_DATE_NAVIGATION ? (
+                            /* Horizontal sliding container for swipe functionality */
+                            <Animated.View style={[styles.slidingContainer, animatedContainerStyle]}>
+                                {/* Previous Day */}
+                                <View style={[styles.dayContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
+                                    <FoodLogContent selectedDate={dates.previous} />
+                                </View>
 
-                            {/* Current Day */}
-                            <View style={[styles.dayContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
-                                <SwipeableFoodLogContent selectedDate={dates.current} />
-                            </View>
+                                {/* Current Day */}
+                                <View style={[styles.dayContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
+                                    <FoodLogContent selectedDate={dates.current} />
+                                </View>
 
-                            {/* Next Day */}
-                            <View style={[styles.dayContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
-                                <SwipeableFoodLogContent selectedDate={dates.next} />
+                                {/* Next Day */}
+                                <View style={[styles.dayContainer, { backgroundColor: themeColors.backgroundSecondary }]}>
+                                    <FoodLogContent selectedDate={dates.next} />
+                                </View>
+                            </Animated.View>
+                        ) : (
+                            /* Simple single day container when swipe is disabled */
+                            <View style={{ backgroundColor: themeColors.backgroundSecondary }}>
+                                <FoodLogContent selectedDate={selectedDate} />
                             </View>
-                        </Animated.View>
+                        )}
                     </Animated.ScrollView>
                 </GestureDetector>
             </GestureHandlerRootView>

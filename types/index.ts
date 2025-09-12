@@ -8,3 +8,4 @@ export * from './feedbackTypes';
 export * from './exerciseSetModificationsTypes';
 export * from './exerciseSubstitutionsType';
 export * from './exerciseProgressTypes';
+export * from './nutritionLogsTypes';

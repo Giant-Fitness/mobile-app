@@ -1,12 +1,16 @@
 // store/user/service.ts
 
 import {
+    AddFoodEntryParams,
+    AddFoodEntryResponse,
     CompleteProfileParams,
     CompleteProfileResponse,
     CreateSetModificationParams,
     CreateSubstitutionParams,
     GetSetModificationsParams,
     GetSubstitutionsParams,
+    UpdateFoodEntryParams,
+    UpdateFoodEntryResponse,
     UpdateSetModificationParams,
     UpdateSubstitutionParams,
     User,
@@ -16,6 +20,7 @@ import {
     UserExerciseSubstitution,
     UserFitnessProfile,
     UserNutritionGoal,
+    UserNutritionLog,
     UserNutritionPreferences,
     UserNutritionProfile,
     UserProgramProgress,
@@ -617,6 +622,85 @@ const createNutritionGoalEntry = async (
     }
 };
 
+// Nutrition Logs Methods
+const getNutritionLogs = async (userId: string, date: string): Promise<UserNutritionLog | null> => {
+    console.log('service: getNutritionLogs');
+    try {
+        if (!userId) throw new Error('No user ID found');
+
+        const { data } = await authUsersApiClient.get(`/users/${userId}/nutrition-logs`, {
+            params: { date },
+        });
+
+        return data.nutritionLog;
+    } catch (error) {
+        throw handleApiError(error, 'GetNutritionLogs');
+    }
+};
+
+const getSpecificDayLog = async (userId: string, date: string): Promise<UserNutritionLog | null> => {
+    console.log('service: getSpecificDayLog');
+    try {
+        if (!userId) throw new Error('No user ID found');
+
+        const { data } = await authUsersApiClient.get(`/users/${userId}/nutrition-logs/${date}`);
+
+        return data.nutritionLog;
+    } catch (error) {
+        throw handleApiError(error, 'GetSpecificDayLog');
+    }
+};
+
+const addFoodEntry = async (userId: string, date: string, entryData: AddFoodEntryParams): Promise<AddFoodEntryResponse> => {
+    console.log('service: addFoodEntry');
+    try {
+        if (!userId) throw new Error('No user ID found');
+
+        const { data } = await authUsersApiClient.post(`/users/${userId}/nutrition-logs/${date}/entries`, entryData);
+
+        return data;
+    } catch (error) {
+        throw handleApiError(error, 'AddFoodEntry');
+    }
+};
+
+const updateFoodEntry = async (userId: string, date: string, entryKey: string, updates: UpdateFoodEntryParams): Promise<UpdateFoodEntryResponse> => {
+    console.log('service: updateFoodEntry');
+    try {
+        if (!userId) throw new Error('No user ID found');
+
+        const { data } = await authUsersApiClient.put(`/users/${userId}/nutrition-logs/${date}/entries/${entryKey}`, updates);
+
+        return data;
+    } catch (error) {
+        throw handleApiError(error, 'UpdateFoodEntry');
+    }
+};
+
+const deleteFoodEntry = async (userId: string, date: string, entryKey: string): Promise<UserNutritionLog> => {
+    console.log('service: deleteFoodEntry');
+    try {
+        if (!userId) throw new Error('No user ID found');
+
+        const { data } = await authUsersApiClient.delete(`/users/${userId}/nutrition-logs/${date}/entries/${entryKey}`);
+
+        return data.nutritionLog;
+    } catch (error) {
+        throw handleApiError(error, 'DeleteFoodEntry');
+    }
+};
+
+const deleteSpecificDayLog = async (userId: string, date: string): Promise<void> => {
+    console.log('service: deleteSpecificDayLog');
+    try {
+        if (!userId) throw new Error('No user ID found');
+
+        await authUsersApiClient.delete(`/users/${userId}/nutrition-logs/${date}`);
+    } catch (error) {
+        throw handleApiError(error, 'DeleteSpecificDayLog');
+    }
+};
+
 export default {
     // User Profile
     getUser,
@@ -672,4 +756,11 @@ export default {
     // Nutrition Goal History
     getUserNutritionGoalHistory,
     createNutritionGoalEntry,
+    // Nutrition Logs
+    getNutritionLogs,
+    getSpecificDayLog,
+    addFoodEntry,
+    updateFoodEntry,
+    deleteFoodEntry,
+    deleteSpecificDayLog,
 };

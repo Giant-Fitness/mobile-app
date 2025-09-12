@@ -28,6 +28,7 @@ import {
     // deleteSleepMeasurementAsync,
     deleteWeightMeasurementAsync,
     getBodyMeasurementsAsync,
+    getNutritionLogsAsync,
     // getSleepMeasurementsAsync,
     getUserAppSettingsAsync,
     getUserAsync,
@@ -81,10 +82,8 @@ export default function HomeScreen() {
     const refreshTimeoutRef = useRef<number | null>(null);
 
     // Store slices
-    // const { user, userWeightMeasurements, userSleepMeasurements, userBodyMeasurements, userNutritionProfile, userRecommendations, userAppSettings } =
-    const { user, userWeightMeasurements, userBodyMeasurements, userRecommendations, userAppSettings, userNutritionGoalHistory } = useSelector(
-        (state: RootState) => state.user,
-    );
+    const { user, userWeightMeasurements, userBodyMeasurements, userRecommendations, userAppSettings, userNutritionGoalHistory, userNutritionLogs } =
+        useSelector((state: RootState) => state.user);
     const { programs } = useSelector((state: RootState) => state.programs);
 
     const { user: programUser, userProgramProgress, hasCompletedWorkoutToday } = useProgramData();
@@ -95,6 +94,17 @@ export default function HomeScreen() {
     const activeNutritionGoal = useMemo(() => {
         return userNutritionGoalHistory?.find((goal) => goal.IsActive) || null;
     }, [userNutritionGoalHistory]);
+
+    // Get today's date in YYYY-MM-DD format
+    const todayDateString = useMemo(() => {
+        const today = new Date();
+        return today.toISOString().split('T')[0];
+    }, []);
+
+    // Get today's nutrition log
+    const todayNutritionLog = useMemo(() => {
+        return userNutritionLogs[todayDateString] || null;
+    }, [userNutritionLogs, todayDateString]);
 
     const { activeProgram, hasActiveProgram, recommendedProgram, weightGoal } = useMemo(() => {
         const rec = userRecommendations?.RecommendedProgramID ? programs[userRecommendations.RecommendedProgramID] : null;
@@ -112,6 +122,15 @@ export default function HomeScreen() {
 
     // Greeting
     const greeting = programUser?.FirstName ? `Hi, ${programUser.FirstName}!` : 'Hi!';
+
+    // ----- Load today's nutrition logs on mount/focus -------------------------
+    useFocusEffect(
+        useCallback(() => {
+            if (user?.UserId && isOnboardingComplete) {
+                dispatch(getNutritionLogsAsync({ date: todayDateString, useCache: true }));
+            }
+        }, [dispatch, user?.UserId, isOnboardingComplete, todayDateString]),
+    );
 
     // ----- Scroll handler -----------------------------------------------------
     const scrollHandler = useAnimatedScrollHandler({
@@ -151,21 +170,6 @@ export default function HomeScreen() {
         [dispatch],
     );
 
-    // const handleLogSleep = useCallback(
-    //     async (sleepData: any, date: Date) => {
-    //         setIsLoading(true);
-    //         try {
-    //             await dispatch(logSleepMeasurementAsync({ ...sleepData, measurementTimestamp: date.toISOString() })).unwrap();
-    //             await dispatch(getSleepMeasurementsAsync()).unwrap();
-    //         } catch (e) {
-    //             console.error('Failed to log sleep:', e);
-    //         } finally {
-    //             if (isMountedAndFocused.current) setIsLoading(false);
-    //         }
-    //     },
-    //     [dispatch],
-    // );
-
     const handleLogBodyMeasurements = useCallback(
         async (measurements: Record<string, number>, date: Date) => {
             setIsLoading(true);
@@ -193,18 +197,6 @@ export default function HomeScreen() {
         [dispatch],
     );
 
-    // const handleSleepDelete = useCallback(
-    //     async (timestamp: string) => {
-    //         try {
-    //             await dispatch(deleteSleepMeasurementAsync({ timestamp })).unwrap();
-    //             setIsSleepSheetVisible(false);
-    //         } catch (e) {
-    //             console.error('Failed to delete sleep:', e);
-    //         }
-    //     },
-    //     [dispatch],
-    // );
-
     const handleBodyMeasurementsDelete = useCallback(
         async (timestamp: string) => {
             try {
@@ -224,13 +216,6 @@ export default function HomeScreen() {
         },
         [userWeightMeasurements],
     );
-
-    // const getExistingSleepData = useCallback(
-    //     (date: Date) => {
-    //         return userSleepMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
-    //     },
-    //     [userSleepMeasurements],
-    // );
 
     const getExistingBodyMeasurementsData = useCallback(
         (date: Date) => {
@@ -259,7 +244,6 @@ export default function HomeScreen() {
                     dispatch(getSpotlightWorkoutsAsync({ forceRefresh: true })),
                     dispatch(getAllProgramsAsync({ forceRefresh: true })),
                     dispatch(getWeightMeasurementsAsync({ forceRefresh: true })),
-                    // dispatch(getSleepMeasurementsAsync({ forceRefresh: true })),
                     dispatch(getUserNutritionGoalHistoryAsync({ forceRefresh: true })),
                     dispatch(initializeTrackedLiftsHistoryAsync({ forceRefresh: true })),
                     dispatch(getUserAppSettingsAsync({ forceRefresh: true })),
@@ -267,6 +251,8 @@ export default function HomeScreen() {
                     dispatch(getBodyMeasurementsAsync({ forceRefresh: true })),
                     dispatch(getUserExerciseSetModificationsAsync({ forceRefresh: true })),
                     dispatch(getUserExerciseSubstitutionsAsync({ forceRefresh: true })),
+                    // Refresh today's nutrition logs
+                    dispatch(getNutritionLogsAsync({ date: todayDateString, forceRefresh: true })),
                 ]);
                 if (userProgramProgress?.ProgramId) {
                     await dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId, forceRefresh: true }));
@@ -280,7 +266,7 @@ export default function HomeScreen() {
                 refreshTimeoutRef.current = null;
             }, 200);
         }
-    }, [dispatch, isRefreshing, user?.UserId, userProgramProgress?.ProgramId]);
+    }, [dispatch, isRefreshing, user?.UserId, userProgramProgress?.ProgramId, todayDateString]);
 
     // ----- Section Components -------------------------------------------------
     const SectionHeader: React.FC<{ title: string; right?: React.ReactNode }> = ({ title, right }) => (
@@ -296,7 +282,7 @@ export default function HomeScreen() {
                 <ThemedText type='titleLarge'>Nutrition Overview</ThemedText>
             </View>
             <View style={styles.nutritionCard}>
-                <DailyMacrosCard isOnboardingComplete={isOnboardingComplete} />
+                <DailyMacrosCard isOnboardingComplete={isOnboardingComplete} nutritionGoal={activeNutritionGoal} nutritionLog={todayNutritionLog} />
             </View>
         </View>
     );
@@ -465,14 +451,6 @@ export default function HomeScreen() {
                         isLoading={isLoading}
                         getExistingData={getExistingWeightData}
                     />
-
-                    {/* <SleepLoggingSheet
-                        visible={isSleepSheetVisible}
-                        onClose={() => setIsSleepSheetVisible(false)}
-                        onSubmit={handleLogSleep}
-                        onDelete={handleSleepDelete}
-                        getExistingData={getExistingSleepData}
-                    /> */}
 
                     <BodyMeasurementsLoggingSheet
                         visible={isBodyMeasurementsSheetVisible}

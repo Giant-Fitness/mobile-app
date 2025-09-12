@@ -7,10 +7,10 @@ import { LinearProgressBar } from '@/components/charts/LinearProgressBar';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { UserNutritionGoal } from '@/types';
+import { UserNutritionGoal, UserNutritionLog } from '@/types';
 import { addAlpha, darkenColor } from '@/utils/colorUtils';
 import { moderateScale } from '@/utils/scaling';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 // Preview data for when user hasn't completed onboarding
@@ -19,9 +19,9 @@ const PREVIEW_NUTRITION_PROFILE: any = {
     GoalMacros: {
         Protein: 150,
         Carbs: 220,
-        Fats: 75,
+        Fat: 75,
     },
-    WeightGoal: 'maintain', // or whatever your type expects
+    WeightGoal: 'maintain',
 } as any;
 
 const PREVIEW_CONSUMED = {
@@ -41,6 +41,7 @@ interface DailyMacrosCardCompressedProps {
     isOnboardingComplete?: boolean;
     style?: any;
     nutritionGoal: UserNutritionGoal | null;
+    nutritionLog?: UserNutritionLog | null;
 }
 
 interface MacroItemProps {
@@ -98,16 +99,49 @@ const MacroItem: React.FC<MacroItemProps> = ({ label, iconName, current, goal, c
     );
 };
 
-export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps> = ({ nutritionGoal, consumedData, isOnboardingComplete = true, style }) => {
+export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps> = ({
+    nutritionGoal,
+    consumedData,
+    isOnboardingComplete = true,
+    style,
+    nutritionLog,
+}) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
     // Use preview data if not onboarded or no goal
     const goal = isOnboardingComplete ? nutritionGoal : PREVIEW_NUTRITION_PROFILE;
-    const consumed = isOnboardingComplete ? consumedData : PREVIEW_CONSUMED;
+
+    // Calculate consumed values from nutrition log or fallback to passed data
+    const consumed = useMemo(() => {
+        if (!isOnboardingComplete) {
+            return PREVIEW_CONSUMED;
+        }
+
+        // If nutrition log exists, use its daily totals
+        if (nutritionLog && nutritionLog.DailyTotals) {
+            const { DailyTotals } = nutritionLog;
+            return {
+                calories: Math.round(DailyTotals.Calories || 0),
+                protein: Math.round(DailyTotals.Protein || 0),
+                carbs: Math.round(DailyTotals.Carbs || 0),
+                fats: Math.round(DailyTotals.Fats || 0),
+            };
+        }
+
+        // Fallback to passed consumed data or zeros
+        return (
+            consumedData || {
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fats: 0,
+            }
+        );
+    }, [nutritionLog, consumedData, isOnboardingComplete]);
 
     // Don't render if no goal available
-    if (!goal || !consumed) {
+    if (!goal) {
         return null;
     }
 

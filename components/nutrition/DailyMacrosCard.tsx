@@ -6,7 +6,7 @@ import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { RootState } from '@/store/store';
+import { UserNutritionGoal, UserNutritionLog } from '@/types';
 import { addAlpha, darkenColor } from '@/utils/colorUtils';
 import { moderateScale } from '@/utils/scaling';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -16,7 +16,6 @@ import { BlurView } from 'expo-blur';
 import { router } from 'expo-router';
 
 import { trigger } from 'react-native-haptic-feedback';
-import { useSelector } from 'react-redux';
 
 import { Icon } from '../base/Icon';
 import { CircularProgress } from '../charts/CircularProgress';
@@ -26,6 +25,8 @@ const { width: screenWidth } = Dimensions.get('window');
 interface DailyMacrosCardProps {
     style?: any;
     isOnboardingComplete?: boolean;
+    nutritionGoal?: UserNutritionGoal | null;
+    nutritionLog?: UserNutritionLog | null;
 }
 
 // Fake data for preview mode
@@ -34,7 +35,7 @@ const PREVIEW_GOALS: any = {
     GoalMacros: {
         Protein: 150,
         Carbs: 220,
-        Fats: 75,
+        Fat: 75,
     },
 };
 
@@ -109,22 +110,41 @@ const DotIndicator: React.FC<{ isActive: boolean; color: string; backgroundColor
     );
 };
 
-export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboardingComplete = true }) => {
+export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboardingComplete = true, nutritionGoal, nutritionLog }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const scrollViewRef = useRef<ScrollView>(null);
-
-    const { userNutritionGoalHistory } = useSelector((state: RootState) => state.user);
-
-    const activeNutritionGoal = useMemo(() => {
-        return userNutritionGoalHistory?.find((goal) => goal.IsActive) || null;
-    }, [userNutritionGoalHistory]);
 
     // Set initial page based on onboarding status: show macros (page 1) first during onboarding
     const [currentPage, setCurrentPage] = useState(isOnboardingComplete ? 0 : 1);
 
     // Use preview data if not onboarded or no profile
-    const nutritionGoals = isOnboardingComplete ? activeNutritionGoal : PREVIEW_GOALS;
+    const nutritionGoals = isOnboardingComplete ? nutritionGoal : PREVIEW_GOALS;
+
+    // Calculate consumed values from nutrition log
+    const consumedValues = useMemo(() => {
+        if (!nutritionLog || !nutritionLog.DailyTotals) {
+            // Return zeros if no log data
+            if (isOnboardingComplete) {
+                return {
+                    calories: 0,
+                    protein: 0,
+                    carbs: 0,
+                    fats: 0,
+                };
+            }
+            // Return preview data if not onboarded
+            return PREVIEW_CONSUMED;
+        }
+
+        const { DailyTotals } = nutritionLog;
+        return {
+            calories: Math.round(DailyTotals.Calories || 0),
+            protein: Math.round(DailyTotals.Protein || 0),
+            carbs: Math.round(DailyTotals.Carbs || 0),
+            fats: Math.round(DailyTotals.Fats || 0),
+        };
+    }, [nutritionLog, isOnboardingComplete]);
 
     // Scroll to initial page when component mounts or onboarding status changes
     useEffect(() => {
@@ -139,11 +159,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboa
         return null;
     }
 
-    // Use preview consumed values if not onboarded, otherwise use actual data
-    const consumedCalories = isOnboardingComplete ? 150 : PREVIEW_CONSUMED.calories; // Replace with actual consumed data
-    const consumedProtein = isOnboardingComplete ? 155 : PREVIEW_CONSUMED.protein;
-    const consumedCarbs = isOnboardingComplete ? 180 : PREVIEW_CONSUMED.carbs;
-    const consumedFats = isOnboardingComplete ? 45 : PREVIEW_CONSUMED.fats;
+    const { calories: consumedCalories, protein: consumedProtein, carbs: consumedCarbs, fats: consumedFats } = consumedValues;
 
     const remaining = nutritionGoals.GoalCalories - consumedCalories;
     const isOverGoal = consumedCalories > nutritionGoals.GoalCalories;
@@ -154,8 +170,14 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboa
         setCurrentPage(pageIndex);
     };
 
+    const handleCardPress = () => {
+        // Navigate to food log screen
+        trigger('impactLight');
+        router.push('/(app)/(tabs)/food-log');
+    };
+
     const CaloriesView = () => (
-        <View style={[styles.pageContainer, { width: screenWidth }]}>
+        <TouchableOpacity style={[styles.pageContainer, { width: screenWidth }]} onPress={handleCardPress} activeOpacity={0.95}>
             <View style={styles.caloriesSection}>
                 {/* Left: Remaining/Over */}
                 <View style={styles.caloriesLeftSection}>
@@ -199,11 +221,11 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboa
                     </ThemedText>
                 </View>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 
     const MacrosView = () => (
-        <View style={[styles.pageContainer, { width: screenWidth }]}>
+        <TouchableOpacity style={[styles.pageContainer, { width: screenWidth }]} onPress={handleCardPress} activeOpacity={0.95}>
             <View style={styles.macrosSection}>
                 <MacroMeter
                     label='Protein'
@@ -233,7 +255,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboa
                     overageColor={darkenColor(themeColors.fats, 0.4)}
                 />
             </View>
-        </View>
+        </TouchableOpacity>
     );
 
     const OnboardingOverlay = () => (
@@ -263,7 +285,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboa
     );
 
     return (
-        <ThemedView style={[styles.outerContainer, { backgroundColor: themeColors.background }, style]}>
+        <ThemedView style={[styles.outerContainer, { backgroundColor: 'transparent' }, style]}>
             <ScrollView
                 ref={scrollViewRef}
                 horizontal

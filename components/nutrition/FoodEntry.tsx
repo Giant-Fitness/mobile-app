@@ -29,20 +29,25 @@ interface FoodEntryProps {
     onEdit: (food: FoodEntryData) => void;
     onDelete: (foodId: string) => void;
     style?: any;
+    enableSwipeToDelete?: boolean; // Feature flag for swipe-to-delete
 }
 
-export const FoodEntry: React.FC<FoodEntryProps> = ({ food, onEdit, onDelete, style }) => {
+export const FoodEntry: React.FC<FoodEntryProps> = ({ food, onEdit, onDelete, style, enableSwipeToDelete = false }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
     const translateX = useSharedValue(0);
+    const isHorizontalPan = useSharedValue(false);
+
     const SWIPE_THRESHOLD = -20; // How far to swipe before snapping to delete
     const DELETE_WIDTH = 40; // Width of delete area
     const MAX_SWIPE = -DELETE_WIDTH; // Maximum swipe distance
+    const DIRECTION_LOCK_THRESHOLD = 10; // Pixels to determine gesture direction
 
     const resetPosition = () => {
         'worklet';
         translateX.value = withSpring(0);
+        isHorizontalPan.value = false;
     };
 
     const showDeleteButton = () => {
@@ -53,126 +58,152 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({ food, onEdit, onDelete, st
     const handleEdit = () => {
         trigger('impactLight');
         onEdit(food);
-        resetPosition();
+        if (enableSwipeToDelete) {
+            resetPosition();
+        }
     };
 
     const handleDelete = () => {
         trigger('impactMedium');
         onDelete(food.id);
-        resetPosition();
+        if (enableSwipeToDelete) {
+            resetPosition();
+        }
     };
 
     // Pan gesture for the food item swipe-to-delete
     const panGesture = Gesture.Pan()
+        .onStart(() => {
+            isHorizontalPan.value = false;
+        })
         .onUpdate((event) => {
-            // Only allow swiping left (negative translation)
-            // Clamp between MAX_SWIPE and 0
-            const newValue = Math.max(MAX_SWIPE, Math.min(0, event.translationX));
-            translateX.value = newValue;
+            const absX = Math.abs(event.translationX);
+            const absY = Math.abs(event.translationY);
+
+            // Determine gesture direction only if we haven't locked in yet
+            if (!isHorizontalPan.value && (absX > DIRECTION_LOCK_THRESHOLD || absY > DIRECTION_LOCK_THRESHOLD)) {
+                // Lock in horizontal pan only if horizontal movement is significantly more than vertical
+                if (absX > absY * 1.5 && absX > DIRECTION_LOCK_THRESHOLD) {
+                    isHorizontalPan.value = true;
+                }
+            }
+
+            // Only update translation if this is confirmed as a horizontal pan
+            if (isHorizontalPan.value) {
+                // Only allow swiping left (negative translation)
+                // Clamp between MAX_SWIPE and 0
+                const newValue = Math.max(MAX_SWIPE, Math.min(0, event.translationX));
+                translateX.value = newValue;
+            }
         })
         .onEnd((event) => {
-            const shouldShowDelete = event.translationX < SWIPE_THRESHOLD || event.velocityX < -300; // Lower velocity threshold for food items
+            if (isHorizontalPan.value) {
+                const shouldShowDelete = event.translationX < SWIPE_THRESHOLD || event.velocityX < -300;
 
-            if (shouldShowDelete) {
-                showDeleteButton();
+                if (shouldShowDelete) {
+                    showDeleteButton();
+                } else {
+                    resetPosition();
+                }
             } else {
+                // Not a horizontal pan, reset position
                 resetPosition();
             }
         })
-        // This is key: make it fail if the gesture is more vertical than horizontal
-        // This allows the parent scroll to take precedence for vertical gestures
-        .failOffsetY([-15, 15]);
+        // Fail the gesture if vertical movement is too dominant early on
+        .failOffsetY([-10, 10])
+        // Make this gesture less aggressive in claiming touches
+        .shouldCancelWhenOutside(true);
 
     const animatedStyle = useAnimatedStyle(() => ({
         transform: [{ translateX: translateX.value }],
     }));
 
+    const contentComponent = (
+        <Animated.View
+            style={[
+                styles.content,
+                {
+                    backgroundColor: themeColors.background,
+                },
+                enableSwipeToDelete ? animatedStyle : {},
+            ]}
+        >
+            <TouchableOpacity style={styles.mainContent} onPress={handleEdit} activeOpacity={0.95}>
+                <View style={styles.foodInfo}>
+                    <ThemedText type='body' style={styles.foodName}>
+                        {food.name}
+                    </ThemedText>
+
+                    {/* Nutrition line with icons (like MealSection) + portion size */}
+                    <View style={styles.nutritionRow}>
+                        {/* Calories */}
+                        <View style={styles.nutritionItem}>
+                            <Icon name='flame' size={11} color={themeColors.iconDefault} />
+                            <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
+                                {Math.round(food.calories)}
+                            </ThemedText>
+                        </View>
+
+                        {/* Protein */}
+                        <View style={styles.nutritionItem}>
+                            <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
+                                {Math.round(food.protein)}P
+                            </ThemedText>
+                        </View>
+
+                        {/* Carbs */}
+                        <View style={styles.nutritionItem}>
+                            <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
+                                {Math.round(food.carbs)}C
+                            </ThemedText>
+                        </View>
+
+                        {/* Fats */}
+                        <View style={styles.nutritionItem}>
+                            <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
+                                {Math.round(food.fats)}F
+                            </ThemedText>
+                        </View>
+
+                        {/* Dot separator */}
+                        <View style={styles.dotSeparator}>
+                            <ThemedText style={[styles.dot, { color: themeColors.subText }]}>•</ThemedText>
+                        </View>
+
+                        {/* Portion size with ellipsis */}
+                        <View style={styles.portionContainer}>
+                            <ThemedText type='bodySmall' style={[styles.portionSize, { color: themeColors.subText }]} numberOfLines={1} ellipsizeMode='tail'>
+                                {food.portionSize}
+                            </ThemedText>
+                        </View>
+                    </View>
+                </View>
+
+                <View style={styles.rightSection}>
+                    <View style={[styles.editButton, { backgroundColor: themeColors.backgroundSecondary }]}>
+                        <Icon name='edit' size={Sizes.iconSizeXS} color={themeColors.iconDefault} />
+                    </View>
+                </View>
+            </TouchableOpacity>
+        </Animated.View>
+    );
+
     return (
         <View style={[styles.container, style]}>
-            {/* Delete button - always rendered, positioned off-screen */}
-            <View style={[styles.deleteButton, { backgroundColor: themeColors.backgroundSecondary }]}>
-                <TouchableOpacity style={styles.deleteButtonTouchable} onPress={handleDelete} activeOpacity={1}>
-                    <View style={[styles.deleteButtonTouchable, { backgroundColor: themeColors.iconDefault }]}>
-                        <Icon name='delete' size={Sizes.iconSizeXS} color={themeColors.background} />
-                    </View>
-                </TouchableOpacity>
-            </View>
-
-            {/* Main content with gesture detector */}
-            <GestureDetector gesture={panGesture}>
-                <Animated.View
-                    style={[
-                        styles.content,
-                        {
-                            backgroundColor: themeColors.background,
-                        },
-                        animatedStyle,
-                    ]}
-                >
-                    <TouchableOpacity style={styles.mainContent} onPress={handleEdit} activeOpacity={0.95}>
-                        <View style={styles.foodInfo}>
-                            <ThemedText type='body' style={styles.foodName}>
-                                {food.name}
-                            </ThemedText>
-
-                            {/* Nutrition line with icons (like MealSection) + portion size */}
-                            <View style={styles.nutritionRow}>
-                                {/* Calories */}
-                                <View style={styles.nutritionItem}>
-                                    <Icon name='flame' size={11} color={themeColors.iconDefault} />
-                                    <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
-                                        {Math.round(food.calories)}
-                                    </ThemedText>
-                                </View>
-
-                                {/* Protein */}
-                                <View style={styles.nutritionItem}>
-                                    <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
-                                        {Math.round(food.protein)}P
-                                    </ThemedText>
-                                </View>
-
-                                {/* Carbs */}
-                                <View style={styles.nutritionItem}>
-                                    <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
-                                        {Math.round(food.carbs)}C
-                                    </ThemedText>
-                                </View>
-
-                                {/* Fats */}
-                                <View style={styles.nutritionItem}>
-                                    <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
-                                        {Math.round(food.fats)}F
-                                    </ThemedText>
-                                </View>
-
-                                {/* Dot separator */}
-                                <View style={styles.dotSeparator}>
-                                    <ThemedText style={[styles.dot, { color: themeColors.subText }]}>•</ThemedText>
-                                </View>
-
-                                {/* Portion size with ellipsis */}
-                                <View style={styles.portionContainer}>
-                                    <ThemedText
-                                        type='bodySmall'
-                                        style={[styles.portionSize, { color: themeColors.subText }]}
-                                        numberOfLines={1}
-                                        ellipsizeMode='tail'
-                                    >
-                                        {food.portionSize}
-                                    </ThemedText>
-                                </View>
-                            </View>
-                        </View>
-
-                        <View style={styles.rightSection}>
-                            <View style={[styles.editButton, { backgroundColor: themeColors.backgroundSecondary }]}>
-                                <Icon name='edit' size={Sizes.iconSizeXS} color={themeColors.iconDefault} />
-                            </View>
+            {/* Delete button - only rendered when swipe-to-delete is enabled */}
+            {enableSwipeToDelete && (
+                <View style={[styles.deleteButton, { backgroundColor: themeColors.backgroundSecondary }]}>
+                    <TouchableOpacity style={styles.deleteButtonTouchable} onPress={handleDelete} activeOpacity={1}>
+                        <View style={[styles.deleteButtonTouchable, { backgroundColor: themeColors.iconDefault }]}>
+                            <Icon name='delete' size={Sizes.iconSizeXS} color={themeColors.background} />
                         </View>
                     </TouchableOpacity>
-                </Animated.View>
-            </GestureDetector>
+                </View>
+            )}
+
+            {/* Main content with optional gesture detector */}
+            {enableSwipeToDelete ? <GestureDetector gesture={panGesture}>{contentComponent}</GestureDetector> : contentComponent}
         </View>
     );
 };

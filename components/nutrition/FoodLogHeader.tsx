@@ -9,7 +9,7 @@ import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { RootState } from '@/store/store';
-import { UserNutritionGoal, UserNutritionProfile } from '@/types';
+import { UserNutritionGoal, UserNutritionLog, UserNutritionProfile } from '@/types';
 import React, { useMemo } from 'react';
 import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 
@@ -36,6 +36,7 @@ interface FoodLogHeaderProps {
         carbs: number;
         fats: number;
     };
+    nutritionLog?: UserNutritionLog | null;
     headerInterpolationStart?: number;
     headerInterpolationEnd?: number;
 }
@@ -88,6 +89,7 @@ export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({
     scrollY,
     dateNavigation,
     consumedData,
+    nutritionLog,
     headerInterpolationStart = 100,
     headerInterpolationEnd = 200,
 }) => {
@@ -106,6 +108,33 @@ export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({
 
         return getGoalForDate(userNutritionGoalHistory, dateNavigation.selectedDate);
     }, [userNutritionGoalHistory, dateNavigation.selectedDate]);
+
+    // Calculate actual consumed data from nutrition log if available
+    const actualConsumedData = useMemo(() => {
+        if (!isOnboardingComplete) {
+            // Use preview data for non-onboarded users
+            return consumedData;
+        }
+
+        if (!nutritionLog || !nutritionLog.DailyTotals) {
+            // No data for this date, return zeros
+            return {
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fats: 0,
+            };
+        }
+
+        // Use actual data from nutrition log
+        const { DailyTotals } = nutritionLog;
+        return {
+            calories: Math.round(DailyTotals.Calories || 0),
+            protein: Math.round(DailyTotals.Protein || 0),
+            carbs: Math.round(DailyTotals.Carbs || 0),
+            fats: Math.round(DailyTotals.Fats || 0),
+        };
+    }, [nutritionLog, consumedData, isOnboardingComplete]);
 
     const CALENDAR_HEIGHT = 60;
 
@@ -170,7 +199,7 @@ export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({
     const animatedHeaderStyle = useAnimatedStyle(() => {
         return {
             backgroundColor: themeColors.background,
-            height: animatedHeaderHeight.value, // Add dynamic height
+            height: animatedHeaderHeight.value,
         };
     });
 
@@ -240,9 +269,10 @@ export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({
             {selectedDateNutritionGoal && (
                 <Animated.View style={[styles.macrosContainer, animatedMacrosStyle]}>
                     <DailyMacrosCardCompressed
-                        consumedData={consumedData}
+                        consumedData={actualConsumedData}
                         isOnboardingComplete={isOnboardingComplete}
                         nutritionGoal={selectedDateNutritionGoal}
+                        nutritionLog={nutritionLog}
                     />
                 </Animated.View>
             )}

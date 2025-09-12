@@ -2,6 +2,7 @@
 
 import { REQUEST_STATE } from '@/constants/requestStates';
 import {
+    addFoodEntryAsync,
     completeDayAsync,
     completeUserProfileAsync,
     createExerciseSetModificationAsync,
@@ -10,11 +11,15 @@ import {
     deleteBodyMeasurementAsync,
     deleteExerciseSetModificationAsync,
     deleteExerciseSubstitutionAsync,
+    deleteFoodEntryAsync,
     deleteSleepMeasurementAsync,
+    deleteSpecificDayLogAsync,
     deleteWeightMeasurementAsync,
     endProgramAsync,
     getBodyMeasurementsAsync,
+    getNutritionLogsAsync,
     getSleepMeasurementsAsync,
+    getSpecificDayLogAsync,
     getUserAppSettingsAsync,
     getUserAsync,
     getUserExerciseSetModificationsAsync,
@@ -35,6 +40,7 @@ import {
     updateBodyMeasurementAsync,
     updateExerciseSetModificationAsync,
     updateExerciseSubstitutionAsync,
+    updateFoodEntryAsync,
     updateSleepMeasurementAsync,
     updateUserAppSettingsAsync,
     updateUserAsync,
@@ -45,7 +51,9 @@ import {
 } from '@/store/user/thunks';
 import { initialState } from '@/store/user/userState';
 import {
+    AddFoodEntryResponse,
     CompleteProfileResponse,
+    UpdateFoodEntryResponse,
     User,
     UserAppSettings,
     UserBodyMeasurement,
@@ -53,6 +61,7 @@ import {
     UserExerciseSubstitution,
     UserFitnessProfile,
     UserNutritionGoal,
+    UserNutritionLog,
     UserNutritionPreferences,
     UserNutritionProfile,
     UserProgramProgress,
@@ -682,6 +691,94 @@ const userSlice = createSlice({
             .addCase(createNutritionGoalEntryAsync.rejected, (state, action) => {
                 state.userNutritionGoalHistoryState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'Failed to create nutrition goal entry';
+            })
+            // Get Nutrition Logs
+            .addCase(getNutritionLogsAsync.pending, (state) => {
+                state.userNutritionLogsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(getNutritionLogsAsync.fulfilled, (state, action: PayloadAction<{ date: string; nutritionLog: UserNutritionLog | null }>) => {
+                state.userNutritionLogsState = REQUEST_STATE.FULFILLED;
+                state.userNutritionLogs[action.payload.date] = action.payload.nutritionLog;
+            })
+
+            .addCase(getNutritionLogsAsync.rejected, (state, action) => {
+                state.userNutritionLogsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to fetch nutrition logs';
+            })
+
+            // Get Specific Day Log
+            .addCase(getSpecificDayLogAsync.pending, (state) => {
+                state.userNutritionLogsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(getSpecificDayLogAsync.fulfilled, (state, action: PayloadAction<{ date: string; nutritionLog: UserNutritionLog | null }>) => {
+                state.userNutritionLogsState = REQUEST_STATE.FULFILLED;
+                state.userNutritionLogs[action.payload.date] = action.payload.nutritionLog;
+            })
+            .addCase(getSpecificDayLogAsync.rejected, (state, action) => {
+                state.userNutritionLogsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to fetch specific day log';
+            })
+
+            // Add Food Entry
+            .addCase(addFoodEntryAsync.pending, (state) => {
+                state.userNutritionLogsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(addFoodEntryAsync.fulfilled, (state, action: PayloadAction<AddFoodEntryResponse & { date: string }>) => {
+                state.userNutritionLogsState = REQUEST_STATE.FULFILLED;
+                // Update the specific date's nutrition log with the new entry
+                state.userNutritionLogs[action.payload.date] = action.payload.nutritionLog;
+            })
+            .addCase(addFoodEntryAsync.rejected, (state, action) => {
+                state.userNutritionLogsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to add food entry';
+            })
+
+            // Update Food Entry
+            .addCase(updateFoodEntryAsync.pending, (state) => {
+                state.userNutritionLogsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(updateFoodEntryAsync.fulfilled, (state, action: PayloadAction<UpdateFoodEntryResponse & { date: string }>) => {
+                state.userNutritionLogsState = REQUEST_STATE.FULFILLED;
+                // Update the specific date's nutrition log with the updated entry
+                state.userNutritionLogs[action.payload.date] = action.payload.nutritionLog;
+            })
+            .addCase(updateFoodEntryAsync.rejected, (state, action) => {
+                state.userNutritionLogsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to update food entry';
+            })
+
+            // Delete Food Entry
+            .addCase(deleteFoodEntryAsync.pending, (state) => {
+                state.userNutritionLogsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(deleteFoodEntryAsync.fulfilled, (state, action: PayloadAction<{ date: string; nutritionLog: UserNutritionLog }>) => {
+                state.userNutritionLogsState = REQUEST_STATE.FULFILLED;
+                // Update the specific date's nutrition log after deletion
+                state.userNutritionLogs[action.payload.date] = action.payload.nutritionLog;
+            })
+            .addCase(deleteFoodEntryAsync.rejected, (state, action) => {
+                state.userNutritionLogsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to delete food entry';
+            })
+
+            // Delete Specific Day Log
+            .addCase(deleteSpecificDayLogAsync.pending, (state) => {
+                state.userNutritionLogsState = REQUEST_STATE.PENDING;
+                state.error = null;
+            })
+            .addCase(deleteSpecificDayLogAsync.fulfilled, (state, action: PayloadAction<{ date: string }>) => {
+                state.userNutritionLogsState = REQUEST_STATE.FULFILLED;
+                // Remove the specific date's nutrition log from state
+                delete state.userNutritionLogs[action.payload.date];
+            })
+            .addCase(deleteSpecificDayLogAsync.rejected, (state, action) => {
+                state.userNutritionLogsState = REQUEST_STATE.REJECTED;
+                state.error = action.error.message || 'Failed to delete day log';
             });
     },
 });

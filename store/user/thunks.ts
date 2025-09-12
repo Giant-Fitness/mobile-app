@@ -4,12 +4,16 @@ import { REQUEST_STATE } from '@/constants/requestStates';
 import { RootState } from '@/store/store';
 import UserService from '@/store/user/service';
 import {
+    AddFoodEntryParams,
+    AddFoodEntryResponse,
     CompleteProfileParams,
     CompleteProfileResponse,
     CreateSetModificationParams,
     CreateSubstitutionParams,
     GetSetModificationsParams,
     GetSubstitutionsParams,
+    UpdateFoodEntryParams,
+    UpdateFoodEntryResponse,
     UpdateSetModificationParams,
     UpdateSubstitutionParams,
     User,
@@ -19,6 +23,7 @@ import {
     UserExerciseSubstitution,
     UserFitnessProfile,
     UserNutritionGoal,
+    UserNutritionLog,
     UserNutritionPreferences,
     UserNutritionProfile,
     UserProgramProgress,
@@ -1559,6 +1564,233 @@ export const createNutritionGoalEntryAsync = createAsyncThunk<
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to create nutrition goal entry',
+        });
+    }
+});
+
+// Nutrition Logs Thunks
+export const getNutritionLogsAsync = createAsyncThunk<
+    { date: string; nutritionLog: UserNutritionLog | null },
+    { date: string; forceRefresh?: boolean; useCache?: boolean },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/getNutritionLogs', async ({ date, forceRefresh = false, useCache = true }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Check Redux state first (unless forcing refresh)
+        if (!forceRefresh && state.user.userNutritionLogs[date]) {
+            console.log(`Loaded nutrition logs for ${date} from Redux state`);
+            return { date, nutritionLog: state.user.userNutritionLogs[date] };
+        }
+
+        // Check cache first if enabled and not forcing refresh
+        if (useCache && !forceRefresh) {
+            const cacheKey = `nutrition_logs_${date}`;
+            const cached = await cacheService.get<UserNutritionLog>(cacheKey);
+            const isExpired = await cacheService.isExpired(cacheKey);
+
+            if (cached !== null && !isExpired) {
+                console.log(`Loaded nutrition logs for ${date} from cache`);
+                return { date, nutritionLog: cached };
+            }
+        }
+
+        console.log(`Loading nutrition logs for ${date} from API`);
+        const nutritionLog = await UserService.getNutritionLogs(userId, date);
+
+        // Cache the result if useCache is enabled (cache null values too!)
+        if (useCache) {
+            const cacheKey = `nutrition_logs_${date}`;
+            await cacheService.set(cacheKey, nutritionLog, CacheTTL.SHORT);
+        }
+
+        return { date, nutritionLog };
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch nutrition logs',
+        });
+    }
+});
+
+export const getSpecificDayLogAsync = createAsyncThunk<
+    { date: string; nutritionLog: UserNutritionLog | null },
+    { date: string; forceRefresh?: boolean; useCache?: boolean },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/getSpecificDayLog', async ({ date, forceRefresh = false, useCache = true }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Check Redux state first (unless forcing refresh)
+        if (!forceRefresh && state.user.userNutritionLogs[date]) {
+            console.log(`Loaded specific day log for ${date} from Redux state`);
+            return { date, nutritionLog: state.user.userNutritionLogs[date] };
+        }
+
+        // Check cache first if enabled and not forcing refresh
+        if (useCache && !forceRefresh) {
+            const cacheKey = `nutrition_logs_${date}`;
+            const cached = await cacheService.get<UserNutritionLog>(cacheKey);
+            const isExpired = await cacheService.isExpired(cacheKey);
+
+            if (cached !== null && !isExpired) {
+                console.log(`Loaded specific day log for ${date} from cache`);
+                return { date, nutritionLog: cached };
+            }
+        }
+
+        console.log(`Loading specific day log for ${date} from API`);
+        const nutritionLog = await UserService.getSpecificDayLog(userId, date);
+
+        // Cache the result if useCache is enabled (cache null values too!)
+        if (useCache) {
+            const cacheKey = `nutrition_logs_${date}`;
+            await cacheService.set(cacheKey, nutritionLog, CacheTTL.SHORT);
+        }
+
+        return { date, nutritionLog };
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch specific day log',
+        });
+    }
+});
+
+export const addFoodEntryAsync = createAsyncThunk<
+    AddFoodEntryResponse & { date: string },
+    { date: string; entryData: AddFoodEntryParams },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/addFoodEntry', async ({ date, entryData }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Add the food entry
+        const result = await UserService.addFoodEntry(userId, date, entryData);
+
+        // Invalidate cache after adding entry
+        const cacheKey = `nutrition_logs_${date}`;
+        await cacheService.remove(cacheKey);
+
+        return { ...result, date };
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to add food entry',
+        });
+    }
+});
+
+export const updateFoodEntryAsync = createAsyncThunk<
+    UpdateFoodEntryResponse & { date: string },
+    { date: string; entryKey: string; updates: UpdateFoodEntryParams },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/updateFoodEntry', async ({ date, entryKey, updates }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Update the food entry
+        const result = await UserService.updateFoodEntry(userId, date, entryKey, updates);
+
+        // Invalidate cache after updating entry
+        const cacheKey = `nutrition_logs_${date}`;
+        await cacheService.remove(cacheKey);
+
+        return { ...result, date };
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to update food entry',
+        });
+    }
+});
+
+export const deleteFoodEntryAsync = createAsyncThunk<
+    { date: string; nutritionLog: UserNutritionLog },
+    { date: string; entryKey: string },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/deleteFoodEntry', async ({ date, entryKey }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Delete the food entry
+        const nutritionLog = await UserService.deleteFoodEntry(userId, date, entryKey);
+
+        // Invalidate cache after deleting entry
+        const cacheKey = `nutrition_logs_${date}`;
+        await cacheService.remove(cacheKey);
+
+        return { date, nutritionLog };
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to delete food entry',
+        });
+    }
+});
+
+export const deleteSpecificDayLogAsync = createAsyncThunk<
+    { date: string },
+    { date: string },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/deleteSpecificDayLog', async ({ date }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Delete the entire day's log
+        await UserService.deleteSpecificDayLog(userId, date);
+
+        // Invalidate cache after deleting day log
+        const cacheKey = `nutrition_logs_${date}`;
+        await cacheService.remove(cacheKey);
+
+        return { date };
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to delete day log',
         });
     }
 });

@@ -58,7 +58,7 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
     const dashArray = isFullCircle ? circumference : `${circumference} ${2 * Math.PI * radius}`;
 
     // Calculate progress values
-    let goalProgress, overageProgress, goalRotateAngle;
+    let goalProgress, overageProgress;
 
     if (isFullCircle && isOverGoal) {
         const totalPercentage = (current / goal) * 100;
@@ -70,27 +70,23 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
                 strokeColor: overageColor ? overColor : color, // Use overage color if specified
             };
             overageProgress = null;
-            goalRotateAngle = rotateAngle;
         } else {
             // Between 100% and 200%
             const overagePercentage = totalPercentage - 100;
-            const cappedOveragePercentage = Math.min(overagePercentage, 100);
-            const remainingGoalPercentage = 100 - cappedOveragePercentage;
 
-            // Overage progress: use overage color if specified, otherwise use main color with opacity
-            overageProgress = {
-                strokeDashoffset: circumference - (circumference * cappedOveragePercentage) / 100,
-                strokeColor: overColor,
-                opacity: overageColor ? 1 : 0.5, // Full opacity if custom overage color, otherwise transparent
+            // Main progress: always show 100% when over goal
+            goalProgress = {
+                strokeDashoffset: 0, // Full circle for main progress
+                strokeColor: color,
             };
 
-            // Main progress: show remaining goal percentage, rotated to start after overage
-            const overageAngle = (cappedOveragePercentage / 100) * 360;
-            goalRotateAngle = rotateAngle + overageAngle;
-
-            goalProgress = {
-                strokeDashoffset: circumference - (circumference * remainingGoalPercentage) / 100,
-                strokeColor: color,
+            // Overage progress: start from beginning and extend to show overage amount
+            // This will be rendered first, so the beginning will be hidden under main progress
+            // but the end will be visible extending beyond the main progress
+            overageProgress = {
+                strokeDashoffset: circumference - (circumference * overagePercentage) / 100,
+                strokeColor: overColor,
+                opacity: overageColor ? 1 : 0.7, // Slightly more opaque for better visibility
             };
         }
     } else {
@@ -101,7 +97,6 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
             strokeColor: color,
         };
         overageProgress = null;
-        goalRotateAngle = rotateAngle;
     }
 
     return (
@@ -120,7 +115,21 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
                     transform={`rotate(${rotateAngle} ${size / 2} ${size / 2})`}
                 />
 
-                {/* Overage Progress (only for full circles when over goal) - render first */}
+                {/* Goal Progress - render on top to hide beginning of overage */}
+                <Circle
+                    cx={size / 2}
+                    cy={size / 2}
+                    r={radius}
+                    stroke={goalProgress.strokeColor}
+                    strokeWidth={strokeWidth}
+                    fill='transparent'
+                    strokeDasharray={dashArray}
+                    strokeDashoffset={goalProgress.strokeDashoffset}
+                    strokeLinecap='round'
+                    transform={`rotate(${rotateAngle} ${size / 2} ${size / 2})`}
+                />
+
+                {/* Overage Progress */}
                 {overageProgress && (
                     <Circle
                         cx={size / 2}
@@ -136,20 +145,6 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
                         transform={`rotate(${rotateAngle} ${size / 2} ${size / 2})`}
                     />
                 )}
-
-                {/* Goal Progress */}
-                <Circle
-                    cx={size / 2}
-                    cy={size / 2}
-                    r={radius}
-                    stroke={goalProgress.strokeColor}
-                    strokeWidth={strokeWidth}
-                    fill='transparent'
-                    strokeDasharray={dashArray}
-                    strokeDashoffset={goalProgress.strokeDashoffset}
-                    strokeLinecap='round'
-                    transform={`rotate(${goalRotateAngle} ${size / 2} ${size / 2})`}
-                />
             </Svg>
             {showContent && <View style={[styles.circularContent, { marginTop: isFullCircle ? 0 : -Spaces.MD }]}>{children}</View>}
         </View>
