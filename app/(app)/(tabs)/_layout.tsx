@@ -138,7 +138,7 @@ export default function TabLayout() {
                     name='food-log'
                     options={{
                         headerShown: false,
-                        title: 'Food Log',
+                        title: 'Food Diary',
                         tabBarIcon: ({ color, focused }) => <Icon name={focused ? 'food-log-active' : 'food-log-inactive'} size={20} color={color} />,
                     }}
                 />

@@ -27,8 +27,8 @@ import {
     deleteBodyMeasurementAsync,
     // deleteSleepMeasurementAsync,
     deleteWeightMeasurementAsync,
+    getAllNutritionLogsAsync,
     getBodyMeasurementsAsync,
-    getNutritionLogsAsync,
     // getSleepMeasurementsAsync,
     getUserAppSettingsAsync,
     getUserAsync,
@@ -81,9 +81,10 @@ export default function HomeScreen() {
     const isMountedAndFocused = useRef(true);
     const refreshTimeoutRef = useRef<number | null>(null);
 
-    // Store slices
-    const { user, userWeightMeasurements, userBodyMeasurements, userRecommendations, userAppSettings, userNutritionGoalHistory, userNutritionLogs } =
-        useSelector((state: RootState) => state.user);
+    // Store slices - removed userNutritionLogs since it's handled by the hook
+    const { user, userWeightMeasurements, userBodyMeasurements, userRecommendations, userAppSettings, userNutritionGoalHistory } = useSelector(
+        (state: RootState) => state.user,
+    );
     const { programs } = useSelector((state: RootState) => state.programs);
 
     const { user: programUser, userProgramProgress, hasCompletedWorkoutToday } = useProgramData();
@@ -94,17 +95,6 @@ export default function HomeScreen() {
     const activeNutritionGoal = useMemo(() => {
         return userNutritionGoalHistory?.find((goal) => goal.IsActive) || null;
     }, [userNutritionGoalHistory]);
-
-    // Get today's date in YYYY-MM-DD format
-    const todayDateString = useMemo(() => {
-        const today = new Date();
-        return today.toISOString().split('T')[0];
-    }, []);
-
-    // Get today's nutrition log
-    const todayNutritionLog = useMemo(() => {
-        return userNutritionLogs[todayDateString] || null;
-    }, [userNutritionLogs, todayDateString]);
 
     const { activeProgram, hasActiveProgram, recommendedProgram, weightGoal } = useMemo(() => {
         const rec = userRecommendations?.RecommendedProgramID ? programs[userRecommendations.RecommendedProgramID] : null;
@@ -123,14 +113,7 @@ export default function HomeScreen() {
     // Greeting
     const greeting = programUser?.FirstName ? `Hi, ${programUser.FirstName}!` : 'Hi!';
 
-    // ----- Load today's nutrition logs on mount/focus -------------------------
-    useFocusEffect(
-        useCallback(() => {
-            if (user?.UserId && isOnboardingComplete) {
-                dispatch(getNutritionLogsAsync({ date: todayDateString, useCache: true }));
-            }
-        }, [dispatch, user?.UserId, isOnboardingComplete, todayDateString]),
-    );
+    // ----- Removed the old nutrition log loading useFocusEffect since the hook handles it -----
 
     // ----- Scroll handler -----------------------------------------------------
     const scrollHandler = useAnimatedScrollHandler({
@@ -224,6 +207,7 @@ export default function HomeScreen() {
         [userBodyMeasurements],
     );
 
+    // Updated handleRefresh to use the nutrition log hook's refetch function
     const handleRefresh = useCallback(async () => {
         if (isRefreshing) return;
         setIsRefreshing(true);
@@ -251,9 +235,9 @@ export default function HomeScreen() {
                     dispatch(getBodyMeasurementsAsync({ forceRefresh: true })),
                     dispatch(getUserExerciseSetModificationsAsync({ forceRefresh: true })),
                     dispatch(getUserExerciseSubstitutionsAsync({ forceRefresh: true })),
-                    // Refresh today's nutrition logs
-                    dispatch(getNutritionLogsAsync({ date: todayDateString, forceRefresh: true })),
+                    dispatch(getAllNutritionLogsAsync({ forceRefresh: true })),
                 ]);
+
                 if (userProgramProgress?.ProgramId) {
                     await dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId, forceRefresh: true }));
                 }
@@ -266,7 +250,7 @@ export default function HomeScreen() {
                 refreshTimeoutRef.current = null;
             }, 200);
         }
-    }, [dispatch, isRefreshing, user?.UserId, userProgramProgress?.ProgramId, todayDateString]);
+    }, [dispatch, isRefreshing, user?.UserId, userProgramProgress?.ProgramId, isOnboardingComplete]);
 
     // ----- Section Components -------------------------------------------------
     const SectionHeader: React.FC<{ title: string; right?: React.ReactNode }> = ({ title, right }) => (
@@ -282,7 +266,7 @@ export default function HomeScreen() {
                 <ThemedText type='titleLarge'>Nutrition Overview</ThemedText>
             </View>
             <View style={styles.nutritionCard}>
-                <DailyMacrosCard isOnboardingComplete={isOnboardingComplete} nutritionGoal={activeNutritionGoal} nutritionLog={todayNutritionLog} />
+                <DailyMacrosCard isOnboardingComplete={isOnboardingComplete} nutritionGoal={activeNutritionGoal} />
             </View>
         </View>
     );

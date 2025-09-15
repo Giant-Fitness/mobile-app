@@ -3,22 +3,21 @@
 import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { FoodEntry, FoodEntryData } from '@/components/nutrition/FoodEntry';
+import { FoodItem } from '@/components/nutrition/FoodItem';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { FoodEntry, MealType } from '@/types';
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { trigger } from 'react-native-haptic-feedback';
 
-export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snacks';
-
 interface MealSectionProps {
     mealType: MealType;
-    foods: FoodEntryData[];
+    foods: FoodEntry[];
     onQuickAdd: (mealType: MealType) => void;
-    onEditFood: (food: FoodEntryData) => void;
+    onEditFood: (food: FoodEntry) => void;
     onDeleteFood: (foodId: string) => void;
     isExpanded?: boolean;
     onToggleExpand?: (mealType: MealType) => void;
@@ -28,13 +27,13 @@ interface MealSectionProps {
 
 const getMealDisplayName = (mealType: MealType): string => {
     switch (mealType) {
-        case 'breakfast':
+        case 'BREAKFAST':
             return 'Breakfast';
-        case 'lunch':
+        case 'LUNCH':
             return 'Lunch';
-        case 'dinner':
+        case 'DINNER':
             return 'Dinner';
-        case 'snacks':
+        case 'SNACK':
             return 'Snacks';
         default:
             return mealType;
@@ -58,12 +57,12 @@ export const MealSection: React.FC<MealSectionProps> = ({
     // Calculate totals
     const totals = foods.reduce(
         (acc, food) => ({
-            calories: acc.calories + food.calories,
-            protein: acc.protein + food.protein,
-            carbs: acc.carbs + food.carbs,
-            fats: acc.fats + food.fats,
+            calories: acc.calories + food.QuickMacros.Calories,
+            protein: acc.protein + food.QuickMacros.Protein,
+            carbs: acc.carbs + food.QuickMacros.Carbs,
+            fat: acc.fat + food.QuickMacros.Fat,
         }),
-        { calories: 0, protein: 0, carbs: 0, fats: 0 },
+        { calories: 0, protein: 0, carbs: 0, fat: 0 },
     );
 
     const handleQuickAdd = () => {
@@ -167,8 +166,8 @@ export const MealSection: React.FC<MealSectionProps> = ({
                                     </View>
                                 )}
 
-                                {/* Fats */}
-                                {totals.fats > 0 && (
+                                {/* Fat */}
+                                {totals.fat > 0 && (
                                     <View style={styles.nutritionItem}>
                                         <View style={[styles.macroIconContainer, { backgroundColor: themeColors.surfaceDark }]}>
                                             <ThemedText type='button' style={[styles.macroLetter, { color: themeColors.text }]}>
@@ -176,7 +175,7 @@ export const MealSection: React.FC<MealSectionProps> = ({
                                             </ThemedText>
                                         </View>
                                         <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.text }]}>
-                                            {Math.round(totals.fats)}
+                                            {Math.round(totals.fat)}
                                         </ThemedText>
                                     </View>
                                 )}
@@ -204,9 +203,9 @@ export const MealSection: React.FC<MealSectionProps> = ({
                         {hasFood ? (
                             <View style={styles.foodList}>
                                 {foods.map((food, index) => (
-                                    <React.Fragment key={food.id}>
-                                        <FoodEntry
-                                            key={`${food.id}-${selectedDate.toISOString()}`} // Include date in key to reset state
+                                    <React.Fragment key={food.FoodId}>
+                                        <FoodItem
+                                            key={`${food.FoodId}-${selectedDate.toISOString()}`} // Include date in key to reset state
                                             food={food}
                                             onEdit={onEditFood}
                                             onDelete={onDeleteFood}

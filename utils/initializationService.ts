@@ -17,6 +17,7 @@ import { getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/th
 import { getRestDayQuoteAsync, getWorkoutQuoteAsync } from '@/store/quotes/thunks';
 import { AppDispatch, RootState } from '@/store/store';
 import {
+    getAllNutritionLogsAsync,
     getBodyMeasurementsAsync,
     // getSleepMeasurementsAsync,
     getUserAppSettingsAsync,
@@ -42,6 +43,7 @@ const CACHE_KEYS = {
     USER_NUTRITION_PROFILE: 'user_nutrition_profile',
     USER_NUTRITION_PREFERENCES: 'user_nutrition_preferences',
     USER_NUTRITION_GOAL_HISTORY: 'user_nutrition_goal_history',
+    USER_NUTRITION_LOGS: 'user_nutrition_logs',
     USER_PROGRAM_PROGRESS: 'user_program_progress',
     USER_APP_SETTINGS: 'user_app_settings',
     USER_RECOMMENDATIONS: 'user_recommendations',
@@ -150,6 +152,15 @@ export class InitializationService {
             key: 'userNutritionGoalHistory',
             thunk: getUserNutritionGoalHistoryAsync,
             cacheKey: CACHE_KEYS.USER_NUTRITION_GOAL_HISTORY,
+            ttl: CacheTTL.LONG,
+            required: true,
+            priority: 'critical',
+            args: { useCache: true },
+        },
+        {
+            key: 'userNutritionLogs',
+            thunk: getAllNutritionLogsAsync,
+            cacheKey: CACHE_KEYS.USER_NUTRITION_LOGS,
             ttl: CacheTTL.LONG,
             required: true,
             priority: 'critical',

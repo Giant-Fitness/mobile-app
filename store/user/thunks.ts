@@ -1569,15 +1569,18 @@ export const createNutritionGoalEntryAsync = createAsyncThunk<
 });
 
 // Nutrition Logs Thunks
-export const getNutritionLogsAsync = createAsyncThunk<
-    { date: string; nutritionLog: UserNutritionLog | null },
-    { date: string; forceRefresh?: boolean; useCache?: boolean },
+
+// 1. Get ALL nutrition logs for a user (no date filter)
+export const getAllNutritionLogsAsync = createAsyncThunk<
+    UserNutritionLog[],
+    { forceRefresh?: boolean; useCache?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
->('user/getNutritionLogs', async ({ date, forceRefresh = false, useCache = true }, { getState, rejectWithValue }) => {
+>('user/getAllNutritionLogs', async (args = {}, { getState, rejectWithValue }) => {
     try {
+        const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
         const state = getState();
         const userId = state.user.user?.UserId;
 
@@ -1585,49 +1588,227 @@ export const getNutritionLogsAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Check Redux state first (unless forcing refresh)
-        if (!forceRefresh && state.user.userNutritionLogs[date]) {
-            console.log(`Loaded nutrition logs for ${date} from Redux state`);
-            return { date, nutritionLog: state.user.userNutritionLogs[date] };
+        // Check if we have a comprehensive set of logs and not forcing refresh
+        if (!forceRefresh && Object.keys(state.user.userNutritionLogs).length > 0) {
+            console.log('Using existing nutrition logs from Redux state');
+            return Object.values(state.user.userNutritionLogs).filter(Boolean) as UserNutritionLog[];
         }
 
-        // Check cache first if enabled and not forcing refresh
+        // Try cache first if enabled and not forcing refresh
         if (useCache && !forceRefresh) {
-            const cacheKey = `nutrition_logs_${date}`;
-            const cached = await cacheService.get<UserNutritionLog>(cacheKey);
+            const cacheKey = `all_nutrition_logs`;
+            const cached = await cacheService.get<UserNutritionLog[]>(cacheKey);
             const isExpired = await cacheService.isExpired(cacheKey);
 
-            if (cached !== null && !isExpired) {
-                console.log(`Loaded nutrition logs for ${date} from cache`);
-                return { date, nutritionLog: cached };
+            if (cached && !isExpired) {
+                console.log('Loaded all nutrition logs from cache');
+                return cached;
             }
         }
+        console.log('Loading all nutrition logs from API');
+        const nutritionLogs = await UserService.getAllNutritionLogs(userId);
 
-        console.log(`Loading nutrition logs for ${date} from API`);
-        const nutritionLog = await UserService.getNutritionLogs(userId, date);
-
-        // Cache the result if useCache is enabled (cache null values too!)
+        // Cache the result if useCache is enabled
         if (useCache) {
-            const cacheKey = `nutrition_logs_${date}`;
-            await cacheService.set(cacheKey, nutritionLog, CacheTTL.SHORT);
+            const cacheKey = `all_nutrition_logs`;
+            await cacheService.set(cacheKey, nutritionLogs, CacheTTL.SHORT);
         }
 
-        return { date, nutritionLog };
+        return nutritionLogs;
     } catch (error) {
+        console.log(error);
         return rejectWithValue({
-            errorMessage: error instanceof Error ? error.message : 'Failed to fetch nutrition logs',
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch all nutrition logs',
         });
     }
 });
 
-export const getSpecificDayLogAsync = createAsyncThunk<
+// 2. Get nutrition logs with filters (date range, limit, etc.)
+export const getNutritionLogsWithFiltersAsync = createAsyncThunk<
+    { nutritionLogs: UserNutritionLog[]; count: number; lastEvaluatedKey?: any },
+    {
+        filters?: { startDate?: string; endDate?: string; limit?: number };
+        forceRefresh?: boolean;
+        useCache?: boolean;
+    },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/getNutritionLogsWithFilters', async ({ filters, forceRefresh = false, useCache = true }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Create cache key based on filters
+        const cacheKey = `nutrition_logs_filtered_${JSON.stringify(filters || {})}`;
+
+        // Try cache first if enabled and not forcing refresh
+        if (useCache && !forceRefresh) {
+            const cached = await cacheService.get<{ nutritionLogs: UserNutritionLog[]; count: number; lastEvaluatedKey?: any }>(cacheKey);
+            const isExpired = await cacheService.isExpired(cacheKey);
+
+            if (cached && !isExpired) {
+                console.log('Loaded filtered nutrition logs from cache');
+                return cached;
+            }
+        }
+
+        console.log('Loading filtered nutrition logs from API');
+        const result = await UserService.getNutritionLogsWithFilters(userId, filters);
+
+        // Cache the result if useCache is enabled
+        if (useCache) {
+            await cacheService.set(cacheKey, result, CacheTTL.SHORT);
+        }
+
+        return result;
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch filtered nutrition logs',
+        });
+    }
+});
+
+// 3. Get nutrition logs for multiple specific dates (optimized for your swipe feature)
+export const getNutritionLogsForDatesAsync = createAsyncThunk<
+    { [date: string]: UserNutritionLog | null },
+    {
+        dates: string[];
+        forceRefresh?: boolean;
+        useCache?: boolean;
+    },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/getNutritionLogsForDates', async ({ dates, forceRefresh = false, useCache = true }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Filter out dates that are already loaded unless forcing refresh
+        const datesToLoad = forceRefresh ? dates : dates.filter((date) => !(date in state.user.userNutritionLogs));
+
+        if (datesToLoad.length === 0 && !forceRefresh) {
+            const result: { [date: string]: UserNutritionLog | null } = {};
+            dates.forEach((date) => {
+                result[date] = state.user.userNutritionLogs[date] || null;
+            });
+            return result;
+        }
+
+        // Try cache first if enabled and not forcing refresh
+        if (useCache && !forceRefresh) {
+            const cachedResults: { [date: string]: UserNutritionLog | null } = {};
+            const uncachedDates: string[] = [];
+
+            for (const date of datesToLoad) {
+                const cacheKey = `nutrition_logs_${date}`;
+                const cached = await cacheService.get<UserNutritionLog>(cacheKey);
+                const isExpired = await cacheService.isExpired(cacheKey);
+
+                if (cached !== null && !isExpired) {
+                    cachedResults[date] = cached;
+                } else {
+                    uncachedDates.push(date);
+                }
+            }
+
+            // If we have some cached data, include it in the final result
+            if (Object.keys(cachedResults).length > 0) {
+                console.log(`Loaded ${Object.keys(cachedResults).length} nutrition logs from cache`);
+            }
+
+            // Only fetch uncached dates
+            if (uncachedDates.length > 0) {
+                console.log(`Loading ${uncachedDates.length} nutrition logs from API`);
+
+                // Use the new bulk API for efficiency
+                const apiResults = await UserService.getBulkNutritionLogs(userId, uncachedDates);
+
+                // Cache the API results if useCache is enabled
+                if (useCache) {
+                    for (const [date, nutritionLog] of Object.entries(apiResults)) {
+                        const cacheKey = `nutrition_logs_${date}`;
+                        await cacheService.set(cacheKey, nutritionLog, CacheTTL.SHORT);
+                    }
+                }
+
+                // Merge cached and API results
+                const mergedResults = { ...cachedResults, ...apiResults };
+
+                // If we had some dates already loaded in Redux, merge them too
+                if (!forceRefresh) {
+                    const fullResults: { [date: string]: UserNutritionLog | null } = {};
+                    dates.forEach((date) => {
+                        fullResults[date] = mergedResults[date] !== undefined ? mergedResults[date] : state.user.userNutritionLogs[date] || null;
+                    });
+                    return fullResults;
+                }
+
+                return mergedResults;
+            }
+
+            // Only cached results, merge with any existing Redux data
+            if (!forceRefresh) {
+                const fullResults: { [date: string]: UserNutritionLog | null } = {};
+                dates.forEach((date) => {
+                    fullResults[date] = cachedResults[date] !== undefined ? cachedResults[date] : state.user.userNutritionLogs[date] || null;
+                });
+                return fullResults;
+            }
+
+            return cachedResults;
+        }
+
+        console.log(`Loading ${datesToLoad.length} nutrition logs from API`);
+
+        // Use the new bulk API instead of the old individual method
+        const results = await UserService.getBulkNutritionLogs(userId, datesToLoad);
+
+        // Cache the results if useCache is enabled
+        if (useCache) {
+            for (const [date, nutritionLog] of Object.entries(results)) {
+                const cacheKey = `nutrition_logs_${date}`;
+                await cacheService.set(cacheKey, nutritionLog, CacheTTL.SHORT);
+            }
+        }
+
+        // If we had some dates already loaded, merge them
+        if (!forceRefresh) {
+            const fullResults: { [date: string]: UserNutritionLog | null } = {};
+            dates.forEach((date) => {
+                fullResults[date] = results[date] !== undefined ? results[date] : state.user.userNutritionLogs[date] || null;
+            });
+            return fullResults;
+        }
+
+        return results;
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch nutrition logs for dates',
+        });
+    }
+});
+
+// 4. Updated single date thunk (keeping backward compatibility)
+export const getNutritionLogForDateAsync = createAsyncThunk<
     { date: string; nutritionLog: UserNutritionLog | null },
     { date: string; forceRefresh?: boolean; useCache?: boolean },
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
->('user/getSpecificDayLog', async ({ date, forceRefresh = false, useCache = true }, { getState, rejectWithValue }) => {
+>('user/getNutritionLogForDate', async ({ date, forceRefresh = false, useCache = true }, { getState, rejectWithValue }) => {
     try {
         const state = getState();
         const userId = state.user.user?.UserId;
@@ -1637,8 +1818,8 @@ export const getSpecificDayLogAsync = createAsyncThunk<
         }
 
         // Check Redux state first (unless forcing refresh)
-        if (!forceRefresh && state.user.userNutritionLogs[date]) {
-            console.log(`Loaded specific day log for ${date} from Redux state`);
+        if (!forceRefresh && state.user.userNutritionLogs[date] !== undefined) {
+            console.log(`Loaded nutrition log for ${date} from Redux state`);
             return { date, nutritionLog: state.user.userNutritionLogs[date] };
         }
 
@@ -1649,13 +1830,13 @@ export const getSpecificDayLogAsync = createAsyncThunk<
             const isExpired = await cacheService.isExpired(cacheKey);
 
             if (cached !== null && !isExpired) {
-                console.log(`Loaded specific day log for ${date} from cache`);
+                console.log(`Loaded nutrition log for ${date} from cache`);
                 return { date, nutritionLog: cached };
             }
         }
 
-        console.log(`Loading specific day log for ${date} from API`);
-        const nutritionLog = await UserService.getSpecificDayLog(userId, date);
+        console.log(`Loading nutrition log for ${date} from API`);
+        const nutritionLog = await UserService.getNutritionLogForDate(userId, date);
 
         // Cache the result if useCache is enabled (cache null values too!)
         if (useCache) {
@@ -1666,9 +1847,54 @@ export const getSpecificDayLogAsync = createAsyncThunk<
         return { date, nutritionLog };
     } catch (error) {
         return rejectWithValue({
-            errorMessage: error instanceof Error ? error.message : 'Failed to fetch specific day log',
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch nutrition log for date',
         });
     }
+});
+
+// 5. Helper thunk for your food log screen (optimized for swipe navigation)
+export const loadNutritionLogsForSwipeNavigationAsync = createAsyncThunk<
+    { [date: string]: UserNutritionLog | null },
+    {
+        centerDate: Date;
+        forceRefresh?: boolean;
+        useCache?: boolean;
+    },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/loadNutritionLogsForSwipeNavigation', async ({ centerDate, forceRefresh = false, useCache = true }, { dispatch }) => {
+    // Format dates for the sliding window (previous, current, next)
+    const formatDateForAPI = (date: Date): string => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const addDays = (date: Date, days: number): Date => {
+        const result = new Date(date);
+        result.setDate(result.getDate() + days);
+        return result;
+    };
+
+    const dates = [
+        formatDateForAPI(addDays(centerDate, -1)), // previous
+        formatDateForAPI(centerDate), // current
+        formatDateForAPI(addDays(centerDate, 1)), // next
+    ];
+
+    // Reuse the existing getNutritionLogsForDatesAsync thunk
+    const result = await dispatch(
+        getNutritionLogsForDatesAsync({
+            dates,
+            forceRefresh,
+            useCache,
+        }),
+    ).unwrap();
+
+    return result;
 });
 
 export const addFoodEntryAsync = createAsyncThunk<

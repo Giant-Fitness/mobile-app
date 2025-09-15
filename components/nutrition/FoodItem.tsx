@@ -1,4 +1,4 @@
-// components/nutrition/FoodEntry.tsx
+// components/nutrition/FoodItem.tsx
 
 import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -6,6 +6,7 @@ import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { FoodEntry } from '@/types/nutritionLogsTypes';
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
@@ -13,26 +14,15 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { trigger } from 'react-native-haptic-feedback';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
-export interface FoodEntryData {
-    id: string;
-    name: string;
-    portionSize: string;
-    calories: number;
-    protein: number;
-    carbs: number;
-    fats: number;
-    type: 'whole-foods' | 'branded-foods' | 'recipes' | 'my-foods' | 'my-recipes' | 'quick-add';
-}
-
-interface FoodEntryProps {
-    food: FoodEntryData;
-    onEdit: (food: FoodEntryData) => void;
+interface FoodItemProps {
+    food: FoodEntry;
+    onEdit: (food: FoodEntry) => void;
     onDelete: (foodId: string) => void;
     style?: any;
     enableSwipeToDelete?: boolean; // Feature flag for swipe-to-delete
 }
 
-export const FoodEntry: React.FC<FoodEntryProps> = ({ food, onEdit, onDelete, style, enableSwipeToDelete = false }) => {
+export const FoodItem: React.FC<FoodItemProps> = ({ food, onEdit, onDelete, style, enableSwipeToDelete = false }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
@@ -65,7 +55,7 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({ food, onEdit, onDelete, st
 
     const handleDelete = () => {
         trigger('impactMedium');
-        onDelete(food.id);
+        onDelete(food.FoodId);
         if (enableSwipeToDelete) {
             resetPosition();
         }
@@ -132,7 +122,7 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({ food, onEdit, onDelete, st
             <TouchableOpacity style={styles.mainContent} onPress={handleEdit} activeOpacity={0.95}>
                 <View style={styles.foodInfo}>
                     <ThemedText type='body' style={styles.foodName}>
-                        {food.name}
+                        {food.Name}
                     </ThemedText>
 
                     {/* Nutrition line with icons (like MealSection) + portion size */}
@@ -141,28 +131,28 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({ food, onEdit, onDelete, st
                         <View style={styles.nutritionItem}>
                             <Icon name='flame' size={11} color={themeColors.iconDefault} />
                             <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
-                                {Math.round(food.calories)}
+                                {Math.round(food.QuickMacros.Calories)}
                             </ThemedText>
                         </View>
 
                         {/* Protein */}
                         <View style={styles.nutritionItem}>
                             <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
-                                {Math.round(food.protein)}P
+                                {Math.round(food.QuickMacros.Protein)}P
                             </ThemedText>
                         </View>
 
                         {/* Carbs */}
                         <View style={styles.nutritionItem}>
                             <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
-                                {Math.round(food.carbs)}C
+                                {Math.round(food.QuickMacros.Carbs)}C
                             </ThemedText>
                         </View>
 
-                        {/* Fats */}
+                        {/* Fat */}
                         <View style={styles.nutritionItem}>
                             <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.subText }]}>
-                                {Math.round(food.fats)}F
+                                {Math.round(food.QuickMacros.Fat)}F
                             </ThemedText>
                         </View>
 
@@ -174,7 +164,7 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({ food, onEdit, onDelete, st
                         {/* Portion size with ellipsis */}
                         <View style={styles.portionContainer}>
                             <ThemedText type='bodySmall' style={[styles.portionSize, { color: themeColors.subText }]} numberOfLines={1} ellipsizeMode='tail'>
-                                {food.portionSize}
+                                {food.UserInputValue} {food.UserInputUnit}
                             </ThemedText>
                         </View>
                     </View>
@@ -275,6 +265,10 @@ const styles = StyleSheet.create({
     },
     portionSize: {
         fontSize: 13,
+    },
+    timestampText: {
+        fontSize: 11,
+        fontStyle: 'italic',
     },
     rightSection: {
         alignItems: 'flex-end',

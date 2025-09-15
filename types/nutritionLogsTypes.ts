@@ -8,19 +8,23 @@ export interface QuickMacros {
 }
 
 export interface FoodEntry {
-    FoodId: string | null;
-    EntryType: 'QUICK_MACRO';
+    Name?: string;
+    FoodId: string;
+    EntryType: EntryType;
     Timestamp: string; // HH:mm:ss format
     Quantity: number;
-    UserInputMethod: 'QUICK_MACRO';
+    UserInputMethod: EntryType;
     UserInputValue: number;
     UserInputUnit: string;
     ServingKey: string | null;
     QuickMacros: QuickMacros;
 }
 
+export type MealType = 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
+export type EntryType = 'QUICK_MACRO';
+
 export interface Meal {
-    MealType: 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
+    MealType: MealType;
     MealId: string;
     Timestamp: string; // HH:mm:ss format
     FoodEntries: { [key: string]: FoodEntry };
@@ -30,7 +34,7 @@ export interface DailyTotals {
     Calories: number;
     Protein: number;
     Carbs: number;
-    Fats: number;
+    Fat: number;
     Fiber: number;
 }
 
@@ -45,10 +49,12 @@ export interface UserNutritionLog {
 
 // Request/Response types
 export interface AddFoodEntryParams {
-    MealType: 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
+    Name: string;
+    MealType: MealType;
+    EntryType: EntryType;
     Timestamp: string;
     Quantity: number;
-    UserInputMethod: 'QUICK_MACRO';
+    UserInputMethod: EntryType;
     UserInputValue: number;
     UserInputUnit: string;
     QuickMacros: QuickMacros;

@@ -6,6 +6,7 @@ import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useNutritionLog } from '@/hooks/useNutritionLog';
 import { UserNutritionGoal, UserNutritionLog } from '@/types';
 import { addAlpha, darkenColor } from '@/utils/colorUtils';
 import { moderateScale } from '@/utils/scaling';
@@ -26,7 +27,7 @@ interface DailyMacrosCardProps {
     style?: any;
     isOnboardingComplete?: boolean;
     nutritionGoal?: UserNutritionGoal | null;
-    nutritionLog?: UserNutritionLog | null;
+    // note: removed nutritionLog prop — component now loads the log itself via hook
 }
 
 // Fake data for preview mode
@@ -43,7 +44,7 @@ const PREVIEW_CONSUMED = {
     calories: 1850,
     protein: 110,
     carbs: 80,
-    fats: 40,
+    fat: 40,
 };
 
 interface MacroMeterProps {
@@ -110,7 +111,15 @@ const DotIndicator: React.FC<{ isActive: boolean; color: string; backgroundColor
     );
 };
 
-export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboardingComplete = true, nutritionGoal, nutritionLog }) => {
+// Helper function to format date for API (same as FoodLogContent)
+const formatDateForAPI = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
+export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboardingComplete = true, nutritionGoal }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const scrollViewRef = useRef<ScrollView>(null);
@@ -118,31 +127,38 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboa
     // Set initial page based on onboarding status: show macros (page 1) first during onboarding
     const [currentPage, setCurrentPage] = useState(isOnboardingComplete ? 0 : 1);
 
-    // Use preview data if not onboarded or no profile
+    // Use preview goals if not onboarded or no profile
     const nutritionGoals = isOnboardingComplete ? nutritionGoal : PREVIEW_GOALS;
 
-    // Calculate consumed values from nutrition log
+    // Determine selected date (today) and load nutrition log via hook
+    const todayString = formatDateForAPI(new Date());
+    const { nutritionLog } = useNutritionLog(todayString, {
+        autoLoad: true,
+        useCache: true,
+    });
+
+    // Calculate consumed values from nutrition log (or preview / zeros)
     const consumedValues = useMemo(() => {
         if (!nutritionLog || !nutritionLog.DailyTotals) {
-            // Return zeros if no log data
+            // If onboarding complete and we have no log, return zeros
             if (isOnboardingComplete) {
                 return {
                     calories: 0,
                     protein: 0,
                     carbs: 0,
-                    fats: 0,
+                    fat: 0,
                 };
             }
             // Return preview data if not onboarded
             return PREVIEW_CONSUMED;
         }
 
-        const { DailyTotals } = nutritionLog;
+        const { DailyTotals } = nutritionLog as UserNutritionLog;
         return {
             calories: Math.round(DailyTotals.Calories || 0),
             protein: Math.round(DailyTotals.Protein || 0),
             carbs: Math.round(DailyTotals.Carbs || 0),
-            fats: Math.round(DailyTotals.Fats || 0),
+            fat: Math.round(DailyTotals.Fat || 0),
         };
     }, [nutritionLog, isOnboardingComplete]);
 
@@ -159,7 +175,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboa
         return null;
     }
 
-    const { calories: consumedCalories, protein: consumedProtein, carbs: consumedCarbs, fats: consumedFats } = consumedValues;
+    const { calories: consumedCalories, protein: consumedProtein, carbs: consumedCarbs, fat: consumedFat } = consumedValues;
 
     const remaining = nutritionGoals.GoalCalories - consumedCalories;
     const isOverGoal = consumedCalories > nutritionGoals.GoalCalories;
@@ -246,13 +262,13 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboa
                     overageColor={darkenColor(themeColors.carbs, 0.4)}
                 />
                 <MacroMeter
-                    label='Fats'
-                    current={consumedFats}
-                    goal={nutritionGoals.GoalMacros.Fats}
+                    label='Fat'
+                    current={consumedFat}
+                    goal={nutritionGoals.GoalMacros.Fat}
                     unit='g'
-                    color={themeColors.fats}
-                    backgroundColor={addAlpha(themeColors.fats, 0.1)}
-                    overageColor={darkenColor(themeColors.fats, 0.4)}
+                    color={themeColors.fat}
+                    backgroundColor={addAlpha(themeColors.fat, 0.1)}
+                    overageColor={darkenColor(themeColors.fat, 0.4)}
                 />
             </View>
         </TouchableOpacity>

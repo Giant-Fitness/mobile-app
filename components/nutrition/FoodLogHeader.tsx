@@ -9,7 +9,7 @@ import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { RootState } from '@/store/store';
-import { UserNutritionGoal, UserNutritionLog, UserNutritionProfile } from '@/types';
+import { UserNutritionGoal } from '@/types';
 import React, { useMemo } from 'react';
 import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 
@@ -29,14 +29,6 @@ interface DateNavigationProps {
 interface FoodLogHeaderProps {
     scrollY: Animated.SharedValue<number>;
     dateNavigation: DateNavigationProps;
-    userNutritionProfile?: UserNutritionProfile;
-    consumedData: {
-        calories: number;
-        protein: number;
-        carbs: number;
-        fats: number;
-    };
-    nutritionLog?: UserNutritionLog | null;
     headerInterpolationStart?: number;
     headerInterpolationEnd?: number;
 }
@@ -44,6 +36,14 @@ interface FoodLogHeaderProps {
 const useOnboardingStatus = () => {
     const user = useSelector((state: RootState) => state.user.user);
     return Boolean(user?.OnboardingComplete);
+};
+
+// Convert Date to YYYY-MM-DD string
+const formatDateForAPI = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 };
 
 /**
@@ -85,20 +85,18 @@ const getGoalForDate = (goals: UserNutritionGoal[], targetDate: Date): UserNutri
     return applicableGoal;
 };
 
-export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({
-    scrollY,
-    dateNavigation,
-    consumedData,
-    nutritionLog,
-    headerInterpolationStart = 100,
-    headerInterpolationEnd = 200,
-}) => {
+export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({ scrollY, dateNavigation, headerInterpolationStart = 100, headerInterpolationEnd = 200 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
     const isOnboardingComplete = useOnboardingStatus();
 
-    const { userNutritionGoalHistory } = useSelector((state: RootState) => state.user);
+    // Get nutrition data from Redux selectors
+    const { userNutritionGoalHistory, userNutritionLogs } = useSelector((state: RootState) => state.user);
+
+    // Get the nutrition log for the selected date
+    const selectedDateString = useMemo(() => formatDateForAPI(dateNavigation.selectedDate), [dateNavigation.selectedDate]);
+    const nutritionLog = userNutritionLogs[selectedDateString] || null;
 
     // Get the nutrition goal that applies to the selected date
     const selectedDateNutritionGoal = useMemo(() => {
@@ -109,11 +107,16 @@ export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({
         return getGoalForDate(userNutritionGoalHistory, dateNavigation.selectedDate);
     }, [userNutritionGoalHistory, dateNavigation.selectedDate]);
 
-    // Calculate actual consumed data from nutrition log if available
-    const actualConsumedData = useMemo(() => {
+    // Calculate consumed data from nutrition log
+    const consumedData = useMemo(() => {
         if (!isOnboardingComplete) {
-            // Use preview data for non-onboarded users
-            return consumedData;
+            // Preview data for non-onboarded users
+            return {
+                calories: 1850,
+                protein: 110,
+                carbs: 180,
+                fat: 65,
+            };
         }
 
         if (!nutritionLog || !nutritionLog.DailyTotals) {
@@ -122,7 +125,7 @@ export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({
                 calories: 0,
                 protein: 0,
                 carbs: 0,
-                fats: 0,
+                fat: 0,
             };
         }
 
@@ -132,9 +135,9 @@ export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({
             calories: Math.round(DailyTotals.Calories || 0),
             protein: Math.round(DailyTotals.Protein || 0),
             carbs: Math.round(DailyTotals.Carbs || 0),
-            fats: Math.round(DailyTotals.Fats || 0),
+            fat: Math.round(DailyTotals.Fat || 0),
         };
-    }, [nutritionLog, consumedData, isOnboardingComplete]);
+    }, [nutritionLog, isOnboardingComplete]);
 
     const CALENDAR_HEIGHT = 60;
 
@@ -269,7 +272,7 @@ export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({
             {selectedDateNutritionGoal && (
                 <Animated.View style={[styles.macrosContainer, animatedMacrosStyle]}>
                     <DailyMacrosCardCompressed
-                        consumedData={actualConsumedData}
+                        consumedData={consumedData}
                         isOnboardingComplete={isOnboardingComplete}
                         nutritionGoal={selectedDateNutritionGoal}
                         nutritionLog={nutritionLog}

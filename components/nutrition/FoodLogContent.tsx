@@ -1,124 +1,88 @@
 // components/nutrition/FoodLogContent.tsx
 
 import { ThemedView } from '@/components/base/ThemedView';
-import { FoodEntryData } from '@/components/nutrition/FoodEntry';
-import { MealSection, MealType } from '@/components/nutrition/MealSection';
+import { MealSection } from '@/components/nutrition/MealSection';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import React, { useEffect, useState } from 'react';
+import { FoodEntry, MealType, UserNutritionLog } from '@/types/nutritionLogsTypes';
+import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet } from 'react-native';
-
-// Mock data for demonstration
-const mockFoodData: Record<MealType, FoodEntryData[]> = {
-    breakfast: [
-        {
-            id: '1',
-            name: 'Greek Yogurt with Berries',
-            portionSize: '200g',
-            calories: 150,
-            protein: 15,
-            carbs: 20,
-            fats: 0,
-            type: 'recipes',
-        },
-        {
-            id: '2',
-            name: 'Avocado Toast',
-            portionSize: '2 slices',
-            calories: 320,
-            protein: 8,
-            carbs: 30,
-            fats: 22,
-            type: 'my-recipes',
-        },
-        {
-            id: '3',
-            name: 'Black Coffee',
-            portionSize: '1 cup',
-            calories: 5,
-            protein: 0,
-            carbs: 1,
-            fats: 0,
-            type: 'whole-foods',
-        },
-    ],
-    lunch: [
-        {
-            id: '4',
-            name: 'Grilled Chicken Salad',
-            portionSize: '1 serving',
-            calories: 380,
-            protein: 35,
-            carbs: 15,
-            fats: 18,
-            type: 'recipes',
-        },
-        {
-            id: '5',
-            name: 'Olive Oil Dressing',
-            portionSize: '2 tbsp',
-            calories: 120,
-            protein: 0,
-            carbs: 0,
-            fats: 14,
-            type: 'whole-foods',
-        },
-    ],
-    dinner: [
-        {
-            id: '6',
-            name: 'Salmon with Quinoa',
-            portionSize: '1 serving',
-            calories: 520,
-            protein: 45,
-            carbs: 40,
-            fats: 18,
-            type: 'recipes',
-        },
-        {
-            id: '7',
-            name: 'Steamed Broccoli',
-            portionSize: '1 cup',
-            calories: 30,
-            protein: 3,
-            carbs: 6,
-            fats: 0,
-            type: 'whole-foods',
-        },
-    ],
-    snacks: [
-        // {
-        //     id: '8',
-        //     name: 'Apple with Almond Butter',
-        //     portionSize: '1 medium apple + 2 tbsp',
-        //     calories: 270,
-        //     protein: 8,
-        //     carbs: 25,
-        //     fats: 16,
-        //     type: 'my-foods',
-        // },
-    ],
-};
 
 interface FoodLogContentProps {
     selectedDate: Date;
+    nutritionLog?: UserNutritionLog | null; // Pre-loaded data passed down
     style?: any;
 }
 
 const defaultExpandedSections: Record<MealType, boolean> = {
-    breakfast: true,
-    lunch: true,
-    dinner: true,
-    snacks: true,
+    BREAKFAST: true,
+    LUNCH: true,
+    DINNER: true,
+    SNACK: true,
 };
 
-export const FoodLogContent: React.FC<FoodLogContentProps> = ({ selectedDate, style }) => {
+// Helper function to format date for API
+const formatDateForAPI = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
+export const FoodLogContent: React.FC<FoodLogContentProps> = ({ selectedDate, nutritionLog, style }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
-    const [foodData, setFoodData] = useState<Record<MealType, FoodEntryData[]>>(mockFoodData);
     const [expandedSections, setExpandedSections] = useState<Record<MealType, boolean>>(defaultExpandedSections);
+
+    const selectedDateString = formatDateForAPI(selectedDate);
+
+    // Convert backend nutrition log to UI format
+    const foodData = useMemo(() => {
+        const data: Record<MealType, FoodEntry[]> = {
+            BREAKFAST: [],
+            LUNCH: [],
+            DINNER: [],
+            SNACK: [],
+        };
+
+        if (!nutritionLog || !nutritionLog.Meals) {
+            return data;
+        }
+
+        // Process each meal from the nutrition log
+        nutritionLog.Meals.forEach((meal) => {
+            // meal.FoodEntries is an object keyed by entryKey — convert to array
+            const entriesObj = meal.FoodEntries || {};
+            const entries: FoodEntry[] = Object.entries(entriesObj).map(([entryKey, entry]) => {
+                // Use the entry's Timestamp if present, otherwise fall back to meal.Timestamp
+                const timestamp = entry.Timestamp || meal.Timestamp || '';
+
+                // Some backends use the object key as the FoodId; fall back to that
+                const foodId = entry.FoodId || entryKey;
+
+                // Ensure ServingKey explicitly allowed to be null
+                const servingKey = entry.ServingKey ?? null;
+
+                // Return a normalized FoodEntry
+                return {
+                    ...entry,
+                    FoodId: foodId,
+                    Timestamp: timestamp,
+                    ServingKey: servingKey,
+                };
+            });
+
+            // Push converted entries into the correct meal bucket
+            data[meal.MealType].push(...entries);
+
+            // Sort the meal bucket by Timestamp (ascending)
+            data[meal.MealType].sort((a, b) => a.Timestamp.localeCompare(b.Timestamp));
+        });
+
+        return data;
+    }, [nutritionLog, selectedDateString]);
 
     // Reset expanded sections to default when date changes
     useEffect(() => {
@@ -127,24 +91,17 @@ export const FoodLogContent: React.FC<FoodLogContentProps> = ({ selectedDate, st
 
     const handleQuickAdd = (mealType: MealType) => {
         console.log('Quick add clicked for meal:', mealType);
-        // This will eventually open food search/entry flow
+        // TODO: This will eventually open food search/entry flow
     };
 
-    const handleEditFood = (food: FoodEntryData) => {
+    const handleEditFood = (food: FoodEntry) => {
         console.log('Edit food clicked:', food, selectedDate);
-        // This will eventually open food editing flow
+        // TODO: This will eventually open food editing flow
     };
 
     const handleDeleteFood = (foodId: string) => {
         console.log('Delete food clicked:', foodId);
-        // Find and remove the food item from the appropriate meal
-        setFoodData((prev) => {
-            const newData = { ...prev };
-            for (const mealType in newData) {
-                newData[mealType as MealType] = newData[mealType as MealType].filter((food) => food.id !== foodId);
-            }
-            return newData;
-        });
+        // TODO: Dispatch delete action
     };
 
     const handleToggleExpand = (mealType: MealType) => {
@@ -154,7 +111,7 @@ export const FoodLogContent: React.FC<FoodLogContentProps> = ({ selectedDate, st
         }));
     };
 
-    const mealOrder: MealType[] = ['breakfast', 'lunch', 'dinner', 'snacks'];
+    const mealOrder: MealType[] = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'];
 
     return (
         <ThemedView style={[styles.container, { backgroundColor: themeColors.backgroundSecondary }, style]}>

@@ -28,7 +28,7 @@ const PREVIEW_CONSUMED = {
     calories: 1850,
     protein: 110,
     carbs: 180,
-    fats: 65,
+    fat: 65,
 };
 
 interface DailyMacrosCardCompressedProps {
@@ -36,7 +36,7 @@ interface DailyMacrosCardCompressedProps {
         calories: number;
         protein: number;
         carbs: number;
-        fats: number;
+        fat: number;
     } | null;
     isOnboardingComplete?: boolean;
     style?: any;
@@ -125,7 +125,7 @@ export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps>
                 calories: Math.round(DailyTotals.Calories || 0),
                 protein: Math.round(DailyTotals.Protein || 0),
                 carbs: Math.round(DailyTotals.Carbs || 0),
-                fats: Math.round(DailyTotals.Fats || 0),
+                fat: Math.round(DailyTotals.Fat || 0),
             };
         }
 
@@ -135,7 +135,7 @@ export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps>
                 calories: 0,
                 protein: 0,
                 carbs: 0,
-                fats: 0,
+                fat: 0,
             }
         );
     }, [nutritionLog, consumedData, isOnboardingComplete]);
@@ -172,11 +172,11 @@ export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps>
         },
         {
             label: 'F',
-            current: consumed.fats,
-            goal: goal.GoalMacros.Fats,
-            color: themeColors.fats,
-            backgroundColor: addAlpha(themeColors.fats, 0.1),
-            overageColor: darkenColor(themeColors.fats, 0.4),
+            current: consumed.fat,
+            goal: goal.GoalMacros.Fat,
+            color: themeColors.fat,
+            backgroundColor: addAlpha(themeColors.fat, 0.1),
+            overageColor: darkenColor(themeColors.fat, 0.4),
         },
     ];
 

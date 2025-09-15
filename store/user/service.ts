@@ -623,8 +623,97 @@ const createNutritionGoalEntry = async (
 };
 
 // Nutrition Logs Methods
-const getNutritionLogs = async (userId: string, date: string): Promise<UserNutritionLog | null> => {
-    console.log('service: getNutritionLogs');
+
+// Get all nutrition logs for a user (no date filter)
+const getAllNutritionLogs = async (userId: string): Promise<UserNutritionLog[]> => {
+    console.log('service: getAllNutritionLogs');
+    try {
+        if (!userId) throw new Error('No user ID found');
+
+        const { data } = await authUsersApiClient.get(`/users/${userId}/nutrition-logs`);
+
+        return data.nutritionLogs || [];
+    } catch (error) {
+        throw handleApiError(error, 'GetAllNutritionLogs');
+    }
+};
+
+const getBulkNutritionLogs = async (userId: string, dates: string[]): Promise<{ [date: string]: UserNutritionLog | null }> => {
+    console.log('service: getBulkNutritionLogs');
+    try {
+        if (!userId) throw new Error('No user ID found');
+
+        const { data } = await authUsersApiClient.get(`/users/${userId}/nutrition-logs/bulk`, {
+            params: { dates: dates.join(',') },
+        });
+
+        return data.nutritionLogs || {};
+    } catch (error) {
+        throw handleApiError(error, 'GetBulkNutritionLogs');
+    }
+};
+
+// Get nutrition logs with optional filters
+const getNutritionLogsWithFilters = async (
+    userId: string,
+    filters?: {
+        startDate?: string;
+        endDate?: string;
+        limit?: number;
+    },
+): Promise<{ nutritionLogs: UserNutritionLog[]; count: number; lastEvaluatedKey?: any }> => {
+    console.log('service: getNutritionLogsWithFilters');
+    try {
+        if (!userId) throw new Error('No user ID found');
+
+        const { data } = await authUsersApiClient.get(`/users/${userId}/nutrition-logs`, {
+            params: filters,
+        });
+
+        return {
+            nutritionLogs: data.nutritionLogs || [],
+            count: data.count || 0,
+            lastEvaluatedKey: data.lastEvaluatedKey || null,
+        };
+    } catch (error) {
+        throw handleApiError(error, 'GetNutritionLogsWithFilters');
+    }
+};
+
+// Get nutrition logs for specific dates (batch request)
+const getNutritionLogsForDates = async (userId: string, dates: string[]): Promise<{ [date: string]: UserNutritionLog | null }> => {
+    console.log('service: getNutritionLogsForDates');
+    try {
+        if (!userId) throw new Error('No user ID found');
+
+        // TODO: When batch API is ready, replace this with a single batch request
+        // For now, make individual requests for each date
+        const results: { [date: string]: UserNutritionLog | null } = {};
+
+        await Promise.all(
+            dates.map(async (date) => {
+                try {
+                    // Inline the API call logic instead of calling getNutritionLogs
+                    const { data } = await authUsersApiClient.get(`/users/${userId}/nutrition-logs`, {
+                        params: { date },
+                    });
+                    results[date] = data.nutritionLog;
+                } catch (error) {
+                    console.warn(`Failed to load nutrition log for ${date}:`, error);
+                    results[date] = null;
+                }
+            }),
+        );
+
+        return results;
+    } catch (error) {
+        throw handleApiError(error, 'GetNutritionLogsForDates');
+    }
+};
+
+// Updated existing method to be more explicit
+const getNutritionLogForDate = async (userId: string, date: string): Promise<UserNutritionLog | null> => {
+    console.log('service: getNutritionLogForDate');
     try {
         if (!userId) throw new Error('No user ID found');
 
@@ -634,20 +723,7 @@ const getNutritionLogs = async (userId: string, date: string): Promise<UserNutri
 
         return data.nutritionLog;
     } catch (error) {
-        throw handleApiError(error, 'GetNutritionLogs');
-    }
-};
-
-const getSpecificDayLog = async (userId: string, date: string): Promise<UserNutritionLog | null> => {
-    console.log('service: getSpecificDayLog');
-    try {
-        if (!userId) throw new Error('No user ID found');
-
-        const { data } = await authUsersApiClient.get(`/users/${userId}/nutrition-logs/${date}`);
-
-        return data.nutritionLog;
-    } catch (error) {
-        throw handleApiError(error, 'GetSpecificDayLog');
+        throw handleApiError(error, 'GetNutritionLogForDate');
     }
 };
 
@@ -757,8 +833,11 @@ export default {
     getUserNutritionGoalHistory,
     createNutritionGoalEntry,
     // Nutrition Logs
-    getNutritionLogs,
-    getSpecificDayLog,
+    getAllNutritionLogs,
+    getBulkNutritionLogs,
+    getNutritionLogsWithFilters,
+    getNutritionLogForDate,
+    getNutritionLogsForDates,
     addFoodEntry,
     updateFoodEntry,
     deleteFoodEntry,

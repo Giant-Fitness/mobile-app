@@ -56,7 +56,7 @@ export const Colors = {
         protein: '#ED6211',
         carbs: '#34BE82',
         carbsLight: 'rgb(95, 211, 161)',
-        fats: '#FFB703',
+        fat: '#FFB703',
         black: '#000000',
     },
     dark: {
@@ -113,7 +113,7 @@ export const Colors = {
         calories: '#685BC5',
         protein: '#ED6211',
         carbs: '#34BE82',
-        fats: '#FFB703',
+        fat: '#FFB703',
         carbsLight: 'rgb(95, 211, 161)',
         black: '#000000',
     },
