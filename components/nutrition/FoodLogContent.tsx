@@ -6,8 +6,13 @@ import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { FoodEntry, MealType, UserNutritionLog } from '@/types/nutritionLogsTypes';
+import { debounce } from '@/utils/debounce';
 import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet } from 'react-native';
+
+import { useRouter } from 'expo-router';
+
+import { trigger } from 'react-native-haptic-feedback';
 
 interface FoodLogContentProps {
     selectedDate: Date;
@@ -33,6 +38,7 @@ const formatDateForAPI = (date: Date): string => {
 export const FoodLogContent: React.FC<FoodLogContentProps> = ({ selectedDate, nutritionLog, style }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const router = useRouter();
 
     const [expandedSections, setExpandedSections] = useState<Record<MealType, boolean>>(defaultExpandedSections);
 
@@ -90,8 +96,17 @@ export const FoodLogContent: React.FC<FoodLogContentProps> = ({ selectedDate, nu
     }, [selectedDate]);
 
     const handleQuickAdd = (mealType: MealType) => {
-        console.log('Quick add clicked for meal:', mealType);
-        // TODO: This will eventually open food search/entry flow
+        trigger('selection');
+
+        // Navigate to food logging screen with the selected date and meal type
+        debounce(router, {
+            pathname: '/(app)/nutrition/food-logging',
+            params: {
+                mode: 'search', // Default to search mode
+                mealType: mealType,
+                date: selectedDate.toISOString(), // Pass date as ISO string
+            },
+        });
     };
 
     const handleEditFood = (food: FoodEntry) => {

@@ -186,14 +186,8 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboa
         setCurrentPage(pageIndex);
     };
 
-    const handleCardPress = () => {
-        // Navigate to food log screen
-        trigger('impactLight');
-        router.push('/(app)/(tabs)/food-log');
-    };
-
     const CaloriesView = () => (
-        <TouchableOpacity style={[styles.pageContainer, { width: screenWidth }]} onPress={handleCardPress} activeOpacity={0.95}>
+        <TouchableOpacity style={[styles.pageContainer, { width: screenWidth }]} activeOpacity={0.95}>
             <View style={styles.caloriesSection}>
                 {/* Left: Remaining/Over */}
                 <View style={styles.caloriesLeftSection}>
@@ -241,7 +235,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboa
     );
 
     const MacrosView = () => (
-        <TouchableOpacity style={[styles.pageContainer, { width: screenWidth }]} onPress={handleCardPress} activeOpacity={0.95}>
+        <TouchableOpacity style={[styles.pageContainer, { width: screenWidth }]} activeOpacity={0.95}>
             <View style={styles.macrosSection}>
                 <MacroMeter
                     label='Protein'

@@ -135,11 +135,11 @@ export default function TabLayout() {
                     }}
                 />
                 <Tabs.Screen
-                    name='food-log'
+                    name='food-diary'
                     options={{
                         headerShown: false,
                         title: 'Food Diary',
-                        tabBarIcon: ({ color, focused }) => <Icon name={focused ? 'food-log-active' : 'food-log-inactive'} size={20} color={color} />,
+                        tabBarIcon: ({ color, focused }) => <Icon name={focused ? 'food-diary-active' : 'food-diary-inactive'} size={20} color={color} />,
                     }}
                 />
                 <Tabs.Screen

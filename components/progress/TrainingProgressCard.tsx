@@ -26,7 +26,6 @@ export const TrainingProgressCard: React.FC<TrainingProgressCardProps> = ({ acti
 
     const handlePress = () => {
         trigger('impactLight');
-        console.log('Training progress card pressed');
         onPress();
     };
 

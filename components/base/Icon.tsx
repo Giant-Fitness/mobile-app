@@ -102,9 +102,9 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
             return <AnimatedMaterialCommunityIcons name='lightning-bolt' {...commonProps} />;
         case 'lightning-inactive':
             return <AnimatedMaterialCommunityIcons name='lightning-bolt-outline' {...commonProps} />;
-        case 'food-log-active':
+        case 'food-diary-active':
             return <AnimatedIonicons name='book' {...commonProps} />;
-        case 'food-log-inactive':
+        case 'food-diary-inactive':
             return <AnimatedIonicons name='book-outline' {...commonProps} />;
         case 'training-active':
             return <AnimatedMaterialIcons name='sports-martial-arts' {...commonProps} />;
@@ -118,6 +118,8 @@ export const Icon = React.forwardRef<any, IconProps>(({ name, size = Sizes.iconS
             return <AnimatedMaterialCommunityIcons name='notebook' {...commonProps} />;
         case 'close':
             return <AnimatedIonicons name='close-circle-outline' {...commonProps} />;
+        case 'close-no-outline':
+            return <AnimatedIonicons name='close' {...commonProps} />;
         case 'info':
             return <AnimatedIonicons name='information-circle-outline' {...commonProps} />;
         case 'warning':

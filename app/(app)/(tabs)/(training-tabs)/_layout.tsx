@@ -34,7 +34,7 @@ export default function TrainingLayout() {
                 backButtonColor={themeColors.text}
             />
 
-            {/* Top Tabs with adjusted positioning */}
+            {/* Top Tabs with adjusted positioning and matching HorizontalTabSwitcher styling */}
             <View
                 style={{
                     flex: 1,
@@ -48,28 +48,53 @@ export default function TrainingLayout() {
                     screenOptions={{
                         tabBarActiveTintColor: themeColors.text,
                         tabBarInactiveTintColor: themeColors.subText,
-                        tabBarIndicatorStyle: {
-                            backgroundColor: themeColors.text,
-                            height: 1,
+                        tabBarIndicator: ({ state, layout }) => {
+                            // Custom indicator that renders borders for all tabs
+                            const tabWidth = layout.width / state.routes.length;
+
+                            return (
+                                <View
+                                    style={{
+                                        position: 'absolute',
+                                        bottom: 0,
+                                        left: 0,
+                                        right: 0,
+                                        height: 3,
+                                        flexDirection: 'row',
+                                    }}
+                                >
+                                    {state.routes.map((route, index) => (
+                                        <View
+                                            key={route.key}
+                                            style={{
+                                                width: tabWidth,
+                                                height: 2,
+                                                backgroundColor:
+                                                    index === state.index
+                                                        ? themeColors.text // Active tab
+                                                        : themeColors.systemBorderColor, // Inactive tabs: gray border
+                                            }}
+                                        />
+                                    ))}
+                                </View>
+                            );
                         },
                         tabBarStyle: {
                             backgroundColor: themeColors.background,
                             elevation: 0,
                             shadowOpacity: 0,
-                            borderBottomWidth: 0.2,
-                            borderBottomColor: themeColors.subTextSecondary, // or any border color you prefer
+                            borderBottomWidth: 0, // Remove base border to avoid double lines
                         },
                         tabBarItemStyle: {
-                            paddingHorizontal: Spaces.MD,
-                            // width: 'auto', // Let tabs size themselves
                             alignItems: 'center',
                         },
                         tabBarLabelStyle: {
                             fontWeight: '500',
-                            textAlign: 'left',
+                            textAlign: 'center',
+                            fontSize: 14,
                         },
                         tabBarContentContainerStyle: {
-                            justifyContent: 'center', // Left align the entire tab bar content
+                            justifyContent: 'center',
                         },
                         swipeEnabled: false,
                     }}

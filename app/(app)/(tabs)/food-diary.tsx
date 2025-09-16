@@ -1,4 +1,4 @@
-// app/(app)/(tabs)/food-log.tsx
+// app/(app)/(tabs)/food-diary.tsx
 
 import { FoodLogContent } from '@/components/nutrition/FoodLogContent';
 import { FoodLogHeader } from '@/components/nutrition/FoodLogHeader';
@@ -60,7 +60,7 @@ const formatDateKey = (date: Date): string => {
     return date.toISOString().split('T')[0];
 };
 
-export default function FoodLogScreen() {
+export default function FoodDiaryScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const dispatch = useDispatch<AppDispatch>();
@@ -74,6 +74,9 @@ export default function FoodLogScreen() {
 
     // Refs for gesture direction tracking
     const gestureDirectionRef = useRef<'none' | 'horizontal' | 'vertical'>('none');
+
+    // Track if the date change was from swiping to avoid useEffect conflicts
+    const dateChangeSource = useRef<'swipe' | 'external'>('external');
 
     // 🚀 VIRTUALIZED: Single component offset instead of 3 components
     const contentOffset = useSharedValue(0); // -SCREEN_WIDTH = prev day, 0 = current, +SCREEN_WIDTH = next day
@@ -118,7 +121,14 @@ export default function FoodLogScreen() {
     );
 
     // Update virtual dates when selectedDate changes externally (date picker, header buttons)
+    // but NOT when changed by swiping (since onSwipeComplete handles that)
     React.useEffect(() => {
+        // Skip if this change was from swiping - onSwipeComplete already updated virtualDates
+        if (dateChangeSource.current === 'swipe') {
+            dateChangeSource.current = 'external'; // Reset for next change
+            return;
+        }
+
         const newVirtualDates = {
             left: addDays(selectedDate, -1),
             center: selectedDate,
@@ -130,7 +140,7 @@ export default function FoodLogScreen() {
             setVirtualDates(newVirtualDates);
             contentOffset.value = 0; // Reset to center position
         }
-    }, [selectedDate]);
+    }, [selectedDate, virtualDates.center]);
 
     // 🚀 VIRTUALIZED: Animation completion - only updates selectedDate, no component data juggling
     const onSwipeComplete = useCallback(
@@ -138,13 +148,24 @@ export default function FoodLogScreen() {
             if (!FEATURE_FLAGS.SWIPEABLE_DATE_NAVIGATION) return;
 
             let newDate: Date;
+            let newVirtualDates: typeof virtualDates;
 
             if (direction === 'left') {
                 // Swiped left - go to next day (virtualDates.right becomes new center)
                 newDate = virtualDates.right;
+                newVirtualDates = {
+                    left: virtualDates.center, // Current center becomes left
+                    center: virtualDates.right, // Right becomes new center
+                    right: addDays(virtualDates.right, 1), // New right
+                };
             } else {
                 // Swiped right - go to previous day (virtualDates.left becomes new center)
                 newDate = virtualDates.left;
+                newVirtualDates = {
+                    left: addDays(virtualDates.left, -1), // New left
+                    center: virtualDates.left, // Left becomes new center
+                    right: virtualDates.center, // Current center becomes right
+                };
             }
 
             if (!isWithinAllowedRange(newDate)) {
@@ -154,7 +175,11 @@ export default function FoodLogScreen() {
                 return;
             }
 
-            // Update selected date - this will trigger the useEffect to update virtualDates
+            // Mark that this date change is from swiping
+            dateChangeSource.current = 'swipe';
+
+            // Update both states synchronously in the same render cycle
+            setVirtualDates(newVirtualDates);
             setSelectedDate(newDate);
             contentOffset.value = 0; // Reset to center
             trigger('virtualKey');

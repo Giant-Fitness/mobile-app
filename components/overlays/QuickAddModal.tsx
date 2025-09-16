@@ -19,9 +19,13 @@ import {
     logWeightMeasurementAsync,
 } from '@/store/user/thunks';
 import { addAlpha } from '@/utils/colorUtils';
+import { debounce } from '@/utils/debounce';
 import React, { useRef, useState } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
+import { useRouter } from 'expo-router';
+
+import { trigger } from 'react-native-haptic-feedback';
 import { useDispatch, useSelector } from 'react-redux';
 
 interface QuickAddModalProps {
@@ -33,6 +37,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({ visible, onClose }
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const dispatch = useDispatch<AppDispatch>();
+    const router = useRouter();
 
     // Get user data from Redux store
     const { userWeightMeasurements, userBodyMeasurements } = useSelector((state: RootState) => state.user);
@@ -113,17 +118,19 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({ visible, onClose }
         return userBodyMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
     };
 
-    // Action handlers
     const handleNutritionAction = (action: string) => {
-        console.log(`Nutrition action: ${action}`);
-        // TODO: Implement nutrition logging functionality
-        // For now, just close the modal
+        // Close the modal first
         onClose();
+
+        // Navigate to food logging screen with the selected logging mode
+        debounce(router, {
+            pathname: '/(app)/nutrition/food-logging',
+            params: { mode: action }, // Pass the selected mode as a parameter
+        });
+        trigger('selection');
     };
 
     const handleMeasurementAction = (measurement: string) => {
-        console.log(`Measurement action: ${measurement}`);
-
         // Close the main modal first, then open the specific logging sheet
         onClose();
 
@@ -146,9 +153,9 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({ visible, onClose }
     };
 
     const nutritionActions = [
-        { id: 'search', label: 'Search', icon: 'saved-search', color: addAlpha(themeColors.tangerineSolid, 0.5) },
-        { id: 'barcode', label: 'Barcode', icon: 'barcode', color: addAlpha(themeColors.slateBlue, 0.5) },
+        { id: 'search', label: 'Search', icon: 'saved-search', color: addAlpha(themeColors.protein, 0.5) },
         { id: 'quick-add', label: 'Quick Add', icon: 'add-chart', color: addAlpha(themeColors.carbs, 0.5) },
+        { id: 'barcode', label: 'Barcode', icon: 'barcode', color: addAlpha(themeColors.fat, 0.5) },
     ];
 
     const measurementActions = [
@@ -163,7 +170,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({ visible, onClose }
                     {/* Nutrition Section */}
                     <View style={styles.section}>
                         <ThemedText type='title' style={[styles.sectionTitle, { color: themeColors.text }]}>
-                            Nutrition
+                            Food
                         </ThemedText>
                         <View style={styles.nutritionRow}>
                             {nutritionActions.map((action) => (
@@ -198,7 +205,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({ visible, onClose }
                                     onPress={() => handleMeasurementAction(measurement.id)}
                                     activeOpacity={1}
                                 >
-                                    <Icon name={measurement.icon} size={Sizes.iconSizeXS} color={themeColors.iconSelected} style={styles.measurementIcon} />
+                                    <Icon name={measurement.icon} size={Sizes.iconSizeSM} color={themeColors.iconSelected} style={styles.measurementIcon} />
 
                                     <ThemedText type='bodySmall' style={[styles.measurementLabel, { color: themeColors.text }]}>
                                         {measurement.label}
@@ -246,7 +253,7 @@ const styles = StyleSheet.create({
     nutritionRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        gap: Spaces.LG,
+        gap: Spaces.MD,
     },
     nutritionBox: {
         flex: 1,
@@ -260,14 +267,13 @@ const styles = StyleSheet.create({
         marginBottom: Spaces.XXS,
     },
     measurementRow: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         gap: Spaces.SM,
     },
     measurementBox: {
-        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: Spaces.SM,
+        paddingVertical: Spaces.MD,
         paddingHorizontal: Spaces.MD,
         borderRadius: Spaces.XS,
     },

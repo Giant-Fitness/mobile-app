@@ -68,7 +68,6 @@ export const MealSection: React.FC<MealSectionProps> = ({
     const handleQuickAdd = () => {
         trigger('impactLight');
         onQuickAdd(mealType);
-        console.log('Quick add for meal:', mealType);
     };
 
     const handleToggleExpand = () => {
@@ -84,21 +83,9 @@ export const MealSection: React.FC<MealSectionProps> = ({
         <View style={[style, { marginBottom: Spaces.MD }]}>
             {/* External Header - Always visible */}
             <View style={styles.externalHeader}>
-                {/* Top Row: Add button + Meal name + Food count badge + Chevron */}
+                {/* Top Row: Meal name + Food count badge + Chevron */}
                 <View style={styles.topRow}>
                     <View style={styles.topRowLeft}>
-                        <TouchableOpacity
-                            onPress={handleQuickAdd}
-                            style={[
-                                styles.addButton,
-                                {
-                                    backgroundColor: themeColors.iconSelected,
-                                },
-                            ]}
-                            activeOpacity={1}
-                        >
-                            <Icon name='plus' size={10} color={themeColors.background} />
-                        </TouchableOpacity>
                         <ThemedText type='title' style={styles.mealName}>
                             {getMealDisplayName(mealType)}
                         </ThemedText>
@@ -202,7 +189,7 @@ export const MealSection: React.FC<MealSectionProps> = ({
                     <View style={styles.content}>
                         {hasFood ? (
                             <View style={styles.foodList}>
-                                {foods.map((food, index) => (
+                                {foods.map((food) => (
                                     <React.Fragment key={food.FoodId}>
                                         <FoodItem
                                             key={`${food.FoodId}-${selectedDate.toISOString()}`} // Include date in key to reset state
@@ -210,12 +197,22 @@ export const MealSection: React.FC<MealSectionProps> = ({
                                             onEdit={onEditFood}
                                             onDelete={onDeleteFood}
                                         />
-                                        {/* Add separator line between food items (not after the last one) */}
-                                        {index < foods.length - 1 && (
-                                            <View style={[styles.foodSeparator, { backgroundColor: themeColors.systemBorderColor }]} />
-                                        )}
+                                        {/* Add separator line between food items */}
+
+                                        <View style={[styles.foodSeparator, { backgroundColor: themeColors.systemBorderColor }]} />
                                     </React.Fragment>
                                 ))}
+
+                                {/* Add Food button at bottom of food list */}
+                                <TouchableOpacity
+                                    style={[styles.addFoodButton, { backgroundColor: themeColors.background }]}
+                                    onPress={handleQuickAdd}
+                                    activeOpacity={1}
+                                >
+                                    <ThemedText type='buttonSmall' style={[styles.addFoodText, { color: themeColors.slateBlue }]}>
+                                        ADD FOOD
+                                    </ThemedText>
+                                </TouchableOpacity>
                             </View>
                         ) : (
                             <TouchableOpacity
@@ -223,11 +220,11 @@ export const MealSection: React.FC<MealSectionProps> = ({
                                 onPress={handleQuickAdd}
                                 activeOpacity={1}
                             >
-                                <View style={[styles.emptyAddButton, { backgroundColor: themeColors.subText }]}>
+                                <View style={[styles.emptyAddButton, { backgroundColor: themeColors.slateBlue }]}>
                                     <Icon name='plus' size={10} color={themeColors.background} />
                                 </View>
-                                <ThemedText type='body' style={[styles.emptyText, { color: themeColors.subText }]}>
-                                    Add Food
+                                <ThemedText type='buttonSmall' style={[styles.emptyText, { color: themeColors.slateBlue }]}>
+                                    ADD FOOD
                                 </ThemedText>
                             </TouchableOpacity>
                         )}
@@ -252,7 +249,6 @@ const styles = StyleSheet.create({
     topRowLeft: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: Spaces.SM,
         flex: 1,
     },
     topRowRight: {
@@ -262,13 +258,6 @@ const styles = StyleSheet.create({
     },
     mealName: {
         // Meal name styling
-    },
-    addButton: {
-        width: Spaces.MD,
-        height: Spaces.MD,
-        borderRadius: Spaces.SM, // Circular
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     foodCountBadge: {
         paddingHorizontal: Spaces.XS,
@@ -288,14 +277,10 @@ const styles = StyleSheet.create({
     bottomRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        // Add left margin to align with meal name (button width + gap)
-        marginLeft: Spaces.MD + Spaces.SM,
     },
     previewRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        // Add left margin to align with meal name (button width + gap)
-        marginLeft: Spaces.MD + Spaces.SM + Spaces.XXS,
     },
     previewDots: {
         flexDirection: 'row',
@@ -340,7 +325,8 @@ const styles = StyleSheet.create({
         fontSize: 13,
     },
     container: {
-        marginLeft: Spaces.MD + Spaces.SM + Spaces.XXS,
+        paddingHorizontal: Spaces.SM + Spaces.XS,
+        paddingVertical: Spaces.SM,
         borderRadius: Spaces.SM,
         shadowColor: '#000',
         shadowOffset: {
@@ -356,14 +342,20 @@ const styles = StyleSheet.create({
     foodSeparator: {
         height: 1,
         opacity: 0.4,
-        marginHorizontal: Spaces.MD,
+        marginHorizontal: Spaces.SM,
+    },
+    addFoodButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingTop: Spaces.SM + Spaces.XS,
+        paddingBottom: Spaces.XS,
+    },
+    addFoodText: {
+        marginLeft: Spaces.XS,
     },
     emptyState: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        padding: Spaces.MD,
-        borderRadius: Spaces.SM,
         borderStyle: 'dashed',
         borderWidth: 1,
         borderColor: 'transparent',

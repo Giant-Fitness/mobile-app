@@ -230,8 +230,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: Spaces.MD,
-        paddingVertical: Spaces.XXS,
     },
     foodInfo: {
         flex: 1,

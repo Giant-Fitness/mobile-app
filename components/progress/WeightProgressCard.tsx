@@ -27,7 +27,6 @@ export const WeightProgressCard: React.FC<WeightProgressCardProps> = ({ nutritio
 
     const handlePress = () => {
         trigger('impactLight');
-        console.log('Weight progress card pressed');
         onPress();
     };
 
