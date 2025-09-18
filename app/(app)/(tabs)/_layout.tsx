@@ -1,7 +1,7 @@
 // app/(app)/(tabs)/_layout.tsx
 
 import { Icon } from '@/components/base/Icon';
-import { QuickAddModal } from '@/components/overlays/QuickAddModal';
+import { QuickAddMenu } from '@/components/overlays/QuickAddMenu';
 import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
@@ -17,11 +17,11 @@ import { trigger } from 'react-native-haptic-feedback';
 export default function TabLayout() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
-    const [quickActionModalVisible, setQuickActionModalVisible] = useState(false);
+    const [quickAddMenuVisible, setQuickAddMenuVisible] = useState(false);
 
     const handleQuickActionPress = () => {
         trigger('effectClick');
-        setQuickActionModalVisible(true);
+        setQuickAddMenuVisible(true);
     };
 
     return (
@@ -153,7 +153,7 @@ export default function TabLayout() {
             </Tabs>
 
             {/* Quick Action Modal */}
-            <QuickAddModal visible={quickActionModalVisible} onClose={() => setQuickActionModalVisible(false)} />
+            <QuickAddMenu visible={quickAddMenuVisible} onClose={() => setQuickAddMenuVisible(false)} />
         </>
     );
 }

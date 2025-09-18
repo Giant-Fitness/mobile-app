@@ -13,7 +13,6 @@ export interface FoodEntry {
     EntryType: EntryType;
     Timestamp: string; // HH:mm:ss format
     Quantity: number;
-    UserInputMethod: EntryType;
     UserInputValue: number;
     UserInputUnit: string;
     ServingKey: string | null;
@@ -54,7 +53,6 @@ export interface AddFoodEntryParams {
     EntryType: EntryType;
     Timestamp: string;
     Quantity: number;
-    UserInputMethod: EntryType;
     UserInputValue: number;
     UserInputUnit: string;
     QuickMacros: QuickMacros;

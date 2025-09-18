@@ -1,4 +1,4 @@
-// components/overlays/QuickAddModal.tsx
+// components/overlays/QuickAddMenu.tsx
 
 import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -28,12 +28,12 @@ import { useRouter } from 'expo-router';
 import { trigger } from 'react-native-haptic-feedback';
 import { useDispatch, useSelector } from 'react-redux';
 
-interface QuickAddModalProps {
+interface QuickAddMenuProps {
     visible: boolean;
     onClose: () => void;
 }
 
-export const QuickAddModal: React.FC<QuickAddModalProps> = ({ visible, onClose }) => {
+export const QuickAddMenu: React.FC<QuickAddMenuProps> = ({ visible, onClose }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const dispatch = useDispatch<AppDispatch>();

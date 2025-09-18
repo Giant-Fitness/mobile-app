@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     },
     container: {
         paddingHorizontal: Spaces.SM + Spaces.XS,
-        paddingVertical: Spaces.SM,
+        paddingBottom: Spaces.SM,
         borderRadius: Spaces.SM,
         shadowColor: '#000',
         shadowOffset: {
@@ -354,6 +354,7 @@ const styles = StyleSheet.create({
         marginLeft: Spaces.XS,
     },
     emptyState: {
+        paddingTop: Spaces.SM,
         flexDirection: 'row',
         alignItems: 'center',
         borderStyle: 'dashed',

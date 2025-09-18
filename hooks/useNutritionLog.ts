@@ -84,16 +84,3 @@ export const useNutritionLog = (date: string, options: UseNutritionLogOptions = 
         refetch,
     };
 };
-
-// Helper hook for multiple dates (for swipe navigation)
-export const useNutritionLogsForDates = (dates: string[]): { [date: string]: UserNutritionLog | null } => {
-    const { userNutritionLogs } = useSelector((state: RootState) => state.user);
-
-    return useMemo(() => {
-        const result: { [date: string]: UserNutritionLog | null } = {};
-        dates.forEach((date) => {
-            result[date] = userNutritionLogs[date] || null;
-        });
-        return result;
-    }, [userNutritionLogs, dates]);
-};

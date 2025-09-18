@@ -201,7 +201,7 @@ export const FoodItem: React.FC<FoodItemProps> = ({ food, onEdit, onDelete, styl
 const styles = StyleSheet.create({
     container: {
         position: 'relative',
-        marginVertical: Spaces.XXS,
+        marginVertical: Spaces.SM,
     },
     deleteButton: {
         position: 'absolute',
@@ -233,10 +233,10 @@ const styles = StyleSheet.create({
     },
     foodInfo: {
         flex: 1,
-        marginRight: Spaces.SM,
     },
     foodName: {},
     nutritionRow: {
+        marginTop: -Spaces.XS,
         flexDirection: 'row',
         alignItems: 'center',
         gap: Spaces.SM,

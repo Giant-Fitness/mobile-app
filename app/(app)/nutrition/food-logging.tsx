@@ -6,13 +6,15 @@ import { ThemedView } from '@/components/base/ThemedView';
 import { IconButton } from '@/components/buttons/IconButton';
 import { DropdownOption, SelectionDropdown } from '@/components/inputs/SelectionDropdown';
 import { HorizontalTabSwitcher, TabOption } from '@/components/navigation/HorizontalTabSwitcher';
+import { QuickAddForm } from '@/components/nutrition/QuickAddForm';
 import { BottomSheet } from '@/components/overlays/BottomSheet';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { MealType } from '@/types';
+import { debounce } from '@/utils/debounce';
 import React, { useState } from 'react';
-import { Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
@@ -21,29 +23,27 @@ import { trigger } from 'react-native-haptic-feedback';
 
 type LoggingMode = 'search' | 'quick-add' | 'barcode';
 
-// Helper function to determine meal type based on current time
+// Helper functions (same as before)
 const getMealTypeFromTime = (): MealType => {
     const now = new Date();
     const hour = now.getHours();
 
     if (hour >= 5 && hour <= 10) {
-        return 'BREAKFAST'; // 5:00 AM - 10:59 AM
+        return 'BREAKFAST';
     } else if (hour >= 11 && hour <= 15) {
-        return 'LUNCH'; // 11:00 AM - 3:59 PM
+        return 'LUNCH';
     } else if (hour >= 18 && hour <= 21) {
-        return 'DINNER'; // 6:00 PM - 9:59 PM
+        return 'DINNER';
     } else {
         return 'SNACK';
     }
 };
 
-// Helper function to check if a date is today
 const isToday = (date: Date): boolean => {
     const today = new Date();
     return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
 };
 
-// Helper function to format time for display (floored to hour)
 const formatTimeForDisplay = (date: Date): string => {
     const hour = date.getHours();
     const ampm = hour >= 12 ? 'PM' : 'AM';
@@ -51,7 +51,6 @@ const formatTimeForDisplay = (date: Date): string => {
     return `${displayHour} ${ampm}`;
 };
 
-// Helper function to format date for display (day and month only)
 const formatDateForDisplay = (date: Date): string => {
     const options: Intl.DateTimeFormatOptions = {
         day: 'numeric',
@@ -60,7 +59,6 @@ const formatDateForDisplay = (date: Date): string => {
     return date.toLocaleDateString('en-GB', options);
 };
 
-// Helper function to get meal display name
 const getMealDisplayName = (mealType: MealType): string => {
     switch (mealType) {
         case 'BREAKFAST':
@@ -76,15 +74,13 @@ const getMealDisplayName = (mealType: MealType): string => {
     }
 };
 
-// Helper function to validate and convert mode parameter to LoggingMode
 const getValidLoggingMode = (mode: string | undefined): LoggingMode => {
     if (mode === 'search' || mode === 'quick-add' || mode === 'barcode') {
         return mode as LoggingMode;
     }
-    return 'search'; // Default fallback
+    return 'search';
 };
 
-// Create meal options for the dropdown
 const createMealOptions = (): DropdownOption<MealType>[] => {
     const mealTypes: MealType[] = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'];
     return mealTypes.map((mealType) => ({
@@ -93,15 +89,10 @@ const createMealOptions = (): DropdownOption<MealType>[] => {
     }));
 };
 
-// Create logging mode tabs
 const createLoggingModeTabs = (): TabOption<LoggingMode>[] => [
     { id: 'search', label: 'Search', icon: 'saved-search' },
     { id: 'quick-add', label: 'Quick Add', icon: 'add-chart' },
     { id: 'barcode', label: 'Barcode', icon: 'barcode' },
-    // You can easily add more modes here:
-    // { id: 'recent', label: 'Recent', icon: 'history' },
-    // { id: 'favorites', label: 'Favorites', icon: 'favorite' },
-    // { id: 'recipe', label: 'Recipe', icon: 'restaurant' },
 ];
 
 export default function FoodLoggingScreen() {
@@ -114,10 +105,8 @@ export default function FoodLoggingScreen() {
         date?: string;
     }>();
 
-    // Get the initial logging mode from parameters or default to 'search'
     const initialLoggingMode = getValidLoggingMode(params.mode);
 
-    // Helper function to get initial meal type
     const getInitialMealType = (): MealType => {
         if (params.mealType && ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'].includes(params.mealType)) {
             return params.mealType as MealType;
@@ -125,13 +114,10 @@ export default function FoodLoggingScreen() {
         return getMealTypeFromTime();
     };
 
-    // Helper function to get initial date/time
     const getInitialDateTime = (): Date => {
         if (params.date) {
             try {
                 const parsedDate = new Date(params.date);
-                // If we have a specific date but it's just the date part,
-                // combine it with a reasonable time for the meal
                 if (params.mealType) {
                     const mealType = params.mealType as MealType;
                     const hour = getMealTypeDefaultHour(mealType);
@@ -145,36 +131,27 @@ export default function FoodLoggingScreen() {
         return new Date();
     };
 
-    // Helper function to get default hour for meal types
     const getMealTypeDefaultHour = (mealType: MealType): number => {
         const currentHour = new Date().getHours();
 
         switch (mealType) {
             case 'BREAKFAST':
-                // Valid range: 5:00 AM - 10:59 AM
                 if (currentHour >= 5 && currentHour <= 10) {
                     return currentHour;
                 }
-                return 8; // Default breakfast time
-
+                return 8;
             case 'LUNCH':
-                // Valid range: 11:00 AM - 3:59 PM
                 if (currentHour >= 11 && currentHour <= 15) {
                     return currentHour;
                 }
-                return 13; // Default lunch time
-
+                return 13;
             case 'DINNER':
-                // Valid range: 6:00 PM - 9:59 PM
                 if (currentHour >= 18 && currentHour <= 21) {
                     return currentHour;
                 }
-                return 19; // Default dinner time (7 PM)
-
+                return 19;
             case 'SNACK':
-                // Snacks can be at any time, so always use current hour
                 return currentHour;
-
             default:
                 return currentHour;
         }
@@ -182,7 +159,7 @@ export default function FoodLoggingScreen() {
 
     const [selectedMealType, setSelectedMealType] = useState<MealType>(getInitialMealType());
     const [selectedTime, setSelectedTime] = useState<Date>(getInitialDateTime());
-    const [tempSelectedTime, setTempSelectedTime] = useState<Date>(getInitialDateTime()); // Temporary state for picker
+    const [tempSelectedTime, setTempSelectedTime] = useState<Date>(getInitialDateTime());
     const [showMealDropdown, setShowMealDropdown] = useState(false);
     const [showTimeSelector, setShowTimeSelector] = useState(false);
     const [activeLoggingMode, setActiveLoggingMode] = useState<LoggingMode>(initialLoggingMode);
@@ -210,13 +187,11 @@ export default function FoodLoggingScreen() {
 
     const handleTimeSelect = () => {
         trigger('selection');
-        // Initialize temp time with current selected time
         setTempSelectedTime(new Date(selectedTime));
         setShowTimeSelector(true);
     };
 
     const handleDateTimeChange = (event: any, date?: Date) => {
-        // Only update the temporary state, not the actual selectedTime
         if (date) {
             setTempSelectedTime(date);
         }
@@ -224,19 +199,23 @@ export default function FoodLoggingScreen() {
 
     const handleTimeSelectorClose = () => {
         setShowTimeSelector(false);
-        // Reset temp time to original selected time when closing without saving
         setTempSelectedTime(new Date(selectedTime));
     };
 
     const handleTimeSelectorDone = () => {
         trigger('selection');
-        // Apply the temporary time to the actual selected time
         setSelectedTime(new Date(tempSelectedTime));
         setShowTimeSelector(false);
     };
 
     const handleLoggingModeChange = (mode: LoggingMode) => {
         setActiveLoggingMode(mode);
+    };
+
+    const handleQuickAddSuccess = () => {
+        debounce(router, {
+            pathname: '/(app)/(tabs)/food-diary',
+        });
     };
 
     const renderTimeSelectorContent = () => (
@@ -251,7 +230,7 @@ export default function FoodLoggingScreen() {
 
             <View style={styles.bottomSheetContent}>
                 <DateTimePicker
-                    value={tempSelectedTime} // Use temporary state for the picker
+                    value={tempSelectedTime}
                     mode='datetime'
                     display={'spinner'}
                     onChange={handleDateTimeChange}
@@ -293,17 +272,7 @@ export default function FoodLoggingScreen() {
                     </View>
                 );
             case 'quick-add':
-                return (
-                    <View style={styles.placeholderContainer}>
-                        <Icon name='add-chart' size={48} color={themeColors.iconDefault} />
-                        <ThemedText type='title' style={[styles.placeholderTitle, { color: themeColors.text }]}>
-                            Quick Add
-                        </ThemedText>
-                        <ThemedText type='body' style={[styles.placeholderDescription, { color: themeColors.subText }]}>
-                            Quickly log calories and macros without selecting specific foods
-                        </ThemedText>
-                    </View>
-                );
+                return <QuickAddForm selectedMealType={selectedMealType} selectedTime={selectedTime} onSuccess={handleQuickAddSuccess} />;
             case 'barcode':
                 return (
                     <View style={styles.placeholderContainer}>
@@ -345,12 +314,10 @@ export default function FoodLoggingScreen() {
             {/* Fixed Header */}
             <View style={[styles.header, { backgroundColor: themeColors.backgroundSecondary }]}>
                 <View style={styles.headerContent}>
-                    {/* Back Button */}
                     <TouchableOpacity style={styles.backButton} onPress={handleBack} activeOpacity={1}>
                         <Icon name='close-no-outline' color={themeColors.text} />
                     </TouchableOpacity>
 
-                    {/* Meal Selector */}
                     <View style={styles.centerSection}>
                         <SelectionDropdown<MealType>
                             selectedValue={selectedMealType}
@@ -363,11 +330,9 @@ export default function FoodLoggingScreen() {
                         />
                     </View>
 
-                    {/* Time Selector */}
                     {renderTimeSelector()}
                 </View>
 
-                {/* Logging Mode Tabs - Now using the new HorizontalTabSwitcher */}
                 <HorizontalTabSwitcher
                     tabs={loggingModeTabs}
                     activeTab={activeLoggingMode}
@@ -382,10 +347,10 @@ export default function FoodLoggingScreen() {
                 {renderTimeSelectorContent()}
             </BottomSheet>
 
-            {/* Content Area */}
-            <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+            {/* Content Area with Keyboard Avoidance */}
+            <KeyboardAvoidingView style={styles.content} behavior={'height'}>
                 {renderLoggingContent()}
-            </ScrollView>
+            </KeyboardAvoidingView>
         </ThemedView>
     );
 }
@@ -424,7 +389,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingVertical: Spaces.SM,
         paddingHorizontal: Spaces.SM,
-        borderRadius: Spaces.MD,
+        borderRadius: Spaces.LG,
         minWidth: 80,
     },
     timeSelectorContent: {
@@ -457,7 +422,6 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         paddingHorizontal: Spaces.LG,
     },
-    // Bottom Sheet specific styles
     bottomSheetContainer: {
         padding: Spaces.SM,
     },
