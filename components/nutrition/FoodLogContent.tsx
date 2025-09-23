@@ -57,33 +57,26 @@ export const FoodLogContent: React.FC<FoodLogContentProps> = ({ selectedDate, nu
             return data;
         }
 
-        // Process each meal from the nutrition log
         nutritionLog.Meals.forEach((meal) => {
-            // meal.FoodEntries is an object keyed by entryKey — convert to array
             const entriesObj = meal.FoodEntries || {};
             const entries: FoodEntry[] = Object.entries(entriesObj).map(([entryKey, entry]) => {
-                // Use the entry's Timestamp if present, otherwise fall back to meal.Timestamp
                 const timestamp = entry.Timestamp || meal.Timestamp || '';
-
-                // Some backends use the object key as the FoodId; fall back to that
                 const foodId = entry.FoodId || entryKey;
-
-                // Ensure ServingKey explicitly allowed to be null
                 const servingKey = entry.ServingKey ?? null;
 
-                // Return a normalized FoodEntry
                 return {
                     ...entry,
                     FoodId: foodId,
                     Timestamp: timestamp,
                     ServingKey: servingKey,
+                    // Add navigation metadata
+                    entryKey, // Include the entry key
+                    mealType: meal.MealType, // Include the meal type'
+                    dateString: selectedDateString,
                 };
             });
 
-            // Push converted entries into the correct meal bucket
             data[meal.MealType].push(...entries);
-
-            // Sort the meal bucket by Timestamp (ascending)
             data[meal.MealType].sort((a, b) => a.Timestamp.localeCompare(b.Timestamp));
         });
 
@@ -109,16 +102,6 @@ export const FoodLogContent: React.FC<FoodLogContentProps> = ({ selectedDate, nu
         });
     };
 
-    const handleEditFood = (food: FoodEntry) => {
-        console.log('Edit food clicked:', food, selectedDate);
-        // TODO: This will eventually open food editing flow
-    };
-
-    const handleDeleteFood = (foodId: string) => {
-        console.log('Delete food clicked:', foodId);
-        // TODO: Dispatch delete action
-    };
-
     const handleToggleExpand = (mealType: MealType) => {
         setExpandedSections((prev) => ({
             ...prev,
@@ -136,8 +119,6 @@ export const FoodLogContent: React.FC<FoodLogContentProps> = ({ selectedDate, nu
                     mealType={mealType}
                     foods={foodData[mealType]}
                     onQuickAdd={handleQuickAdd}
-                    onEditFood={handleEditFood}
-                    onDeleteFood={handleDeleteFood}
                     isExpanded={expandedSections[mealType]}
                     onToggleExpand={handleToggleExpand}
                     selectedDate={selectedDate} // Pass selectedDate for key generation

@@ -49,12 +49,18 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
     const themeColors = Colors[colorScheme];
 
     const getButtonStyle = () => {
+        const basePaddingVertical = size === 'SM' ? Spaces.SM + Spaces.XS : Spaces.MD + Spaces.XXS;
+        const basePaddingHorizontal = size === 'SM' ? Spaces.MD : Spaces.MD;
+        const marginBottom = size === 'SM' ? Spaces.MD : Spaces.MD;
+
         if (variant === 'chip') {
             return [
                 styles.chipButton,
                 {
                     backgroundColor: isSelected ? themeColors.buttonPrimary : themeColors.background,
                     borderColor: isSelected ? themeColors.buttonPrimary : themeColors.systemBorderColor,
+                    paddingVertical: size === 'SM' ? Spaces.XS : Spaces.SM,
+                    marginBottom,
                 },
                 containerStyle,
             ];
@@ -66,6 +72,9 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
                 backgroundColor: themeColors.background,
                 borderColor: isSelected ? themeColors.iconSelected : themeColors.systemBorderColor,
                 borderWidth: isSelected ? 1.2 : 1,
+                paddingVertical: basePaddingVertical,
+                paddingHorizontal: basePaddingHorizontal,
+                marginBottom,
             },
             containerStyle,
         ];
@@ -198,7 +207,7 @@ export const SelectionGroup: React.FC<SelectionGroupProps> = ({
 
     const getContainerStyle = () => {
         if (layout === 'row') {
-            return [styles.rowContainer, containerStyle];
+            return [size === 'SM' ? styles.rowContainerSM : styles.rowContainer, containerStyle];
         }
         return [styles.columnContainer, containerStyle];
     };
@@ -237,14 +246,21 @@ const styles = StyleSheet.create({
         width: '100%',
     },
 
-    // Row layout
+    // Row layout - default size
     rowContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         gap: Spaces.SM,
     },
 
-    // Radio button variant styles
+    // Row layout - small size
+    rowContainerSM: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: Spaces.XS, // Smaller gap for SM size
+    },
+
+    // Radio button variant styles - padding now set dynamically
     radioButton: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -252,9 +268,7 @@ const styles = StyleSheet.create({
         borderRadius: Spaces.XS,
         borderWidth: 0,
         opacity: 0.9,
-        paddingVertical: Spaces.MD + Spaces.XXS,
-        paddingHorizontal: Spaces.MD,
-        marginBottom: Spaces.MD,
+        // paddingVertical, paddingHorizontal, and marginBottom now set dynamically in getButtonStyle
     },
     leftContent: {
         flexDirection: 'row',
@@ -274,14 +288,13 @@ const styles = StyleSheet.create({
     subText: {},
     radioContainer: {},
 
-    // Chip variant styles
+    // Chip variant styles - padding now set dynamically
     chipButton: {
-        paddingVertical: Spaces.SM,
         borderWidth: moderateScale(0.8),
         borderRadius: Spaces.XS,
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: Spaces.MD,
+        // paddingVertical and marginBottom now set dynamically in getButtonStyle
     },
     chipContent: {
         flexDirection: 'row',

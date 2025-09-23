@@ -9,6 +9,7 @@ import {
     CreateSubstitutionParams,
     GetSetModificationsParams,
     GetSubstitutionsParams,
+    MealType,
     UpdateFoodEntryParams,
     UpdateFoodEntryResponse,
     UpdateSetModificationParams,
@@ -732,7 +733,7 @@ const addFoodEntry = async (userId: string, date: string, entryData: AddFoodEntr
     try {
         if (!userId) throw new Error('No user ID found');
 
-        const { data } = await authUsersApiClient.post(`/users/${userId}/nutrition-logs/${date}/entries`, entryData);
+        const { data } = await authUsersApiClient.post(`/users/${userId}/nutrition-logs/${date}/meals`, entryData);
 
         return data;
     } catch (error) {
@@ -740,12 +741,18 @@ const addFoodEntry = async (userId: string, date: string, entryData: AddFoodEntr
     }
 };
 
-const updateFoodEntry = async (userId: string, date: string, entryKey: string, updates: UpdateFoodEntryParams): Promise<UpdateFoodEntryResponse> => {
+const updateFoodEntry = async (
+    userId: string,
+    date: string,
+    mealType: MealType,
+    entryKey: string,
+    updates: UpdateFoodEntryParams,
+): Promise<UpdateFoodEntryResponse> => {
     console.log('service: updateFoodEntry');
     try {
         if (!userId) throw new Error('No user ID found');
 
-        const { data } = await authUsersApiClient.put(`/users/${userId}/nutrition-logs/${date}/entries/${entryKey}`, updates);
+        const { data } = await authUsersApiClient.put(`/users/${userId}/nutrition-logs/${date}/meals/${mealType}/entries/${entryKey}`, updates);
 
         return data;
     } catch (error) {
@@ -753,12 +760,12 @@ const updateFoodEntry = async (userId: string, date: string, entryKey: string, u
     }
 };
 
-const deleteFoodEntry = async (userId: string, date: string, entryKey: string): Promise<UserNutritionLog> => {
+const deleteFoodEntry = async (userId: string, date: string, mealType: MealType, entryKey: string): Promise<UserNutritionLog> => {
     console.log('service: deleteFoodEntry');
     try {
         if (!userId) throw new Error('No user ID found');
 
-        const { data } = await authUsersApiClient.delete(`/users/${userId}/nutrition-logs/${date}/entries/${entryKey}`);
+        const { data } = await authUsersApiClient.delete(`/users/${userId}/nutrition-logs/${date}/meals/${mealType}/entries/${entryKey}`);
 
         return data.nutritionLog;
     } catch (error) {

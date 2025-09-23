@@ -12,6 +12,7 @@ import {
     CreateSubstitutionParams,
     GetSetModificationsParams,
     GetSubstitutionsParams,
+    MealType,
     UpdateFoodEntryParams,
     UpdateFoodEntryResponse,
     UpdateSetModificationParams,
@@ -1930,12 +1931,12 @@ export const addFoodEntryAsync = createAsyncThunk<
 
 export const updateFoodEntryAsync = createAsyncThunk<
     UpdateFoodEntryResponse & { date: string },
-    { date: string; entryKey: string; updates: UpdateFoodEntryParams },
+    { date: string; mealType: MealType; entryKey: string; updates: UpdateFoodEntryParams },
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
->('user/updateFoodEntry', async ({ date, entryKey, updates }, { getState, rejectWithValue }) => {
+>('user/updateFoodEntry', async ({ date, mealType, entryKey, updates }, { getState, rejectWithValue }) => {
     try {
         const state = getState();
         const userId = state.user.user?.UserId;
@@ -1945,7 +1946,7 @@ export const updateFoodEntryAsync = createAsyncThunk<
         }
 
         // Update the food entry
-        const result = await UserService.updateFoodEntry(userId, date, entryKey, updates);
+        const result = await UserService.updateFoodEntry(userId, date, mealType, entryKey, updates);
 
         // Invalidate cache after updating entry
         const cacheKey = `nutrition_logs_${date}`;
@@ -1961,12 +1962,12 @@ export const updateFoodEntryAsync = createAsyncThunk<
 
 export const deleteFoodEntryAsync = createAsyncThunk<
     { date: string; nutritionLog: UserNutritionLog },
-    { date: string; entryKey: string },
+    { date: string; mealType: MealType; entryKey: string },
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
->('user/deleteFoodEntry', async ({ date, entryKey }, { getState, rejectWithValue }) => {
+>('user/deleteFoodEntry', async ({ date, mealType, entryKey }, { getState, rejectWithValue }) => {
     try {
         const state = getState();
         const userId = state.user.user?.UserId;
@@ -1976,7 +1977,7 @@ export const deleteFoodEntryAsync = createAsyncThunk<
         }
 
         // Delete the food entry
-        const nutritionLog = await UserService.deleteFoodEntry(userId, date, entryKey);
+        const nutritionLog = await UserService.deleteFoodEntry(userId, date, mealType, entryKey);
 
         // Invalidate cache after deleting entry
         const cacheKey = `nutrition_logs_${date}`;

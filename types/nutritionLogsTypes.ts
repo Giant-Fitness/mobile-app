@@ -17,6 +17,11 @@ export interface FoodEntry {
     UserInputUnit: string;
     ServingKey: string | null;
     QuickMacros: QuickMacros;
+
+    // Navigation metadata (optional, added during UI processing)
+    entryKey?: string;
+    mealType?: MealType;
+    dateString?: string;
 }
 
 export type MealType = 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
@@ -59,11 +64,14 @@ export interface AddFoodEntryParams {
 }
 
 export interface UpdateFoodEntryParams {
+    Name?: string;
     Timestamp?: string;
     Quantity?: number;
     UserInputValue?: number;
     UserInputUnit?: string;
     QuickMacros?: QuickMacros;
+    MealType?: MealType;
+    UpdatedMealType?: MealType;
 }
 
 export interface AddFoodEntryResponse {

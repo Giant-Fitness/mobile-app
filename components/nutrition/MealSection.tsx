@@ -3,7 +3,7 @@
 import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
-import { FoodItem } from '@/components/nutrition/FoodItem';
+import { MealItem } from '@/components/nutrition/MealItem';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -17,8 +17,6 @@ interface MealSectionProps {
     mealType: MealType;
     foods: FoodEntry[];
     onQuickAdd: (mealType: MealType) => void;
-    onEditFood: (food: FoodEntry) => void;
-    onDeleteFood: (foodId: string) => void;
     isExpanded?: boolean;
     onToggleExpand?: (mealType: MealType) => void;
     selectedDate: Date; // Add selectedDate prop
@@ -40,17 +38,7 @@ const getMealDisplayName = (mealType: MealType): string => {
     }
 };
 
-export const MealSection: React.FC<MealSectionProps> = ({
-    mealType,
-    foods,
-    onQuickAdd,
-    onEditFood,
-    onDeleteFood,
-    isExpanded = true,
-    onToggleExpand,
-    selectedDate,
-    style,
-}) => {
+export const MealSection: React.FC<MealSectionProps> = ({ mealType, foods, onQuickAdd, isExpanded = true, onToggleExpand, selectedDate, style }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
@@ -126,46 +114,41 @@ export const MealSection: React.FC<MealSectionProps> = ({
                                 </View>
 
                                 {/* Protein */}
-                                {totals.protein > 0 && (
-                                    <View style={styles.nutritionItem}>
-                                        <View style={[styles.macroIconContainer, { backgroundColor: themeColors.surfaceDark }]}>
-                                            <ThemedText type='button' style={[styles.macroLetter, { color: themeColors.text }]}>
-                                                P
-                                            </ThemedText>
-                                        </View>
-                                        <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.text }]}>
-                                            {Math.round(totals.protein)}
+
+                                <View style={styles.nutritionItem}>
+                                    <View style={[styles.macroIconContainer, { backgroundColor: themeColors.surfaceDark }]}>
+                                        <ThemedText type='button' style={[styles.macroLetter, { color: themeColors.text }]}>
+                                            P
                                         </ThemedText>
                                     </View>
-                                )}
+                                    <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.text }]}>
+                                        {Math.round(totals.protein)}
+                                    </ThemedText>
+                                </View>
 
                                 {/* Carbs */}
-                                {totals.carbs > 0 && (
-                                    <View style={styles.nutritionItem}>
-                                        <View style={[styles.macroIconContainer, { backgroundColor: themeColors.surfaceDark }]}>
-                                            <ThemedText type='button' style={[styles.macroLetter, { color: themeColors.text }]}>
-                                                C
-                                            </ThemedText>
-                                        </View>
-                                        <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.text }]}>
-                                            {Math.round(totals.carbs)}
+                                <View style={styles.nutritionItem}>
+                                    <View style={[styles.macroIconContainer, { backgroundColor: themeColors.surfaceDark }]}>
+                                        <ThemedText type='button' style={[styles.macroLetter, { color: themeColors.text }]}>
+                                            C
                                         </ThemedText>
                                     </View>
-                                )}
+                                    <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.text }]}>
+                                        {Math.round(totals.carbs)}
+                                    </ThemedText>
+                                </View>
 
                                 {/* Fat */}
-                                {totals.fat > 0 && (
-                                    <View style={styles.nutritionItem}>
-                                        <View style={[styles.macroIconContainer, { backgroundColor: themeColors.surfaceDark }]}>
-                                            <ThemedText type='button' style={[styles.macroLetter, { color: themeColors.text }]}>
-                                                F
-                                            </ThemedText>
-                                        </View>
-                                        <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.text }]}>
-                                            {Math.round(totals.fat)}
+                                <View style={styles.nutritionItem}>
+                                    <View style={[styles.macroIconContainer, { backgroundColor: themeColors.surfaceDark }]}>
+                                        <ThemedText type='button' style={[styles.macroLetter, { color: themeColors.text }]}>
+                                            F
                                         </ThemedText>
                                     </View>
-                                )}
+                                    <ThemedText type='bodySmall' style={[styles.nutritionText, { color: themeColors.text }]}>
+                                        {Math.round(totals.fat)}
+                                    </ThemedText>
+                                </View>
                             </View>
                         </View>
                     )
@@ -191,11 +174,9 @@ export const MealSection: React.FC<MealSectionProps> = ({
                             <View style={styles.foodList}>
                                 {foods.map((food) => (
                                     <React.Fragment key={food.FoodId}>
-                                        <FoodItem
+                                        <MealItem
                                             key={`${food.FoodId}-${selectedDate.toISOString()}`} // Include date in key to reset state
                                             food={food}
-                                            onEdit={onEditFood}
-                                            onDelete={onDeleteFood}
                                         />
                                         {/* Add separator line between food items */}
 
@@ -220,9 +201,6 @@ export const MealSection: React.FC<MealSectionProps> = ({
                                 onPress={handleQuickAdd}
                                 activeOpacity={1}
                             >
-                                <View style={[styles.emptyAddButton, { backgroundColor: themeColors.slateBlue }]}>
-                                    <Icon name='plus' size={10} color={themeColors.background} />
-                                </View>
                                 <ThemedText type='buttonSmall' style={[styles.emptyText, { color: themeColors.slateBlue }]}>
                                     ADD FOOD
                                 </ThemedText>
@@ -323,6 +301,7 @@ const styles = StyleSheet.create({
     },
     nutritionText: {
         fontSize: 13,
+        marginTop: -1,
     },
     container: {
         paddingHorizontal: Spaces.SM + Spaces.XS,
@@ -371,5 +350,6 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         textAlign: 'center',
+        marginLeft: Spaces.XS,
     },
 });

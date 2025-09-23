@@ -1,4 +1,4 @@
-// components/nutrition/FoodItem.tsx
+// components/nutrition/MealItem.tsx
 
 import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
@@ -7,24 +7,26 @@ import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { FoodEntry } from '@/types/nutritionLogsTypes';
+import { debounce } from '@/utils/debounce';
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { useRouter } from 'expo-router';
 
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { trigger } from 'react-native-haptic-feedback';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
-interface FoodItemProps {
+interface MealItemProps {
     food: FoodEntry;
-    onEdit: (food: FoodEntry) => void;
-    onDelete: (foodId: string) => void;
     style?: any;
     enableSwipeToDelete?: boolean; // Feature flag for swipe-to-delete
 }
 
-export const FoodItem: React.FC<FoodItemProps> = ({ food, onEdit, onDelete, style, enableSwipeToDelete = false }) => {
+export const MealItem: React.FC<MealItemProps> = ({ food, style, enableSwipeToDelete = false }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
+    const router = useRouter();
 
     const translateX = useSharedValue(0);
     const isHorizontalPan = useSharedValue(false);
@@ -47,7 +49,14 @@ export const FoodItem: React.FC<FoodItemProps> = ({ food, onEdit, onDelete, styl
 
     const handleEdit = () => {
         trigger('impactLight');
-        onEdit(food);
+        // Navigate directly to edit screen
+        debounce(router, {
+            pathname: '/(app)/nutrition/edit-meal-item',
+            params: {
+                food: JSON.stringify(food),
+            },
+        });
+
         if (enableSwipeToDelete) {
             resetPosition();
         }
@@ -55,7 +64,7 @@ export const FoodItem: React.FC<FoodItemProps> = ({ food, onEdit, onDelete, styl
 
     const handleDelete = () => {
         trigger('impactMedium');
-        onDelete(food.FoodId);
+        console.log('food deleted');
         if (enableSwipeToDelete) {
             resetPosition();
         }

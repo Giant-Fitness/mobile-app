@@ -16,7 +16,7 @@ const mockWorkoutQuote: Quote = {
 const mockRestDayQuote: Quote = {
     QuoteType: 'Recovery',
     QuoteId: 'quote002',
-    QuoteText: 'Take a break; your gains will wait',
+    QuoteText: 'Take a break. Your gains will wait',
     Author: '',
     Context: 'Rest',
     Active: true,

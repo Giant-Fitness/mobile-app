@@ -30,7 +30,7 @@ export const WeightProgressCard: React.FC<WeightProgressCardProps> = ({ nutritio
         onPress();
     };
 
-    if (!nutritionGoal) {
+    if (!nutritionGoal || !userWeightMeasurements.length) {
         return null;
     }
 

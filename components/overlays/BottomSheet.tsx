@@ -29,6 +29,7 @@ interface BottomSheetProps {
     style?: StyleProp<ViewStyle>;
     disableBackdropPress?: boolean;
     keyboardAvoidingBehavior?: 'none' | 'padding' | 'position';
+    animationType?: 'none' | 'slide' | 'fade';
 }
 
 const { height: screenHeight } = Dimensions.get('window');
@@ -40,6 +41,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
     style,
     disableBackdropPress = false,
     keyboardAvoidingBehavior = 'position',
+    animationType = 'slide',
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -169,7 +171,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
             )}
 
             {/* Modal with Drawer - Uses built-in slide animation */}
-            <Modal animationType='none' transparent={true} visible={visible} onRequestClose={onClose}>
+            <Modal animationType={animationType} transparent={true} visible={visible} onRequestClose={onClose}>
                 <Animated.View style={getModalContentStyle()}>
                     <ScrollView
                         contentContainerStyle={styles.container}

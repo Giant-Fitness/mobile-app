@@ -165,7 +165,7 @@ export const QuickAddMenu: React.FC<QuickAddMenuProps> = ({ visible, onClose }) 
 
     return (
         <>
-            <BottomSheet visible={visible} onClose={onClose}>
+            <BottomSheet visible={visible} onClose={onClose} animationType='slide'>
                 <View style={styles.container}>
                     {/* Nutrition Section */}
                     <View style={styles.section}>

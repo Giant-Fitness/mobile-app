@@ -4,8 +4,8 @@ import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { IconButton } from '@/components/buttons/IconButton';
-import { DropdownOption, SelectionDropdown } from '@/components/inputs/SelectionDropdown';
 import { HorizontalTabSwitcher, TabOption } from '@/components/navigation/HorizontalTabSwitcher';
+import { MealSelector, renderMealSelectorContent } from '@/components/nutrition/MealSelector';
 import { QuickAddForm } from '@/components/nutrition/QuickAddForm';
 import { BottomSheet } from '@/components/overlays/BottomSheet';
 import { Colors } from '@/constants/Colors';
@@ -23,7 +23,7 @@ import { trigger } from 'react-native-haptic-feedback';
 
 type LoggingMode = 'search' | 'quick-add' | 'barcode';
 
-// Helper functions (same as before)
+// Helper functions
 const getMealTypeFromTime = (): MealType => {
     const now = new Date();
     const hour = now.getHours();
@@ -59,34 +59,11 @@ const formatDateForDisplay = (date: Date): string => {
     return date.toLocaleDateString('en-GB', options);
 };
 
-const getMealDisplayName = (mealType: MealType): string => {
-    switch (mealType) {
-        case 'BREAKFAST':
-            return 'Breakfast';
-        case 'LUNCH':
-            return 'Lunch';
-        case 'DINNER':
-            return 'Dinner';
-        case 'SNACK':
-            return 'Snack';
-        default:
-            return mealType;
-    }
-};
-
 const getValidLoggingMode = (mode: string | undefined): LoggingMode => {
     if (mode === 'search' || mode === 'quick-add' || mode === 'barcode') {
         return mode as LoggingMode;
     }
     return 'search';
-};
-
-const createMealOptions = (): DropdownOption<MealType>[] => {
-    const mealTypes: MealType[] = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'];
-    return mealTypes.map((mealType) => ({
-        value: mealType,
-        label: getMealDisplayName(mealType),
-    }));
 };
 
 const createLoggingModeTabs = (): TabOption<LoggingMode>[] => [
@@ -160,11 +137,10 @@ export default function FoodLoggingScreen() {
     const [selectedMealType, setSelectedMealType] = useState<MealType>(getInitialMealType());
     const [selectedTime, setSelectedTime] = useState<Date>(getInitialDateTime());
     const [tempSelectedTime, setTempSelectedTime] = useState<Date>(getInitialDateTime());
-    const [showMealDropdown, setShowMealDropdown] = useState(false);
     const [showTimeSelector, setShowTimeSelector] = useState(false);
     const [activeLoggingMode, setActiveLoggingMode] = useState<LoggingMode>(initialLoggingMode);
+    const [showMealSelector, setShowMealSelector] = useState(false);
 
-    const mealOptions = createMealOptions();
     const loggingModeTabs = createLoggingModeTabs();
 
     const handleBack = () => {
@@ -172,17 +148,8 @@ export default function FoodLoggingScreen() {
         router.back();
     };
 
-    const handleMealSelect = (mealType: MealType) => {
+    const handleMealTypeChange = (mealType: MealType) => {
         setSelectedMealType(mealType);
-        setShowMealDropdown(false);
-    };
-
-    const handleMealDropdownToggle = () => {
-        setShowMealDropdown(!showMealDropdown);
-    };
-
-    const handleMealDropdownClose = () => {
-        setShowMealDropdown(false);
     };
 
     const handleTimeSelect = () => {
@@ -216,6 +183,15 @@ export default function FoodLoggingScreen() {
         debounce(router, {
             pathname: '/(app)/(tabs)/food-diary',
         });
+    };
+
+    const handleMealSelect = (mealType: string) => {
+        handleMealTypeChange(mealType as MealType);
+        setShowMealSelector(false);
+    };
+
+    const handleMealSelectorClose = () => {
+        setShowMealSelector(false);
     };
 
     const renderTimeSelectorContent = () => (
@@ -319,14 +295,11 @@ export default function FoodLoggingScreen() {
                     </TouchableOpacity>
 
                     <View style={styles.centerSection}>
-                        <SelectionDropdown<MealType>
-                            selectedValue={selectedMealType}
-                            options={mealOptions}
-                            isOpen={showMealDropdown}
-                            onSelect={handleMealSelect}
-                            onClose={handleMealDropdownClose}
-                            onToggle={handleMealDropdownToggle}
-                            placeholder='Select Meal'
+                        <MealSelector
+                            selectedMealType={selectedMealType}
+                            onMealTypeChange={handleMealTypeChange}
+                            onShowMealSelector={() => setShowMealSelector(true)}
+                            displayTextType='title'
                         />
                     </View>
 
@@ -345,6 +318,10 @@ export default function FoodLoggingScreen() {
             {/* Time Selector BottomSheet */}
             <BottomSheet visible={showTimeSelector} onClose={handleTimeSelectorClose}>
                 {renderTimeSelectorContent()}
+            </BottomSheet>
+
+            <BottomSheet visible={showMealSelector} onClose={handleMealSelectorClose} animationType='slide'>
+                {renderMealSelectorContent(selectedMealType, handleMealSelect, handleMealSelectorClose, themeColors)}
             </BottomSheet>
 
             {/* Content Area with Keyboard Avoidance */}

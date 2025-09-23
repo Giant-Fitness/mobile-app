@@ -14,6 +14,8 @@ import { Keyboard, KeyboardAvoidingView, TextInput as RNTextInput, ScrollView, S
 import { trigger } from 'react-native-haptic-feedback';
 import { useDispatch } from 'react-redux';
 
+import { ThemedView } from '../base/ThemedView';
+
 interface QuickAddFormProps {
     selectedMealType: MealType;
     selectedTime: Date;
@@ -296,7 +298,7 @@ export const QuickAddForm: React.FC<QuickAddFormProps> = ({ selectedMealType, se
             </ScrollView>
 
             {/* Fixed Log Button */}
-            <View
+            <ThemedView
                 style={[
                     styles.buttonContainer,
                     {
@@ -313,7 +315,7 @@ export const QuickAddForm: React.FC<QuickAddFormProps> = ({ selectedMealType, se
                     haptic='impactLight'
                     accessibilityLabel='Log macro entry'
                 />
-            </View>
+            </ThemedView>
         </KeyboardAvoidingView>
     );
 };
@@ -362,7 +364,7 @@ const styles = StyleSheet.create({
         paddingVertical: Spaces.MD,
     },
     buttonContainer: {
-        paddingHorizontal: Spaces.MD,
-        paddingBottom: Spaces.MD,
+        marginHorizontal: Spaces.MD,
+        marginBottom: Spaces.LG,
     },
 });
