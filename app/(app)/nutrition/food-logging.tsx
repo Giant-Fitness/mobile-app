@@ -14,7 +14,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { MealType } from '@/types';
 import { debounce } from '@/utils/debounce';
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Keyboard, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
@@ -155,7 +155,14 @@ export default function FoodLoggingScreen() {
     const handleTimeSelect = () => {
         trigger('selection');
         setTempSelectedTime(new Date(selectedTime));
-        setShowTimeSelector(true);
+
+        // Dismiss keyboard first
+        Keyboard.dismiss();
+
+        // Small delay to allow keyboard to fully dismiss before showing bottom sheet
+        setTimeout(() => {
+            setShowTimeSelector(true);
+        }, 100);
     };
 
     const handleDateTimeChange = (event: any, date?: Date) => {

@@ -209,11 +209,12 @@ const getWeightMeasurements = async (userId: string): Promise<UserWeightMeasurem
 const logWeightMeasurement = async (userId: string, weight: number, measurementTimestamp: string): Promise<UserWeightMeasurement> => {
     console.log('service: logWeightMeasurement');
     try {
-        const { data } = await authUsersApiClient.post(`/users/${userId}/weight-measurements`, {
+        const response = await authUsersApiClient.post(`/users/${userId}/weight-measurements`, {
             weight,
             MeasurementTimestamp: measurementTimestamp,
         });
-        return data.measurements;
+
+        return response.data.measurement;
     } catch (error) {
         throw handleApiError(error, 'LogWeightMeasurement');
     }

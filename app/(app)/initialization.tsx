@@ -34,7 +34,10 @@ const Initialization: React.FC = () => {
 
     // Initialize service
     useEffect(() => {
+        const { store } = require('@/store/store');
         initServiceRef.current = new InitializationService(dispatch);
+        // IMPORTANT: Set the state getter so the service can access Redux state
+        initServiceRef.current.setStateGetter(() => store.getState());
     }, [dispatch]);
 
     // Main initialization flow - Enhanced with better parallelization
@@ -192,6 +195,19 @@ const Initialization: React.FC = () => {
         };
     }, []); // Empty dependency array - only run once on mount
 
+    useEffect(() => {
+        console.log('🔍 Starting app initialization...');
+        if (!hasInitializedRef.current) {
+            initializeApp();
+        }
+
+        return () => {
+            console.log('🧹 Cleaning up initialization...');
+            if (retryTimeoutRef.current) {
+                clearTimeout(retryTimeoutRef.current);
+            }
+        };
+    }, []);
     // Enhanced error screen with more options
     if (showManualRetry) {
         return (

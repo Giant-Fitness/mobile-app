@@ -33,6 +33,9 @@ import {
     UserWeightMeasurement,
 } from '@/types';
 import { cacheService, CacheTTL } from '@/utils/cache';
+import { networkStateManager } from '@/utils/offline/NetworkStateManager';
+import { offlineStorageService } from '@/utils/offline/OfflineStorageService';
+import { syncQueueService } from '@/utils/offline/SyncQueueService';
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
@@ -651,7 +654,12 @@ export const deleteExerciseSubstitutionAsync = createAsyncThunk<
     }
 });
 
-// READ - Get weight measurements (with caching)
+// store/user/thunks.ts - Simplified Offline-First Weight Measurement Thunks
+
+/**
+ * Get weight measurements (offline-first)
+ * Loads immediately from SQLite, triggers background server sync
+ */
 export const getWeightMeasurementsAsync = createAsyncThunk<
     UserWeightMeasurement[],
     { forceRefresh?: boolean; useCache?: boolean } | void,
@@ -661,15 +669,7 @@ export const getWeightMeasurementsAsync = createAsyncThunk<
     }
 >('user/getWeightMeasurements', async (args = {}, { getState, rejectWithValue }) => {
     try {
-        // 🧪 TESTING: Add delays/failures
-        if (TESTING.SIMULATE_DELAYS) {
-            await new Promise((resolve) => setTimeout(resolve, TESTING.DELAY_MS));
-        }
-        if (TESTING.SIMULATE_WEIGHT_FAILURE) {
-            throw new Error('Simulated weight measurements failure');
-        }
-
-        const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
+        const { forceRefresh = false } = typeof args === 'object' ? args : {};
         const state = getState();
         const userId = state.user.user?.UserId;
 
@@ -677,40 +677,70 @@ export const getWeightMeasurementsAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Return cached measurements if available and not forcing refresh
-        if (state.user.userWeightMeasurements.length > 0 && state.user.userWeightMeasurementsState === REQUEST_STATE.FULFILLED && !forceRefresh) {
-            return state.user.userWeightMeasurements;
+        // Always load from SQLite first (offline-first)
+        console.log('Loading weight measurements from SQLite...');
+        const localMeasurements = await offlineStorageService.getWeightMeasurements(userId, {
+            includeLocalOnly: true,
+            orderBy: 'DESC',
+        });
+
+        // Convert to API format
+        const measurements: UserWeightMeasurement[] = localMeasurements.map((local) => ({
+            UserId: local.UserId,
+            MeasurementTimestamp: local.MeasurementTimestamp,
+            Weight: local.Weight,
+        }));
+
+        // Background server sync (non-blocking) unless force refresh
+        if (networkStateManager.isOnline() && !forceRefresh) {
+            setTimeout(async () => {
+                try {
+                    console.log('Triggering background weight measurements sync...');
+                    const serverMeasurements = await UserService.getWeightMeasurements(userId);
+                    await offlineStorageService.mergeServerWeightMeasurements(userId, serverMeasurements);
+                } catch (error) {
+                    console.warn('Background weight measurements sync failed:', error);
+                }
+            }, 100);
         }
 
-        // Try cache first if enabled and not forcing refresh
-        if (useCache && !forceRefresh) {
-            const cached = await cacheService.get<UserWeightMeasurement[]>('weight_measurements');
-            const isExpired = await cacheService.isExpired('weight_measurements');
+        // Force refresh: synchronous server sync
+        if (forceRefresh && networkStateManager.isOnline()) {
+            try {
+                console.log('Force refreshing weight measurements from server...');
+                const serverMeasurements = await UserService.getWeightMeasurements(userId);
+                await offlineStorageService.mergeServerWeightMeasurements(userId, serverMeasurements);
 
-            if (cached && !isExpired) {
-                console.log('Loaded weight measurements from cache');
-                return cached;
+                // Reload from SQLite to get merged data
+                const refreshedMeasurements = await offlineStorageService.getWeightMeasurements(userId, {
+                    includeLocalOnly: true,
+                    orderBy: 'DESC',
+                });
+
+                return refreshedMeasurements.map((local) => ({
+                    UserId: local.UserId,
+                    MeasurementTimestamp: local.MeasurementTimestamp,
+                    Weight: local.Weight,
+                }));
+            } catch (error) {
+                console.warn('Force refresh failed, using local data:', error);
             }
         }
 
-        // Load from API
-        console.log('Loading weight measurements from API');
-        const measurements = await UserService.getWeightMeasurements(userId);
-
-        // Cache the result if useCache is enabled
-        if (useCache) {
-            await cacheService.set('weight_measurements', measurements, CacheTTL.LONG);
-        }
-
+        console.log(`Loaded ${measurements.length} weight measurements from offline storage`);
         return measurements;
     } catch (error) {
+        console.log(error);
         return rejectWithValue({
-            errorMessage: error instanceof Error ? error.message : 'Failed to fetch weight measurements',
+            errorMessage: error instanceof Error ? error.message : 'Failed to load weight measurements',
         });
     }
 });
 
-// CREATE - Log weight measurement (invalidate cache)
+/**
+ * Log weight measurement (offline-first with smart duplicate handling)
+ * Automatically switches to update mode if entry already exists for the date
+ */
 export const logWeightMeasurementAsync = createAsyncThunk<
     UserWeightMeasurement[],
     { weight: number; measurementTimestamp?: string },
@@ -718,7 +748,7 @@ export const logWeightMeasurementAsync = createAsyncThunk<
         state: RootState;
         rejectValue: { errorMessage: string };
     }
->('user/logWeightMeasurement', async ({ weight, measurementTimestamp }, { getState, rejectWithValue }) => {
+>('user/logWeightMeasurement', async ({ weight, measurementTimestamp }, { getState, rejectWithValue, dispatch }) => {
     try {
         const state = getState();
         const userId = state.user.user?.UserId;
@@ -727,15 +757,67 @@ export const logWeightMeasurementAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Log the new measurement
         const timestamp = measurementTimestamp ?? new Date().toISOString();
-        await UserService.logWeightMeasurement(userId, weight, timestamp);
 
-        // Invalidate cache after creating new measurement
-        await cacheService.remove('weight_measurements');
+        // Check if there's already an entry for this date
+        const localMeasurements = await offlineStorageService.getWeightMeasurements(userId);
 
-        // Refresh and return all measurements
-        return await UserService.getWeightMeasurements(userId);
+        // Look for existing entry using multiple comparison methods to be robust
+        const dateToCheck = new Date(timestamp);
+        const dateString = dateToCheck.toISOString().split('T')[0]; // YYYY-MM-DD format
+
+        const existingEntry = localMeasurements.find((m) => {
+            // Method 1: Check if timestamps start with same date
+            if (m.MeasurementTimestamp.startsWith(dateString)) return true;
+
+            // Method 2: Compare normalized dates (start of day)
+            const existingDate = new Date(m.MeasurementTimestamp);
+            existingDate.setHours(0, 0, 0, 0);
+            dateToCheck.setHours(0, 0, 0, 0);
+
+            return existingDate.getTime() === dateToCheck.getTime();
+        });
+
+        if (existingEntry) {
+            // Entry already exists - automatically switch to update mode
+            return await dispatch(
+                updateWeightMeasurementAsync({
+                    timestamp: existingEntry.MeasurementTimestamp, // Use existing entry's exact timestamp
+                    weight,
+                }),
+            ).unwrap();
+        }
+
+        // No existing entry found - proceed with create
+
+        // Store immediately in SQLite (optimistic update)
+        const localId = await offlineStorageService.storeWeightMeasurement({
+            userId,
+            weight,
+            measurementTimestamp: timestamp,
+        });
+
+        // Queue for server sync (immediate attempt)
+        await syncQueueService.queueWeightMeasurement('CREATE', localId, {
+            userId,
+            weight,
+            measurementTimestamp: timestamp,
+        });
+
+        // Return updated measurements from SQLite
+        const updatedMeasurements = await offlineStorageService.getWeightMeasurements(userId, {
+            includeLocalOnly: true,
+            orderBy: 'DESC',
+        });
+
+        const measurements: UserWeightMeasurement[] = updatedMeasurements.map((local) => ({
+            UserId: local.UserId,
+            MeasurementTimestamp: local.MeasurementTimestamp,
+            Weight: local.Weight,
+        }));
+
+        console.log(`Weight measurement logged offline (${measurements.length} total measurements)`);
+        return measurements;
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to log weight measurement',
@@ -743,7 +825,9 @@ export const logWeightMeasurementAsync = createAsyncThunk<
     }
 });
 
-// UPDATE - Update weight measurement (invalidate cache)
+/**
+ * Update weight measurement (offline-first with optimistic update)
+ */
 export const updateWeightMeasurementAsync = createAsyncThunk<
     UserWeightMeasurement[],
     { timestamp: string; weight: number },
@@ -760,14 +844,41 @@ export const updateWeightMeasurementAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Update the measurement
-        await UserService.updateWeightMeasurement(userId, timestamp, weight);
+        // Find local record by timestamp
+        const localMeasurements = await offlineStorageService.getWeightMeasurements(userId);
+        const localRecord = localMeasurements.find((m) => m.MeasurementTimestamp === timestamp);
 
-        // Invalidate cache after updating measurement
-        await cacheService.remove('weight_measurements');
+        if (!localRecord) {
+            return rejectWithValue({ errorMessage: 'Weight measurement not found' });
+        }
 
-        // Refresh and return all measurements
-        return await UserService.getWeightMeasurements(userId);
+        // Update immediately in SQLite (optimistic update)
+        console.log('Updating weight measurement locally...');
+        await offlineStorageService.updateWeightMeasurement(localRecord.localId, {
+            weight,
+        });
+
+        // Queue for server sync (immediate attempt)
+        await syncQueueService.queueWeightMeasurement('UPDATE', localRecord.localId, {
+            userId,
+            weight,
+            measurementTimestamp: timestamp,
+        });
+
+        // Return updated measurements from SQLite
+        const updatedMeasurements = await offlineStorageService.getWeightMeasurements(userId, {
+            includeLocalOnly: true,
+            orderBy: 'DESC',
+        });
+
+        const measurements: UserWeightMeasurement[] = updatedMeasurements.map((local) => ({
+            UserId: local.UserId,
+            MeasurementTimestamp: local.MeasurementTimestamp,
+            Weight: local.Weight,
+        }));
+
+        console.log('Weight measurement updated offline');
+        return measurements;
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to update weight measurement',
@@ -775,7 +886,9 @@ export const updateWeightMeasurementAsync = createAsyncThunk<
     }
 });
 
-// DELETE - Delete weight measurement (invalidate cache)
+/**
+ * Delete weight measurement (offline-first with optimistic update)
+ */
 export const deleteWeightMeasurementAsync = createAsyncThunk<
     UserWeightMeasurement[],
     { timestamp: string },
@@ -792,14 +905,44 @@ export const deleteWeightMeasurementAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Delete the measurement
-        await UserService.deleteWeightMeasurement(userId, timestamp);
+        // Find local record by timestamp
+        const localMeasurements = await offlineStorageService.getWeightMeasurements(userId);
+        const localRecord = localMeasurements.find((m) => m.MeasurementTimestamp === timestamp);
 
-        // Invalidate cache after deleting measurement
-        await cacheService.remove('weight_measurements');
+        if (!localRecord) {
+            return rejectWithValue({ errorMessage: 'Weight measurement not found' });
+        }
 
-        // Refresh and return all measurements
-        return await UserService.getWeightMeasurements(userId);
+        // If local-only record, just delete it
+        if (localRecord.syncStatus === 'local_only') {
+            console.log('Deleting local-only weight measurement...');
+            await offlineStorageService.deleteWeightMeasurement(localRecord.localId);
+        } else {
+            // For synced records, queue for server deletion
+            console.log('Queueing weight measurement for server deletion...');
+            await syncQueueService.queueWeightMeasurement('DELETE', localRecord.localId, {
+                userId,
+                measurementTimestamp: timestamp,
+            });
+
+            // Delete from local storage immediately (optimistic)
+            await offlineStorageService.deleteWeightMeasurement(localRecord.localId);
+        }
+
+        // Return updated measurements from SQLite
+        const updatedMeasurements = await offlineStorageService.getWeightMeasurements(userId, {
+            includeLocalOnly: true,
+            orderBy: 'DESC',
+        });
+
+        const measurements: UserWeightMeasurement[] = updatedMeasurements.map((local) => ({
+            UserId: local.UserId,
+            MeasurementTimestamp: local.MeasurementTimestamp,
+            Weight: local.Weight,
+        }));
+
+        console.log(`Weight measurement deleted offline (${measurements.length} remaining)`);
+        return measurements;
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to delete weight measurement',

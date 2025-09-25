@@ -17,7 +17,7 @@ import { deleteFoodEntryAsync, updateFoodEntryAsync } from '@/store/user/thunks'
 import { FoodEntry, MealType, UpdateFoodEntryParams } from '@/types';
 import { addAlpha } from '@/utils/colorUtils';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, TextInput as RNTextInput, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, TextInput as RNTextInput, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
@@ -325,7 +325,15 @@ export default function EditMealItemScreen() {
     const handleTimeSelect = useCallback(() => {
         trigger('selection');
         setTempSelectedTime(new Date(selectedTime));
-        setShowTimeSelector(true);
+
+        // Dismiss keyboard first
+        Keyboard.dismiss();
+
+        // Small delay to allow keyboard to fully dismiss before showing bottom sheet
+        setTimeout(() => {
+            setShowTimeSelector(true);
+        }, 100);
+
         setFocusedInput('time');
     }, [selectedTime]);
 

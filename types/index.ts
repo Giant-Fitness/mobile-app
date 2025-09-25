@@ -6,6 +6,6 @@ export * from './quoteTypes';
 export * from './workoutTypes';
 export * from './feedbackTypes';
 export * from './exerciseSetModificationsTypes';
-export * from './exerciseSubstitutionsType';
+export * from './exerciseSubstitutionsTypes';
 export * from './exerciseProgressTypes';
 export * from './nutritionLogsTypes';

@@ -85,6 +85,7 @@ export default function HomeScreen() {
     const { user, userWeightMeasurements, userBodyMeasurements, userRecommendations, userAppSettings, userNutritionGoalHistory } = useSelector(
         (state: RootState) => state.user,
     );
+
     const { programs } = useSelector((state: RootState) => state.programs);
 
     const { user: programUser, userProgramProgress, hasCompletedWorkoutToday } = useProgramData();

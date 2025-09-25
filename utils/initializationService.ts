@@ -16,6 +16,8 @@ import {
 import { getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/thunks';
 import { getRestDayQuoteAsync, getWorkoutQuoteAsync } from '@/store/quotes/thunks';
 import { AppDispatch, RootState } from '@/store/store';
+import { initializeSyncAsync } from '@/store/sync/syncSlice';
+import UserService from '@/store/user/service';
 import {
     getAllNutritionLogsAsync,
     getBodyMeasurementsAsync,
@@ -33,6 +35,8 @@ import {
     getWeightMeasurementsAsync,
 } from '@/store/user/thunks';
 import { getAllWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
+import { networkStateManager } from '@/utils/offline/NetworkStateManager';
+import { offlineStorageService } from '@/utils/offline/OfflineStorageService';
 
 import { cacheService, CacheTTL } from './cache';
 
@@ -344,13 +348,13 @@ export class InitializationService {
      */
     async initializeApp(): Promise<boolean> {
         try {
-            if (this.isFirstRun) {
-                console.log('Using first-run initialization strategy (maximum parallelization)');
-                return await this.initializeFirstRun();
-            } else {
-                console.log('Using cache-aware initialization strategy');
-                return await this.initializeCacheAware();
-            }
+            // if (this.isFirstRun) {
+            //     console.log('Using first-run initialization strategy (maximum parallelization)');
+            //     return await this.initializeFirstRun();
+            // } else {
+            console.log('Using cache-aware initialization strategy');
+            return await this.initializeCacheAware();
+            // }
         } catch (error) {
             console.error('Initialization failed:', error);
             this.dispatch(setCriticalError(error instanceof Error ? error.message : 'Unknown error'));
@@ -359,13 +363,30 @@ export class InitializationService {
     }
 
     /**
-     * First-run strategy: Maximum parallelization since no cache exists
+     * First-run strategy: Maximum parallelization with proper service initialization
      */
     private async initializeFirstRun(): Promise<boolean> {
         this.dispatch(setPhase('critical'));
         this.dispatch(setCriticalDataState(REQUEST_STATE.PENDING));
 
-        // On first run, load everything possible in parallel
+        // STEP 1: Initialize sync services first (critical for offline-first features)
+        try {
+            console.log('🔧 Initializing offline sync services (first run)...');
+            await this.dispatch(
+                initializeSyncAsync({
+                    enableBackgroundSync: true,
+                    enableNetworkMonitoring: true,
+                }),
+            ).unwrap();
+            console.log('✅ Offline sync services initialized (first run)');
+
+            // Handle empty SQLite scenario for first run
+            await this.handleEmptyLocalStorage();
+        } catch (error) {
+            console.warn('⚠️ Offline sync initialization failed, continuing without offline support:', error);
+        }
+
+        // STEP 2: On first run, load everything possible in parallel
         // Only respect true dependencies, not artificial phase boundaries
         const results = await this.loadAllDataWithMaxParallelization();
 
@@ -379,6 +400,20 @@ export class InitializationService {
         this.dispatch(setSecondaryDataState(REQUEST_STATE.FULFILLED));
         this.dispatch(setBackgroundSyncState(REQUEST_STATE.FULFILLED));
 
+        // STEP 3: Perform data retention cleanup in background
+        setTimeout(async () => {
+            try {
+                const stats = await offlineStorageService.getStorageStats();
+                if (stats) {
+                    console.log('🧹 Performing data retention cleanup (first run)...');
+                    await offlineStorageService.cleanupExpiredData('weight_measurements', 90);
+                    console.log('✅ Data cleanup completed (first run)');
+                }
+            } catch (error) {
+                console.warn('⚠️ Data cleanup skipped - offline storage not available:', error);
+            }
+        }, 5000);
+
         return true;
     }
 
@@ -386,6 +421,38 @@ export class InitializationService {
      * Cache-aware strategy: Respect cache and load in phases
      */
     private async initializeCacheAware(): Promise<boolean> {
+        // Initialize offline sync services
+        try {
+            console.log('Initializing offline sync services...');
+            await this.dispatch(
+                initializeSyncAsync({
+                    enableBackgroundSync: true,
+                    enableNetworkMonitoring: true,
+                }),
+            ).unwrap();
+            console.log('Offline sync services initialized');
+
+            // Handle empty SQLite scenario (fresh install OR reinstall)
+            await this.handleEmptyLocalStorage();
+        } catch (error) {
+            console.warn('Offline sync initialization failed, continuing without offline support:', error);
+        }
+
+        // Perform data retention cleanup in background - only if offline storage is available
+        setTimeout(async () => {
+            try {
+                // Check if offline storage is properly initialized before cleanup
+                const stats = await offlineStorageService.getStorageStats();
+                if (stats) {
+                    console.log('Performing data retention cleanup...');
+                    await offlineStorageService.cleanupExpiredData('weight_measurements', 90);
+                    console.log('Data cleanup completed');
+                }
+            } catch (error) {
+                console.warn('Data cleanup skipped - offline storage not available:', error);
+            }
+        }, 5000);
+
         // Load critical data first
         this.dispatch(setPhase('critical'));
         this.dispatch(setCriticalDataState(REQUEST_STATE.PENDING));
@@ -422,7 +489,59 @@ export class InitializationService {
     }
 
     /**
-     * NEW: Load all data with maximum parallelization for first run
+     * Handle empty local storage scenario
+     * If SQLite is empty AND online → fetch server first (handles both fresh install and reinstall)
+     */
+    private async handleEmptyLocalStorage(): Promise<void> {
+        try {
+            const state = this.getState?.();
+            const userId = state?.user?.user?.UserId;
+
+            if (!userId || !networkStateManager.isOnline()) {
+                console.log('Skipping initial server sync - no user ID or offline');
+                return;
+            }
+
+            // Check if SQLite is empty - but only if offline storage is initialized
+            try {
+                const stats = await offlineStorageService.getStorageStats();
+                const hasLocalData = stats.weightMeasurements > 0;
+
+                if (!hasLocalData) {
+                    console.log('Empty local storage detected - fetching server data...');
+
+                    try {
+                        // Fetch weight measurements from server
+                        const serverWeightMeasurements = await UserService.getWeightMeasurements(userId);
+
+                        if (serverWeightMeasurements.length > 0) {
+                            await offlineStorageService.mergeServerWeightMeasurements(userId, serverWeightMeasurements);
+                            console.log(`Initial sync: loaded ${serverWeightMeasurements.length} weight measurements from server`);
+                        } else {
+                            console.log('No server data found - fresh install');
+                        }
+
+                        // TODO: Add other data types here as they become offline-first
+                        // const serverSleepMeasurements = await UserService.getSleepMeasurements(userId);
+                        // const serverBodyMeasurements = await UserService.getBodyMeasurements(userId);
+                    } catch (error) {
+                        console.warn('Initial server sync failed:', error);
+                        // Continue normally - user will see empty state initially
+                    }
+                } else {
+                    console.log('Local data found - normal startup');
+                }
+            } catch (error) {
+                console.warn('Could not check local storage stats (offline storage not available):', error);
+                // Continue without offline storage checks
+            }
+        } catch (error) {
+            console.warn('Failed to handle empty local storage:', error);
+        }
+    }
+
+    /**
+     * Load all data with maximum parallelization for first run
      */
     private async loadAllDataWithMaxParallelization(): Promise<{ hasRequiredFailures: boolean }> {
         const loadResults: LoadResult[] = [];

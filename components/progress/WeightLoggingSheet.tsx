@@ -197,17 +197,22 @@ export const WeightLoggingSheet: React.FC<WeightLoggingSheetProps> = ({
             </View>
         );
     };
+
     const handleDelete = async () => {
-        if (!onDelete) return;
+        if (!onDelete || !getExistingData) return;
 
         setIsDeleting(true);
         try {
-            const localSelectedDate = new Date(selectedDate);
+            // Get the existing measurement data to use its exact timestamp
+            const existingMeasurement = getExistingData(selectedDate);
 
-            localSelectedDate.setHours(0, 0, 0, 0);
+            if (!existingMeasurement) {
+                setError('No measurement found to delete');
+                return;
+            }
 
-            const utcMidnight = new Date(Date.UTC(localSelectedDate.getFullYear(), localSelectedDate.getMonth(), localSelectedDate.getDate(), 0, 0, 0));
-            await onDelete(utcMidnight.toISOString());
+            // Use the exact timestamp from the existing measurement
+            await onDelete(existingMeasurement.MeasurementTimestamp);
 
             handleClose();
         } catch (err) {
