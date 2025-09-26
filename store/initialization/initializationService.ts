@@ -1,6 +1,10 @@
-// utils/initializationService.ts
+// store/initialization/initializationService.ts
 
 import { REQUEST_STATE } from '@/constants/requestStates';
+import { bodyMeasurementOfflineService } from '@/lib/storage/body-measurements/BodyMeasurementOfflineService';
+import { initializeOfflineServices } from '@/lib/storage/initializeOfflineServices';
+import { weightMeasurementOfflineService } from '@/lib/storage/weight-measurements/WeightMeasurementOfflineService';
+import { networkStateManager } from '@/lib/sync/NetworkStateManager';
 import { initializeTrackedLiftsHistoryAsync } from '@/store/exerciseProgress/thunks';
 import { fetchAllExercisesAsync } from '@/store/exercises/thunks';
 import {
@@ -35,10 +39,8 @@ import {
     getWeightMeasurementsAsync,
 } from '@/store/user/thunks';
 import { getAllWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
-import { networkStateManager } from '@/utils/offline/NetworkStateManager';
-import { offlineStorageService } from '@/utils/offline/OfflineStorageService';
 
-import { cacheService, CacheTTL } from './cache';
+import { cacheService, CacheTTL } from '../../lib/cache/cacheService';
 
 // Standardized cache keys
 const CACHE_KEYS = {
@@ -238,15 +240,15 @@ export class InitializationService {
             priority: 'medium',
             args: { useCache: true },
         },
-        {
-            key: 'userWeightMeasurements',
-            thunk: getWeightMeasurementsAsync,
-            cacheKey: CACHE_KEYS.WEIGHT_MEASUREMENTS,
-            ttl: CacheTTL.LONG,
-            required: false,
-            priority: 'medium',
-            args: { useCache: true },
-        },
+        // {
+        //     key: 'userWeightMeasurements',
+        //     thunk: getWeightMeasurementsAsync,
+        //     cacheKey: CACHE_KEYS.WEIGHT_MEASUREMENTS,
+        //     ttl: CacheTTL.LONG,
+        //     required: false,
+        //     priority: 'medium',
+        //     args: { useCache: true },
+        // },
         // {
         //     key: 'userSleepMeasurements',
         //     thunk: getSleepMeasurementsAsync,
@@ -256,15 +258,15 @@ export class InitializationService {
         //     priority: 'medium',
         //     args: { useCache: true },
         // },
-        {
-            key: 'userBodyMeasurements',
-            thunk: getBodyMeasurementsAsync,
-            cacheKey: CACHE_KEYS.BODY_MEASUREMENTS,
-            ttl: CacheTTL.LONG,
-            required: false,
-            priority: 'medium',
-            args: { useCache: true },
-        },
+        // {
+        //     key: 'userBodyMeasurements',
+        //     thunk: getBodyMeasurementsAsync,
+        //     cacheKey: CACHE_KEYS.BODY_MEASUREMENTS,
+        //     ttl: CacheTTL.LONG,
+        //     required: false,
+        //     priority: 'medium',
+        //     args: { useCache: true },
+        // },
         {
             key: 'spotlightWorkouts',
             thunk: getSpotlightWorkoutsAsync,
@@ -337,24 +339,15 @@ export class InitializationService {
         });
 
         await Promise.allSettled(cacheChecks);
-
-        // Determine if this is a first run (no critical cache)
-        this.isFirstRun = await this.detectFirstRun();
-        console.log(`First run detected: ${this.isFirstRun}`);
     }
 
     /**
-     * NEW: Main initialization method that chooses strategy based on cache status
+     * Main initialization method
      */
     async initializeApp(): Promise<boolean> {
         try {
-            // if (this.isFirstRun) {
-            //     console.log('Using first-run initialization strategy (maximum parallelization)');
-            //     return await this.initializeFirstRun();
-            // } else {
             console.log('Using cache-aware initialization strategy');
             return await this.initializeCacheAware();
-            // }
         } catch (error) {
             console.error('Initialization failed:', error);
             this.dispatch(setCriticalError(error instanceof Error ? error.message : 'Unknown error'));
@@ -363,91 +356,48 @@ export class InitializationService {
     }
 
     /**
-     * First-run strategy: Maximum parallelization with proper service initialization
-     */
-    private async initializeFirstRun(): Promise<boolean> {
-        this.dispatch(setPhase('critical'));
-        this.dispatch(setCriticalDataState(REQUEST_STATE.PENDING));
-
-        // STEP 1: Initialize sync services first (critical for offline-first features)
-        try {
-            console.log('🔧 Initializing offline sync services (first run)...');
-            await this.dispatch(
-                initializeSyncAsync({
-                    enableBackgroundSync: true,
-                    enableNetworkMonitoring: true,
-                }),
-            ).unwrap();
-            console.log('✅ Offline sync services initialized (first run)');
-
-            // Handle empty SQLite scenario for first run
-            await this.handleEmptyLocalStorage();
-        } catch (error) {
-            console.warn('⚠️ Offline sync initialization failed, continuing without offline support:', error);
-        }
-
-        // STEP 2: On first run, load everything possible in parallel
-        // Only respect true dependencies, not artificial phase boundaries
-        const results = await this.loadAllDataWithMaxParallelization();
-
-        if (results.hasRequiredFailures) {
-            this.dispatch(setCriticalDataState(REQUEST_STATE.REJECTED));
-            this.dispatch(setCriticalError('Failed to load required app data'));
-            return false;
-        }
-
-        this.dispatch(setCriticalDataState(REQUEST_STATE.FULFILLED));
-        this.dispatch(setSecondaryDataState(REQUEST_STATE.FULFILLED));
-        this.dispatch(setBackgroundSyncState(REQUEST_STATE.FULFILLED));
-
-        // STEP 3: Perform data retention cleanup in background
-        setTimeout(async () => {
-            try {
-                const stats = await offlineStorageService.getStorageStats();
-                if (stats) {
-                    console.log('🧹 Performing data retention cleanup (first run)...');
-                    await offlineStorageService.cleanupExpiredData('weight_measurements', 90);
-                    console.log('✅ Data cleanup completed (first run)');
-                }
-            } catch (error) {
-                console.warn('⚠️ Data cleanup skipped - offline storage not available:', error);
-            }
-        }, 5000);
-
-        return true;
-    }
-
-    /**
      * Cache-aware strategy: Respect cache and load in phases
      */
     private async initializeCacheAware(): Promise<boolean> {
-        // Initialize offline sync services
+        // STEP 1: Initialize offline infrastructure FIRST
         try {
-            console.log('Initializing offline sync services...');
-            await this.dispatch(
-                initializeSyncAsync({
-                    enableBackgroundSync: true,
-                    enableNetworkMonitoring: true,
-                }),
-            ).unwrap();
-            console.log('Offline sync services initialized');
+            console.log('Initializing offline services...');
+            await initializeOfflineServices({
+                enableNetworkMonitoring: true,
+            });
+            console.log('Offline services initialized successfully');
 
             // Handle empty SQLite scenario (fresh install OR reinstall)
             await this.handleEmptyLocalStorage();
+
+            // STEP 1.5: Load data into Redux
+            await this.loadOfflineDataIntoRedux();
         } catch (error) {
             console.warn('Offline sync initialization failed, continuing without offline support:', error);
         }
 
-        // Perform data retention cleanup in background - only if offline storage is available
+        // STEP 2: Initialize Redux sync slice (this coordinates with the offline services)
+        try {
+            await this.dispatch(
+                initializeSyncAsync({
+                    enableBackgroundSync: true,
+                    enableNetworkMonitoring: true,
+                }),
+            ).unwrap();
+            console.log('Redux sync coordination initialized');
+        } catch (error) {
+            console.warn('Redux sync initialization failed:', error);
+        }
+
+        // STEP 3: Continue with existing data loading logic
+        // Perform data retention cleanup in background
         setTimeout(async () => {
             try {
-                // Check if offline storage is properly initialized before cleanup
-                const stats = await offlineStorageService.getStorageStats();
-                if (stats) {
-                    console.log('Performing data retention cleanup...');
-                    await offlineStorageService.cleanupExpiredData('weight_measurements', 90);
-                    console.log('Data cleanup completed');
-                }
+                // Use the specific service methods instead of generic offlineStorageService
+                const weightCleanup = await weightMeasurementOfflineService.cleanupExpiredData();
+                const bodyCleanup = await bodyMeasurementOfflineService.cleanupExpiredData();
+
+                console.log(`Data cleanup completed: ${weightCleanup + bodyCleanup} records removed`);
             } catch (error) {
                 console.warn('Data cleanup skipped - offline storage not available:', error);
             }
@@ -502,10 +452,12 @@ export class InitializationService {
                 return;
             }
 
-            // Check if SQLite is empty - but only if offline storage is initialized
+            // Check if SQLite is empty using the new services
             try {
-                const stats = await offlineStorageService.getStorageStats();
-                const hasLocalData = stats.weightMeasurements > 0;
+                const weightStats = await weightMeasurementOfflineService.getRecords(userId);
+                const bodyStats = await bodyMeasurementOfflineService.getRecords(userId);
+
+                const hasLocalData = weightStats.length > 0 || bodyStats.length > 0;
 
                 if (!hasLocalData) {
                     console.log('Empty local storage detected - fetching server data...');
@@ -513,17 +465,21 @@ export class InitializationService {
                     try {
                         // Fetch weight measurements from server
                         const serverWeightMeasurements = await UserService.getWeightMeasurements(userId);
-
                         if (serverWeightMeasurements.length > 0) {
-                            await offlineStorageService.mergeServerWeightMeasurements(userId, serverWeightMeasurements);
+                            await weightMeasurementOfflineService.mergeServerData(userId, serverWeightMeasurements);
                             console.log(`Initial sync: loaded ${serverWeightMeasurements.length} weight measurements from server`);
-                        } else {
-                            console.log('No server data found - fresh install');
                         }
 
-                        // TODO: Add other data types here as they become offline-first
-                        // const serverSleepMeasurements = await UserService.getSleepMeasurements(userId);
-                        // const serverBodyMeasurements = await UserService.getBodyMeasurements(userId);
+                        // Fetch body measurements from server
+                        const serverBodyMeasurements = await UserService.getBodyMeasurements(userId);
+                        if (serverBodyMeasurements.length > 0) {
+                            await bodyMeasurementOfflineService.mergeServerData(userId, serverBodyMeasurements);
+                            console.log(`Initial sync: loaded ${serverBodyMeasurements.length} body measurements from server`);
+                        }
+
+                        if (serverWeightMeasurements.length === 0 && serverBodyMeasurements.length === 0) {
+                            console.log('No server data found - fresh install');
+                        }
                     } catch (error) {
                         console.warn('Initial server sync failed:', error);
                         // Continue normally - user will see empty state initially
@@ -540,107 +496,71 @@ export class InitializationService {
         }
     }
 
-    /**
-     * Load all data with maximum parallelization for first run
-     */
-    private async loadAllDataWithMaxParallelization(): Promise<{ hasRequiredFailures: boolean }> {
-        const loadResults: LoadResult[] = [];
-        const processedItems = new Set<string>();
+    private async loadOfflineDataIntoRedux(): Promise<void> {
+        try {
+            const state = this.getState?.();
+            const userId = state?.user?.user?.UserId;
 
-        // Separate items by dependency requirements
-        const independentItems = this.allDataCategories.filter((item) => !item.dependsOn?.length);
-        const dependentItems = this.allDataCategories.filter((item) => item.dependsOn?.length);
-
-        console.log(`First run: Loading ${independentItems.length} independent items in parallel`);
-
-        // Load ALL independent items in parallel (regardless of priority)
-        if (independentItems.length > 0) {
-            const independentPromises = independentItems.map((item) => this.loadSingleItem(item));
-            const independentResults = await Promise.allSettled(independentPromises);
-
-            independentResults.forEach((result, index) => {
-                const item = independentItems[index];
-                if (result.status === 'fulfilled') {
-                    loadResults.push(result.value);
-                    if (result.value.success) {
-                        processedItems.add(item.key);
-                    }
-                } else {
-                    loadResults.push({
-                        key: item.key,
-                        success: false,
-                        error: result.reason,
-                        required: item.required,
-                    });
-                }
-            });
-        }
-
-        // Process dependent items in waves
-        let remainingDependentItems = [...dependentItems];
-        let maxIterations = 10;
-        let iteration = 0;
-
-        while (remainingDependentItems.length > 0 && iteration < maxIterations) {
-            iteration++;
-            const readyItems: DataCategory[] = [];
-            const stillWaitingItems: DataCategory[] = [];
-
-            for (const item of remainingDependentItems) {
-                const canLoad = await this.canLoadItem(item, processedItems);
-                if (canLoad) {
-                    readyItems.push(item);
-                } else {
-                    stillWaitingItems.push(item);
-                }
+            if (!userId) {
+                console.log('Skipping measurements loading - no user ID available yet');
+                return;
             }
 
-            if (readyItems.length === 0) {
-                // Log remaining items that couldn't be loaded
-                console.log(
-                    `Cannot load remaining items due to missing dependencies:`,
-                    stillWaitingItems.map((item) => ({
-                        key: item.key,
-                        dependsOn: item.dependsOn,
-                        reason: this.getCannotLoadReason(item),
-                    })),
-                );
-                break;
-            }
+            console.log('Loading measurements from SQLite into Redux...');
 
-            console.log(`First run: Loading ${readyItems.length} dependent items in parallel (iteration ${iteration})`);
+            // Load both measurements into Redux from SQLite
+            const promises = [this.dispatch(getWeightMeasurementsAsync({})), this.dispatch(getBodyMeasurementsAsync({}))];
 
-            const dependentPromises = readyItems.map((item) => this.loadSingleItem(item));
-            const dependentResults = await Promise.allSettled(dependentPromises);
+            const results = await Promise.allSettled(promises);
 
-            dependentResults.forEach((result, index) => {
-                const item = readyItems[index];
-                if (result.status === 'fulfilled') {
-                    loadResults.push(result.value);
-                    if (result.value.success) {
-                        processedItems.add(item.key);
-                    }
+            results.forEach((result, index) => {
+                const measurementType = index === 0 ? 'weight' : 'body';
+                if (result.status === 'fulfilled' && result.value.type.endsWith('/fulfilled')) {
+                    const data = result.value.payload;
+                    const count = Array.isArray(data) ? data.length : 0;
+                    console.log(`✅ Loaded ${count} ${measurementType} measurements into Redux`);
                 } else {
-                    loadResults.push({
-                        key: item.key,
-                        success: false,
-                        error: result.reason,
-                        required: item.required,
-                    });
+                    console.warn(`⚠️ Failed to load ${measurementType} measurements into Redux`);
                 }
             });
-
-            remainingDependentItems = stillWaitingItems;
+        } catch (error) {
+            console.warn('Failed to load measurements into Redux:', error);
         }
+    }
 
-        const hasRequiredFailures = loadResults.some((result) => !result.success && result.required);
+    private async refreshOfflineDataInBackground(): Promise<void> {
+        try {
+            const state = this.getState?.();
+            const userId = state?.user?.user?.UserId;
 
-        // Log detailed results for first run
-        const successCount = loadResults.filter((r) => r.success).length;
-        const failureCount = loadResults.filter((r) => !r.success).length;
-        console.log(`First run complete: ${successCount} successful, ${failureCount} failed`);
+            if (!userId || !networkStateManager.isOnline()) {
+                console.log('Skipping background measurements refresh - no user ID or offline');
+                return;
+            }
 
-        return { hasRequiredFailures };
+            console.log('🔄 Background refreshing measurements data...');
+
+            // Force refresh both measurements (this will sync with server and update Redux)
+            const promises = [
+                this.dispatch(getWeightMeasurementsAsync({ forceRefresh: true })),
+                this.dispatch(getBodyMeasurementsAsync({ forceRefresh: true })),
+            ];
+
+            const results = await Promise.allSettled(promises);
+
+            results.forEach((result, index) => {
+                const measurementType = index === 0 ? 'weight' : 'body';
+                if (result.status === 'fulfilled' && result.value.type.endsWith('/fulfilled')) {
+                    const data = result.value.payload;
+                    const count = Array.isArray(data) ? data.length : 0;
+                    console.log(`✅ Background refreshed ${count} ${measurementType} measurements`);
+                } else {
+                    console.warn(`⚠️ Background refresh failed for ${measurementType} measurements`);
+                }
+            });
+        } catch (error) {
+            console.warn('Failed to refresh measurements in background:', error);
+        }
     }
 
     /**
@@ -833,6 +753,8 @@ export class InitializationService {
 
             // Refresh stale data
             await this.performSmartBackgroundRefresh();
+
+            await this.refreshOfflineDataInBackground();
 
             this.dispatch(setBackgroundSyncState(REQUEST_STATE.FULFILLED));
         } catch (error) {

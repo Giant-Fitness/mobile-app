@@ -9,10 +9,7 @@ import { OnboardingCard } from '@/components/onboarding/OnboardingCard';
 import { ActiveProgramDayCompressedCard } from '@/components/programs/ActiveProgramDayCompressedCard';
 import { RecommendedProgramCard } from '@/components/programs/RecommendedProgramCard';
 import { WorkoutCompletedCard } from '@/components/programs/WorkoutCompletedCard';
-import { BodyMeasurementsLoggingSheet } from '@/components/progress/BodyMeasurementsLoggingSheet';
-// import { SleepLoggingSheet } from '@/components/progress/SleepLoggingSheet';
 import { TrainingProgressCard } from '@/components/progress/TrainingProgressCard';
-import { WeightLoggingSheet } from '@/components/progress/WeightLoggingSheet';
 import { WeightProgressCard } from '@/components/progress/WeightProgressCard';
 import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
@@ -24,12 +21,8 @@ import { getAllProgramDaysAsync, getAllProgramsAsync } from '@/store/programs/th
 import { getRestDayQuoteAsync, getWorkoutQuoteAsync } from '@/store/quotes/thunks';
 import { AppDispatch, RootState } from '@/store/store';
 import {
-    deleteBodyMeasurementAsync,
-    // deleteSleepMeasurementAsync,
-    deleteWeightMeasurementAsync,
     getAllNutritionLogsAsync,
     getBodyMeasurementsAsync,
-    // getSleepMeasurementsAsync,
     getUserAppSettingsAsync,
     getUserAsync,
     getUserExerciseSetModificationsAsync,
@@ -41,9 +34,6 @@ import {
     getUserProgramProgressAsync,
     getUserRecommendationsAsync,
     getWeightMeasurementsAsync,
-    logBodyMeasurementAsync,
-    // logSleepMeasurementAsync,
-    logWeightMeasurementAsync,
 } from '@/store/user/thunks';
 import { getAllWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
 import { debounce } from '@/utils/debounce';
@@ -70,10 +60,6 @@ export default function HomeScreen() {
 
     // State / refs
     const dispatch = useDispatch<AppDispatch>();
-    const [isWeightSheetVisible, setIsWeightSheetVisible] = useState(false);
-    // const [isSleepSheetVisible, setIsSleepSheetVisible] = useState(false);
-    const [isBodyMeasurementsSheetVisible, setIsBodyMeasurementsSheetVisible] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
     const EXPANDED_HEADER_HEIGHT = Sizes.headerHeight + 40;
@@ -81,10 +67,8 @@ export default function HomeScreen() {
     const isMountedAndFocused = useRef(true);
     const refreshTimeoutRef = useRef<number | null>(null);
 
-    // Store slices - removed userNutritionLogs since it's handled by the hook
-    const { user, userWeightMeasurements, userBodyMeasurements, userRecommendations, userAppSettings, userNutritionGoalHistory } = useSelector(
-        (state: RootState) => state.user,
-    );
+    // Store slices
+    const { user, userWeightMeasurements, userRecommendations, userAppSettings, userNutritionGoalHistory } = useSelector((state: RootState) => state.user);
 
     const { programs } = useSelector((state: RootState) => state.programs);
 
@@ -114,8 +98,6 @@ export default function HomeScreen() {
     // Greeting
     const greeting = programUser?.FirstName ? `Hi, ${programUser.FirstName}!` : 'Hi!';
 
-    // ----- Removed the old nutrition log loading useFocusEffect since the hook handles it -----
-
     // ----- Scroll handler -----------------------------------------------------
     const scrollHandler = useAnimatedScrollHandler({
         onScroll: (event) => {
@@ -136,76 +118,6 @@ export default function HomeScreen() {
                 if (isRefreshing) setIsRefreshing(false);
             };
         }, [isRefreshing]),
-    );
-
-    // ----- Handlers: Log & Delete -------------------------------------------
-    const handleLogWeight = useCallback(
-        async (weight: number, date: Date) => {
-            setIsLoading(true);
-            try {
-                await dispatch(logWeightMeasurementAsync({ weight, measurementTimestamp: date.toISOString() })).unwrap();
-                await dispatch(getWeightMeasurementsAsync()).unwrap();
-            } catch (e) {
-                console.error('Failed to log weight:', e);
-            } finally {
-                if (isMountedAndFocused.current) setIsLoading(false);
-            }
-        },
-        [dispatch],
-    );
-
-    const handleLogBodyMeasurements = useCallback(
-        async (measurements: Record<string, number>, date: Date) => {
-            setIsLoading(true);
-            try {
-                await dispatch(logBodyMeasurementAsync({ measurements, measurementTimestamp: date.toISOString() })).unwrap();
-                await dispatch(getBodyMeasurementsAsync()).unwrap();
-            } catch (e) {
-                console.error('Failed to log body measurements:', e);
-            } finally {
-                if (isMountedAndFocused.current) setIsLoading(false);
-            }
-        },
-        [dispatch],
-    );
-
-    const handleWeightDelete = useCallback(
-        async (timestamp: string) => {
-            try {
-                await dispatch(deleteWeightMeasurementAsync({ timestamp })).unwrap();
-                setIsWeightSheetVisible(false);
-            } catch (e) {
-                console.error('Failed to delete weight:', e);
-            }
-        },
-        [dispatch],
-    );
-
-    const handleBodyMeasurementsDelete = useCallback(
-        async (timestamp: string) => {
-            try {
-                await dispatch(deleteBodyMeasurementAsync({ timestamp })).unwrap();
-                setIsBodyMeasurementsSheetVisible(false);
-            } catch (e) {
-                console.error('Failed to delete body measurements:', e);
-            }
-        },
-        [dispatch],
-    );
-
-    // ----- Utilities ----------------------------------------------------------
-    const getExistingWeightData = useCallback(
-        (date: Date) => {
-            return userWeightMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
-        },
-        [userWeightMeasurements],
-    );
-
-    const getExistingBodyMeasurementsData = useCallback(
-        (date: Date) => {
-            return userBodyMeasurements.find((m) => new Date(m.MeasurementTimestamp).toDateString() === date.toDateString());
-        },
-        [userBodyMeasurements],
     );
 
     // Updated handleRefresh to use the nutrition log hook's refetch function
@@ -401,7 +313,7 @@ export default function HomeScreen() {
             <ProgressSection key='progress' />,
             <FactSection key='fact' />,
         ].filter(Boolean) as React.ReactElement[];
-    }, [isOnboardingComplete, hasActiveProgram, activeNutritionGoal, recommendedProgram, weightGoal, activeProgram]);
+    }, [isOnboardingComplete, hasActiveProgram, activeNutritionGoal, recommendedProgram, weightGoal, activeProgram, userWeightMeasurements, userAppSettings]);
 
     return (
         <View style={styles.container}>
@@ -424,28 +336,7 @@ export default function HomeScreen() {
                 style={[styles.scrollView, { backgroundColor: themeColors.backgroundSecondary }]}
                 contentContainerStyle={{ paddingTop: EXPANDED_HEADER_HEIGHT }}
             >
-                <ThemedView style={{ backgroundColor: themeColors.backgroundSecondary }}>
-                    {sections}
-
-                    {/* Sheets */}
-                    <WeightLoggingSheet
-                        visible={isWeightSheetVisible}
-                        onClose={() => setIsWeightSheetVisible(false)}
-                        onSubmit={handleLogWeight}
-                        onDelete={handleWeightDelete}
-                        isLoading={isLoading}
-                        getExistingData={getExistingWeightData}
-                    />
-
-                    <BodyMeasurementsLoggingSheet
-                        visible={isBodyMeasurementsSheetVisible}
-                        onClose={() => setIsBodyMeasurementsSheetVisible(false)}
-                        onSubmit={handleLogBodyMeasurements}
-                        onDelete={handleBodyMeasurementsDelete}
-                        isLoading={isLoading}
-                        getExistingData={getExistingBodyMeasurementsData}
-                    />
-                </ThemedView>
+                <ThemedView style={{ backgroundColor: themeColors.backgroundSecondary }}>{sections}</ThemedView>
             </Animated.ScrollView>
         </View>
     );

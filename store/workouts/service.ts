@@ -1,8 +1,8 @@
 // store/workouts/service.ts
 
+import { authCatalogApiClient, authRecommendationsApiClient } from '@/lib/api/apiConfig';
+import { handleApiError } from '@/lib/api/errorUtils';
 import { Workout, WorkoutRecommendations } from '@/types';
-import { authCatalogApiClient, authRecommendationsApiClient } from '@/utils/api/apiConfig';
-import { handleApiError } from '@/utils/api/errorUtils';
 
 const getAllWorkouts = async (): Promise<Workout[]> => {
     console.log('service: getAllWorkouts');

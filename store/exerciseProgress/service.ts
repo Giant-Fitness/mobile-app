@@ -1,8 +1,8 @@
 // store/exerciseProgress/service.ts
 
+import { authUsersApiClient } from '@/lib/api/apiConfig';
+import { handleApiError } from '@/lib/api/errorUtils';
 import { ExerciseLog, ExerciseSet } from '@/types/exerciseProgressTypes';
-import { authUsersApiClient } from '@/utils/api/apiConfig';
-import { handleApiError } from '@/utils/api/errorUtils';
 
 const getExerciseLogs = async (userId: string, date?: string): Promise<{ [exerciseLogId: string]: ExerciseLog }> => {
     console.log('service: getExerciseLogs');

@@ -10,14 +10,7 @@ import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AppDispatch, RootState } from '@/store/store';
-import {
-    deleteBodyMeasurementAsync,
-    deleteWeightMeasurementAsync,
-    getBodyMeasurementsAsync,
-    getWeightMeasurementsAsync,
-    logBodyMeasurementAsync,
-    logWeightMeasurementAsync,
-} from '@/store/user/thunks';
+import { deleteBodyMeasurementAsync, deleteWeightMeasurementAsync, logBodyMeasurementAsync, logWeightMeasurementAsync } from '@/store/user/thunks';
 import { addAlpha } from '@/utils/colorUtils';
 import { debounce } from '@/utils/debounce';
 import React, { useRef, useState } from 'react';
@@ -54,14 +47,7 @@ export const QuickAddMenu: React.FC<QuickAddMenuProps> = ({ visible, onClose }) 
     const handleLogWeight = async (weight: number, date: Date) => {
         setIsLoading(true);
         try {
-            await dispatch(
-                logWeightMeasurementAsync({
-                    weight: weight,
-                    measurementTimestamp: date.toISOString(),
-                }),
-            ).unwrap();
-
-            await dispatch(getWeightMeasurementsAsync()).unwrap();
+            await dispatch(logWeightMeasurementAsync({ weight, measurementTimestamp: date.toISOString() })).unwrap();
         } catch (error) {
             console.error('Failed to log weight:', error);
         } finally {
@@ -94,8 +80,6 @@ export const QuickAddMenu: React.FC<QuickAddMenuProps> = ({ visible, onClose }) 
                     measurementTimestamp: date.toISOString(),
                 }),
             ).unwrap();
-
-            await dispatch(getBodyMeasurementsAsync()).unwrap();
         } catch (error) {
             console.error('Failed to log body measurements:', error);
         } finally {

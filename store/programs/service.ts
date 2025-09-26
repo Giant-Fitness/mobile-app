@@ -1,8 +1,8 @@
 // store/programs/service.ts
 
+import { authCatalogApiClient } from '@/lib/api/apiConfig';
+import { handleApiError } from '@/lib/api/errorUtils';
 import { Program, ProgramDay } from '@/types';
-import { authCatalogApiClient } from '@/utils/api/apiConfig';
-import { handleApiError } from '@/utils/api/errorUtils';
 
 const getAllPrograms = async (): Promise<Program[]> => {
     console.log('service: getAllPrograms');

@@ -19,6 +19,7 @@ export type ThemedTextTypes =
     | 'subtitle'
     | 'headline'
     | 'overline'
+    | 'overlineTransformed'
     | 'button'
     | 'link'
     | 'italic'

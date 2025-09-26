@@ -1,8 +1,8 @@
 // store/sync/syncTypes.ts
 
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { NetworkState } from '@/utils/offline/NetworkStateManager';
-import { SyncStatus } from '@/utils/offline/SyncQueueService';
+import { NetworkState } from '@/lib/sync/NetworkStateManager';
+import { SyncStatus } from '@/lib/sync/SyncQueueManager';
 
 // ==================== SYNC STATE TYPES ====================
 

@@ -1,6 +1,6 @@
-// utils/api/apiConfig.ts
+// lib/api/apiConfig.ts
 
-import { authService } from '@/utils/auth';
+import { authService } from '@/lib/auth/authService';
 
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 

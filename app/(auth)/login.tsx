@@ -6,7 +6,7 @@ import { ThemedText } from '@/components/base/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { authService } from '@/utils/auth';
+import { authService } from '@/lib/auth/authService';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, Platform, Pressable, StyleSheet, View } from 'react-native';
 

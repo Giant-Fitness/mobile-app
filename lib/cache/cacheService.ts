@@ -1,4 +1,4 @@
-// utils/cache.ts
+// lib/cache/cacheService.ts
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

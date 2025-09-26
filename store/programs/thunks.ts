@@ -1,10 +1,10 @@
 // store/programs/thunks.ts
 
 import { REQUEST_STATE } from '@/constants/requestStates';
+import { cacheService, CacheTTL } from '@/lib/cache/cacheService';
 import ProgramService from '@/store/programs/service';
 import { RootState } from '@/store/store';
 import { Program, ProgramDay } from '@/types';
-import { cacheService, CacheTTL } from '@/utils/cache';
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 

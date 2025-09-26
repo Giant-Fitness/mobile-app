@@ -1,9 +1,8 @@
 // store/sync/syncSlice.ts
 
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { NetworkState, networkStateManager } from '@/utils/offline/NetworkStateManager';
-import { offlineStorageService } from '@/utils/offline/OfflineStorageService';
-import { syncQueueService } from '@/utils/offline/SyncQueueService';
+import { NetworkState, networkStateManager } from '@/lib/sync/NetworkStateManager';
+import { syncQueueManager } from '@/lib/sync/SyncQueueManager';
 
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 
@@ -60,17 +59,22 @@ const initialState: SyncState = {
 
 // ==================== ASYNC THUNKS ====================
 
+// store/sync/syncSlice.ts (updated thunk)
+
 export const initializeSyncAsync = createAsyncThunk<boolean, InitializeSyncParams | undefined, { rejectValue: string }>(
     'sync/initializeSync',
     async (params, { dispatch, rejectWithValue }) => {
         try {
+            console.log('Initializing Redux sync coordination...');
+
+            // NOTE: The actual offline services should already be initialized
+            // by initializeOfflineServices() before this thunk is called
+
+            // This thunk just coordinates the Redux state with the already-initialized services
             const { enableBackgroundSync = true, enableNetworkMonitoring = true } = params ?? {};
 
-            // Initialize network monitoring
-            if (enableNetworkMonitoring) {
-                await networkStateManager.initialize();
-
-                // Set up network state monitoring
+            // Set up network state monitoring (if network manager is already initialized)
+            if (enableNetworkMonitoring && networkStateManager.getCurrentState()) {
                 networkStateManager.onStateChange((networkState: NetworkState) => {
                     dispatch(
                         updateNetworkState({
@@ -80,44 +84,42 @@ export const initializeSyncAsync = createAsyncThunk<boolean, InitializeSyncParam
                     );
                 });
             }
-            // Initialize storage service
-            await offlineStorageService.initialize();
 
-            // Initialize sync queue service
-            await syncQueueService.initialize();
+            // Set up queue status monitoring (if sync queue manager is already initialized)
+            try {
+                syncQueueManager.onStatusChange((queueStatus) => {
+                    dispatch(updateQueueStatus({ queueStatus }));
+                });
 
-            // Set up queue status monitoring
-            syncQueueService.onStatusChange((queueStatus) => {
-                dispatch(updateQueueStatus({ queueStatus }));
-            });
+                // Get initial states
+                const currentNetworkState = networkStateManager.getCurrentState();
+                if (currentNetworkState) {
+                    dispatch(
+                        updateNetworkState({
+                            networkState: currentNetworkState,
+                            isOnline: networkStateManager.isOnline(),
+                        }),
+                    );
+                }
 
-            // Initial network state
-            const currentNetworkState = networkStateManager.getCurrentState();
-            if (currentNetworkState) {
-                dispatch(
-                    updateNetworkState({
-                        networkState: currentNetworkState,
-                        isOnline: networkStateManager.isOnline(),
-                    }),
-                );
+                const currentQueueStatus = await syncQueueManager.getSyncStatus();
+                dispatch(updateQueueStatus({ queueStatus: currentQueueStatus }));
+            } catch (error) {
+                console.warn('Could not set up sync queue monitoring:', error);
             }
 
-            // Initial queue status
-            const currentQueueStatus = await syncQueueService.getSyncStatus();
-            dispatch(updateQueueStatus({ queueStatus: currentQueueStatus }));
-
-            // Start background sync if enabled
+            // Start background sync if enabled and online
             if (enableBackgroundSync && networkStateManager.isOnline()) {
                 setTimeout(() => {
                     dispatch(performBackgroundSyncAsync());
                 }, 2000);
             }
 
-            console.log('Sync services initialized successfully');
+            console.log('Redux sync coordination initialized successfully');
             return true;
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown initialization error';
-            console.error('Failed to initialize sync services:', errorMessage);
+            console.error('Failed to initialize Redux sync coordination:', errorMessage);
             return rejectWithValue(errorMessage);
         }
     },
@@ -136,7 +138,7 @@ export const performManualSyncAsync = createAsyncThunk<BatchSyncResult, ManualSy
             console.log('Starting manual sync...');
 
             // Force sync all pending items
-            const syncResults = await syncQueueService.forceSyncAll();
+            const syncResults = await syncQueueManager.forceSyncAll();
 
             const duration = Date.now() - startTime;
             const timestamp = new Date().toISOString();
@@ -196,7 +198,7 @@ export const performBackgroundSyncAsync = createAsyncThunk<BatchSyncResult, Back
             console.log('Starting background sync...');
 
             // Process sync queue
-            const syncResults = await syncQueueService.processQueue();
+            const syncResults = await syncQueueManager.processQueue();
 
             const duration = Date.now() - startTime;
             const timestamp = new Date().toISOString();
@@ -241,7 +243,7 @@ export const clearFailedSyncItemsAsync = createAsyncThunk<number, void, { reject
     'sync/clearFailedSyncItems',
     async (_, { rejectWithValue }) => {
         try {
-            const clearedCount = await syncQueueService.clearFailedItems();
+            const clearedCount = await syncQueueManager.clearFailedItems();
             console.log(`Cleared ${clearedCount} failed sync items`);
             return clearedCount;
         } catch (error) {

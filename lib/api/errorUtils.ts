@@ -1,4 +1,4 @@
-// utils/api/errorUtils.ts
+// lib/api/errorUtils.ts
 
 import axios from 'axios';
 

@@ -1,8 +1,8 @@
 // store/quotes/thunks.ts
 
+import { cacheService, CacheTTL } from '@/lib/cache/cacheService';
 import { RootState } from '@/store/store';
 import { Quote } from '@/types';
-import { cacheService, CacheTTL } from '@/utils/cache';
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 

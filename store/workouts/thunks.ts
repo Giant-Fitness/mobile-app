@@ -1,10 +1,10 @@
 // store/workouts/thunks.ts
 
 import { REQUEST_STATE } from '@/constants/requestStates';
+import { cacheService, CacheTTL } from '@/lib/cache/cacheService';
 import { RootState } from '@/store/store';
 import WorkoutService from '@/store/workouts/service';
 import { Workout, WorkoutRecommendations } from '@/types';
-import { cacheService, CacheTTL } from '@/utils/cache';
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 

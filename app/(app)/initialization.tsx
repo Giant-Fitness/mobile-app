@@ -6,10 +6,10 @@ import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { cacheService } from '@/lib/cache/cacheService';
+import { InitializationService } from '@/store/initialization/initializationService';
 import { incrementRetryAttempt, reset as resetInitialization, resetRetryAttempt, setInitialized } from '@/store/initialization/initializationSlice';
 import { AppDispatch, RootState } from '@/store/store';
-import { cacheService } from '@/utils/cache';
-import { InitializationService } from '@/utils/initializationService';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
 
@@ -182,6 +182,7 @@ const Initialization: React.FC = () => {
 
     // Start initialization on mount
     useEffect(() => {
+        console.log('🔍 Starting app initialization...');
         // Only initialize once
         if (!hasInitializedRef.current) {
             initializeApp();
@@ -189,25 +190,13 @@ const Initialization: React.FC = () => {
 
         // Cleanup timeout on unmount
         return () => {
+            console.log('🧹 Cleaning up initialization...');
             if (retryTimeoutRef.current) {
                 clearTimeout(retryTimeoutRef.current);
             }
         };
     }, []); // Empty dependency array - only run once on mount
 
-    useEffect(() => {
-        console.log('🔍 Starting app initialization...');
-        if (!hasInitializedRef.current) {
-            initializeApp();
-        }
-
-        return () => {
-            console.log('🧹 Cleaning up initialization...');
-            if (retryTimeoutRef.current) {
-                clearTimeout(retryTimeoutRef.current);
-            }
-        };
-    }, []);
     // Enhanced error screen with more options
     if (showManualRetry) {
         return (

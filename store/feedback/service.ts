@@ -1,7 +1,7 @@
 // store/feedback/service.ts
 
-import { authFeedbackApiClient } from '@/utils/api/apiConfig';
-import { handleApiError } from '@/utils/api/errorUtils';
+import { authFeedbackApiClient } from '@/lib/api/apiConfig';
+import { handleApiError } from '@/lib/api/errorUtils';
 
 // Define proper types for feedback payload
 interface ProgramFeedback {

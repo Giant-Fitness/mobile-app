@@ -1,11 +1,11 @@
 // store/exerciseProgress/thunks.ts
 
 import { REQUEST_STATE } from '@/constants/requestStates';
+import { cacheService, CacheTTL } from '@/lib/cache/cacheService';
 import ExerciseProgressService from '@/store/exerciseProgress/service';
 import { isLongTermTrackedLift, LONG_TERM_TRACKED_LIFT_IDS } from '@/store/exerciseProgress/utils';
 import { RootState } from '@/store/store';
 import { ExerciseSet } from '@/types/exerciseProgressTypes';
-import { cacheService, CacheTTL } from '@/utils/cache';
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 

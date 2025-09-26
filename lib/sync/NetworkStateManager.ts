@@ -1,4 +1,4 @@
-// utils/offline/NetworkStateManager.ts
+// lib/sync/NetworkStateManager.ts
 
 import NetInfo, { NetInfoState, NetInfoSubscription } from '@react-native-community/netinfo';
 

@@ -1,4 +1,4 @@
-// utils/offline/DatabaseManager.ts
+// lib/database/DatabaseManager.ts
 
 import * as SQLite from 'expo-sqlite';
 
@@ -223,6 +223,24 @@ export class DatabaseManager {
             );
         `);
 
+        // Body measurements table
+        await db.execAsync(`
+            CREATE TABLE IF NOT EXISTS body_measurements (
+                id TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                measurements_json TEXT NOT NULL,
+                measurement_timestamp TEXT NOT NULL,
+                server_timestamp TEXT,
+                sync_status TEXT NOT NULL DEFAULT 'local_only',
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                retry_count INTEGER DEFAULT 0,
+                last_sync_attempt TEXT,
+                error_message TEXT,
+                UNIQUE(user_id, measurement_timestamp)
+            );
+        `);
+
         // Sync queue table
         await db.execAsync(`
             CREATE TABLE IF NOT EXISTS sync_queue (
@@ -267,6 +285,15 @@ export class DatabaseManager {
         await db.execAsync(`
             CREATE INDEX IF NOT EXISTS idx_sync_queue_table_operation 
             ON sync_queue(table_name, operation);
+        `);
+        await db.execAsync(`
+            CREATE INDEX IF NOT EXISTS idx_body_user_timestamp 
+            ON body_measurements(user_id, measurement_timestamp);
+        `);
+
+        await db.execAsync(`
+            CREATE INDEX IF NOT EXISTS idx_body_sync_status 
+            ON body_measurements(sync_status);
         `);
 
         console.log('Database tables created successfully');

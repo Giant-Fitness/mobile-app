@@ -1,6 +1,10 @@
 // store/user/thunks.ts
 
 import { REQUEST_STATE } from '@/constants/requestStates';
+import { cacheService, CacheTTL } from '@/lib/cache/cacheService';
+import { bodyMeasurementOfflineService } from '@/lib/storage/body-measurements/BodyMeasurementOfflineService';
+import { weightMeasurementOfflineService } from '@/lib/storage/weight-measurements/WeightMeasurementOfflineService';
+import { networkStateManager } from '@/lib/sync/NetworkStateManager';
 import { RootState } from '@/store/store';
 import UserService from '@/store/user/service';
 import {
@@ -32,10 +36,6 @@ import {
     UserSleepMeasurement,
     UserWeightMeasurement,
 } from '@/types';
-import { cacheService, CacheTTL } from '@/utils/cache';
-import { networkStateManager } from '@/utils/offline/NetworkStateManager';
-import { offlineStorageService } from '@/utils/offline/OfflineStorageService';
-import { syncQueueService } from '@/utils/offline/SyncQueueService';
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
@@ -662,7 +662,7 @@ export const deleteExerciseSubstitutionAsync = createAsyncThunk<
  */
 export const getWeightMeasurementsAsync = createAsyncThunk<
     UserWeightMeasurement[],
-    { forceRefresh?: boolean; useCache?: boolean } | void,
+    { forceRefresh?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
@@ -679,17 +679,13 @@ export const getWeightMeasurementsAsync = createAsyncThunk<
 
         // Always load from SQLite first (offline-first)
         console.log('Loading weight measurements from SQLite...');
-        const localMeasurements = await offlineStorageService.getWeightMeasurements(userId, {
+        const localMeasurements = await weightMeasurementOfflineService.getRecords(userId, {
             includeLocalOnly: true,
             orderBy: 'DESC',
         });
 
         // Convert to API format
-        const measurements: UserWeightMeasurement[] = localMeasurements.map((local) => ({
-            UserId: local.UserId,
-            MeasurementTimestamp: local.MeasurementTimestamp,
-            Weight: local.Weight,
-        }));
+        const measurements: UserWeightMeasurement[] = localMeasurements.map((local) => local.data);
 
         // Background server sync (non-blocking) unless force refresh
         if (networkStateManager.isOnline() && !forceRefresh) {
@@ -697,7 +693,7 @@ export const getWeightMeasurementsAsync = createAsyncThunk<
                 try {
                     console.log('Triggering background weight measurements sync...');
                     const serverMeasurements = await UserService.getWeightMeasurements(userId);
-                    await offlineStorageService.mergeServerWeightMeasurements(userId, serverMeasurements);
+                    await weightMeasurementOfflineService.mergeServerData(userId, serverMeasurements);
                 } catch (error) {
                     console.warn('Background weight measurements sync failed:', error);
                 }
@@ -709,19 +705,15 @@ export const getWeightMeasurementsAsync = createAsyncThunk<
             try {
                 console.log('Force refreshing weight measurements from server...');
                 const serverMeasurements = await UserService.getWeightMeasurements(userId);
-                await offlineStorageService.mergeServerWeightMeasurements(userId, serverMeasurements);
+                await weightMeasurementOfflineService.mergeServerData(userId, serverMeasurements);
 
                 // Reload from SQLite to get merged data
-                const refreshedMeasurements = await offlineStorageService.getWeightMeasurements(userId, {
+                const refreshedMeasurements = await weightMeasurementOfflineService.getRecords(userId, {
                     includeLocalOnly: true,
                     orderBy: 'DESC',
                 });
 
-                return refreshedMeasurements.map((local) => ({
-                    UserId: local.UserId,
-                    MeasurementTimestamp: local.MeasurementTimestamp,
-                    Weight: local.Weight,
-                }));
+                return refreshedMeasurements.map((local) => local.data);
             } catch (error) {
                 console.warn('Force refresh failed, using local data:', error);
             }
@@ -760,18 +752,18 @@ export const logWeightMeasurementAsync = createAsyncThunk<
         const timestamp = measurementTimestamp ?? new Date().toISOString();
 
         // Check if there's already an entry for this date
-        const localMeasurements = await offlineStorageService.getWeightMeasurements(userId);
+        const localMeasurements = await weightMeasurementOfflineService.getRecords(userId);
 
-        // Look for existing entry using multiple comparison methods to be robust
+        // Look for existing entry using date comparison
         const dateToCheck = new Date(timestamp);
         const dateString = dateToCheck.toISOString().split('T')[0]; // YYYY-MM-DD format
 
         const existingEntry = localMeasurements.find((m) => {
             // Method 1: Check if timestamps start with same date
-            if (m.MeasurementTimestamp.startsWith(dateString)) return true;
+            if (m.data.MeasurementTimestamp.startsWith(dateString)) return true;
 
             // Method 2: Compare normalized dates (start of day)
-            const existingDate = new Date(m.MeasurementTimestamp);
+            const existingDate = new Date(m.data.MeasurementTimestamp);
             existingDate.setHours(0, 0, 0, 0);
             dateToCheck.setHours(0, 0, 0, 0);
 
@@ -780,41 +772,34 @@ export const logWeightMeasurementAsync = createAsyncThunk<
 
         if (existingEntry) {
             // Entry already exists - automatically switch to update mode
-            return await dispatch(
+            console.log(`Weight entry already exists for ${dateString}, updating instead`);
+            const measurements = dispatch(
                 updateWeightMeasurementAsync({
-                    timestamp: existingEntry.MeasurementTimestamp, // Use existing entry's exact timestamp
+                    timestamp: existingEntry.data.MeasurementTimestamp,
                     weight,
                 }),
             ).unwrap();
+            return measurements;
         }
 
         // No existing entry found - proceed with create
-
-        // Store immediately in SQLite (optimistic update)
-        const localId = await offlineStorageService.storeWeightMeasurement({
+        console.log('Creating new weight measurement...');
+        await weightMeasurementOfflineService.create({
             userId,
-            weight,
-            measurementTimestamp: timestamp,
-        });
-
-        // Queue for server sync (immediate attempt)
-        await syncQueueService.queueWeightMeasurement('CREATE', localId, {
-            userId,
-            weight,
-            measurementTimestamp: timestamp,
+            data: {
+                weight,
+                measurementTimestamp: timestamp,
+            },
+            timestamp,
         });
 
         // Return updated measurements from SQLite
-        const updatedMeasurements = await offlineStorageService.getWeightMeasurements(userId, {
+        const updatedMeasurements = await weightMeasurementOfflineService.getRecords(userId, {
             includeLocalOnly: true,
             orderBy: 'DESC',
         });
 
-        const measurements: UserWeightMeasurement[] = updatedMeasurements.map((local) => ({
-            UserId: local.UserId,
-            MeasurementTimestamp: local.MeasurementTimestamp,
-            Weight: local.Weight,
-        }));
+        const measurements: UserWeightMeasurement[] = updatedMeasurements.map((local) => local.data);
 
         console.log(`Weight measurement logged offline (${measurements.length} total measurements)`);
         return measurements;
@@ -845,8 +830,8 @@ export const updateWeightMeasurementAsync = createAsyncThunk<
         }
 
         // Find local record by timestamp
-        const localMeasurements = await offlineStorageService.getWeightMeasurements(userId);
-        const localRecord = localMeasurements.find((m) => m.MeasurementTimestamp === timestamp);
+        const localMeasurements = await weightMeasurementOfflineService.getRecords(userId);
+        const localRecord = localMeasurements.find((m) => m.data.MeasurementTimestamp === timestamp);
 
         if (!localRecord) {
             return rejectWithValue({ errorMessage: 'Weight measurement not found' });
@@ -854,28 +839,17 @@ export const updateWeightMeasurementAsync = createAsyncThunk<
 
         // Update immediately in SQLite (optimistic update)
         console.log('Updating weight measurement locally...');
-        await offlineStorageService.updateWeightMeasurement(localRecord.localId, {
+        await weightMeasurementOfflineService.update(localRecord.localId, {
             weight,
-        });
-
-        // Queue for server sync (immediate attempt)
-        await syncQueueService.queueWeightMeasurement('UPDATE', localRecord.localId, {
-            userId,
-            weight,
-            measurementTimestamp: timestamp,
         });
 
         // Return updated measurements from SQLite
-        const updatedMeasurements = await offlineStorageService.getWeightMeasurements(userId, {
+        const updatedMeasurements = await weightMeasurementOfflineService.getRecords(userId, {
             includeLocalOnly: true,
             orderBy: 'DESC',
         });
 
-        const measurements: UserWeightMeasurement[] = updatedMeasurements.map((local) => ({
-            UserId: local.UserId,
-            MeasurementTimestamp: local.MeasurementTimestamp,
-            Weight: local.Weight,
-        }));
+        const measurements: UserWeightMeasurement[] = updatedMeasurements.map((local) => local.data);
 
         console.log('Weight measurement updated offline');
         return measurements;
@@ -906,40 +880,25 @@ export const deleteWeightMeasurementAsync = createAsyncThunk<
         }
 
         // Find local record by timestamp
-        const localMeasurements = await offlineStorageService.getWeightMeasurements(userId);
-        const localRecord = localMeasurements.find((m) => m.MeasurementTimestamp === timestamp);
+        const localMeasurements = await weightMeasurementOfflineService.getRecords(userId);
+        const localRecord = localMeasurements.find((m) => m.data.MeasurementTimestamp === timestamp);
 
         if (!localRecord) {
             return rejectWithValue({ errorMessage: 'Weight measurement not found' });
         }
 
-        // If local-only record, just delete it
-        if (localRecord.syncStatus === 'local_only') {
-            console.log('Deleting local-only weight measurement...');
-            await offlineStorageService.deleteWeightMeasurement(localRecord.localId);
-        } else {
-            // For synced records, queue for server deletion
-            console.log('Queueing weight measurement for server deletion...');
-            await syncQueueService.queueWeightMeasurement('DELETE', localRecord.localId, {
-                userId,
-                measurementTimestamp: timestamp,
-            });
-
-            // Delete from local storage immediately (optimistic)
-            await offlineStorageService.deleteWeightMeasurement(localRecord.localId);
-        }
+        // Delete from local storage (optimistic update)
+        // The service handles queueing for server deletion if needed
+        console.log('Deleting weight measurement from local storage...');
+        await weightMeasurementOfflineService.delete(localRecord.localId);
 
         // Return updated measurements from SQLite
-        const updatedMeasurements = await offlineStorageService.getWeightMeasurements(userId, {
+        const updatedMeasurements = await weightMeasurementOfflineService.getRecords(userId, {
             includeLocalOnly: true,
             orderBy: 'DESC',
         });
 
-        const measurements: UserWeightMeasurement[] = updatedMeasurements.map((local) => ({
-            UserId: local.UserId,
-            MeasurementTimestamp: local.MeasurementTimestamp,
-            Weight: local.Weight,
-        }));
+        const measurements: UserWeightMeasurement[] = updatedMeasurements.map((local) => local.data);
 
         console.log(`Weight measurement deleted offline (${measurements.length} remaining)`);
         return measurements;
@@ -1109,24 +1068,20 @@ export const deleteSleepMeasurementAsync = createAsyncThunk<
     }
 });
 
-// READ - Get body measurements (with caching)
+/**
+ * Get body measurements (offline-first)
+ * Loads immediately from SQLite, triggers background server sync if online
+ */
 export const getBodyMeasurementsAsync = createAsyncThunk<
     UserBodyMeasurement[],
-    { forceRefresh?: boolean; useCache?: boolean } | void,
+    { forceRefresh?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
 >('user/getBodyMeasurements', async (args = {}, { getState, rejectWithValue }) => {
     try {
-        // 🧪 TESTING: Add delays/failures
-        if (TESTING.SIMULATE_DELAYS) {
-            await new Promise((resolve) => setTimeout(resolve, TESTING.DELAY_MS));
-        }
-        if (TESTING.SIMULATE_BODY_FAILURE) {
-            throw new Error('Simulated body measurements failure');
-        }
-        const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
+        const { forceRefresh = false } = typeof args === 'object' ? args : {};
         const state = getState();
         const userId = state.user.user?.UserId;
 
@@ -1134,40 +1089,62 @@ export const getBodyMeasurementsAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Return cached measurements if available and not forcing refresh
-        if (state.user.userBodyMeasurements.length > 0 && state.user.userBodyMeasurementsState === REQUEST_STATE.FULFILLED && !forceRefresh) {
-            return state.user.userBodyMeasurements;
+        console.log('Loading body measurements from SQLite...');
+
+        // Always load from SQLite first (offline-first approach)
+        const localMeasurements = await bodyMeasurementOfflineService.getRecords(userId, {
+            includeLocalOnly: true,
+            orderBy: 'DESC',
+        });
+
+        // Convert to API format
+        const measurements: UserBodyMeasurement[] = localMeasurements.map((local) => local.data);
+
+        // Background server sync (non-blocking) unless force refresh
+        if (networkStateManager.isOnline() && !forceRefresh) {
+            setTimeout(async () => {
+                try {
+                    console.log('Triggering background body measurements sync...');
+                    const serverMeasurements = await UserService.getBodyMeasurements(userId);
+                    await bodyMeasurementOfflineService.mergeServerData(userId, serverMeasurements);
+                } catch (error) {
+                    console.warn('Background body measurements sync failed:', error);
+                }
+            }, 100);
         }
 
-        // Try cache first if enabled and not forcing refresh
-        if (useCache && !forceRefresh) {
-            const cached = await cacheService.get<UserBodyMeasurement[]>('body_measurements');
-            const isExpired = await cacheService.isExpired('body_measurements');
+        // Force refresh: synchronous server sync
+        if (forceRefresh && networkStateManager.isOnline()) {
+            try {
+                console.log('Force refreshing body measurements from server...');
+                const serverMeasurements = await UserService.getBodyMeasurements(userId);
+                await bodyMeasurementOfflineService.mergeServerData(userId, serverMeasurements);
 
-            if (cached && !isExpired) {
-                console.log('Loaded body measurements from cache');
-                return cached;
+                // Reload from SQLite to get merged data
+                const refreshedMeasurements = await bodyMeasurementOfflineService.getRecords(userId, {
+                    includeLocalOnly: true,
+                    orderBy: 'DESC',
+                });
+
+                return refreshedMeasurements.map((local) => local.data);
+            } catch (error) {
+                console.warn('Force refresh failed, using local data:', error);
             }
         }
 
-        // Load from API
-        console.log('Loading body measurements from API');
-        const measurements = await UserService.getBodyMeasurements(userId);
-
-        // Cache the result if useCache is enabled
-        if (useCache) {
-            await cacheService.set('body_measurements', measurements, CacheTTL.LONG);
-        }
-
+        console.log(`Loaded ${measurements.length} body measurements from offline storage`);
         return measurements;
     } catch (error) {
         return rejectWithValue({
-            errorMessage: error instanceof Error ? error.message : 'Failed to fetch body measurements',
+            errorMessage: error instanceof Error ? error.message : 'Failed to load body measurements',
         });
     }
 });
 
-// CREATE - Log body measurement (invalidate cache)
+/**
+ * Log body measurement (offline-first with smart duplicate handling)
+ * Automatically switches to update mode if entry already exists for the date
+ */
 export const logBodyMeasurementAsync = createAsyncThunk<
     UserBodyMeasurement[],
     { measurements: Record<string, number>; measurementTimestamp?: string },
@@ -1175,7 +1152,7 @@ export const logBodyMeasurementAsync = createAsyncThunk<
         state: RootState;
         rejectValue: { errorMessage: string };
     }
->('user/logBodyMeasurement', async ({ measurements, measurementTimestamp }, { getState, rejectWithValue }) => {
+>('user/logBodyMeasurement', async ({ measurements, measurementTimestamp }, { getState, rejectWithValue, dispatch }) => {
     try {
         const state = getState();
         const userId = state.user.user?.UserId;
@@ -1184,15 +1161,59 @@ export const logBodyMeasurementAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Log the new measurement
         const timestamp = measurementTimestamp ?? new Date().toISOString();
-        await UserService.logBodyMeasurement(userId, measurements, timestamp);
 
-        // Invalidate cache after creating new measurement
-        await cacheService.remove('body_measurements');
+        // Check if there's already an entry for this date
+        const localMeasurements = await bodyMeasurementOfflineService.getRecords(userId);
 
-        // Refresh and return all measurements
-        return await UserService.getBodyMeasurements(userId);
+        // Look for existing entry using date comparison
+        const dateToCheck = new Date(timestamp);
+        const dateString = dateToCheck.toISOString().split('T')[0]; // YYYY-MM-DD format
+
+        const existingEntry = localMeasurements.find((m) => {
+            // Method 1: Check if timestamps start with same date
+            if (m.data.MeasurementTimestamp.startsWith(dateString)) return true;
+
+            // Method 2: Compare normalized dates (start of day)
+            const existingDate = new Date(m.data.MeasurementTimestamp);
+            existingDate.setHours(0, 0, 0, 0);
+            dateToCheck.setHours(0, 0, 0, 0);
+
+            return existingDate.getTime() === dateToCheck.getTime();
+        });
+
+        if (existingEntry) {
+            // Entry already exists - automatically switch to update mode
+            console.log(`Body measurement entry already exists for ${dateString}, updating instead`);
+            return await dispatch(
+                updateBodyMeasurementAsync({
+                    timestamp: existingEntry.data.MeasurementTimestamp,
+                    measurements,
+                }),
+            ).unwrap();
+        }
+
+        // No existing entry found - proceed with create
+        console.log('Creating new body measurement...');
+        await bodyMeasurementOfflineService.create({
+            userId,
+            data: {
+                measurements,
+                measurementTimestamp: timestamp,
+            },
+            timestamp,
+        });
+
+        // Return updated measurements from SQLite
+        const updatedMeasurements = await bodyMeasurementOfflineService.getRecords(userId, {
+            includeLocalOnly: true,
+            orderBy: 'DESC',
+        });
+
+        const measurementsResult: UserBodyMeasurement[] = updatedMeasurements.map((local) => local.data);
+
+        console.log(`Body measurement logged offline (${measurementsResult.length} total measurements)`);
+        return measurementsResult;
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to log body measurement',
@@ -1200,7 +1221,9 @@ export const logBodyMeasurementAsync = createAsyncThunk<
     }
 });
 
-// UPDATE - Update body measurement (invalidate cache)
+/**
+ * Update body measurement (offline-first with optimistic update)
+ */
 export const updateBodyMeasurementAsync = createAsyncThunk<
     UserBodyMeasurement[],
     { timestamp: string; measurements: Record<string, number> },
@@ -1217,14 +1240,30 @@ export const updateBodyMeasurementAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Update the measurement
-        await UserService.updateBodyMeasurement(userId, timestamp, measurements);
+        // Find local record by timestamp
+        const localMeasurements = await bodyMeasurementOfflineService.getRecords(userId);
+        const localRecord = localMeasurements.find((m) => m.data.MeasurementTimestamp === timestamp);
 
-        // Invalidate cache after updating measurement
-        await cacheService.remove('body_measurements');
+        if (!localRecord) {
+            return rejectWithValue({ errorMessage: 'Body measurement not found' });
+        }
 
-        // Refresh and return all measurements
-        return await UserService.getBodyMeasurements(userId);
+        // Update immediately in SQLite (optimistic update)
+        console.log('Updating body measurement locally...');
+        await bodyMeasurementOfflineService.update(localRecord.localId, {
+            measurements,
+        });
+
+        // Return updated measurements from SQLite
+        const updatedMeasurements = await bodyMeasurementOfflineService.getRecords(userId, {
+            includeLocalOnly: true,
+            orderBy: 'DESC',
+        });
+
+        const measurementsResult: UserBodyMeasurement[] = updatedMeasurements.map((local) => local.data);
+
+        console.log('Body measurement updated offline');
+        return measurementsResult;
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to update body measurement',
@@ -1232,7 +1271,9 @@ export const updateBodyMeasurementAsync = createAsyncThunk<
     }
 });
 
-// DELETE - Delete body measurement (invalidate cache)
+/**
+ * Delete body measurement (offline-first with optimistic update)
+ */
 export const deleteBodyMeasurementAsync = createAsyncThunk<
     UserBodyMeasurement[],
     { timestamp: string },
@@ -1249,14 +1290,29 @@ export const deleteBodyMeasurementAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Delete the measurement
-        await UserService.deleteBodyMeasurement(userId, timestamp);
+        // Find local record by timestamp
+        const localMeasurements = await bodyMeasurementOfflineService.getRecords(userId);
+        const localRecord = localMeasurements.find((m) => m.data.MeasurementTimestamp === timestamp);
 
-        // Invalidate cache after deleting measurement
-        await cacheService.remove('body_measurements');
+        if (!localRecord) {
+            return rejectWithValue({ errorMessage: 'Body measurement not found' });
+        }
 
-        // Refresh and return all measurements
-        return await UserService.getBodyMeasurements(userId);
+        // Delete from local storage (optimistic update)
+        // The service handles queueing for server deletion if needed
+        console.log('Deleting body measurement from local storage...');
+        await bodyMeasurementOfflineService.delete(localRecord.localId);
+
+        // Return updated measurements from SQLite
+        const updatedMeasurements = await bodyMeasurementOfflineService.getRecords(userId, {
+            includeLocalOnly: true,
+            orderBy: 'DESC',
+        });
+
+        const measurementsResult: UserBodyMeasurement[] = updatedMeasurements.map((local) => local.data);
+
+        console.log(`Body measurement deleted offline (${measurementsResult.length} remaining)`);
+        return measurementsResult;
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to delete body measurement',

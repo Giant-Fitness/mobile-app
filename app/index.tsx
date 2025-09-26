@@ -3,9 +3,9 @@
 import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import WelcomeScreens from '@/components/welcome/WelcomeScreens';
 import { configureAmplify } from '@/config/amplify';
+import { authService } from '@/lib/auth/authService';
 import { AppDispatch } from '@/store/store';
 import { getUserAsync } from '@/store/user/thunks';
-import { authService } from '@/utils/auth';
 import React, { useEffect, useState } from 'react';
 
 import { router } from 'expo-router';

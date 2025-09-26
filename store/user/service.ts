@@ -1,5 +1,8 @@
 // store/user/service.ts
 
+import { authRecommendationsApiClient, authUsersApiClient } from '@/lib/api/apiConfig';
+import { handleApiError } from '@/lib/api/errorUtils';
+import { authService } from '@/lib/auth/authService';
 import {
     AddFoodEntryParams,
     AddFoodEntryResponse,
@@ -29,9 +32,6 @@ import {
     UserSleepMeasurement,
     UserWeightMeasurement,
 } from '@/types';
-import { authRecommendationsApiClient, authUsersApiClient } from '@/utils/api/apiConfig';
-import { handleApiError } from '@/utils/api/errorUtils';
-import { authService } from '@/utils/auth';
 
 // Types for sleep measurement parameters
 interface SleepMeasurementParams {

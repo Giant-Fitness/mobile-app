@@ -1,8 +1,8 @@
 // store/exercises/service.ts
 
+import { authCatalogApiClient } from '@/lib/api/apiConfig';
+import { handleApiError } from '@/lib/api/errorUtils';
 import { Exercise, ExerciseAlternative } from '@/types';
-import { authCatalogApiClient } from '@/utils/api/apiConfig';
-import { handleApiError } from '@/utils/api/errorUtils';
 
 /**
  * Service for accessing exercise-related API endpoints
