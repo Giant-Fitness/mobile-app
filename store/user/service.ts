@@ -25,7 +25,6 @@ import {
     UserFitnessProfile,
     UserNutritionGoal,
     UserNutritionLog,
-    UserNutritionPreferences,
     UserNutritionProfile,
     UserProgramProgress,
     UserRecommendations,
@@ -516,46 +515,6 @@ const updateUserNutritionProfile = async (
     }
 };
 
-// Nutrition Preferences Methods
-const getUserNutritionPreferences = async (userId: string): Promise<UserNutritionPreferences> => {
-    console.log('service: getUserNutritionPreferences');
-    try {
-        if (!userId) throw new Error('No user ID found');
-
-        const { data } = await authUsersApiClient.get(`/users/${userId}/nutrition-preferences`);
-        if (!data.userNutritionPreferences) {
-            throw new Error('Invalid response format');
-        }
-        return data.userNutritionPreferences;
-    } catch (error) {
-        throw handleApiError(error, 'GetUserNutritionPreferences');
-    }
-};
-
-const updateUserNutritionPreferences = async (
-    userId: string,
-    userNutritionPreferences: UserNutritionPreferences,
-): Promise<{
-    user: User;
-    userNutritionPreferences: UserNutritionPreferences;
-}> => {
-    console.log('service: updateUserNutritionPreferences');
-    try {
-        const { data } = await authUsersApiClient.put(`/users/${userId}/nutrition-preferences`, userNutritionPreferences);
-
-        if (!data.user || !data.userNutritionPreferences) {
-            throw new Error('Invalid response format');
-        }
-
-        return {
-            user: data.user,
-            userNutritionPreferences: data.userNutritionPreferences,
-        };
-    } catch (error) {
-        throw handleApiError(error, 'UpdateUserNutritionPreferences');
-    }
-};
-
 const completeUserProfile = async (profileData: CompleteProfileParams): Promise<CompleteProfileResponse> => {
     console.log('service: completeUserProfile');
     try {
@@ -572,7 +531,6 @@ const completeUserProfile = async (profileData: CompleteProfileParams): Promise<
             user: data.user,
             userFitnessProfile: data.userFitnessProfile,
             userNutritionProfile: data.userNutritionProfile || null,
-            userNutritionPreferences: data.userNutritionPreferences || null,
             userRecommendations: data.userRecommendations,
             userNutritionGoal: data.userNutritionGoal,
             calculated: data.calculated,
@@ -834,9 +792,6 @@ export default {
     // Nutrition Profile
     getUserNutritionProfile,
     updateUserNutritionProfile,
-    // Nutrition Preferences
-    getUserNutritionPreferences,
-    updateUserNutritionPreferences,
     // Nutrition Goal History
     getUserNutritionGoalHistory,
     createNutritionGoalEntry,

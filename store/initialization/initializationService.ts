@@ -4,6 +4,7 @@ import { REQUEST_STATE } from '@/constants/requestStates';
 import { bodyMeasurementOfflineService } from '@/lib/storage/body-measurements/BodyMeasurementOfflineService';
 import { fitnessProfileOfflineService } from '@/lib/storage/fitness-profile/FitnessProfileOfflineService';
 import { initializeOfflineServices } from '@/lib/storage/initializeOfflineServices';
+import { nutritionProfileOfflineService } from '@/lib/storage/nutrition-profile/NutritionProfileOfflineService';
 import { weightMeasurementOfflineService } from '@/lib/storage/weight-measurements/WeightMeasurementOfflineService';
 import { networkStateManager } from '@/lib/sync/NetworkStateManager';
 import { initializeTrackedLiftsHistoryAsync } from '@/store/exerciseProgress/thunks';
@@ -33,7 +34,6 @@ import {
     getUserExerciseSubstitutionsAsync,
     getUserFitnessProfileAsync,
     getUserNutritionGoalHistoryAsync,
-    getUserNutritionPreferencesAsync,
     getUserNutritionProfileAsync,
     getUserProgramProgressAsync,
     getUserRecommendationsAsync,
@@ -48,7 +48,6 @@ const CACHE_KEYS = {
     USER_DATA: 'user_data',
     USER_FITNESS_PROFILE: 'user_fitness_profile',
     USER_NUTRITION_PROFILE: 'user_nutrition_profile',
-    USER_NUTRITION_PREFERENCES: 'user_nutrition_preferences',
     USER_NUTRITION_GOAL_HISTORY: 'user_nutrition_goal_history',
     USER_NUTRITION_LOGS: 'user_nutrition_logs',
     USER_PROGRAM_PROGRESS: 'user_program_progress',
@@ -123,24 +122,6 @@ export class InitializationService {
             key: 'userProgramProgress',
             thunk: getUserProgramProgressAsync,
             cacheKey: CACHE_KEYS.USER_PROGRAM_PROGRESS,
-            ttl: CacheTTL.LONG,
-            required: true,
-            priority: 'critical',
-            args: { useCache: true },
-        },
-        {
-            key: 'userNutritionProfile',
-            thunk: getUserNutritionProfileAsync,
-            cacheKey: CACHE_KEYS.USER_NUTRITION_PROFILE,
-            ttl: CacheTTL.LONG,
-            required: true,
-            priority: 'critical',
-            args: { useCache: true },
-        },
-        {
-            key: 'userNutritionPreferences',
-            thunk: getUserNutritionPreferencesAsync,
-            cacheKey: CACHE_KEYS.USER_NUTRITION_PREFERENCES,
             ttl: CacheTTL.LONG,
             required: true,
             priority: 'critical',
@@ -232,33 +213,6 @@ export class InitializationService {
             priority: 'medium',
             args: { useCache: true },
         },
-        // {
-        //     key: 'userWeightMeasurements',
-        //     thunk: getWeightMeasurementsAsync,
-        //     cacheKey: CACHE_KEYS.WEIGHT_MEASUREMENTS,
-        //     ttl: CacheTTL.LONG,
-        //     required: false,
-        //     priority: 'medium',
-        //     args: { useCache: true },
-        // },
-        // {
-        //     key: 'userSleepMeasurements',
-        //     thunk: getSleepMeasurementsAsync,
-        //     cacheKey: CACHE_KEYS.SLEEP_MEASUREMENTS,
-        //     ttl: CacheTTL.LONG,
-        //     required: false,
-        //     priority: 'medium',
-        //     args: { useCache: true },
-        // },
-        // {
-        //     key: 'userBodyMeasurements',
-        //     thunk: getBodyMeasurementsAsync,
-        //     cacheKey: CACHE_KEYS.BODY_MEASUREMENTS,
-        //     ttl: CacheTTL.LONG,
-        //     required: false,
-        //     priority: 'medium',
-        //     args: { useCache: true },
-        // },
         {
             key: 'spotlightWorkouts',
             thunk: getSpotlightWorkoutsAsync,
@@ -449,8 +403,9 @@ export class InitializationService {
                 const weightStats = await weightMeasurementOfflineService.getRecords(userId);
                 const bodyStats = await bodyMeasurementOfflineService.getRecords(userId);
                 const fitnessProfile = await fitnessProfileOfflineService.getProfileForUser(userId);
+                const nutritionProfile = await nutritionProfileOfflineService.getProfileForUser(userId);
 
-                const hasLocalData = weightStats.length > 0 || bodyStats.length > 0 || !!fitnessProfile;
+                const hasLocalData = weightStats.length > 0 || bodyStats.length > 0 || !!fitnessProfile || !!nutritionProfile;
 
                 if (!hasLocalData) {
                     console.log('Empty local storage detected - fetching server data...');
@@ -479,7 +434,16 @@ export class InitializationService {
                             console.log('No fitness profile found on server (this might be normal for new users)', fitnessError);
                         }
 
-                        if (serverWeightMeasurements.length === 0 && serverBodyMeasurements.length === 0 && !fitnessProfile) {
+                        // Fetch nutrition profile from server
+                        try {
+                            const serverNutritionProfile = await UserService.getUserNutritionProfile(userId);
+                            await nutritionProfileOfflineService.mergeServerData(userId, serverNutritionProfile);
+                            console.log(`Initial sync: loaded nutrition profile from server`);
+                        } catch (nutritionError) {
+                            console.log('No nutrition profile found on server (this might be normal for new users)', nutritionError);
+                        }
+
+                        if (serverWeightMeasurements.length === 0 && serverBodyMeasurements.length === 0 && !fitnessProfile && !nutritionProfile) {
                             console.log('No server data found - fresh install');
                         }
                     } catch (error) {
@@ -515,15 +479,16 @@ export class InitializationService {
                 this.dispatch(getWeightMeasurementsAsync({})),
                 this.dispatch(getBodyMeasurementsAsync({})),
                 this.dispatch(getUserFitnessProfileAsync({})),
+                this.dispatch(getUserNutritionProfileAsync({})),
             ];
 
             const results = await Promise.allSettled(promises);
 
             results.forEach((result, index) => {
-                const dataType = ['weight', 'body', 'fitness profile'][index];
+                const dataType = ['weight', 'body', 'fitness profile', 'nutrition profile'][index];
                 if (result.status === 'fulfilled' && result.value.type.endsWith('/fulfilled')) {
                     const data = result.value.payload;
-                    const count = Array.isArray(data) ? data.length : 0;
+                    const count = Array.isArray(data) ? data.length : data ? 1 : 0;
                     console.log(`✅ Loaded ${count} ${dataType} records into Redux`);
                 } else {
                     console.warn(`⚠️ Failed to load ${dataType} data into Redux`);
@@ -551,12 +516,13 @@ export class InitializationService {
                 this.dispatch(getWeightMeasurementsAsync({ forceRefresh: true })),
                 this.dispatch(getBodyMeasurementsAsync({ forceRefresh: true })),
                 this.dispatch(getUserFitnessProfileAsync({ forceRefresh: true })),
+                this.dispatch(getUserNutritionProfileAsync({ forceRefresh: true })),
             ];
 
             const results = await Promise.allSettled(promises);
 
             results.forEach((result, index) => {
-                const dataType = ['weight', 'body', 'fitness profile'][index];
+                const dataType = ['weight', 'body', 'fitness profile', 'nutrition profile'][index];
                 if (result.status === 'fulfilled' && result.value.type.endsWith('/fulfilled')) {
                     const data = result.value.payload;
                     const count = Array.isArray(data) ? data.length : data ? 1 : 0;

@@ -5,6 +5,8 @@ import { bodyMeasurementOfflineService } from '@/lib/storage/body-measurements/B
 import { bodyMeasurementSyncHandler } from '@/lib/storage/body-measurements/BodyMeasurementSyncHandler';
 import { fitnessProfileOfflineService } from '@/lib/storage/fitness-profile/FitnessProfileOfflineService';
 import { fitnessProfileSyncHandler } from '@/lib/storage/fitness-profile/FitnessProfileSyncHandler';
+import { nutritionProfileOfflineService } from '@/lib/storage/nutrition-profile/NutritionProfileOfflineService';
+import { nutritionProfileSyncHandler } from '@/lib/storage/nutrition-profile/NutritionProfileSyncHandler';
 import { weightMeasurementOfflineService } from '@/lib/storage/weight-measurements/WeightMeasurementOfflineService';
 import { weightMeasurementSyncHandler } from '@/lib/storage/weight-measurements/WeightMeasurementSyncHandler';
 import { networkStateManager } from '@/lib/sync/NetworkStateManager';
@@ -33,10 +35,11 @@ export async function initializeOfflineServices(options: OfflineInitializationOp
         await syncQueueManager.initialize();
 
         // Step 2: Initialize data services (creates tables if needed)
-        const [weightInit, bodyInit, fitnessInit] = await Promise.allSettled([
+        const [weightInit, bodyInit, fitnessInit, nutritionInit] = await Promise.allSettled([
             weightMeasurementOfflineService.initialize(),
             bodyMeasurementOfflineService.initialize(),
             fitnessProfileOfflineService.initialize(),
+            nutritionProfileOfflineService.initialize(),
         ]);
 
         // Check if any failed
@@ -49,11 +52,15 @@ export async function initializeOfflineServices(options: OfflineInitializationOp
         if (fitnessInit.status === 'rejected') {
             console.warn('Fitness profile service initialization failed:', fitnessInit.reason);
         }
+        if (nutritionInit.status === 'rejected') {
+            console.warn('Nutrition profile service initialization failed:', nutritionInit.reason);
+        }
 
         // Step 3: Register sync handlers with the queue manager
         syncQueueManager.registerSyncHandler('weight_measurements', weightMeasurementSyncHandler);
         syncQueueManager.registerSyncHandler('body_measurements', bodyMeasurementSyncHandler);
         syncQueueManager.registerSyncHandler('fitness_profiles', fitnessProfileSyncHandler);
+        syncQueueManager.registerSyncHandler('nutrition_profiles', nutritionProfileSyncHandler);
 
         console.log('✅ Offline services initialized successfully');
     } catch (error) {
@@ -89,6 +96,7 @@ export async function getOfflineServicesStatus(): Promise<{
     weightService: boolean;
     bodyService: boolean;
     fitnessProfileService: boolean;
+    nutritionProfileService: boolean;
 }> {
     try {
         // These would need to be exposed as public methods on your services
@@ -104,6 +112,7 @@ export async function getOfflineServicesStatus(): Promise<{
             weightService: true, // Assume OK if no errors thrown
             bodyService: true, // Assume OK if no errors thrown
             fitnessProfileService: true, // Assume OK if no errors thrown
+            nutritionProfileService: true, // Assume OK if no errors thrown
         };
     } catch (error) {
         console.error('Error checking offline services status:', error);
@@ -114,6 +123,7 @@ export async function getOfflineServicesStatus(): Promise<{
             weightService: false,
             bodyService: false,
             fitnessProfileService: false,
+            nutritionProfileService: false,
         };
     }
 }

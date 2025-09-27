@@ -95,14 +95,6 @@ export interface UserNutritionProfile {
     UpdatedAt?: string;
 }
 
-export interface UserNutritionPreferences {
-    UserId: string;
-    DietaryType: string;
-    DietaryRestrictions: string[];
-    BudgetPreference: string;
-    UpdatedAt: string;
-}
-
 export interface UserNutritionGoal {
     UserId: string;
     EffectiveDate: string; // YYYY-MM-DD format
@@ -152,7 +144,6 @@ export interface CompleteProfileResponse {
     user: User;
     userFitnessProfile: UserFitnessProfile;
     userNutritionProfile?: UserNutritionProfile;
-    userNutritionPreferences?: UserNutritionPreferences;
     userNutritionGoal: UserNutritionGoal;
     userRecommendations: UserRecommendations;
     calculated: {
