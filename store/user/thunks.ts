@@ -3,6 +3,7 @@
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { cacheService, CacheTTL } from '@/lib/cache/cacheService';
 import { bodyMeasurementOfflineService } from '@/lib/storage/body-measurements/BodyMeasurementOfflineService';
+import { fitnessProfileOfflineService } from '@/lib/storage/fitness-profile/FitnessProfileOfflineService';
 import { weightMeasurementOfflineService } from '@/lib/storage/weight-measurements/WeightMeasurementOfflineService';
 import { networkStateManager } from '@/lib/sync/NetworkStateManager';
 import { RootState } from '@/store/store';
@@ -106,59 +107,89 @@ export const updateUserAsync = createAsyncThunk<
     }
 });
 
+/**
+ * Get user fitness profile (offline-first)
+ * Loads immediately from SQLite, triggers background server sync
+ */
 export const getUserFitnessProfileAsync = createAsyncThunk<
     UserFitnessProfile,
-    { forceRefresh?: boolean; useCache?: boolean } | void,
+    { forceRefresh?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
 >('user/getUserFitnessProfile', async (args = {}, { getState, rejectWithValue }) => {
     try {
-        const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
+        const { forceRefresh = false } = typeof args === 'object' ? args : {};
         const state = getState();
         const userId = state.user.user?.UserId;
 
-        // Check if user ID exists
         if (!userId) {
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Return cached fitness profile if available and not forcing refresh
-        if (state.user.userFitnessProfile && !forceRefresh) {
-            return state.user.userFitnessProfile;
-        }
+        // Always load from SQLite first (offline-first)
+        console.log('Loading fitness profile from SQLite...');
+        const localProfile = await fitnessProfileOfflineService.getProfileForUser(userId);
 
-        // Try cache first if enabled and not forcing refresh
-        if (useCache && !forceRefresh) {
-            const cacheKey = `user_fitness_profile`;
-            const cached = await cacheService.get<UserFitnessProfile>(cacheKey);
-            const isExpired = await cacheService.isExpired(cacheKey);
+        if (localProfile) {
+            console.log('Found fitness profile in SQLite');
 
-            if (cached && !isExpired) {
-                console.log('Loaded user fitness profile from cache');
-                return cached;
+            // Background server sync (non-blocking) unless force refresh
+            if (networkStateManager.isOnline() && !forceRefresh) {
+                setTimeout(async () => {
+                    try {
+                        console.log('Triggering background fitness profile sync...');
+                        const serverProfile = await UserService.getUserFitnessProfile(userId);
+                        await fitnessProfileOfflineService.mergeServerData(userId, serverProfile);
+                    } catch (error) {
+                        console.warn('Background fitness profile sync failed:', error);
+                    }
+                }, 100);
             }
+
+            // Force refresh: synchronous server sync
+            if (forceRefresh && networkStateManager.isOnline()) {
+                try {
+                    console.log('Force refreshing fitness profile from server...');
+                    const serverProfile = await UserService.getUserFitnessProfile(userId);
+                    await fitnessProfileOfflineService.mergeServerData(userId, serverProfile);
+
+                    // Reload from SQLite to get merged data
+                    const refreshedProfile = await fitnessProfileOfflineService.getProfileForUser(userId);
+                    return refreshedProfile ? refreshedProfile.data : localProfile.data;
+                } catch (error) {
+                    console.warn('Force refresh failed, using local data:', error);
+                }
+            }
+
+            return localProfile.data;
         }
 
-        // Load from API
-        console.log('Loading user fitness profile from API');
-        const profile = await UserService.getUserFitnessProfile(userId);
+        // No local profile found - try server
+        if (networkStateManager.isOnline()) {
+            console.log('No local fitness profile found, fetching from server...');
+            const serverProfile = await UserService.getUserFitnessProfile(userId);
 
-        // Cache the result if useCache is enabled
-        if (useCache) {
-            const cacheKey = `user_fitness_profile`;
-            await cacheService.set(cacheKey, profile, CacheTTL.LONG);
+            // Store in SQLite for future offline use
+            await fitnessProfileOfflineService.mergeServerData(userId, serverProfile);
+
+            return serverProfile;
         }
 
-        return profile;
+        // Offline and no local data
+        return rejectWithValue({ errorMessage: 'No fitness profile available offline' });
     } catch (error) {
+        console.error('Failed to get fitness profile:', error);
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to fetch fitness profile',
         });
     }
 });
 
+/**
+ * Update user fitness profile (offline-first with optimistic update)
+ */
 export const updateUserFitnessProfileAsync = createAsyncThunk<
     { user: User; userRecommendations: UserRecommendations; userFitnessProfile: UserFitnessProfile },
     { userFitnessProfile: UserFitnessProfile },
@@ -175,15 +206,68 @@ export const updateUserFitnessProfileAsync = createAsyncThunk<
     }
 
     try {
-        const result = await UserService.updateUserFitnessProfile(userId, userFitnessProfile);
+        // Optimistically update local SQLite immediately
+        console.log('Updating fitness profile locally...');
+        const updatedProfile = await fitnessProfileOfflineService.upsertProfile({
+            userId,
+            data: {
+                GymExperienceLevel: userFitnessProfile.GymExperienceLevel,
+                AccessToEquipment: userFitnessProfile.AccessToEquipment,
+                DaysPerWeekDesired: userFitnessProfile.DaysPerWeekDesired,
+                PrimaryFitnessGoal: userFitnessProfile.PrimaryFitnessGoal,
+            },
+        });
 
-        // Invalidate related caches after update
-        await Promise.all([cacheService.remove(`user_fitness_profile`), cacheService.remove(`user_recommendations`), cacheService.remove('user_data')]);
+        // Try to sync to server immediately if online
+        if (networkStateManager.isOnline()) {
+            try {
+                console.log('Syncing fitness profile to server...');
+                const serverResult = await UserService.updateUserFitnessProfile(userId, userFitnessProfile);
 
-        return result;
+                // Update local record as synced
+                await fitnessProfileOfflineService.updateSyncStatus(updatedProfile.localId, 'synced', {
+                    serverTimestamp: new Date().toISOString(),
+                });
+
+                // Invalidate related caches after successful sync
+                await Promise.all([cacheService.remove('user_fitness_profile'), cacheService.remove('user_recommendations'), cacheService.remove('user_data')]);
+
+                console.log('Fitness profile successfully synced to server');
+                return serverResult;
+            } catch (syncError) {
+                console.warn('Failed to sync fitness profile to server, will retry later:', syncError);
+
+                // Mark as failed but don't fail the whole operation since we have local data
+                await fitnessProfileOfflineService.updateSyncStatus(updatedProfile.localId, 'failed', {
+                    errorMessage: syncError instanceof Error ? syncError.message : 'Sync failed',
+                    incrementRetry: true,
+                });
+            }
+        }
+
+        // Return optimistic result based on local update
+        // Note: We don't have user and userRecommendations from local storage,
+        // so we'll need to get them from Redux state or make this return type more flexible
+        const currentUser = state.user.user;
+        const currentRecommendations = state.user.userRecommendations;
+
+        if (!currentUser || !currentRecommendations) {
+            // If we don't have the required data in state, we need to handle this case
+            console.warn('Missing user or recommendations data in state for optimistic update');
+            return rejectWithValue({ errorMessage: 'Insufficient data for offline update' });
+        }
+
+        console.log('Fitness profile updated offline (will sync when online)');
+        return {
+            user: currentUser,
+            userRecommendations: currentRecommendations,
+            userFitnessProfile: updatedProfile.data,
+        };
     } catch (error) {
-        console.log(error);
-        return rejectWithValue({ errorMessage: 'Failed to update fitness profile' });
+        console.error('Failed to update fitness profile:', error);
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to update fitness profile',
+        });
     }
 });
 

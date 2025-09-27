@@ -2,6 +2,7 @@
 
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { bodyMeasurementOfflineService } from '@/lib/storage/body-measurements/BodyMeasurementOfflineService';
+import { fitnessProfileOfflineService } from '@/lib/storage/fitness-profile/FitnessProfileOfflineService';
 import { initializeOfflineServices } from '@/lib/storage/initializeOfflineServices';
 import { weightMeasurementOfflineService } from '@/lib/storage/weight-measurements/WeightMeasurementOfflineService';
 import { networkStateManager } from '@/lib/sync/NetworkStateManager';
@@ -113,15 +114,6 @@ export class InitializationService {
             key: 'user',
             thunk: getUserAsync,
             cacheKey: CACHE_KEYS.USER_DATA,
-            ttl: CacheTTL.LONG,
-            required: true,
-            priority: 'critical',
-            args: { useCache: true },
-        },
-        {
-            key: 'userFitnessProfile',
-            thunk: getUserFitnessProfileAsync,
-            cacheKey: CACHE_KEYS.USER_FITNESS_PROFILE,
             ttl: CacheTTL.LONG,
             required: true,
             priority: 'critical',
@@ -456,8 +448,9 @@ export class InitializationService {
             try {
                 const weightStats = await weightMeasurementOfflineService.getRecords(userId);
                 const bodyStats = await bodyMeasurementOfflineService.getRecords(userId);
+                const fitnessProfile = await fitnessProfileOfflineService.getProfileForUser(userId);
 
-                const hasLocalData = weightStats.length > 0 || bodyStats.length > 0;
+                const hasLocalData = weightStats.length > 0 || bodyStats.length > 0 || !!fitnessProfile;
 
                 if (!hasLocalData) {
                     console.log('Empty local storage detected - fetching server data...');
@@ -477,7 +470,16 @@ export class InitializationService {
                             console.log(`Initial sync: loaded ${serverBodyMeasurements.length} body measurements from server`);
                         }
 
-                        if (serverWeightMeasurements.length === 0 && serverBodyMeasurements.length === 0) {
+                        // Fetch fitness profile from server
+                        try {
+                            const serverFitnessProfile = await UserService.getUserFitnessProfile(userId);
+                            await fitnessProfileOfflineService.mergeServerData(userId, serverFitnessProfile);
+                            console.log(`Initial sync: loaded fitness profile from server`);
+                        } catch (fitnessError) {
+                            console.log('No fitness profile found on server (this might be normal for new users)', fitnessError);
+                        }
+
+                        if (serverWeightMeasurements.length === 0 && serverBodyMeasurements.length === 0 && !fitnessProfile) {
                             console.log('No server data found - fresh install');
                         }
                     } catch (error) {
@@ -508,19 +510,23 @@ export class InitializationService {
 
             console.log('Loading measurements from SQLite into Redux...');
 
-            // Load both measurements into Redux from SQLite
-            const promises = [this.dispatch(getWeightMeasurementsAsync({})), this.dispatch(getBodyMeasurementsAsync({}))];
+            // Load all offline data into Redux from SQLite
+            const promises = [
+                this.dispatch(getWeightMeasurementsAsync({})),
+                this.dispatch(getBodyMeasurementsAsync({})),
+                this.dispatch(getUserFitnessProfileAsync({})),
+            ];
 
             const results = await Promise.allSettled(promises);
 
             results.forEach((result, index) => {
-                const measurementType = index === 0 ? 'weight' : 'body';
+                const dataType = ['weight', 'body', 'fitness profile'][index];
                 if (result.status === 'fulfilled' && result.value.type.endsWith('/fulfilled')) {
                     const data = result.value.payload;
                     const count = Array.isArray(data) ? data.length : 0;
-                    console.log(`✅ Loaded ${count} ${measurementType} measurements into Redux`);
+                    console.log(`✅ Loaded ${count} ${dataType} records into Redux`);
                 } else {
-                    console.warn(`⚠️ Failed to load ${measurementType} measurements into Redux`);
+                    console.warn(`⚠️ Failed to load ${dataType} data into Redux`);
                 }
             });
         } catch (error) {
@@ -540,22 +546,23 @@ export class InitializationService {
 
             console.log('🔄 Background refreshing measurements data...');
 
-            // Force refresh both measurements (this will sync with server and update Redux)
+            // Force refresh all offline data (this will sync with server and update Redux)
             const promises = [
                 this.dispatch(getWeightMeasurementsAsync({ forceRefresh: true })),
                 this.dispatch(getBodyMeasurementsAsync({ forceRefresh: true })),
+                this.dispatch(getUserFitnessProfileAsync({ forceRefresh: true })),
             ];
 
             const results = await Promise.allSettled(promises);
 
             results.forEach((result, index) => {
-                const measurementType = index === 0 ? 'weight' : 'body';
+                const dataType = ['weight', 'body', 'fitness profile'][index];
                 if (result.status === 'fulfilled' && result.value.type.endsWith('/fulfilled')) {
                     const data = result.value.payload;
-                    const count = Array.isArray(data) ? data.length : 0;
-                    console.log(`✅ Background refreshed ${count} ${measurementType} measurements`);
+                    const count = Array.isArray(data) ? data.length : data ? 1 : 0;
+                    console.log(`✅ Background refreshed ${count} ${dataType} records`);
                 } else {
-                    console.warn(`⚠️ Background refresh failed for ${measurementType} measurements`);
+                    console.warn(`⚠️ Background refresh failed for ${dataType} data`);
                 }
             });
         } catch (error) {
@@ -583,16 +590,6 @@ export class InitializationService {
         }
 
         return true;
-    }
-
-    /**
-     * Get reason why an item cannot be loaded (for debugging)
-     */
-    private getCannotLoadReason(item: DataCategory): string {
-        if (item.key === 'programDays') {
-            return 'No active program found';
-        }
-        return `Missing dependencies: ${item.dependsOn?.join(', ')}`;
     }
 
     /**
@@ -704,39 +701,6 @@ export class InitializationService {
 
         const hasRequiredFailures = loadResults.some((result) => !result.success && result.required);
         return { hasRequiredFailures };
-    }
-
-    /**
-     * Detect if this is a first run (majority of critical data missing)
-     */
-    private async detectFirstRun(): Promise<boolean> {
-        try {
-            const criticalCacheKeys = [
-                CACHE_KEYS.USER_FITNESS_PROFILE,
-                CACHE_KEYS.USER_PROGRAM_PROGRESS,
-                CACHE_KEYS.ALL_PROGRAMS,
-                CACHE_KEYS.ALL_WORKOUTS,
-                CACHE_KEYS.ALL_EXERCISES,
-            ];
-
-            let cachedCount = 0;
-            for (const key of criticalCacheKeys) {
-                const cached = await cacheService.get(key);
-                if (cached) {
-                    cachedCount++;
-                }
-            }
-
-            // If less than 50% of critical data is cached, consider it a first run
-            const isFirstRun = cachedCount < criticalCacheKeys.length * 0.5;
-
-            console.log(`First run detection: ${cachedCount}/${criticalCacheKeys.length} items cached -> ${isFirstRun ? 'FIRST RUN' : 'CACHED RUN'}`);
-
-            return isFirstRun;
-        } catch (error) {
-            console.warn('Error detecting first run:', error);
-            return true; // Assume first run on error to use maximum parallelization
-        }
     }
 
     async startBackgroundSync(): Promise<void> {
