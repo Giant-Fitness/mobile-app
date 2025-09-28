@@ -88,7 +88,6 @@ export type SleepSubmissionData = {
 
 export interface UserNutritionProfile {
     UserId: string;
-    WeightGoal: number;
     PrimaryNutritionGoal: string;
     ActivityLevel: string;
     CreatedAt?: string;

@@ -1,6 +1,7 @@
 // store/initialization/initializationService.ts
 
 import { REQUEST_STATE } from '@/constants/requestStates';
+import { appSettingsOfflineService } from '@/lib/storage/app-settings/AppSettingsOfflineService';
 import { bodyMeasurementOfflineService } from '@/lib/storage/body-measurements/BodyMeasurementOfflineService';
 import { fitnessProfileOfflineService } from '@/lib/storage/fitness-profile/FitnessProfileOfflineService';
 import { initializeOfflineServices } from '@/lib/storage/initializeOfflineServices';
@@ -195,15 +196,6 @@ export class InitializationService {
         },
 
         // Medium priority data
-        {
-            key: 'userAppSettings',
-            thunk: getUserAppSettingsAsync,
-            cacheKey: CACHE_KEYS.USER_APP_SETTINGS,
-            ttl: CacheTTL.LONG,
-            required: false,
-            priority: 'medium',
-            args: { useCache: true },
-        },
         {
             key: 'exerciseSetModifications',
             thunk: getUserExerciseSetModificationsAsync,
@@ -400,12 +392,13 @@ export class InitializationService {
 
             // Check if SQLite is empty using the new services
             try {
+                const appSettings = await appSettingsOfflineService.getSettingsForUser(userId);
                 const weightStats = await weightMeasurementOfflineService.getRecords(userId);
                 const bodyStats = await bodyMeasurementOfflineService.getRecords(userId);
                 const fitnessProfile = await fitnessProfileOfflineService.getProfileForUser(userId);
                 const nutritionProfile = await nutritionProfileOfflineService.getProfileForUser(userId);
 
-                const hasLocalData = weightStats.length > 0 || bodyStats.length > 0 || !!fitnessProfile || !!nutritionProfile;
+                const hasLocalData = weightStats.length > 0 || bodyStats.length > 0 || !!fitnessProfile || !!nutritionProfile || !!appSettings;
 
                 if (!hasLocalData) {
                     console.log('Empty local storage detected - fetching server data...');
@@ -443,7 +436,22 @@ export class InitializationService {
                             console.log('No nutrition profile found on server (this might be normal for new users)', nutritionError);
                         }
 
-                        if (serverWeightMeasurements.length === 0 && serverBodyMeasurements.length === 0 && !fitnessProfile && !nutritionProfile) {
+                        // Fetch app settings from server
+                        try {
+                            const serverAppSettings = await UserService.getUserAppSettings(userId);
+                            await appSettingsOfflineService.mergeServerData(userId, serverAppSettings);
+                            console.log(`Initial sync: loaded app settings from server`);
+                        } catch (appSettingsError) {
+                            console.log('No app settings found on server (this might be normal for new users)', appSettingsError);
+                        }
+
+                        if (
+                            serverWeightMeasurements.length === 0 &&
+                            serverBodyMeasurements.length === 0 &&
+                            !fitnessProfile &&
+                            !nutritionProfile &&
+                            !appSettings
+                        ) {
                             console.log('No server data found - fresh install');
                         }
                     } catch (error) {
@@ -480,12 +488,13 @@ export class InitializationService {
                 this.dispatch(getBodyMeasurementsAsync({})),
                 this.dispatch(getUserFitnessProfileAsync({})),
                 this.dispatch(getUserNutritionProfileAsync({})),
+                this.dispatch(getUserAppSettingsAsync({})),
             ];
 
             const results = await Promise.allSettled(promises);
 
             results.forEach((result, index) => {
-                const dataType = ['weight', 'body', 'fitness profile', 'nutrition profile'][index];
+                const dataType = ['weight', 'body', 'fitness profile', 'nutrition profile', 'app settings'][index];
                 if (result.status === 'fulfilled' && result.value.type.endsWith('/fulfilled')) {
                     const data = result.value.payload;
                     const count = Array.isArray(data) ? data.length : data ? 1 : 0;
@@ -517,12 +526,13 @@ export class InitializationService {
                 this.dispatch(getBodyMeasurementsAsync({ forceRefresh: true })),
                 this.dispatch(getUserFitnessProfileAsync({ forceRefresh: true })),
                 this.dispatch(getUserNutritionProfileAsync({ forceRefresh: true })),
+                this.dispatch(getUserAppSettingsAsync({ forceRefresh: true })),
             ];
 
             const results = await Promise.allSettled(promises);
 
             results.forEach((result, index) => {
-                const dataType = ['weight', 'body', 'fitness profile', 'nutrition profile'][index];
+                const dataType = ['weight', 'body', 'fitness profile', 'nutrition profile', 'app settings'][index];
                 if (result.status === 'fulfilled' && result.value.type.endsWith('/fulfilled')) {
                     const data = result.value.payload;
                     const count = Array.isArray(data) ? data.length : data ? 1 : 0;

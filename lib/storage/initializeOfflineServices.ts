@@ -1,6 +1,8 @@
 // lib/storage/initializeOfflineServices.ts
 
 import { databaseManager } from '@/lib/database/DatabaseManager';
+import { appSettingsOfflineService } from '@/lib/storage/app-settings/AppSettingsOfflineService';
+import { appSettingsSyncHandler } from '@/lib/storage/app-settings/AppSettingsSyncHandler';
 import { bodyMeasurementOfflineService } from '@/lib/storage/body-measurements/BodyMeasurementOfflineService';
 import { bodyMeasurementSyncHandler } from '@/lib/storage/body-measurements/BodyMeasurementSyncHandler';
 import { fitnessProfileOfflineService } from '@/lib/storage/fitness-profile/FitnessProfileOfflineService';
@@ -35,11 +37,12 @@ export async function initializeOfflineServices(options: OfflineInitializationOp
         await syncQueueManager.initialize();
 
         // Step 2: Initialize data services (creates tables if needed)
-        const [weightInit, bodyInit, fitnessInit, nutritionInit] = await Promise.allSettled([
+        const [weightInit, bodyInit, fitnessInit, nutritionInit, appSettingsInit] = await Promise.allSettled([
             weightMeasurementOfflineService.initialize(),
             bodyMeasurementOfflineService.initialize(),
             fitnessProfileOfflineService.initialize(),
             nutritionProfileOfflineService.initialize(),
+            appSettingsOfflineService.initialize(),
         ]);
 
         // Check if any failed
@@ -55,12 +58,16 @@ export async function initializeOfflineServices(options: OfflineInitializationOp
         if (nutritionInit.status === 'rejected') {
             console.warn('Nutrition profile service initialization failed:', nutritionInit.reason);
         }
+        if (appSettingsInit.status === 'rejected') {
+            console.warn('App settings service initialization failed:', appSettingsInit.reason);
+        }
 
         // Step 3: Register sync handlers with the queue manager
         syncQueueManager.registerSyncHandler('weight_measurements', weightMeasurementSyncHandler);
         syncQueueManager.registerSyncHandler('body_measurements', bodyMeasurementSyncHandler);
         syncQueueManager.registerSyncHandler('fitness_profiles', fitnessProfileSyncHandler);
         syncQueueManager.registerSyncHandler('nutrition_profiles', nutritionProfileSyncHandler);
+        syncQueueManager.registerSyncHandler('app_settings', appSettingsSyncHandler);
 
         console.log('✅ Offline services initialized successfully');
     } catch (error) {
@@ -83,47 +90,5 @@ export async function cleanupOfflineServices(): Promise<void> {
         console.log('✅ Offline services cleaned up');
     } catch (error) {
         console.error('⚠️ Error during offline services cleanup:', error);
-    }
-}
-
-/**
- * Get initialization status for debugging
- */
-export async function getOfflineServicesStatus(): Promise<{
-    database: boolean;
-    network: boolean;
-    syncQueue: boolean;
-    weightService: boolean;
-    bodyService: boolean;
-    fitnessProfileService: boolean;
-    nutritionProfileService: boolean;
-}> {
-    try {
-        // These would need to be exposed as public methods on your services
-        // For now, we'll do basic checks
-        const databaseOk = !!databaseManager.getDatabase();
-        const networkOk = !!networkStateManager.getCurrentState();
-        const syncQueueOk = !!(await syncQueueManager.getSyncStatus());
-
-        return {
-            database: databaseOk,
-            network: networkOk,
-            syncQueue: syncQueueOk,
-            weightService: true, // Assume OK if no errors thrown
-            bodyService: true, // Assume OK if no errors thrown
-            fitnessProfileService: true, // Assume OK if no errors thrown
-            nutritionProfileService: true, // Assume OK if no errors thrown
-        };
-    } catch (error) {
-        console.error('Error checking offline services status:', error);
-        return {
-            database: false,
-            network: false,
-            syncQueue: false,
-            weightService: false,
-            bodyService: false,
-            fitnessProfileService: false,
-            nutritionProfileService: false,
-        };
     }
 }

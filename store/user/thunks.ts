@@ -1670,7 +1670,6 @@ export const updateUserNutritionProfileAsync = createAsyncThunk<
         const updatedProfile = await nutritionProfileOfflineService.upsertProfile({
             userId,
             data: {
-                WeightGoal: userNutritionProfile.WeightGoal,
                 PrimaryNutritionGoal: userNutritionProfile.PrimaryNutritionGoal,
                 ActivityLevel: userNutritionProfile.ActivityLevel,
             },

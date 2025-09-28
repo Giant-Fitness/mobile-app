@@ -10,13 +10,11 @@ import { v4 as uuidv4 } from 'uuid';
 
 // Nutrition profile specific types
 export interface CreateNutritionProfileInput {
-    WeightGoal: number;
     PrimaryNutritionGoal: string;
     ActivityLevel: string;
 }
 
 export interface UpdateNutritionProfileInput {
-    WeightGoal?: number;
     PrimaryNutritionGoal?: string;
     ActivityLevel?: string;
 }
@@ -32,7 +30,6 @@ export interface NutritionProfileWithStatus extends UserNutritionProfile {
 interface NutritionProfileRecord {
     id: string;
     user_id: string;
-    weight_goal: number;
     primary_nutrition_goal: string;
     activity_level: string;
     created_at_server?: string;
@@ -71,7 +68,6 @@ export class NutritionProfileOfflineService extends BaseOfflineDataService<UserN
             CREATE TABLE IF NOT EXISTS nutrition_profiles (
                 id TEXT PRIMARY KEY,
                 user_id TEXT NOT NULL UNIQUE,
-                weight_goal REAL NOT NULL,
                 primary_nutrition_goal TEXT NOT NULL,
                 activity_level TEXT NOT NULL,
                 created_at_server TEXT,
@@ -102,10 +98,10 @@ export class NutritionProfileOfflineService extends BaseOfflineDataService<UserN
     protected async insertRecord(db: any, localId: string, userId: string, data: CreateNutritionProfileInput, timestamp: string, now: string): Promise<void> {
         await db.runAsync(
             `INSERT OR REPLACE INTO nutrition_profiles (
-                id, user_id, weight_goal, primary_nutrition_goal, activity_level,
+                id, user_id, primary_nutrition_goal, activity_level,
                 sync_status, created_at, updated_at, retry_count
-            ) VALUES (?, ?, ?, ?, ?, 'local_only', ?, ?, 0)`,
-            [localId, userId, data.WeightGoal, data.PrimaryNutritionGoal, data.ActivityLevel, now, now],
+            ) VALUES (?, ?, ?, ?, 'local_only', ?, ?, 0)`,
+            [localId, userId, data.PrimaryNutritionGoal, data.ActivityLevel, now, now],
         );
     }
 
@@ -130,11 +126,6 @@ export class NutritionProfileOfflineService extends BaseOfflineDataService<UserN
         const now = new Date().toISOString();
         const setParts: string[] = ['updated_at = ?'];
         const params: any[] = [now];
-
-        if (updates.WeightGoal !== undefined) {
-            setParts.push('weight_goal = ?');
-            params.push(updates.WeightGoal);
-        }
 
         if (updates.PrimaryNutritionGoal !== undefined) {
             setParts.push('primary_nutrition_goal = ?');
@@ -211,12 +202,11 @@ export class NutritionProfileOfflineService extends BaseOfflineDataService<UserN
             // Update existing record with server data
             await db.runAsync(
                 `UPDATE nutrition_profiles 
-                 SET weight_goal = ?, primary_nutrition_goal = ?, activity_level = ?,
+                 SET primary_nutrition_goal = ?, activity_level = ?,
                      created_at_server = ?, updated_at_server = ?, sync_status = 'synced',
                      updated_at = ?, retry_count = 0, error_message = NULL
                  WHERE id = ?`,
                 [
-                    serverRecord.WeightGoal,
                     serverRecord.PrimaryNutritionGoal,
                     serverRecord.ActivityLevel,
                     serverRecord.CreatedAt || new Date().toISOString(),
@@ -232,13 +222,12 @@ export class NutritionProfileOfflineService extends BaseOfflineDataService<UserN
 
             await db.runAsync(
                 `INSERT INTO nutrition_profiles (
-                    id, user_id, weight_goal, primary_nutrition_goal, activity_level,
+                    id, user_id, primary_nutrition_goal, activity_level,
                     created_at_server, updated_at_server, sync_status, created_at, updated_at, retry_count
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, 'synced', ?, ?, 0)`,
+                ) VALUES (?, ?, ?, ?, ?, ?, 'synced', ?, ?, 0)`,
                 [
                     localId,
                     userId,
-                    serverRecord.WeightGoal,
                     serverRecord.PrimaryNutritionGoal,
                     serverRecord.ActivityLevel,
                     serverRecord.CreatedAt || now,
@@ -284,7 +273,6 @@ export class NutritionProfileOfflineService extends BaseOfflineDataService<UserN
     protected transformToOfflineRecord(row: NutritionProfileRecord): OfflineRecord<UserNutritionProfile> {
         const nutritionProfile: UserNutritionProfile = {
             UserId: row.user_id,
-            WeightGoal: row.weight_goal,
             PrimaryNutritionGoal: row.primary_nutrition_goal,
             ActivityLevel: row.activity_level,
             CreatedAt: row.created_at_server,
@@ -355,7 +343,6 @@ export class NutritionProfileOfflineService extends BaseOfflineDataService<UserN
     public transformToNutritionProfileWithStatus(record: NutritionProfileRecord): NutritionProfileWithStatus {
         return {
             UserId: record.user_id,
-            WeightGoal: record.weight_goal,
             PrimaryNutritionGoal: record.primary_nutrition_goal,
             ActivityLevel: record.activity_level,
             CreatedAt: record.created_at_server,
