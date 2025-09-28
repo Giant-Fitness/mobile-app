@@ -1,7 +1,7 @@
 // store/exerciseProgress/thunks.ts
 
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { cacheService, CacheTTL } from '@/lib/cache/cacheService';
+import { cacheService } from '@/lib/cache/cacheService';
 import ExerciseProgressService from '@/store/exerciseProgress/service';
 import { isLongTermTrackedLift, LONG_TERM_TRACKED_LIFT_IDS } from '@/store/exerciseProgress/utils';
 import { RootState } from '@/store/store';
@@ -32,9 +32,8 @@ export const initializeTrackedLiftsHistoryAsync = createAsyncThunk<any, { forceR
             if (useCache && !forceRefresh) {
                 const cacheKey = `tracked_lifts_history`;
                 const cached = await cacheService.get<any>(cacheKey);
-                const isExpired = await cacheService.isExpired(cacheKey);
 
-                if (cached && !isExpired) {
+                if (cached) {
                     console.log('Loaded tracked lifts history from cache');
                     return { liftHistory: cached };
                 }
@@ -60,7 +59,7 @@ export const initializeTrackedLiftsHistoryAsync = createAsyncThunk<any, { forceR
             // Cache the result if useCache is enabled
             if (useCache) {
                 const cacheKey = `tracked_lifts_history`;
-                await cacheService.set(cacheKey, liftHistory, CacheTTL.LONG);
+                await cacheService.set(cacheKey, liftHistory);
             }
 
             return { liftHistory };
@@ -123,9 +122,8 @@ export const fetchExercisesRecentHistoryAsync = createAsyncThunk(
                 for (const exerciseId of uncachedExercises) {
                     const cacheKey = `recent_logs_${exerciseId}`;
                     const cached = await cacheService.get<any>(cacheKey);
-                    const isExpired = await cacheService.isExpired(cacheKey);
 
-                    if (cached && !isExpired) {
+                    if (cached) {
                         cachedRecentLogs[exerciseId] = cached;
                         cachedExercises.push(exerciseId);
                         console.log(`Loaded recent logs for ${exerciseId} from cache`);
@@ -161,7 +159,7 @@ export const fetchExercisesRecentHistoryAsync = createAsyncThunk(
                     // Cache the result if useCache is enabled
                     if (useCache) {
                         const cacheKey = `recent_logs_${exerciseId}`;
-                        cacheService.set(cacheKey, exerciseLogs, CacheTTL.LONG);
+                        cacheService.set(cacheKey, exerciseLogs);
                     }
 
                     return {

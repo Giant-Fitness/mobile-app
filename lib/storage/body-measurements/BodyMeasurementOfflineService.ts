@@ -54,7 +54,7 @@ export class BodyMeasurementOfflineService extends BaseOfflineDataService<UserBo
     private constructor() {
         super({
             tableName: 'body_measurements',
-            retentionDays: 90,
+            retentionDays: 365,
             enableCleanup: true,
         });
     }

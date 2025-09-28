@@ -1,7 +1,7 @@
 // store/programs/thunks.ts
 
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { cacheService, CacheTTL } from '@/lib/cache/cacheService';
+import { cacheService } from '@/lib/cache/cacheService';
 import ProgramService from '@/store/programs/service';
 import { RootState } from '@/store/store';
 import { Program, ProgramDay } from '@/types';
@@ -23,9 +23,8 @@ export const getAllProgramsAsync = createAsyncThunk<Program[], { forceRefresh?: 
         // Try cache first if enabled and not forcing refresh
         if (useCache && !forceRefresh) {
             const cached = await cacheService.get<Program[]>('all_programs');
-            const isExpired = await cacheService.isExpired('all_programs');
 
-            if (cached && !isExpired) {
+            if (cached) {
                 console.log('Loaded programs from cache');
                 return cached;
             }
@@ -37,7 +36,7 @@ export const getAllProgramsAsync = createAsyncThunk<Program[], { forceRefresh?: 
 
         // Cache the result if useCache is enabled
         if (useCache) {
-            await cacheService.set('all_programs', programs, CacheTTL.VERY_LONG);
+            await cacheService.set('all_programs', programs);
         }
 
         return programs;
@@ -59,9 +58,8 @@ export const getProgramAsync = createAsyncThunk<Program | undefined, { programId
         if (useCache && !forceRefresh) {
             const cacheKey = `program_${programId}`;
             const cached = await cacheService.get<Program>(cacheKey);
-            const isExpired = await cacheService.isExpired(cacheKey);
 
-            if (cached && !isExpired) {
+            if (cached) {
                 console.log(`Loaded program ${programId} from cache`);
                 return cached;
             }
@@ -77,7 +75,7 @@ export const getProgramAsync = createAsyncThunk<Program | undefined, { programId
         // Cache the result if useCache is enabled
         if (useCache) {
             const cacheKey = `program_${programId}`;
-            await cacheService.set(cacheKey, program, CacheTTL.VERY_LONG);
+            await cacheService.set(cacheKey, program);
         }
 
         return program;
@@ -101,9 +99,8 @@ export const getAllProgramDaysAsync = createAsyncThunk<ProgramDay[], { programId
             if (useCache && !forceRefresh) {
                 const cacheKey = `program_days_${programId}`;
                 const cached = await cacheService.get<ProgramDay[]>(cacheKey);
-                const isExpired = await cacheService.isExpired(cacheKey);
 
-                if (cached && !isExpired) {
+                if (cached) {
                     console.log(`Loaded program days for ${programId} from cache`);
                     return cached;
                 }
@@ -119,7 +116,7 @@ export const getAllProgramDaysAsync = createAsyncThunk<ProgramDay[], { programId
             // Cache the result if useCache is enabled
             if (useCache) {
                 const cacheKey = `program_days_${programId}`;
-                await cacheService.set(cacheKey, programDays, CacheTTL.VERY_LONG);
+                await cacheService.set(cacheKey, programDays);
             }
 
             return programDays;
@@ -148,9 +145,8 @@ export const getProgramDayAsync = createAsyncThunk<
     if (useCache && !forceRefresh) {
         const cacheKey = `program_day_${programId}_${dayId}`;
         const cached = await cacheService.get<ProgramDay>(cacheKey);
-        const isExpired = await cacheService.isExpired(cacheKey);
 
-        if (cached && !isExpired) {
+        if (cached) {
             console.log(`Loaded program day ${programId}/${dayId} from cache`);
             return cached;
         }
@@ -166,7 +162,7 @@ export const getProgramDayAsync = createAsyncThunk<
     // Cache the result if useCache is enabled
     if (useCache) {
         const cacheKey = `program_day_${programId}_${dayId}`;
-        await cacheService.set(cacheKey, programDay, CacheTTL.VERY_LONG);
+        await cacheService.set(cacheKey, programDay);
     }
 
     return programDay;
@@ -197,9 +193,8 @@ export const getMultipleProgramDaysAsync = createAsyncThunk<
         for (const dayId of missingDayIds) {
             const cacheKey = `program_day_${programId}_${dayId}`;
             const cached = await cacheService.get<ProgramDay>(cacheKey);
-            const isExpired = await cacheService.isExpired(cacheKey);
 
-            if (cached && !isExpired) {
+            if (cached) {
                 cachedDays.push(cached);
                 console.log(`Loaded program day ${programId}/${dayId} from cache`);
             } else {
@@ -221,7 +216,7 @@ export const getMultipleProgramDaysAsync = createAsyncThunk<
             if (useCache) {
                 for (const day of fetchedDays) {
                     const cacheKey = `program_day_${programId}_${day.DayId}`;
-                    await cacheService.set(cacheKey, day, CacheTTL.VERY_LONG);
+                    await cacheService.set(cacheKey, day);
                 }
             }
         } catch (error) {

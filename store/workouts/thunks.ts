@@ -1,7 +1,7 @@
 // store/workouts/thunks.ts
 
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { cacheService, CacheTTL } from '@/lib/cache/cacheService';
+import { cacheService } from '@/lib/cache/cacheService';
 import { RootState } from '@/store/store';
 import WorkoutService from '@/store/workouts/service';
 import { Workout, WorkoutRecommendations } from '@/types';
@@ -22,9 +22,8 @@ export const getAllWorkoutsAsync = createAsyncThunk<Workout[], { forceRefresh?: 
         // Try cache first if enabled and not forcing refresh
         if (useCache && !forceRefresh) {
             const cached = await cacheService.get<Workout[]>('all_workouts');
-            const isExpired = await cacheService.isExpired('all_workouts');
 
-            if (cached && !isExpired) {
+            if (cached) {
                 console.log('Loaded workouts from cache');
                 return cached;
             }
@@ -36,7 +35,7 @@ export const getAllWorkoutsAsync = createAsyncThunk<Workout[], { forceRefresh?: 
 
         // Cache the result if useCache is enabled
         if (useCache) {
-            await cacheService.set('all_workouts', workouts, CacheTTL.VERY_LONG);
+            await cacheService.set('all_workouts', workouts);
         }
 
         return workouts;
@@ -58,9 +57,8 @@ export const getWorkoutAsync = createAsyncThunk<Workout | undefined, { workoutId
         if (useCache && !forceRefresh) {
             const cacheKey = `workout_${workoutId}`;
             const cached = await cacheService.get<Workout>(cacheKey);
-            const isExpired = await cacheService.isExpired(cacheKey);
 
-            if (cached && !isExpired) {
+            if (cached) {
                 console.log(`Loaded workout ${workoutId} from cache`);
                 return cached;
             }
@@ -76,7 +74,7 @@ export const getWorkoutAsync = createAsyncThunk<Workout | undefined, { workoutId
         // Cache the result if useCache is enabled
         if (useCache) {
             const cacheKey = `workout_${workoutId}`;
-            await cacheService.set(cacheKey, workout, CacheTTL.VERY_LONG);
+            await cacheService.set(cacheKey, workout);
         }
 
         return workout;
@@ -106,9 +104,8 @@ export const getMultipleWorkoutsAsync = createAsyncThunk<Workout[], { workoutIds
             for (const workoutId of missingWorkoutIds) {
                 const cacheKey = `workout_${workoutId}`;
                 const cached = await cacheService.get<Workout>(cacheKey);
-                const isExpired = await cacheService.isExpired(cacheKey);
 
-                if (cached && !isExpired) {
+                if (cached) {
                     cachedWorkouts.push(cached);
                     console.log(`Loaded workout ${workoutId} from cache`);
                 } else {
@@ -130,7 +127,7 @@ export const getMultipleWorkoutsAsync = createAsyncThunk<Workout[], { workoutIds
                 if (useCache) {
                     for (const workout of fetchedWorkouts) {
                         const cacheKey = `workout_${workout.WorkoutId}`;
-                        await cacheService.set(cacheKey, workout, CacheTTL.VERY_LONG);
+                        await cacheService.set(cacheKey, workout);
                     }
                 }
             } catch (error) {
@@ -167,9 +164,8 @@ export const getSpotlightWorkoutsAsync = createAsyncThunk<WorkoutRecommendations
         // Try cache first if enabled and not forcing refresh
         if (useCache && !forceRefresh) {
             const cached = await cacheService.get<WorkoutRecommendations>('spotlight_workouts');
-            const isExpired = await cacheService.isExpired('spotlight_workouts');
 
-            if (cached && !isExpired) {
+            if (cached) {
                 console.log('Loaded spotlight workouts from cache');
                 return cached;
             }
@@ -181,7 +177,7 @@ export const getSpotlightWorkoutsAsync = createAsyncThunk<WorkoutRecommendations
 
         // Cache the result if useCache is enabled
         if (useCache) {
-            await cacheService.set('spotlight_workouts', spotlightWorkouts, CacheTTL.SHORT);
+            await cacheService.set('spotlight_workouts', spotlightWorkouts);
         }
 
         return spotlightWorkouts;

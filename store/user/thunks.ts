@@ -1,7 +1,8 @@
 // store/user/thunks.ts
 
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { cacheService, CacheTTL } from '@/lib/cache/cacheService';
+import { cacheService } from '@/lib/cache/cacheService';
+import { appSettingsOfflineService } from '@/lib/storage/app-settings/AppSettingsOfflineService';
 import { bodyMeasurementOfflineService } from '@/lib/storage/body-measurements/BodyMeasurementOfflineService';
 import { fitnessProfileOfflineService } from '@/lib/storage/fitness-profile/FitnessProfileOfflineService';
 import { nutritionProfileOfflineService } from '@/lib/storage/nutrition-profile/NutritionProfileOfflineService';
@@ -59,9 +60,8 @@ export const getUserAsync = createAsyncThunk<User, { forceRefresh?: boolean; use
     // Try cache first if enabled and not forcing refresh
     if (useCache && !forceRefresh) {
         const cached = await cacheService.get<User>('user_data');
-        const isExpired = await cacheService.isExpired('user_data');
 
-        if (cached && !isExpired) {
+        if (cached) {
             console.log('Loaded user data from cache');
             return cached;
         }
@@ -73,7 +73,7 @@ export const getUserAsync = createAsyncThunk<User, { forceRefresh?: boolean; use
 
     // Cache the result if useCache is enabled
     if (useCache) {
-        await cacheService.set('user_data', user, CacheTTL.LONG);
+        await cacheService.set('user_data', user);
     }
 
     return user;
@@ -205,66 +205,20 @@ export const updateUserFitnessProfileAsync = createAsyncThunk<
         return rejectWithValue({ errorMessage: 'User ID not available' });
     }
 
-    try {
-        // Optimistically update local SQLite immediately
-        console.log('Updating fitness profile locally...');
-        const updatedProfile = await fitnessProfileOfflineService.upsertProfile({
-            userId,
-            data: {
-                GymExperienceLevel: userFitnessProfile.GymExperienceLevel,
-                AccessToEquipment: userFitnessProfile.AccessToEquipment,
-                DaysPerWeekDesired: userFitnessProfile.DaysPerWeekDesired,
-                PrimaryFitnessGoal: userFitnessProfile.PrimaryFitnessGoal,
-            },
+    if (!networkStateManager.isOnline()) {
+        return rejectWithValue({
+            errorMessage: 'Internet connection required to update fitness profile',
         });
+    }
 
-        // Try to sync to server immediately if online
-        if (networkStateManager.isOnline()) {
-            try {
-                console.log('Syncing fitness profile to server...');
-                const serverResult = await UserService.updateUserFitnessProfile(userId, userFitnessProfile);
+    try {
+        const serverResult = await UserService.updateUserFitnessProfile(userId, userFitnessProfile);
 
-                // Update local record as synced
-                await fitnessProfileOfflineService.updateSyncStatus(updatedProfile.localId, 'synced', {
-                    serverTimestamp: new Date().toISOString(),
-                });
+        // Cache the fresh data we just received
+        await Promise.all([cacheService.set('user_data', serverResult.user), cacheService.set('user_recommendations', serverResult.userRecommendations)]);
 
-                // Invalidate related caches after successful sync
-                await Promise.all([cacheService.remove('user_fitness_profile'), cacheService.remove('user_recommendations'), cacheService.remove('user_data')]);
-
-                console.log('Fitness profile successfully synced to server');
-                return serverResult;
-            } catch (syncError) {
-                console.warn('Failed to sync fitness profile to server, will retry later:', syncError);
-
-                // Mark as failed but don't fail the whole operation since we have local data
-                await fitnessProfileOfflineService.updateSyncStatus(updatedProfile.localId, 'failed', {
-                    errorMessage: syncError instanceof Error ? syncError.message : 'Sync failed',
-                    incrementRetry: true,
-                });
-            }
-        }
-
-        // Return optimistic result based on local update
-        // Note: We don't have user and userRecommendations from local storage,
-        // so we'll need to get them from Redux state or make this return type more flexible
-        const currentUser = state.user.user;
-        const currentRecommendations = state.user.userRecommendations;
-
-        if (!currentUser || !currentRecommendations) {
-            // If we don't have the required data in state, we need to handle this case
-            console.warn('Missing user or recommendations data in state for optimistic update');
-            return rejectWithValue({ errorMessage: 'Insufficient data for offline update' });
-        }
-
-        console.log('Fitness profile updated offline (will sync when online)');
-        return {
-            user: currentUser,
-            userRecommendations: currentRecommendations,
-            userFitnessProfile: updatedProfile.data,
-        };
+        return serverResult;
     } catch (error) {
-        console.error('Failed to update fitness profile:', error);
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to update fitness profile',
         });
@@ -298,9 +252,8 @@ export const getUserRecommendationsAsync = createAsyncThunk<
         if (useCache && !forceRefresh) {
             const cacheKey = `user_recommendations`;
             const cached = await cacheService.get<UserRecommendations>(cacheKey);
-            const isExpired = await cacheService.isExpired(cacheKey);
 
-            if (cached && !isExpired) {
+            if (cached) {
                 console.log('Loaded user recommendations from cache');
                 return cached;
             }
@@ -313,7 +266,7 @@ export const getUserRecommendationsAsync = createAsyncThunk<
         // Cache the result if useCache is enabled
         if (useCache) {
             const cacheKey = `user_recommendations`;
-            await cacheService.set(cacheKey, userRecommendations, CacheTTL.LONG);
+            await cacheService.set(cacheKey, userRecommendations);
         }
 
         return userRecommendations;
@@ -349,9 +302,8 @@ export const getUserProgramProgressAsync = createAsyncThunk<
         // Try cache first if enabled and not forcing refresh
         if (useCache && !forceRefresh) {
             const cached = await cacheService.get<UserProgramProgress>('user_program_progress');
-            const isExpired = await cacheService.isExpired('user_program_progress');
 
-            if (cached && !isExpired) {
+            if (cached) {
                 console.log('Loaded user program progress from cache');
                 return cached;
             }
@@ -363,7 +315,7 @@ export const getUserProgramProgressAsync = createAsyncThunk<
 
         // Cache the result if useCache is enabled
         if (useCache) {
-            await cacheService.set('user_program_progress', userProgramProgress, CacheTTL.SHORT);
+            await cacheService.set('user_program_progress', userProgramProgress);
         }
 
         return userProgramProgress;
@@ -495,59 +447,89 @@ export const resetProgramAsync = createAsyncThunk<UserProgramProgress, void>('us
     }
 });
 
+/**
+ * Get user app settings (offline-first)
+ * Loads immediately from SQLite, triggers background server sync
+ */
 export const getUserAppSettingsAsync = createAsyncThunk<
     UserAppSettings,
-    { forceRefresh?: boolean; useCache?: boolean } | void,
+    { forceRefresh?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
 >('user/getUserAppSettings', async (args = {}, { getState, rejectWithValue }) => {
     try {
-        const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
+        const { forceRefresh = false } = typeof args === 'object' ? args : {};
         const state = getState();
         const userId = state.user.user?.UserId;
 
-        // Check if user ID exists
         if (!userId) {
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Return cached app settings if available and not forcing refresh
-        if (state.user.userAppSettings && !forceRefresh) {
-            return state.user.userAppSettings;
-        }
+        // Always load from SQLite first (offline-first)
+        console.log('Loading app settings from SQLite...');
+        const localSettings = await appSettingsOfflineService.getSettingsForUser(userId);
 
-        // Try cache first if enabled and not forcing refresh
-        if (useCache && !forceRefresh) {
-            const cacheKey = `user_app_settings`;
-            const cached = await cacheService.get<UserAppSettings>(cacheKey);
-            const isExpired = await cacheService.isExpired(cacheKey);
+        if (localSettings) {
+            console.log('Found app settings in SQLite');
 
-            if (cached && !isExpired) {
-                console.log('Loaded user app settings from cache');
-                return cached;
+            // Background server sync (non-blocking) unless force refresh
+            if (networkStateManager.isOnline() && !forceRefresh) {
+                setTimeout(async () => {
+                    try {
+                        console.log('Triggering background app settings sync...');
+                        const serverSettings = await UserService.getUserAppSettings(userId);
+                        await appSettingsOfflineService.mergeServerData(userId, serverSettings);
+                    } catch (error) {
+                        console.warn('Background app settings sync failed:', error);
+                    }
+                }, 100);
             }
+
+            // Force refresh: synchronous server sync
+            if (forceRefresh && networkStateManager.isOnline()) {
+                try {
+                    console.log('Force refreshing app settings from server...');
+                    const serverSettings = await UserService.getUserAppSettings(userId);
+                    await appSettingsOfflineService.mergeServerData(userId, serverSettings);
+
+                    // Reload from SQLite to get merged data
+                    const refreshedSettings = await appSettingsOfflineService.getSettingsForUser(userId);
+                    return refreshedSettings ? refreshedSettings.data : localSettings.data;
+                } catch (error) {
+                    console.warn('Force refresh failed, using local data:', error);
+                }
+            }
+
+            return localSettings.data;
         }
 
-        // Load from API
-        console.log('Loading user app settings from API');
-        const profile = await UserService.getUserAppSettings(userId);
+        // No local settings found - try server
+        if (networkStateManager.isOnline()) {
+            console.log('No local app settings found, fetching from server...');
+            const serverSettings = await UserService.getUserAppSettings(userId);
 
-        // Cache the result if useCache is enabled
-        if (useCache) {
-            const cacheKey = `user_app_settings`;
-            await cacheService.set(cacheKey, profile, CacheTTL.LONG);
+            // Store in SQLite for future offline use
+            await appSettingsOfflineService.mergeServerData(userId, serverSettings);
+
+            return serverSettings;
         }
 
-        return profile;
+        // Offline and no local data
+        return rejectWithValue({ errorMessage: 'No app settings available offline' });
     } catch (error) {
+        console.error('Failed to get app settings:', error);
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to fetch app settings',
         });
     }
 });
 
+/**
+ * Update user app settings (offline-first with optimistic update)
+ */
 export const updateUserAppSettingsAsync = createAsyncThunk<
     { userAppSettings: UserAppSettings },
     { userAppSettings: UserAppSettings },
@@ -564,16 +546,52 @@ export const updateUserAppSettingsAsync = createAsyncThunk<
     }
 
     try {
-        const result = await UserService.updateUserAppSettings(userId, userAppSettings);
+        // Optimistically update local SQLite immediately
+        console.log('Updating app settings locally...');
+        const updatedSettings = await appSettingsOfflineService.upsertSettings({
+            userId,
+            data: {
+                UnitsOfMeasurement: userAppSettings.UnitsOfMeasurement,
+            },
+        });
 
-        // Invalidate app settings cache after update
-        const cacheKey = `user_app_settings`;
-        await cacheService.remove(cacheKey);
+        // Try to sync to server immediately if online
+        if (networkStateManager.isOnline()) {
+            try {
+                console.log('Syncing app settings to server...');
+                const serverResult = await UserService.updateUserAppSettings(userId, userAppSettings);
 
-        return { userAppSettings: result };
+                // Update local record as synced
+                await appSettingsOfflineService.updateSyncStatus(updatedSettings.localId, 'synced', {
+                    serverTimestamp: new Date().toISOString(),
+                });
+
+                console.log('App settings successfully synced to server');
+                const normalizedResult: { userAppSettings: UserAppSettings } = (serverResult as any)?.userAppSettings
+                    ? (serverResult as any)
+                    : { userAppSettings: serverResult as UserAppSettings };
+                return normalizedResult;
+            } catch (syncError) {
+                console.warn('Failed to sync app settings to server, will retry later:', syncError);
+
+                // Mark as failed but don't fail the whole operation since we have local data
+                await appSettingsOfflineService.updateSyncStatus(updatedSettings.localId, 'failed', {
+                    errorMessage: syncError instanceof Error ? syncError.message : 'Sync failed',
+                    incrementRetry: true,
+                });
+            }
+        }
+
+        // Return optimistic result based on local update
+        console.log('App settings updated offline (will sync when online)');
+        return {
+            userAppSettings: updatedSettings.data,
+        };
     } catch (error) {
-        console.log(error);
-        return rejectWithValue({ errorMessage: 'Failed to update app settings' });
+        console.error('Failed to update app settings:', error);
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to update app settings',
+        });
     }
 });
 
@@ -608,9 +626,8 @@ export const getUserExerciseSubstitutionsAsync = createAsyncThunk<
         if (useCache && !forceRefresh && !params) {
             const cacheKey = `exercise_substitutions`;
             const cached = await cacheService.get<UserExerciseSubstitution[]>(cacheKey);
-            const isExpired = await cacheService.isExpired(cacheKey);
 
-            if (cached && !isExpired) {
+            if (cached) {
                 console.log('Loaded exercise substitutions from cache');
                 return cached;
             }
@@ -623,7 +640,7 @@ export const getUserExerciseSubstitutionsAsync = createAsyncThunk<
         // Cache the result if useCache is enabled and no params (full list)
         if (useCache && !params) {
             const cacheKey = `exercise_substitutions`;
-            await cacheService.set(cacheKey, substitutions, CacheTTL.VERY_LONG);
+            await cacheService.set(cacheKey, substitutions);
         }
 
         return substitutions;
@@ -1025,9 +1042,8 @@ export const getSleepMeasurementsAsync = createAsyncThunk<
         // Try cache first if enabled and not forcing refresh
         if (useCache && !forceRefresh) {
             const cached = await cacheService.get<UserSleepMeasurement[]>('sleep_measurements');
-            const isExpired = await cacheService.isExpired('sleep_measurements');
 
-            if (cached && !isExpired) {
+            if (cached) {
                 console.log('Loaded sleep measurements from cache');
                 return cached;
             }
@@ -1039,7 +1055,7 @@ export const getSleepMeasurementsAsync = createAsyncThunk<
 
         // Cache the result if useCache is enabled
         if (useCache) {
-            await cacheService.set('sleep_measurements', measurements, CacheTTL.LONG);
+            await cacheService.set('sleep_measurements', measurements);
         }
 
         return measurements;
@@ -1435,9 +1451,8 @@ export const getUserExerciseSetModificationsAsync = createAsyncThunk<
         if (useCache && !forceRefresh && !params) {
             const cacheKey = `exercise_set_modifications`;
             const cached = await cacheService.get<UserExerciseSetModification[]>(cacheKey);
-            const isExpired = await cacheService.isExpired(cacheKey);
 
-            if (cached && !isExpired) {
+            if (cached) {
                 console.log('Loaded exercise set modifications from cache');
                 return cached;
             }
@@ -1450,7 +1465,7 @@ export const getUserExerciseSetModificationsAsync = createAsyncThunk<
         // Cache the result if useCache is enabled and no params (full list)
         if (useCache && !params) {
             const cacheKey = `exercise_set_modifications`;
-            await cacheService.set(cacheKey, modifications, CacheTTL.LONG);
+            await cacheService.set(cacheKey, modifications);
         }
 
         return modifications;
@@ -1686,9 +1701,6 @@ export const updateUserNutritionProfileAsync = createAsyncThunk<
                     serverTimestamp: serverResult.userNutritionProfile.UpdatedAt,
                 });
 
-                // Invalidate related caches after successful sync
-                await Promise.all([cacheService.remove('user_nutrition_profile'), cacheService.remove('user_data')]);
-
                 console.log('Nutrition profile successfully synced to server');
                 return serverResult;
             } catch (syncError) {
@@ -1737,15 +1749,8 @@ export const completeUserProfileAsync = createAsyncThunk<
     try {
         const result = await UserService.completeUserProfile(profileData);
 
-        // Clear all related caches since we're setting up the profile for the first time
-        await Promise.all([
-            cacheService.remove('user_data'),
-            cacheService.remove('user_fitness_profile'),
-            cacheService.remove('user_nutrition_profile'),
-            cacheService.remove('user_recommendations'),
-            cacheService.remove('user_app_settings'),
-            cacheService.remove('weight_measurements'), // Initial weight was logged
-        ]);
+        // Clear cache
+        await Promise.all([cacheService.remove('user_recommendations')]);
 
         return result;
     } catch (error) {
@@ -1781,9 +1786,8 @@ export const getUserNutritionGoalHistoryAsync = createAsyncThunk<
         if (useCache && !forceRefresh) {
             const cacheKey = `user_nutrition_goal_history`;
             const cached = await cacheService.get<UserNutritionGoal[]>(cacheKey);
-            const isExpired = await cacheService.isExpired(cacheKey);
 
-            if (cached && !isExpired) {
+            if (cached) {
                 console.log('Loaded nutrition goal history from cache');
                 return cached;
             }
@@ -1796,7 +1800,7 @@ export const getUserNutritionGoalHistoryAsync = createAsyncThunk<
         // Cache the result if useCache is enabled
         if (useCache) {
             const cacheKey = `user_nutrition_goal_history`;
-            await cacheService.set(cacheKey, goalHistory, CacheTTL.LONG);
+            await cacheService.set(cacheKey, goalHistory);
         }
 
         return goalHistory;
@@ -1878,9 +1882,8 @@ export const getAllNutritionLogsAsync = createAsyncThunk<
         if (useCache && !forceRefresh) {
             const cacheKey = `all_nutrition_logs`;
             const cached = await cacheService.get<UserNutritionLog[]>(cacheKey);
-            const isExpired = await cacheService.isExpired(cacheKey);
 
-            if (cached && !isExpired) {
+            if (cached) {
                 console.log('Loaded all nutrition logs from cache');
                 return cached;
             }
@@ -1891,7 +1894,7 @@ export const getAllNutritionLogsAsync = createAsyncThunk<
         // Cache the result if useCache is enabled
         if (useCache) {
             const cacheKey = `all_nutrition_logs`;
-            await cacheService.set(cacheKey, nutritionLogs, CacheTTL.SHORT);
+            await cacheService.set(cacheKey, nutritionLogs);
         }
 
         return nutritionLogs;
@@ -1930,9 +1933,8 @@ export const getNutritionLogsWithFiltersAsync = createAsyncThunk<
         // Try cache first if enabled and not forcing refresh
         if (useCache && !forceRefresh) {
             const cached = await cacheService.get<{ nutritionLogs: UserNutritionLog[]; count: number; lastEvaluatedKey?: any }>(cacheKey);
-            const isExpired = await cacheService.isExpired(cacheKey);
 
-            if (cached && !isExpired) {
+            if (cached) {
                 console.log('Loaded filtered nutrition logs from cache');
                 return cached;
             }
@@ -1943,7 +1945,7 @@ export const getNutritionLogsWithFiltersAsync = createAsyncThunk<
 
         // Cache the result if useCache is enabled
         if (useCache) {
-            await cacheService.set(cacheKey, result, CacheTTL.SHORT);
+            await cacheService.set(cacheKey, result);
         }
 
         return result;
@@ -1994,9 +1996,8 @@ export const getNutritionLogsForDatesAsync = createAsyncThunk<
             for (const date of datesToLoad) {
                 const cacheKey = `nutrition_logs_${date}`;
                 const cached = await cacheService.get<UserNutritionLog>(cacheKey);
-                const isExpired = await cacheService.isExpired(cacheKey);
 
-                if (cached !== null && !isExpired) {
+                if (cached !== null) {
                     cachedResults[date] = cached;
                 } else {
                     uncachedDates.push(date);
@@ -2019,7 +2020,7 @@ export const getNutritionLogsForDatesAsync = createAsyncThunk<
                 if (useCache) {
                     for (const [date, nutritionLog] of Object.entries(apiResults)) {
                         const cacheKey = `nutrition_logs_${date}`;
-                        await cacheService.set(cacheKey, nutritionLog, CacheTTL.SHORT);
+                        await cacheService.set(cacheKey, nutritionLog);
                     }
                 }
 
@@ -2059,7 +2060,7 @@ export const getNutritionLogsForDatesAsync = createAsyncThunk<
         if (useCache) {
             for (const [date, nutritionLog] of Object.entries(results)) {
                 const cacheKey = `nutrition_logs_${date}`;
-                await cacheService.set(cacheKey, nutritionLog, CacheTTL.SHORT);
+                await cacheService.set(cacheKey, nutritionLog);
             }
         }
 
@@ -2107,9 +2108,8 @@ export const getNutritionLogForDateAsync = createAsyncThunk<
         if (useCache && !forceRefresh) {
             const cacheKey = `nutrition_logs_${date}`;
             const cached = await cacheService.get<UserNutritionLog>(cacheKey);
-            const isExpired = await cacheService.isExpired(cacheKey);
 
-            if (cached !== null && !isExpired) {
+            if (cached !== null) {
                 console.log(`Loaded nutrition log for ${date} from cache`);
                 return { date, nutritionLog: cached };
             }
@@ -2121,7 +2121,7 @@ export const getNutritionLogForDateAsync = createAsyncThunk<
         // Cache the result if useCache is enabled (cache null values too!)
         if (useCache) {
             const cacheKey = `nutrition_logs_${date}`;
-            await cacheService.set(cacheKey, nutritionLog, CacheTTL.SHORT);
+            await cacheService.set(cacheKey, nutritionLog);
         }
 
         return { date, nutritionLog };

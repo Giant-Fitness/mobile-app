@@ -1,6 +1,6 @@
 // store/quotes/thunks.ts
 
-import { cacheService, CacheTTL } from '@/lib/cache/cacheService';
+import { cacheService } from '@/lib/cache/cacheService';
 import { RootState } from '@/store/store';
 import { Quote } from '@/types';
 
@@ -21,9 +21,8 @@ export const getWorkoutQuoteAsync = createAsyncThunk<Quote, { forceRefresh?: boo
         // Try cache first if enabled and not forcing refresh
         if (useCache && !forceRefresh) {
             const cached = await cacheService.get<Quote>('workout_quote');
-            const isExpired = await cacheService.isExpired('workout_quote');
 
-            if (cached && !isExpired) {
+            if (cached) {
                 console.log('Loaded workout quote from cache');
                 return cached;
             }
@@ -33,9 +32,8 @@ export const getWorkoutQuoteAsync = createAsyncThunk<Quote, { forceRefresh?: boo
         console.log('Loading workout quote from service');
         const quote = await QuoteService.getWorkoutQuote();
 
-        // Cache the result if useCache is enabled (short TTL since quotes change)
         if (useCache) {
-            await cacheService.set('workout_quote', quote, CacheTTL.SHORT);
+            await cacheService.set('workout_quote', quote);
         }
 
         return quote;
@@ -55,9 +53,8 @@ export const getRestDayQuoteAsync = createAsyncThunk<Quote, { forceRefresh?: boo
         // Try cache first if enabled and not forcing refresh
         if (useCache && !forceRefresh) {
             const cached = await cacheService.get<Quote>('rest_day_quote');
-            const isExpired = await cacheService.isExpired('rest_day_quote');
 
-            if (cached && !isExpired) {
+            if (cached) {
                 console.log('Loaded rest day quote from cache');
                 return cached;
             }
@@ -67,9 +64,8 @@ export const getRestDayQuoteAsync = createAsyncThunk<Quote, { forceRefresh?: boo
         console.log('Loading rest day quote from service');
         const quote = await QuoteService.getRestDayQuote();
 
-        // Cache the result if useCache is enabled (short TTL since quotes change)
         if (useCache) {
-            await cacheService.set('rest_day_quote', quote, CacheTTL.SHORT);
+            await cacheService.set('rest_day_quote', quote);
         }
 
         return quote;

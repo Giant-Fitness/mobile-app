@@ -54,7 +54,7 @@ export class WeightMeasurementOfflineService extends BaseOfflineDataService<User
     private constructor() {
         super({
             tableName: 'weight_measurements',
-            retentionDays: 90,
+            retentionDays: 365,
             enableCleanup: true,
         });
     }

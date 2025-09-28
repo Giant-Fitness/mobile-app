@@ -42,29 +42,24 @@ import {
 } from '@/store/user/thunks';
 import { getAllWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
 
-import { cacheService, CacheTTL } from '../../lib/cache/cacheService';
+import { cacheService } from '../../lib/cache/cacheService';
 
 // Standardized cache keys
 const CACHE_KEYS = {
     USER_DATA: 'user_data',
-    USER_FITNESS_PROFILE: 'user_fitness_profile',
-    USER_NUTRITION_PROFILE: 'user_nutrition_profile',
     USER_NUTRITION_GOAL_HISTORY: 'user_nutrition_goal_history',
     USER_NUTRITION_LOGS: 'user_nutrition_logs',
     USER_PROGRAM_PROGRESS: 'user_program_progress',
-    USER_APP_SETTINGS: 'user_app_settings',
-    USER_RECOMMENDATIONS: 'user_recommendations',
     EXERCISE_SUBSTITUTIONS: 'exercise_substitutions',
     EXERCISE_SET_MODIFICATIONS: 'exercise_set_modifications',
-    WEIGHT_MEASUREMENTS: 'weight_measurements',
-    // SLEEP_MEASUREMENTS: 'sleep_measurements',
-    BODY_MEASUREMENTS: 'body_measurements',
     ALL_PROGRAMS: 'all_programs',
     ALL_WORKOUTS: 'all_workouts',
     ALL_EXERCISES: 'all_exercises',
     PROGRAM_DAYS: (programId: string) => `program_days_${programId}`,
-    SPOTLIGHT_WORKOUTS: 'spotlight_workouts',
     TRACKED_LIFTS_HISTORY: 'tracked_lifts_history',
+
+    USER_RECOMMENDATIONS: 'user_recommendations',
+    SPOTLIGHT_WORKOUTS: 'spotlight_workouts',
     WORKOUT_QUOTE: 'workout_quote',
     REST_DAY_QUOTE: 'rest_day_quote',
 } as const;
@@ -73,7 +68,6 @@ export interface DataCategory {
     key: string;
     thunk: any;
     cacheKey: string;
-    ttl: CacheTTL;
     required: boolean;
     priority: 'critical' | 'high' | 'medium' | 'low';
     args?: any;
@@ -89,7 +83,7 @@ interface LoadResult {
 
 export class InitializationService {
     private dispatch: AppDispatch;
-    private getState?: () => RootState; // Make optional
+    private getState?: () => RootState;
     private backgroundRefreshInProgress = false;
     private loadedData: Set<string> = new Set();
     private loadedResults: Map<string, any> = new Map(); // Store loaded results
@@ -107,52 +101,66 @@ export class InitializationService {
         this.getState = getState;
     }
 
-    // Flattened data categories with dependency-only sequencing
     private allDataCategories: DataCategory[] = [
-        // Critical data
+        // complex transition
+        // - everything depends on this
         {
             key: 'user',
             thunk: getUserAsync,
             cacheKey: CACHE_KEYS.USER_DATA,
-            ttl: CacheTTL.LONG,
-            required: true,
-            priority: 'critical',
-            args: { useCache: true },
-        },
-        {
-            key: 'userProgramProgress',
-            thunk: getUserProgramProgressAsync,
-            cacheKey: CACHE_KEYS.USER_PROGRAM_PROGRESS,
-            ttl: CacheTTL.LONG,
-            required: true,
-            priority: 'critical',
-            args: { useCache: true },
-        },
-        {
-            key: 'userNutritionGoalHistory',
-            thunk: getUserNutritionGoalHistoryAsync,
-            cacheKey: CACHE_KEYS.USER_NUTRITION_GOAL_HISTORY,
-            ttl: CacheTTL.LONG,
-            required: true,
-            priority: 'critical',
-            args: { useCache: true },
-        },
-        {
-            key: 'userNutritionLogs',
-            thunk: getAllNutritionLogsAsync,
-            cacheKey: CACHE_KEYS.USER_NUTRITION_LOGS,
-            ttl: CacheTTL.LONG,
             required: true,
             priority: 'critical',
             args: { useCache: true },
         },
 
-        // High priority data (essential for core functionality)
+        // - requires program progress
+        {
+            key: 'programDays',
+            thunk: getAllProgramDaysAsync,
+            cacheKey: 'program_days', // Will be dynamic
+            required: false, // Changed to false since it depends on having an active program
+            priority: 'high',
+            dependsOn: ['userProgramProgress'], // Only real dependency
+            args: { useCache: true },
+        },
+
+        // - need to handle the prefetching for the diary a bit better. its too slow
+        {
+            key: 'userNutritionLogs',
+            thunk: getAllNutritionLogsAsync,
+            cacheKey: CACHE_KEYS.USER_NUTRITION_LOGS,
+            required: true,
+            priority: 'critical',
+            args: { useCache: true },
+        },
+
+        // changes required
+
+        // - all lift history should be stored (upto 365 days)
+        {
+            key: 'trackedLiftsHistory',
+            thunk: initializeTrackedLiftsHistoryAsync,
+            cacheKey: CACHE_KEYS.TRACKED_LIFTS_HISTORY,
+            required: false,
+            priority: 'medium',
+            args: { useCache: true },
+        },
+
+        // - split into goal history and macro target history
+        {
+            key: 'userNutritionGoalHistory',
+            thunk: getUserNutritionGoalHistoryAsync,
+            cacheKey: CACHE_KEYS.USER_NUTRITION_GOAL_HISTORY,
+            required: true,
+            priority: 'critical',
+            args: { useCache: true },
+        },
+
+        // media links need to be made perma in s3
         {
             key: 'programs',
             thunk: getAllProgramsAsync,
             cacheKey: CACHE_KEYS.ALL_PROGRAMS,
-            ttl: CacheTTL.VERY_LONG,
             required: true,
             priority: 'high',
             args: { useCache: true },
@@ -161,7 +169,6 @@ export class InitializationService {
             key: 'workouts',
             thunk: getAllWorkoutsAsync,
             cacheKey: CACHE_KEYS.ALL_WORKOUTS,
-            ttl: CacheTTL.VERY_LONG,
             required: true,
             priority: 'high',
             args: { useCache: true },
@@ -170,75 +177,58 @@ export class InitializationService {
             key: 'exercises',
             thunk: fetchAllExercisesAsync,
             cacheKey: CACHE_KEYS.ALL_EXERCISES,
-            ttl: CacheTTL.VERY_LONG,
             required: true,
             priority: 'high',
             args: { useCache: true },
         },
-        {
-            key: 'programDays',
-            thunk: getAllProgramDaysAsync,
-            cacheKey: 'program_days', // Will be dynamic
-            ttl: CacheTTL.LONG,
-            required: false, // Changed to false since it depends on having an active program
-            priority: 'high',
-            dependsOn: ['userProgramProgress'], // Only real dependency
-            args: { useCache: true },
-        },
-        {
-            key: 'userRecommendations',
-            thunk: getUserRecommendationsAsync,
-            cacheKey: CACHE_KEYS.USER_RECOMMENDATIONS,
-            ttl: CacheTTL.SHORT,
-            required: false,
-            priority: 'high',
-            args: { useCache: true },
-        },
 
-        // Medium priority data
+        // data that can transitioned easily
+        {
+            key: 'userProgramProgress',
+            thunk: getUserProgramProgressAsync,
+            cacheKey: CACHE_KEYS.USER_PROGRAM_PROGRESS,
+            required: true,
+            priority: 'critical',
+            args: { useCache: true },
+        },
         {
             key: 'exerciseSetModifications',
             thunk: getUserExerciseSetModificationsAsync,
             cacheKey: CACHE_KEYS.EXERCISE_SET_MODIFICATIONS,
-            ttl: CacheTTL.LONG,
             required: false,
             priority: 'medium',
+            args: { useCache: true },
+        },
+        {
+            key: 'exerciseSubstitutions',
+            thunk: getUserExerciseSubstitutionsAsync,
+            cacheKey: CACHE_KEYS.EXERCISE_SUBSTITUTIONS,
+            required: false,
+            priority: 'low',
+            args: { useCache: true },
+        },
+
+        // data to be kept in cache
+        {
+            key: 'userRecommendations',
+            thunk: getUserRecommendationsAsync,
+            cacheKey: CACHE_KEYS.USER_RECOMMENDATIONS,
+            required: false,
+            priority: 'high',
             args: { useCache: true },
         },
         {
             key: 'spotlightWorkouts',
             thunk: getSpotlightWorkoutsAsync,
             cacheKey: CACHE_KEYS.SPOTLIGHT_WORKOUTS,
-            ttl: CacheTTL.SHORT,
             required: false,
             priority: 'medium',
-            args: { useCache: true },
-        },
-        {
-            key: 'trackedLiftsHistory',
-            thunk: initializeTrackedLiftsHistoryAsync,
-            cacheKey: CACHE_KEYS.TRACKED_LIFTS_HISTORY,
-            ttl: CacheTTL.SHORT,
-            required: false,
-            priority: 'medium',
-            args: { useCache: true },
-        },
-
-        // Low priority data
-        {
-            key: 'exerciseSubstitutions',
-            thunk: getUserExerciseSubstitutionsAsync,
-            cacheKey: CACHE_KEYS.EXERCISE_SUBSTITUTIONS,
-            ttl: CacheTTL.VERY_LONG,
-            required: false,
-            priority: 'low',
             args: { useCache: true },
         },
         {
             key: 'workoutQuote',
             thunk: getWorkoutQuoteAsync,
             cacheKey: CACHE_KEYS.WORKOUT_QUOTE,
-            ttl: CacheTTL.SHORT,
             required: false,
             priority: 'low',
             args: { useCache: false },
@@ -247,7 +237,6 @@ export class InitializationService {
             key: 'restDayQuote',
             thunk: getRestDayQuoteAsync,
             cacheKey: CACHE_KEYS.REST_DAY_QUOTE,
-            ttl: CacheTTL.SHORT,
             required: false,
             priority: 'low',
             args: { useCache: false },
@@ -259,15 +248,12 @@ export class InitializationService {
             try {
                 const cacheKey = await this.getDynamicCacheKey(item);
                 const cached = await cacheService.get(cacheKey);
-                const needsBackgroundRefresh = await cacheService.needsBackgroundRefresh(cacheKey);
 
-                let status: 'fresh' | 'stale' | 'missing';
+                let status: 'stale' | 'missing';
                 if (!cached) {
                     status = 'missing';
-                } else if (needsBackgroundRefresh) {
-                    status = 'stale';
                 } else {
-                    status = 'fresh';
+                    status = 'stale';
                 }
 
                 this.dispatch(setCacheStatus({ key: item.key, status }));
@@ -786,8 +772,7 @@ export class InitializationService {
             try {
                 // Check conditional items
                 if (await this.canLoadConditionalItem(item)) {
-                    const cacheKey = await this.getDynamicCacheKey(item);
-                    const needsRefresh = forceRefresh || (await cacheService.needsBackgroundRefresh(cacheKey));
+                    const needsRefresh = forceRefresh;
 
                     if (!needsRefresh) {
                         console.log(`⏭️  Skipping refresh for ${item.key} - still fresh`);

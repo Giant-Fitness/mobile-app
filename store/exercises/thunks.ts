@@ -1,7 +1,7 @@
 // store/exercises/thunks.ts
 
 import { REQUEST_STATE } from '@/constants/requestStates';
-import { cacheService, CacheTTL } from '@/lib/cache/cacheService';
+import { cacheService } from '@/lib/cache/cacheService';
 import ExercisesService from '@/store/exercises/service';
 import { RootState } from '@/store/store';
 import { Exercise } from '@/types';
@@ -31,9 +31,8 @@ export const fetchAllExercisesAsync = createAsyncThunk<
         // Try cache first if enabled and not forcing refresh
         if (useCache && !forceRefresh) {
             const cached = await cacheService.get<Record<string, Exercise>>('all_exercises');
-            const isExpired = await cacheService.isExpired('all_exercises');
 
-            if (cached && !isExpired) {
+            if (cached) {
                 console.log('Loaded exercises from cache');
                 return cached;
             }
@@ -45,7 +44,7 @@ export const fetchAllExercisesAsync = createAsyncThunk<
 
         // Cache the result if useCache is enabled
         if (useCache) {
-            await cacheService.set('all_exercises', exercises, CacheTTL.VERY_LONG);
+            await cacheService.set('all_exercises', exercises);
         }
 
         return exercises;
@@ -79,9 +78,8 @@ export const fetchExerciseByIdAsync = createAsyncThunk<
         if (useCache) {
             const cacheKey = `exercise_${exerciseId}`;
             const cached = await cacheService.get<Exercise>(cacheKey);
-            const isExpired = await cacheService.isExpired(cacheKey);
 
-            if (cached && !isExpired) {
+            if (cached) {
                 console.log(`Loaded exercise ${exerciseId} from cache`);
                 return cached;
             }
@@ -94,7 +92,7 @@ export const fetchExerciseByIdAsync = createAsyncThunk<
         // Cache the result if useCache is enabled
         if (useCache) {
             const cacheKey = `exercise_${exerciseId}`;
-            await cacheService.set(cacheKey, exercise, CacheTTL.VERY_LONG);
+            await cacheService.set(cacheKey, exercise);
         }
 
         return exercise;
