@@ -6,6 +6,7 @@ import { appSettingsOfflineService } from '@/lib/storage/app-settings/AppSetting
 import { bodyMeasurementOfflineService } from '@/lib/storage/body-measurements/BodyMeasurementOfflineService';
 import { fitnessProfileOfflineService } from '@/lib/storage/fitness-profile/FitnessProfileOfflineService';
 import { nutritionProfileOfflineService } from '@/lib/storage/nutrition-profile/NutritionProfileOfflineService';
+import { programProgressOfflineService } from '@/lib/storage/program-progress/ProgramProgressOfflineService';
 import { weightMeasurementOfflineService } from '@/lib/storage/weight-measurements/WeightMeasurementOfflineService';
 import { networkStateManager } from '@/lib/sync/NetworkStateManager';
 import { RootState } from '@/store/store';
@@ -277,56 +278,124 @@ export const getUserRecommendationsAsync = createAsyncThunk<
     }
 });
 
+// Helper functions to match backend logic exactly while handling string/number conversion
+const completeUpToDay = (existingCompletedDays: string[], dayId: string): string[] => {
+    // Convert strings to numbers for calculation
+    const dayNumber = parseInt(dayId, 10);
+    const existingNumbers = existingCompletedDays.map((d) => parseInt(d, 10));
+
+    // Complete all days up to and including the specified day
+    const allDaysUpTo = Array.from({ length: dayNumber }, (_, i) => i + 1);
+    const completedSet = new Set([...existingNumbers, ...allDaysUpTo]);
+
+    // Convert back to strings and return sorted
+    return Array.from(completedSet)
+        .sort((a, b) => a - b)
+        .map((d) => d.toString());
+};
+
+const calculateNewCurrentDay = (updatedCompletedDays: string[], dayId: string, totalDays: number): number => {
+    const dayNumber = parseInt(dayId, 10);
+    const completedNumbers = updatedCompletedDays.map((d) => parseInt(d, 10));
+
+    // If completing the last day, current day stays at total days
+    if (dayNumber === totalDays) {
+        return totalDays;
+    }
+
+    // Otherwise, find the next uncompleted day
+    for (let i = dayNumber + 1; i <= totalDays; i++) {
+        if (!completedNumbers.includes(i)) {
+            return i;
+        }
+    }
+
+    // If all subsequent days are completed, return the day after the last day
+    return dayNumber + 1;
+};
+
+/**
+ * Get user program progress (offline-first)
+ */
 export const getUserProgramProgressAsync = createAsyncThunk<
     UserProgramProgress,
-    { forceRefresh?: boolean; useCache?: boolean } | void,
+    { forceRefresh?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
 >('user/getUserProgramProgress', async (args = {}, { getState, rejectWithValue }) => {
     try {
-        const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
-        const state = getState() as RootState;
+        const { forceRefresh = false } = typeof args === 'object' ? args : {};
+        const state = getState();
         const userId = state.user.user?.UserId;
 
         if (!userId) {
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Return cached progress if available and not forcing refresh
-        if (state.user.userProgramProgress && !forceRefresh) {
-            return state.user.userProgramProgress;
-        }
+        // Always load from SQLite first (offline-first)
+        console.log('Loading program progress from SQLite...');
+        const localProgress = await programProgressOfflineService.getProgressForUser(userId);
 
-        // Try cache first if enabled and not forcing refresh
-        if (useCache && !forceRefresh) {
-            const cached = await cacheService.get<UserProgramProgress>('user_program_progress');
+        if (localProgress) {
+            console.log('Found program progress in SQLite');
 
-            if (cached) {
-                console.log('Loaded user program progress from cache');
-                return cached;
+            // Background server sync (non-blocking) unless force refresh
+            if (networkStateManager.isOnline() && !forceRefresh) {
+                setTimeout(async () => {
+                    try {
+                        console.log('Triggering background program progress sync...');
+                        const serverProgress = await UserService.getUserProgramProgress(userId);
+                        await programProgressOfflineService.mergeServerData(userId, serverProgress);
+                    } catch (error) {
+                        console.warn('Background program progress sync failed:', error);
+                    }
+                }, 100);
             }
+
+            // Force refresh: synchronous server sync
+            if (forceRefresh && networkStateManager.isOnline()) {
+                try {
+                    console.log('Force refreshing program progress from server...');
+                    const serverProgress = await UserService.getUserProgramProgress(userId);
+                    await programProgressOfflineService.mergeServerData(userId, serverProgress);
+
+                    // Reload from SQLite to get merged data
+                    const refreshedProgress = await programProgressOfflineService.getProgressForUser(userId);
+                    return refreshedProgress ? refreshedProgress.data : localProgress.data;
+                } catch (error) {
+                    console.warn('Force refresh failed, using local data:', error);
+                }
+            }
+
+            return localProgress.data;
         }
 
-        // Load from API
-        console.log('Loading user program progress from API');
-        const userProgramProgress = await UserService.getUserProgramProgress(userId);
+        // No local progress found - try server
+        if (networkStateManager.isOnline()) {
+            console.log('No local program progress found, fetching from server...');
+            const serverProgress = await UserService.getUserProgramProgress(userId);
 
-        // Cache the result if useCache is enabled
-        if (useCache) {
-            await cacheService.set('user_program_progress', userProgramProgress);
+            // Store in SQLite for future offline use
+            await programProgressOfflineService.mergeServerData(userId, serverProgress);
+
+            return serverProgress;
         }
 
-        return userProgramProgress;
+        // Offline and no local data
+        return rejectWithValue({ errorMessage: 'No program progress available offline' });
     } catch (error) {
+        console.error('Failed to get program progress:', error);
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to fetch program progress',
         });
     }
 });
 
-// CREATE - Start program (invalidate cache)
+/**
+ * Start program (offline-first with optimistic update)
+ */
 export const startProgramAsync = createAsyncThunk<
     UserProgramProgress,
     { programId: string },
@@ -337,23 +406,64 @@ export const startProgramAsync = createAsyncThunk<
 >('user/startProgram', async ({ programId }, { getState, rejectWithValue }) => {
     const state = getState() as RootState;
     const userId = state.user.user?.UserId;
+
     if (!userId) {
         return rejectWithValue({ errorMessage: 'User ID not available' });
     }
+
     try {
-        const result = await UserService.startProgram(userId, programId);
+        // Create optimistic local record immediately
+        console.log('Creating program progress locally...');
+        const now = new Date().toISOString();
+        const optimisticProgress = await programProgressOfflineService.upsertProgress({
+            userId,
+            data: {
+                ProgramId: programId,
+                CurrentDay: 1,
+                CompletedDays: [],
+                StartedAt: now,
+                LastActivityAt: now,
+                LastAction: 'start',
+                LastActionWasAutoComplete: false,
+            },
+        });
 
-        // Invalidate cache after starting program
-        await cacheService.remove('user_program_progress');
+        // Try to sync to server immediately if online
+        if (networkStateManager.isOnline()) {
+            try {
+                console.log('Syncing program start to server...');
+                const serverResult = await UserService.startProgram(userId, programId);
 
-        return result;
+                // Update local record as synced
+                await programProgressOfflineService.updateSyncStatus(optimisticProgress.localId, 'synced', {});
+
+                console.log('Program start successfully synced to server');
+                return serverResult;
+            } catch (syncError) {
+                console.warn('Failed to sync program start to server, will retry later:', syncError);
+
+                // Mark as failed but don't fail the whole operation since we have local data
+                await programProgressOfflineService.updateSyncStatus(optimisticProgress.localId, 'failed', {
+                    errorMessage: syncError instanceof Error ? syncError.message : 'Sync failed',
+                    incrementRetry: true,
+                });
+            }
+        }
+
+        // Return optimistic result based on local update
+        console.log('Program started offline (will sync when online)');
+        return optimisticProgress.data;
     } catch (error) {
-        console.log(error);
-        return rejectWithValue({ errorMessage: 'Failed to start program' });
+        console.error('Failed to start program:', error);
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to start program',
+        });
     }
 });
 
-// UPDATE - Complete day (invalidate cache)
+/**
+ * Complete day (offline-first with optimistic update matching backend logic)
+ */
 export const completeDayAsync = createAsyncThunk<
     UserProgramProgress | null,
     { dayId: string; isAutoComplete?: boolean },
@@ -364,23 +474,80 @@ export const completeDayAsync = createAsyncThunk<
 >('user/completeDay', async ({ dayId, isAutoComplete = false }, { getState, rejectWithValue }) => {
     const state = getState() as RootState;
     const userId = state.user.user?.UserId;
+
     if (!userId) {
         return rejectWithValue({ errorMessage: 'User ID not available' });
     }
+
     try {
-        const result = await UserService.completeDay(userId, dayId, isAutoComplete);
+        // Get current progress from SQLite
+        const currentProgress = await programProgressOfflineService.getProgressForUser(userId);
 
-        // Invalidate cache after completing day
-        await cacheService.remove('user_program_progress');
+        if (!currentProgress) {
+            return rejectWithValue({ errorMessage: 'No active program progress found' });
+        }
 
-        return result;
+        // Get the program to know total days (you might need to get this from Redux state or cache)
+        // For now, assuming we have it or using a high number as fallback
+        const programState = state.programs.programs[currentProgress.data.ProgramId];
+        const totalDays = programState?.Days || 999; // Fallback to high number
+
+        // Apply backend logic exactly: complete all days up to and including dayId
+        console.log('Completing day locally with backend logic...');
+        const now = new Date().toISOString();
+        const updatedCompletedDays = completeUpToDay(currentProgress.data.CompletedDays, dayId);
+        const newCurrentDay = calculateNewCurrentDay(updatedCompletedDays, dayId, totalDays);
+
+        await programProgressOfflineService.update(currentProgress.localId, {
+            CurrentDay: newCurrentDay,
+            CompletedDays: updatedCompletedDays,
+            LastActivityAt: now,
+            LastAction: 'complete',
+            LastActionWasAutoComplete: isAutoComplete,
+        });
+
+        // Get updated progress from SQLite
+        const updatedProgress = await programProgressOfflineService.getById(currentProgress.localId);
+        if (!updatedProgress) {
+            throw new Error('Failed to retrieve updated progress');
+        }
+
+        // Try to sync to server immediately if online
+        if (networkStateManager.isOnline()) {
+            try {
+                console.log('Syncing day completion to server...');
+                const serverResult = await UserService.completeDay(userId, dayId, isAutoComplete);
+
+                // Update local record as synced
+                await programProgressOfflineService.updateSyncStatus(currentProgress.localId, 'synced', {});
+
+                console.log('Day completion successfully synced to server');
+                return serverResult;
+            } catch (syncError) {
+                console.warn('Failed to sync day completion to server, will retry later:', syncError);
+
+                // Mark as failed but don't fail the whole operation since we have local data
+                await programProgressOfflineService.updateSyncStatus(currentProgress.localId, 'failed', {
+                    errorMessage: syncError instanceof Error ? syncError.message : 'Sync failed',
+                    incrementRetry: true,
+                });
+            }
+        }
+
+        // Return optimistic result based on local update
+        console.log('Day completed offline (will sync when online)');
+        return updatedProgress.data;
     } catch (error) {
-        console.log(error);
-        return rejectWithValue({ errorMessage: 'Failed to complete day' });
+        console.error('Failed to complete day:', error);
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to complete day',
+        });
     }
 });
 
-// UPDATE - Uncomplete day (invalidate cache)
+/**
+ * Uncomplete day (offline-first with optimistic update matching backend logic)
+ */
 export const uncompleteDayAsync = createAsyncThunk<
     UserProgramProgress,
     { dayId: string },
@@ -391,59 +558,212 @@ export const uncompleteDayAsync = createAsyncThunk<
 >('user/uncompleteDay', async ({ dayId }, { getState, rejectWithValue }) => {
     const state = getState() as RootState;
     const userId = state.user.user?.UserId;
+
     if (!userId) {
         return rejectWithValue({ errorMessage: 'User ID not available' });
     }
+
     try {
-        const result = await UserService.uncompleteDay(userId, dayId);
+        // Get current progress from SQLite
+        const currentProgress = await programProgressOfflineService.getProgressForUser(userId);
 
-        // Invalidate cache after uncompleting day
-        await cacheService.remove('user_program_progress');
+        if (!currentProgress) {
+            return rejectWithValue({ errorMessage: 'No active program progress found' });
+        }
 
-        return result;
+        // Convert dayId to number for backend logic
+        const dayNumber = parseInt(dayId, 10);
+
+        // Apply backend logic exactly: filter out the specified day and any days after it
+        console.log('Uncompleting day locally with backend logic...');
+        const now = new Date().toISOString();
+        const updatedCompletedDays = currentProgress.data.CompletedDays.map((d) => parseInt(d, 10)) // Convert to numbers for comparison
+            .filter((day) => day < dayNumber)
+            .sort((a, b) => a - b)
+            .map((d) => d.toString()); // Convert back to strings
+
+        await programProgressOfflineService.update(currentProgress.localId, {
+            CurrentDay: dayNumber, // Backend sets newCurrentDay = dayId
+            CompletedDays: updatedCompletedDays,
+            LastActivityAt: now,
+            LastAction: 'uncomplete',
+            LastActionWasAutoComplete: false,
+        });
+
+        // Get updated progress from SQLite
+        const updatedProgress = await programProgressOfflineService.getById(currentProgress.localId);
+        if (!updatedProgress) {
+            throw new Error('Failed to retrieve updated progress');
+        }
+
+        // Try to sync to server immediately if online
+        if (networkStateManager.isOnline()) {
+            try {
+                console.log('Syncing day uncompletion to server...');
+                const serverResult = await UserService.uncompleteDay(userId, dayId);
+
+                // Update local record as synced
+                await programProgressOfflineService.updateSyncStatus(currentProgress.localId, 'synced', {});
+
+                console.log('Day uncompletion successfully synced to server');
+                return serverResult;
+            } catch (syncError) {
+                console.warn('Failed to sync day uncompletion to server, will retry later:', syncError);
+
+                // Mark as failed but don't fail the whole operation since we have local data
+                await programProgressOfflineService.updateSyncStatus(currentProgress.localId, 'failed', {
+                    errorMessage: syncError instanceof Error ? syncError.message : 'Sync failed',
+                    incrementRetry: true,
+                });
+            }
+        }
+
+        // Return optimistic result based on local update
+        console.log('Day uncompleted offline (will sync when online)');
+        return updatedProgress.data;
     } catch (error) {
-        console.log(error);
-        return rejectWithValue({ errorMessage: 'Failed to uncomplete day' });
+        console.error('Failed to uncomplete day:', error);
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to uncomplete day',
+        });
     }
 });
 
-// DELETE - End program (invalidate cache)
+/**
+ * End program (offline-first with optimistic update)
+ */
 export const endProgramAsync = createAsyncThunk<UserProgramProgress, void>('user/endProgram', async (_, { getState, rejectWithValue }) => {
     const state = getState() as RootState;
     const userId = state.user.user?.UserId;
+
     if (!userId) {
         return rejectWithValue({ errorMessage: 'User ID not available' });
     }
+
     try {
-        const result = await UserService.endProgram(userId);
+        // Get current progress from SQLite
+        const currentProgress = await programProgressOfflineService.getProgressForUser(userId);
 
-        // Invalidate cache after ending program
-        await cacheService.remove('user_program_progress');
+        if (!currentProgress) {
+            return rejectWithValue({ errorMessage: 'No active program progress found' });
+        }
 
-        return result as UserProgramProgress;
+        // Update optimistically in SQLite to mark as ended
+        console.log('Ending program locally...');
+        const now = new Date().toISOString();
+
+        await programProgressOfflineService.update(currentProgress.localId, {
+            LastActivityAt: now,
+            LastAction: 'end',
+            LastActionWasAutoComplete: false,
+        });
+
+        // Get updated progress from SQLite
+        const updatedProgress = await programProgressOfflineService.getById(currentProgress.localId);
+        if (!updatedProgress) {
+            throw new Error('Failed to retrieve updated progress');
+        }
+
+        // Try to sync to server immediately if online
+        if (networkStateManager.isOnline()) {
+            try {
+                console.log('Syncing program end to server...');
+                const serverResult = await UserService.endProgram(userId);
+
+                // Update local record as synced
+                await programProgressOfflineService.updateSyncStatus(currentProgress.localId, 'synced', {});
+
+                console.log('Program end successfully synced to server');
+                return serverResult;
+            } catch (syncError) {
+                console.warn('Failed to sync program end to server, will retry later:', syncError);
+
+                // Mark as failed but don't fail the whole operation since we have local data
+                await programProgressOfflineService.updateSyncStatus(currentProgress.localId, 'failed', {
+                    errorMessage: syncError instanceof Error ? syncError.message : 'Sync failed',
+                    incrementRetry: true,
+                });
+            }
+        }
+
+        // Return optimistic result based on local update
+        console.log('Program ended offline (will sync when online)');
+        return updatedProgress.data;
     } catch (error) {
-        console.log(error);
-        return rejectWithValue({ errorMessage: 'Failed to end program' });
+        console.error('Failed to end program:', error);
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to end program',
+        });
     }
 });
 
-// DELETE - Reset program (invalidate cache)
+/**
+ * Reset program (offline-first with optimistic update matching backend logic)
+ */
 export const resetProgramAsync = createAsyncThunk<UserProgramProgress, void>('user/resetProgram', async (_, { getState, rejectWithValue }) => {
     const state = getState() as RootState;
     const userId = state.user.user?.UserId;
+
     if (!userId) {
         return rejectWithValue({ errorMessage: 'User ID not available' });
     }
+
     try {
-        const result = await UserService.resetProgram(userId);
+        // Get current progress from SQLite
+        const currentProgress = await programProgressOfflineService.getProgressForUser(userId);
 
-        // Invalidate cache after resetting program
-        await cacheService.remove('user_program_progress');
+        if (!currentProgress) {
+            return rejectWithValue({ errorMessage: 'No active program progress found' });
+        }
 
-        return result;
+        // Apply backend logic exactly: reset to day 1 with empty completed days
+        console.log('Resetting program locally with backend logic...');
+        const now = new Date().toISOString();
+
+        await programProgressOfflineService.update(currentProgress.localId, {
+            CurrentDay: 1,
+            CompletedDays: [],
+            LastActivityAt: now,
+            LastAction: 'uncomplete', // Backend uses 'uncomplete' for reset
+            LastActionWasAutoComplete: false,
+        });
+
+        // Get updated progress from SQLite
+        const updatedProgress = await programProgressOfflineService.getById(currentProgress.localId);
+        if (!updatedProgress) {
+            throw new Error('Failed to retrieve updated progress');
+        }
+
+        // Try to sync to server immediately if online
+        if (networkStateManager.isOnline()) {
+            try {
+                console.log('Syncing program reset to server...');
+                const serverResult = await UserService.resetProgram(userId);
+
+                // Update local record as synced
+                await programProgressOfflineService.updateSyncStatus(currentProgress.localId, 'synced', {});
+
+                console.log('Program reset successfully synced to server');
+                return serverResult;
+            } catch (syncError) {
+                console.warn('Failed to sync program reset to server, will retry later:', syncError);
+
+                // Mark as failed but don't fail the whole operation since we have local data
+                await programProgressOfflineService.updateSyncStatus(currentProgress.localId, 'failed', {
+                    errorMessage: syncError instanceof Error ? syncError.message : 'Sync failed',
+                    incrementRetry: true,
+                });
+            }
+        }
+
+        // Return optimistic result based on local update
+        console.log('Program reset offline (will sync when online)');
+        return updatedProgress.data;
     } catch (error) {
-        console.log(error);
-        return rejectWithValue({ errorMessage: 'Failed to reset program' });
+        console.error('Failed to reset program:', error);
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to reset program',
+        });
     }
 });
 

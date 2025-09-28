@@ -9,6 +9,8 @@ import { fitnessProfileOfflineService } from '@/lib/storage/fitness-profile/Fitn
 import { fitnessProfileSyncHandler } from '@/lib/storage/fitness-profile/FitnessProfileSyncHandler';
 import { nutritionProfileOfflineService } from '@/lib/storage/nutrition-profile/NutritionProfileOfflineService';
 import { nutritionProfileSyncHandler } from '@/lib/storage/nutrition-profile/NutritionProfileSyncHandler';
+import { programProgressOfflineService } from '@/lib/storage/program-progress/ProgramProgressOfflineService';
+import { programProgressSyncHandler } from '@/lib/storage/program-progress/ProgramProgressSyncHandler';
 import { weightMeasurementOfflineService } from '@/lib/storage/weight-measurements/WeightMeasurementOfflineService';
 import { weightMeasurementSyncHandler } from '@/lib/storage/weight-measurements/WeightMeasurementSyncHandler';
 import { networkStateManager } from '@/lib/sync/NetworkStateManager';
@@ -37,7 +39,8 @@ export async function initializeOfflineServices(options: OfflineInitializationOp
         await syncQueueManager.initialize();
 
         // Step 2: Initialize data services (creates tables if needed)
-        const [weightInit, bodyInit, fitnessInit, nutritionInit, appSettingsInit] = await Promise.allSettled([
+        const [weightInit, bodyInit, fitnessInit, nutritionInit, appSettingsInit, programProgressInit] = await Promise.allSettled([
+            programProgressOfflineService.initialize(),
             weightMeasurementOfflineService.initialize(),
             bodyMeasurementOfflineService.initialize(),
             fitnessProfileOfflineService.initialize(),
@@ -61,8 +64,12 @@ export async function initializeOfflineServices(options: OfflineInitializationOp
         if (appSettingsInit.status === 'rejected') {
             console.warn('App settings service initialization failed:', appSettingsInit.reason);
         }
+        if (programProgressInit.status === 'rejected') {
+            console.warn('Program progress service initialization failed:', programProgressInit.reason);
+        }
 
         // Step 3: Register sync handlers with the queue manager
+        syncQueueManager.registerSyncHandler('program_progress', programProgressSyncHandler);
         syncQueueManager.registerSyncHandler('weight_measurements', weightMeasurementSyncHandler);
         syncQueueManager.registerSyncHandler('body_measurements', bodyMeasurementSyncHandler);
         syncQueueManager.registerSyncHandler('fitness_profiles', fitnessProfileSyncHandler);

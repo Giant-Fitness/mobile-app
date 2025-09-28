@@ -6,6 +6,7 @@ import { bodyMeasurementOfflineService } from '@/lib/storage/body-measurements/B
 import { fitnessProfileOfflineService } from '@/lib/storage/fitness-profile/FitnessProfileOfflineService';
 import { initializeOfflineServices } from '@/lib/storage/initializeOfflineServices';
 import { nutritionProfileOfflineService } from '@/lib/storage/nutrition-profile/NutritionProfileOfflineService';
+import { programProgressOfflineService } from '@/lib/storage/program-progress/ProgramProgressOfflineService';
 import { weightMeasurementOfflineService } from '@/lib/storage/weight-measurements/WeightMeasurementOfflineService';
 import { networkStateManager } from '@/lib/sync/NetworkStateManager';
 import { initializeTrackedLiftsHistoryAsync } from '@/store/exerciseProgress/thunks';
@@ -49,7 +50,6 @@ const CACHE_KEYS = {
     USER_DATA: 'user_data',
     USER_NUTRITION_GOAL_HISTORY: 'user_nutrition_goal_history',
     USER_NUTRITION_LOGS: 'user_nutrition_logs',
-    USER_PROGRAM_PROGRESS: 'user_program_progress',
     EXERCISE_SUBSTITUTIONS: 'exercise_substitutions',
     EXERCISE_SET_MODIFICATIONS: 'exercise_set_modifications',
     ALL_PROGRAMS: 'all_programs',
@@ -104,6 +104,7 @@ export class InitializationService {
     private allDataCategories: DataCategory[] = [
         // complex transition
         // - everything depends on this
+        // - also need to figure out how to effectively do the on complete
         {
             key: 'user',
             thunk: getUserAsync,
@@ -183,14 +184,6 @@ export class InitializationService {
         },
 
         // data that can transitioned easily
-        {
-            key: 'userProgramProgress',
-            thunk: getUserProgramProgressAsync,
-            cacheKey: CACHE_KEYS.USER_PROGRAM_PROGRESS,
-            required: true,
-            priority: 'critical',
-            args: { useCache: true },
-        },
         {
             key: 'exerciseSetModifications',
             thunk: getUserExerciseSetModificationsAsync,
@@ -383,8 +376,10 @@ export class InitializationService {
                 const bodyStats = await bodyMeasurementOfflineService.getRecords(userId);
                 const fitnessProfile = await fitnessProfileOfflineService.getProfileForUser(userId);
                 const nutritionProfile = await nutritionProfileOfflineService.getProfileForUser(userId);
+                const programProgress = await programProgressOfflineService.getProgressForUser(userId);
 
-                const hasLocalData = weightStats.length > 0 || bodyStats.length > 0 || !!fitnessProfile || !!nutritionProfile || !!appSettings;
+                const hasLocalData =
+                    weightStats.length > 0 || bodyStats.length > 0 || !!fitnessProfile || !!nutritionProfile || !!appSettings || !!programProgress;
 
                 if (!hasLocalData) {
                     console.log('Empty local storage detected - fetching server data...');
@@ -431,12 +426,22 @@ export class InitializationService {
                             console.log('No app settings found on server (this might be normal for new users)', appSettingsError);
                         }
 
+                        // Fetch program prgoress
+                        try {
+                            const serverProgramProgress = await UserService.getUserProgramProgress(userId);
+                            await programProgressOfflineService.mergeServerData(userId, serverProgramProgress);
+                            console.log(`Initial sync: loaded program progress from server`);
+                        } catch (programProgressError) {
+                            console.log('No program progress found on server (this might be normal for new users)', programProgressError);
+                        }
+
                         if (
                             serverWeightMeasurements.length === 0 &&
                             serverBodyMeasurements.length === 0 &&
                             !fitnessProfile &&
                             !nutritionProfile &&
-                            !appSettings
+                            !appSettings &&
+                            !programProgress
                         ) {
                             console.log('No server data found - fresh install');
                         }
@@ -475,12 +480,13 @@ export class InitializationService {
                 this.dispatch(getUserFitnessProfileAsync({})),
                 this.dispatch(getUserNutritionProfileAsync({})),
                 this.dispatch(getUserAppSettingsAsync({})),
+                this.dispatch(getUserProgramProgressAsync({})),
             ];
 
             const results = await Promise.allSettled(promises);
 
             results.forEach((result, index) => {
-                const dataType = ['weight', 'body', 'fitness profile', 'nutrition profile', 'app settings'][index];
+                const dataType = ['weight', 'body', 'fitness profile', 'nutrition profile', 'app settings', 'program progress'][index];
                 if (result.status === 'fulfilled' && result.value.type.endsWith('/fulfilled')) {
                     const data = result.value.payload;
                     const count = Array.isArray(data) ? data.length : data ? 1 : 0;
@@ -513,6 +519,7 @@ export class InitializationService {
                 this.dispatch(getUserFitnessProfileAsync({ forceRefresh: true })),
                 this.dispatch(getUserNutritionProfileAsync({ forceRefresh: true })),
                 this.dispatch(getUserAppSettingsAsync({ forceRefresh: true })),
+                this.dispatch(getUserProgramProgressAsync({ forceRefresh: true })),
             ];
 
             const results = await Promise.allSettled(promises);
@@ -568,14 +575,6 @@ export class InitializationService {
                     return programProgress.ProgramId;
                 }
             }
-
-            // Fallback to cache
-            const cachedProgress = (await cacheService.get(CACHE_KEYS.USER_PROGRAM_PROGRESS)) as any;
-            if (cachedProgress?.ProgramId) {
-                this.userProgramId = cachedProgress.ProgramId;
-                return cachedProgress.ProgramId;
-            }
-
             return null;
         } catch (error) {
             console.warn('Failed to get current program ID:', error);

@@ -14,7 +14,7 @@ export interface UserProgramProgress {
     ProgramId: string;
     CurrentDay: number;
     CompletedDays: string[];
-    StartAt: string;
+    StartedAt: string;
     LastActivityAt: string;
     LastAction?: string;
     LastActionWasAutoComplete?: boolean;
