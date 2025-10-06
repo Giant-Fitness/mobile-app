@@ -4,7 +4,6 @@ import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
 import { TextButton } from '@/components/buttons/TextButton';
-import { ExerciseAlternativesBottomSheet } from '@/components/exercise/ExerciseAlternativesBottomSheet';
 import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
@@ -36,6 +35,7 @@ type ExerciseCardProps = {
     isEnrolled: boolean;
     showLoggingButton?: boolean;
     onLogPress?: (exercise: Exercise) => void;
+    onSwapPress?: (exercise: Exercise) => void;
     exerciseNumber?: number;
     programId?: string;
 };
@@ -47,12 +47,12 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
     isEnrolled = false,
     showLoggingButton = false,
     onLogPress = defaultLogPress,
+    onSwapPress,
     exerciseNumber,
     programId,
 }) => {
     const colorScheme = useColorScheme();
     const themeColors = Colors[colorScheme as 'light' | 'dark'];
-    const [showAlternativesSheet, setShowAlternativesSheet] = useState(false);
     const [forceUpdate, setForceUpdate] = useState(0);
 
     // Animation value
@@ -198,14 +198,9 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
     };
 
     const handleSwapPress = () => {
-        setShowAlternativesSheet(true);
-    };
-
-    // Handle the bottom sheet closing - trigger a re-render
-    const handleSheetClose = () => {
-        setShowAlternativesSheet(false);
-        // Force a re-render after closing the sheet
-        setForceUpdate((prev) => prev + 1);
+        if (onSwapPress) {
+            onSwapPress(exercise);
+        }
     };
 
     // Handle logging with substituted exercise and set modifications
@@ -489,9 +484,6 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
                     {isEnrolled && showLoggingButton && renderLogButton()}
                 </View>
             </TouchableOpacity>
-
-            {/* Exercise Alternatives Bottom Sheet */}
-            <ExerciseAlternativesBottomSheet visible={showAlternativesSheet} onClose={handleSheetClose} exercise={exercise} programId={programId} />
         </Animated.View>
     );
 };

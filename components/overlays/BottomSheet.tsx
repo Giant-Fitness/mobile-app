@@ -30,6 +30,7 @@ interface BottomSheetProps {
     disableBackdropPress?: boolean;
     keyboardAvoidingBehavior?: 'none' | 'padding' | 'position';
     animationType?: 'none' | 'slide' | 'fade';
+    useScrollView?: boolean;
 }
 
 const { height: screenHeight } = Dimensions.get('window');
@@ -42,6 +43,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
     disableBackdropPress = false,
     keyboardAvoidingBehavior = 'position',
     animationType = 'slide',
+    useScrollView = false,
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -159,6 +161,35 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
         return styles.modalContent;
     };
 
+    const renderContent = () => {
+        if (useScrollView) {
+            return (
+                <ScrollView
+                    contentContainerStyle={styles.container}
+                    keyboardShouldPersistTaps='handled'
+                    scrollEnabled={false}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <TouchableOpacity style={styles.spacer} onPress={handleBackdropPress} activeOpacity={1} />
+
+                    <TouchableWithoutFeedback onPress={handleModalPress}>
+                        <ThemedView style={getDrawerStyle()}>{children}</ThemedView>
+                    </TouchableWithoutFeedback>
+                </ScrollView>
+            );
+        }
+
+        return (
+            <View style={styles.container}>
+                <TouchableOpacity style={styles.spacer} onPress={handleBackdropPress} activeOpacity={1} />
+
+                <TouchableWithoutFeedback onPress={handleModalPress}>
+                    <ThemedView style={getDrawerStyle()}>{children}</ThemedView>
+                </TouchableWithoutFeedback>
+            </View>
+        );
+    };
+
     return (
         <View style={styles.wrapper}>
             {/* Blur Layer - Always present but animated opacity */}
@@ -172,20 +203,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
 
             {/* Modal with Drawer - Uses built-in slide animation */}
             <Modal animationType={animationType} transparent={true} visible={visible} onRequestClose={onClose}>
-                <Animated.View style={getModalContentStyle()}>
-                    <ScrollView
-                        contentContainerStyle={styles.container}
-                        keyboardShouldPersistTaps='handled'
-                        scrollEnabled={false}
-                        showsVerticalScrollIndicator={false}
-                    >
-                        <TouchableOpacity style={styles.spacer} onPress={handleBackdropPress} activeOpacity={1} />
-
-                        <TouchableWithoutFeedback onPress={handleModalPress}>
-                            <ThemedView style={getDrawerStyle()}>{children}</ThemedView>
-                        </TouchableWithoutFeedback>
-                    </ScrollView>
-                </Animated.View>
+                <Animated.View style={getModalContentStyle()}>{renderContent()}</Animated.View>
             </Modal>
         </View>
     );

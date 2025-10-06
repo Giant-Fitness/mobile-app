@@ -6,6 +6,7 @@ import { ThemedView } from '@/components/base/ThemedView';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { SlideUpActionButton } from '@/components/buttons/SlideUpActionButton';
 import { TextButton } from '@/components/buttons/TextButton';
+import { ExerciseAlternativesBottomSheet } from '@/components/exercise/ExerciseAlternativesBottomSheet';
 import { ExerciseCard } from '@/components/exercise/ExerciseCard';
 import { ExerciseLoggingSheet } from '@/components/exercise/ExerciseLoggingSheet';
 import { FullScreenVideoPlayer, FullScreenVideoPlayerHandle, VideoPlaybackStatus } from '@/components/media/FullScreenVideoPlayer';
@@ -50,6 +51,8 @@ const ProgramDayScreen = () => {
     const [showResetSuccess, setShowResetSuccess] = useState(false);
     const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
     const [isLoggingSheetVisible, setIsLoggingSheetVisible] = useState(false);
+    const [showAlternativesSheet, setShowAlternativesSheet] = useState(false);
+    const [selectedExerciseForSwap, setSelectedExerciseForSwap] = useState<Exercise | null>(null);
 
     const confettiRef = useRef<LottieView>(null);
     const videoPlayerRef = useRef<FullScreenVideoPlayerHandle>(null);
@@ -189,6 +192,16 @@ const ProgramDayScreen = () => {
 
     const handleMenuPress = () => {
         setIsBottomMenuVisible(true);
+    };
+
+    const handleExerciseSwapPress = (exercise: Exercise) => {
+        setSelectedExerciseForSwap(exercise);
+        setShowAlternativesSheet(true);
+    };
+
+    const handleAlternativesSheetClose = () => {
+        setShowAlternativesSheet(false);
+        setSelectedExerciseForSwap(null);
     };
 
     const menuOptions = [
@@ -331,6 +344,7 @@ const ProgramDayScreen = () => {
                     >
                         {programDay.Exercises.map((exercise, index) => (
                             <ExerciseCard
+                                onSwapPress={handleExerciseSwapPress}
                                 key={exercise.ExerciseId}
                                 exercise={exercise}
                                 isEnrolled={isEnrolled}
@@ -517,6 +531,14 @@ const ProgramDayScreen = () => {
             )}
             {selectedExercise && (
                 <ExerciseLoggingSheet visible={isLoggingSheetVisible} onClose={handleLoggingSheetClose} exercise={selectedExercise} programId={programId} />
+            )}
+            {selectedExerciseForSwap && (
+                <ExerciseAlternativesBottomSheet
+                    visible={showAlternativesSheet}
+                    onClose={handleAlternativesSheetClose}
+                    exercise={selectedExerciseForSwap}
+                    programId={programId}
+                />
             )}
             <BottomMenuModal isVisible={isBottomMenuVisible} onClose={() => setIsBottomMenuVisible(false)} options={menuOptions} />
         </ThemedView>

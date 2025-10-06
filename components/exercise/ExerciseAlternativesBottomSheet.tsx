@@ -380,7 +380,7 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
     const isSwapEnabled = selectedAlternative && (!existingSubstitution || existingSubstitution.SubstituteExerciseId !== selectedAlternative.ExerciseId);
 
     return (
-        <BottomSheet visible={visible} onClose={handleSheetClose} style={{ maxHeight: '90%' }}>
+        <BottomSheet visible={visible} onClose={handleSheetClose} style={{ maxHeight: '90%' }} key={`alts-sheet-${visible}`} useScrollView={false}>
             {renderHeader()}
 
             {showSuccess?.visible ? (

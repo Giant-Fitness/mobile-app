@@ -50,8 +50,6 @@ const CACHE_KEYS = {
     USER_DATA: 'user_data',
     USER_NUTRITION_GOAL_HISTORY: 'user_nutrition_goal_history',
     USER_NUTRITION_LOGS: 'user_nutrition_logs',
-    EXERCISE_SUBSTITUTIONS: 'exercise_substitutions',
-    EXERCISE_SET_MODIFICATIONS: 'exercise_set_modifications',
     ALL_PROGRAMS: 'all_programs',
     ALL_WORKOUTS: 'all_workouts',
     ALL_EXERCISES: 'all_exercises',
@@ -180,24 +178,6 @@ export class InitializationService {
             cacheKey: CACHE_KEYS.ALL_EXERCISES,
             required: true,
             priority: 'high',
-            args: { useCache: true },
-        },
-
-        // data that can transitioned easily
-        {
-            key: 'exerciseSetModifications',
-            thunk: getUserExerciseSetModificationsAsync,
-            cacheKey: CACHE_KEYS.EXERCISE_SET_MODIFICATIONS,
-            required: false,
-            priority: 'medium',
-            args: { useCache: true },
-        },
-        {
-            key: 'exerciseSubstitutions',
-            thunk: getUserExerciseSubstitutionsAsync,
-            cacheKey: CACHE_KEYS.EXERCISE_SUBSTITUTIONS,
-            required: false,
-            priority: 'low',
             args: { useCache: true },
         },
 
@@ -481,12 +461,23 @@ export class InitializationService {
                 this.dispatch(getUserNutritionProfileAsync({})),
                 this.dispatch(getUserAppSettingsAsync({})),
                 this.dispatch(getUserProgramProgressAsync({})),
+                this.dispatch(getUserExerciseSubstitutionsAsync({})),
+                this.dispatch(getUserExerciseSetModificationsAsync({})),
             ];
 
             const results = await Promise.allSettled(promises);
 
             results.forEach((result, index) => {
-                const dataType = ['weight', 'body', 'fitness profile', 'nutrition profile', 'app settings', 'program progress'][index];
+                const dataType = [
+                    'weight',
+                    'body',
+                    'fitness profile',
+                    'nutrition profile',
+                    'app settings',
+                    'program progress',
+                    'exercise substitutions',
+                    'exercise set modifications',
+                ][index];
                 if (result.status === 'fulfilled' && result.value.type.endsWith('/fulfilled')) {
                     const data = result.value.payload;
                     const count = Array.isArray(data) ? data.length : data ? 1 : 0;
@@ -520,12 +511,23 @@ export class InitializationService {
                 this.dispatch(getUserNutritionProfileAsync({ forceRefresh: true })),
                 this.dispatch(getUserAppSettingsAsync({ forceRefresh: true })),
                 this.dispatch(getUserProgramProgressAsync({ forceRefresh: true })),
+                this.dispatch(getUserExerciseSubstitutionsAsync({ forceRefresh: true })),
+                this.dispatch(getUserExerciseSetModificationsAsync({ forceRefresh: true })),
             ];
 
             const results = await Promise.allSettled(promises);
 
             results.forEach((result, index) => {
-                const dataType = ['weight', 'body', 'fitness profile', 'nutrition profile', 'app settings'][index];
+                const dataType = [
+                    'weight',
+                    'body',
+                    'fitness profile',
+                    'nutrition profile',
+                    'app settings',
+                    'program progress',
+                    'exercise substitutions',
+                    'exercise set modifications',
+                ][index];
                 if (result.status === 'fulfilled' && result.value.type.endsWith('/fulfilled')) {
                     const data = result.value.payload;
                     const count = Array.isArray(data) ? data.length : data ? 1 : 0;

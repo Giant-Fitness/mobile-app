@@ -4,6 +4,8 @@ import { REQUEST_STATE } from '@/constants/requestStates';
 import { cacheService } from '@/lib/cache/cacheService';
 import { appSettingsOfflineService } from '@/lib/storage/app-settings/AppSettingsOfflineService';
 import { bodyMeasurementOfflineService } from '@/lib/storage/body-measurements/BodyMeasurementOfflineService';
+import { exerciseSetModificationOfflineService } from '@/lib/storage/exercise-set-modifications/ExerciseSetModificationOfflineService';
+import { exerciseSubstitutionOfflineService } from '@/lib/storage/exercise-substitutions/ExerciseSubstitutionOfflineService';
 import { fitnessProfileOfflineService } from '@/lib/storage/fitness-profile/FitnessProfileOfflineService';
 import { nutritionProfileOfflineService } from '@/lib/storage/nutrition-profile/NutritionProfileOfflineService';
 import { programProgressOfflineService } from '@/lib/storage/program-progress/ProgramProgressOfflineService';
@@ -915,16 +917,19 @@ export const updateUserAppSettingsAsync = createAsyncThunk<
     }
 });
 
+/**
+ * Get user exercise substitutions (offline-first with filtering)
+ */
 export const getUserExerciseSubstitutionsAsync = createAsyncThunk<
     UserExerciseSubstitution[],
-    { params?: GetSubstitutionsParams; forceRefresh?: boolean; useCache?: boolean } | void,
+    { params?: GetSubstitutionsParams; forceRefresh?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
 >('user/getUserExerciseSubstitutions', async (args = {}, { getState, rejectWithValue }) => {
     try {
-        const { params, forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
+        const { params, forceRefresh = false } = typeof args === 'object' ? args : {};
         const state = getState();
         const userId = state.user.user?.UserId;
 
@@ -932,51 +937,65 @@ export const getUserExerciseSubstitutionsAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Return cached substitutions if available and not forcing refresh (only if no params)
-        if (
-            state.user.userExerciseSubstitutions.length > 0 &&
-            state.user.userExerciseSubstitutionsState === REQUEST_STATE.FULFILLED &&
-            !forceRefresh &&
-            !params // Only use cache if not filtering
-        ) {
-            return state.user.userExerciseSubstitutions;
+        // Always load from SQLite first (offline-first)
+        console.log('Loading exercise substitutions from SQLite...');
+        const localSubstitutions = await exerciseSubstitutionOfflineService.getRecords(userId, {
+            includeLocalOnly: true,
+            programId: params?.programId,
+            includeTemporary: params?.includeTemporary,
+            date: params?.date,
+        });
+
+        // Convert to API format
+        const substitutions: UserExerciseSubstitution[] = localSubstitutions.map((local) => local.data);
+
+        // Background server sync (non-blocking) unless force refresh
+        if (networkStateManager.isOnline() && !forceRefresh) {
+            setTimeout(async () => {
+                try {
+                    console.log('Triggering background exercise substitutions sync...');
+                    const serverSubstitutions = await UserService.getUserExerciseSubstitutions(userId, params);
+                    await exerciseSubstitutionOfflineService.mergeServerData(userId, serverSubstitutions);
+                } catch (error) {
+                    console.warn('Background exercise substitutions sync failed:', error);
+                }
+            }, 100);
         }
 
-        // Try cache first if enabled and not forcing refresh and no params
-        if (useCache && !forceRefresh && !params) {
-            const cacheKey = `exercise_substitutions`;
-            const cached = await cacheService.get<UserExerciseSubstitution[]>(cacheKey);
+        // Force refresh: synchronous server sync
+        if (forceRefresh && networkStateManager.isOnline()) {
+            try {
+                console.log('Force refreshing exercise substitutions from server...');
+                const serverSubstitutions = await UserService.getUserExerciseSubstitutions(userId, params);
+                await exerciseSubstitutionOfflineService.mergeServerData(userId, serverSubstitutions);
 
-            if (cached) {
-                console.log('Loaded exercise substitutions from cache');
-                return cached;
+                // Reload from SQLite to get merged data
+                const refreshedSubstitutions = await exerciseSubstitutionOfflineService.getRecords(userId, {
+                    includeLocalOnly: true,
+                    programId: params?.programId,
+                    includeTemporary: params?.includeTemporary,
+                    date: params?.date,
+                });
+
+                return refreshedSubstitutions.map((local) => local.data);
+            } catch (error) {
+                console.warn('Force refresh failed, using local data:', error);
             }
         }
 
-        // Load from API
-        console.log('Loading exercise substitutions from API');
-        const substitutions = await UserService.getUserExerciseSubstitutions(userId, params);
-
-        // Cache the result if useCache is enabled and no params (full list)
-        if (useCache && !params) {
-            const cacheKey = `exercise_substitutions`;
-            await cacheService.set(cacheKey, substitutions);
-        }
-
+        console.log(`Loaded ${substitutions.length} exercise substitutions from offline storage`);
         return substitutions;
     } catch (error) {
+        console.error('Failed to get exercise substitutions:', error);
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to fetch exercise substitutions',
         });
     }
 });
 
-// Helper function to refresh exercise substitutions
-const refreshExerciseSubstitutions = async (userId: string, params?: GetSubstitutionsParams) => {
-    return await UserService.getUserExerciseSubstitutions(userId, params);
-};
-
-// Create a new exercise substitution
+/**
+ * Create exercise substitution (offline-first with optimistic update)
+ */
 export const createExerciseSubstitutionAsync = createAsyncThunk<
     UserExerciseSubstitution[],
     CreateSubstitutionParams,
@@ -993,23 +1012,57 @@ export const createExerciseSubstitutionAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Create the substitution
-        await UserService.createExerciseSubstitution(userId, substitutionData);
+        // Create optimistically in SQLite
+        console.log('Creating exercise substitution locally...');
+        const now = new Date().toISOString();
 
-        // Invalidate cache after creation
-        const cacheKey = `exercise_substitutions`;
-        await cacheService.remove(cacheKey);
+        await exerciseSubstitutionOfflineService.create({
+            userId,
+            data: {
+                originalExerciseId: substitutionData.originalExerciseId,
+                substituteExerciseId: substitutionData.substituteExerciseId,
+                programId: substitutionData.programId || null,
+                isTemporary: substitutionData.isTemporary || false,
+                temporaryDate: substitutionData.temporaryDate || null,
+            },
+            timestamp: now,
+        });
 
-        // Refresh and return all substitutions
-        return await refreshExerciseSubstitutions(userId);
+        // Try to sync to server immediately if online
+        if (networkStateManager.isOnline()) {
+            try {
+                console.log('Syncing substitution creation to server...');
+                await UserService.createExerciseSubstitution(userId, substitutionData);
+
+                // Refresh from server to get all substitutions with server IDs
+                const serverSubstitutions = await UserService.getUserExerciseSubstitutions(userId);
+                await exerciseSubstitutionOfflineService.mergeServerData(userId, serverSubstitutions);
+
+                console.log('Substitution creation successfully synced to server');
+            } catch (syncError) {
+                console.warn('Failed to sync substitution creation to server, will retry later:', syncError);
+                // Local data remains, will retry via sync queue
+            }
+        }
+
+        // Return updated list from SQLite
+        const updatedSubstitutions = await exerciseSubstitutionOfflineService.getRecords(userId, {
+            includeLocalOnly: true,
+        });
+
+        console.log('Exercise substitution created offline (will sync when online)');
+        return updatedSubstitutions.map((local) => local.data);
     } catch (error) {
+        console.error('Failed to create exercise substitution:', error);
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to create exercise substitution',
         });
     }
 });
 
-// Update an existing exercise substitution
+/**
+ * Update exercise substitution (offline-first with optimistic update)
+ */
 export const updateExerciseSubstitutionAsync = createAsyncThunk<
     UserExerciseSubstitution[],
     { substitutionId: string; updates: UpdateSubstitutionParams },
@@ -1026,23 +1079,60 @@ export const updateExerciseSubstitutionAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Update the substitution
-        await UserService.updateExerciseSubstitution(userId, substitutionId, updates);
+        // Find local record by SubstitutionId
+        const localRecord = await exerciseSubstitutionOfflineService.getBySubstitutionId(userId, substitutionId);
 
-        // Invalidate cache after update
-        const cacheKey = `exercise_substitutions`;
-        await cacheService.remove(cacheKey);
+        if (!localRecord) {
+            return rejectWithValue({ errorMessage: 'Exercise substitution not found' });
+        }
 
-        // Refresh and return all substitutions
-        return await refreshExerciseSubstitutions(userId);
+        // Update immediately in SQLite (optimistic update)
+        console.log('Updating exercise substitution locally...');
+        await exerciseSubstitutionOfflineService.update(localRecord.localId, {
+            substituteExerciseId: updates.substituteExerciseId,
+            isTemporary: updates.isTemporary,
+            temporaryDate: updates.temporaryDate,
+        });
+
+        // Try to sync to server immediately if online
+        if (networkStateManager.isOnline()) {
+            try {
+                console.log('Syncing substitution update to server...');
+                await UserService.updateExerciseSubstitution(userId, substitutionId, updates);
+
+                // Mark as synced
+                await exerciseSubstitutionOfflineService.updateSyncStatus(localRecord.localId, 'synced', {});
+
+                console.log('Substitution update successfully synced to server');
+            } catch (syncError) {
+                console.warn('Failed to sync substitution update to server, will retry later:', syncError);
+
+                // Mark as failed
+                await exerciseSubstitutionOfflineService.updateSyncStatus(localRecord.localId, 'failed', {
+                    errorMessage: syncError instanceof Error ? syncError.message : 'Sync failed',
+                    incrementRetry: true,
+                });
+            }
+        }
+
+        // Return updated list from SQLite
+        const updatedSubstitutions = await exerciseSubstitutionOfflineService.getRecords(userId, {
+            includeLocalOnly: true,
+        });
+
+        console.log('Exercise substitution updated offline');
+        return updatedSubstitutions.map((local) => local.data);
     } catch (error) {
+        console.error('Failed to update exercise substitution:', error);
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to update exercise substitution',
         });
     }
 });
 
-// Delete an exercise substitution
+/**
+ * Delete exercise substitution (offline-first with optimistic update)
+ */
 export const deleteExerciseSubstitutionAsync = createAsyncThunk<
     UserExerciseSubstitution[],
     { substitutionId: string },
@@ -1059,23 +1149,45 @@ export const deleteExerciseSubstitutionAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Delete the substitution
-        await UserService.deleteExerciseSubstitution(userId, substitutionId);
+        // Find local record by SubstitutionId
+        const localRecord = await exerciseSubstitutionOfflineService.getBySubstitutionId(userId, substitutionId);
 
-        // Invalidate cache after deletion
-        const cacheKey = `exercise_substitutions_${userId}`;
-        await cacheService.remove(cacheKey);
+        if (!localRecord) {
+            return rejectWithValue({ errorMessage: 'Exercise substitution not found' });
+        }
 
-        // Refresh and return all substitutions
-        return await refreshExerciseSubstitutions(userId);
+        // Delete from local storage (optimistic update)
+        // The service handles queueing for server deletion if needed
+        console.log('Deleting exercise substitution from local storage...');
+        await exerciseSubstitutionOfflineService.delete(localRecord.localId);
+
+        // Try to sync deletion to server immediately if online
+        if (networkStateManager.isOnline()) {
+            try {
+                console.log('Syncing substitution deletion to server...');
+                await UserService.deleteExerciseSubstitution(userId, substitutionId);
+
+                console.log('Substitution deletion successfully synced to server');
+            } catch (syncError) {
+                console.warn('Failed to sync substitution deletion to server:', syncError);
+                // Deletion already happened locally, might need manual resolution if sync fails
+            }
+        }
+
+        // Return updated list from SQLite
+        const updatedSubstitutions = await exerciseSubstitutionOfflineService.getRecords(userId, {
+            includeLocalOnly: true,
+        });
+
+        console.log(`Exercise substitution deleted offline (${updatedSubstitutions.length} remaining)`);
+        return updatedSubstitutions.map((local) => local.data);
     } catch (error) {
+        console.error('Failed to delete exercise substitution:', error);
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to delete exercise substitution',
         });
     }
 });
-
-// store/user/thunks.ts - Simplified Offline-First Weight Measurement Thunks
 
 /**
  * Get weight measurements (offline-first)
@@ -1740,16 +1852,19 @@ export const deleteBodyMeasurementAsync = createAsyncThunk<
     }
 });
 
+/**
+ * Get user exercise set modifications (offline-first with filtering)
+ */
 export const getUserExerciseSetModificationsAsync = createAsyncThunk<
     UserExerciseSetModification[],
-    { params?: GetSetModificationsParams; forceRefresh?: boolean; useCache?: boolean } | void,
+    { params?: GetSetModificationsParams; forceRefresh?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
 >('user/getUserExerciseSetModifications', async (args = {}, { getState, rejectWithValue }) => {
     try {
-        const { params, forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
+        const { params, forceRefresh = false } = typeof args === 'object' ? args : {};
         const state = getState();
         const userId = state.user.user?.UserId;
 
@@ -1757,51 +1872,65 @@ export const getUserExerciseSetModificationsAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Return cached modifications if available and not forcing refresh (only if no params)
-        if (
-            state.user.userExerciseSetModifications.length > 0 &&
-            state.user.userExerciseSetModificationsState === REQUEST_STATE.FULFILLED &&
-            !forceRefresh &&
-            !params // Only use cache if not filtering
-        ) {
-            return state.user.userExerciseSetModifications;
+        // Always load from SQLite first (offline-first)
+        console.log('Loading exercise set modifications from SQLite...');
+        const localModifications = await exerciseSetModificationOfflineService.getRecords(userId, {
+            includeLocalOnly: true,
+            programId: params?.programId,
+            includeTemporary: params?.includeTemporary,
+            date: params?.date,
+        });
+
+        // Convert to API format
+        const modifications: UserExerciseSetModification[] = localModifications.map((local) => local.data);
+
+        // Background server sync (non-blocking) unless force refresh
+        if (networkStateManager.isOnline() && !forceRefresh) {
+            setTimeout(async () => {
+                try {
+                    console.log('Triggering background exercise set modifications sync...');
+                    const serverModifications = await UserService.getUserExerciseSetModifications(userId, params);
+                    await exerciseSetModificationOfflineService.mergeServerData(userId, serverModifications);
+                } catch (error) {
+                    console.warn('Background exercise set modifications sync failed:', error);
+                }
+            }, 100);
         }
 
-        // Try cache first if enabled and not forcing refresh and no params
-        if (useCache && !forceRefresh && !params) {
-            const cacheKey = `exercise_set_modifications`;
-            const cached = await cacheService.get<UserExerciseSetModification[]>(cacheKey);
+        // Force refresh: synchronous server sync
+        if (forceRefresh && networkStateManager.isOnline()) {
+            try {
+                console.log('Force refreshing exercise set modifications from server...');
+                const serverModifications = await UserService.getUserExerciseSetModifications(userId, params);
+                await exerciseSetModificationOfflineService.mergeServerData(userId, serverModifications);
 
-            if (cached) {
-                console.log('Loaded exercise set modifications from cache');
-                return cached;
+                // Reload from SQLite to get merged data
+                const refreshedModifications = await exerciseSetModificationOfflineService.getRecords(userId, {
+                    includeLocalOnly: true,
+                    programId: params?.programId,
+                    includeTemporary: params?.includeTemporary,
+                    date: params?.date,
+                });
+
+                return refreshedModifications.map((local) => local.data);
+            } catch (error) {
+                console.warn('Force refresh failed, using local data:', error);
             }
         }
 
-        // Load from API
-        console.log('Loading exercise set modifications from API');
-        const modifications = await UserService.getUserExerciseSetModifications(userId, params);
-
-        // Cache the result if useCache is enabled and no params (full list)
-        if (useCache && !params) {
-            const cacheKey = `exercise_set_modifications`;
-            await cacheService.set(cacheKey, modifications);
-        }
-
+        console.log(`Loaded ${modifications.length} exercise set modifications from offline storage`);
         return modifications;
     } catch (error) {
+        console.error('Failed to get exercise set modifications:', error);
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to fetch exercise set modifications',
         });
     }
 });
 
-// Helper function to refresh exercise set modifications
-const refreshExerciseSetModifications = async (userId: string, params?: GetSetModificationsParams) => {
-    return await UserService.getUserExerciseSetModifications(userId, params);
-};
-
-// Create a new exercise set modification
+/**
+ * Create exercise set modification (offline-first with optimistic update)
+ */
 export const createExerciseSetModificationAsync = createAsyncThunk<
     UserExerciseSetModification[],
     CreateSetModificationParams,
@@ -1818,23 +1947,58 @@ export const createExerciseSetModificationAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Create the modification
-        await UserService.createExerciseSetModification(userId, modificationData);
+        // Create optimistically in SQLite
+        console.log('Creating exercise set modification locally...');
+        const now = new Date().toISOString();
 
-        // Invalidate cache after creation
-        const cacheKey = `exercise_set_modifications`;
-        await cacheService.remove(cacheKey);
+        await exerciseSetModificationOfflineService.create({
+            userId,
+            data: {
+                exerciseId: modificationData.exerciseId,
+                programId: modificationData.programId,
+                originalSets: modificationData.originalSets,
+                additionalSets: modificationData.additionalSets,
+                isTemporary: modificationData.isTemporary || false,
+                temporaryDate: modificationData.temporaryDate || null,
+            },
+            timestamp: now,
+        });
 
-        // Refresh and return all modifications
-        return await refreshExerciseSetModifications(userId);
+        // Try to sync to server immediately if online
+        if (networkStateManager.isOnline()) {
+            try {
+                console.log('Syncing modification creation to server...');
+                await UserService.createExerciseSetModification(userId, modificationData);
+
+                // Refresh from server to get all modifications with server IDs
+                const serverModifications = await UserService.getUserExerciseSetModifications(userId);
+                await exerciseSetModificationOfflineService.mergeServerData(userId, serverModifications);
+
+                console.log('Modification creation successfully synced to server');
+            } catch (syncError) {
+                console.warn('Failed to sync modification creation to server, will retry later:', syncError);
+                // Local data remains, will retry via sync queue
+            }
+        }
+
+        // Return updated list from SQLite
+        const updatedModifications = await exerciseSetModificationOfflineService.getRecords(userId, {
+            includeLocalOnly: true,
+        });
+
+        console.log('Exercise set modification created offline (will sync when online)');
+        return updatedModifications.map((local) => local.data);
     } catch (error) {
+        console.error('Failed to create exercise set modification:', error);
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to create exercise set modification',
         });
     }
 });
 
-// Update an existing exercise set modification
+/**
+ * Update exercise set modification (offline-first with optimistic update)
+ */
 export const updateExerciseSetModificationAsync = createAsyncThunk<
     UserExerciseSetModification[],
     { modificationId: string; updates: UpdateSetModificationParams },
@@ -1851,23 +2015,60 @@ export const updateExerciseSetModificationAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Update the modification
-        await UserService.updateExerciseSetModification(userId, modificationId, updates);
+        // Find local record by ModificationId
+        const localRecord = await exerciseSetModificationOfflineService.getByModificationId(userId, modificationId);
 
-        // Invalidate cache after update
-        const cacheKey = `exercise_set_modifications`;
-        await cacheService.remove(cacheKey);
+        if (!localRecord) {
+            return rejectWithValue({ errorMessage: 'Exercise set modification not found' });
+        }
 
-        // Refresh and return all modifications
-        return await refreshExerciseSetModifications(userId);
+        // Update immediately in SQLite (optimistic update)
+        console.log('Updating exercise set modification locally...');
+        await exerciseSetModificationOfflineService.update(localRecord.localId, {
+            additionalSets: updates.additionalSets,
+            isTemporary: updates.isTemporary,
+            temporaryDate: updates.temporaryDate,
+        });
+
+        // Try to sync to server immediately if online
+        if (networkStateManager.isOnline()) {
+            try {
+                console.log('Syncing modification update to server...');
+                await UserService.updateExerciseSetModification(userId, modificationId, updates);
+
+                // Mark as synced
+                await exerciseSetModificationOfflineService.updateSyncStatus(localRecord.localId, 'synced', {});
+
+                console.log('Modification update successfully synced to server');
+            } catch (syncError) {
+                console.warn('Failed to sync modification update to server, will retry later:', syncError);
+
+                // Mark as failed
+                await exerciseSetModificationOfflineService.updateSyncStatus(localRecord.localId, 'failed', {
+                    errorMessage: syncError instanceof Error ? syncError.message : 'Sync failed',
+                    incrementRetry: true,
+                });
+            }
+        }
+
+        // Return updated list from SQLite
+        const updatedModifications = await exerciseSetModificationOfflineService.getRecords(userId, {
+            includeLocalOnly: true,
+        });
+
+        console.log('Exercise set modification updated offline');
+        return updatedModifications.map((local) => local.data);
     } catch (error) {
+        console.error('Failed to update exercise set modification:', error);
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to update exercise set modification',
         });
     }
 });
 
-// Delete an exercise set modification
+/**
+ * Delete exercise set modification (offline-first with optimistic update)
+ */
 export const deleteExerciseSetModificationAsync = createAsyncThunk<
     UserExerciseSetModification[],
     { modificationId: string },
@@ -1884,22 +2085,44 @@ export const deleteExerciseSetModificationAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Delete the modification
-        await UserService.deleteExerciseSetModification(userId, modificationId);
+        // Find local record by ModificationId
+        const localRecord = await exerciseSetModificationOfflineService.getByModificationId(userId, modificationId);
 
-        // Invalidate cache after deletion
-        const cacheKey = `exercise_set_modifications`;
-        await cacheService.remove(cacheKey);
+        if (!localRecord) {
+            return rejectWithValue({ errorMessage: 'Exercise set modification not found' });
+        }
 
-        // Refresh and return all modifications
-        return await refreshExerciseSetModifications(userId);
+        // Delete from local storage (optimistic update)
+        console.log('Deleting exercise set modification from local storage...');
+        await exerciseSetModificationOfflineService.delete(localRecord.localId);
+
+        // Try to sync deletion to server immediately if online
+        if (networkStateManager.isOnline()) {
+            try {
+                console.log('Syncing modification deletion to server...');
+                await UserService.deleteExerciseSetModification(userId, modificationId);
+
+                console.log('Modification deletion successfully synced to server');
+            } catch (syncError) {
+                console.warn('Failed to sync modification deletion to server:', syncError);
+                // Deletion already happened locally
+            }
+        }
+
+        // Return updated list from SQLite
+        const updatedModifications = await exerciseSetModificationOfflineService.getRecords(userId, {
+            includeLocalOnly: true,
+        });
+
+        console.log(`Exercise set modification deleted offline (${updatedModifications.length} remaining)`);
+        return updatedModifications.map((local) => local.data);
     } catch (error) {
+        console.error('Failed to delete exercise set modification:', error);
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to delete exercise set modification',
         });
     }
 });
-
 // Nutrition Profile Thunks
 /**
  * Get user nutrition profile (offline-first)
