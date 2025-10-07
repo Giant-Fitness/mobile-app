@@ -16,7 +16,7 @@ import { AppDispatch, RootState } from '@/store/store';
 import { createExerciseSubstitutionAsync, deleteExerciseSubstitutionAsync, getUserExerciseSubstitutionsAsync } from '@/store/user/thunks';
 import { Exercise, ExerciseAlternative } from '@/types';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { format } from 'date-fns';
@@ -48,10 +48,24 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
     // Redux state
     const { userExerciseSubstitutions, userExerciseSubstitutionsState } = useSelector((state: RootState) => state.user);
 
-    // Find existing substitution for this exercise
-    const existingSubstitution = userExerciseSubstitutions.find(
-        (sub) => sub.OriginalExerciseId === exercise.ExerciseId && (sub.ProgramId === programId || sub.ProgramId === null),
-    );
+    // Find existing substitution for this exercise (prioritize temp for today)
+    const existingSubstitution = useMemo(() => {
+        if (!programId) return null;
+
+        const today = format(new Date(), 'yyyy-MM-dd');
+
+        const applicableSubs = userExerciseSubstitutions.filter(
+            (sub) => sub.OriginalExerciseId === exercise.ExerciseId && (sub.ProgramId === programId || sub.ProgramId === null),
+        );
+
+        // Priority 1: Temp for today
+        const tempForToday = applicableSubs.find((sub) => sub.IsTemporary && sub.TemporaryDate === today);
+        if (tempForToday) return tempForToday;
+
+        // Priority 2: Permanent
+        const permanent = applicableSubs.find((sub) => !sub.IsTemporary);
+        return permanent || null;
+    }, [exercise.ExerciseId, programId, userExerciseSubstitutions]);
 
     // Reset success animation state when sheet becomes invisible
     useEffect(() => {
@@ -131,7 +145,6 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
         setShowSubstitutionTypeModal(false);
 
         try {
-            // Prepare substitution data
             const today = format(new Date(), 'yyyy-MM-dd');
             const substitutionData = {
                 originalExerciseId: exercise.ExerciseId,
@@ -141,13 +154,42 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
                 temporaryDate: type === 'temporary' ? today : null,
             };
 
-            // If there's an existing substitution, delete it first
-            if (existingSubstitution) {
-                await dispatch(
-                    deleteExerciseSubstitutionAsync({
-                        substitutionId: existingSubstitution.SubstitutionId,
-                    }),
+            // Find what needs to be deleted based on substitution type
+            if (type === 'temporary') {
+                // When creating temp: only delete existing temp for TODAY (keep permanent and other temps)
+                const existingTempForToday = userExerciseSubstitutions.find(
+                    (sub) =>
+                        sub.OriginalExerciseId === exercise.ExerciseId &&
+                        (sub.ProgramId === programId || sub.ProgramId === null) &&
+                        sub.IsTemporary === true &&
+                        sub.TemporaryDate === today,
                 );
+
+                if (existingTempForToday) {
+                    await dispatch(
+                        deleteExerciseSubstitutionAsync({
+                            substitutionId: existingTempForToday.SubstitutionId,
+                        }),
+                    );
+                }
+            } else {
+                // When creating permanent: delete existing permanent AND temp for today
+                const subsToDelete = userExerciseSubstitutions.filter(
+                    (sub) =>
+                        sub.OriginalExerciseId === exercise.ExerciseId &&
+                        (sub.ProgramId === programId || sub.ProgramId === null) &&
+                        // Delete if: permanent OR temp for today
+                        (sub.IsTemporary === false || (sub.IsTemporary === true && sub.TemporaryDate === today)),
+                );
+
+                // Delete all matching substitutions
+                for (const sub of subsToDelete) {
+                    await dispatch(
+                        deleteExerciseSubstitutionAsync({
+                            substitutionId: sub.SubstitutionId,
+                        }),
+                    );
+                }
             }
 
             // Create the new substitution
@@ -164,7 +206,6 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
 
             // Set a timeout to close the sheet after showing the success message
             setTimeout(() => {
-                // Important: Reset the success state and then close the sheet
                 setShowSuccess(null);
                 onClose();
             }, 1500);
