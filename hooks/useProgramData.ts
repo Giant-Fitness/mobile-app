@@ -398,14 +398,22 @@ export const useProgramData = (
         }
 
         try {
-            // Calculate days elapsed since last activity
+            // Get dates at midnight local time to compare calendar days, not time differences
             const lastActive = new Date(userProgramProgress.LastActivityAt);
-            const now = new Date();
-            const timeDiffMillis = now.getTime() - lastActive.getTime();
-            const daysPassed = Math.floor(timeDiffMillis / (1000 * 60 * 60 * 24));
+            const lastActiveDate = new Date(lastActive.getFullYear(), lastActive.getMonth(), lastActive.getDate());
 
-            // Only auto-complete if more than 1 day has passed
-            if (daysPassed <= 1) {
+            const now = new Date();
+            const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            // Calculate calendar days difference (not 24-hour periods)
+            const timeDiffMillis = todayDate.getTime() - lastActiveDate.getTime();
+            const calendarDaysPassed = Math.floor(timeDiffMillis / (1000 * 60 * 60 * 24));
+
+            // We need at least 2 calendar days to have passed to skip a rest day
+            // Day 1 (Mon): Complete workout
+            // Day 2 (Tue): Current day = rest day, don't skip (0-1 days passed)
+            // Day 3 (Wed): Should skip Day 2 rest and show Day 3 workout (2+ days passed)
+            if (calendarDaysPassed < 2) {
                 return 0;
             }
 
@@ -422,43 +430,32 @@ export const useProgramData = (
             const totalProgramDays = programs[programId]?.Days || 0;
             const currentDay = userProgramProgress.CurrentDay;
 
-            // Get current day data - accounting for 0-based array indexing
-            const currentDayData = loadedProgramDays[currentDay - 1];
-
             let daysToComplete = [];
 
-            // Only proceed if the current day is a rest day
-            if (currentDayData?.RestDay) {
-                // Don't auto-complete the last day of the program
-                if (currentDay - 1 < totalProgramDays - 1) {
-                    daysToComplete.push(currentDay - 1);
+            // Start checking from the current day
+            let dayToCheck = currentDay;
 
-                    // Track how many days we've auto-completed
-                    let daysAutoCompleted = 1;
+            // We can auto-complete up to (calendarDaysPassed - 1) days
+            // This ensures we don't complete today's day, only past days
+            const maxDaysToAutoComplete = calendarDaysPassed - 1;
+            let daysChecked = 0;
 
-                    // Check for consecutive rest days after this one
-                    let nextDayToCheck = currentDay + 1;
+            // Check consecutive rest days starting from current day
+            while (dayToCheck - 1 < totalProgramDays - 1 && daysChecked < maxDaysToAutoComplete) {
+                const dayData = loadedProgramDays[dayToCheck - 1];
 
-                    // We can auto-complete up to daysPassed days
-                    const maxDaysToAutoComplete = daysPassed;
-
-                    while (nextDayToCheck - 1 < totalProgramDays - 1 && daysAutoCompleted < maxDaysToAutoComplete) {
-                        const nextDay = loadedProgramDays[nextDayToCheck - 1];
-
-                        // If the next day is also a rest day, add it to our list
-                        if (nextDay?.RestDay) {
-                            daysToComplete.push(nextDayToCheck - 1);
-                            nextDayToCheck++;
-                            daysAutoCompleted++;
-                        } else {
-                            // Stop when we hit a non-rest day
-                            break;
-                        }
-                    }
+                // If it's a rest day, mark it for completion
+                if (dayData?.RestDay) {
+                    daysToComplete.push(dayToCheck);
+                    dayToCheck++;
+                    daysChecked++;
+                } else {
+                    // Stop when we hit a workout day
+                    break;
                 }
             }
 
-            // If we have days to complete, just complete the last one
+            // If we have days to complete, complete the last one
             // The backend will automatically mark in-between days as complete
             if (daysToComplete.length > 0) {
                 // Get the last day to complete (highest day number)

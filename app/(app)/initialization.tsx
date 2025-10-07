@@ -4,11 +4,14 @@ import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { ThemedText } from '@/components/base/ThemedText';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { Colors } from '@/constants/Colors';
+import { REQUEST_STATE } from '@/constants/requestStates';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useProgramData } from '@/hooks/useProgramData';
 import { cacheService } from '@/lib/cache/cacheService';
 import { InitializationService } from '@/store/initialization/initializationService';
 import { incrementRetryAttempt, reset as resetInitialization, resetRetryAttempt, setInitialized } from '@/store/initialization/initializationSlice';
+import { getAllProgramDaysAsync } from '@/store/programs/thunks';
 import { AppDispatch, RootState } from '@/store/store';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
@@ -24,6 +27,7 @@ const Initialization: React.FC = () => {
 
     // Redux state
     const initialization = useSelector((state: RootState) => state.initialization);
+    const { userProgramProgress, userProgramProgressState } = useSelector((state: RootState) => state.user);
 
     // Local state
     const [showManualRetry, setShowManualRetry] = useState(false);
@@ -31,6 +35,7 @@ const Initialization: React.FC = () => {
     const retryTimeoutRef = useRef<number | null>(null);
     const initializationStartTimeRef = useRef<number | null>(null);
     const hasInitializedRef = useRef(false);
+    const { programDay, handleAutoCompleteRestDays } = useProgramData(undefined, undefined);
 
     // Initialize service
     useEffect(() => {
@@ -39,6 +44,34 @@ const Initialization: React.FC = () => {
         // IMPORTANT: Set the state getter so the service can access Redux state
         initServiceRef.current.setStateGetter(() => store.getState());
     }, [dispatch]);
+
+    // Fetch program days and auto-complete rest days after initialization completes
+    useEffect(() => {
+        // Only run after successful initialization
+        if (!initialization.isInitialized || userProgramProgressState !== REQUEST_STATE.FULFILLED) return;
+        if (userProgramProgress?.ProgramId) {
+            dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId }));
+        }
+    }, [initialization.isInitialized, userProgramProgress?.ProgramId, dispatch, userProgramProgressState]);
+
+    // Auto-complete rest days functionality - runs after initialization and program days load
+    useEffect(() => {
+        // Wait for initialization to complete
+        if (!initialization.isInitialized) return;
+        if (!userProgramProgress?.LastActivityAt || userProgramProgressState !== REQUEST_STATE.FULFILLED) return;
+
+        const checkAndAutoCompleteRestDays = async () => {
+            try {
+                if (programDay && userProgramProgress) {
+                    await handleAutoCompleteRestDays();
+                }
+            } catch (error) {
+                console.error('❌ Auto-complete rest days check failed:', error);
+            }
+        };
+
+        checkAndAutoCompleteRestDays();
+    }, [initialization.isInitialized, userProgramProgress, userProgramProgressState, programDay, handleAutoCompleteRestDays]);
 
     // Main initialization flow - Enhanced with better parallelization
     const initializeApp = useCallback(async () => {
