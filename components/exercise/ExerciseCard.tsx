@@ -65,17 +65,27 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
     // Determine if this exercise can be logged
     const canLog = isExerciseLoggable(exercise);
 
-    // Find if this exercise has a substitution
+    // Find applicable substitution for this exercise
     const substitution = useMemo(() => {
         if (!programId) return null;
 
-        return userExerciseSubstitutions.find(
-            (sub) =>
-                sub.OriginalExerciseId === exercise.ExerciseId &&
-                (sub.ProgramId === programId || sub.ProgramId === null) &&
-                // For temporary substitutions, check if it's for today
-                (!sub.IsTemporary || (sub.IsTemporary && sub.TemporaryDate === format(new Date(), 'yyyy-MM-dd'))),
+        const today = format(new Date(), 'yyyy-MM-dd');
+
+        // Filter to only this exercise and program
+        const applicableSubs = userExerciseSubstitutions.filter(
+            (sub) => sub.OriginalExerciseId === exercise.ExerciseId && (sub.ProgramId === programId || sub.ProgramId === null),
         );
+
+        // Priority 1: Temp for today
+        const tempForToday = applicableSubs.find((sub) => sub.IsTemporary && sub.TemporaryDate === today);
+        if (tempForToday) return tempForToday;
+
+        // Priority 2: Permanent
+        const permanent = applicableSubs.find((sub) => !sub.IsTemporary);
+        if (permanent) return permanent;
+
+        // Priority 3: None
+        return null;
     }, [exercise.ExerciseId, programId, userExerciseSubstitutions, forceUpdate]);
 
     // Get the substituted exercise name (if substituted)
