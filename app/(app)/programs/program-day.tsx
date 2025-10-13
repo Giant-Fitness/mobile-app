@@ -33,7 +33,6 @@ import { ActivityIndicator, StyleSheet, Vibration, View } from 'react-native';
 
 import { router, useLocalSearchParams } from 'expo-router';
 
-import LottieView from 'lottie-react-native';
 import { usePostHog } from 'posthog-react-native';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useDispatch, useSelector } from 'react-redux';
@@ -46,7 +45,6 @@ const ProgramDayScreen = () => {
 
     const [isProgramDaySkipModalVisible, setIsProgramDaySkipModalVisible] = useState(false);
     const [isResetDayModalVisible, setIsResetDayModalVisible] = useState(false);
-    const [showConfetti, setShowConfetti] = useState(false);
     const [isBottomMenuVisible, setIsBottomMenuVisible] = useState(false);
     const [showResetSuccess, setShowResetSuccess] = useState(false);
     const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
@@ -54,7 +52,6 @@ const ProgramDayScreen = () => {
     const [showAlternativesSheet, setShowAlternativesSheet] = useState(false);
     const [selectedExerciseForSwap, setSelectedExerciseForSwap] = useState<Exercise | null>(null);
 
-    const confettiRef = useRef<LottieView>(null);
     const videoPlayerRef = useRef<FullScreenVideoPlayerHandle>(null);
     const scrollY = useSharedValue(0);
     const contentHeight = useSharedValue(0);
@@ -162,13 +159,13 @@ const ProgramDayScreen = () => {
             });
         } else {
             await handleCompleteDay();
-            setShowConfetti(true);
-            confettiRef.current?.play();
+            // Just vibration + visual state change
             Vibration.vibrate(200);
+
+            // Navigate immediately or after brief delay
             setTimeout(() => {
-                setShowConfetti(false);
                 router.push('/(app)/(tabs)/home');
-            }, 2200);
+            }, 400);
         }
     };
 
@@ -518,17 +515,6 @@ const ProgramDayScreen = () => {
                 onConfirm={handleProgramDaySkip}
             />
             <ProgramDayUnfinishModal visible={isResetDayModalVisible} onClose={() => setIsResetDayModalVisible(false)} onConfirm={resetDay} />
-            {showConfetti && (
-                <View style={StyleSheet.absoluteFill}>
-                    <LottieView
-                        ref={confettiRef}
-                        source={require('@/assets/animations/confetti.json')}
-                        autoPlay={false}
-                        loop={false}
-                        style={StyleSheet.absoluteFill}
-                    />
-                </View>
-            )}
             {selectedExercise && (
                 <ExerciseLoggingSheet visible={isLoggingSheetVisible} onClose={handleLoggingSheetClose} exercise={selectedExercise} programId={programId} />
             )}
@@ -592,7 +578,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: '10%',
         position: 'absolute',
-        bottom: Spaces.XXL,
+        bottom: Spaces.XL,
         left: 0,
         right: 0,
         backgroundColor: 'transparent',
