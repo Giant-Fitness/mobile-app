@@ -317,8 +317,6 @@ export const useProgramData = (
 
     const isLastDay = activeProgram && userProgramProgress && activeProgram.Days ? currentDayNumber === activeProgram.Days : false;
 
-    const displayQuote = !isLastDay ? (programDay?.RestDay ? restDayQuote : workoutQuote) : null;
-
     const isEnrolled = !!userProgramProgress?.ProgramId && userProgramProgress.ProgramId === specificProgramId;
 
     const isDayCompleted = userProgramProgress?.CompletedDays?.includes(parseInt(specificDayId)) || false;
@@ -390,6 +388,63 @@ export const useProgramData = (
         // Otherwise, check if they've completed a workout today
         return isToday(userProgramProgress.LastActivityAt);
     }, [userProgramProgress, userProgramProgress?.LastActivityAt, userProgramProgress?.CurrentDay]);
+
+    const displayQuote = useMemo(() => {
+        if (isLastDay) {
+            return null;
+        }
+
+        if (!hasCompletedWorkoutToday) {
+            // Haven't completed today - show quote for current active day
+            return activeProgramCurrentDay?.RestDay ? restDayQuote : workoutQuote;
+        }
+
+        // Has completed today - show quote for what was JUST completed
+        // When a day is completed, CurrentDay moves forward by 1
+        // So the completed day number is: userProgramProgress.CurrentDay - 1
+        const completedDayNumber = (userProgramProgress?.CurrentDay || 1) - 1;
+
+        // Find the completed day in the program days
+        const programId = userProgramProgress?.ProgramId;
+        if (!programId || completedDayNumber < 1) {
+            return activeProgramCurrentDay?.RestDay ? restDayQuote : workoutQuote;
+        }
+
+        // Convert day number to string for the lookup
+        const completedDayId = completedDayNumber.toString();
+        const completedDay = programDays[programId]?.[completedDayId];
+
+        return completedDay?.RestDay ? restDayQuote : workoutQuote;
+    }, [
+        isLastDay,
+        hasCompletedWorkoutToday,
+        activeProgramCurrentDay?.RestDay,
+        userProgramProgress?.CurrentDay,
+        userProgramProgress?.ProgramId,
+        programDays,
+        restDayQuote,
+        workoutQuote,
+    ]);
+
+    const displayQuoteIsRestDay = useMemo(() => {
+        if (!hasCompletedWorkoutToday) {
+            // Haven't completed today - show quote for current active day
+            return activeProgramCurrentDay?.RestDay || false;
+        }
+
+        // Has completed today - show quote for what was JUST completed
+        const completedDayNumber = (userProgramProgress?.CurrentDay || 1) - 1;
+        const programId = userProgramProgress?.ProgramId;
+
+        if (!programId || completedDayNumber < 1) {
+            return activeProgramCurrentDay?.RestDay || false;
+        }
+
+        const completedDayId = completedDayNumber.toString();
+        const completedDay = programDays[programId]?.[completedDayId];
+
+        return completedDay?.RestDay || false;
+    }, [hasCompletedWorkoutToday, activeProgramCurrentDay?.RestDay, userProgramProgress?.CurrentDay, userProgramProgress?.ProgramId, programDays]);
 
     const handleAutoCompleteRestDays = async () => {
         // Use user's current program progress
@@ -489,6 +544,7 @@ export const useProgramData = (
         isLastDay,
         dayOfWeek,
         displayQuote,
+        displayQuoteIsRestDay,
         isEnrolled,
         isDayCompleted,
         handleCompleteDay,

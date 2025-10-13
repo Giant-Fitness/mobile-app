@@ -33,6 +33,7 @@ export default function ActiveProgramHome() {
         isLastDay,
         currentWeek,
         displayQuote,
+        displayQuoteIsRestDay,
         hasCompletedWorkoutToday,
         error,
     } = useProgramData(undefined, undefined, {
@@ -147,7 +148,7 @@ export default function ActiveProgramHome() {
             >
                 {displayQuote && (
                     <View style={styles.trainingQuoteWrapper}>
-                        <TrainingQuote quote={displayQuote} isLastDay={isLastDay} isRestDay={activeProgramCurrentDay?.RestDay || false} />
+                        <TrainingQuote quote={displayQuote} isLastDay={isLastDay} isRestDay={displayQuoteIsRestDay} />
                     </View>
                 )}
 
