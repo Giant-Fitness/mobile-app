@@ -1,7 +1,7 @@
 // app/(app)/(tabs)/food-diary.tsx
 
 import { FoodLogContent } from '@/components/nutrition/FoodLogContent';
-import { FoodLogHeader } from '@/components/nutrition/FoodLogHeader';
+import { calculateFoodLogHeaderHeight, FoodLogHeader } from '@/components/nutrition/FoodLogHeader';
 import { OnboardingCard } from '@/components/onboarding/OnboardingCard';
 import { DatePickerBottomSheet } from '@/components/overlays/DatePickerBottomSheet';
 import { Colors } from '@/constants/Colors';
@@ -12,7 +12,7 @@ import { AppDispatch, RootState } from '@/store/store';
 import { getUserAsync, getUserNutritionGoalHistoryAsync } from '@/store/user/thunks';
 import { addAlpha } from '@/utils/colorUtils';
 import React, { useCallback, useRef, useState } from 'react';
-import { Dimensions, Platform, RefreshControl, StyleSheet, View } from 'react-native';
+import { Dimensions, RefreshControl, StyleSheet, View } from 'react-native';
 
 import { BlurView } from 'expo-blur';
 
@@ -32,6 +32,7 @@ const ACTIVATION_THRESHOLD = 20;
 const FEATURE_FLAGS = {
     SWIPEABLE_DATE_NAVIGATION: true,
     DEBUG_MODE: __DEV__ && false,
+    SHOW_WEEKLY_CALENDAR: false, // Control weekly calendar visibility
 };
 
 const useOnboardingStatus = () => {
@@ -295,15 +296,8 @@ export default function FoodDiaryScreen() {
         },
     });
 
-    const calculateExpandedHeaderHeight = () => {
-        const baseHeaderHeight = Platform.select({ ios: 44, android: 24 }) || 44;
-        const dateNavigationHeight = 60;
-        const macrosHeight = 60;
-        const CALENDAR_HEIGHT = 60;
-        return baseHeaderHeight + dateNavigationHeight + CALENDAR_HEIGHT + macrosHeight;
-    };
-
-    const expandedHeaderHeight = calculateExpandedHeaderHeight();
+    // Use the exported function to calculate header height
+    const headerHeight = calculateFoodLogHeaderHeight(FEATURE_FLAGS.SHOW_WEEKLY_CALENDAR);
 
     const handleRefresh = useCallback(async () => {
         if (isRefreshing) return;
@@ -388,6 +382,7 @@ export default function FoodDiaryScreen() {
                     onDateSelect: handleDateSelect,
                 }}
                 headerInterpolationStart={60}
+                showWeeklyCalendar={FEATURE_FLAGS.SHOW_WEEKLY_CALENDAR}
             />
 
             <GestureHandlerRootView>
@@ -404,12 +399,12 @@ export default function FoodDiaryScreen() {
                                 onRefresh={handleRefresh}
                                 colors={[themeColors.iconSelected]}
                                 tintColor={themeColors.iconSelected}
-                                progressViewOffset={expandedHeaderHeight}
+                                progressViewOffset={headerHeight}
                             />
                         }
                         style={[styles.scrollView, { backgroundColor: themeColors.backgroundSecondary }]}
                         contentContainerStyle={{
-                            paddingTop: expandedHeaderHeight + Spaces.MD,
+                            paddingTop: headerHeight + Spaces.LG,
                         }}
                         scrollEventThrottle={16}
                     >

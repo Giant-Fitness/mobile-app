@@ -31,7 +31,24 @@ interface FoodLogHeaderProps {
     dateNavigation: DateNavigationProps;
     headerInterpolationStart?: number;
     headerInterpolationEnd?: number;
+    showWeeklyCalendar?: boolean;
 }
+
+/**
+ * Calculates the expanded header height based on whether the weekly calendar is shown
+ * @param showWeeklyCalendar - Whether the weekly calendar is visible
+ * @returns The total expanded header height in pixels
+ */
+export const calculateFoodLogHeaderHeight = (showWeeklyCalendar: boolean = false): number => {
+    const baseHeaderHeight = Platform.select({ ios: 44, android: 24 }) || 44;
+    const dateNavigationHeight = 60;
+    const macrosHeight = 60;
+    const CALENDAR_HEIGHT = 60;
+
+    return showWeeklyCalendar
+        ? baseHeaderHeight + dateNavigationHeight + CALENDAR_HEIGHT + macrosHeight
+        : baseHeaderHeight + dateNavigationHeight + macrosHeight;
+};
 
 const useOnboardingStatus = () => {
     const user = useSelector((state: RootState) => state.user.user);
@@ -85,7 +102,13 @@ const getGoalForDate = (goals: UserNutritionGoal[], targetDate: Date): UserNutri
     return applicableGoal;
 };
 
-export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({ scrollY, dateNavigation, headerInterpolationStart = 100, headerInterpolationEnd = 200 }) => {
+export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({
+    scrollY,
+    dateNavigation,
+    headerInterpolationStart = 100,
+    headerInterpolationEnd = 200,
+    showWeeklyCalendar = false,
+}) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
@@ -151,8 +174,12 @@ export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({ scrollY, dateNavig
     const dateNavigationHeight = 60;
     const macrosHeight = 60;
 
-    const expandedHeaderHeight = baseHeaderHeight + dateNavigationHeight + CALENDAR_HEIGHT + macrosHeight;
-    const collapsedHeaderHeight = baseHeaderHeight + dateNavigationHeight + macrosHeight - Spaces.MD;
+    const expandedHeaderHeight = showWeeklyCalendar
+        ? baseHeaderHeight + dateNavigationHeight + CALENDAR_HEIGHT + macrosHeight
+        : baseHeaderHeight + dateNavigationHeight + macrosHeight;
+    const collapsedHeaderHeight = showWeeklyCalendar
+        ? baseHeaderHeight + dateNavigationHeight + macrosHeight - Spaces.MD
+        : baseHeaderHeight + dateNavigationHeight + macrosHeight;
 
     // Default date formatter
     const defaultFormatDate = (date: Date) => {
@@ -181,6 +208,9 @@ export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({ scrollY, dateNavig
 
     // Header height animation - like HomeExpandableHeader
     const animatedHeaderHeight = useDerivedValue(() => {
+        if (!showWeeklyCalendar) {
+            return expandedHeaderHeight; // Static height when calendar is hidden
+        }
         return interpolate(
             2 * scrollY.value,
             [headerInterpolationStart, headerInterpolationEnd],
@@ -191,10 +221,12 @@ export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({ scrollY, dateNavig
 
     // Calendar animations
     const calendarTranslateY = useDerivedValue(() => {
+        if (!showWeeklyCalendar) return -CALENDAR_HEIGHT - Spaces.MD; // Hide by default
         return interpolate(2 * scrollY.value, [headerInterpolationStart, headerInterpolationEnd], [0, -CALENDAR_HEIGHT - Spaces.MD], Extrapolation.CLAMP);
     });
 
     const calendarOpacity = useDerivedValue(() => {
+        if (!showWeeklyCalendar) return 0; // Hide by default
         return interpolate(2 * scrollY.value, [headerInterpolationStart, headerInterpolationEnd * 0.7], [1, 0], Extrapolation.CLAMP);
     });
 
@@ -216,6 +248,9 @@ export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({ scrollY, dateNavig
 
     // Macros container moves up as calendar disappears
     const animatedMacrosStyle = useAnimatedStyle(() => {
+        if (!showWeeklyCalendar) {
+            return {}; // No animation when calendar is hidden
+        }
         return {
             transform: [{ translateY: calendarTranslateY.value }],
         };
@@ -263,10 +298,12 @@ export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({ scrollY, dateNavig
                 </TouchableOpacity>
             </View>
 
-            {/* Weekly Calendar - Transform animation */}
-            <Animated.View style={[styles.calendarContainer, animatedCalendarStyle]}>
-                <WeeklyCalendar selectedDate={dateNavigation.selectedDate} onDateSelect={handleDateSelect} />
-            </Animated.View>
+            {/* Weekly Calendar - Transform animation (hidden by default) */}
+            {showWeeklyCalendar && (
+                <Animated.View style={[styles.calendarContainer, animatedCalendarStyle]}>
+                    <WeeklyCalendar selectedDate={dateNavigation.selectedDate} onDateSelect={handleDateSelect} />
+                </Animated.View>
+            )}
 
             {/* Daily Macros Card - Moves up as calendar disappears */}
             {selectedDateNutritionGoal && (
@@ -334,8 +371,7 @@ const styles = StyleSheet.create({
     },
     macrosContainer: {
         paddingHorizontal: Spaces.MD,
-        paddingTop: Spaces.SM,
-        paddingBottom: Spaces.MD,
+        paddingTop: Spaces.XS + Spaces.XXS,
     },
 });
 

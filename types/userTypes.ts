@@ -111,6 +111,8 @@ export interface UserNutritionGoal {
     PreviousGoalDate?: string;
     CreatedAt: string;
     IsActive: boolean;
+    IsCaloriesOverridden: boolean;
+    WeightChangeRate: number;
 }
 
 export interface CompleteProfileParams {

@@ -37,9 +37,10 @@ interface MealSelectorProps {
     /** Whether to enable haptic feedback */
     enableHaptics?: boolean;
     /** Display text type for the trigger */
-    displayTextType?: 'title' | 'body' | 'buttonSmall';
+    displayTextType?: 'title' | 'body' | 'buttonSmall' | 'bodySmall';
     /** Callback to show the meal selector - controlled by parent */
     onShowMealSelector?: () => void;
+    chevronSize?: number;
 }
 
 // Export this function so parent components can use it for BottomSheet content
@@ -75,6 +76,7 @@ export const MealSelector: React.FC<MealSelectorProps> = ({
     enableHaptics = true,
     displayTextType = 'title',
     onShowMealSelector,
+    chevronSize = 16,
 }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -100,7 +102,7 @@ export const MealSelector: React.FC<MealSelectorProps> = ({
             <ThemedText type={displayTextType} style={[styles.triggerText, { color: themeColors.text }]}>
                 {getMealDisplayName(selectedMealType)}
             </ThemedText>
-            <Icon name='chevron-down' size={16} color={themeColors.text} />
+            <Icon name='chevron-down' size={chevronSize} color={themeColors.text} />
         </TouchableOpacity>
     );
 };

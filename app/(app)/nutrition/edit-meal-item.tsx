@@ -14,7 +14,7 @@ import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AppDispatch, RootState } from '@/store/store';
 import { deleteFoodEntryAsync, updateFoodEntryAsync } from '@/store/user/thunks';
-import { FoodEntry, MealType, UpdateFoodEntryParams } from '@/types';
+import { FoodEntry, MealType, UpdateFoodEntryParams, UserNutritionGoal } from '@/types';
 import { addAlpha } from '@/utils/colorUtils';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, TextInput as RNTextInput, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
@@ -70,6 +70,29 @@ const ImpactProgressRing: React.FC<ImpactProgressRingProps> = ({ label, current,
 
 type FocusedInput = 'name' | 'calories' | 'protein' | 'carbs' | 'fat' | 'time' | null;
 
+/**
+ * Helper function to find the applicable nutrition goal for a given date
+ * @param goals - Array of all nutrition goals sorted by EffectiveDate desc
+ * @param dateString - Date string in YYYY-MM-DD format
+ * @returns The applicable goal or undefined
+ */
+const findApplicableGoal = (goals: UserNutritionGoal[] | undefined, dateString: string): UserNutritionGoal | undefined => {
+    if (!goals || goals.length === 0) return undefined;
+
+    // Sort goals by EffectiveDate in descending order
+    const sortedGoals = [...goals].sort((a, b) => b.EffectiveDate.localeCompare(a.EffectiveDate));
+
+    // Find the first goal where EffectiveDate <= dateString
+    const applicableGoal = sortedGoals.find((goal) => goal.EffectiveDate <= dateString);
+
+    // If no applicable goal found, fall back to active goal
+    if (!applicableGoal) {
+        return sortedGoals.find((goal) => goal.IsActive);
+    }
+
+    return applicableGoal;
+};
+
 export default function EditMealItemScreen() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
@@ -86,8 +109,16 @@ export default function EditMealItemScreen() {
         }
     }, [params.food]);
 
-    // Get the nutrition goal entry from Redux state
-    const activeNutritionGoal = useSelector((state: RootState) => state.user.userNutritionGoalHistory?.find((goal) => goal.IsActive));
+    // Get all nutrition goals from Redux state
+    const allNutritionGoals = useSelector((state: RootState) => state.user.userNutritionGoalHistory);
+
+    // Get the date string from the food entry
+    const date = food?.dateString ?? '';
+
+    // Find the applicable nutrition goal for this date
+    const applicableNutritionGoal = useMemo(() => {
+        return findApplicableGoal(allNutritionGoals, date);
+    }, [allNutritionGoals, date]);
 
     // Memoize initial time calculation
     const initialTime = useMemo(() => {
@@ -118,8 +149,6 @@ export default function EditMealItemScreen() {
         fat: food?.QuickMacros.Fat ?? 0,
     });
 
-    const date = food?.dateString ?? '';
-
     // Input refs
     const nameInputRef = useRef<RNTextInput>(null);
     const caloriesInputRef = useRef<RNTextInput>(null);
@@ -144,19 +173,19 @@ export default function EditMealItemScreen() {
         [focusedInput, themeColors.slateBlueLight, themeColors.backgroundSecondary],
     );
 
-    // Memoize impact percentages
+    // Memoize impact percentages - now using the applicable goal for the date
     const impactPercentages = useMemo(() => {
-        if (!activeNutritionGoal) {
+        if (!applicableNutritionGoal) {
             return { calories: 0, protein: 0, carbs: 0, fat: 0 };
         }
 
         return {
-            calories: Math.round((formData.calories / activeNutritionGoal.GoalCalories) * 100),
-            protein: Math.round((formData.protein / activeNutritionGoal.GoalMacros.Protein) * 100),
-            carbs: Math.round((formData.carbs / activeNutritionGoal.GoalMacros.Carbs) * 100),
-            fat: Math.round((formData.fat / activeNutritionGoal.GoalMacros.Fat) * 100),
+            calories: Math.round((formData.calories / applicableNutritionGoal.GoalCalories) * 100),
+            protein: Math.round((formData.protein / applicableNutritionGoal.GoalMacros.Protein) * 100),
+            carbs: Math.round((formData.carbs / applicableNutritionGoal.GoalMacros.Carbs) * 100),
+            fat: Math.round((formData.fat / applicableNutritionGoal.GoalMacros.Fat) * 100),
         };
-    }, [formData, activeNutritionGoal]);
+    }, [formData, applicableNutritionGoal]);
 
     // Memoize original values for comparison
     const originalValues = useMemo(() => {
@@ -475,7 +504,8 @@ export default function EditMealItemScreen() {
                                         selectedMealType={selectedMealType}
                                         onMealTypeChange={handleMealTypeChange}
                                         onShowMealSelector={() => setShowMealSelector(true)}
-                                        displayTextType='body'
+                                        displayTextType='bodySmall'
+                                        chevronSize={14}
                                     />
                                 </View>
                             </View>
@@ -487,10 +517,10 @@ export default function EditMealItemScreen() {
                                 </ThemedText>
                                 <View style={styles.dropdownContainer}>
                                     <TouchableOpacity style={styles.timeSelectButton} onPress={handleTimeSelect} activeOpacity={1}>
-                                        <ThemedText type='body' style={[styles.timeDisplayText, { color: themeColors.text }]}>
+                                        <ThemedText type='bodySmall' style={[styles.timeDisplayText, { color: themeColors.text }]}>
                                             {formatTimeForDisplay(selectedTime)}
                                         </ThemedText>
-                                        <Icon name='chevron-down' size={16} color={themeColors.subText} />
+                                        <Icon name='chevron-down' size={14} color={themeColors.text} />
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -591,7 +621,7 @@ export default function EditMealItemScreen() {
                     </View>
 
                     {/* Impact on Targets Section */}
-                    {activeNutritionGoal && (
+                    {applicableNutritionGoal && (
                         <View style={[styles.section, { backgroundColor: themeColors.background }]}>
                             <ThemedText type='title' style={styles.sectionTitle}>
                                 Impact on Daily Goals
@@ -633,7 +663,7 @@ export default function EditMealItemScreen() {
                         {
                             backgroundColor: themeColors.background,
                             paddingHorizontal: Spaces.MD,
-                            paddingBottom: Spaces.MD,
+                            paddingBottom: Spaces.XL,
                         },
                     ]}
                 >
@@ -756,7 +786,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     caloriesLabel: {
-        minWidth: 80, // Fixed width for "Calories" label to make room for calculated value
+        minWidth: 80,
     },
     calculatedCaloriesInline: {
         flex: 1,
@@ -778,7 +808,6 @@ const styles = StyleSheet.create({
         paddingVertical: Spaces.MD,
     },
     mealSelectorTrigger: {
-        // Remove background and padding since we're styling it to match other inputs
         backgroundColor: 'transparent',
         padding: 0,
         minHeight: 'auto',
@@ -792,9 +821,7 @@ const styles = StyleSheet.create({
     timeDisplayText: {
         fontWeight: '500',
     },
-    updateButtonContainer: {
-        // Position will be handled inline
-    },
+    updateButtonContainer: {},
     updateButton: {
         width: '100%',
     },

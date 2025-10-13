@@ -91,7 +91,7 @@ const MacroItem: React.FC<MacroItemProps> = ({ label, iconName, current, goal, c
                 goal={goal}
                 color={color}
                 backgroundColor={backgroundColor}
-                height={4}
+                height={8}
                 fullHeight={true}
                 overageColor={overageColor}
             />
