@@ -1,6 +1,7 @@
 // lib/auth/authService.ts
 
 import { cacheService } from '@/lib/cache/cacheService';
+import { databaseManager } from '@/lib/database/DatabaseManager';
 import { Platform } from 'react-native';
 
 import * as SecureStore from 'expo-secure-store';
@@ -91,7 +92,7 @@ export const authService = {
                 hasTokens: true,
             };
         } catch (error) {
-            console.error('Error in storeAuthData:', {
+            console.error('❌ Error in storeAuthData:', {
                 name: (error as Error).name,
                 message: (error as Error).message,
                 code: (error as any).code,
@@ -102,54 +103,61 @@ export const authService = {
 
     signOut: async () => {
         try {
-            // Get the auth provider to determine the right sign-out flow
-            const authProvider = (await SecureStore.getItemAsync(STORAGE_KEYS.AUTH_PROVIDER)) || 'cognito';
+            // STEP 1: Amplify sign out FIRST (before clearing anything)
+            // This way if user cancels, nothing is cleared yet
 
-            // For Google authentication, use a more cautious approach
-            if (authProvider === 'google') {
-                // First clear local auth data
-                await authService.clearAuthData();
-
-                // Close any open browser sessions to prevent redirects (iOS only)
-                if (Platform.OS === 'ios') {
-                    WebBrowser.dismissAuthSession();
-                }
-
-                // Then perform a local-only sign out (no global sign out)
-                await amplifySignOut({ global: false });
-
-                return true;
-            } else {
-                // For Cognito email/password auth, use normal sign out
-                await amplifySignOut({ global: false });
-                await authService.clearAuthData();
-                return true;
+            if (Platform.OS === 'ios') {
+                WebBrowser.dismissAuthSession();
             }
-        } catch (error) {
-            console.error('Error signing out:', error);
-            // Even if there's an error with Amplify, clear local data
+
             try {
-                await authService.clearAuthData();
-            } catch (clearError) {
-                console.error('Error clearing auth data during sign-out failure:', clearError);
+                await amplifySignOut({ global: false });
+            } catch {
+                // If this throws, user might have cancelled
+                // We'll continue anyway since we can't detect cancellation
             }
-            return false;
+
+            // Check if we're actually signed out
+            const session = await fetchAuthSession();
+            if (session.tokens) {
+                throw new Error('Sign out incomplete');
+            }
+
+            // STEP 2: Now clear local data (only after Amplify confirmed sign out)
+            const keys = Object.values(STORAGE_KEYS);
+            await Promise.all(keys.map((key) => SecureStore.deleteItemAsync(key)));
+            await cacheService.clear();
+
+            try {
+                await databaseManager.clearAllData();
+            } catch (dbError) {
+                console.warn('⚠️ SQLite clear failed:', dbError);
+            }
+            await new Promise((resolve) => setTimeout(resolve, 300));
+        } catch (error) {
+            console.error('❌ Error in signOut:', error);
+            throw error; // Let caller handle it
         }
     },
-
-    // Enhanced clearAuthData to include cache clearing
+    // Enhanced clearAuthData to include SQLite and cache clearing
     clearAuthData: async () => {
         try {
-            // Clear secure store auth data
+            // Step 1: Clear secure store auth data
             const keys = Object.values(STORAGE_KEYS);
             await Promise.all(keys.map((key) => SecureStore.deleteItemAsync(key)));
 
-            // Clear all cached data
+            // Step 2: Clear all cached data
             await cacheService.clear();
 
-            console.log('All auth data and cache cleared successfully');
+            // Step 3: Clear SQLite database
+            try {
+                await databaseManager.clearAllData();
+            } catch (dbError) {
+                console.warn('⚠️ SQLite clear failed (database may not be initialized):', dbError);
+                // Don't throw - this is okay if database wasn't initialized
+            }
         } catch (error) {
-            console.error('Error clearing auth data and cache:', error);
+            console.error('❌ Error clearing auth data and cache:', error);
             throw error;
         }
     },
@@ -228,7 +236,6 @@ export const authService = {
 
     getUserId: async () => {
         const userId = await SecureStore.getItemAsync(STORAGE_KEYS.USER_ID);
-        // const userId = '01f33d7a-0041-70a4-4522-d6943bcc6aa7';
         if (!userId) {
             throw new Error('No user ID found');
         }

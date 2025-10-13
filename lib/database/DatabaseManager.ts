@@ -167,25 +167,54 @@ export class DatabaseManager {
     }
 
     /**
-     * Get database statistics for debugging
+     * Get comprehensive database statistics for debugging
      */
     public async getStats(): Promise<{
-        weightMeasurements: number;
+        tables: Record<string, number>;
         pendingSyncItems: number;
         failedSyncItems: number;
         databaseSize: number;
+        totalRecords: number;
     }> {
         const db = this.getDatabase();
 
         try {
-            const weightCount = (await db.getFirstAsync('SELECT COUNT(*) as count FROM weight_measurements')) as { count: number };
+            // Get all user tables
+            const tables = (await db.getAllAsync(
+                `SELECT name FROM sqlite_master 
+             WHERE type='table' 
+             AND name NOT LIKE 'sqlite_%'
+             ORDER BY name`,
+            )) as Array<{ name: string }>;
 
+            // Get count for each table
+            const tableCounts: Record<string, number> = {};
+            let totalRecords = 0;
+
+            for (const table of tables) {
+                const result = (await db.getFirstAsync(`SELECT COUNT(*) as count FROM ${table.name}`)) as { count: number };
+
+                const count = result?.count || 0;
+                tableCounts[table.name] = count;
+                totalRecords += count;
+            }
+
+            // Get pending sync items
             const pendingCount = (await db.getFirstAsync('SELECT COUNT(*) as count FROM sync_queue')) as { count: number };
 
-            const failedCount = (await db.getFirstAsync(
-                `SELECT COUNT(*) as count FROM weight_measurements 
-                 WHERE sync_status = 'failed'`,
-            )) as { count: number };
+            // Get failed sync items across all tables
+            let failedCount = 0;
+            for (const table of tables) {
+                // Check if table has sync_status column
+                const columns = (await db.getAllAsync(`PRAGMA table_info(${table.name})`)) as Array<{ name: string }>;
+
+                const hasSyncStatus = columns.some((col) => col.name === 'sync_status');
+
+                if (hasSyncStatus) {
+                    const failed = (await db.getFirstAsync(`SELECT COUNT(*) as count FROM ${table.name} WHERE sync_status = 'failed'`)) as { count: number };
+                    failedCount += failed?.count || 0;
+                }
+            }
 
             // Get database file size (approximate)
             const sizeQuery = (await db.getFirstAsync('PRAGMA page_count')) as { page_count: number };
@@ -193,10 +222,11 @@ export class DatabaseManager {
             const dbSize = (sizeQuery?.page_count || 0) * (pageSize?.page_size || 0);
 
             return {
-                weightMeasurements: weightCount?.count || 0,
+                tables: tableCounts,
                 pendingSyncItems: pendingCount?.count || 0,
-                failedSyncItems: failedCount?.count || 0,
+                failedSyncItems: failedCount,
                 databaseSize: dbSize,
+                totalRecords,
             };
         } catch (error) {
             console.error('Failed to get database stats:', error);
@@ -205,42 +235,6 @@ export class DatabaseManager {
     }
 
     private async createTables(db: SQLite.SQLiteDatabase): Promise<void> {
-        // Weight measurements table
-        await db.execAsync(`
-            CREATE TABLE IF NOT EXISTS weight_measurements (
-                id TEXT PRIMARY KEY,
-                user_id TEXT NOT NULL,
-                weight REAL NOT NULL,
-                measurement_timestamp TEXT NOT NULL,
-                server_timestamp TEXT,
-                sync_status TEXT NOT NULL DEFAULT 'local_only',
-                created_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL,
-                retry_count INTEGER DEFAULT 0,
-                last_sync_attempt TEXT,
-                error_message TEXT,
-                UNIQUE(user_id, measurement_timestamp)
-            );
-        `);
-
-        // Body measurements table
-        await db.execAsync(`
-            CREATE TABLE IF NOT EXISTS body_measurements (
-                id TEXT PRIMARY KEY,
-                user_id TEXT NOT NULL,
-                measurements_json TEXT NOT NULL,
-                measurement_timestamp TEXT NOT NULL,
-                server_timestamp TEXT,
-                sync_status TEXT NOT NULL DEFAULT 'local_only',
-                created_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL,
-                retry_count INTEGER DEFAULT 0,
-                last_sync_attempt TEXT,
-                error_message TEXT,
-                UNIQUE(user_id, measurement_timestamp)
-            );
-        `);
-
         // Sync queue table
         await db.execAsync(`
             CREATE TABLE IF NOT EXISTS sync_queue (
@@ -267,15 +261,6 @@ export class DatabaseManager {
         `);
 
         // Create indexes for better query performance
-        await db.execAsync(`
-            CREATE INDEX IF NOT EXISTS idx_weight_user_timestamp 
-            ON weight_measurements(user_id, measurement_timestamp);
-        `);
-
-        await db.execAsync(`
-            CREATE INDEX IF NOT EXISTS idx_weight_sync_status 
-            ON weight_measurements(sync_status);
-        `);
 
         await db.execAsync(`
             CREATE INDEX IF NOT EXISTS idx_sync_queue_priority 
@@ -286,15 +271,6 @@ export class DatabaseManager {
             CREATE INDEX IF NOT EXISTS idx_sync_queue_table_operation 
             ON sync_queue(table_name, operation);
         `);
-        await db.execAsync(`
-            CREATE INDEX IF NOT EXISTS idx_body_user_timestamp 
-            ON body_measurements(user_id, measurement_timestamp);
-        `);
-
-        await db.execAsync(`
-            CREATE INDEX IF NOT EXISTS idx_body_sync_status 
-            ON body_measurements(sync_status);
-        `);
 
         console.log('Database tables created successfully');
     }
@@ -302,6 +278,7 @@ export class DatabaseManager {
     private async runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
         // Get current schema version
         let currentVersion = 0;
+
         try {
             const versionResult = (await db.getFirstAsync('SELECT value FROM sync_metadata WHERE key = ?', ['schema_version'])) as { value: string } | null;
 
@@ -362,6 +339,39 @@ export class DatabaseManager {
 
             default:
                 console.warn(`Unknown migration version: ${version}`);
+        }
+    }
+
+    /**
+     * Clear all data from the database (for logout/account switching)
+     * This removes all user data but keeps the schema intact
+     * Only preserves schema_version in sync_metadata for migrations
+     */
+    public async clearAllData(): Promise<void> {
+        try {
+            await this.withTransaction(async (db) => {
+                // Get all user tables dynamically (including sync_metadata this time)
+                const tables = (await db.getAllAsync(
+                    `SELECT name FROM sqlite_master 
+                 WHERE type='table' 
+                 AND name NOT LIKE 'sqlite_%'
+                 ORDER BY name`,
+                )) as Array<{ name: string }>;
+
+                // Clear all tables (including sync_metadata will be cleared selectively)
+                for (const table of tables) {
+                    if (table.name === 'sync_metadata') {
+                        // For sync_metadata, only keep schema_version
+                        await db.runAsync(`DELETE FROM sync_metadata WHERE key != 'schema_version';`);
+                    } else {
+                        // Clear all records from other tables
+                        await db.runAsync(`DELETE FROM ${table.name};`);
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('❌ Failed to clear SQLite data:', error);
+            throw error;
         }
     }
 }

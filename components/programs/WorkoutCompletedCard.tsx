@@ -42,7 +42,6 @@ export const WorkoutCompletedCard = ({ onBrowseSolos }: WorkoutCompletedCardProp
                 styles.tileContainer,
                 styles.shadowContainer,
                 {
-                    marginBottom: Spaces.XL,
                     height: Sizes.imageLGHeight,
                     overflow: 'hidden',
                 },

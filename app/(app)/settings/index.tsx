@@ -66,48 +66,30 @@ const SettingsIndex = () => {
 
     const handleSignOut = async () => {
         try {
-            // Capture analytics event
-            posthog.capture('sign_out_clicked');
-            posthog.reset();
+            await authService.signOut();
 
-            const success = await authService.signOut();
-
-            // Clear store state (this now also clears cache via authService.clearAuthData)
+            // Only clear Redux and navigate if sign out succeeded
             await dispatch(resetStore());
+            router.replace('/');
+        } catch (error: any) {
+            // Check if user is actually still signed in
+            const { isAuthenticated } = await authService.checkSession();
 
-            // Navigate to welcome screen with a slight delay to ensure cleanup
-            setTimeout(() => {
-                router.replace('/');
-            }, 100);
+            if (isAuthenticated) {
+                // User cancelled or sign out failed - stay in app
+                return; // Don't navigate, don't clear Redux
+            } else {
+                // Something weird happened - force cleanup
+                try {
+                    posthog.capture('sign_out_clicked');
+                    posthog.reset();
 
-            if (!success) {
-                // If sign out failed through normal channels, still ensure local cleanup
-                console.warn('Sign out through Amplify failed, but local state and cache have been cleared');
-            }
-        } catch (error: unknown) {
-            console.error('Error during sign out process:', error);
-
-            // Even on error, ensure complete cleanup
-            try {
-                // This will clear both auth data AND cache
-                await authService.clearAuthData();
-                await dispatch(resetStore());
-
-                setTimeout(() => {
+                    await authService.clearAuthData();
+                    await dispatch(resetStore());
                     router.replace('/');
-                }, 100);
-
-                console.log('Fallback cleanup completed - auth data, cache, and Redux store cleared');
-            } catch (cleanupError: unknown) {
-                const errorMessage =
-                    error instanceof Error
-                        ? error.message
-                            ? error.message
-                            : cleanupError instanceof Error
-                              ? cleanupError.message
-                              : 'An unexpected error occurred'
-                        : 'An unexpected error occurred';
-                Alert.alert('Sign out Error', errorMessage);
+                } catch (cleanupError: any) {
+                    Alert.alert('Sign out Error', 'Please try again', error, cleanupError);
+                }
             }
         }
     };
