@@ -84,12 +84,6 @@ export default function ProfileScreen() {
         await Promise.allSettled(promises);
     };
 
-    useEffect(() => {
-        if (userWeightMeasurementsState === REQUEST_STATE.IDLE) {
-            dispatch(getWeightMeasurementsAsync());
-        }
-    }, [dispatch, userWeightMeasurementsState]);
-
     // useEffect(() => {
     //     if (userSleepMeasurementsState === REQUEST_STATE.IDLE) {
     //         dispatch(getSleepMeasurementsAsync());
@@ -97,10 +91,17 @@ export default function ProfileScreen() {
     // }, [dispatch, userSleepMeasurementsState]);
 
     useEffect(() => {
-        if (userBodyMeasurementsState === REQUEST_STATE.IDLE) {
+        // Only fetch if IDLE and we don't have data
+        if (userWeightMeasurementsState === REQUEST_STATE.IDLE && !userWeightMeasurements?.length) {
+            dispatch(getWeightMeasurementsAsync());
+        }
+    }, [dispatch, userWeightMeasurementsState, userWeightMeasurements]);
+
+    useEffect(() => {
+        if (userBodyMeasurementsState === REQUEST_STATE.IDLE && !userBodyMeasurements?.length) {
             dispatch(getBodyMeasurementsAsync());
         }
-    }, [dispatch, userBodyMeasurementsState]);
+    }, [dispatch, userBodyMeasurementsState, userBodyMeasurements]);
 
     // Updated data loaded state to handle REJECTED states
     const dataLoadedState = useMemo(() => {

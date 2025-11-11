@@ -45,7 +45,7 @@ export const WeightProgressCard: React.FC<WeightProgressCardProps> = ({ nutritio
 
     const currentWeight = getCurrentWeight();
     const startingWeight = getStartingWeight();
-    const goalWeight = nutritionGoal.WeightGoal;
+    const goalWeight = nutritionGoal.TargetWeight;
 
     const isWeightLoss = startingWeight > goalWeight;
     const isWeightGain = startingWeight < goalWeight;

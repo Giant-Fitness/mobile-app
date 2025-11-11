@@ -8,6 +8,7 @@ import {
     UserExerciseSetModification,
     UserExerciseSubstitution,
     UserFitnessProfile,
+    UserMacroTarget,
     UserNutritionGoal,
     UserNutritionLog,
     UserNutritionProfile,
@@ -24,8 +25,10 @@ export interface UserState {
     userFitnessProfileState: REQUEST_STATE;
     userNutritionProfile: UserNutritionProfile | null;
     userNutritionProfileState: REQUEST_STATE;
-    userNutritionGoalHistory: UserNutritionGoal[];
-    userNutritionGoalHistoryState: REQUEST_STATE;
+    userNutritionGoals: UserNutritionGoal[];
+    userNutritionGoalsState: REQUEST_STATE;
+    userMacroTargets: UserMacroTarget[];
+    userMacroTargetsState: REQUEST_STATE;
     userNutritionLogs: { [date: string]: UserNutritionLog | null };
     userNutritionLogsState: REQUEST_STATE;
     userRecommendations: UserRecommendations | null;
@@ -54,8 +57,10 @@ export const initialState: UserState = {
     userFitnessProfileState: REQUEST_STATE.IDLE,
     userNutritionProfile: null,
     userNutritionProfileState: REQUEST_STATE.IDLE,
-    userNutritionGoalHistory: [],
-    userNutritionGoalHistoryState: REQUEST_STATE.IDLE,
+    userNutritionGoals: [],
+    userNutritionGoalsState: REQUEST_STATE.IDLE,
+    userMacroTargets: [],
+    userMacroTargetsState: REQUEST_STATE.IDLE,
     userNutritionLogs: {},
     userNutritionLogsState: REQUEST_STATE.IDLE,
     userRecommendations: null,

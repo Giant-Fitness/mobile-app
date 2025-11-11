@@ -9,8 +9,6 @@ import { exerciseSubstitutionOfflineService } from '@/lib/storage/exercise-subst
 import { exerciseSubstitutionSyncHandler } from '@/lib/storage/exercise-substitutions/ExerciseSubstitutionSyncHandler';
 import { fitnessProfileOfflineService } from '@/lib/storage/fitness-profile/FitnessProfileOfflineService';
 import { fitnessProfileSyncHandler } from '@/lib/storage/fitness-profile/FitnessProfileSyncHandler';
-import { nutritionProfileOfflineService } from '@/lib/storage/nutrition-profile/NutritionProfileOfflineService';
-import { nutritionProfileSyncHandler } from '@/lib/storage/nutrition-profile/NutritionProfileSyncHandler';
 import { programProgressOfflineService } from '@/lib/storage/program-progress/ProgramProgressOfflineService';
 import { programProgressSyncHandler } from '@/lib/storage/program-progress/ProgramProgressSyncHandler';
 import { weightMeasurementOfflineService } from '@/lib/storage/weight-measurements/WeightMeasurementOfflineService';
@@ -44,13 +42,12 @@ export async function initializeOfflineServices(options: OfflineInitializationOp
         await syncQueueManager.initialize();
 
         // Step 2: Initialize data services (creates tables if needed)
-        const [weightInit, bodyInit, fitnessInit, nutritionInit, appSettingsInit, programProgressInit, exerciseSubstitutionInit, exerciseSetModificationInit] =
+        const [weightInit, bodyInit, fitnessInit, appSettingsInit, programProgressInit, exerciseSubstitutionInit, exerciseSetModificationInit] =
             await Promise.allSettled([
                 programProgressOfflineService.initialize(),
                 weightMeasurementOfflineService.initialize(),
                 bodyMeasurementOfflineService.initialize(),
                 fitnessProfileOfflineService.initialize(),
-                nutritionProfileOfflineService.initialize(),
                 appSettingsOfflineService.initialize(),
                 exerciseSubstitutionOfflineService.initialize(),
                 exerciseSetModificationOfflineService.initialize(),
@@ -65,9 +62,6 @@ export async function initializeOfflineServices(options: OfflineInitializationOp
         }
         if (fitnessInit.status === 'rejected') {
             console.warn('Fitness profile service initialization failed:', fitnessInit.reason);
-        }
-        if (nutritionInit.status === 'rejected') {
-            console.warn('Nutrition profile service initialization failed:', nutritionInit.reason);
         }
         if (appSettingsInit.status === 'rejected') {
             console.warn('App settings service initialization failed:', appSettingsInit.reason);
@@ -87,7 +81,6 @@ export async function initializeOfflineServices(options: OfflineInitializationOp
         syncQueueManager.registerSyncHandler('weight_measurements', weightMeasurementSyncHandler);
         syncQueueManager.registerSyncHandler('body_measurements', bodyMeasurementSyncHandler);
         syncQueueManager.registerSyncHandler('fitness_profiles', fitnessProfileSyncHandler);
-        syncQueueManager.registerSyncHandler('nutrition_profiles', nutritionProfileSyncHandler);
         syncQueueManager.registerSyncHandler('app_settings', appSettingsSyncHandler);
         syncQueueManager.registerSyncHandler('exercise_substitutions', exerciseSubstitutionSyncHandler);
         syncQueueManager.registerSyncHandler('exercise_set_modifications', exerciseSetModificationSyncHandler);

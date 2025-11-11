@@ -1,6 +1,5 @@
 // app/programs/active-program-home.tsx
 
-import { DumbbellSplash } from '@/components/base/DumbbellSplash';
 import { Icon } from '@/components/base/Icon';
 import { ThemedText } from '@/components/base/ThemedText';
 import { ThemedView } from '@/components/base/ThemedView';
@@ -9,11 +8,9 @@ import { ProgramDayDetailCard } from '@/components/programs/ProgramDayDetailCard
 import { WorkoutCompletedCard } from '@/components/programs/WorkoutCompletedCard';
 import { TrainingQuote } from '@/components/quotes/TrainingQuote';
 import { Colors } from '@/constants/Colors';
-import { REQUEST_STATE } from '@/constants/requestStates';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useProgramData } from '@/hooks/useProgramData';
-import { useSplashScreen } from '@/hooks/useSplashScreen';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { debounce } from '@/utils/debounce';
 import React from 'react';
@@ -29,7 +26,6 @@ export default function ActiveProgramHome() {
         activeProgram,
         activeProgramNextDays,
         activeProgramCurrentDay,
-        dataLoadedState,
         isLastDay,
         currentWeek,
         displayQuote,
@@ -39,14 +35,6 @@ export default function ActiveProgramHome() {
     } = useProgramData(undefined, undefined, {
         fetchAllDays: true,
     });
-
-    const { showSplash, handleSplashComplete } = useSplashScreen({
-        dataLoadedState,
-    });
-
-    if (showSplash) {
-        return <DumbbellSplash onAnimationComplete={handleSplashComplete} isDataLoaded={dataLoadedState === REQUEST_STATE.FULFILLED} />;
-    }
 
     if (error) {
         return (

@@ -9,7 +9,7 @@ import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { RootState } from '@/store/store';
-import { UserNutritionGoal } from '@/types';
+import { UserMacroTarget } from '@/types';
 import React, { useMemo } from 'react';
 import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 
@@ -64,42 +64,41 @@ const formatDateForAPI = (date: Date): string => {
 };
 
 /**
- * Finds the appropriate nutrition goal for a given date
- * @param goals - Array of nutrition goals sorted by EffectiveDate
- * @param targetDate - The date to find the goal for
- * @returns The nutrition goal that applies to the target date
+ * Finds the appropriate macro target for a given date
+ * @param targets - Array of macro targets sorted by EffectiveDate
+ * @param targetDate - The date to find the target for
+ * @returns The macro target that applies to the target date
  */
-const getGoalForDate = (goals: UserNutritionGoal[], targetDate: Date): UserNutritionGoal | null => {
-    if (!goals || goals.length === 0) return null;
+const getMacroTargetForDate = (targets: UserMacroTarget[], targetDate: Date): UserMacroTarget | null => {
+    if (!targets || targets.length === 0) return null;
 
     // Convert target date to YYYY-MM-DD format for comparison
-    // Use local timezone to avoid timezone issues
     const year = targetDate.getFullYear();
     const month = String(targetDate.getMonth() + 1).padStart(2, '0');
     const day = String(targetDate.getDate()).padStart(2, '0');
     const targetDateString = `${year}-${month}-${day}`;
 
-    // Sort goals by EffectiveDate in ascending order (earliest first)
-    const sortedGoals = [...goals].sort((a, b) => a.EffectiveDate.localeCompare(b.EffectiveDate));
+    // Sort targets by EffectiveDate in ascending order (earliest first)
+    const sortedTargets = [...targets].sort((a, b) => a.EffectiveDate.localeCompare(b.EffectiveDate));
 
-    // Find the most recent goal that is effective on or before the target date
-    let applicableGoal: UserNutritionGoal | null = null;
+    // Find the most recent target that is effective on or before the target date
+    let applicableTarget: UserMacroTarget | null = null;
 
-    for (const goal of sortedGoals) {
-        if (goal.EffectiveDate <= targetDateString) {
-            applicableGoal = goal;
+    for (const target of sortedTargets) {
+        if (target.EffectiveDate <= targetDateString) {
+            applicableTarget = target;
         } else {
-            // Since goals are sorted, we can break when we find the first future goal
+            // Since targets are sorted, we can break when we find the first future target
             break;
         }
     }
 
-    // If no goal is found (target date is before all goals), return the earliest goal
-    if (!applicableGoal && sortedGoals.length > 0) {
-        applicableGoal = sortedGoals[0];
+    // If no target is found (target date is before all targets), return the earliest target
+    if (!applicableTarget && sortedTargets.length > 0) {
+        applicableTarget = sortedTargets[0];
     }
 
-    return applicableGoal;
+    return applicableTarget;
 };
 
 export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({
@@ -115,20 +114,20 @@ export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({
     const isOnboardingComplete = useOnboardingStatus();
 
     // Get nutrition data from Redux selectors
-    const { userNutritionGoalHistory, userNutritionLogs } = useSelector((state: RootState) => state.user);
+    const { userMacroTargets, userNutritionLogs } = useSelector((state: RootState) => state.user);
 
     // Get the nutrition log for the selected date
     const selectedDateString = useMemo(() => formatDateForAPI(dateNavigation.selectedDate), [dateNavigation.selectedDate]);
     const nutritionLog = userNutritionLogs[selectedDateString] || null;
 
-    // Get the nutrition goal that applies to the selected date
-    const selectedDateNutritionGoal = useMemo(() => {
-        if (!userNutritionGoalHistory || userNutritionGoalHistory.length === 0) {
+    // Get the macro target that applies to the selected date
+    const selectedDateMacroTarget = useMemo(() => {
+        if (!userMacroTargets || userMacroTargets.length === 0) {
             return null;
         }
 
-        return getGoalForDate(userNutritionGoalHistory, dateNavigation.selectedDate);
-    }, [userNutritionGoalHistory, dateNavigation.selectedDate]);
+        return getMacroTargetForDate(userMacroTargets, dateNavigation.selectedDate);
+    }, [userMacroTargets, dateNavigation.selectedDate]);
 
     // Calculate consumed data from nutrition log
     const consumedData = useMemo(() => {
@@ -306,12 +305,12 @@ export const FoodLogHeader: React.FC<FoodLogHeaderProps> = ({
             )}
 
             {/* Daily Macros Card - Moves up as calendar disappears */}
-            {selectedDateNutritionGoal && (
+            {selectedDateMacroTarget && (
                 <Animated.View style={[styles.macrosContainer, animatedMacrosStyle]}>
                     <DailyMacrosCardCompressed
                         consumedData={consumedData}
                         isOnboardingComplete={isOnboardingComplete}
-                        nutritionGoal={selectedDateNutritionGoal}
+                        macroTarget={selectedDateMacroTarget}
                         nutritionLog={nutritionLog}
                     />
                 </Animated.View>

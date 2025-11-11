@@ -243,6 +243,14 @@ export class ProgramProgressOfflineService extends BaseOfflineDataService<UserPr
     }
 
     protected async mergeServerRecord(db: any, userId: string, serverRecord: UserProgramProgress): Promise<void> {
+        // Handle case where program has ended (ProgramId is null)
+        if (!serverRecord.ProgramId) {
+            // Delete any existing local record since there's no active program
+            await db.runAsync('DELETE FROM program_progress WHERE user_id = ?', [userId]);
+            console.log('Deleted program progress - no active program');
+            return;
+        }
+
         // Check if record already exists
         const existing = (await db.getFirstAsync('SELECT * FROM program_progress WHERE user_id = ?', [userId])) as ProgramProgressRecord | null;
 

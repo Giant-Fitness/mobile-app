@@ -30,93 +30,101 @@ type ImageTextOverlayProps = {
     subtitleType?: ThemedTextProps['type'];
 };
 
-export const ImageTextOverlay: React.FC<ImageTextOverlayProps> = ({
-    image,
-    title,
-    subtitle,
-    titleStyle,
-    subtitleStyle,
-    imageContentFit = 'cover',
-    titleType = 'titleLarge', // Default to 'titleLarge' if not provided
-    subtitleType = 'subtitle', // Default to 'subtitle' if not provided
-    containerStyle,
-    textContainerStyle,
-    gradientColors = ['transparent', 'rgba(0,0,0,0.8)'],
-}) => {
-    const colorScheme = useColorScheme() as 'light' | 'dark';
-    const themeColors = Colors[colorScheme];
-    const [isLoading, setIsLoading] = useState(true);
-    const [initialLoad, setInitialLoad] = useState(true);
+export const ImageTextOverlay = React.memo<ImageTextOverlayProps>(
+    ({
+        image,
+        title,
+        subtitle,
+        titleStyle,
+        subtitleStyle,
+        imageContentFit = 'cover',
+        titleType = 'titleLarge',
+        subtitleType = 'subtitle',
+        containerStyle,
+        textContainerStyle,
+        gradientColors = ['transparent', 'rgba(0,0,0,0.8)'],
+    }) => {
+        const colorScheme = useColorScheme() as 'light' | 'dark';
+        const themeColors = Colors[colorScheme];
+        const [isLoading, setIsLoading] = useState(true);
+        const [initialLoad, setInitialLoad] = useState(true);
 
-    useEffect(() => {
-        const checkCache = async () => {
-            try {
-                if (typeof image === 'string') {
-                    const isCached = await Image.getCachePathAsync(image);
-                    if (isCached) {
-                        setIsLoading(false);
-                        setInitialLoad(false);
+        // Get stable image URI
+        const currentImageUri = typeof image === 'string' ? image : image?.uri;
+
+        useEffect(() => {
+            const checkCache = async () => {
+                try {
+                    if (currentImageUri) {
+                        const isCached = await Image.getCachePathAsync(currentImageUri);
+                        if (isCached) {
+                            setIsLoading(false);
+                            setInitialLoad(false);
+                        }
                     }
-                } else if (image && typeof image === 'object' && 'uri' in image && image.uri) {
-                    const isCached = await Image.getCachePathAsync(image.uri);
-                    if (isCached) {
-                        setIsLoading(false);
-                        setInitialLoad(false);
-                    }
+                } catch (error) {
+                    console.log('Cache check error:', error);
                 }
-            } catch (error) {
-                console.log('Cache check error:', error);
-            }
+            };
+
+            checkCache();
+        }, [currentImageUri]);
+
+        const renderImage = () => {
+            return (
+                <ThemedView style={styles.imageWrapper}>
+                    <Image
+                        source={image}
+                        style={styles.image}
+                        contentFit={imageContentFit}
+                        cachePolicy='memory-disk'
+                        onLoadStart={() => {
+                            if (initialLoad) {
+                                setIsLoading(true);
+                            }
+                        }}
+                        onLoad={() => {
+                            setIsLoading(false);
+                            setInitialLoad(false);
+                        }}
+                        priority='high'
+                        recyclingKey={currentImageUri}
+                    />
+                    {initialLoad && (
+                        <ShimmerPlaceholderComponent
+                            LinearGradient={LinearGradient}
+                            style={styles.shimmer}
+                            visible={!isLoading}
+                            shimmerColors={colorScheme === 'dark' ? ['#1A1A1A', '#2A2A2A', '#1A1A1A'] : ['#D0D0D0', '#E0E0E0', '#D0D0D0']}
+                        />
+                    )}
+                    <LinearGradient colors={gradientColors} style={styles.gradientOverlay} />
+                    <ThemedView style={[styles.textContainer, textContainerStyle]}>
+                        <ThemedText type={titleType} style={[styles.title, titleStyle, { color: themeColors.white }]}>
+                            {title}
+                        </ThemedText>
+                        {subtitle && (
+                            <ThemedText type={subtitleType} style={[styles.subtitle, subtitleStyle, { color: themeColors.white }]}>
+                                {subtitle}
+                            </ThemedText>
+                        )}
+                    </ThemedView>
+                </ThemedView>
+            );
         };
 
-        checkCache();
-    }, [image]);
+        return <ThemedView style={[styles.container, containerStyle]}>{renderImage()}</ThemedView>;
+    },
+    (prevProps, nextProps) => {
+        // Custom comparison to prevent unnecessary re-renders
+        const prevUri = typeof prevProps.image === 'string' ? prevProps.image : prevProps.image?.uri;
+        const nextUri = typeof nextProps.image === 'string' ? nextProps.image : nextProps.image?.uri;
 
-    const renderImage = () => {
-        return (
-            <ThemedView style={styles.imageWrapper}>
-                <Image
-                    source={image}
-                    style={styles.image}
-                    contentFit={imageContentFit}
-                    cachePolicy='memory-disk'
-                    onLoadStart={() => {
-                        if (initialLoad) {
-                            setIsLoading(true);
-                        }
-                    }}
-                    onLoad={() => {
-                        setIsLoading(false);
-                        setInitialLoad(false);
-                    }}
-                    priority='normal'
-                    recyclingKey={typeof image === 'string' ? image : image.toString()}
-                />
-                {initialLoad && (
-                    <ShimmerPlaceholderComponent
-                        LinearGradient={LinearGradient}
-                        style={styles.shimmer}
-                        visible={!isLoading}
-                        shimmerColors={colorScheme === 'dark' ? ['#1A1A1A', '#2A2A2A', '#1A1A1A'] : ['#D0D0D0', '#E0E0E0', '#D0D0D0']}
-                    />
-                )}
-                <LinearGradient colors={gradientColors} style={styles.gradientOverlay} />
-                <ThemedView style={[styles.textContainer, textContainerStyle]}>
-                    <ThemedText type={titleType} style={[styles.title, titleStyle, { color: themeColors.white }]}>
-                        {title}
-                    </ThemedText>
-                    {subtitle && (
-                        <ThemedText type={subtitleType} style={[styles.subtitle, subtitleStyle, { color: themeColors.white }]}>
-                            {subtitle}
-                        </ThemedText>
-                    )}
-                </ThemedView>
-            </ThemedView>
-        );
-    };
+        return prevUri === nextUri && prevProps.title === nextProps.title && prevProps.subtitle === nextProps.subtitle;
+    },
+);
 
-    return <ThemedView style={[styles.container, containerStyle]}>{renderImage()}</ThemedView>;
-};
+ImageTextOverlay.displayName = 'ImageTextOverlay';
 
 const styles = StyleSheet.create({
     container: {
@@ -128,7 +136,7 @@ const styles = StyleSheet.create({
         flex: 1,
         overflow: 'hidden',
         width: '100%',
-        height: Sizes.imageLGHeight, // Ensure you have this size defined
+        height: Sizes.imageLGHeight,
     },
     image: {
         width: '100%',
@@ -138,9 +146,10 @@ const styles = StyleSheet.create({
         position: 'absolute',
         width: '100%',
         height: '100%',
+        zIndex: 1,
     },
     gradientOverlay: {
-        ...StyleSheet.absoluteFillObject, // Ensures the gradient covers the entire image
+        ...StyleSheet.absoluteFillObject,
         zIndex: 2,
     },
     textContainer: {

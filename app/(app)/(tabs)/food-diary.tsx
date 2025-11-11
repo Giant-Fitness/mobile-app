@@ -9,7 +9,7 @@ import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useNutritionDataPool } from '@/hooks/useNutritionDataPool';
 import { AppDispatch, RootState } from '@/store/store';
-import { getUserAsync, getUserNutritionGoalHistoryAsync } from '@/store/user/thunks';
+import { getUserAsync, getUserMacroTargetsAsync, getUserNutritionGoalsAsync } from '@/store/user/thunks';
 import { addAlpha } from '@/utils/colorUtils';
 import React, { useCallback, useRef, useState } from 'react';
 import { Dimensions, RefreshControl, StyleSheet, View } from 'react-native';
@@ -308,7 +308,8 @@ export default function FoodDiaryScreen() {
         try {
             await Promise.all([
                 dispatch(getUserAsync({ forceRefresh: true })),
-                dispatch(getUserNutritionGoalHistoryAsync({ forceRefresh: true })),
+                dispatch(getUserNutritionGoalsAsync({ forceRefresh: true })),
+                dispatch(getUserMacroTargetsAsync({ forceRefresh: true })),
                 refreshPool(selectedDate, true),
             ]);
         } catch (error) {

@@ -7,21 +7,20 @@ import { LinearProgressBar } from '@/components/charts/LinearProgressBar';
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { UserNutritionGoal, UserNutritionLog } from '@/types';
+import { UserMacroTarget, UserNutritionLog } from '@/types';
 import { addAlpha, darkenColor } from '@/utils/colorUtils';
 import { moderateScale } from '@/utils/scaling';
 import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 // Preview data for when user hasn't completed onboarding
-const PREVIEW_NUTRITION_PROFILE: any = {
-    GoalCalories: 2200,
-    GoalMacros: {
+const PREVIEW_MACRO_TARGET: any = {
+    TargetCalories: 2200,
+    TargetMacros: {
         Protein: 150,
         Carbs: 220,
         Fat: 75,
     },
-    WeightGoal: 'maintain',
 } as any;
 
 const PREVIEW_CONSUMED = {
@@ -40,7 +39,7 @@ interface DailyMacrosCardCompressedProps {
     } | null;
     isOnboardingComplete?: boolean;
     style?: any;
-    nutritionGoal: UserNutritionGoal | null;
+    macroTarget: UserMacroTarget | null;
     nutritionLog?: UserNutritionLog | null;
 }
 
@@ -100,7 +99,7 @@ const MacroItem: React.FC<MacroItemProps> = ({ label, iconName, current, goal, c
 };
 
 export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps> = ({
-    nutritionGoal,
+    macroTarget,
     consumedData,
     isOnboardingComplete = true,
     style,
@@ -109,8 +108,8 @@ export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps>
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
-    // Use preview data if not onboarded or no goal
-    const goal = isOnboardingComplete ? nutritionGoal : PREVIEW_NUTRITION_PROFILE;
+    // Use preview data if not onboarded or no target
+    const target = isOnboardingComplete ? macroTarget : PREVIEW_MACRO_TARGET;
 
     // Calculate consumed values from nutrition log or fallback to passed data
     const consumed = useMemo(() => {
@@ -140,8 +139,8 @@ export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps>
         );
     }, [nutritionLog, consumedData, isOnboardingComplete]);
 
-    // Don't render if no goal available
-    if (!goal) {
+    // Don't render if no target available
+    if (!target) {
         return null;
     }
 
@@ -149,7 +148,7 @@ export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps>
         {
             iconName: 'flame',
             current: consumed.calories,
-            goal: goal.GoalCalories,
+            goal: target.TargetCalories,
             color: themeColors.slateBlue,
             backgroundColor: themeColors.slateBlueTransparent,
             overageColor: darkenColor(themeColors.slateBlue, 0.4),
@@ -157,7 +156,7 @@ export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps>
         {
             label: 'P',
             current: consumed.protein,
-            goal: goal.GoalMacros.Protein,
+            goal: target.TargetMacros.Protein,
             color: themeColors.protein,
             backgroundColor: addAlpha(themeColors.protein, 0.1),
             overageColor: darkenColor(themeColors.protein, 0.4),
@@ -165,7 +164,7 @@ export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps>
         {
             label: 'C',
             current: consumed.carbs,
-            goal: goal.GoalMacros.Carbs,
+            goal: target.TargetMacros.Carbs,
             color: themeColors.carbs,
             backgroundColor: addAlpha(themeColors.carbs, 0.1),
             overageColor: darkenColor(themeColors.carbs, 0.4),
@@ -173,7 +172,7 @@ export const DailyMacrosCardCompressed: React.FC<DailyMacrosCardCompressedProps>
         {
             label: 'F',
             current: consumed.fat,
-            goal: goal.GoalMacros.Fat,
+            goal: target.TargetMacros.Fat,
             color: themeColors.fat,
             backgroundColor: addAlpha(themeColors.fat, 0.1),
             overageColor: darkenColor(themeColors.fat, 0.4),

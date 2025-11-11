@@ -30,7 +30,7 @@ export interface UserFitnessProfile {
     GymExperienceLevel: string;
     AccessToEquipment: string;
     DaysPerWeekDesired: string;
-    PrimaryFitnessGoal: string;
+    ActivityLevel?: string;
 }
 
 export interface UserWeightMeasurement {
@@ -86,33 +86,44 @@ export type SleepSubmissionData = {
     wakeTime?: string;
 };
 
-export interface UserNutritionProfile {
-    UserId: string;
-    PrimaryNutritionGoal: string;
-    ActivityLevel: string;
-    CreatedAt?: string;
-    UpdatedAt?: string;
-}
-
 export interface UserNutritionGoal {
     UserId: string;
     EffectiveDate: string; // YYYY-MM-DD format
-    GoalCalories: number;
-    GoalMacros: {
-        Protein: number;
-        Carbs: number;
-        Fat: number;
-    };
-    TDEE: number;
-    WeightGoal: number;
+    PrimaryFitnessGoal: 'lose-fat' | 'build-muscle' | 'body-recomposition' | 'maintain-fitness';
+    TargetWeight: number;
+    WeightChangeRate: number; // kg per week
     StartingWeight: number;
-    AdjustmentReason: 'INITIAL_CALCULATION' | 'ADAPTIVE_ADJUSTMENT' | 'MANUAL_UPDATE';
+    ActivityLevel: string;
+    AdjustmentReason: 'INITIAL_SETUP' | 'USER_UPDATED' | 'GOAL_CHANGED';
     AdjustmentNotes?: string;
     PreviousGoalDate?: string;
     CreatedAt: string;
     IsActive: boolean;
+}
+
+export interface UserMacroTarget {
+    UserId: string;
+    EffectiveDate: string; // YYYY-MM-DD format
+    TargetCalories: number;
+    TargetMacros: {
+        Protein: number;
+        Carbs: number;
+        Fat: number;
+    };
+    CalculatedTDEE: number;
     IsCaloriesOverridden: boolean;
-    WeightChangeRate: number;
+    OverriddenCalories?: number;
+    AdjustmentReason: 'INITIAL_CALCULATION' | 'WEEKLY_ADAPTIVE_ADJUSTMENT' | 'MANUAL_OVERRIDE' | 'GOAL_CHANGED';
+    AdjustmentDetails?: {
+        ExpectedWeightChange: number;
+        ActualWeightChange: number;
+        ComplianceRate: number;
+        CalorieAdjustment: number;
+    };
+    AdjustmentNotes?: string;
+    PreviousTargetDate?: string;
+    CreatedAt: string;
+    IsActive: boolean;
 }
 
 export interface CompleteProfileParams {
@@ -123,7 +134,7 @@ export interface CompleteProfileParams {
     Weight: number;
     ActivityLevel?: string;
 
-    PrimaryFitnessGoal: string;
+    PrimaryFitnessGoal: 'lose-fat' | 'build-muscle' | 'body-recomposition' | 'maintain-fitness';
 
     // Fitness
     GymExperienceLevel: string;
@@ -144,7 +155,7 @@ export interface CompleteProfileParams {
 export interface CompleteProfileResponse {
     user: User;
     userFitnessProfile: UserFitnessProfile;
-    userNutritionProfile?: UserNutritionProfile;
+    userMacroTarget: UserMacroTarget;
     userNutritionGoal: UserNutritionGoal;
     userRecommendations: UserRecommendations;
     calculated: {

@@ -9,22 +9,17 @@ import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { RootState } from '@/store/store';
-import { ProgramDay, Workout } from '@/types';
 import { debounce } from '@/utils/debounce';
 import { moderateScale } from '@/utils/scaling';
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
 
-import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 
 import { trigger } from 'react-native-haptic-feedback';
-import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
 import { useSelector } from 'react-redux';
 
 import { ImageTextOverlay } from '../media/ImageTextOverlay';
-
-const ShimmerPlaceholder = ShimmerPlaceHolder as unknown as React.ComponentType<any>;
 
 type ActiveProgramDayCompressedCardProps = {
     source: 'home';
@@ -57,36 +52,24 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
     const scaleAnim = useRef(new Animated.Value(1)).current;
     const badgeScaleAnim = useRef(new Animated.Value(1)).current;
 
-    const getDisplayImage = (day: ProgramDay, workouts: Record<string, Workout>) => {
-        if (day.Type === 'video' && day.WorkoutId && workouts[day.WorkoutId]) {
-            return { uri: workouts[day.WorkoutId].PhotoUrl };
+    // Memoize the display image to prevent recalculation on every render
+    const displayImage = useMemo(() => {
+        if (!currentDay) return null;
+
+        if (currentDay.Type === 'video' && currentDay.WorkoutId && workouts[currentDay.WorkoutId]) {
+            return { uri: workouts[currentDay.WorkoutId].PhotoUrl };
         }
-        return { uri: day.PhotoUrl };
-    };
+        return { uri: currentDay.PhotoUrl };
+    }, [currentDay?.DayId, currentDay?.Type, currentDay?.WorkoutId, currentDay?.PhotoUrl, workouts]);
 
-    // Loading and error states
-    if (currentDayState === REQUEST_STATE.PENDING || !currentDay) {
-        return (
-            <View style={styles.shadowContainer}>
-                <ShimmerPlaceholder
-                    LinearGradient={LinearGradient}
-                    style={styles.shimmerContainer}
-                    shimmerColors={colorScheme === 'dark' ? ['#1A1A1A', '#2A2A2A', '#1A1A1A'] : ['#D0D0D0', '#E0E0E0', '#D0D0D0']}
-                    autoRun={true}
-                >
-                    <View style={styles.shimmerContent}>
-                        <View style={styles.shimmerImage} />
-                        <View style={styles.shimmerTextContainer}>
-                            <View style={styles.shimmerTitle} />
-                            <View style={styles.shimmerSubtitle} />
-                        </View>
-                    </View>
-                </ShimmerPlaceholder>
-            </View>
-        );
-    }
+    // Cache the title to prevent unnecessary updates
+    const dayTitle = useMemo(() => currentDay?.DayTitle, [currentDay?.DayId, currentDay?.DayTitle]);
 
-    if (currentDayState === REQUEST_STATE.REJECTED || !currentDay) {
+    // Create a stable key based on the day ID
+    const imageKey = useMemo(() => `program-day-${dayId}-${displayImage?.uri}`, [dayId, displayImage?.uri]);
+
+    // Show error only if we have no data
+    if (currentDayState === REQUEST_STATE.REJECTED && !currentDay) {
         return (
             <View style={styles.shadowContainer}>
                 <ThemedView style={[styles.cardContainer, { backgroundColor: themeColors.background }]}>
@@ -174,8 +157,9 @@ export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressed
             <TouchableOpacity onPressIn={handlePressIn} onPressOut={handlePressOut} onPress={handlePress} activeOpacity={1} style={styles.cardContainer}>
                 <View style={styles.imageContainer}>
                     <ImageTextOverlay
-                        image={getDisplayImage(currentDay, workouts)}
-                        title={currentDay.DayTitle}
+                        key={imageKey}
+                        image={displayImage}
+                        title={dayTitle}
                         gradientColors={['transparent', 'rgba(0,0,0,0.65)']}
                         containerStyle={{ height: '100%' }}
                         titleType='title'

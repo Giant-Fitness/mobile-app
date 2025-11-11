@@ -7,7 +7,6 @@ import { bodyMeasurementOfflineService } from '@/lib/storage/body-measurements/B
 import { exerciseSetModificationOfflineService } from '@/lib/storage/exercise-set-modifications/ExerciseSetModificationOfflineService';
 import { exerciseSubstitutionOfflineService } from '@/lib/storage/exercise-substitutions/ExerciseSubstitutionOfflineService';
 import { fitnessProfileOfflineService } from '@/lib/storage/fitness-profile/FitnessProfileOfflineService';
-import { nutritionProfileOfflineService } from '@/lib/storage/nutrition-profile/NutritionProfileOfflineService';
 import { programProgressOfflineService } from '@/lib/storage/program-progress/ProgramProgressOfflineService';
 import { weightMeasurementOfflineService } from '@/lib/storage/weight-measurements/WeightMeasurementOfflineService';
 import { networkStateManager } from '@/lib/sync/NetworkStateManager';
@@ -33,9 +32,9 @@ import {
     UserExerciseSetModification,
     UserExerciseSubstitution,
     UserFitnessProfile,
+    UserMacroTarget,
     UserNutritionGoal,
     UserNutritionLog,
-    UserNutritionProfile,
     UserProgramProgress,
     UserRecommendations,
     UserSleepMeasurement,
@@ -672,7 +671,14 @@ export const endProgramAsync = createAsyncThunk<UserProgramProgress, void>('user
                 console.log('Syncing program end to server...');
                 const serverResult = await UserService.endProgram(userId);
 
-                // Update local record as synced
+                // Delete local record since program is ended
+                if (!serverResult || !serverResult.ProgramId) {
+                    await programProgressOfflineService.delete(currentProgress.localId);
+                    console.log('Program ended and local record deleted');
+                    return null; // Return null to indicate no active program
+                }
+
+                // Update local record as synced (shouldn't happen, but just in case)
                 await programProgressOfflineService.updateSyncStatus(currentProgress.localId, 'synced', {});
 
                 console.log('Program end successfully synced to server');
@@ -2123,163 +2129,6 @@ export const deleteExerciseSetModificationAsync = createAsyncThunk<
         });
     }
 });
-// Nutrition Profile Thunks
-/**
- * Get user nutrition profile (offline-first)
- * Loads immediately from SQLite, triggers background server sync
- */
-export const getUserNutritionProfileAsync = createAsyncThunk<
-    UserNutritionProfile,
-    { forceRefresh?: boolean } | void,
-    {
-        state: RootState;
-        rejectValue: { errorMessage: string };
-    }
->('user/getUserNutritionProfile', async (args = {}, { getState, rejectWithValue }) => {
-    try {
-        const { forceRefresh = false } = typeof args === 'object' ? args : {};
-        const state = getState();
-        const userId = state.user.user?.UserId;
-
-        if (!userId) {
-            return rejectWithValue({ errorMessage: 'User ID not available' });
-        }
-
-        // Always load from SQLite first (offline-first)
-        console.log('Loading nutrition profile from SQLite...');
-        const localProfile = await nutritionProfileOfflineService.getProfileForUser(userId);
-
-        if (localProfile) {
-            console.log('Found nutrition profile in SQLite');
-
-            // Background server sync (non-blocking) unless force refresh
-            if (networkStateManager.isOnline() && !forceRefresh) {
-                setTimeout(async () => {
-                    try {
-                        console.log('Triggering background nutrition profile sync...');
-                        const serverProfile = await UserService.getUserNutritionProfile(userId);
-                        await nutritionProfileOfflineService.mergeServerData(userId, serverProfile);
-                    } catch (error) {
-                        console.warn('Background nutrition profile sync failed:', error);
-                    }
-                }, 100);
-            }
-
-            // Force refresh: synchronous server sync
-            if (forceRefresh && networkStateManager.isOnline()) {
-                try {
-                    console.log('Force refreshing nutrition profile from server...');
-                    const serverProfile = await UserService.getUserNutritionProfile(userId);
-                    await nutritionProfileOfflineService.mergeServerData(userId, serverProfile);
-
-                    // Reload from SQLite to get merged data
-                    const refreshedProfile = await nutritionProfileOfflineService.getProfileForUser(userId);
-                    return refreshedProfile ? refreshedProfile.data : localProfile.data;
-                } catch (error) {
-                    console.warn('Force refresh failed, using local data:', error);
-                }
-            }
-
-            return localProfile.data;
-        }
-
-        // No local profile found - try server
-        if (networkStateManager.isOnline()) {
-            console.log('No local nutrition profile found, fetching from server...');
-            const serverProfile = await UserService.getUserNutritionProfile(userId);
-
-            // Store in SQLite for future offline use
-            await nutritionProfileOfflineService.mergeServerData(userId, serverProfile);
-
-            return serverProfile;
-        }
-
-        // Offline and no local data
-        return rejectWithValue({ errorMessage: 'No nutrition profile available offline' });
-    } catch (error) {
-        console.error('Failed to get nutrition profile:', error);
-        return rejectWithValue({
-            errorMessage: error instanceof Error ? error.message : 'Failed to fetch nutrition profile',
-        });
-    }
-});
-
-/**
- * Update user nutrition profile (offline-first with optimistic update)
- */
-export const updateUserNutritionProfileAsync = createAsyncThunk<
-    { user: User; userNutritionProfile: UserNutritionProfile },
-    { userNutritionProfile: UserNutritionProfile },
-    {
-        state: RootState;
-        rejectValue: { errorMessage: string };
-    }
->('user/updateNutritionProfile', async ({ userNutritionProfile }, { getState, rejectWithValue }) => {
-    const state = getState();
-    const userId = state.user.user?.UserId;
-
-    if (!userId) {
-        return rejectWithValue({ errorMessage: 'User ID not available' });
-    }
-
-    try {
-        // Optimistically update local SQLite immediately
-        console.log('Updating nutrition profile locally...');
-        const updatedProfile = await nutritionProfileOfflineService.upsertProfile({
-            userId,
-            data: {
-                PrimaryNutritionGoal: userNutritionProfile.PrimaryNutritionGoal,
-                ActivityLevel: userNutritionProfile.ActivityLevel,
-            },
-        });
-
-        // Try to sync to server immediately if online
-        if (networkStateManager.isOnline()) {
-            try {
-                console.log('Syncing nutrition profile to server...');
-                const serverResult = await UserService.updateUserNutritionProfile(userId, userNutritionProfile);
-
-                // Update local record as synced
-                await nutritionProfileOfflineService.updateSyncStatus(updatedProfile.localId, 'synced', {
-                    serverTimestamp: serverResult.userNutritionProfile.UpdatedAt,
-                });
-
-                console.log('Nutrition profile successfully synced to server');
-                return serverResult;
-            } catch (syncError) {
-                console.warn('Failed to sync nutrition profile to server, will retry later:', syncError);
-
-                // Mark as failed but don't fail the whole operation since we have local data
-                await nutritionProfileOfflineService.updateSyncStatus(updatedProfile.localId, 'failed', {
-                    errorMessage: syncError instanceof Error ? syncError.message : 'Sync failed',
-                    incrementRetry: true,
-                });
-            }
-        }
-
-        // Return optimistic result based on local update
-        // Note: We don't have user from local storage,
-        // so we'll need to get it from Redux state or make this return type more flexible
-        const currentUser = state.user.user;
-
-        if (!currentUser) {
-            // If we don't have the required data in state, we need to handle this case
-            console.warn('Missing user data in state for optimistic update');
-            return rejectWithValue({ errorMessage: 'Insufficient data for offline update' });
-        }
-
-        console.log('Nutrition profile updated offline (will sync when online)');
-        return {
-            user: currentUser,
-            userNutritionProfile: updatedProfile.data,
-        };
-    } catch (error) {
-        console.error('Failed to update nutrition profile:', error);
-        return rejectWithValue({
-            errorMessage: error instanceof Error ? error.message : 'Failed to update nutrition profile',
-        });
-    }
-});
 
 export const completeUserProfileAsync = createAsyncThunk<
     CompleteProfileResponse,
@@ -2293,7 +2142,11 @@ export const completeUserProfileAsync = createAsyncThunk<
         const result = await UserService.completeUserProfile(profileData);
 
         // Clear cache
-        await Promise.all([cacheService.remove('user_recommendations')]);
+        await Promise.all([
+            cacheService.remove('user_recommendations'),
+            cacheService.remove('user_nutrition_goals'),
+            cacheService.remove('user_macro_targets'),
+        ]);
 
         return result;
     } catch (error) {
@@ -2303,14 +2156,15 @@ export const completeUserProfileAsync = createAsyncThunk<
     }
 });
 
-export const getUserNutritionGoalHistoryAsync = createAsyncThunk<
+// Get User Nutrition Goals
+export const getUserNutritionGoalsAsync = createAsyncThunk<
     UserNutritionGoal[],
     { forceRefresh?: boolean; useCache?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
->('user/getUserNutritionGoalHistory', async (args = {}, { getState, rejectWithValue }) => {
+>('user/getUserNutritionGoals', async (args = {}, { getState, rejectWithValue }) => {
     try {
         const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
         const state = getState();
@@ -2320,48 +2174,50 @@ export const getUserNutritionGoalHistoryAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Return cached goal history if available and not forcing refresh
-        if (state.user.userNutritionGoalHistory.length > 0 && state.user.userNutritionGoalHistoryState === REQUEST_STATE.FULFILLED && !forceRefresh) {
-            return state.user.userNutritionGoalHistory;
+        // Return cached goals if available and not forcing refresh
+        if (state.user.userNutritionGoals.length > 0 && state.user.userNutritionGoalsState === REQUEST_STATE.FULFILLED && !forceRefresh) {
+            return state.user.userNutritionGoals;
         }
 
         // Try cache first if enabled and not forcing refresh
         if (useCache && !forceRefresh) {
-            const cacheKey = `user_nutrition_goal_history`;
+            const cacheKey = `user_nutrition_goals`;
             const cached = await cacheService.get<UserNutritionGoal[]>(cacheKey);
 
             if (cached) {
-                console.log('Loaded nutrition goal history from cache');
+                console.log('Loaded nutrition goals from cache');
                 return cached;
             }
         }
 
         // Load from API
-        console.log('Loading nutrition goal history from API');
-        const goalHistory = await UserService.getUserNutritionGoalHistory(userId);
+        console.log('Loading nutrition goals from API');
+        const goals = await UserService.getUserNutritionGoals(userId);
 
         // Cache the result if useCache is enabled
         if (useCache) {
-            const cacheKey = `user_nutrition_goal_history`;
-            await cacheService.set(cacheKey, goalHistory);
+            const cacheKey = `user_nutrition_goals`;
+            await cacheService.set(cacheKey, goals);
         }
 
-        return goalHistory;
+        return goals;
     } catch (error) {
         return rejectWithValue({
-            errorMessage: error instanceof Error ? error.message : 'Failed to fetch nutrition goal history',
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch nutrition goals',
         });
     }
 });
 
-export const createNutritionGoalEntryAsync = createAsyncThunk<
+// Create Nutrition Goal
+export const createNutritionGoalAsync = createAsyncThunk<
     UserNutritionGoal[],
     {
         goalData: {
-            goalCalories: number;
-            goalMacros: { Protein: number; Carbs: number; Fat: number };
-            tdee: number;
-            weightGoal: number;
+            primaryNutritionGoal: string;
+            targetWeight: number;
+            weightChangeRate: number;
+            startingWeight: number;
+            activityLevel: string;
         };
         adjustmentReason?: string;
         adjustmentNotes?: string;
@@ -2370,7 +2226,7 @@ export const createNutritionGoalEntryAsync = createAsyncThunk<
         state: RootState;
         rejectValue: { errorMessage: string };
     }
->('user/createNutritionGoalEntry', async ({ goalData, adjustmentReason, adjustmentNotes }, { getState, rejectWithValue }) => {
+>('user/createNutritionGoal', async ({ goalData, adjustmentReason, adjustmentNotes }, { getState, rejectWithValue }) => {
     try {
         const state = getState();
         const userId = state.user.user?.UserId;
@@ -2379,18 +2235,112 @@ export const createNutritionGoalEntryAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Create the new goal entry
-        await UserService.createNutritionGoalEntry(userId, goalData, adjustmentReason, adjustmentNotes);
+        // Create the new goal
+        await UserService.createNutritionGoal(userId, goalData, adjustmentReason, adjustmentNotes);
 
         // Invalidate cache after creation
-        const cacheKey = `user_nutrition_goal_history`;
+        const cacheKey = `user_nutrition_goals`;
         await cacheService.remove(cacheKey);
 
-        // Refresh and return all goal history
-        return await UserService.getUserNutritionGoalHistory(userId);
+        // Refresh and return all goals
+        return await UserService.getUserNutritionGoals(userId);
     } catch (error) {
         return rejectWithValue({
-            errorMessage: error instanceof Error ? error.message : 'Failed to create nutrition goal entry',
+            errorMessage: error instanceof Error ? error.message : 'Failed to create nutrition goal',
+        });
+    }
+});
+
+// Update Nutrition Goal
+export const updateNutritionGoalAsync = createAsyncThunk<
+    UserNutritionGoal[],
+    {
+        goalData: {
+            primaryNutritionGoal?: string;
+            targetWeight?: number;
+            weightChangeRate?: number;
+            activityLevel?: string;
+        };
+        adjustmentReason?: string;
+        adjustmentNotes?: string;
+    },
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/updateNutritionGoal', async ({ goalData, adjustmentReason, adjustmentNotes }, { getState, rejectWithValue }) => {
+    try {
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Update the active goal (creates a new entry with updated values)
+        await UserService.updateNutritionGoal(userId, goalData, adjustmentReason, adjustmentNotes);
+
+        // Invalidate cache after update
+        const cacheKey = `user_nutrition_goals`;
+        await cacheService.remove(cacheKey);
+
+        // Refresh and return all goals
+        return await UserService.getUserNutritionGoals(userId);
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to update nutrition goal',
+        });
+    }
+});
+
+// Get User Macro Targets
+export const getUserMacroTargetsAsync = createAsyncThunk<
+    UserMacroTarget[],
+    { forceRefresh?: boolean; useCache?: boolean } | void,
+    {
+        state: RootState;
+        rejectValue: { errorMessage: string };
+    }
+>('user/getUserMacroTargets', async (args = {}, { getState, rejectWithValue }) => {
+    try {
+        const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
+        const state = getState();
+        const userId = state.user.user?.UserId;
+
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
+        }
+
+        // Return cached targets if available and not forcing refresh
+        if (state.user.userMacroTargets.length > 0 && state.user.userMacroTargetsState === REQUEST_STATE.FULFILLED && !forceRefresh) {
+            return state.user.userMacroTargets;
+        }
+
+        // Try cache first if enabled and not forcing refresh
+        if (useCache && !forceRefresh) {
+            const cacheKey = `user_macro_targets`;
+            const cached = await cacheService.get<UserMacroTarget[]>(cacheKey);
+
+            if (cached) {
+                console.log('Loaded macro targets from cache');
+                return cached;
+            }
+        }
+
+        // Load from API
+        console.log('Loading macro targets from API');
+        const targets = await UserService.getUserMacroTargets(userId);
+
+        // Cache the result if useCache is enabled
+        if (useCache) {
+            const cacheKey = `user_macro_targets`;
+            await cacheService.set(cacheKey, targets);
+        }
+
+        return targets;
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch macro targets',
         });
     }
 });

@@ -69,7 +69,8 @@ export const RecommendedProgramCard: React.FC<RecommendedProgramCardProps> = ({ 
     const renderBadge = () => {
         const badgeColor = themeColors.tangerineSolid;
         const badgeTextColor = themeColors.white;
-
+        const text = compressed ? 'Recommended' : 'Start';
+        const icon = compressed ? 'star' : 'play';
         return (
             <Animated.View
                 style={[
@@ -81,9 +82,9 @@ export const RecommendedProgramCard: React.FC<RecommendedProgramCardProps> = ({ 
                     },
                 ]}
             >
-                <Icon name='play' color={badgeTextColor} size={12} style={{ marginRight: 4 }} />
+                <Icon name={icon} color={badgeTextColor} size={12} style={{ marginRight: 4 }} />
                 <ThemedText type='buttonSmall' style={[styles.badgeText, { color: badgeTextColor }]}>
-                    Start
+                    {text}
                 </ThemedText>
             </Animated.View>
         );

@@ -23,9 +23,9 @@ import {
     UserExerciseSetModification,
     UserExerciseSubstitution,
     UserFitnessProfile,
+    UserMacroTarget,
     UserNutritionGoal,
     UserNutritionLog,
-    UserNutritionProfile,
     UserProgramProgress,
     UserRecommendations,
     UserSleepMeasurement,
@@ -475,46 +475,6 @@ const deleteExerciseSetModification = async (userId: string, modificationId: str
     }
 };
 
-// Nutrition Profile Methods
-const getUserNutritionProfile = async (userId: string): Promise<UserNutritionProfile> => {
-    console.log('service: getUserNutritionProfile');
-    try {
-        if (!userId) throw new Error('No user ID found');
-
-        const { data } = await authUsersApiClient.get(`/users/${userId}/nutrition-profile`);
-        if (!data.userNutritionProfile) {
-            throw new Error('Invalid response format');
-        }
-        return data.userNutritionProfile;
-    } catch (error) {
-        throw handleApiError(error, 'GetUserNutritionProfile');
-    }
-};
-
-const updateUserNutritionProfile = async (
-    userId: string,
-    userNutritionProfile: UserNutritionProfile,
-): Promise<{
-    user: User;
-    userNutritionProfile: UserNutritionProfile;
-}> => {
-    console.log('service: updateUserNutritionProfile');
-    try {
-        const { data } = await authUsersApiClient.put(`/users/${userId}/nutrition-profile`, userNutritionProfile);
-
-        if (!data.user || !data.userNutritionProfile) {
-            throw new Error('Invalid response format');
-        }
-
-        return {
-            user: data.user,
-            userNutritionProfile: data.userNutritionProfile,
-        };
-    } catch (error) {
-        throw handleApiError(error, 'UpdateUserNutritionProfile');
-    }
-};
-
 const completeUserProfile = async (profileData: CompleteProfileParams): Promise<CompleteProfileResponse> => {
     console.log('service: completeUserProfile');
     try {
@@ -530,7 +490,7 @@ const completeUserProfile = async (profileData: CompleteProfileParams): Promise<
         return {
             user: data.user,
             userFitnessProfile: data.userFitnessProfile,
-            userNutritionProfile: data.userNutritionProfile || null,
+            userMacroTarget: data.userMacroTarget,
             userRecommendations: data.userRecommendations,
             userNutritionGoal: data.userNutritionGoal,
             calculated: data.calculated,
@@ -540,45 +500,87 @@ const completeUserProfile = async (profileData: CompleteProfileParams): Promise<
     }
 };
 
-const getUserNutritionGoalHistory = async (userId: string): Promise<UserNutritionGoal[]> => {
-    console.log('service: getUserNutritionGoalHistory');
+const getUserNutritionGoals = async (userId: string): Promise<UserNutritionGoal[]> => {
+    console.log('service: getUserNutritionGoals');
     try {
         if (!userId) throw new Error('No user ID found');
 
-        const { data } = await authUsersApiClient.get(`/users/${userId}/nutrition-goal-history`);
+        const { data } = await authUsersApiClient.get(`/users/${userId}/nutrition-goals`);
 
         return data.goals || [];
     } catch (error) {
-        throw handleApiError(error, 'GetUserNutritionGoalHistory');
+        throw handleApiError(error, 'GetUserNutritionGoals');
     }
 };
 
-const createNutritionGoalEntry = async (
+const createNutritionGoal = async (
     userId: string,
     goalData: {
-        goalCalories: number;
-        goalMacros: { Protein: number; Carbs: number; Fat: number };
-        tdee: number;
-        weightGoal: number;
+        primaryNutritionGoal: string;
+        targetWeight: number;
+        weightChangeRate: number;
+        startingWeight: number;
+        activityLevel: string;
     },
     adjustmentReason?: string,
     adjustmentNotes?: string,
 ): Promise<UserNutritionGoal> => {
-    console.log('service: createNutritionGoalEntry');
+    console.log('service: createNutritionGoal');
     try {
-        const { data } = await authUsersApiClient.post(`/users/${userId}/nutrition-goal-history`, {
+        const { data } = await authUsersApiClient.post(`/users/${userId}/nutrition-goals`, {
             ...goalData,
-            adjustmentReason: adjustmentReason || 'MANUAL_UPDATE',
+            adjustmentReason: adjustmentReason || 'USER_UPDATED',
             adjustmentNotes,
         });
 
-        if (!data.goalEntry) {
+        if (!data.goal) {
             throw new Error('Invalid response format');
         }
 
-        return data.goalEntry;
+        return data.goal;
     } catch (error) {
-        throw handleApiError(error, 'CreateNutritionGoalEntry');
+        throw handleApiError(error, 'CreateNutritionGoal');
+    }
+};
+
+const updateNutritionGoal = async (
+    userId: string,
+    goalData: {
+        primaryNutritionGoal?: string;
+        targetWeight?: number;
+        weightChangeRate?: number;
+        activityLevel?: string;
+    },
+    adjustmentReason?: string,
+    adjustmentNotes?: string,
+): Promise<UserNutritionGoal> => {
+    console.log('service: updateNutritionGoal');
+    try {
+        const { data } = await authUsersApiClient.put(`/users/${userId}/nutrition-goals/active`, {
+            ...goalData,
+            adjustmentReason: adjustmentReason || 'USER_UPDATED',
+            adjustmentNotes,
+        });
+
+        if (!data.goal) {
+            throw new Error('Invalid response format');
+        }
+
+        return data.goal;
+    } catch (error) {
+        throw handleApiError(error, 'UpdateNutritionGoal');
+    }
+};
+
+const getUserMacroTargets = async (userId: string): Promise<UserMacroTarget[]> => {
+    console.log('service: getUserMacroTargets');
+    try {
+        if (!userId) throw new Error('No user ID found');
+
+        const { data } = await authUsersApiClient.get(`/users/${userId}/macro-targets`);
+        return data.macroTargets || [];
+    } catch (error) {
+        throw handleApiError(error, 'GetUserMacroTargets');
     }
 };
 
@@ -789,12 +791,11 @@ export default {
     createExerciseSetModification,
     updateExerciseSetModification,
     deleteExerciseSetModification,
-    // Nutrition Profile
-    getUserNutritionProfile,
-    updateUserNutritionProfile,
     // Nutrition Goal History
-    getUserNutritionGoalHistory,
-    createNutritionGoalEntry,
+    getUserNutritionGoals,
+    createNutritionGoal,
+    updateNutritionGoal,
+    getUserMacroTargets,
     // Nutrition Logs
     getAllNutritionLogs,
     getBulkNutritionLogs,

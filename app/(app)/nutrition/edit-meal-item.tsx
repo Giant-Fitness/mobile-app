@@ -14,7 +14,7 @@ import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AppDispatch, RootState } from '@/store/store';
 import { deleteFoodEntryAsync, updateFoodEntryAsync } from '@/store/user/thunks';
-import { FoodEntry, MealType, UpdateFoodEntryParams, UserNutritionGoal } from '@/types';
+import { FoodEntry, MealType, UpdateFoodEntryParams, UserMacroTarget } from '@/types';
 import { addAlpha } from '@/utils/colorUtils';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, TextInput as RNTextInput, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
@@ -71,26 +71,26 @@ const ImpactProgressRing: React.FC<ImpactProgressRingProps> = ({ label, current,
 type FocusedInput = 'name' | 'calories' | 'protein' | 'carbs' | 'fat' | 'time' | null;
 
 /**
- * Helper function to find the applicable nutrition goal for a given date
- * @param goals - Array of all nutrition goals sorted by EffectiveDate desc
+ * Helper function to find the applicable macro target for a given date
+ * @param targets - Array of all macro targets sorted by EffectiveDate desc
  * @param dateString - Date string in YYYY-MM-DD format
- * @returns The applicable goal or undefined
+ * @returns The applicable target or undefined
  */
-const findApplicableGoal = (goals: UserNutritionGoal[] | undefined, dateString: string): UserNutritionGoal | undefined => {
-    if (!goals || goals.length === 0) return undefined;
+const findApplicableMacroTarget = (targets: UserMacroTarget[] | undefined, dateString: string): UserMacroTarget | undefined => {
+    if (!targets || targets.length === 0) return undefined;
 
-    // Sort goals by EffectiveDate in descending order
-    const sortedGoals = [...goals].sort((a, b) => b.EffectiveDate.localeCompare(a.EffectiveDate));
+    // Sort targets by EffectiveDate in descending order
+    const sortedTargets = [...targets].sort((a, b) => b.EffectiveDate.localeCompare(a.EffectiveDate));
 
-    // Find the first goal where EffectiveDate <= dateString
-    const applicableGoal = sortedGoals.find((goal) => goal.EffectiveDate <= dateString);
+    // Find the first target where EffectiveDate <= dateString
+    const applicableTarget = sortedTargets.find((target) => target.EffectiveDate <= dateString);
 
-    // If no applicable goal found, fall back to active goal
-    if (!applicableGoal) {
-        return sortedGoals.find((goal) => goal.IsActive);
+    // If no applicable target found, fall back to active target
+    if (!applicableTarget) {
+        return sortedTargets.find((target) => target.IsActive);
     }
 
-    return applicableGoal;
+    return applicableTarget;
 };
 
 export default function EditMealItemScreen() {
@@ -109,16 +109,16 @@ export default function EditMealItemScreen() {
         }
     }, [params.food]);
 
-    // Get all nutrition goals from Redux state
-    const allNutritionGoals = useSelector((state: RootState) => state.user.userNutritionGoalHistory);
+    // Get all macro targets from Redux state
+    const allMacroTargets = useSelector((state: RootState) => state.user.userMacroTargets);
 
     // Get the date string from the food entry
     const date = food?.dateString ?? '';
 
-    // Find the applicable nutrition goal for this date
-    const applicableNutritionGoal = useMemo(() => {
-        return findApplicableGoal(allNutritionGoals, date);
-    }, [allNutritionGoals, date]);
+    // Find the applicable macro target for this date
+    const applicableMacroTarget = useMemo(() => {
+        return findApplicableMacroTarget(allMacroTargets, date);
+    }, [allMacroTargets, date]);
 
     // Memoize initial time calculation
     const initialTime = useMemo(() => {
@@ -173,19 +173,19 @@ export default function EditMealItemScreen() {
         [focusedInput, themeColors.slateBlueLight, themeColors.backgroundSecondary],
     );
 
-    // Memoize impact percentages - now using the applicable goal for the date
+    // Memoize impact percentages - now using the applicable macro target for the date
     const impactPercentages = useMemo(() => {
-        if (!applicableNutritionGoal) {
+        if (!applicableMacroTarget) {
             return { calories: 0, protein: 0, carbs: 0, fat: 0 };
         }
 
         return {
-            calories: Math.round((formData.calories / applicableNutritionGoal.GoalCalories) * 100),
-            protein: Math.round((formData.protein / applicableNutritionGoal.GoalMacros.Protein) * 100),
-            carbs: Math.round((formData.carbs / applicableNutritionGoal.GoalMacros.Carbs) * 100),
-            fat: Math.round((formData.fat / applicableNutritionGoal.GoalMacros.Fat) * 100),
+            calories: Math.round((formData.calories / applicableMacroTarget.TargetCalories) * 100),
+            protein: Math.round((formData.protein / applicableMacroTarget.TargetMacros.Protein) * 100),
+            carbs: Math.round((formData.carbs / applicableMacroTarget.TargetMacros.Carbs) * 100),
+            fat: Math.round((formData.fat / applicableMacroTarget.TargetMacros.Fat) * 100),
         };
-    }, [formData, applicableNutritionGoal]);
+    }, [formData, applicableMacroTarget]);
 
     // Memoize original values for comparison
     const originalValues = useMemo(() => {
@@ -621,7 +621,7 @@ export default function EditMealItemScreen() {
                     </View>
 
                     {/* Impact on Targets Section */}
-                    {applicableNutritionGoal && (
+                    {applicableMacroTarget && (
                         <View style={[styles.section, { backgroundColor: themeColors.background }]}>
                             <ThemedText type='title' style={styles.sectionTitle}>
                                 Impact on Daily Goals

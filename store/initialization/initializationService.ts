@@ -5,7 +5,6 @@ import { appSettingsOfflineService } from '@/lib/storage/app-settings/AppSetting
 import { bodyMeasurementOfflineService } from '@/lib/storage/body-measurements/BodyMeasurementOfflineService';
 import { fitnessProfileOfflineService } from '@/lib/storage/fitness-profile/FitnessProfileOfflineService';
 import { initializeOfflineServices } from '@/lib/storage/initializeOfflineServices';
-import { nutritionProfileOfflineService } from '@/lib/storage/nutrition-profile/NutritionProfileOfflineService';
 import { programProgressOfflineService } from '@/lib/storage/program-progress/ProgramProgressOfflineService';
 import { weightMeasurementOfflineService } from '@/lib/storage/weight-measurements/WeightMeasurementOfflineService';
 import { networkStateManager } from '@/lib/sync/NetworkStateManager';
@@ -35,8 +34,8 @@ import {
     getUserExerciseSetModificationsAsync,
     getUserExerciseSubstitutionsAsync,
     getUserFitnessProfileAsync,
-    getUserNutritionGoalHistoryAsync,
-    getUserNutritionProfileAsync,
+    getUserMacroTargetsAsync,
+    getUserNutritionGoalsAsync,
     getUserProgramProgressAsync,
     getUserRecommendationsAsync,
     getWeightMeasurementsAsync,
@@ -145,11 +144,19 @@ export class InitializationService {
             args: { useCache: true },
         },
 
-        // - split into goal history and macro target history
+        // - easy
         {
-            key: 'userNutritionGoalHistory',
-            thunk: getUserNutritionGoalHistoryAsync,
-            cacheKey: CACHE_KEYS.USER_NUTRITION_GOAL_HISTORY,
+            key: 'userNutritionGoals',
+            thunk: getUserNutritionGoalsAsync,
+            cacheKey: 'user_nutrition_goals',
+            required: true,
+            priority: 'critical',
+            args: { useCache: true },
+        },
+        {
+            key: 'userMacroTargets',
+            thunk: getUserMacroTargetsAsync,
+            cacheKey: 'user_macro_targets',
             required: true,
             priority: 'critical',
             args: { useCache: true },
@@ -355,11 +362,9 @@ export class InitializationService {
                 const weightStats = await weightMeasurementOfflineService.getRecords(userId);
                 const bodyStats = await bodyMeasurementOfflineService.getRecords(userId);
                 const fitnessProfile = await fitnessProfileOfflineService.getProfileForUser(userId);
-                const nutritionProfile = await nutritionProfileOfflineService.getProfileForUser(userId);
                 const programProgress = await programProgressOfflineService.getProgressForUser(userId);
 
-                const hasLocalData =
-                    weightStats.length > 0 || bodyStats.length > 0 || !!fitnessProfile || !!nutritionProfile || !!appSettings || !!programProgress;
+                const hasLocalData = weightStats.length > 0 || bodyStats.length > 0 || !!fitnessProfile || !!appSettings || !!programProgress;
 
                 if (!hasLocalData) {
                     console.log('Empty local storage detected - fetching server data...');
@@ -388,15 +393,6 @@ export class InitializationService {
                             console.log('No fitness profile found on server (this might be normal for new users)', fitnessError);
                         }
 
-                        // Fetch nutrition profile from server
-                        try {
-                            const serverNutritionProfile = await UserService.getUserNutritionProfile(userId);
-                            await nutritionProfileOfflineService.mergeServerData(userId, serverNutritionProfile);
-                            console.log(`Initial sync: loaded nutrition profile from server`);
-                        } catch (nutritionError) {
-                            console.log('No nutrition profile found on server (this might be normal for new users)', nutritionError);
-                        }
-
                         // Fetch app settings from server
                         try {
                             const serverAppSettings = await UserService.getUserAppSettings(userId);
@@ -419,7 +415,6 @@ export class InitializationService {
                             serverWeightMeasurements.length === 0 &&
                             serverBodyMeasurements.length === 0 &&
                             !fitnessProfile &&
-                            !nutritionProfile &&
                             !appSettings &&
                             !programProgress
                         ) {
@@ -458,7 +453,6 @@ export class InitializationService {
                 this.dispatch(getWeightMeasurementsAsync({})),
                 this.dispatch(getBodyMeasurementsAsync({})),
                 this.dispatch(getUserFitnessProfileAsync({})),
-                this.dispatch(getUserNutritionProfileAsync({})),
                 this.dispatch(getUserAppSettingsAsync({})),
                 this.dispatch(getUserProgramProgressAsync({})),
                 this.dispatch(getUserExerciseSubstitutionsAsync({})),
@@ -472,7 +466,6 @@ export class InitializationService {
                     'weight',
                     'body',
                     'fitness profile',
-                    'nutrition profile',
                     'app settings',
                     'program progress',
                     'exercise substitutions',
@@ -508,7 +501,6 @@ export class InitializationService {
                 this.dispatch(getWeightMeasurementsAsync({ forceRefresh: true })),
                 this.dispatch(getBodyMeasurementsAsync({ forceRefresh: true })),
                 this.dispatch(getUserFitnessProfileAsync({ forceRefresh: true })),
-                this.dispatch(getUserNutritionProfileAsync({ forceRefresh: true })),
                 this.dispatch(getUserAppSettingsAsync({ forceRefresh: true })),
                 this.dispatch(getUserProgramProgressAsync({ forceRefresh: true })),
                 this.dispatch(getUserExerciseSubstitutionsAsync({ forceRefresh: true })),

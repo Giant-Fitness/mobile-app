@@ -83,7 +83,7 @@ export default function OnboardingCompleteScreen() {
                 ActivityLevel: params.ActivityLevel as string, // 'sedentary' | 'lightly-active' | 'moderately-active' | 'very-active'
 
                 // Fitness goals
-                PrimaryFitnessGoal: params.PrimaryFitnessGoal as string, // 'lose-fat' | 'build-muscle' | 'body-recomposition' | 'maintain-fitness'
+                PrimaryFitnessGoal: params.PrimaryFitnessGoal as 'lose-fat' | 'build-muscle' | 'body-recomposition' | 'maintain-fitness',
 
                 // Weight goals (optional - only for weight loss/gain goals)
                 TargetWeight: params.GoalWeight ? parseFloat(params.GoalWeight as string) : undefined, // Target weight in display units

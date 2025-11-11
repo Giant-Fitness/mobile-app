@@ -40,7 +40,8 @@ export const ActiveProgramDayCard: React.FC<ActiveProgramDayCardProps> = ({ sour
     const currentDay = programId && dayId ? programDays[programId]?.[dayId] : null;
     const currentDayState = programId && dayId ? programDaysState[programId]?.[dayId] : REQUEST_STATE.IDLE;
 
-    if (currentDayState === REQUEST_STATE.PENDING || !currentDay) {
+    // Only show loading if we're pending AND don't have cached data
+    if (currentDayState === REQUEST_STATE.PENDING && !currentDay) {
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size='large' color={themeColors.text} />

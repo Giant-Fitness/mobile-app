@@ -7,7 +7,7 @@ import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useNutritionLog } from '@/hooks/useNutritionLog';
-import { UserNutritionGoal, UserNutritionLog } from '@/types';
+import { UserMacroTarget, UserNutritionLog } from '@/types';
 import { addAlpha, darkenColor } from '@/utils/colorUtils';
 import { moderateScale } from '@/utils/scaling';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -26,14 +26,14 @@ const { width: screenWidth } = Dimensions.get('window');
 interface DailyMacrosCardProps {
     style?: any;
     isOnboardingComplete?: boolean;
-    nutritionGoal?: UserNutritionGoal | null;
+    macroTarget?: UserMacroTarget | null;
     // note: removed nutritionLog prop — component now loads the log itself via hook
 }
 
 // Fake data for preview mode
-const PREVIEW_GOALS: any = {
-    GoalCalories: 2200,
-    GoalMacros: {
+const PREVIEW_MACRO_TARGET: any = {
+    TargetCalories: 2200,
+    TargetMacros: {
         Protein: 150,
         Carbs: 220,
         Fat: 75,
@@ -119,7 +119,7 @@ const formatDateForAPI = (date: Date): string => {
     return `${year}-${month}-${day}`;
 };
 
-export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboardingComplete = true, nutritionGoal }) => {
+export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboardingComplete = true, macroTarget }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
     const scrollViewRef = useRef<ScrollView>(null);
@@ -127,8 +127,8 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboa
     // Set initial page based on onboarding status: show macros (page 1) first during onboarding
     const [currentPage, setCurrentPage] = useState(isOnboardingComplete ? 0 : 1);
 
-    // Use preview goals if not onboarded or no profile
-    const nutritionGoals = isOnboardingComplete ? nutritionGoal : PREVIEW_GOALS;
+    // Use preview target if not onboarded or no target
+    const effectiveMacroTarget = isOnboardingComplete ? macroTarget : PREVIEW_MACRO_TARGET;
 
     // Determine selected date (today) and load nutrition log via hook
     const todayString = formatDateForAPI(new Date());
@@ -171,14 +171,14 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboa
         }
     }, [isOnboardingComplete]);
 
-    if (!nutritionGoals) {
+    if (!effectiveMacroTarget) {
         return null;
     }
 
     const { calories: consumedCalories, protein: consumedProtein, carbs: consumedCarbs, fat: consumedFat } = consumedValues;
 
-    const remaining = nutritionGoals.GoalCalories - consumedCalories;
-    const isOverGoal = consumedCalories > nutritionGoals.GoalCalories;
+    const remaining = effectiveMacroTarget.TargetCalories - consumedCalories;
+    const isOverGoal = consumedCalories > effectiveMacroTarget.TargetCalories;
 
     const handleScroll = (event: any) => {
         const contentOffsetX = event.nativeEvent.contentOffset.x;
@@ -203,7 +203,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboa
                 <View style={styles.caloriesCenterSection}>
                     <CircularProgress
                         current={consumedCalories}
-                        goal={nutritionGoals.GoalCalories}
+                        goal={effectiveMacroTarget.TargetCalories}
                         color={themeColors.slateBlue}
                         backgroundColor={themeColors.slateBlueTransparent}
                         size={180}
@@ -224,7 +224,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboa
                 {/* Right: Goal */}
                 <View style={styles.caloriesRightSection}>
                     <ThemedText type='titleLarge' style={styles.goalNumber}>
-                        {nutritionGoals.GoalCalories.toString()}
+                        {effectiveMacroTarget.TargetCalories.toString()}
                     </ThemedText>
                     <ThemedText type='caption' style={styles.goalLabel}>
                         Goal
@@ -240,7 +240,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboa
                 <MacroMeter
                     label='Protein'
                     current={consumedProtein}
-                    goal={nutritionGoals.GoalMacros.Protein}
+                    goal={effectiveMacroTarget.TargetMacros.Protein}
                     unit='g'
                     color={themeColors.protein}
                     backgroundColor={addAlpha(themeColors.protein, 0.1)}
@@ -249,7 +249,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboa
                 <MacroMeter
                     label='Carbs'
                     current={consumedCarbs}
-                    goal={nutritionGoals.GoalMacros.Carbs}
+                    goal={effectiveMacroTarget.TargetMacros.Carbs}
                     unit='g'
                     color={themeColors.carbs}
                     backgroundColor={addAlpha(themeColors.carbs, 0.1)}
@@ -258,7 +258,7 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboa
                 <MacroMeter
                     label='Fat'
                     current={consumedFat}
-                    goal={nutritionGoals.GoalMacros.Fat}
+                    goal={effectiveMacroTarget.TargetMacros.Fat}
                     unit='g'
                     color={themeColors.fat}
                     backgroundColor={addAlpha(themeColors.fat, 0.1)}

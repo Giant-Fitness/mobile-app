@@ -13,14 +13,14 @@ export interface CreateFitnessProfileInput {
     GymExperienceLevel: string;
     AccessToEquipment: string;
     DaysPerWeekDesired: string;
-    PrimaryFitnessGoal: string;
+    ActivityLevel?: string;
 }
 
 export interface UpdateFitnessProfileInput {
     GymExperienceLevel?: string;
     AccessToEquipment?: string;
     DaysPerWeekDesired?: string;
-    PrimaryFitnessGoal?: string;
+    ActivityLevel?: string;
 }
 
 export interface FitnessProfileWithStatus extends UserFitnessProfile {
@@ -37,7 +37,7 @@ interface FitnessProfileRecord {
     gym_experience_level: string;
     access_to_equipment: string;
     days_per_week_desired: string;
-    primary_fitness_goal: string;
+    activity_level?: string;
     server_updated_at?: string;
     sync_status: 'local_only' | 'synced' | 'conflict' | 'failed';
     created_at: string;
@@ -76,7 +76,7 @@ export class FitnessProfileOfflineService extends BaseOfflineDataService<UserFit
                 gym_experience_level TEXT NOT NULL,
                 access_to_equipment TEXT NOT NULL,
                 days_per_week_desired TEXT NOT NULL,
-                primary_fitness_goal TEXT NOT NULL,
+                activity_level TEXT DEFAULT '',  -- Default to empty string
                 server_updated_at TEXT,
                 sync_status TEXT NOT NULL DEFAULT 'local_only',
                 created_at TEXT NOT NULL,
@@ -105,10 +105,10 @@ export class FitnessProfileOfflineService extends BaseOfflineDataService<UserFit
         await db.runAsync(
             `INSERT OR REPLACE INTO fitness_profiles (
                 id, user_id, gym_experience_level, access_to_equipment,
-                days_per_week_desired, primary_fitness_goal,
+                days_per_week_desired, activity_level,
                 sync_status, created_at, updated_at, retry_count
             ) VALUES (?, ?, ?, ?, ?, ?, 'local_only', ?, ?, 0)`,
-            [localId, userId, data.GymExperienceLevel, data.AccessToEquipment, data.DaysPerWeekDesired, data.PrimaryFitnessGoal, now, now],
+            [localId, userId, data.GymExperienceLevel, data.AccessToEquipment, data.DaysPerWeekDesired, data.ActivityLevel || '', now, now],
         );
     }
 
@@ -149,9 +149,9 @@ export class FitnessProfileOfflineService extends BaseOfflineDataService<UserFit
             params.push(updates.DaysPerWeekDesired);
         }
 
-        if (updates.PrimaryFitnessGoal !== undefined) {
-            setParts.push('primary_fitness_goal = ?');
-            params.push(updates.PrimaryFitnessGoal);
+        if (updates.ActivityLevel !== undefined) {
+            setParts.push('activity_level = ?');
+            params.push(updates.ActivityLevel);
         }
 
         // Reset sync status to local_only if updating a synced record
@@ -214,7 +214,7 @@ export class FitnessProfileOfflineService extends BaseOfflineDataService<UserFit
             await db.runAsync(
                 `UPDATE fitness_profiles 
                  SET gym_experience_level = ?, access_to_equipment = ?, 
-                     days_per_week_desired = ?, primary_fitness_goal = ?,
+                     days_per_week_desired = ?, activity_level = ?,
                      server_updated_at = ?, sync_status = 'synced',
                      updated_at = ?, retry_count = 0, error_message = NULL
                  WHERE id = ?`,
@@ -222,7 +222,7 @@ export class FitnessProfileOfflineService extends BaseOfflineDataService<UserFit
                     serverRecord.GymExperienceLevel,
                     serverRecord.AccessToEquipment,
                     serverRecord.DaysPerWeekDesired,
-                    serverRecord.PrimaryFitnessGoal,
+                    serverRecord.ActivityLevel,
                     new Date().toISOString(),
                     new Date().toISOString(),
                     existing.id,
@@ -236,7 +236,7 @@ export class FitnessProfileOfflineService extends BaseOfflineDataService<UserFit
             await db.runAsync(
                 `INSERT INTO fitness_profiles (
                     id, user_id, gym_experience_level, access_to_equipment,
-                    days_per_week_desired, primary_fitness_goal,
+                    days_per_week_desired, activity_level,
                     server_updated_at, sync_status, created_at, updated_at, retry_count
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, 'synced', ?, ?, 0)`,
                 [
@@ -245,7 +245,7 @@ export class FitnessProfileOfflineService extends BaseOfflineDataService<UserFit
                     serverRecord.GymExperienceLevel,
                     serverRecord.AccessToEquipment,
                     serverRecord.DaysPerWeekDesired,
-                    serverRecord.PrimaryFitnessGoal,
+                    serverRecord.ActivityLevel,
                     now,
                     now,
                     now,
@@ -291,7 +291,7 @@ export class FitnessProfileOfflineService extends BaseOfflineDataService<UserFit
             GymExperienceLevel: row.gym_experience_level,
             AccessToEquipment: row.access_to_equipment,
             DaysPerWeekDesired: row.days_per_week_desired,
-            PrimaryFitnessGoal: row.primary_fitness_goal,
+            ActivityLevel: row.activity_level,
         };
 
         return {
@@ -361,7 +361,7 @@ export class FitnessProfileOfflineService extends BaseOfflineDataService<UserFit
             GymExperienceLevel: record.gym_experience_level,
             AccessToEquipment: record.access_to_equipment,
             DaysPerWeekDesired: record.days_per_week_desired,
-            PrimaryFitnessGoal: record.primary_fitness_goal,
+            ActivityLevel: record.activity_level,
 
             // Offline-specific properties
             localId: record.id,
