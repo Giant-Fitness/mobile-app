@@ -5,6 +5,8 @@ import { appSettingsOfflineService } from '@/lib/storage/app-settings/AppSetting
 import { bodyMeasurementOfflineService } from '@/lib/storage/body-measurements/BodyMeasurementOfflineService';
 import { fitnessProfileOfflineService } from '@/lib/storage/fitness-profile/FitnessProfileOfflineService';
 import { initializeOfflineServices } from '@/lib/storage/initializeOfflineServices';
+import { macroTargetOfflineService } from '@/lib/storage/macro-targets/MacroTargetOfflineService';
+import { nutritionGoalOfflineService } from '@/lib/storage/nutrition-goals/NutritionGoalOfflineService';
 import { programProgressOfflineService } from '@/lib/storage/program-progress/ProgramProgressOfflineService';
 import { weightMeasurementOfflineService } from '@/lib/storage/weight-measurements/WeightMeasurementOfflineService';
 import { networkStateManager } from '@/lib/sync/NetworkStateManager';
@@ -47,7 +49,6 @@ import { cacheService } from '../../lib/cache/cacheService';
 // Standardized cache keys
 const CACHE_KEYS = {
     USER_DATA: 'user_data',
-    USER_NUTRITION_GOAL_HISTORY: 'user_nutrition_goal_history',
     USER_NUTRITION_LOGS: 'user_nutrition_logs',
     ALL_PROGRAMS: 'all_programs',
     ALL_WORKOUTS: 'all_workouts',
@@ -134,31 +135,13 @@ export class InitializationService {
 
         // changes required
 
-        // - all lift history should be stored (upto 365 days)
+        // - all lift history should be stored
         {
             key: 'trackedLiftsHistory',
             thunk: initializeTrackedLiftsHistoryAsync,
             cacheKey: CACHE_KEYS.TRACKED_LIFTS_HISTORY,
             required: false,
             priority: 'medium',
-            args: { useCache: true },
-        },
-
-        // - easy
-        {
-            key: 'userNutritionGoals',
-            thunk: getUserNutritionGoalsAsync,
-            cacheKey: 'user_nutrition_goals',
-            required: true,
-            priority: 'critical',
-            args: { useCache: true },
-        },
-        {
-            key: 'userMacroTargets',
-            thunk: getUserMacroTargetsAsync,
-            cacheKey: 'user_macro_targets',
-            required: true,
-            priority: 'critical',
             args: { useCache: true },
         },
 
@@ -363,8 +346,17 @@ export class InitializationService {
                 const bodyStats = await bodyMeasurementOfflineService.getRecords(userId);
                 const fitnessProfile = await fitnessProfileOfflineService.getProfileForUser(userId);
                 const programProgress = await programProgressOfflineService.getProgressForUser(userId);
+                const macroTargets = await macroTargetOfflineService.getRecords(userId);
+                const nutritionGoals = await nutritionGoalOfflineService.getRecords(userId);
 
-                const hasLocalData = weightStats.length > 0 || bodyStats.length > 0 || !!fitnessProfile || !!appSettings || !!programProgress;
+                const hasLocalData =
+                    weightStats.length > 0 ||
+                    bodyStats.length > 0 ||
+                    !!fitnessProfile ||
+                    !!appSettings ||
+                    !!programProgress ||
+                    nutritionGoals.length > 0 ||
+                    macroTargets.length > 0;
 
                 if (!hasLocalData) {
                     console.log('Empty local storage detected - fetching server data...');
@@ -411,12 +403,34 @@ export class InitializationService {
                             console.log('No program progress found on server (this might be normal for new users)', programProgressError);
                         }
 
+                        try {
+                            const serverNutritionGoals = await UserService.getUserNutritionGoals(userId);
+                            if (serverNutritionGoals.length > 0) {
+                                await nutritionGoalOfflineService.mergeServerData(userId, serverNutritionGoals);
+                                console.log(`Initial sync: loaded ${serverNutritionGoals.length} nutrition goals from server`);
+                            }
+                        } catch (nutritionGoalsError) {
+                            console.log('No nutrition goals found on server (this might be normal for new users)', nutritionGoalsError);
+                        }
+
+                        try {
+                            const serverMacroTargets = await UserService.getUserMacroTargets(userId);
+                            if (serverMacroTargets.length > 0) {
+                                await macroTargetOfflineService.mergeServerData(userId, serverMacroTargets);
+                                console.log(`Initial sync: loaded ${serverMacroTargets.length} macro targets from server`);
+                            }
+                        } catch (macroTargetsError) {
+                            console.log('No macro targets found on server (this might be normal for new users)', macroTargetsError);
+                        }
+
                         if (
                             serverWeightMeasurements.length === 0 &&
                             serverBodyMeasurements.length === 0 &&
                             !fitnessProfile &&
                             !appSettings &&
-                            !programProgress
+                            !programProgress &&
+                            !nutritionGoals &&
+                            !macroTargets
                         ) {
                             console.log('No server data found - fresh install');
                         }
@@ -457,6 +471,8 @@ export class InitializationService {
                 this.dispatch(getUserProgramProgressAsync({})),
                 this.dispatch(getUserExerciseSubstitutionsAsync({})),
                 this.dispatch(getUserExerciseSetModificationsAsync({})),
+                this.dispatch(getUserNutritionGoalsAsync({})),
+                this.dispatch(getUserMacroTargetsAsync({})),
             ];
 
             const results = await Promise.allSettled(promises);
@@ -470,6 +486,8 @@ export class InitializationService {
                     'program progress',
                     'exercise substitutions',
                     'exercise set modifications',
+                    'nutrition goals',
+                    'macro targets',
                 ][index];
                 if (result.status === 'fulfilled' && result.value.type.endsWith('/fulfilled')) {
                     const data = result.value.payload;
@@ -505,6 +523,8 @@ export class InitializationService {
                 this.dispatch(getUserProgramProgressAsync({ forceRefresh: true })),
                 this.dispatch(getUserExerciseSubstitutionsAsync({ forceRefresh: true })),
                 this.dispatch(getUserExerciseSetModificationsAsync({ forceRefresh: true })),
+                this.dispatch(getUserNutritionGoalsAsync({ forceRefresh: true })),
+                this.dispatch(getUserMacroTargetsAsync({ forceRefresh: true })),
             ];
 
             const results = await Promise.allSettled(promises);
@@ -519,6 +539,8 @@ export class InitializationService {
                     'program progress',
                     'exercise substitutions',
                     'exercise set modifications',
+                    'nutrition goals',
+                    'macro targets',
                 ][index];
                 if (result.status === 'fulfilled' && result.value.type.endsWith('/fulfilled')) {
                     const data = result.value.payload;

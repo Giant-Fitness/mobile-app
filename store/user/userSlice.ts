@@ -255,7 +255,7 @@ const userSlice = createSlice({
                 state.userProgramProgressState = REQUEST_STATE.PENDING;
                 state.error = null;
             })
-            .addCase(endProgramAsync.fulfilled, (state, action: PayloadAction<UserProgramProgress>) => {
+            .addCase(endProgramAsync.fulfilled, (state, action: PayloadAction<UserProgramProgress | null>) => {
                 state.userProgramProgressState = REQUEST_STATE.FULFILLED;
                 state.userProgramProgress = action.payload;
             })

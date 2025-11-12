@@ -18,6 +18,10 @@ import { syncQueueManager } from '@/lib/sync/SyncQueueManager';
 
 import { exerciseSetModificationOfflineService } from './exercise-set-modifications/ExerciseSetModificationOfflineService';
 import { exerciseSetModificationSyncHandler } from './exercise-set-modifications/ExerciseSetModificationSyncHandler';
+import { macroTargetOfflineService } from './macro-targets/MacroTargetOfflineService';
+import { macroTargetSyncHandler } from './macro-targets/MacroTargetSyncHandler';
+import { nutritionGoalOfflineService } from './nutrition-goals/NutritionGoalOfflineService';
+import { nutritionGoalSyncHandler } from './nutrition-goals/NutritionGoalSyncHandler';
 
 export interface OfflineInitializationOptions {
     enableNetworkMonitoring?: boolean;
@@ -42,16 +46,27 @@ export async function initializeOfflineServices(options: OfflineInitializationOp
         await syncQueueManager.initialize();
 
         // Step 2: Initialize data services (creates tables if needed)
-        const [weightInit, bodyInit, fitnessInit, appSettingsInit, programProgressInit, exerciseSubstitutionInit, exerciseSetModificationInit] =
-            await Promise.allSettled([
-                programProgressOfflineService.initialize(),
-                weightMeasurementOfflineService.initialize(),
-                bodyMeasurementOfflineService.initialize(),
-                fitnessProfileOfflineService.initialize(),
-                appSettingsOfflineService.initialize(),
-                exerciseSubstitutionOfflineService.initialize(),
-                exerciseSetModificationOfflineService.initialize(),
-            ]);
+        const [
+            weightInit,
+            bodyInit,
+            fitnessInit,
+            appSettingsInit,
+            programProgressInit,
+            exerciseSubstitutionInit,
+            exerciseSetModificationInit,
+            nutritionGoalInit,
+            macroTargetInit,
+        ] = await Promise.allSettled([
+            programProgressOfflineService.initialize(),
+            weightMeasurementOfflineService.initialize(),
+            bodyMeasurementOfflineService.initialize(),
+            fitnessProfileOfflineService.initialize(),
+            appSettingsOfflineService.initialize(),
+            exerciseSubstitutionOfflineService.initialize(),
+            exerciseSetModificationOfflineService.initialize(),
+            nutritionGoalOfflineService.initialize(),
+            macroTargetOfflineService.initialize(),
+        ]);
 
         // Check if any failed
         if (weightInit.status === 'rejected') {
@@ -75,6 +90,12 @@ export async function initializeOfflineServices(options: OfflineInitializationOp
         if (exerciseSetModificationInit.status === 'rejected') {
             console.warn('Exercise set modification service initialization failed:', exerciseSetModificationInit.reason);
         }
+        if (nutritionGoalInit.status === 'rejected') {
+            console.warn('Nutrition goal service initialization failed:', nutritionGoalInit.reason);
+        }
+        if (macroTargetInit.status === 'rejected') {
+            console.warn('Macro target service initialization failed:', macroTargetInit.reason);
+        }
 
         // Step 3: Register sync handlers with the queue manager
         syncQueueManager.registerSyncHandler('program_progress', programProgressSyncHandler);
@@ -84,6 +105,9 @@ export async function initializeOfflineServices(options: OfflineInitializationOp
         syncQueueManager.registerSyncHandler('app_settings', appSettingsSyncHandler);
         syncQueueManager.registerSyncHandler('exercise_substitutions', exerciseSubstitutionSyncHandler);
         syncQueueManager.registerSyncHandler('exercise_set_modifications', exerciseSetModificationSyncHandler);
+        syncQueueManager.registerSyncHandler('nutrition_goals', nutritionGoalSyncHandler);
+        syncQueueManager.registerSyncHandler('macro_targets', macroTargetSyncHandler);
+
         console.log('✅ Offline services initialized successfully');
     } catch (error) {
         console.error('❌ Failed to initialize offline services:', error);

@@ -7,6 +7,8 @@ import { bodyMeasurementOfflineService } from '@/lib/storage/body-measurements/B
 import { exerciseSetModificationOfflineService } from '@/lib/storage/exercise-set-modifications/ExerciseSetModificationOfflineService';
 import { exerciseSubstitutionOfflineService } from '@/lib/storage/exercise-substitutions/ExerciseSubstitutionOfflineService';
 import { fitnessProfileOfflineService } from '@/lib/storage/fitness-profile/FitnessProfileOfflineService';
+import { macroTargetOfflineService } from '@/lib/storage/macro-targets/MacroTargetOfflineService';
+import { nutritionGoalOfflineService } from '@/lib/storage/nutrition-goals/NutritionGoalOfflineService';
 import { programProgressOfflineService } from '@/lib/storage/program-progress/ProgramProgressOfflineService';
 import { weightMeasurementOfflineService } from '@/lib/storage/weight-measurements/WeightMeasurementOfflineService';
 import { networkStateManager } from '@/lib/sync/NetworkStateManager';
@@ -633,7 +635,7 @@ export const uncompleteDayAsync = createAsyncThunk<
 /**
  * End program (offline-first with optimistic update)
  */
-export const endProgramAsync = createAsyncThunk<UserProgramProgress, void>('user/endProgram', async (_, { getState, rejectWithValue }) => {
+export const endProgramAsync = createAsyncThunk<UserProgramProgress | null, void>('user/endProgram', async (_, { getState, rejectWithValue }) => {
     const state = getState() as RootState;
     const userId = state.user.user?.UserId;
 
@@ -2156,17 +2158,20 @@ export const completeUserProfileAsync = createAsyncThunk<
     }
 });
 
-// Get User Nutrition Goals
+/**
+ * Get user nutrition goals (offline-first)
+ * Loads immediately from SQLite, triggers background server sync
+ */
 export const getUserNutritionGoalsAsync = createAsyncThunk<
     UserNutritionGoal[],
-    { forceRefresh?: boolean; useCache?: boolean } | void,
+    { forceRefresh?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
 >('user/getUserNutritionGoals', async (args = {}, { getState, rejectWithValue }) => {
     try {
-        const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
+        const { forceRefresh = false } = typeof args === 'object' ? args : {};
         const state = getState();
         const userId = state.user.user?.UserId;
 
@@ -2174,41 +2179,60 @@ export const getUserNutritionGoalsAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Return cached goals if available and not forcing refresh
-        if (state.user.userNutritionGoals.length > 0 && state.user.userNutritionGoalsState === REQUEST_STATE.FULFILLED && !forceRefresh) {
-            return state.user.userNutritionGoals;
+        // Always load from SQLite first (offline-first)
+        console.log('Loading nutrition goals from SQLite...');
+        const localGoals = await nutritionGoalOfflineService.getRecords(userId, {
+            includeLocalOnly: true,
+            orderBy: 'DESC',
+        });
+
+        // Convert to API format
+        const goals: UserNutritionGoal[] = localGoals.map((local) => local.data);
+
+        // Background server sync (non-blocking) unless force refresh
+        if (networkStateManager.isOnline() && !forceRefresh) {
+            setTimeout(async () => {
+                try {
+                    const serverGoals = await UserService.getUserNutritionGoals(userId);
+                    await nutritionGoalOfflineService.mergeServerData(userId, serverGoals);
+                } catch (error) {
+                    console.warn('Background nutrition goals sync failed:', error);
+                }
+            }, 100);
         }
 
-        // Try cache first if enabled and not forcing refresh
-        if (useCache && !forceRefresh) {
-            const cacheKey = `user_nutrition_goals`;
-            const cached = await cacheService.get<UserNutritionGoal[]>(cacheKey);
+        // Force refresh: synchronous server sync
+        if (forceRefresh && networkStateManager.isOnline()) {
+            try {
+                console.log('Force refreshing nutrition goals from server...');
+                const serverGoals = await UserService.getUserNutritionGoals(userId);
+                await nutritionGoalOfflineService.mergeServerData(userId, serverGoals);
 
-            if (cached) {
-                console.log('Loaded nutrition goals from cache');
-                return cached;
+                // Reload from SQLite to get merged data
+                const refreshedGoals = await nutritionGoalOfflineService.getRecords(userId, {
+                    includeLocalOnly: true,
+                    orderBy: 'DESC',
+                });
+
+                return refreshedGoals.map((local) => local.data);
+            } catch (error) {
+                console.warn('Force refresh failed, using local data:', error);
             }
         }
 
-        // Load from API
-        console.log('Loading nutrition goals from API');
-        const goals = await UserService.getUserNutritionGoals(userId);
-
-        // Cache the result if useCache is enabled
-        if (useCache) {
-            const cacheKey = `user_nutrition_goals`;
-            await cacheService.set(cacheKey, goals);
-        }
-
+        console.log(`Loaded ${goals.length} nutrition goals from offline storage`);
         return goals;
     } catch (error) {
+        console.error('Failed to get nutrition goals:', error);
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to fetch nutrition goals',
         });
     }
 });
 
-// Create Nutrition Goal
+/**
+ * Create nutrition goal (offline-first with optimistic update)
+ */
 export const createNutritionGoalAsync = createAsyncThunk<
     UserNutritionGoal[],
     {
@@ -2235,23 +2259,66 @@ export const createNutritionGoalAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Create the new goal
-        await UserService.createNutritionGoal(userId, goalData, adjustmentReason, adjustmentNotes);
+        const now = new Date().toISOString();
+        const effectiveDate = now.split('T')[0]; // YYYY-MM-DD
 
-        // Invalidate cache after creation
-        const cacheKey = `user_nutrition_goals`;
-        await cacheService.remove(cacheKey);
+        // Deactivate all existing goals first
+        await nutritionGoalOfflineService.deactivateAllGoals(userId);
 
-        // Refresh and return all goals
-        return await UserService.getUserNutritionGoals(userId);
+        // Create optimistically in SQLite
+        console.log('Creating nutrition goal locally...');
+        await nutritionGoalOfflineService.create({
+            userId,
+            data: {
+                effectiveDate,
+                primaryFitnessGoal: goalData.primaryNutritionGoal as any,
+                targetWeight: goalData.targetWeight,
+                weightChangeRate: goalData.weightChangeRate,
+                startingWeight: goalData.startingWeight,
+                activityLevel: goalData.activityLevel,
+                adjustmentReason: (adjustmentReason as any) || 'INITIAL_SETUP',
+                adjustmentNotes,
+                isActive: true,
+            },
+            timestamp: now,
+        });
+
+        // Try to sync to server immediately if online
+        if (networkStateManager.isOnline()) {
+            try {
+                console.log('Syncing nutrition goal creation to server...');
+                const serverGoals = await UserService.createNutritionGoal(userId, goalData, adjustmentReason, adjustmentNotes);
+
+                // Merge server response back to SQLite
+                const serverGoalsArray = Array.isArray(serverGoals) ? serverGoals : [serverGoals];
+                await nutritionGoalOfflineService.mergeServerData(userId, serverGoalsArray);
+
+                console.log('Nutrition goal creation successfully synced to server');
+            } catch (syncError) {
+                console.warn('Failed to sync nutrition goal creation to server, will retry later:', syncError);
+                // Local data remains, will retry via sync queue
+            }
+        }
+
+        // Return updated list from SQLite
+        const updatedGoals = await nutritionGoalOfflineService.getRecords(userId, {
+            includeLocalOnly: true,
+            orderBy: 'DESC',
+        });
+
+        console.log('Nutrition goal created offline (will sync when online)');
+        return updatedGoals.map((local) => local.data);
     } catch (error) {
+        console.error('Failed to create nutrition goal:', error);
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to create nutrition goal',
         });
     }
 });
 
-// Update Nutrition Goal
+/**
+ * Update nutrition goal (offline-first with optimistic update)
+ */
 export const updateNutritionGoalAsync = createAsyncThunk<
     UserNutritionGoal[],
     {
@@ -2277,33 +2344,83 @@ export const updateNutritionGoalAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Update the active goal (creates a new entry with updated values)
-        await UserService.updateNutritionGoal(userId, goalData, adjustmentReason, adjustmentNotes);
+        // Get current active goal
+        const activeGoal = await nutritionGoalOfflineService.getActiveGoal(userId);
 
-        // Invalidate cache after update
-        const cacheKey = `user_nutrition_goals`;
-        await cacheService.remove(cacheKey);
+        if (!activeGoal) {
+            return rejectWithValue({ errorMessage: 'No active nutrition goal found' });
+        }
 
-        // Refresh and return all goals
-        return await UserService.getUserNutritionGoals(userId);
+        const now = new Date().toISOString();
+        const effectiveDate = now.split('T')[0]; // YYYY-MM-DD
+
+        // Deactivate current goal
+        await nutritionGoalOfflineService.update(activeGoal.localId, { isActive: false });
+
+        // Create new goal with updated data (backend behavior)
+        await nutritionGoalOfflineService.create({
+            userId,
+            data: {
+                effectiveDate,
+                primaryFitnessGoal: (goalData.primaryNutritionGoal as any) || activeGoal.data.PrimaryFitnessGoal,
+                targetWeight: goalData.targetWeight ?? activeGoal.data.TargetWeight,
+                weightChangeRate: goalData.weightChangeRate ?? activeGoal.data.WeightChangeRate,
+                startingWeight: activeGoal.data.StartingWeight, // Carry forward
+                activityLevel: goalData.activityLevel || activeGoal.data.ActivityLevel,
+                adjustmentReason: (adjustmentReason as any) || 'USER_UPDATED',
+                adjustmentNotes,
+                previousGoalDate: activeGoal.data.EffectiveDate,
+                isActive: true,
+            },
+            timestamp: now,
+        });
+
+        // Try to sync to server immediately if online
+        if (networkStateManager.isOnline()) {
+            try {
+                console.log('Syncing nutrition goal update to server...');
+                const serverGoals = await UserService.updateNutritionGoal(userId, goalData, adjustmentReason, adjustmentNotes);
+
+                // Merge server response back to SQLite
+                const serverGoalsArray = Array.isArray(serverGoals) ? serverGoals : [serverGoals];
+                await nutritionGoalOfflineService.mergeServerData(userId, serverGoalsArray);
+
+                console.log('Nutrition goal update successfully synced to server');
+            } catch (syncError) {
+                console.warn('Failed to sync nutrition goal update to server, will retry later:', syncError);
+            }
+        }
+
+        // Return updated list from SQLite
+        const updatedGoals = await nutritionGoalOfflineService.getRecords(userId, {
+            includeLocalOnly: true,
+            orderBy: 'DESC',
+        });
+
+        console.log('Nutrition goal updated offline (will sync when online)');
+        return updatedGoals.map((local) => local.data);
     } catch (error) {
+        console.error('Failed to update nutrition goal:', error);
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to update nutrition goal',
         });
     }
 });
 
-// Get User Macro Targets
+/**
+ * Get user macro targets (offline-first)
+ * Loads immediately from SQLite, triggers background server sync
+ */
 export const getUserMacroTargetsAsync = createAsyncThunk<
     UserMacroTarget[],
-    { forceRefresh?: boolean; useCache?: boolean } | void,
+    { forceRefresh?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
 >('user/getUserMacroTargets', async (args = {}, { getState, rejectWithValue }) => {
     try {
-        const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
+        const { forceRefresh = false } = typeof args === 'object' ? args : {};
         const state = getState();
         const userId = state.user.user?.UserId;
 
@@ -2311,34 +2428,51 @@ export const getUserMacroTargetsAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Return cached targets if available and not forcing refresh
-        if (state.user.userMacroTargets.length > 0 && state.user.userMacroTargetsState === REQUEST_STATE.FULFILLED && !forceRefresh) {
-            return state.user.userMacroTargets;
+        // Always load from SQLite first (offline-first)
+        console.log('Loading macro targets from SQLite...');
+        const localTargets = await macroTargetOfflineService.getRecords(userId, {
+            includeLocalOnly: true,
+            orderBy: 'DESC',
+        });
+
+        // Convert to API format
+        const targets: UserMacroTarget[] = localTargets.map((local) => local.data);
+
+        // Background server sync (non-blocking) unless force refresh
+        if (networkStateManager.isOnline() && !forceRefresh) {
+            setTimeout(async () => {
+                try {
+                    const serverTargets = await UserService.getUserMacroTargets(userId);
+                    await macroTargetOfflineService.mergeServerData(userId, serverTargets);
+                } catch (error) {
+                    console.warn('Background macro targets sync failed:', error);
+                }
+            }, 100);
         }
 
-        // Try cache first if enabled and not forcing refresh
-        if (useCache && !forceRefresh) {
-            const cacheKey = `user_macro_targets`;
-            const cached = await cacheService.get<UserMacroTarget[]>(cacheKey);
+        // Force refresh: synchronous server sync
+        if (forceRefresh && networkStateManager.isOnline()) {
+            try {
+                console.log('Force refreshing macro targets from server...');
+                const serverTargets = await UserService.getUserMacroTargets(userId);
+                await macroTargetOfflineService.mergeServerData(userId, serverTargets);
 
-            if (cached) {
-                console.log('Loaded macro targets from cache');
-                return cached;
+                // Reload from SQLite to get merged data
+                const refreshedTargets = await macroTargetOfflineService.getRecords(userId, {
+                    includeLocalOnly: true,
+                    orderBy: 'DESC',
+                });
+
+                return refreshedTargets.map((local) => local.data);
+            } catch (error) {
+                console.warn('Force refresh failed, using local data:', error);
             }
         }
 
-        // Load from API
-        console.log('Loading macro targets from API');
-        const targets = await UserService.getUserMacroTargets(userId);
-
-        // Cache the result if useCache is enabled
-        if (useCache) {
-            const cacheKey = `user_macro_targets`;
-            await cacheService.set(cacheKey, targets);
-        }
-
+        console.log(`Loaded ${targets.length} macro targets from offline storage`);
         return targets;
     } catch (error) {
+        console.error('Failed to get macro targets:', error);
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to fetch macro targets',
         });
