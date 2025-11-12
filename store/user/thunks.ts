@@ -9,6 +9,7 @@ import { exerciseSubstitutionOfflineService } from '@/lib/storage/exercise-subst
 import { fitnessProfileOfflineService } from '@/lib/storage/fitness-profile/FitnessProfileOfflineService';
 import { macroTargetOfflineService } from '@/lib/storage/macro-targets/MacroTargetOfflineService';
 import { nutritionGoalOfflineService } from '@/lib/storage/nutrition-goals/NutritionGoalOfflineService';
+import { nutritionLogOfflineService } from '@/lib/storage/nutrition-logs/NutritionLogOfflineService';
 import { programProgressOfflineService } from '@/lib/storage/program-progress/ProgramProgressOfflineService';
 import { weightMeasurementOfflineService } from '@/lib/storage/weight-measurements/WeightMeasurementOfflineService';
 import { networkStateManager } from '@/lib/sync/NetworkStateManager';
@@ -16,7 +17,6 @@ import { RootState } from '@/store/store';
 import UserService from '@/store/user/service';
 import {
     AddFoodEntryParams,
-    AddFoodEntryResponse,
     CompleteProfileParams,
     CompleteProfileResponse,
     CreateSetModificationParams,
@@ -25,7 +25,6 @@ import {
     GetSubstitutionsParams,
     MealType,
     UpdateFoodEntryParams,
-    UpdateFoodEntryResponse,
     UpdateSetModificationParams,
     UpdateSubstitutionParams,
     User,
@@ -2481,17 +2480,20 @@ export const getUserMacroTargetsAsync = createAsyncThunk<
 
 // Nutrition Logs Thunks
 
-// 1. Get ALL nutrition logs for a user (no date filter)
+/**
+ * Get all nutrition logs (offline-first)
+ * Loads from SQLite immediately, syncs with server in background
+ */
 export const getAllNutritionLogsAsync = createAsyncThunk<
     UserNutritionLog[],
-    { forceRefresh?: boolean; useCache?: boolean } | void,
+    { forceRefresh?: boolean } | void,
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
 >('user/getAllNutritionLogs', async (args = {}, { getState, rejectWithValue }) => {
     try {
-        const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
+        const { forceRefresh = false } = typeof args === 'object' ? args : {};
         const state = getState();
         const userId = state.user.user?.UserId;
 
@@ -2499,224 +2501,77 @@ export const getAllNutritionLogsAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Check if we have a comprehensive set of logs and not forcing refresh
-        if (!forceRefresh && Object.keys(state.user.userNutritionLogs).length > 0) {
-            console.log('Using existing nutrition logs from Redux state');
-            return Object.values(state.user.userNutritionLogs).filter(Boolean) as UserNutritionLog[];
-        }
-
-        // Try cache first if enabled and not forcing refresh
-        if (useCache && !forceRefresh) {
-            const cacheKey = `all_nutrition_logs`;
-            const cached = await cacheService.get<UserNutritionLog[]>(cacheKey);
-
-            if (cached) {
-                console.log('Loaded all nutrition logs from cache');
-                return cached;
-            }
-        }
-        console.log('Loading all nutrition logs from API');
-        const nutritionLogs = await UserService.getAllNutritionLogs(userId);
-
-        // Cache the result if useCache is enabled
-        if (useCache) {
-            const cacheKey = `all_nutrition_logs`;
-            await cacheService.set(cacheKey, nutritionLogs);
-        }
-
-        return nutritionLogs;
-    } catch (error) {
-        console.log(error);
-        return rejectWithValue({
-            errorMessage: error instanceof Error ? error.message : 'Failed to fetch all nutrition logs',
+        // Load from SQLite immediately
+        console.log('Loading all nutrition logs from SQLite...');
+        const localLogs = await nutritionLogOfflineService.getRecords(userId, {
+            includeLocalOnly: true,
+            orderBy: 'DESC',
         });
-    }
-});
 
-// 2. Get nutrition logs with filters (date range, limit, etc.)
-export const getNutritionLogsWithFiltersAsync = createAsyncThunk<
-    { nutritionLogs: UserNutritionLog[]; count: number; lastEvaluatedKey?: any },
-    {
-        filters?: { startDate?: string; endDate?: string; limit?: number };
-        forceRefresh?: boolean;
-        useCache?: boolean;
-    },
-    {
-        state: RootState;
-        rejectValue: { errorMessage: string };
-    }
->('user/getNutritionLogsWithFilters', async ({ filters, forceRefresh = false, useCache = true }, { getState, rejectWithValue }) => {
-    try {
-        const state = getState();
-        const userId = state.user.user?.UserId;
+        // Convert to API format
+        const logs: UserNutritionLog[] = localLogs.map((local) => local.data);
 
-        if (!userId) {
-            return rejectWithValue({ errorMessage: 'User ID not available' });
-        }
+        // Background server sync (non-blocking) unless force refresh
+        if (networkStateManager.isOnline() && !forceRefresh) {
+            setTimeout(async () => {
+                try {
+                    console.log('Triggering background nutrition logs sync...');
+                    const serverLogs = await UserService.getAllNutritionLogs(userId);
 
-        // Create cache key based on filters
-        const cacheKey = `nutrition_logs_filtered_${JSON.stringify(filters || {})}`;
-
-        // Try cache first if enabled and not forcing refresh
-        if (useCache && !forceRefresh) {
-            const cached = await cacheService.get<{ nutritionLogs: UserNutritionLog[]; count: number; lastEvaluatedKey?: any }>(cacheKey);
-
-            if (cached) {
-                console.log('Loaded filtered nutrition logs from cache');
-                return cached;
-            }
-        }
-
-        console.log('Loading filtered nutrition logs from API');
-        const result = await UserService.getNutritionLogsWithFilters(userId, filters);
-
-        // Cache the result if useCache is enabled
-        if (useCache) {
-            await cacheService.set(cacheKey, result);
-        }
-
-        return result;
-    } catch (error) {
-        return rejectWithValue({
-            errorMessage: error instanceof Error ? error.message : 'Failed to fetch filtered nutrition logs',
-        });
-    }
-});
-
-// 3. Get nutrition logs for multiple specific dates (optimized for your swipe feature)
-export const getNutritionLogsForDatesAsync = createAsyncThunk<
-    { [date: string]: UserNutritionLog | null },
-    {
-        dates: string[];
-        forceRefresh?: boolean;
-        useCache?: boolean;
-    },
-    {
-        state: RootState;
-        rejectValue: { errorMessage: string };
-    }
->('user/getNutritionLogsForDates', async ({ dates, forceRefresh = false, useCache = true }, { getState, rejectWithValue }) => {
-    try {
-        const state = getState();
-        const userId = state.user.user?.UserId;
-
-        if (!userId) {
-            return rejectWithValue({ errorMessage: 'User ID not available' });
-        }
-
-        // Filter out dates that are already loaded unless forcing refresh
-        const datesToLoad = forceRefresh ? dates : dates.filter((date) => !(date in state.user.userNutritionLogs));
-
-        if (datesToLoad.length === 0 && !forceRefresh) {
-            const result: { [date: string]: UserNutritionLog | null } = {};
-            dates.forEach((date) => {
-                result[date] = state.user.userNutritionLogs[date] || null;
-            });
-            return result;
-        }
-
-        // Try cache first if enabled and not forcing refresh
-        if (useCache && !forceRefresh) {
-            const cachedResults: { [date: string]: UserNutritionLog | null } = {};
-            const uncachedDates: string[] = [];
-
-            for (const date of datesToLoad) {
-                const cacheKey = `nutrition_logs_${date}`;
-                const cached = await cacheService.get<UserNutritionLog>(cacheKey);
-
-                if (cached !== null) {
-                    cachedResults[date] = cached;
-                } else {
-                    uncachedDates.push(date);
-                }
-            }
-
-            // If we have some cached data, include it in the final result
-            if (Object.keys(cachedResults).length > 0) {
-                console.log(`Loaded ${Object.keys(cachedResults).length} nutrition logs from cache`);
-            }
-
-            // Only fetch uncached dates
-            if (uncachedDates.length > 0) {
-                console.log(`Loading ${uncachedDates.length} nutrition logs from API`);
-
-                // Use the new bulk API for efficiency
-                const apiResults = await UserService.getBulkNutritionLogs(userId, uncachedDates);
-
-                // Cache the API results if useCache is enabled
-                if (useCache) {
-                    for (const [date, nutritionLog] of Object.entries(apiResults)) {
-                        const cacheKey = `nutrition_logs_${date}`;
-                        await cacheService.set(cacheKey, nutritionLog);
+                    // Merge all server logs into SQLite
+                    for (const serverLog of serverLogs) {
+                        await nutritionLogOfflineService.mergeServerData(userId, [serverLog]);
                     }
+                } catch (error) {
+                    console.warn('Background nutrition logs sync failed:', error);
+                }
+            }, 100);
+        }
+
+        // Force refresh: synchronous server sync
+        if (forceRefresh && networkStateManager.isOnline()) {
+            try {
+                console.log('Force refreshing nutrition logs from server...');
+                const serverLogs = await UserService.getAllNutritionLogs(userId);
+
+                // Merge all server logs
+                for (const serverLog of serverLogs) {
+                    await nutritionLogOfflineService.mergeServerData(userId, [serverLog]);
                 }
 
-                // Merge cached and API results
-                const mergedResults = { ...cachedResults, ...apiResults };
-
-                // If we had some dates already loaded in Redux, merge them too
-                if (!forceRefresh) {
-                    const fullResults: { [date: string]: UserNutritionLog | null } = {};
-                    dates.forEach((date) => {
-                        fullResults[date] = mergedResults[date] !== undefined ? mergedResults[date] : state.user.userNutritionLogs[date] || null;
-                    });
-                    return fullResults;
-                }
-
-                return mergedResults;
-            }
-
-            // Only cached results, merge with any existing Redux data
-            if (!forceRefresh) {
-                const fullResults: { [date: string]: UserNutritionLog | null } = {};
-                dates.forEach((date) => {
-                    fullResults[date] = cachedResults[date] !== undefined ? cachedResults[date] : state.user.userNutritionLogs[date] || null;
+                // Reload from SQLite to get merged data
+                const refreshedLogs = await nutritionLogOfflineService.getRecords(userId, {
+                    includeLocalOnly: true,
+                    orderBy: 'DESC',
                 });
-                return fullResults;
-            }
 
-            return cachedResults;
-        }
-
-        console.log(`Loading ${datesToLoad.length} nutrition logs from API`);
-
-        // Use the new bulk API instead of the old individual method
-        const results = await UserService.getBulkNutritionLogs(userId, datesToLoad);
-
-        // Cache the results if useCache is enabled
-        if (useCache) {
-            for (const [date, nutritionLog] of Object.entries(results)) {
-                const cacheKey = `nutrition_logs_${date}`;
-                await cacheService.set(cacheKey, nutritionLog);
+                return refreshedLogs.map((local) => local.data);
+            } catch (error) {
+                console.warn('Force refresh failed, using local data:', error);
             }
         }
 
-        // If we had some dates already loaded, merge them
-        if (!forceRefresh) {
-            const fullResults: { [date: string]: UserNutritionLog | null } = {};
-            dates.forEach((date) => {
-                fullResults[date] = results[date] !== undefined ? results[date] : state.user.userNutritionLogs[date] || null;
-            });
-            return fullResults;
-        }
-
-        return results;
+        console.log(`Loaded ${logs.length} nutrition logs from offline storage`);
+        return logs;
     } catch (error) {
+        console.error('Failed to get nutrition logs:', error);
         return rejectWithValue({
-            errorMessage: error instanceof Error ? error.message : 'Failed to fetch nutrition logs for dates',
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch nutrition logs',
         });
     }
 });
 
-// 4. Updated single date thunk (keeping backward compatibility)
+/**
+ * Get nutrition log for a specific date (offline-first)
+ */
 export const getNutritionLogForDateAsync = createAsyncThunk<
     { date: string; nutritionLog: UserNutritionLog | null },
-    { date: string; forceRefresh?: boolean; useCache?: boolean },
+    { date: string; forceRefresh?: boolean },
     {
         state: RootState;
         rejectValue: { errorMessage: string };
     }
->('user/getNutritionLogForDate', async ({ date, forceRefresh = false, useCache = true }, { getState, rejectWithValue }) => {
+>('user/getNutritionLogForDate', async ({ date, forceRefresh = false }, { getState, rejectWithValue }) => {
     try {
         const state = getState();
         const userId = state.user.user?.UserId;
@@ -2725,87 +2580,58 @@ export const getNutritionLogForDateAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Check Redux state first (unless forcing refresh)
-        if (!forceRefresh && state.user.userNutritionLogs[date] !== undefined) {
-            console.log(`Loaded nutrition log for ${date} from Redux state`);
-            return { date, nutritionLog: state.user.userNutritionLogs[date] };
+        // Load from SQLite immediately
+        console.log(`Loading nutrition log for ${date} from SQLite...`);
+        const localLog = await nutritionLogOfflineService.getLogForDate(userId, date);
+
+        // Background server sync (non-blocking) unless force refresh
+        if (networkStateManager.isOnline() && !forceRefresh) {
+            setTimeout(async () => {
+                try {
+                    console.log(`Triggering background sync for ${date}...`);
+                    const serverLog = await UserService.getNutritionLogForDate(userId, date);
+
+                    if (serverLog) {
+                        await nutritionLogOfflineService.mergeServerData(userId, [serverLog]);
+                    }
+                } catch (error) {
+                    console.warn('Background nutrition log sync failed:', error);
+                }
+            }, 100);
         }
 
-        // Check cache first if enabled and not forcing refresh
-        if (useCache && !forceRefresh) {
-            const cacheKey = `nutrition_logs_${date}`;
-            const cached = await cacheService.get<UserNutritionLog>(cacheKey);
+        // Force refresh: synchronous server sync
+        if (forceRefresh && networkStateManager.isOnline()) {
+            try {
+                console.log(`Force refreshing nutrition log for ${date} from server...`);
+                const serverLog = await UserService.getNutritionLogForDate(userId, date);
 
-            if (cached !== null) {
-                console.log(`Loaded nutrition log for ${date} from cache`);
-                return { date, nutritionLog: cached };
+                if (serverLog) {
+                    await nutritionLogOfflineService.mergeServerData(userId, [serverLog]);
+
+                    // Reload from SQLite
+                    const refreshedLog = await nutritionLogOfflineService.getLogForDate(userId, date);
+                    return { date, nutritionLog: refreshedLog ? refreshedLog.data : null };
+                }
+            } catch (error) {
+                console.warn('Force refresh failed, using local data:', error);
             }
         }
 
-        console.log(`Loading nutrition log for ${date} from API`);
-        const nutritionLog = await UserService.getNutritionLogForDate(userId, date);
-
-        // Cache the result if useCache is enabled (cache null values too!)
-        if (useCache) {
-            const cacheKey = `nutrition_logs_${date}`;
-            await cacheService.set(cacheKey, nutritionLog);
-        }
-
-        return { date, nutritionLog };
+        return { date, nutritionLog: localLog ? localLog.data : null };
     } catch (error) {
+        console.error('Failed to get nutrition log for date:', error);
         return rejectWithValue({
-            errorMessage: error instanceof Error ? error.message : 'Failed to fetch nutrition log for date',
+            errorMessage: error instanceof Error ? error.message : 'Failed to fetch nutrition log',
         });
     }
 });
 
-// 5. Helper thunk for your food log screen (optimized for swipe navigation)
-export const loadNutritionLogsForSwipeNavigationAsync = createAsyncThunk<
-    { [date: string]: UserNutritionLog | null },
-    {
-        centerDate: Date;
-        forceRefresh?: boolean;
-        useCache?: boolean;
-    },
-    {
-        state: RootState;
-        rejectValue: { errorMessage: string };
-    }
->('user/loadNutritionLogsForSwipeNavigation', async ({ centerDate, forceRefresh = false, useCache = true }, { dispatch }) => {
-    // Format dates for the sliding window (previous, current, next)
-    const formatDateForAPI = (date: Date): string => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
-
-    const addDays = (date: Date, days: number): Date => {
-        const result = new Date(date);
-        result.setDate(result.getDate() + days);
-        return result;
-    };
-
-    const dates = [
-        formatDateForAPI(addDays(centerDate, -1)), // previous
-        formatDateForAPI(centerDate), // current
-        formatDateForAPI(addDays(centerDate, 1)), // next
-    ];
-
-    // Reuse the existing getNutritionLogsForDatesAsync thunk
-    const result = await dispatch(
-        getNutritionLogsForDatesAsync({
-            dates,
-            forceRefresh,
-            useCache,
-        }),
-    ).unwrap();
-
-    return result;
-});
-
+/**
+ * Add food entry (offline-first with optimistic update)
+ */
 export const addFoodEntryAsync = createAsyncThunk<
-    AddFoodEntryResponse & { date: string },
+    { date: string; nutritionLog: UserNutritionLog },
     { date: string; entryData: AddFoodEntryParams },
     {
         state: RootState;
@@ -2820,14 +2646,28 @@ export const addFoodEntryAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Add the food entry
-        const result = await UserService.addFoodEntry(userId, date, entryData);
+        // For now, always sync to server immediately (food entries are small operations)
+        // In the future, you could add optimistic updates to SQLite
+        if (networkStateManager.isOnline()) {
+            try {
+                console.log('Adding food entry to server...');
+                const result = await UserService.addFoodEntry(userId, date, entryData);
 
-        // Invalidate cache after adding entry
-        const cacheKey = `nutrition_logs_${date}`;
-        await cacheService.remove(cacheKey);
+                // Update SQLite with server response
+                await nutritionLogOfflineService.mergeServerData(userId, [result.nutritionLog]);
 
-        return { ...result, date };
+                return { date, nutritionLog: result.nutritionLog };
+            } catch (error) {
+                console.error('Failed to add food entry:', error);
+                return rejectWithValue({
+                    errorMessage: error instanceof Error ? error.message : 'Failed to add food entry',
+                });
+            }
+        } else {
+            return rejectWithValue({
+                errorMessage: 'Internet connection required to add food entries',
+            });
+        }
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to add food entry',
@@ -2835,8 +2675,11 @@ export const addFoodEntryAsync = createAsyncThunk<
     }
 });
 
+/**
+ * Update food entry (offline-first with optimistic update)
+ */
 export const updateFoodEntryAsync = createAsyncThunk<
-    UpdateFoodEntryResponse & { date: string },
+    { date: string; nutritionLog: UserNutritionLog },
     { date: string; mealType: MealType; entryKey: string; updates: UpdateFoodEntryParams },
     {
         state: RootState;
@@ -2851,14 +2694,26 @@ export const updateFoodEntryAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Update the food entry
-        const result = await UserService.updateFoodEntry(userId, date, mealType, entryKey, updates);
+        if (networkStateManager.isOnline()) {
+            try {
+                console.log('Updating food entry on server...');
+                const result = await UserService.updateFoodEntry(userId, date, mealType, entryKey, updates);
 
-        // Invalidate cache after updating entry
-        const cacheKey = `nutrition_logs_${date}`;
-        await cacheService.remove(cacheKey);
+                // Update SQLite with server response
+                await nutritionLogOfflineService.mergeServerData(userId, [result.nutritionLog]);
 
-        return { ...result, date };
+                return { date, nutritionLog: result.nutritionLog };
+            } catch (error) {
+                console.error('Failed to update food entry:', error);
+                return rejectWithValue({
+                    errorMessage: error instanceof Error ? error.message : 'Failed to update food entry',
+                });
+            }
+        } else {
+            return rejectWithValue({
+                errorMessage: 'Internet connection required to update food entries',
+            });
+        }
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to update food entry',
@@ -2866,6 +2721,9 @@ export const updateFoodEntryAsync = createAsyncThunk<
     }
 });
 
+/**
+ * Delete food entry (offline-first with optimistic update)
+ */
 export const deleteFoodEntryAsync = createAsyncThunk<
     { date: string; nutritionLog: UserNutritionLog },
     { date: string; mealType: MealType; entryKey: string },
@@ -2882,14 +2740,26 @@ export const deleteFoodEntryAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Delete the food entry
-        const nutritionLog = await UserService.deleteFoodEntry(userId, date, mealType, entryKey);
+        if (networkStateManager.isOnline()) {
+            try {
+                console.log('Deleting food entry from server...');
+                const nutritionLog = await UserService.deleteFoodEntry(userId, date, mealType, entryKey);
 
-        // Invalidate cache after deleting entry
-        const cacheKey = `nutrition_logs_${date}`;
-        await cacheService.remove(cacheKey);
+                // Update SQLite with server response
+                await nutritionLogOfflineService.mergeServerData(userId, [nutritionLog]);
 
-        return { date, nutritionLog };
+                return { date, nutritionLog };
+            } catch (error) {
+                console.error('Failed to delete food entry:', error);
+                return rejectWithValue({
+                    errorMessage: error instanceof Error ? error.message : 'Failed to delete food entry',
+                });
+            }
+        } else {
+            return rejectWithValue({
+                errorMessage: 'Internet connection required to delete food entries',
+            });
+        }
     } catch (error) {
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to delete food entry',
@@ -2897,6 +2767,9 @@ export const deleteFoodEntryAsync = createAsyncThunk<
     }
 });
 
+/**
+ * Delete entire day's log (offline-first)
+ */
 export const deleteSpecificDayLogAsync = createAsyncThunk<
     { date: string },
     { date: string },
@@ -2913,15 +2786,29 @@ export const deleteSpecificDayLogAsync = createAsyncThunk<
             return rejectWithValue({ errorMessage: 'User ID not available' });
         }
 
-        // Delete the entire day's log
-        await UserService.deleteSpecificDayLog(userId, date);
+        // Find local record
+        const localLog = await nutritionLogOfflineService.getLogForDate(userId, date);
 
-        // Invalidate cache after deleting day log
-        const cacheKey = `nutrition_logs_${date}`;
-        await cacheService.remove(cacheKey);
+        if (localLog) {
+            // Delete from SQLite
+            await nutritionLogOfflineService.delete(localLog.localId);
+        }
+
+        // Try to delete from server if online
+        if (networkStateManager.isOnline()) {
+            try {
+                console.log('Deleting day log from server...');
+                await UserService.deleteSpecificDayLog(userId, date);
+                console.log('Day log deleted from server');
+            } catch (error) {
+                console.warn('Failed to delete day log from server:', error);
+                // Local deletion already happened
+            }
+        }
 
         return { date };
     } catch (error) {
+        console.error('Failed to delete day log:', error);
         return rejectWithValue({
             errorMessage: error instanceof Error ? error.message : 'Failed to delete day log',
         });

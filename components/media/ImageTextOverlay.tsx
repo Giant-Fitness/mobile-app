@@ -6,7 +6,7 @@ import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { StyleProp, StyleSheet, TextStyle, ViewStyle } from 'react-native';
 
 import { Image, ImageContentFit } from 'expo-image';
@@ -47,50 +47,25 @@ export const ImageTextOverlay = React.memo<ImageTextOverlayProps>(
         const colorScheme = useColorScheme() as 'light' | 'dark';
         const themeColors = Colors[colorScheme];
         const [isLoading, setIsLoading] = useState(true);
-        const [initialLoad, setInitialLoad] = useState(true);
 
-        // Get stable image URI
+        // Get stable image URI for recycling key
         const currentImageUri = typeof image === 'string' ? image : image?.uri;
 
-        useEffect(() => {
-            const checkCache = async () => {
-                try {
-                    if (currentImageUri) {
-                        const isCached = await Image.getCachePathAsync(currentImageUri);
-                        if (isCached) {
-                            setIsLoading(false);
-                            setInitialLoad(false);
-                        }
-                    }
-                } catch (error) {
-                    console.log('Cache check error:', error);
-                }
-            };
-
-            checkCache();
-        }, [currentImageUri]);
-
-        const renderImage = () => {
-            return (
+        return (
+            <ThemedView style={[styles.container, containerStyle]}>
                 <ThemedView style={styles.imageWrapper}>
                     <Image
                         source={image}
                         style={styles.image}
                         contentFit={imageContentFit}
                         cachePolicy='memory-disk'
-                        onLoadStart={() => {
-                            if (initialLoad) {
-                                setIsLoading(true);
-                            }
-                        }}
-                        onLoad={() => {
-                            setIsLoading(false);
-                            setInitialLoad(false);
-                        }}
+                        onLoadStart={() => setIsLoading(true)}
+                        onLoad={() => setIsLoading(false)}
                         priority='high'
                         recyclingKey={currentImageUri}
+                        transition={200}
                     />
-                    {initialLoad && (
+                    {isLoading && (
                         <ShimmerPlaceholderComponent
                             LinearGradient={LinearGradient}
                             style={styles.shimmer}
@@ -110,17 +85,20 @@ export const ImageTextOverlay = React.memo<ImageTextOverlayProps>(
                         )}
                     </ThemedView>
                 </ThemedView>
-            );
-        };
-
-        return <ThemedView style={[styles.container, containerStyle]}>{renderImage()}</ThemedView>;
+            </ThemedView>
+        );
     },
     (prevProps, nextProps) => {
         // Custom comparison to prevent unnecessary re-renders
         const prevUri = typeof prevProps.image === 'string' ? prevProps.image : prevProps.image?.uri;
         const nextUri = typeof nextProps.image === 'string' ? nextProps.image : nextProps.image?.uri;
 
-        return prevUri === nextUri && prevProps.title === nextProps.title && prevProps.subtitle === nextProps.subtitle;
+        return (
+            prevUri === nextUri &&
+            prevProps.title === nextProps.title &&
+            prevProps.subtitle === nextProps.subtitle &&
+            prevProps.imageContentFit === nextProps.imageContentFit
+        );
     },
 );
 

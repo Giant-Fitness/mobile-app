@@ -11,7 +11,6 @@ import { useDispatch, useSelector } from 'react-redux';
 
 interface UseNutritionLogOptions {
     autoLoad?: boolean;
-    useCache?: boolean;
     forceRefresh?: boolean;
 }
 
@@ -23,7 +22,7 @@ interface UseNutritionLogReturn {
 }
 
 export const useNutritionLog = (date: string, options: UseNutritionLogOptions = {}): UseNutritionLogReturn => {
-    const { autoLoad = true, useCache = true, forceRefresh = false } = options;
+    const { autoLoad = true, forceRefresh = false } = options;
 
     const dispatch = useDispatch<AppDispatch>();
     const { userNutritionLogs, userNutritionLogsState, error, user } = useSelector((state: RootState) => state.user);
@@ -53,11 +52,10 @@ export const useNutritionLog = (date: string, options: UseNutritionLogOptions = 
                 getNutritionLogForDateAsync({
                     date,
                     forceRefresh: true,
-                    useCache,
                 }),
             );
         }
-    }, [dispatch, date, user?.UserId, isOnboardingComplete, useCache]);
+    }, [dispatch, date, user?.UserId, isOnboardingComplete]);
 
     // Auto-load data when component focuses
     useFocusEffect(
@@ -69,12 +67,11 @@ export const useNutritionLog = (date: string, options: UseNutritionLogOptions = 
                 dispatch(
                     getNutritionLogForDateAsync({
                         date,
-                        useCache,
                         forceRefresh,
                     }),
                 );
             }
-        }, [dispatch, date, user?.UserId, isOnboardingComplete, autoLoad, isDataLoaded, forceRefresh, useCache]),
+        }, [dispatch, date, user?.UserId, isOnboardingComplete, autoLoad, isDataLoaded, forceRefresh]),
     );
 
     return {

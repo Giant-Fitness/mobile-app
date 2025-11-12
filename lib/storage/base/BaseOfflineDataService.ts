@@ -42,6 +42,8 @@ export interface RecordQuery {
     limit?: number;
     offset?: number;
     orderBy?: 'ASC' | 'DESC';
+    startDate?: string;
+    endDate?: string;
 }
 
 /**

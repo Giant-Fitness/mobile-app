@@ -19,8 +19,6 @@ import {
     getAllNutritionLogsAsync,
     getBodyMeasurementsAsync,
     getNutritionLogForDateAsync,
-    getNutritionLogsForDatesAsync,
-    getNutritionLogsWithFiltersAsync,
     getSleepMeasurementsAsync,
     getUserAppSettingsAsync,
     getUserAsync,
@@ -32,7 +30,6 @@ import {
     getUserProgramProgressAsync,
     getUserRecommendationsAsync,
     getWeightMeasurementsAsync,
-    loadNutritionLogsForSwipeNavigationAsync,
     logBodyMeasurementAsync,
     logSleepMeasurementAsync,
     logWeightMeasurementAsync,
@@ -52,9 +49,7 @@ import {
 } from '@/store/user/thunks';
 import { initialState } from '@/store/user/userState';
 import {
-    AddFoodEntryResponse,
     CompleteProfileResponse,
-    UpdateFoodEntryResponse,
     User,
     UserAppSettings,
     UserBodyMeasurement,
@@ -670,45 +665,6 @@ const userSlice = createSlice({
                 state.error = action.error.message || 'Failed to fetch all nutrition logs';
             })
 
-            // Get Nutrition Logs with Filters
-            .addCase(getNutritionLogsWithFiltersAsync.pending, (state) => {
-                state.userNutritionLogsState = REQUEST_STATE.PENDING;
-                state.error = null;
-            })
-            .addCase(
-                getNutritionLogsWithFiltersAsync.fulfilled,
-                (state, action: PayloadAction<{ nutritionLogs: UserNutritionLog[]; count: number; lastEvaluatedKey?: any }>) => {
-                    state.userNutritionLogsState = REQUEST_STATE.FULFILLED;
-                    // Convert array to date-indexed object and merge with existing
-                    const logsObj: { [date: string]: UserNutritionLog | null } = {};
-                    action.payload.nutritionLogs.forEach((log) => {
-                        if (log?.DateString) {
-                            logsObj[log.DateString] = log;
-                        }
-                    });
-                    state.userNutritionLogs = { ...state.userNutritionLogs, ...logsObj };
-                },
-            )
-            .addCase(getNutritionLogsWithFiltersAsync.rejected, (state, action) => {
-                state.userNutritionLogsState = REQUEST_STATE.REJECTED;
-                state.error = action.error.message || 'Failed to fetch filtered nutrition logs';
-            })
-
-            // Get Nutrition Logs for Multiple Dates
-            .addCase(getNutritionLogsForDatesAsync.pending, (state) => {
-                state.userNutritionLogsState = REQUEST_STATE.PENDING;
-                state.error = null;
-            })
-            .addCase(getNutritionLogsForDatesAsync.fulfilled, (state, action: PayloadAction<{ [date: string]: UserNutritionLog | null }>) => {
-                state.userNutritionLogsState = REQUEST_STATE.FULFILLED;
-                // Merge the results with existing logs
-                state.userNutritionLogs = { ...state.userNutritionLogs, ...action.payload };
-            })
-            .addCase(getNutritionLogsForDatesAsync.rejected, (state, action) => {
-                state.userNutritionLogsState = REQUEST_STATE.REJECTED;
-                state.error = action.error.message || 'Failed to fetch nutrition logs for dates';
-            })
-
             // Get Single Nutrition Log for Date
             .addCase(getNutritionLogForDateAsync.pending, (state) => {
                 state.userNutritionLogsState = REQUEST_STATE.PENDING;
@@ -722,28 +678,12 @@ const userSlice = createSlice({
                 state.userNutritionLogsState = REQUEST_STATE.REJECTED;
                 state.error = action.error.message || 'Failed to fetch nutrition log for date';
             })
-
-            // Load Nutrition Logs for Swipe Navigation
-            .addCase(loadNutritionLogsForSwipeNavigationAsync.pending, (state) => {
-                state.userNutritionLogsState = REQUEST_STATE.PENDING;
-                state.error = null;
-            })
-            .addCase(loadNutritionLogsForSwipeNavigationAsync.fulfilled, (state, action: PayloadAction<{ [date: string]: UserNutritionLog | null }>) => {
-                state.userNutritionLogsState = REQUEST_STATE.FULFILLED;
-                // Merge the results with existing logs
-                state.userNutritionLogs = { ...state.userNutritionLogs, ...action.payload };
-            })
-            .addCase(loadNutritionLogsForSwipeNavigationAsync.rejected, (state, action) => {
-                state.userNutritionLogsState = REQUEST_STATE.REJECTED;
-                state.error = action.error.message || 'Failed to load nutrition logs for swipe navigation';
-            })
-
             // Add Food Entry
             .addCase(addFoodEntryAsync.pending, (state) => {
                 state.userNutritionLogsState = REQUEST_STATE.PENDING;
                 state.error = null;
             })
-            .addCase(addFoodEntryAsync.fulfilled, (state, action: PayloadAction<AddFoodEntryResponse & { date: string }>) => {
+            .addCase(addFoodEntryAsync.fulfilled, (state, action: PayloadAction<{ date: string; nutritionLog: UserNutritionLog }>) => {
                 state.userNutritionLogsState = REQUEST_STATE.FULFILLED;
                 // Update the specific date's nutrition log with the new entry
                 state.userNutritionLogs[action.payload.date] = action.payload.nutritionLog;
@@ -758,7 +698,7 @@ const userSlice = createSlice({
                 state.userNutritionLogsState = REQUEST_STATE.PENDING;
                 state.error = null;
             })
-            .addCase(updateFoodEntryAsync.fulfilled, (state, action: PayloadAction<UpdateFoodEntryResponse & { date: string }>) => {
+            .addCase(updateFoodEntryAsync.fulfilled, (state, action: PayloadAction<{ date: string; nutritionLog: UserNutritionLog }>) => {
                 state.userNutritionLogsState = REQUEST_STATE.FULFILLED;
                 // Update the specific date's nutrition log with the updated entry
                 state.userNutritionLogs[action.payload.date] = action.payload.nutritionLog;

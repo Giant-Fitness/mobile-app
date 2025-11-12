@@ -134,7 +134,6 @@ export const DailyMacrosCard: React.FC<DailyMacrosCardProps> = ({ style, isOnboa
     const todayString = formatDateForAPI(new Date());
     const { nutritionLog } = useNutritionLog(todayString, {
         autoLoad: true,
-        useCache: true,
     });
 
     // Calculate consumed values from nutrition log (or preview / zeros)

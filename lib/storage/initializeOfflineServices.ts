@@ -9,6 +9,8 @@ import { exerciseSubstitutionOfflineService } from '@/lib/storage/exercise-subst
 import { exerciseSubstitutionSyncHandler } from '@/lib/storage/exercise-substitutions/ExerciseSubstitutionSyncHandler';
 import { fitnessProfileOfflineService } from '@/lib/storage/fitness-profile/FitnessProfileOfflineService';
 import { fitnessProfileSyncHandler } from '@/lib/storage/fitness-profile/FitnessProfileSyncHandler';
+import { nutritionLogOfflineService } from '@/lib/storage/nutrition-logs/NutritionLogOfflineService';
+import { nutritionLogSyncHandler } from '@/lib/storage/nutrition-logs/NutritionLogSyncHandler';
 import { programProgressOfflineService } from '@/lib/storage/program-progress/ProgramProgressOfflineService';
 import { programProgressSyncHandler } from '@/lib/storage/program-progress/ProgramProgressSyncHandler';
 import { weightMeasurementOfflineService } from '@/lib/storage/weight-measurements/WeightMeasurementOfflineService';
@@ -56,6 +58,7 @@ export async function initializeOfflineServices(options: OfflineInitializationOp
             exerciseSetModificationInit,
             nutritionGoalInit,
             macroTargetInit,
+            nutritionLogInit,
         ] = await Promise.allSettled([
             programProgressOfflineService.initialize(),
             weightMeasurementOfflineService.initialize(),
@@ -66,6 +69,7 @@ export async function initializeOfflineServices(options: OfflineInitializationOp
             exerciseSetModificationOfflineService.initialize(),
             nutritionGoalOfflineService.initialize(),
             macroTargetOfflineService.initialize(),
+            nutritionLogOfflineService.initialize(),
         ]);
 
         // Check if any failed
@@ -96,6 +100,9 @@ export async function initializeOfflineServices(options: OfflineInitializationOp
         if (macroTargetInit.status === 'rejected') {
             console.warn('Macro target service initialization failed:', macroTargetInit.reason);
         }
+        if (nutritionLogInit.status === 'rejected') {
+            console.warn('Nutrition log service initialization failed:', nutritionLogInit.reason);
+        }
 
         // Step 3: Register sync handlers with the queue manager
         syncQueueManager.registerSyncHandler('program_progress', programProgressSyncHandler);
@@ -107,6 +114,7 @@ export async function initializeOfflineServices(options: OfflineInitializationOp
         syncQueueManager.registerSyncHandler('exercise_set_modifications', exerciseSetModificationSyncHandler);
         syncQueueManager.registerSyncHandler('nutrition_goals', nutritionGoalSyncHandler);
         syncQueueManager.registerSyncHandler('macro_targets', macroTargetSyncHandler);
+        syncQueueManager.registerSyncHandler('nutrition_logs', nutritionLogSyncHandler);
 
         console.log('✅ Offline services initialized successfully');
     } catch (error) {

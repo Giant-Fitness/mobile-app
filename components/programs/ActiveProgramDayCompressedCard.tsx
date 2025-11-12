@@ -28,149 +28,228 @@ type ActiveProgramDayCompressedCardProps = {
     badgeIcon?: string;
 };
 
-export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressedCardProps> = ({
-    source,
-    showBadge = true,
-    badgeText = 'Start',
-    badgeIcon = 'play',
-}) => {
-    const colorScheme = useColorScheme() as 'light' | 'dark';
-    const themeColors = Colors[colorScheme];
-    const shadowColor = 'rgba(0,0,0,0.2)';
-    const { workouts } = useSelector((state: RootState) => state.workouts);
+// Helper function to extract base URL without query parameters
+const getBaseUrl = (url: string | null | undefined): string | null => {
+    if (!url) return null;
+    const urlWithoutQuery = url.split('?')[0];
+    return urlWithoutQuery;
+};
 
-    const { userProgramProgress } = useSelector((state: RootState) => state.user);
-    const { programDays, programDaysState } = useSelector((state: RootState) => state.programs);
+// CRITICAL: Deep equality function for program day data
+const selectCurrentDayDataEqual = (prev: any, next: any) => {
+    if (prev === next) return true;
+    if (!prev || !next) return prev === next;
 
-    const programId = userProgramProgress?.ProgramId;
-    const dayId = userProgramProgress?.CurrentDay;
-
-    const currentDay = programId && dayId ? programDays[programId]?.[dayId] : null;
-    const currentDayState = programId && dayId ? programDaysState[programId]?.[dayId] : REQUEST_STATE.IDLE;
-
-    // Animation values
-    const scaleAnim = useRef(new Animated.Value(1)).current;
-    const badgeScaleAnim = useRef(new Animated.Value(1)).current;
-
-    // Memoize the display image to prevent recalculation on every render
-    const displayImage = useMemo(() => {
-        if (!currentDay) return null;
-
-        if (currentDay.Type === 'video' && currentDay.WorkoutId && workouts[currentDay.WorkoutId]) {
-            return { uri: workouts[currentDay.WorkoutId].PhotoUrl };
-        }
-        return { uri: currentDay.PhotoUrl };
-    }, [currentDay?.DayId, currentDay?.Type, currentDay?.WorkoutId, currentDay?.PhotoUrl, workouts]);
-
-    // Cache the title to prevent unnecessary updates
-    const dayTitle = useMemo(() => currentDay?.DayTitle, [currentDay?.DayId, currentDay?.DayTitle]);
-
-    // Create a stable key based on the day ID
-    const imageKey = useMemo(() => `program-day-${dayId}-${displayImage?.uri}`, [dayId, displayImage?.uri]);
-
-    // Show error only if we have no data
-    if (currentDayState === REQUEST_STATE.REJECTED && !currentDay) {
-        return (
-            <View style={styles.shadowContainer}>
-                <ThemedView style={[styles.cardContainer, { backgroundColor: themeColors.background }]}>
-                    <ThemedText>Error loading the current day.</ThemedText>
-                </ThemedView>
-            </View>
-        );
-    }
-
-    const handlePressIn = () => {
-        Animated.parallel([
-            Animated.spring(scaleAnim, {
-                toValue: 0.97,
-                friction: 3,
-                useNativeDriver: true,
-            }),
-            Animated.spring(badgeScaleAnim, {
-                toValue: 0.95,
-                friction: 3,
-                useNativeDriver: true,
-            }),
-        ]).start();
-    };
-
-    const handlePressOut = () => {
-        Animated.parallel([
-            Animated.spring(scaleAnim, {
-                toValue: 1,
-                friction: 3,
-                useNativeDriver: true,
-            }),
-            Animated.spring(badgeScaleAnim, {
-                toValue: 1,
-                friction: 3,
-                useNativeDriver: true,
-            }),
-        ]).start();
-    };
-
-    const navigateToProgramDay = () => {
-        if (programId && dayId) {
-            debounce(
-                router,
-                {
-                    pathname: '/(app)/programs/program-day',
-                    params: { programId, dayId, source },
-                },
-                1200,
-            );
-        }
-    };
-
-    const handlePress = () => {
-        trigger('impactLight');
-        navigateToProgramDay();
-    };
-
-    const renderBadge = () => {
-        if (!showBadge) return null;
-
-        const badgeColor = themeColors.tangerineSolid;
-        const badgeTextColor = themeColors.white;
-
-        return (
-            <Animated.View
-                style={[
-                    styles.floatingBadge,
-                    {
-                        backgroundColor: badgeColor,
-                        shadowColor: shadowColor,
-                        transform: [{ scale: badgeScaleAnim }],
-                    },
-                ]}
-            >
-                <Icon name={badgeIcon} color={badgeTextColor} size={12} style={{ marginRight: Spaces.XS }} />
-                <ThemedText type='buttonSmall' style={[styles.badgeText, { color: badgeTextColor }]}>
-                    {badgeText}
-                </ThemedText>
-            </Animated.View>
-        );
-    };
-
+    // Compare only the fields we actually use
     return (
-        <Animated.View style={[styles.shadowContainer, { transform: [{ scale: scaleAnim }] }]}>
-            <TouchableOpacity onPressIn={handlePressIn} onPressOut={handlePressOut} onPress={handlePress} activeOpacity={1} style={styles.cardContainer}>
-                <View style={styles.imageContainer}>
-                    <ImageTextOverlay
-                        key={imageKey}
-                        image={displayImage}
-                        title={dayTitle}
-                        gradientColors={['transparent', 'rgba(0,0,0,0.65)']}
-                        containerStyle={{ height: '100%' }}
-                        titleType='title'
-                        titleStyle={{ marginRight: 2 * Spaces.XXL, lineHeight: moderateScale(20), marginBottom: 0 }}
-                    />
-                    {renderBadge()}
-                </View>
-            </TouchableOpacity>
-        </Animated.View>
+        prev.programId === next.programId &&
+        prev.dayId === next.dayId &&
+        prev.currentDayState === next.currentDayState &&
+        prev.currentDay?.DayId === next.currentDay?.DayId &&
+        prev.currentDay?.DayTitle === next.currentDay?.DayTitle &&
+        prev.currentDay?.Type === next.currentDay?.Type &&
+        prev.currentDay?.PhotoUrl === next.currentDay?.PhotoUrl &&
+        prev.currentDay?.WorkoutId === next.currentDay?.WorkoutId
     );
 };
+
+// Create a memoized selector for the current day data
+const selectCurrentDayData = (state: RootState) => {
+    const programId = state.user.userProgramProgress?.ProgramId;
+    const dayId = state.user.userProgramProgress?.CurrentDay;
+
+    if (!programId || !dayId) {
+        return { currentDay: null, currentDayState: REQUEST_STATE.IDLE, programId: null, dayId: null };
+    }
+
+    return {
+        currentDay: state.programs.programDays[programId]?.[dayId] || null,
+        currentDayState: state.programs.programDaysState[programId]?.[dayId] || REQUEST_STATE.IDLE,
+        programId,
+        dayId,
+    };
+};
+
+export const ActiveProgramDayCompressedCard: React.FC<ActiveProgramDayCompressedCardProps> = React.memo(
+    ({ source, showBadge = true, badgeText = 'Start', badgeIcon = 'play' }) => {
+        const colorScheme = useColorScheme() as 'light' | 'dark';
+        const themeColors = Colors[colorScheme];
+        const shadowColor = 'rgba(0,0,0,0.2)';
+
+        // Use custom equality function to prevent re-renders when values haven't changed
+        const { currentDay, currentDayState, programId, dayId } = useSelector(selectCurrentDayData, selectCurrentDayDataEqual);
+
+        // Only select the specific workout we need with deep equality
+        const currentWorkout = useSelector(
+            (state: RootState) => {
+                if (currentDay?.Type === 'video' && currentDay.WorkoutId) {
+                    return state.workouts.workouts[currentDay.WorkoutId];
+                }
+                return null;
+            },
+            (prev, next) => {
+                // Custom equality: only re-render if PhotoUrl actually changed
+                if (!prev && !next) return true;
+                if (!prev || !next) return false;
+                return prev.PhotoUrl === next.PhotoUrl;
+            },
+        );
+
+        // Animation values
+        const scaleAnim = useRef(new Animated.Value(1)).current;
+        const badgeScaleAnim = useRef(new Animated.Value(1)).current;
+
+        // CRITICAL FIX: Extract base URL without query parameters for stable key
+        const displayImageBaseUrl = useMemo(() => {
+            if (!currentDay) return null;
+
+            let fullUrl: string | null = null;
+            if (currentDay.Type === 'video' && currentWorkout) {
+                fullUrl = currentWorkout.PhotoUrl;
+            } else {
+                fullUrl = currentDay.PhotoUrl || null;
+            }
+
+            return getBaseUrl(fullUrl);
+        }, [currentDay?.Type, currentDay?.PhotoUrl, currentWorkout?.PhotoUrl]);
+
+        // Get full URL for the actual image (with credentials)
+        const displayImageUri = useMemo(() => {
+            if (!currentDay) return null;
+
+            if (currentDay.Type === 'video' && currentWorkout) {
+                return currentWorkout.PhotoUrl;
+            }
+            return currentDay.PhotoUrl;
+        }, [currentDay?.Type, currentDay?.PhotoUrl, currentWorkout?.PhotoUrl]);
+
+        // Create stable image object using full URL
+        const displayImage = useMemo(() => {
+            return displayImageUri ? { uri: displayImageUri } : null;
+        }, [displayImageUri]);
+
+        // Cache the title
+        const dayTitle = useMemo(() => currentDay?.DayTitle ?? null, [currentDay?.DayTitle]);
+
+        // CRITICAL: Use base URL (without query params) for stable key
+        const imageKey = useMemo(() => {
+            return `program-day-${dayId}-${displayImageBaseUrl}`;
+        }, [dayId, displayImageBaseUrl]);
+
+        // Show error only if we have no data
+        if (currentDayState === REQUEST_STATE.REJECTED && !currentDay) {
+            return (
+                <View style={styles.shadowContainer}>
+                    <ThemedView style={[styles.cardContainer, { backgroundColor: themeColors.background }]}>
+                        <ThemedText>Error loading the current day.</ThemedText>
+                    </ThemedView>
+                </View>
+            );
+        }
+
+        const handlePressIn = () => {
+            Animated.parallel([
+                Animated.spring(scaleAnim, {
+                    toValue: 0.97,
+                    friction: 3,
+                    useNativeDriver: true,
+                }),
+                Animated.spring(badgeScaleAnim, {
+                    toValue: 0.95,
+                    friction: 3,
+                    useNativeDriver: true,
+                }),
+            ]).start();
+        };
+
+        const handlePressOut = () => {
+            Animated.parallel([
+                Animated.spring(scaleAnim, {
+                    toValue: 1,
+                    friction: 3,
+                    useNativeDriver: true,
+                }),
+                Animated.spring(badgeScaleAnim, {
+                    toValue: 1,
+                    friction: 3,
+                    useNativeDriver: true,
+                }),
+            ]).start();
+        };
+
+        const navigateToProgramDay = () => {
+            if (programId && dayId) {
+                debounce(
+                    router,
+                    {
+                        pathname: '/(app)/programs/program-day',
+                        params: { programId, dayId, source },
+                    },
+                    1200,
+                );
+            }
+        };
+
+        const handlePress = () => {
+            trigger('impactLight');
+            navigateToProgramDay();
+        };
+
+        const renderBadge = () => {
+            if (!showBadge) return null;
+
+            const badgeColor = themeColors.tangerineSolid;
+            const badgeTextColor = themeColors.white;
+
+            return (
+                <Animated.View
+                    style={[
+                        styles.floatingBadge,
+                        {
+                            backgroundColor: badgeColor,
+                            shadowColor: shadowColor,
+                            transform: [{ scale: badgeScaleAnim }],
+                        },
+                    ]}
+                >
+                    <Icon name={badgeIcon} color={badgeTextColor} size={12} style={{ marginRight: Spaces.XS }} />
+                    <ThemedText type='buttonSmall' style={[styles.badgeText, { color: badgeTextColor }]}>
+                        {badgeText}
+                    </ThemedText>
+                </Animated.View>
+            );
+        };
+
+        return (
+            <Animated.View style={[styles.shadowContainer, { transform: [{ scale: scaleAnim }] }]}>
+                <TouchableOpacity onPressIn={handlePressIn} onPressOut={handlePressOut} onPress={handlePress} activeOpacity={1} style={styles.cardContainer}>
+                    <View style={styles.imageContainer}>
+                        <ImageTextOverlay
+                            key={imageKey}
+                            image={displayImage}
+                            title={dayTitle ?? undefined}
+                            gradientColors={['transparent', 'rgba(0,0,0,0.65)']}
+                            containerStyle={{ height: '100%' }}
+                            titleType='title'
+                            titleStyle={{ marginRight: 2 * Spaces.XXL, lineHeight: moderateScale(20), marginBottom: 0 }}
+                        />
+                        {renderBadge()}
+                    </View>
+                </TouchableOpacity>
+            </Animated.View>
+        );
+    },
+    (prevProps, nextProps) => {
+        return (
+            prevProps.source === nextProps.source &&
+            prevProps.showBadge === nextProps.showBadge &&
+            prevProps.badgeText === nextProps.badgeText &&
+            prevProps.badgeIcon === nextProps.badgeIcon
+        );
+    },
+);
+
+ActiveProgramDayCompressedCard.displayName = 'ActiveProgramDayCompressedCard';
 
 const styles = StyleSheet.create({
     shadowContainer: {
@@ -190,39 +269,6 @@ const styles = StyleSheet.create({
         position: 'relative',
         height: '100%',
     },
-    shimmerContainer: {
-        width: '100%',
-        height: Sizes.imageLGHeight,
-        borderRadius: Spaces.SM,
-        overflow: 'hidden',
-    },
-    shimmerContent: {
-        flex: 1,
-        padding: Spaces.MD,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    shimmerImage: {
-        width: '100%',
-        height: '70%',
-        borderRadius: Spaces.SM,
-        marginBottom: Spaces.SM,
-    },
-    shimmerTextContainer: {
-        width: '80%',
-    },
-    shimmerTitle: {
-        width: '60%',
-        height: 20,
-        borderRadius: 4,
-        marginBottom: Spaces.XXS,
-    },
-    shimmerSubtitle: {
-        width: '40%',
-        height: 14,
-        borderRadius: 4,
-    },
-    // Floating badge styles
     floatingBadge: {
         position: 'absolute',
         bottom: Spaces.MD,

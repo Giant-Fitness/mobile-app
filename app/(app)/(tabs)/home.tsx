@@ -45,141 +45,63 @@ import { useFocusEffect } from '@react-navigation/native';
 
 import { trigger } from 'react-native-haptic-feedback';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
-import { useDispatch, useSelector } from 'react-redux';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 
 const useOnboardingStatus = () => {
     const user = useSelector((state: RootState) => state.user.user);
     return Boolean(user?.OnboardingComplete);
 };
 
-export default function HomeScreen() {
-    // Theme
+// Add memoized selectors at the top level
+const selectUserData = (state: RootState) => ({
+    user: state.user.user,
+    userWeightMeasurements: state.user.userWeightMeasurements,
+    userRecommendations: state.user.userRecommendations,
+    userAppSettings: state.user.userAppSettings,
+    userNutritionGoals: state.user.userNutritionGoals,
+    userMacroTargets: state.user.userMacroTargets,
+});
+
+const selectProgramData = (state: RootState) => ({
+    programs: state.programs.programs,
+});
+
+// CRITICAL FIX: Move component definitions OUTSIDE HomeScreen
+// This prevents them from being recreated on every render
+
+const SectionHeader = React.memo<{ title: string; right?: React.ReactNode }>(({ title, right }) => (
+    <View style={styles.headerWithAction}>
+        <ThemedText type='titleLarge'>{title}</ThemedText>
+        {right ? right : null}
+    </View>
+));
+SectionHeader.displayName = 'SectionHeader';
+
+const FactSection = React.memo(() => (
+    <View style={styles.factSection}>
+        <FactOfTheDay key='fact' />
+    </View>
+));
+FactSection.displayName = 'FactSection';
+
+const OnboardingSection = React.memo<{ isOnboardingComplete: boolean }>(({ isOnboardingComplete }) => {
+    return (
+        <View style={styles.onboardingSection}>
+            <OnboardingCard key='onboarding' isOnboardingComplete={isOnboardingComplete} />
+        </View>
+    );
+});
+OnboardingSection.displayName = 'OnboardingSection';
+
+// Component that needs theme colors
+const NutritionOverview = React.memo<{
+    isOnboardingComplete: boolean;
+    activeMacroTarget: any;
+}>(({ isOnboardingComplete, activeMacroTarget }) => {
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
-    // State / refs
-    const dispatch = useDispatch<AppDispatch>();
-    const [isRefreshing, setIsRefreshing] = useState(false);
-
-    const EXPANDED_HEADER_HEIGHT = Sizes.headerHeight + 40;
-    const scrollY = useSharedValue(0);
-    const isMountedAndFocused = useRef(true);
-    const refreshTimeoutRef = useRef<number | null>(null);
-
-    // Store slices
-    const { user, userWeightMeasurements, userRecommendations, userAppSettings, userNutritionGoals, userMacroTargets } = useSelector(
-        (state: RootState) => state.user,
-    );
-
-    const { programs } = useSelector((state: RootState) => state.programs);
-
-    const { user: programUser, userProgramProgress, hasCompletedWorkoutToday } = useProgramData();
-
-    // ----- Derived HomeState --------------------------------------------------
-    const isOnboardingComplete = useOnboardingStatus();
-
-    // Get active nutrition goal
-    const activeNutritionGoal = useMemo(() => {
-        return userNutritionGoals?.find((goal) => goal.IsActive) || null;
-    }, [userNutritionGoals]);
-
-    // Get active macro target
-    const activeMacroTarget = useMemo(() => {
-        return userMacroTargets?.find((target) => target.IsActive) || null;
-    }, [userMacroTargets]);
-
-    const { activeProgram, hasActiveProgram, recommendedProgram, weightGoal } = useMemo(() => {
-        const rec = userRecommendations?.RecommendedProgramID ? programs[userRecommendations.RecommendedProgramID] : null;
-
-        const activeId = userProgramProgress?.ProgramId;
-        const active = activeId ? programs[activeId] : null;
-
-        return {
-            activeProgram: active,
-            hasActiveProgram: Boolean(activeId && active),
-            recommendedProgram: rec,
-            weightGoal: activeNutritionGoal?.TargetWeight ?? null,
-        };
-    }, [userRecommendations, programs, userProgramProgress, activeNutritionGoal]);
-
-    // Greeting
-    const greeting = programUser?.FirstName ? `Hi, ${programUser.FirstName}!` : 'Hi!';
-
-    // ----- Scroll handler -----------------------------------------------------
-    const scrollHandler = useAnimatedScrollHandler({
-        onScroll: (event) => {
-            scrollY.value = event.contentOffset.y;
-        },
-    });
-
-    // ----- Lifecycle: focus cleanup for refresh control ----------------------
-    useFocusEffect(
-        useCallback(() => {
-            isMountedAndFocused.current = true;
-            return () => {
-                isMountedAndFocused.current = false;
-                if (refreshTimeoutRef.current) {
-                    clearTimeout(refreshTimeoutRef.current);
-                    refreshTimeoutRef.current = null;
-                }
-                if (isRefreshing) setIsRefreshing(false);
-            };
-        }, [isRefreshing]),
-    );
-
-    // Updated handleRefresh to use the nutrition log hook's refetch function
-    const handleRefresh = useCallback(async () => {
-        if (isRefreshing) return;
-        setIsRefreshing(true);
-        trigger('virtualKeyRelease');
-
-        try {
-            await dispatch(getUserAsync());
-            if (user?.UserId) {
-                await Promise.all([
-                    dispatch(getUserAsync({ forceRefresh: true })),
-                    dispatch(getUserFitnessProfileAsync({ forceRefresh: true })),
-                    dispatch(getUserProgramProgressAsync({ forceRefresh: true })),
-                    dispatch(getUserRecommendationsAsync({ forceRefresh: true })),
-                    dispatch(getWorkoutQuoteAsync({ forceRefresh: true })),
-                    dispatch(getRestDayQuoteAsync({ forceRefresh: true })),
-                    dispatch(getSpotlightWorkoutsAsync({ forceRefresh: true })),
-                    dispatch(getAllProgramsAsync({ forceRefresh: true })),
-                    dispatch(getWeightMeasurementsAsync({ forceRefresh: true })),
-                    dispatch(getUserNutritionGoalsAsync({ forceRefresh: true })),
-                    dispatch(getUserMacroTargetsAsync({ forceRefresh: true })),
-                    dispatch(initializeTrackedLiftsHistoryAsync({ forceRefresh: true })),
-                    dispatch(getUserAppSettingsAsync({ forceRefresh: true })),
-                    dispatch(getAllWorkoutsAsync({ forceRefresh: true })),
-                    dispatch(getBodyMeasurementsAsync({ forceRefresh: true })),
-                    dispatch(getUserExerciseSetModificationsAsync({ forceRefresh: true })),
-                    dispatch(getUserExerciseSubstitutionsAsync({ forceRefresh: true })),
-                    dispatch(getAllNutritionLogsAsync({ forceRefresh: true })),
-                ]);
-
-                if (userProgramProgress?.ProgramId) {
-                    await dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId, forceRefresh: true }));
-                }
-            }
-        } catch (e) {
-            console.error('Refresh failed:', e);
-        } finally {
-            refreshTimeoutRef.current = setTimeout(() => {
-                if (isMountedAndFocused.current) setIsRefreshing(false);
-                refreshTimeoutRef.current = null;
-            }, 200);
-        }
-    }, [dispatch, isRefreshing, user?.UserId, userProgramProgress?.ProgramId, isOnboardingComplete]);
-
-    // ----- Section Components -------------------------------------------------
-    const SectionHeader: React.FC<{ title: string; right?: React.ReactNode }> = ({ title, right }) => (
-        <View style={styles.headerWithAction}>
-            <ThemedText type='titleLarge'>{title}</ThemedText>
-            {right ? right : null}
-        </View>
-    );
-
-    const NutritionOverview: React.FC = () => (
+    return (
         <View style={[styles.nutritionSection, { backgroundColor: themeColors.background }]}>
             <View style={styles.header}>
                 <ThemedText type='titleLarge'>Nutrition Overview</ThemedText>
@@ -189,36 +111,37 @@ export default function HomeScreen() {
             </View>
         </View>
     );
+});
+NutritionOverview.displayName = 'NutritionOverview';
 
-    const TodaysWorkout: React.FC = () => (
-        <View style={styles.todaysWorkoutSection}>
-            <View style={styles.header}>
-                <ThemedText type='titleLarge'>Today&apos;s Workout</ThemedText>
-            </View>
-            <View style={styles.workoutDayCard}>
-                {hasCompletedWorkoutToday ? (
-                    <WorkoutCompletedCard
-                        onBrowseSolos={() =>
-                            debounce(router, {
-                                pathname: '/(app)/workouts/all-workouts',
-                                params: { source: 'home-program-day-completed-tile' },
-                            })
-                        }
-                    />
-                ) : (
-                    <ActiveProgramDayCompressedCard source={'home'} />
-                )}
-            </View>
+const TodaysWorkout = React.memo<{ hasCompletedWorkoutToday: boolean }>(({ hasCompletedWorkoutToday }) => (
+    <View style={styles.todaysWorkoutSection}>
+        <View style={styles.header}>
+            <ThemedText type='titleLarge'>Today&apos;s Workout</ThemedText>
         </View>
-    );
-
-    const FactSection: React.FC = () => (
-        <View style={styles.factSection}>
-            <FactOfTheDay key='fact' />
+        <View style={styles.workoutDayCard}>
+            {hasCompletedWorkoutToday ? (
+                <WorkoutCompletedCard
+                    onBrowseSolos={() =>
+                        debounce(router, {
+                            pathname: '/(app)/workouts/all-workouts',
+                            params: { source: 'home-program-day-completed-tile' },
+                        })
+                    }
+                />
+            ) : (
+                <ActiveProgramDayCompressedCard source={'home'} />
+            )}
         </View>
-    );
+    </View>
+));
+TodaysWorkout.displayName = 'TodaysWorkout';
 
-    const TrainingProgram: React.FC = () => (
+const TrainingProgram = React.memo<{ recommendedProgram: any }>(({ recommendedProgram }) => {
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
+
+    return (
         <View style={[styles.recommendedProgramSection, { backgroundColor: themeColors.backgroundSecondary }]}>
             <SectionHeader
                 title='Training Program'
@@ -254,72 +177,229 @@ export default function HomeScreen() {
             </View>
         </View>
     );
+});
+TrainingProgram.displayName = 'TrainingProgram';
 
-    const ProgressSection: React.FC = () => {
-        const showWeight = Boolean(weightGoal);
-        const showTraining = hasActiveProgram && activeProgram;
-        if (!showWeight && !showTraining) return null;
+const ProgressSection = React.memo<{
+    weightGoal: any;
+    hasActiveProgram: boolean;
+    activeProgram: any;
+    activeNutritionGoal: any;
+    userWeightMeasurements: any;
+    userAppSettings: any;
+    userProgramProgress: any;
+}>(({ weightGoal, hasActiveProgram, activeProgram, activeNutritionGoal, userWeightMeasurements, userAppSettings, userProgramProgress }) => {
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
 
-        return (
-            <View style={[styles.goalProgressSection, { backgroundColor: themeColors.backgroundSecondary }]}>
-                <View style={styles.header}>
-                    <ThemedText type='titleLarge'>Progress</ThemedText>
-                </View>
-                <View style={styles.goalProgressCards}>
-                    {showWeight && (
-                        <WeightProgressCard
-                            nutritionGoal={activeNutritionGoal}
-                            userWeightMeasurements={userWeightMeasurements}
-                            weightUnit={userAppSettings?.UnitsOfMeasurement?.BodyWeightUnits || 'lbs'}
-                            onPress={() => debounce(router, '/(app)/progress/weight-tracking')}
-                        />
-                    )}
-                    {showTraining && (
-                        <TrainingProgressCard
-                            activeProgram={activeProgram!}
-                            userProgramProgress={userProgramProgress!}
-                            onPress={() => debounce(router, '/(app)/programs/active-program-progress')}
-                        />
-                    )}
-                </View>
+    const showWeight = Boolean(weightGoal);
+    const showTraining = hasActiveProgram && activeProgram;
+
+    if (!showWeight && !showTraining) return null;
+
+    return (
+        <View style={[styles.goalProgressSection, { backgroundColor: themeColors.backgroundSecondary }]}>
+            <View style={styles.header}>
+                <ThemedText type='titleLarge'>Progress</ThemedText>
             </View>
-        );
-    };
-
-    const OnboardingSection: React.FC = () => {
-        return (
-            <View style={styles.onboardingSection}>
-                <OnboardingCard key='onboarding' isOnboardingComplete={isOnboardingComplete} />
+            <View style={styles.goalProgressCards}>
+                {showWeight && (
+                    <WeightProgressCard
+                        nutritionGoal={activeNutritionGoal}
+                        userWeightMeasurements={userWeightMeasurements}
+                        weightUnit={userAppSettings?.UnitsOfMeasurement?.BodyWeightUnits || 'lbs'}
+                        onPress={() => debounce(router, '/(app)/progress/weight-tracking')}
+                    />
+                )}
+                {showTraining && (
+                    <TrainingProgressCard
+                        activeProgram={activeProgram}
+                        userProgramProgress={userProgramProgress}
+                        onPress={() => debounce(router, '/(app)/programs/active-program-progress')}
+                    />
+                )}
             </View>
-        );
-    };
+        </View>
+    );
+});
+ProgressSection.displayName = 'ProgressSection';
 
-    // ----- Scenario-driven section list --------------------------------------
+export default function HomeScreen() {
+    // Theme
+    const colorScheme = useColorScheme() as 'light' | 'dark';
+    const themeColors = Colors[colorScheme];
+
+    // State / refs
+    const dispatch = useDispatch<AppDispatch>();
+    const [isRefreshing, setIsRefreshing] = useState(false);
+
+    const EXPANDED_HEADER_HEIGHT = Sizes.headerHeight + 40;
+    const scrollY = useSharedValue(0);
+    const isMountedAndFocused = useRef(true);
+    const refreshTimeoutRef = useRef<number | null>(null);
+
+    // Use memoized selectors with shallow equality
+    const userData = useSelector(selectUserData, shallowEqual);
+    const { programs } = useSelector(selectProgramData, shallowEqual);
+
+    const { user: programUser, userProgramProgress, hasCompletedWorkoutToday } = useProgramData();
+
+    // ----- Derived HomeState --------------------------------------------------
+    const isOnboardingComplete = useOnboardingStatus();
+
+    // Get active nutrition goal
+    const activeNutritionGoal = useMemo(() => {
+        return userData.userNutritionGoals?.find((goal) => goal.IsActive) || null;
+    }, [userData.userNutritionGoals]);
+
+    // Get active macro target
+    const activeMacroTarget = useMemo(() => {
+        return userData.userMacroTargets?.find((target) => target.IsActive) || null;
+    }, [userData.userMacroTargets]);
+
+    const { activeProgram, hasActiveProgram, recommendedProgram, weightGoal } = useMemo(() => {
+        const rec = userData.userRecommendations?.RecommendedProgramID ? programs[userData.userRecommendations.RecommendedProgramID] : null;
+
+        const activeId = userProgramProgress?.ProgramId;
+        const active = activeId ? programs[activeId] : null;
+
+        return {
+            activeProgram: active,
+            hasActiveProgram: Boolean(activeId && active),
+            recommendedProgram: rec,
+            weightGoal: activeNutritionGoal?.TargetWeight ?? null,
+        };
+    }, [userData.userRecommendations, programs, userProgramProgress, activeNutritionGoal]);
+
+    // Greeting
+    const greeting = useMemo(() => {
+        return programUser?.FirstName ? `Hi, ${programUser.FirstName}!` : 'Hi!';
+    }, [programUser?.FirstName]);
+
+    // ----- Scroll handler -----------------------------------------------------
+    const scrollHandler = useAnimatedScrollHandler({
+        onScroll: (event) => {
+            scrollY.value = event.contentOffset.y;
+        },
+    });
+
+    // ----- Lifecycle: focus cleanup for refresh control ----------------------
+    useFocusEffect(
+        useCallback(() => {
+            isMountedAndFocused.current = true;
+            return () => {
+                isMountedAndFocused.current = false;
+                if (refreshTimeoutRef.current) {
+                    clearTimeout(refreshTimeoutRef.current);
+                    refreshTimeoutRef.current = null;
+                }
+                if (isRefreshing) setIsRefreshing(false);
+            };
+        }, [isRefreshing]),
+    );
+
+    // Updated handleRefresh to use the nutrition log hook's refetch function
+    const handleRefresh = useCallback(async () => {
+        if (isRefreshing) return;
+        setIsRefreshing(true);
+        trigger('virtualKeyRelease');
+
+        try {
+            await dispatch(getUserAsync());
+            if (userData.user?.UserId) {
+                await Promise.all([
+                    dispatch(getUserAsync({ forceRefresh: true })),
+                    dispatch(getUserFitnessProfileAsync({ forceRefresh: true })),
+                    dispatch(getUserProgramProgressAsync({ forceRefresh: true })),
+                    dispatch(getUserRecommendationsAsync({ forceRefresh: true })),
+                    dispatch(getWorkoutQuoteAsync({ forceRefresh: true })),
+                    dispatch(getRestDayQuoteAsync({ forceRefresh: true })),
+                    dispatch(getSpotlightWorkoutsAsync({ forceRefresh: true })),
+                    dispatch(getAllProgramsAsync({ forceRefresh: true })),
+                    dispatch(getWeightMeasurementsAsync({ forceRefresh: true })),
+                    dispatch(getUserNutritionGoalsAsync({ forceRefresh: true })),
+                    dispatch(getUserMacroTargetsAsync({ forceRefresh: true })),
+                    dispatch(initializeTrackedLiftsHistoryAsync({ forceRefresh: true })),
+                    dispatch(getUserAppSettingsAsync({ forceRefresh: true })),
+                    dispatch(getAllWorkoutsAsync({ forceRefresh: true })),
+                    dispatch(getBodyMeasurementsAsync({ forceRefresh: true })),
+                    dispatch(getUserExerciseSetModificationsAsync({ forceRefresh: true })),
+                    dispatch(getUserExerciseSubstitutionsAsync({ forceRefresh: true })),
+                    dispatch(getAllNutritionLogsAsync({ forceRefresh: true })),
+                ]);
+
+                if (userProgramProgress?.ProgramId) {
+                    await dispatch(getAllProgramDaysAsync({ programId: userProgramProgress.ProgramId, forceRefresh: true }));
+                }
+            }
+        } catch (e) {
+            console.error('Refresh failed:', e);
+        } finally {
+            refreshTimeoutRef.current = setTimeout(() => {
+                if (isMountedAndFocused.current) setIsRefreshing(false);
+                refreshTimeoutRef.current = null;
+            }, 200);
+        }
+    }, [dispatch, isRefreshing, userData.user?.UserId, userProgramProgress?.ProgramId]);
+
+    // ----- Scenario-driven section list - Create stable keys --------------------------------------
     const sections = useMemo(() => {
-        // Always show FactOfTheDay at the end
-        // Scenarios
         if (!isOnboardingComplete) {
-            return [<NutritionOverview key='nutrition' />, <OnboardingSection key='onboarding' />, <FactSection key='fact' />];
+            return [
+                <NutritionOverview key='nutrition' isOnboardingComplete={isOnboardingComplete} activeMacroTarget={activeMacroTarget} />,
+                <OnboardingSection key='onboarding' isOnboardingComplete={isOnboardingComplete} />,
+                <FactSection key='fact' />,
+            ];
         }
 
-        // Onboarded + Active program
         if (hasActiveProgram) {
             return [
-                activeMacroTarget ? <NutritionOverview key='nutrition' /> : null,
-                <TodaysWorkout key='today' />,
-                <ProgressSection key='progress' />,
+                activeMacroTarget ? (
+                    <NutritionOverview key='nutrition' isOnboardingComplete={isOnboardingComplete} activeMacroTarget={activeMacroTarget} />
+                ) : null,
+                <TodaysWorkout key='today' hasCompletedWorkoutToday={hasCompletedWorkoutToday} />,
+                <ProgressSection
+                    key='progress'
+                    weightGoal={weightGoal}
+                    hasActiveProgram={hasActiveProgram}
+                    activeProgram={activeProgram}
+                    activeNutritionGoal={activeNutritionGoal}
+                    userWeightMeasurements={userData.userWeightMeasurements}
+                    userAppSettings={userData.userAppSettings}
+                    userProgramProgress={userProgramProgress}
+                />,
                 <FactSection key='fact' />,
             ].filter(Boolean) as React.ReactElement[];
         }
 
-        // Onboarded, no active program
         return [
-            activeMacroTarget ? <NutritionOverview key='nutrition' /> : null,
-            recommendedProgram ? <TrainingProgram key='program' /> : null,
-            <ProgressSection key='progress' />,
+            activeMacroTarget ? <NutritionOverview key='nutrition' isOnboardingComplete={isOnboardingComplete} activeMacroTarget={activeMacroTarget} /> : null,
+            recommendedProgram ? <TrainingProgram key='program' recommendedProgram={recommendedProgram} /> : null,
+            <ProgressSection
+                key='progress'
+                weightGoal={weightGoal}
+                hasActiveProgram={hasActiveProgram}
+                activeProgram={activeProgram}
+                activeNutritionGoal={activeNutritionGoal}
+                userWeightMeasurements={userData.userWeightMeasurements}
+                userAppSettings={userData.userAppSettings}
+                userProgramProgress={userProgramProgress}
+            />,
             <FactSection key='fact' />,
         ].filter(Boolean) as React.ReactElement[];
-    }, [isOnboardingComplete, hasActiveProgram, activeMacroTarget, recommendedProgram, weightGoal, activeProgram, userWeightMeasurements, userAppSettings]);
+    }, [
+        isOnboardingComplete,
+        hasActiveProgram,
+        activeMacroTarget,
+        recommendedProgram,
+        weightGoal,
+        activeProgram,
+        userData.userWeightMeasurements,
+        userData.userAppSettings,
+        hasCompletedWorkoutToday,
+        activeNutritionGoal,
+        userProgramProgress,
+    ]);
 
     return (
         <View style={styles.container}>

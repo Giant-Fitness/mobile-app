@@ -11,6 +11,7 @@ interface LinearProgressBarProps {
     backgroundColor: string;
     height?: number;
     fullHeight?: boolean;
+    showOverage?: boolean; // Whether to show overage progress (default: false)
     overageColor?: string; // Optional custom overage color
 }
 
@@ -21,6 +22,7 @@ export const LinearProgressBar: React.FC<LinearProgressBarProps> = ({
     backgroundColor,
     height = 16,
     fullHeight = false,
+    showOverage = false,
     overageColor,
 }) => {
     const isOverGoal = current > goal;
@@ -37,7 +39,7 @@ export const LinearProgressBar: React.FC<LinearProgressBarProps> = ({
     // Calculate progress values
     let goalProgress, overageProgress;
 
-    if (isOverGoal) {
+    if (isOverGoal && showOverage) {
         // If over 200%, just show a fully filled bar with overage color
         if (totalPercentage >= 200) {
             goalProgress = {
@@ -66,7 +68,8 @@ export const LinearProgressBar: React.FC<LinearProgressBarProps> = ({
             };
         }
     } else {
-        // Normal progress (not over goal)
+        // Normal progress (not over goal OR showOverage is false)
+        // Cap at 100% when showOverage is false
         const percentage = Math.min(totalPercentage, 100);
         goalProgress = {
             width: `${percentage}%`,
@@ -91,7 +94,7 @@ export const LinearProgressBar: React.FC<LinearProgressBarProps> = ({
                 ]}
             />
 
-            {/* Overage Progress (only when over goal) */}
+            {/* Overage Progress (only when over goal AND showOverage is true) */}
             {overageProgress && (
                 <View
                     style={[

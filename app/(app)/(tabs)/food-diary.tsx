@@ -7,9 +7,9 @@ import { DatePickerBottomSheet } from '@/components/overlays/DatePickerBottomShe
 import { Colors } from '@/constants/Colors';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { useNutritionDataPool } from '@/hooks/useNutritionDataPool';
+import { useNutritionLog } from '@/hooks/useNutritionLog';
 import { AppDispatch, RootState } from '@/store/store';
-import { getUserAsync, getUserMacroTargetsAsync, getUserNutritionGoalsAsync } from '@/store/user/thunks';
+import { getAllNutritionLogsAsync, getUserAsync, getUserMacroTargetsAsync, getUserNutritionGoalsAsync } from '@/store/user/thunks';
 import { addAlpha } from '@/utils/colorUtils';
 import React, { useCallback, useRef, useState } from 'react';
 import { Dimensions, RefreshControl, StyleSheet, View } from 'react-native';
@@ -32,7 +32,7 @@ const ACTIVATION_THRESHOLD = 20;
 const FEATURE_FLAGS = {
     SWIPEABLE_DATE_NAVIGATION: true,
     DEBUG_MODE: __DEV__ && false,
-    SHOW_WEEKLY_CALENDAR: false, // Control weekly calendar visibility
+    SHOW_WEEKLY_CALENDAR: false,
 };
 
 const useOnboardingStatus = () => {
@@ -40,7 +40,6 @@ const useOnboardingStatus = () => {
     return Boolean(user?.OnboardingComplete);
 };
 
-// Helper functions for date manipulation
 const addDays = (date: Date, days: number): Date => {
     const result = new Date(date);
     result.setDate(result.getDate() + days);
@@ -79,28 +78,23 @@ export default function FoodDiaryScreen() {
     // Track if the date change was from swiping to avoid useEffect conflicts
     const dateChangeSource = useRef<'swipe' | 'external'>('external');
 
-    // 🚀 VIRTUALIZED: Single component offset instead of 3 components
-    const contentOffset = useSharedValue(0); // -SCREEN_WIDTH = prev day, 0 = current, +SCREEN_WIDTH = next day
+    // Virtualized: Single component offset instead of 3 components
+    const contentOffset = useSharedValue(0);
     const isAnimating = useSharedValue(false);
     const isSwipeActivated = useSharedValue(false);
 
-    // 🚀 VIRTUALIZED: Track which dates are "virtually" positioned where
+    // Virtualized: Track which dates are "virtually" positioned where
     const [virtualDates, setVirtualDates] = useState(() => ({
-        left: addDays(selectedDate, -1), // The date that would be shown if we scroll left
-        center: selectedDate, // Current visible date
-        right: addDays(selectedDate, 1), // The date that would be shown if we scroll right
+        left: addDays(selectedDate, -1),
+        center: selectedDate,
+        right: addDays(selectedDate, 1),
     }));
 
-    // Data pool for pre-loaded nutrition data
-    const { getDataForDate, refreshPool } = useNutritionDataPool(selectedDate, {
-        poolSize: 21,
-        loadBuffer: 7,
+    const { nutritionLog, refetch } = useNutritionLog(formatDateKey(selectedDate), {
         autoLoad: true,
-        useCache: true,
     });
 
     const isOnboardingComplete = useOnboardingStatus();
-
     const isMountedAndFocused = useRef(true);
     const refreshTimeoutRef = useRef<number | null>(null);
 
@@ -121,12 +115,11 @@ export default function FoodDiaryScreen() {
         }, [isRefreshing]),
     );
 
-    // Update virtual dates when selectedDate changes externally (date picker, header buttons)
-    // but NOT when changed by swiping (since onSwipeComplete handles that)
+    // Update virtual dates when selectedDate changes externally
     React.useEffect(() => {
-        // Skip if this change was from swiping - onSwipeComplete already updated virtualDates
+        // Skip if this change was from swiping
         if (dateChangeSource.current === 'swipe') {
-            dateChangeSource.current = 'external'; // Reset for next change
+            dateChangeSource.current = 'external';
             return;
         }
 
@@ -136,14 +129,13 @@ export default function FoodDiaryScreen() {
             right: addDays(selectedDate, 1),
         };
 
-        // Only update if center date actually changed
         if (formatDateKey(virtualDates.center) !== formatDateKey(selectedDate)) {
             setVirtualDates(newVirtualDates);
-            contentOffset.value = 0; // Reset to center position
+            contentOffset.value = 0;
         }
     }, [selectedDate, virtualDates.center]);
 
-    // 🚀 VIRTUALIZED: Animation completion - only updates selectedDate, no component data juggling
+    // Animation completion - updates selectedDate after swipe
     const onSwipeComplete = useCallback(
         (direction: 'left' | 'right') => {
             if (!FEATURE_FLAGS.SWIPEABLE_DATE_NAVIGATION) return;
@@ -152,20 +144,20 @@ export default function FoodDiaryScreen() {
             let newVirtualDates: typeof virtualDates;
 
             if (direction === 'left') {
-                // Swiped left - go to next day (virtualDates.right becomes new center)
+                // Swiped left - go to next day
                 newDate = virtualDates.right;
                 newVirtualDates = {
-                    left: virtualDates.center, // Current center becomes left
-                    center: virtualDates.right, // Right becomes new center
-                    right: addDays(virtualDates.right, 1), // New right
+                    left: virtualDates.center,
+                    center: virtualDates.right,
+                    right: addDays(virtualDates.right, 1),
                 };
             } else {
-                // Swiped right - go to previous day (virtualDates.left becomes new center)
+                // Swiped right - go to previous day
                 newDate = virtualDates.left;
                 newVirtualDates = {
-                    left: addDays(virtualDates.left, -1), // New left
-                    center: virtualDates.left, // Left becomes new center
-                    right: virtualDates.center, // Current center becomes right
+                    left: addDays(virtualDates.left, -1),
+                    center: virtualDates.left,
+                    right: virtualDates.center,
                 };
             }
 
@@ -179,10 +171,10 @@ export default function FoodDiaryScreen() {
             // Mark that this date change is from swiping
             dateChangeSource.current = 'swipe';
 
-            // Update both states synchronously in the same render cycle
+            // Update both states synchronously
             setVirtualDates(newVirtualDates);
             setSelectedDate(newDate);
-            contentOffset.value = 0; // Reset to center
+            contentOffset.value = 0;
             trigger('virtualKey');
 
             isAnimating.value = false;
@@ -215,21 +207,18 @@ export default function FoodDiaryScreen() {
 
             // Only determine direction if we haven't locked to one yet
             if (gestureDirectionRef.current === 'none') {
-                // Check if movement is significant enough to determine direction
                 if (absTranslationX > ACTIVATION_THRESHOLD || absTranslationY > ACTIVATION_THRESHOLD) {
-                    // Determine primary direction with a bias towards vertical scrolling
-                    // This gives scroll view priority when movements are similar
                     if (absTranslationX > absTranslationY * 1.5) {
                         // Horizontal movement is significantly stronger
                         gestureDirectionRef.current = 'horizontal';
                         runOnJS(setGestureDirection)('horizontal');
                         isSwipeActivated.value = true;
                     } else if (absTranslationY > ACTIVATION_THRESHOLD) {
-                        // Vertical movement detected or movements are similar - prefer vertical
+                        // Vertical movement detected - prefer vertical
                         gestureDirectionRef.current = 'vertical';
                         runOnJS(setGestureDirection)('vertical');
                         isSwipeActivated.value = false;
-                        return; // Exit early to let scroll view handle it
+                        return;
                     }
                 }
             }
@@ -273,22 +262,19 @@ export default function FoodDiaryScreen() {
                 });
             }
         })
-        .failOffsetY([-10, 10]); // This helps prevent conflicts with vertical scrolling
+        .failOffsetY([-10, 10]);
 
     const nativeGesture = Gesture.Native();
     const composedGesture = FEATURE_FLAGS.SWIPEABLE_DATE_NAVIGATION ? Gesture.Simultaneous(panGesture, nativeGesture) : nativeGesture;
 
-    // Update the scroll handler to disable pan when scrolling
     const scrollHandler = useAnimatedScrollHandler({
         onBeginDrag: () => {
-            // Temporarily disable pan gesture when user starts scrolling
             runOnJS(setIsPanEnabled)(false);
         },
         onScroll: (event) => {
             scrollY.value = event.contentOffset.y;
         },
         onEndDrag: () => {
-            // Re-enable pan gesture after scroll ends
             runOnJS(setIsPanEnabled)(FEATURE_FLAGS.SWIPEABLE_DATE_NAVIGATION);
         },
         onMomentumEnd: () => {
@@ -296,7 +282,6 @@ export default function FoodDiaryScreen() {
         },
     });
 
-    // Use the exported function to calculate header height
     const headerHeight = calculateFoodLogHeaderHeight(FEATURE_FLAGS.SHOW_WEEKLY_CALENDAR);
 
     const handleRefresh = useCallback(async () => {
@@ -310,7 +295,8 @@ export default function FoodDiaryScreen() {
                 dispatch(getUserAsync({ forceRefresh: true })),
                 dispatch(getUserNutritionGoalsAsync({ forceRefresh: true })),
                 dispatch(getUserMacroTargetsAsync({ forceRefresh: true })),
-                refreshPool(selectedDate, true),
+                dispatch(getAllNutritionLogsAsync({ forceRefresh: true })),
+                refetch(),
             ]);
         } catch (error) {
             console.error('Refresh failed:', error);
@@ -322,7 +308,7 @@ export default function FoodDiaryScreen() {
                 refreshTimeoutRef.current = null;
             }, 200);
         }
-    }, [dispatch, refreshPool, selectedDate, isRefreshing]);
+    }, [dispatch, refetch, isRefreshing]);
 
     const handleDatePress = () => {
         setShowDatePicker(true);
@@ -350,17 +336,10 @@ export default function FoodDiaryScreen() {
         setShowDatePicker(false);
     };
 
-    // VIRTUALIZED: Single content container that slides
+    // Animated style for swipe gesture
     const animatedContentStyle = useAnimatedStyle(() => ({
         transform: FEATURE_FLAGS.SWIPEABLE_DATE_NAVIGATION ? [{ translateX: contentOffset.value }] : [],
     }));
-
-    // Get the data for the currently visible date (not all 3 dates)
-    const currentlyVisibleDate = FEATURE_FLAGS.SWIPEABLE_DATE_NAVIGATION
-        ? virtualDates.center // During animation, always show center data to avoid flicker
-        : selectedDate;
-
-    const visibleDayData = getDataForDate(currentlyVisibleDate);
 
     const OnboardingOverlay = () => (
         <BlurView intensity={12} tint={colorScheme} style={styles.onboardingOverlay}>
@@ -393,7 +372,7 @@ export default function FoodDiaryScreen() {
                         showsVerticalScrollIndicator={false}
                         overScrollMode='never'
                         bounces={true}
-                        scrollEnabled={gestureDirection !== 'horizontal'} // Disable scroll when horizontal gesture is active
+                        scrollEnabled={gestureDirection !== 'horizontal'}
                         refreshControl={
                             <RefreshControl
                                 refreshing={isRefreshing}
@@ -409,14 +388,9 @@ export default function FoodDiaryScreen() {
                         }}
                         scrollEventThrottle={16}
                     >
-                        {/* VIRTUALIZED: Single content container that slides */}
                         <Animated.View style={[animatedContentStyle]}>
                             <View style={{ backgroundColor: themeColors.backgroundSecondary }}>
-                                <FoodLogContent
-                                    key={formatDateKey(currentlyVisibleDate)} // Key changes only when date actually changes
-                                    selectedDate={currentlyVisibleDate}
-                                    nutritionLog={visibleDayData}
-                                />
+                                <FoodLogContent key={formatDateKey(selectedDate)} selectedDate={selectedDate} nutritionLog={nutritionLog} />
                             </View>
                         </Animated.View>
                     </Animated.ScrollView>

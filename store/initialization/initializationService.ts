@@ -7,6 +7,7 @@ import { fitnessProfileOfflineService } from '@/lib/storage/fitness-profile/Fitn
 import { initializeOfflineServices } from '@/lib/storage/initializeOfflineServices';
 import { macroTargetOfflineService } from '@/lib/storage/macro-targets/MacroTargetOfflineService';
 import { nutritionGoalOfflineService } from '@/lib/storage/nutrition-goals/NutritionGoalOfflineService';
+import { nutritionLogOfflineService } from '@/lib/storage/nutrition-logs/NutritionLogOfflineService';
 import { programProgressOfflineService } from '@/lib/storage/program-progress/ProgramProgressOfflineService';
 import { weightMeasurementOfflineService } from '@/lib/storage/weight-measurements/WeightMeasurementOfflineService';
 import { networkStateManager } from '@/lib/sync/NetworkStateManager';
@@ -49,7 +50,6 @@ import { cacheService } from '../../lib/cache/cacheService';
 // Standardized cache keys
 const CACHE_KEYS = {
     USER_DATA: 'user_data',
-    USER_NUTRITION_LOGS: 'user_nutrition_logs',
     ALL_PROGRAMS: 'all_programs',
     ALL_WORKOUTS: 'all_workouts',
     ALL_EXERCISES: 'all_exercises',
@@ -120,16 +120,6 @@ export class InitializationService {
             required: false, // Changed to false since it depends on having an active program
             priority: 'high',
             dependsOn: ['userProgramProgress'], // Only real dependency
-            args: { useCache: true },
-        },
-
-        // - need to handle the prefetching for the diary a bit better. its too slow
-        {
-            key: 'userNutritionLogs',
-            thunk: getAllNutritionLogsAsync,
-            cacheKey: CACHE_KEYS.USER_NUTRITION_LOGS,
-            required: true,
-            priority: 'critical',
             args: { useCache: true },
         },
 
@@ -348,6 +338,7 @@ export class InitializationService {
                 const programProgress = await programProgressOfflineService.getProgressForUser(userId);
                 const macroTargets = await macroTargetOfflineService.getRecords(userId);
                 const nutritionGoals = await nutritionGoalOfflineService.getRecords(userId);
+                const nutritionLogs = await nutritionLogOfflineService.getRecords(userId);
 
                 const hasLocalData =
                     weightStats.length > 0 ||
@@ -356,7 +347,8 @@ export class InitializationService {
                     !!appSettings ||
                     !!programProgress ||
                     nutritionGoals.length > 0 ||
-                    macroTargets.length > 0;
+                    macroTargets.length > 0 ||
+                    nutritionLogs.length > 0;
 
                 if (!hasLocalData) {
                     console.log('Empty local storage detected - fetching server data...');
@@ -423,6 +415,16 @@ export class InitializationService {
                             console.log('No macro targets found on server (this might be normal for new users)', macroTargetsError);
                         }
 
+                        try {
+                            const serverNutritionLogs = await UserService.getAllNutritionLogs(userId);
+                            if (serverNutritionLogs.length > 0) {
+                                await nutritionLogOfflineService.mergeServerData(userId, serverNutritionLogs);
+                                console.log(`Initial sync: loaded ${serverNutritionLogs.length} nutrition logs from server`);
+                            }
+                        } catch (nutritionLogsError) {
+                            console.log('No nutrition logs found on server (this might be normal for new users)', nutritionLogsError);
+                        }
+
                         if (
                             serverWeightMeasurements.length === 0 &&
                             serverBodyMeasurements.length === 0 &&
@@ -430,7 +432,8 @@ export class InitializationService {
                             !appSettings &&
                             !programProgress &&
                             !nutritionGoals &&
-                            !macroTargets
+                            !macroTargets &&
+                            !nutritionLogs
                         ) {
                             console.log('No server data found - fresh install');
                         }
@@ -473,6 +476,7 @@ export class InitializationService {
                 this.dispatch(getUserExerciseSetModificationsAsync({})),
                 this.dispatch(getUserNutritionGoalsAsync({})),
                 this.dispatch(getUserMacroTargetsAsync({})),
+                this.dispatch(getAllNutritionLogsAsync({})),
             ];
 
             const results = await Promise.allSettled(promises);
@@ -488,6 +492,7 @@ export class InitializationService {
                     'exercise set modifications',
                     'nutrition goals',
                     'macro targets',
+                    'nutrition logs',
                 ][index];
                 if (result.status === 'fulfilled' && result.value.type.endsWith('/fulfilled')) {
                     const data = result.value.payload;
@@ -525,6 +530,7 @@ export class InitializationService {
                 this.dispatch(getUserExerciseSetModificationsAsync({ forceRefresh: true })),
                 this.dispatch(getUserNutritionGoalsAsync({ forceRefresh: true })),
                 this.dispatch(getUserMacroTargetsAsync({ forceRefresh: true })),
+                this.dispatch(getAllNutritionLogsAsync({ forceRefresh: true })),
             ];
 
             const results = await Promise.allSettled(promises);
@@ -534,13 +540,13 @@ export class InitializationService {
                     'weight',
                     'body',
                     'fitness profile',
-                    'nutrition profile',
                     'app settings',
                     'program progress',
                     'exercise substitutions',
                     'exercise set modifications',
                     'nutrition goals',
                     'macro targets',
+                    'nutrition logs',
                 ][index];
                 if (result.status === 'fulfilled' && result.value.type.endsWith('/fulfilled')) {
                     const data = result.value.payload;
