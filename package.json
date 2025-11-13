@@ -31,7 +31,6 @@
         "ajv": "^8.17.1",
         "aws-amplify": "^6.15.1",
         "axios": "^1.7.7",
-        "d3-shape": "^3.2.0",
         "date-fns": "^4.1.0",
         "expo": "^53.0.0",
         "expo-application": "~6.1.4",
@@ -72,6 +71,7 @@
         "react-native-calendars": "^1.1307.0",
         "react-native-gesture-handler": "~2.24.0",
         "react-native-get-random-values": "^1.11.0",
+        "react-native-gifted-charts": "^1.4.65",
         "react-native-haptic-feedback": "^2.3.3",
         "react-native-keyboard-aware-scroll-view": "^0.9.5",
         "react-native-linear-gradient": "^2.8.3",
@@ -89,7 +89,6 @@
         "react-native-vector-icons": "^10.2.0",
         "react-native-web": "^0.20.0",
         "react-redux": "^9.2.0",
-        "victory-native": "^37.3.1",
         "zod": "^3.22.2"
     },
     "devDependencies": {
