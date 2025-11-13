@@ -7,6 +7,7 @@ import { ActionTile } from '@/components/home/ActionTile';
 import { WorkoutOverviewCard } from '@/components/workouts/WorkoutOverviewCard';
 import { Colors } from '@/constants/Colors';
 import { REQUEST_STATE } from '@/constants/requestStates';
+import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useSplashScreen } from '@/hooks/useSplashScreen';
@@ -14,8 +15,12 @@ import { AppDispatch, RootState } from '@/store/store';
 import { getAllWorkoutsAsync, getMultipleWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import { debounce } from '@/utils/debounce';
+import { scale, verticalScale } from '@/utils/scaling';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Dimensions, Platform, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import Carousel from 'react-native-reanimated-carousel';
+
+const CarouselComponent = Carousel as any;
 
 import { router } from 'expo-router';
 
@@ -73,14 +78,10 @@ export default function WorkoutsScreen() {
         );
     }, []);
 
-    // Memoize workout cards to prevent unnecessary re-renders
-    const workoutCards = useMemo(() => {
+    // Memoize spotlight workout IDs that have loaded data
+    const spotlightWorkoutIds = useMemo(() => {
         if (!spotlightWorkouts) return [];
-        return spotlightWorkouts.WorkoutIds.map((id) => {
-            const workout = workouts[id];
-            if (!workout) return null;
-            return <WorkoutOverviewCard key={id} workout={workout} source={'spotlight'} />;
-        }).filter(Boolean);
+        return spotlightWorkouts.WorkoutIds.filter((id) => workouts[id]);
     }, [spotlightWorkouts, workouts]);
 
     // Memoize category data to prevent recreations
@@ -176,9 +177,23 @@ export default function WorkoutsScreen() {
                     {'Spotlight'}
                 </ThemedText>
 
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.spotlightContainer}>
-                    {workoutCards}
-                </ScrollView>
+                {spotlightWorkoutIds.length > 0 && (
+                    <View style={styles.carouselWrapper}>
+                        <CarouselComponent
+                            loop
+                            width={Sizes.imageXXLWidth + Spaces.MD}
+                            height={Sizes.imageXXLHeight}
+                            data={spotlightWorkoutIds}
+                            scrollAnimationDuration={300}
+                            renderItem={({ item: workoutId }: any) => (
+                                <WorkoutOverviewCard workout={workouts[workoutId]} source={'spotlight'} />
+                            )}
+                            panGestureHandlerProps={{
+                                activeOffsetX: [-10, 10],
+                            }}
+                        />
+                    </View>
+                )}
 
                 <ThemedText type='titleLarge' style={[styles.header, { color: themeColors.text, paddingBottom: Spaces.SM }]}>
                     {'Browse'}
@@ -247,12 +262,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: Spaces.LG,
         marginBottom: Spaces.SM,
     },
-    spotlightContainer: {
-        marginLeft: Spaces.LG,
-        paddingRight: Spaces.XL,
-        paddingBottom: Spaces.XL,
+    carouselWrapper: {
         paddingTop: Spaces.MD,
-        flexDirection: 'row',
+        paddingBottom: Spaces.XL,
+        paddingLeft: Spaces.LG,
     },
     categoryGrid: {
         flexDirection: 'row',
