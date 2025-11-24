@@ -23,8 +23,7 @@ import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useProgramData } from '@/hooks/useProgramData';
-import { fetchExercisesRecentHistoryAsync } from '@/store/exerciseProgress/thunks';
-import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
+import { fetchExercisesHistoryAsync } from '@/store/exerciseProgress/thunks';
 import { AppDispatch, RootState } from '@/store/store';
 import { Exercise, isExerciseLoggable } from '@/types';
 import { getDayOfWeek, getWeekNumber } from '@/utils/calendar';
@@ -81,15 +80,18 @@ const ProgramDayScreen = () => {
     // Load exercise histories for workout type days
     useEffect(() => {
         if (programDay?.Type === 'workout' && programDay.Exercises) {
-            const exerciseIds = programDay.Exercises.filter((exercise) => !isLongTermTrackedLift(exercise.ExerciseId) && isExerciseLoggable(exercise)).map(
-                (exercise) => exercise.ExerciseId,
-            );
+            const exerciseIds = programDay.Exercises.filter((exercise) => isExerciseLoggable(exercise)).map((exercise) => exercise.ExerciseId);
 
             if (exerciseIds.length > 0) {
-                dispatch(fetchExercisesRecentHistoryAsync({ exerciseIds }));
+                dispatch(
+                    fetchExercisesHistoryAsync({
+                        exerciseIds,
+                        limit: 20,
+                    }),
+                );
             }
         }
-    }, [programDay?.Type, programDay?.Exercises]);
+    }, [programDay?.Type, programDay?.Exercises, dispatch]);
 
     const handlePlaybackStatusUpdate = (status: VideoPlaybackStatus) => {
         if (status.isLoaded) {

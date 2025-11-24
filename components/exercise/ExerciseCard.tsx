@@ -8,7 +8,6 @@ import { Colors } from '@/constants/Colors';
 import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
 import { RootState } from '@/store/store';
 import { Exercise } from '@/types';
 import { isExerciseLoggable } from '@/types/exerciseProgressTypes';
@@ -58,7 +57,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
     // Animation value
     const scaleAnim = useRef(new Animated.Value(1)).current;
 
-    const { recentLogs, liftHistory } = useSelector((state: RootState) => state.exerciseProgress);
+    const { allHistory } = useSelector((state: RootState) => state.exerciseProgress);
     const { userExerciseSubstitutions, userExerciseSetModifications } = useSelector((state: RootState) => state.user);
     const { exercises } = useSelector((state: RootState) => state.exercises);
 
@@ -135,9 +134,8 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
         const exerciseIdToLog = substituteExercise ? substituteExercise.ExerciseId : exercise.ExerciseId;
         const exerciseLogId = `${exerciseIdToLog}#${today}`;
 
-        // Get today's log from either source
-        const todaysLog =
-            recentLogs[exerciseIdToLog]?.[exerciseLogId] || (isLongTermTrackedLift(exerciseIdToLog) ? liftHistory[exerciseIdToLog]?.[exerciseLogId] : null);
+        // Get today's log from unified history
+        const todaysLog = allHistory[exerciseIdToLog]?.[exerciseLogId];
 
         if (!todaysLog) {
             return { type: 'empty' };
@@ -155,7 +153,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
             type: 'partial',
             progress: loggedSets / requiredSets,
         };
-    }, [exercise.ExerciseId, effectiveSets, substituteExercise, recentLogs, liftHistory, canLog]);
+    }, [exercise.ExerciseId, effectiveSets, substituteExercise, allHistory, canLog]);
 
     const handlePressIn = () => {
         Animated.spring(scaleAnim, {

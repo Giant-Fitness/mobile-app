@@ -3,6 +3,7 @@
 import { REQUEST_STATE } from '@/constants/requestStates';
 import { appSettingsOfflineService } from '@/lib/storage/app-settings/AppSettingsOfflineService';
 import { bodyMeasurementOfflineService } from '@/lib/storage/body-measurements/BodyMeasurementOfflineService';
+import { exerciseHistoryOfflineService } from '@/lib/storage/exercise-history/ExerciseHistoryOfflineService';
 import { fitnessProfileOfflineService } from '@/lib/storage/fitness-profile/FitnessProfileOfflineService';
 import { initializeOfflineServices } from '@/lib/storage/initializeOfflineServices';
 import { macroTargetOfflineService } from '@/lib/storage/macro-targets/MacroTargetOfflineService';
@@ -11,7 +12,7 @@ import { nutritionLogOfflineService } from '@/lib/storage/nutrition-logs/Nutriti
 import { programProgressOfflineService } from '@/lib/storage/program-progress/ProgramProgressOfflineService';
 import { weightMeasurementOfflineService } from '@/lib/storage/weight-measurements/WeightMeasurementOfflineService';
 import { networkStateManager } from '@/lib/sync/NetworkStateManager';
-import { initializeTrackedLiftsHistoryAsync } from '@/store/exerciseProgress/thunks';
+import ExerciseProgressService from '@/store/exerciseProgress/service';
 import { fetchAllExercisesAsync } from '@/store/exercises/thunks';
 import {
     addFailedItem,
@@ -46,6 +47,7 @@ import {
 import { getAllWorkoutsAsync, getSpotlightWorkoutsAsync } from '@/store/workouts/thunks';
 
 import { cacheService } from '../../lib/cache/cacheService';
+import { getAllExerciseHistoryAsync } from '../exerciseProgress/thunks';
 
 // Standardized cache keys
 const CACHE_KEYS = {
@@ -124,16 +126,6 @@ export class InitializationService {
         },
 
         // changes required
-
-        // - all lift history should be stored
-        {
-            key: 'trackedLiftsHistory',
-            thunk: initializeTrackedLiftsHistoryAsync,
-            cacheKey: CACHE_KEYS.TRACKED_LIFTS_HISTORY,
-            required: false,
-            priority: 'medium',
-            args: { useCache: true },
-        },
 
         // media links need to be made perma in s3
         {
@@ -339,6 +331,7 @@ export class InitializationService {
                 const macroTargets = await macroTargetOfflineService.getRecords(userId);
                 const nutritionGoals = await nutritionGoalOfflineService.getRecords(userId);
                 const nutritionLogs = await nutritionLogOfflineService.getRecords(userId);
+                const exerciseHistory = await exerciseHistoryOfflineService.getRecords(userId);
 
                 const hasLocalData =
                     weightStats.length > 0 ||
@@ -348,7 +341,8 @@ export class InitializationService {
                     !!programProgress ||
                     nutritionGoals.length > 0 ||
                     macroTargets.length > 0 ||
-                    nutritionLogs.length > 0;
+                    nutritionLogs.length > 0 ||
+                    exerciseHistory.length > 0;
 
                 if (!hasLocalData) {
                     console.log('Empty local storage detected - fetching server data...');
@@ -425,6 +419,16 @@ export class InitializationService {
                             console.log('No nutrition logs found on server (this might be normal for new users)', nutritionLogsError);
                         }
 
+                        try {
+                            const serverExerciseHistory = await ExerciseProgressService.getAllExerciseLogs(userId);
+                            if (serverExerciseHistory.length > 0) {
+                                await exerciseHistoryOfflineService.mergeServerData(userId, serverExerciseHistory);
+                                console.log(`Initial sync: loaded ${serverExerciseHistory.length} exercise history from server`);
+                            }
+                        } catch (exerciseHistoryError) {
+                            console.log('No exercise history found on server (this might be normal for new users)', exerciseHistoryError);
+                        }
+
                         if (
                             serverWeightMeasurements.length === 0 &&
                             serverBodyMeasurements.length === 0 &&
@@ -433,7 +437,8 @@ export class InitializationService {
                             !programProgress &&
                             !nutritionGoals &&
                             !macroTargets &&
-                            !nutritionLogs
+                            !nutritionLogs &&
+                            !exerciseHistory
                         ) {
                             console.log('No server data found - fresh install');
                         }
@@ -477,6 +482,7 @@ export class InitializationService {
                 this.dispatch(getUserNutritionGoalsAsync({})),
                 this.dispatch(getUserMacroTargetsAsync({})),
                 this.dispatch(getAllNutritionLogsAsync({})),
+                this.dispatch(getAllExerciseHistoryAsync({})),
             ];
 
             const results = await Promise.allSettled(promises);
@@ -493,6 +499,7 @@ export class InitializationService {
                     'nutrition goals',
                     'macro targets',
                     'nutrition logs',
+                    'exercise history',
                 ][index];
                 if (result.status === 'fulfilled' && result.value.type.endsWith('/fulfilled')) {
                     const data = result.value.payload;
@@ -531,6 +538,7 @@ export class InitializationService {
                 this.dispatch(getUserNutritionGoalsAsync({ forceRefresh: true })),
                 this.dispatch(getUserMacroTargetsAsync({ forceRefresh: true })),
                 this.dispatch(getAllNutritionLogsAsync({ forceRefresh: true })),
+                this.dispatch(getAllExerciseHistoryAsync({ forceRefresh: true })),
             ];
 
             const results = await Promise.allSettled(promises);
@@ -547,6 +555,7 @@ export class InitializationService {
                     'nutrition goals',
                     'macro targets',
                     'nutrition logs',
+                    'exercise history',
                 ][index];
                 if (result.status === 'fulfilled' && result.value.type.endsWith('/fulfilled')) {
                     const data = result.value.payload;
@@ -604,9 +613,6 @@ export class InitializationService {
         }
     }
 
-    /**
-     * Existing method - updated to use new canLoadItem logic
-     */
     private async loadDataCategoryWithParallelization(dataItems: DataCategory[]): Promise<{ hasRequiredFailures: boolean }> {
         const loadResults: LoadResult[] = [];
         const processedItems = new Set<string>();

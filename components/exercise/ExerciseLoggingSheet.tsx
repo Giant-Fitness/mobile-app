@@ -11,7 +11,6 @@ import { Sizes } from '@/constants/Sizes';
 import { Spaces } from '@/constants/Spaces';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { deleteExerciseLogAsync, saveExerciseProgressAsync } from '@/store/exerciseProgress/thunks';
-import { isLongTermTrackedLift } from '@/store/exerciseProgress/utils';
 import { AppDispatch, RootState } from '@/store/store';
 import { createExerciseSetModificationAsync, deleteExerciseSetModificationAsync, updateExerciseSetModificationAsync } from '@/store/user/thunks';
 import {
@@ -64,7 +63,7 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
         visible: boolean;
     } | null>(null);
 
-    const { recentLogs, liftHistory } = useSelector((state: RootState) => state.exerciseProgress);
+    const { allHistory } = useSelector((state: RootState) => state.exerciseProgress);
     const { userExerciseSetModifications } = useSelector((state: RootState) => state.user);
     const scrollViewRef = useRef<ScrollView>(null);
     const inputRefs = useRef<(TextInput | null)[]>([]);
@@ -123,8 +122,7 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
         // For today's log, we need to be more careful about existing modifications
         const today = format(new Date(), 'yyyy-MM-dd');
         const exerciseLogId = `${exercise.ExerciseId}#${today}`;
-        const isTracked = isLongTermTrackedLift(exercise.ExerciseId);
-        const todaysLog = isTracked ? liftHistory[exercise.ExerciseId]?.[exerciseLogId] : recentLogs[exercise.ExerciseId]?.[exerciseLogId];
+        const todaysLog = allHistory[exercise.ExerciseId]?.[exerciseLogId];
 
         const originalSetsCount = exercise.Sets ?? 0;
 
@@ -831,7 +829,9 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                 {showWeight && (
                     <View style={styles.setInputContainer}>
                         <TextInput
-                            ref={(el) => (inputRefs.current[index * 3] = el)}
+                            ref={(el) => {
+                                inputRefs.current[index * 3] = el;
+                            }}
                             style={[styles.input, { color: themeColors.text }, isExtraSet && { borderColor: themeColors.text }]}
                             value={set.weight || ''}
                             onChangeText={(value) => handleSetChange(index, 'weight', value)}
@@ -850,7 +850,9 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
                 {/* Primary metric input (reps or time) */}
                 <View style={styles.setInputContainer}>
                     <TextInput
-                        ref={(el) => (inputRefs.current[index * 3 + 1] = el)}
+                        ref={(el) => {
+                            inputRefs.current[index * 3 + 1] = el;
+                        }}
                         style={[styles.input, { color: themeColors.text }, isExtraSet && { borderColor: themeColors.text }]}
                         value={isTimeBasedLogging ? set.time || '' : set.reps || ''}
                         onChangeText={(value) => handleSetChange(index, isTimeBasedLogging ? 'time' : 'reps', value)}
@@ -1044,14 +1046,7 @@ export const ExerciseLoggingSheet: React.FC<ExerciseLoggingSheetProps> = ({ visi
     };
 
     const renderHistoryTab = () => {
-        const isTrackedLift = isLongTermTrackedLift(exercise.ExerciseId);
-        let logs: ExerciseLog[] = [];
-
-        if (isTrackedLift && liftHistory[exercise.ExerciseId]) {
-            logs = Object.values(liftHistory[exercise.ExerciseId]);
-        } else if (!isTrackedLift && recentLogs[exercise.ExerciseId]) {
-            logs = Object.values(recentLogs[exercise.ExerciseId]);
-        }
+        const logs = allHistory[exercise.ExerciseId] ? Object.values(allHistory[exercise.ExerciseId]) : [];
 
         const sortedLogs = logs
             .sort((a, b) => {

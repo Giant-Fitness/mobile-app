@@ -4,27 +4,26 @@ import { REQUEST_STATE } from '@/constants/requestStates';
 import { ExerciseLog } from '@/types/exerciseProgressTypes';
 
 export interface ExerciseProgressState {
-    // Regular exercise logs (last 10-15 logs per exercise)
-    recentLogs: {
+    // UNIFIED: All exercise history in one place (replaces recentLogs + liftHistory)
+    allHistory: {
         [exerciseId: string]: {
             [exerciseLogId: string]: ExerciseLog; // exerciseId#YYYY-MM-DD
         };
     };
-    recentLogsState: REQUEST_STATE;
-    // Complete history for major compound lifts
-    liftHistory: {
-        [exerciseId: string]: {
-            [exerciseLogId: string]: ExerciseLog; // exerciseId#YYYY-MM-DD
-        };
-    };
-    liftHistoryState: REQUEST_STATE;
+    allHistoryState: REQUEST_STATE;
+
+    // Loading states for specific operations
+    saveState: REQUEST_STATE;
+    deleteState: REQUEST_STATE;
+
+    // Error handling
     error: string | null;
 }
 
 export const initialState: ExerciseProgressState = {
-    recentLogs: {},
-    recentLogsState: REQUEST_STATE.IDLE,
-    liftHistory: {},
-    liftHistoryState: REQUEST_STATE.IDLE,
+    allHistory: {},
+    allHistoryState: REQUEST_STATE.IDLE,
+    saveState: REQUEST_STATE.IDLE,
+    deleteState: REQUEST_STATE.IDLE,
     error: null,
 };

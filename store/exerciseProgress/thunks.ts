@@ -1,186 +1,170 @@
 // store/exerciseProgress/thunks.ts
 
-import { REQUEST_STATE } from '@/constants/requestStates';
-import { cacheService } from '@/lib/cache/cacheService';
+import { exerciseHistoryOfflineService } from '@/lib/storage/exercise-history/ExerciseHistoryOfflineService';
+import { networkStateManager } from '@/lib/sync/NetworkStateManager';
 import ExerciseProgressService from '@/store/exerciseProgress/service';
-import { isLongTermTrackedLift, LONG_TERM_TRACKED_LIFT_IDS } from '@/store/exerciseProgress/utils';
 import { RootState } from '@/store/store';
-import { ExerciseSet } from '@/types/exerciseProgressTypes';
+import { ExerciseLog, ExerciseSet } from '@/types/exerciseProgressTypes';
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
-// Load only full history for tracked/compound lifts during initialization
-export const initializeTrackedLiftsHistoryAsync = createAsyncThunk<any, { forceRefresh?: boolean; useCache?: boolean } | void>(
-    'exerciseProgress/initializeTrackedLifts',
-    async (args = {}, { getState, rejectWithValue }) => {
-        try {
-            const { forceRefresh = false, useCache = true } = typeof args === 'object' ? args : {};
-            const state = getState() as RootState;
-            const userId = state.user.user?.UserId;
-            if (!userId) return rejectWithValue({ errorMessage: 'User ID not available' });
+/**
+ * Get ALL exercise history for the user
+ * - Loads from SQLite immediately (offline-first)
+ * - Background syncs from server if forceRefresh=true or SQLite is empty
+ */
+export const getAllExerciseHistoryAsync = createAsyncThunk<
+    any,
+    {
+        forceRefresh?: boolean;
+    } | void
+>('exerciseProgress/getAllHistory', async (args = {}, { getState, rejectWithValue }) => {
+    try {
+        const { forceRefresh = false } = typeof args === 'object' ? args : {};
+        const state = getState() as RootState;
+        const userId = state.user.user?.UserId;
 
-            // Check if we already have history loaded and not forcing refresh
-            if (
-                !forceRefresh &&
-                state.exerciseProgress.liftHistoryState === REQUEST_STATE.FULFILLED &&
-                Object.keys(state.exerciseProgress.liftHistory).length > 0
-            ) {
-                return { liftHistory: state.exerciseProgress.liftHistory };
-            }
-
-            // Try cache first if enabled and not forcing refresh
-            if (useCache && !forceRefresh) {
-                const cacheKey = `tracked_lifts_history`;
-                const cached = await cacheService.get<any>(cacheKey);
-
-                if (cached) {
-                    console.log('Loaded tracked lifts history from cache');
-                    return { liftHistory: cached };
-                }
-            }
-
-            // Load from API
-            console.log('Loading tracked lifts history from API');
-            // Get full history for tracked lifts only
-            const trackedLiftsHistoryPromises = Object.keys(LONG_TERM_TRACKED_LIFT_IDS).map((exerciseId) =>
-                ExerciseProgressService.getExerciseHistory(userId, exerciseId, {}),
-            );
-            const trackedLiftsHistories = await Promise.all(trackedLiftsHistoryPromises);
-
-            // Create mapping of exercise IDs to their full histories
-            const liftHistory = Object.keys(LONG_TERM_TRACKED_LIFT_IDS).reduce(
-                (acc, exerciseId, index) => ({
-                    ...acc,
-                    [exerciseId]: trackedLiftsHistories[index],
-                }),
-                {},
-            );
-
-            // Cache the result if useCache is enabled
-            if (useCache) {
-                const cacheKey = `tracked_lifts_history`;
-                await cacheService.set(cacheKey, liftHistory);
-            }
-
-            return { liftHistory };
-        } catch (error) {
-            return rejectWithValue({
-                errorMessage: error instanceof Error ? error.message : 'Failed to initialize tracked lifts history',
-            });
+        if (!userId) {
+            return rejectWithValue({ errorMessage: 'User ID not available' });
         }
-    },
-);
 
-// Fetch recent history for specific exercises (when viewing a program day)
-export const fetchExercisesRecentHistoryAsync = createAsyncThunk(
-    'exerciseProgress/fetchExercisesRecentHistory',
+        console.log('Loading exercise history from SQLite...');
+
+        // ================================================================
+        // Load from SQLite immediately (offline-first)
+        // ================================================================
+        const allRecords = await exerciseHistoryOfflineService.getRecords(userId, {
+            includeLocalOnly: true,
+            orderBy: 'DESC',
+        });
+
+        // Transform to Redux structure
+        const allHistory: Record<string, Record<string, ExerciseLog>> = {};
+
+        for (const record of allRecords) {
+            const exerciseId = record.data.ExerciseId;
+            const exerciseLogId = record.data.ExerciseLogId;
+
+            if (!allHistory[exerciseId]) {
+                allHistory[exerciseId] = {};
+            }
+
+            allHistory[exerciseId][exerciseLogId] = record.data;
+        }
+
+        const hasLocalData = allRecords.length > 0;
+        console.log(`Loaded ${allRecords.length} exercise logs from SQLite`);
+
+        // ================================================================
+        // Background sync from server (if needed)
+        // ================================================================
+        const shouldSyncFromServer = forceRefresh || !hasLocalData;
+
+        if (shouldSyncFromServer && networkStateManager.isOnline()) {
+            console.log('Background syncing from server...');
+
+            // Background sync - don't await
+            setTimeout(async () => {
+                try {
+                    // Fetch last year of logs
+                    const oneYearAgo = new Date();
+                    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+                    const serverLogs = await ExerciseProgressService.getAllExerciseLogs(userId, {
+                        startDate: oneYearAgo.toISOString().split('T')[0],
+                        limit: 1000,
+                    });
+
+                    if (serverLogs.length > 0) {
+                        await exerciseHistoryOfflineService.mergeServerData(userId, serverLogs);
+                        console.log(`Background sync: merged ${serverLogs.length} logs`);
+                    }
+                } catch (error) {
+                    console.warn('Background sync failed:', error);
+                }
+            }, 100);
+        }
+
+        return { allHistory };
+    } catch (error) {
+        return rejectWithValue({
+            errorMessage: error instanceof Error ? error.message : 'Failed to get exercise history',
+        });
+    }
+});
+
+/**
+ * Get history for specific exercises (used when viewing a program day)
+ * Loads from SQLite immediately, background syncs if needed
+ */
+export const fetchExercisesHistoryAsync = createAsyncThunk(
+    'exerciseProgress/fetchExercisesHistory',
     async (
         {
             exerciseIds,
+            limit = 10,
             forceRefresh = false,
-            useCache = true,
         }: {
             exerciseIds: string[];
+            limit?: number;
             forceRefresh?: boolean;
-            useCache?: boolean;
         },
         { getState, rejectWithValue },
     ) => {
         try {
             const state = getState() as RootState;
             const userId = state.user.user?.UserId;
-            if (!userId) return rejectWithValue({ errorMessage: 'User ID not available' });
 
-            const exercisesToFetch = exerciseIds.filter((id) => !isLongTermTrackedLift(id));
-
-            // Check which exercises need to be fetched
-            const uncachedExercises = exercisesToFetch.filter((exerciseId) => {
-                return (
-                    forceRefresh || !state.exerciseProgress.recentLogs[exerciseId] || Object.keys(state.exerciseProgress.recentLogs[exerciseId]).length === 0
-                );
-            });
-
-            // If we have all exercises cached and they're not stale and not forcing refresh
-            if (uncachedExercises.length === 0 && state.exerciseProgress.recentLogsState === REQUEST_STATE.FULFILLED && !forceRefresh) {
-                return {
-                    recentLogs: exercisesToFetch.reduce(
-                        (acc, exerciseId) => ({
-                            ...acc,
-                            [exerciseId]: state.exerciseProgress.recentLogs[exerciseId] || {},
-                        }),
-                        {},
-                    ),
-                };
+            if (!userId) {
+                return rejectWithValue({ errorMessage: 'User ID not available' });
             }
 
-            // Check cache for missing exercises
-            const cachedExercises: string[] = [];
-            const apiExercises: string[] = [];
-            let cachedRecentLogs: any = {};
+            console.log(`Loading history for ${exerciseIds.length} exercises from SQLite...`);
 
-            if (useCache && !forceRefresh) {
-                for (const exerciseId of uncachedExercises) {
-                    const cacheKey = `recent_logs_${exerciseId}`;
-                    const cached = await cacheService.get<any>(cacheKey);
+            // Load from SQLite (offline-first)
+            const historyByExercise = await exerciseHistoryOfflineService.getHistoryForExercises(userId, exerciseIds, limit);
 
-                    if (cached) {
-                        cachedRecentLogs[exerciseId] = cached;
-                        cachedExercises.push(exerciseId);
-                        console.log(`Loaded recent logs for ${exerciseId} from cache`);
-                    } else {
-                        apiExercises.push(exerciseId);
-                    }
+            // Transform to Redux structure
+            const exerciseHistory: Record<string, Record<string, ExerciseLog>> = {};
+
+            for (const [exerciseId, records] of Object.entries(historyByExercise)) {
+                exerciseHistory[exerciseId] = {};
+                for (const record of records) {
+                    exerciseHistory[exerciseId][record.ExerciseLogId] = record;
                 }
-            } else {
-                apiExercises.push(...uncachedExercises);
             }
 
-            // Fetch uncached exercises from API
-            let apiRecentLogs: any = {};
-            if (apiExercises.length > 0) {
-                console.log(`Loading recent logs from API for: ${apiExercises.join(', ')}`);
-                const recentHistoryPromises = apiExercises.map((exerciseId) => ExerciseProgressService.getExerciseHistory(userId, exerciseId, { limit: 10 }));
-                const recentHistories = await Promise.all(recentHistoryPromises);
+            // Background sync if requested
+            if (forceRefresh && networkStateManager.isOnline()) {
+                setTimeout(async () => {
+                    try {
+                        for (const exerciseId of exerciseIds) {
+                            const serverHistory = await ExerciseProgressService.getExerciseHistory(userId, exerciseId, { limit });
 
-                // Transform the response to object structure
-                apiRecentLogs = apiExercises.reduce((acc, exerciseId, index) => {
-                    const history = recentHistories[index];
-                    // Handle if history is array or object
-                    const logs = Array.isArray(history) ? history : Object.values(history);
-
-                    const exerciseLogs = logs.reduce(
-                        (logAcc, log) => ({
-                            ...logAcc,
-                            [log.ExerciseLogId]: log,
-                        }),
-                        {},
-                    );
-
-                    // Cache the result if useCache is enabled
-                    if (useCache) {
-                        const cacheKey = `recent_logs_${exerciseId}`;
-                        cacheService.set(cacheKey, exerciseLogs);
+                            if (serverHistory.length > 0) {
+                                await exerciseHistoryOfflineService.mergeServerData(userId, serverHistory);
+                            }
+                        }
+                        console.log('Background sync completed for exercises');
+                    } catch (error) {
+                        console.warn('Background sync failed:', error);
                     }
-
-                    return {
-                        ...acc,
-                        [exerciseId]: exerciseLogs,
-                    };
-                }, {});
+                }, 100);
             }
 
-            // Combine cached and API results
-            const recentLogs = { ...cachedRecentLogs, ...apiRecentLogs };
-
-            return { recentLogs };
+            return { exerciseHistory };
         } catch (error) {
             return rejectWithValue({
-                errorMessage: error instanceof Error ? error.message : 'Failed to fetch recent exercise history',
+                errorMessage: error instanceof Error ? error.message : 'Failed to fetch exercise history',
             });
         }
     },
 );
 
+/**
+ * Save exercise progress - Optimistic update to SQLite
+ * Syncs to server in background via SyncQueueManager
+ */
 export const saveExerciseProgressAsync = createAsyncThunk(
     'exerciseProgress/saveProgress',
     async (
@@ -198,61 +182,74 @@ export const saveExerciseProgressAsync = createAsyncThunk(
         try {
             const state = getState() as RootState;
             const userId = state.user.user?.UserId;
-            if (!userId) return rejectWithValue({ errorMessage: 'User ID not available' });
 
-            // Validate sets before sending to backend
+            if (!userId) {
+                return rejectWithValue({ errorMessage: 'User ID not available' });
+            }
+
+            // Validate sets
             if (!sets || sets.length === 0) {
                 return rejectWithValue({ errorMessage: 'At least one set is required' });
             }
 
-            // Basic validation for sets
             for (let i = 0; i < sets.length; i++) {
                 const set = sets[i];
 
-                // At least one of Reps or Time must be provided
                 if ((set.Reps === undefined || set.Reps === null) && (set.Time === undefined || set.Time === null)) {
                     return rejectWithValue({ errorMessage: `Set ${i + 1}: Either reps or time must be provided` });
                 }
 
-                // If Reps is provided, it must be > 0
                 if (set.Reps !== undefined && set.Reps !== null && set.Reps <= 0) {
                     return rejectWithValue({ errorMessage: `Set ${i + 1}: Reps must be greater than 0` });
                 }
 
-                // If Time is provided, it must be > 0
                 if (set.Time !== undefined && set.Time !== null && set.Time <= 0) {
                     return rejectWithValue({ errorMessage: `Set ${i + 1}: Time must be greater than 0 seconds` });
                 }
 
-                // If Weight is provided, it must be >= 0
                 if (set.Weight !== undefined && set.Weight !== null && set.Weight < 0) {
                     return rejectWithValue({ errorMessage: `Set ${i + 1}: Weight must be greater than or equal to 0` });
                 }
             }
 
-            const log = await ExerciseProgressService.saveExerciseProgress(userId, exerciseId, date, sets);
+            console.log(`Saving exercise progress to SQLite: ${exerciseId} on ${date}`);
 
-            // Invalidate relevant caches after saving
-            const isTracked = isLongTermTrackedLift(exerciseId);
+            // Check if log already exists
+            const existingLog = await exerciseHistoryOfflineService.getExerciseLog(userId, exerciseId, date);
 
-            // Clear cache for this exercise's recent logs
-            const recentLogsCacheKey = `recent_logs_${exerciseId}`;
-            await cacheService.remove(recentLogsCacheKey);
+            let localId: string;
 
-            // If it's a tracked lift, also clear the tracked lifts history cache
-            if (isTracked) {
-                const trackedHistoryCacheKey = `tracked_lifts_history`;
-                await cacheService.remove(trackedHistoryCacheKey);
+            if (existingLog) {
+                // Update existing log
+                localId = existingLog.localId;
+                await exerciseHistoryOfflineService.update(localId, { sets });
+                console.log(`Updated existing exercise log: ${localId}`);
+            } else {
+                // Create new log
+                localId = await exerciseHistoryOfflineService.create({
+                    userId,
+                    data: { exerciseId, date, sets },
+                    timestamp: date,
+                });
+                console.log(`Created new exercise log: ${localId}`);
             }
+
+            // Get the updated/created log
+            const updatedLog = await exerciseHistoryOfflineService.getById(localId);
+
+            if (!updatedLog) {
+                throw new Error('Failed to retrieve saved exercise log');
+            }
+
+            // SyncQueueManager will automatically sync to server in background
+            console.log('Exercise progress saved locally, will sync to server in background');
 
             return {
                 exerciseId,
                 date,
-                log,
-                isTrackedLift: isTracked,
+                log: updatedLog.data,
             };
         } catch (error: any) {
-            // Pass the specific error message up
             return rejectWithValue({
                 errorMessage: error.message || 'Failed to save exercise progress',
             });
@@ -260,6 +257,10 @@ export const saveExerciseProgressAsync = createAsyncThunk(
     },
 );
 
+/**
+ * Delete exercise log - Optimistic delete from SQLite
+ * Syncs deletion to server in background via SyncQueueManager
+ */
 export const deleteExerciseLogAsync = createAsyncThunk(
     'exerciseProgress/deleteLog',
     async (
@@ -275,27 +276,22 @@ export const deleteExerciseLogAsync = createAsyncThunk(
         try {
             const state = getState() as RootState;
             const userId = state.user.user?.UserId;
-            if (!userId) return rejectWithValue({ errorMessage: 'User ID not available' });
 
-            await ExerciseProgressService.deleteExerciseLog(userId, exerciseId, date);
-
-            // Invalidate relevant caches after deletion
-            const isTracked = isLongTermTrackedLift(exerciseId);
-
-            // Clear cache for this exercise's recent logs
-            const recentLogsCacheKey = `recent_logs_${exerciseId}`;
-            await cacheService.remove(recentLogsCacheKey);
-
-            // If it's a tracked lift, also clear the tracked lifts history cache
-            if (isTracked) {
-                const trackedHistoryCacheKey = `tracked_lifts_history`;
-                await cacheService.remove(trackedHistoryCacheKey);
+            if (!userId) {
+                return rejectWithValue({ errorMessage: 'User ID not available' });
             }
+
+            console.log(`Deleting exercise log from SQLite: ${exerciseId} on ${date}`);
+
+            // Delete from SQLite (optimistic)
+            await exerciseHistoryOfflineService.deleteExerciseLog(userId, exerciseId, date);
+
+            // SyncQueueManager will automatically sync deletion to server in background
+            console.log('Exercise log deleted locally, will sync to server in background');
 
             return {
                 exerciseId,
                 date,
-                isTrackedLift: isTracked,
             };
         } catch (error) {
             return rejectWithValue({
