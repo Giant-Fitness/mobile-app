@@ -56,6 +56,10 @@ posthog.json
 package-lock.json
 
 google-services.json
+google-services-prod.json
+google-services-dev.json
 GoogleService-Info.plist
+GoogleService-Info-prod.plist
+GoogleService-Info-dev.plist
 
 .idea
