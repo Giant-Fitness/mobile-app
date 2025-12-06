@@ -38,7 +38,10 @@ export default function WorkoutsScreen() {
 
     useEffect(() => {
         if (spotlightWorkoutsState === REQUEST_STATE.FULFILLED && spotlightWorkouts) {
-            const missingWorkoutIds = spotlightWorkouts.WorkoutIds.filter((id) => !workouts[id] || workoutStates[id] !== REQUEST_STATE.FULFILLED);
+            // Only fetch workouts that haven't been attempted yet (not FULFILLED or REJECTED)
+            const missingWorkoutIds = spotlightWorkouts.WorkoutIds.filter(
+                (id) => !workoutStates[id] || (workoutStates[id] !== REQUEST_STATE.FULFILLED && workoutStates[id] !== REQUEST_STATE.REJECTED),
+            );
             if (missingWorkoutIds.length > 0) {
                 dispatch(getMultipleWorkoutsAsync({ workoutIds: missingWorkoutIds }));
             }
@@ -52,9 +55,12 @@ export default function WorkoutsScreen() {
         if (!spotlightWorkouts) {
             return REQUEST_STATE.REJECTED;
         }
-        const allWorkoutsLoaded = spotlightWorkouts.WorkoutIds.every((id) => workouts[id] && workoutStates[id] === REQUEST_STATE.FULFILLED);
+        // Consider loading complete if all workouts have been resolved (either successfully or failed)
+        const allWorkoutsResolved = spotlightWorkouts.WorkoutIds.every(
+            (id) => workoutStates[id] === REQUEST_STATE.FULFILLED || workoutStates[id] === REQUEST_STATE.REJECTED,
+        );
 
-        return allWorkoutsLoaded ? REQUEST_STATE.FULFILLED : REQUEST_STATE.PENDING;
+        return allWorkoutsResolved ? REQUEST_STATE.FULFILLED : REQUEST_STATE.PENDING;
     }, [spotlightWorkoutsState, spotlightWorkouts, workouts, workoutStates]);
 
     const { showSplash } = useSplashScreen({
