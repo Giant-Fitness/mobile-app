@@ -7,11 +7,8 @@
         "android": "expo run:android",
         "ios": "expo run:ios",
         "web": "expo start --web",
-        "test": "jest --watchAll",
+        "test": "jest",
         "postinstall": "patch-package"
-    },
-    "jest": {
-        "preset": "jest-expo"
     },
     "dependencies": {
         "@aws-amplify/core": "^6.7.0",
@@ -98,6 +95,7 @@
         "@babel/core": "^7.25.2",
         "@ianvs/prettier-plugin-sort-imports": "^4.4.2",
         "@react-native-community/cli": "^18.0.0",
+        "@testing-library/react-native": "^13.3.3",
         "@types/jest": "^29.5.12",
         "@types/react": "~19.0.10",
         "@types/react-test-renderer": "~18.0.0",
@@ -111,8 +109,10 @@
         "eslint-plugin-react": "^7.37.2",
         "globals": "^15.8.0",
         "jest": "^29.7.0",
+        "jest-expo": "^54.0.13",
         "patch-package": "^8.0.0",
         "prettier": "^3.6.0",
+        "react-test-renderer": "19.0.0",
         "tsx": "^4.19.2",
         "typescript": "~5.8.3"
     },
