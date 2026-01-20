@@ -4,8 +4,7 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-
-import { Circle, Defs, LinearGradient, Path, Stop, Svg } from 'react-native-svg';
+import { LineChart } from 'react-native-gifted-charts';
 
 type Point = {
     x: number;
@@ -28,56 +27,76 @@ export const SinglePointSparkLine = ({ color, value, dotFillColor }: { color: st
     const colorScheme = useColorScheme() as 'light' | 'dark';
     const themeColors = Colors[colorScheme];
 
-    // Position the dot in the center horizontally
-    const centerX = 50;
-
-    // Calculate y position based on value if provided (otherwise center vertically)
-    // For demonstration, let's assume values typically range from 0-100
-    // We'll invert the y-axis so higher values appear higher on the chart
-    const y = value !== undefined ? Math.max(5, Math.min(35, 35 - (value / 100) * 30)) : 20;
+    const chartData = [
+        { value: value || 50, hideDataPoint: false },
+        { value: value || 50, hideDataPoint: true },
+    ];
 
     return (
-        <Svg width='100%' height='100%' viewBox='0 0 100 38' preserveAspectRatio='xMidYMid meet'>
-            <Defs>
-                <LinearGradient id='singlePointGradient' x1='0' y1='0' x2='0' y2='1'>
-                    <Stop offset='0' stopColor={color} stopOpacity='0.3' />
-                    <Stop offset='1' stopColor={color} stopOpacity='0.05' />
-                </LinearGradient>
-            </Defs>
-
-            {/* Horizontal reference line */}
-            <Path d='M 10 20 L 90 20' stroke={color} strokeWidth='0.5' strokeDasharray='1,1.5' fill='none' opacity='0.4' />
-
-            {/* Center dot with pulse circle */}
-            <Circle cx={centerX} cy={y} r='3' fill={dotFillColor || themeColors.background} stroke={color} strokeWidth='1.2' />
-
-            {/* Value indicator line */}
-            <Path d={`M ${centerX} 38 L ${centerX} ${y + 3}`} stroke={color} strokeWidth='0.6' strokeDasharray='1.5,1' opacity='0.5' />
-
-            {/* Subtle background gradient */}
-            <Path d='M 0 38 L 100 38 L 100 20 C 75 20, 75 20, 50 20 C 25 20, 25 20, 0 20 Z' fill='url(#singlePointGradient)' opacity='0.5' />
-        </Svg>
+        <View style={styles.container}>
+            <LineChart
+                data={chartData}
+                width={100}
+                height={38}
+                curved
+                hideYAxisText
+                hideAxesAndRules
+                hideDataPoints={false}
+                dataPointsColor={color}
+                dataPointsRadius={3}
+                dataPointsWidth={1.5}
+                color={color}
+                thickness={1}
+                startFillColor={color}
+                startOpacity={0.2}
+                endOpacity={0.05}
+                areaChart
+                hideOrigin
+                spacing={50}
+                initialSpacing={0}
+            />
+        </View>
     );
 };
 
-export const EmptySparkLine = ({ color }: { color: string }) => (
-    <Svg width='100%' height='100%' viewBox='0 0 100 38' preserveAspectRatio='xMidYMid meet'>
-        <Defs>
-            <LinearGradient id='emptyGradient' x1='0' y1='0' x2='0' y2='1'>
-                <Stop offset='0' stopColor={color} stopOpacity='0.2' />
-                <Stop offset='1' stopColor={color} stopOpacity='0.05' />
-            </LinearGradient>
-        </Defs>
-        <Path d='M 0 30 C 25 30, 25 15, 50 15 C 75 15, 75 30, 100 30' stroke={color} strokeWidth='0.9' strokeDasharray='2,2' fill='none' opacity='0.5' />
-        <Path d='M 0 30 C 25 30, 25 15, 50 15 C 75 15, 75 30, 100 30 L 100 38 L 0 38 Z' fill='url(#emptyGradient)' />
-    </Svg>
-);
+export const EmptySparkLine = ({ color }: { color: string }) => {
+    const chartData = [
+        { value: 30 },
+        { value: 15 },
+        { value: 30 },
+    ];
+
+    return (
+        <View style={styles.container}>
+            <LineChart
+                data={chartData}
+                width={100}
+                height={38}
+                curved
+                hideYAxisText
+                hideAxesAndRules
+                hideDataPoints
+                color={color}
+                thickness={1}
+                startFillColor={color}
+                startOpacity={0.2}
+                endOpacity={0.05}
+                areaChart
+                hideOrigin
+                spacing={40}
+                initialSpacing={10}
+                dashGap={2}
+                dashWidth={2}
+            />
+        </View>
+    );
+};
 
 export const SparkLine: React.FC<SparkLineProps> = ({
     data,
     color,
-    width = '100%',
-    height = '100%',
+    width = 100,
+    height = 38,
     strokeWidth = 1.3,
     dotRadius = 2.5,
     dotFillColor,
@@ -90,84 +109,67 @@ export const SparkLine: React.FC<SparkLineProps> = ({
 
     // Validate y-coordinates and handle edge cases
     const validData = data.map((point) => {
-        // If y is NaN, null, or undefined, use a default y value (middle of the chart)
         return {
-            ...point,
-            y: isNaN(point.y) || point.y === null || point.y === undefined ? 20 : point.y,
+            value: isNaN(point.y) || point.y === null || point.y === undefined ? 20 : point.y,
         };
     });
 
-    // Add padding to accommodate the circle radius
-    const padding = dotRadius + strokeWidth;
-
     if (validData.length === 1) {
-        const midY = 20;
-        const x = 50; // Center point
-        return (
-            <Svg width={width} height={height} viewBox={`-${padding} -${padding} ${100 + padding * 2} ${38 + padding * 2}`} preserveAspectRatio='xMidYMid meet'>
-                <Path d={`M ${x - 20} ${midY} L ${x + 20} ${midY}`} stroke={color} strokeWidth={strokeWidth} fill='none' />
-                <Circle cx={x} cy={midY} stroke={color} strokeWidth={strokeWidth} r={dotRadius} fill={dotFillColor || themeColors.background} />
-            </Svg>
-        );
+        return <SinglePointSparkLine color={color} value={validData[0].value} dotFillColor={dotFillColor} />;
     }
 
     // Check if all y values are the same
-    const allSameY = validData.every((point) => point.y === validData[0].y);
+    const allSameY = validData.every((point) => point.value === validData[0].value);
 
     if (allSameY) {
-        // Draw a straight horizontal line
-        const midY = validData[0].y;
+        // Draw a straight horizontal line with points
         return (
             <View style={[styles.container, style]}>
-                <Svg
-                    width={width}
-                    height={height}
-                    viewBox={`-${padding} -${padding} ${100 + padding * 2} ${38 + padding * 2}`}
-                    preserveAspectRatio='xMidYMid meet'
-                >
-                    <Path d={`M 0 ${midY} L 100 ${midY}`} stroke={color} strokeWidth={strokeWidth} fill='none' />
-                    {validData.map((point, index) => (
-                        <Circle
-                            key={index}
-                            cx={point.x}
-                            cy={midY}
-                            stroke={color}
-                            strokeWidth={strokeWidth}
-                            r={dotRadius}
-                            fill={dotFillColor || themeColors.background}
-                        />
-                    ))}
-                </Svg>
+                <LineChart
+                    data={validData}
+                    width={typeof width === 'number' ? width : 100}
+                    height={typeof height === 'number' ? height : 38}
+                    curved={false}
+                    hideYAxisText
+                    hideAxesAndRules
+                    hideDataPoints={false}
+                    dataPointsColor={color}
+                    dataPointsRadius={dotRadius}
+                    dataPointsWidth={strokeWidth}
+                    color={color}
+                    thickness={strokeWidth}
+                    hideOrigin
+                    spacing={80 / Math.max(validData.length - 1, 1)}
+                    initialSpacing={10}
+                />
             </View>
         );
     }
 
-    // Generate smooth path
-    let path = `M ${validData[0].x} ${validData[0].y}`;
-    for (let i = 1; i < validData.length; i++) {
-        const xDiff = validData[i].x - validData[i - 1].x;
-        const controlPointDistance = Math.min(xDiff / 3, 20);
-        const x1 = validData[i - 1].x + controlPointDistance;
-        const x2 = validData[i].x - controlPointDistance;
-        path += ` C ${x1} ${validData[i - 1].y}, ${x2} ${validData[i].y}, ${validData[i].x} ${validData[i].y}`;
-    }
-
     return (
         <View style={[styles.container, style]}>
-            <Svg width={width} height={height} viewBox={`-${padding} -${padding} ${100 + padding * 2} ${38 + padding * 2}`} preserveAspectRatio='xMidYMid meet'>
-                <Path d={path} stroke={color} strokeWidth={strokeWidth} fill='none' />
-                {validData.map((point, index) => (
-                    <Circle
-                        key={index}
-                        cx={point.x}
-                        cy={point.y}
-                        stroke={color}
-                        strokeWidth={strokeWidth}
-                        r={dotRadius}
-                        fill={dotFillColor || themeColors.background}
-                    />
-                ))}
-            </Svg>
+            <LineChart
+                data={validData}
+                width={typeof width === 'number' ? width : 100}
+                height={typeof height === 'number' ? height : 38}
+                curved
+                curvature={0.3}
+                hideYAxisText
+                hideAxesAndRules
+                hideDataPoints={false}
+                dataPointsColor={color}
+                dataPointsRadius={dotRadius}
+                dataPointsWidth={strokeWidth}
+                color={color}
+                thickness={strokeWidth}
+                startFillColor={color}
+                startOpacity={0.15}
+                endOpacity={0.02}
+                areaChart
+                hideOrigin
+                spacing={80 / Math.max(validData.length - 1, 1)}
+                initialSpacing={10}
+            />
         </View>
     );
 };
