@@ -20,29 +20,29 @@ interface ApiConfig {
 
 export const API_CONFIG = {
     CATALOG_API: {
-        // BASE_URL: 'https://mfr52pxu54.execute-api.ap-south-1.amazonaws.com/v1/',
-        BASE_URL: 'https://bd9lpoysuk.execute-api.ap-south-1.amazonaws.com/v1/',
+        BASE_URL: 'https://mfr52pxu54.execute-api.ap-south-1.amazonaws.com/v1/',
+        // BASE_URL: 'https://bd9lpoysuk.execute-api.ap-south-1.amazonaws.com/v1/',
         RETRY_ATTEMPTS: 3,
         RETRY_DELAY: 1000,
         TIMEOUT: 10000,
     },
     USERS_API: {
-        // BASE_URL: 'https://9tx2oki3g7.execute-api.ap-south-1.amazonaws.com/v1/',
-        BASE_URL: 'https://kkftdf4lzk.execute-api.ap-south-1.amazonaws.com/v1',
+        BASE_URL: 'https://9tx2oki3g7.execute-api.ap-south-1.amazonaws.com/v1/',
+        // BASE_URL: 'https://kkftdf4lzk.execute-api.ap-south-1.amazonaws.com/v1',
         RETRY_ATTEMPTS: 3,
         RETRY_DELAY: 1000,
         TIMEOUT: 10000,
     },
     FEEDBACK_API: {
-        // BASE_URL: 'https://p589brhtni.execute-api.ap-south-1.amazonaws.com/v1/',
-        BASE_URL: 'https://kcz0rv962l.execute-api.ap-south-1.amazonaws.com/v1/',
+        BASE_URL: 'https://p589brhtni.execute-api.ap-south-1.amazonaws.com/v1/',
+        // BASE_URL: 'https://kcz0rv962l.execute-api.ap-south-1.amazonaws.com/v1/',
         RETRY_ATTEMPTS: 3,
         RETRY_DELAY: 1000,
         TIMEOUT: 10000,
     },
     RECOMMENDATIONS_API: {
-        // BASE_URL: 'https://mb4m5mqhk8.execute-api.ap-south-1.amazonaws.com/v1/',
-        BASE_URL: 'https://0on6j1nq7k.execute-api.ap-south-1.amazonaws.com/v1/',
+        BASE_URL: 'https://mb4m5mqhk8.execute-api.ap-south-1.amazonaws.com/v1/',
+        // BASE_URL: 'https://0on6j1nq7k.execute-api.ap-south-1.amazonaws.com/v1/',
         RETRY_ATTEMPTS: 3,
         RETRY_DELAY: 1000,
         TIMEOUT: 10000,
