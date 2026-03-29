@@ -17,7 +17,7 @@ import { createExerciseSubstitutionAsync, deleteExerciseSubstitutionAsync, getUs
 import { Exercise, ExerciseAlternative } from '@/types';
 import { darkenColor, lightenColor } from '@/utils/colorUtils';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Platform, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { format } from 'date-fns';
 import LottieView from 'lottie-react-native';
@@ -31,6 +31,7 @@ interface ExerciseAlternativesBottomSheetProps {
 }
 
 type SubstitutionTypeOption = 'temporary' | 'permanent';
+type TabOption = 'recommendations' | 'search';
 
 export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBottomSheetProps> = ({ visible, onClose, exercise, programId }) => {
     const colorScheme = useColorScheme();
@@ -44,6 +45,13 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
     const [selectedAlternative, setSelectedAlternative] = useState<ExerciseAlternative | null>(null);
     const [showSuccess, setShowSuccess] = useState<{ message: string; visible: boolean } | null>(null);
     const [showSubstitutionTypeModal, setShowSubstitutionTypeModal] = useState(false);
+
+    // Search state
+    const [activeTab, setActiveTab] = useState<TabOption>('recommendations');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<Exercise[]>([]);
+    const [loadingSearch, setLoadingSearch] = useState(false);
+    const [allExercises, setAllExercises] = useState<Record<string, Exercise>>({});
 
     // Redux state
     const { userExerciseSubstitutions, userExerciseSubstitutionsState } = useSelector((state: RootState) => state.user);
@@ -89,6 +97,22 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
         }
     }, [visible, existingSubstitution, alternatives]);
 
+    // Load all exercises when sheet becomes visible (for search functionality)
+    useEffect(() => {
+        if (visible && Object.keys(allExercises).length === 0) {
+            loadAllExercises();
+        }
+    }, [visible]);
+
+    // Search exercises when query changes
+    useEffect(() => {
+        if (activeTab === 'search' && searchQuery.trim().length > 0) {
+            performSearch(searchQuery);
+        } else {
+            setSearchResults([]);
+        }
+    }, [searchQuery, activeTab, allExercises]);
+
     const fetchAlternatives = async () => {
         try {
             setLoadingAlternatives(true);
@@ -109,7 +133,47 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
         }
     };
 
+    const loadAllExercises = async () => {
+        try {
+            setLoadingSearch(true);
+            const exercises = await ExercisesService.getAllExercises();
+            setAllExercises(exercises);
+        } catch (err) {
+            console.error('Error loading exercises:', err);
+        } finally {
+            setLoadingSearch(false);
+        }
+    };
+
+    const performSearch = (query: string) => {
+        const lowerQuery = query.toLowerCase().trim();
+        const results = Object.values(allExercises)
+            .filter(
+                (ex) =>
+                    // Exclude the current exercise from search results
+                    ex.ExerciseId !== exercise.ExerciseId &&
+                    // Search by name
+                    ex.ExerciseName.toLowerCase().includes(lowerQuery),
+            )
+            .slice(0, 20); // Limit to 20 results
+
+        setSearchResults(results);
+    };
+
     const handleSelectAlternative = (alternative: ExerciseAlternative) => {
+        setSelectedAlternative(alternative);
+    };
+
+    const handleSelectSearchResult = (exercise: Exercise) => {
+        // Convert Exercise to ExerciseAlternative format
+        const alternative: ExerciseAlternative = {
+            ExerciseId: exercise.ExerciseId,
+            ExerciseName: exercise.ExerciseName,
+            MatchScore: 0, // No match score for search results
+            EquipmentRequired: [],
+            MuscleGroups: exercise.MuscleGroups,
+            Category: exercise.Category,
+        };
         setSelectedAlternative(alternative);
     };
 
@@ -220,17 +284,60 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
 
     // Render the header with close button
     const renderHeader = () => (
-        <View style={[styles.header, { borderBottomColor: themeColors.systemBorderColor }]}>
-            <TouchableOpacity onPress={handleSheetClose} style={styles.closeButton} hitSlop={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                <Icon name='close' size={20} color={themeColors.text} />
-            </TouchableOpacity>
-            <View style={styles.headerTitleContainer}>
-                <ThemedText type='title'>Substitute</ThemedText>
-                <ThemedText type='bodySmall' style={styles.headerSubtitle}>
-                    {exercise.ExerciseName}
-                </ThemedText>
+        <>
+            <View style={[styles.header, { borderBottomColor: themeColors.systemBorderColor }]}>
+                <TouchableOpacity onPress={handleSheetClose} style={styles.closeButton} hitSlop={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                    <Icon name='close' size={20} color={themeColors.text} />
+                </TouchableOpacity>
+                <View style={styles.headerTitleContainer}>
+                    <ThemedText type='title'>Substitute</ThemedText>
+                    <ThemedText type='bodySmall' style={styles.headerSubtitle}>
+                        {exercise.ExerciseName}
+                    </ThemedText>
+                </View>
             </View>
-        </View>
+
+            {/* Search Input */}
+            <View style={styles.searchContainer}>
+                <View style={[styles.searchInputContainer, { backgroundColor: themeColors.inputBackground, borderColor: themeColors.systemBorderColor }]}>
+                    <Icon name='search' size={18} color={themeColors.subText} style={styles.searchIcon} />
+                    <TextInput
+                        style={[styles.searchInput, { color: themeColors.text }]}
+                        placeholder='Search exercises...'
+                        placeholderTextColor={themeColors.subText}
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        autoCapitalize='none'
+                        autoCorrect={false}
+                    />
+                    {searchQuery.length > 0 && (
+                        <TouchableOpacity onPress={() => setSearchQuery('')} hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}>
+                            <Icon name='close-circle' size={18} color={themeColors.subText} />
+                        </TouchableOpacity>
+                    )}
+                </View>
+            </View>
+
+            {/* Tab Navigation */}
+            <View style={styles.tabContainer}>
+                <TouchableOpacity
+                    style={[styles.tab, activeTab === 'recommendations' && { borderBottomColor: themeColors.tangerineSolid }]}
+                    onPress={() => setActiveTab('recommendations')}
+                >
+                    <ThemedText type='bodySmall' style={[styles.tabText, activeTab === 'recommendations' && { color: themeColors.tangerineSolid }]}>
+                        Recommendations
+                    </ThemedText>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.tab, activeTab === 'search' && { borderBottomColor: themeColors.tangerineSolid }]}
+                    onPress={() => setActiveTab('search')}
+                >
+                    <ThemedText type='bodySmall' style={[styles.tabText, activeTab === 'search' && { color: themeColors.tangerineSolid }]}>
+                        Search
+                    </ThemedText>
+                </TouchableOpacity>
+            </View>
+        </>
     );
 
     // Get lighter version of match color for background
@@ -280,6 +387,46 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
                             <View style={[styles.matchIndicator, { backgroundColor: matchColor }]} />
                             <ThemedText type='caption' style={[styles.matchText, { color: matchColor }]}>
                                 {matchScore}% Match
+                            </ThemedText>
+                        </View>
+                    </View>
+                </TouchableOpacity>
+            </ThemedView>
+        );
+    };
+
+    // Render a search result item
+    const renderSearchResultItem = ({ item }: { item: Exercise }) => {
+        const isSelected = selectedAlternative?.ExerciseId === item.ExerciseId;
+
+        return (
+            <ThemedView
+                style={[
+                    styles.alternativeCard,
+                    {
+                        backgroundColor: isSelected ? lightenColor(themeColors.tangerineTransparent, 0.7) : themeColors.background,
+                        borderColor: isSelected ? themeColors.tangerineSolid : themeColors.systemBorderColor,
+                    },
+                    Platform.OS === 'ios' ? styles.shadowIOS : styles.shadowAndroid,
+                ]}
+            >
+                <TouchableOpacity onPress={() => handleSelectSearchResult(item)} activeOpacity={0.7} style={styles.cardTouchable}>
+                    <View style={styles.alternativeContent}>
+                        <View style={styles.exerciseNameRow}>
+                            <ThemedText type='buttonSmall' style={styles.exerciseName} numberOfLines={2}>
+                                {item.ExerciseName}
+                            </ThemedText>
+                            {isSelected && (
+                                <View style={styles.selectedIndicator}>
+                                    <Icon name='check' size={14} color={themeColors.tangerineSolid} />
+                                </View>
+                            )}
+                        </View>
+
+                        {/* Show category instead of match score for search results */}
+                        <View style={[styles.categoryContainer, { backgroundColor: themeColors.inputBackground }]}>
+                            <ThemedText type='caption' style={styles.categoryText}>
+                                {item.Category}
                             </ThemedText>
                         </View>
                     </View>
@@ -388,25 +535,58 @@ export const ExerciseAlternativesBottomSheet: React.FC<ExerciseAlternativesBotto
             ) : (
                 <>
                     {/* Loading, Error or Results */}
-                    {loadingAlternatives ? (
-                        renderLoading()
-                    ) : error ? (
-                        renderError()
+                    {activeTab === 'recommendations' ? (
+                        loadingAlternatives ? (
+                            renderLoading()
+                        ) : error ? (
+                            renderError()
+                        ) : (
+                            <FlatList
+                                data={alternatives}
+                                renderItem={renderAlternativeItem}
+                                keyExtractor={(item) => item.ExerciseId}
+                                contentContainerStyle={styles.alternativesList}
+                                numColumns={2}
+                                columnWrapperStyle={styles.gridRow}
+                                ListEmptyComponent={
+                                    <View style={styles.emptyContainer}>
+                                        <ThemedText type='body' style={styles.emptyText}>
+                                            We couldn&apos;t find any alternatives for this exercise right now.
+                                        </ThemedText>
+                                    </View>
+                                }
+                                showsVerticalScrollIndicator={false}
+                            />
+                        )
+                    ) : loadingSearch ? (
+                        <View style={styles.loadingContainer}>
+                            <ActivityIndicator size='small' color={themeColors.subText} />
+                            <ThemedText type='body' style={styles.loadingText}>
+                                Loading exercises...
+                            </ThemedText>
+                        </View>
+                    ) : searchQuery.trim().length === 0 ? (
+                        <View style={styles.emptyContainer}>
+                            <Icon name='search' size={40} color={themeColors.subText} />
+                            <ThemedText type='body' style={styles.emptyText}>
+                                Start typing to search for exercises
+                            </ThemedText>
+                        </View>
+                    ) : searchResults.length === 0 ? (
+                        <View style={styles.emptyContainer}>
+                            <Icon name='alert-circle' size={40} color={themeColors.subText} />
+                            <ThemedText type='body' style={styles.emptyText}>
+                                No exercises found matching &quot;{searchQuery}&quot;
+                            </ThemedText>
+                        </View>
                     ) : (
                         <FlatList
-                            data={alternatives}
-                            renderItem={renderAlternativeItem}
+                            data={searchResults}
+                            renderItem={renderSearchResultItem}
                             keyExtractor={(item) => item.ExerciseId}
                             contentContainerStyle={styles.alternativesList}
                             numColumns={2}
                             columnWrapperStyle={styles.gridRow}
-                            ListEmptyComponent={
-                                <View style={styles.emptyContainer}>
-                                    <ThemedText type='body' style={styles.emptyText}>
-                                        We couldn&apos;t find any alternatives for this exercise right now.
-                                    </ThemedText>
-                                </View>
-                            }
                             showsVerticalScrollIndicator={false}
                         />
                     )}
@@ -649,5 +829,52 @@ const styles = StyleSheet.create({
         top: 0,
         left: 0,
         zIndex: 10,
+    },
+    searchContainer: {
+        paddingHorizontal: Spaces.MD,
+        paddingTop: Spaces.MD,
+        paddingBottom: Spaces.SM,
+    },
+    searchInputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderRadius: Spaces.SM,
+        borderWidth: StyleSheet.hairlineWidth,
+        paddingHorizontal: Spaces.SM,
+        paddingVertical: Spaces.SM,
+    },
+    searchIcon: {
+        marginRight: Spaces.SM,
+    },
+    searchInput: {
+        flex: 1,
+        fontSize: Sizes.fontSizeSmall,
+        paddingVertical: 0,
+    },
+    tabContainer: {
+        flexDirection: 'row',
+        paddingHorizontal: Spaces.MD,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: 'transparent',
+    },
+    tab: {
+        flex: 1,
+        paddingVertical: Spaces.MD,
+        alignItems: 'center',
+        borderBottomWidth: 2,
+        borderBottomColor: 'transparent',
+    },
+    tabText: {
+        fontWeight: '500',
+    },
+    categoryContainer: {
+        paddingHorizontal: Spaces.SM,
+        paddingVertical: Spaces.XS,
+        borderRadius: Spaces.XS,
+        alignSelf: 'flex-start',
+    },
+    categoryText: {
+        fontSize: 11,
+        fontWeight: '500',
     },
 });
