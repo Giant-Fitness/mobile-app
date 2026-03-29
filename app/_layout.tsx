@@ -12,6 +12,7 @@ import 'react-native-reanimated';
 
 import { POSTHOG_CONFIG } from '@/config/posthog';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useNotifications } from '@/hooks/useNotifications';
 import { resetStore } from '@/store/actions';
 import { store } from '@/store/store';
 import React from 'react';
@@ -67,6 +68,20 @@ function AppStateHandler() {
 
         return () => subscription.remove();
     }, [dispatch]);
+
+    return null;
+}
+
+function NotificationHandler() {
+    const { initializeNotifications } = useNotifications();
+    const initialized = useRef(false);
+
+    useEffect(() => {
+        if (!initialized.current) {
+            initialized.current = true;
+            initializeNotifications();
+        }
+    }, [initializeNotifications]);
 
     return null;
 }
@@ -145,6 +160,7 @@ export default function RootLayout() {
             <Provider store={store}>
                 <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                     <AppStateHandler />
+                    <NotificationHandler />
                     <PostHogProvider
                         apiKey={POSTHOG_CONFIG.apiKey}
                         autocapture={{
